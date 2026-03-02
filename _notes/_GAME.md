@@ -37,7 +37,7 @@ Each commander (starting-item) starts with unique blessings.
 Blessing ideas:
 - Courage: At the start of combat, revive 3 random units
 - Cannibalism: When a unit dies, gain +2 food
-- Cannibalism: When a unit dies, gain +2 food
+- Rucksacks: Increase food storage by 50
 
 
 
@@ -60,8 +60,8 @@ PERKS: Squads can also have perks.
 - Lean: Consumes 1 less food
 
 Some squads/units are economy-focused:
-- Necromancer: if he survives to the end of a fight, revives a random dead unit
-- Cleric: gives 1 mana on combat start and nothing else
+- Necromancer: if survives to the end of a fight, revives a random dead unit
+- Cleric: gives 1 mana on combat start (10 health, 0 damage)
 
 
 ## Armys:
