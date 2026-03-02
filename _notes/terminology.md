@@ -3,8 +3,8 @@
 ## TERMINOLOGY:
 
 
-Ante: The current "level" you are in. Start at ante-0
-Timer: The "countdown timer" until bossfight and map-reset (ante-increase)
+Zone: The current "map" you are in. Start at Zone-1
+Timer: The "countdown timer" until bossfight and map-reset (zone-increase)
 
 
 Node: the world objects you move between at the cost of time and food
@@ -27,6 +27,8 @@ Map: a collection of nodes and decorations
 
 
 Commander: Player has 1 commander in their army. Each commander has different starting blessing. Can unlock more.
+
+BattleField: where the battles are hosted, where objects are stored
 
 Unit: A singular individual (eg an archer)
 Squad: A collection of units (eg 5 x archers)
