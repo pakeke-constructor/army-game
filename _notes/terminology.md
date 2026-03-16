@@ -21,7 +21,7 @@ RESOURCE: A value that presists across combat
 Food:  resource. Consumed when moving.
 Money:  resource. used to buy stuff
 Mana:  resource. used to cast spells
-Health:  each unit has health. Persists across combat.
+Health:  each unit has health.
 
 Map: a collection of nodes and decorations
 

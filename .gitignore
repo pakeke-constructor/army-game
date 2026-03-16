@@ -18,3 +18,11 @@ jit/
 
 incremental_game.zip
 steamitemdef.json
+
+.DS_Store
+
+pyrightconfig.json
+ex6.bat
+
+__pycache__
+

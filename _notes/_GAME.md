@@ -16,10 +16,9 @@ MAP-NAVIGATION: Choose next node on map, plan route
 
 
 ## Manage resources:
-(Money, Army-health, Food, Mana)
+(Money, Food, Mana)
 
 Money: used at shops. Earned from battles/events
-Army-health: depleted during combat. Is done on a per-soldier basis
 Food: Costs food every time you move
 Mana: Spells cost mana
 Timer: The player has 8 more moves until they must fight the boss
