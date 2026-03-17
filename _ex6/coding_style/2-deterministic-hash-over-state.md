@@ -12,4 +12,4 @@ function Entity:draw()
     local wobble = (h % 1000) / 1000 * math.pi * 2
 end
 ```
-Why: zero stored state, fully deterministic, survives serialization, no init required. Works for any entity that has a stable identity (position, id, index, etc).
+Why: zero stored state, fully deterministic, survives serialization, no init required. Works for anything that has a stable identity (position, id, index, etc).

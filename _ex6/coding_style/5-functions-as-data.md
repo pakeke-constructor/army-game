@@ -21,6 +21,6 @@ Other examples where this could be useful include fields on objects / entity def
 ```lua
 defineEntity(name {
     getDamageMultiplier = func -- func returns 0 when entity is in "defensive mode".
-    -- Much simpler than writing a complex system to handle different "modes", and damage propagation.
+    -- Much simpler than writing a complex system for damage propagation.
 })
 ```
