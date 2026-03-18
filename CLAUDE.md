@@ -16,7 +16,7 @@ After 8 turns, the map is reset; and the player fights a boss.
 
 
 ## architecture:
-g.lua: All core functions stored here, exposed via `g.*` namespace
+src/g.lua: All core functions stored here, exposed via `g.*` namespace
 src/scenes/*: All scenes defined here, in folders.
 src/modules/*: Extra modules (analytics, lighting, richtext, typechecking)
 src/world/*: Stuff to do with the world (used by harvest_scene)

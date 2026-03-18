@@ -153,19 +153,6 @@ if SMART_MODEL.startswith("anthropic/"):
     cache_manually(coder)
 
 
-# coder = Context("coder_cc", model="cc/opus", reasoning="none", messages=[
-#     MAIN_SYSTEM_PROMPT,
-#     make_code_mode_system_prompt([
-#         read_file, glob, search, read_headers, read_body,
-#         write_file, edit_file, edit_file_lines,
-#         explore_agent, web_search, websearch_agent
-#     ]),
-#     ENV_PROMPT,
-#     CLAUDE_MD,
-# ])
-
-
-
 PLANNER_SYSTEM_PROMPT = ex6.Message(
 role="system",
 overview="planner-system",
