@@ -152,4 +152,90 @@ function g.defineSquad(id, tabl)
 
 end
 
+local suffixes = {
+    {1e12, "t"},
+    {1e9,  "b"},
+    {1e6,  "m"},
+    {1e3,  "k"},
+}
+
+local bigCache = {}
+local smolCache = {}
+local fbCache = {}
+
+local function getFallbackFonts(size)
+    if not fbCache[size] then
+        fbCache[size] = love.graphics.newFont("assets/fonts/unifont-17.0.03.otf", size, "mono", size / 16)
+    end
+    return fbCache[size]
+end
+
+---@param size number
+function g.getBigFont(size)
+    assert(size % 16 == 0, "Size must by divisible by 16")
+    if not bigCache[size] then
+        local f = love.graphics.newFont("assets/fonts/Smart 9h.ttf", size, "mono", 1)
+        f:setFallbacks(getFallbackFonts(size))
+        bigCache[size] = f
+    end
+    return bigCache[size]
+end
+
+---@param size number
+function g.getSmallFont(size)
+    assert(size % 16 == 0, "Size must by divisible by 16")
+    if not smolCache[size] then
+        local f = love.graphics.newFont("assets/fonts/Match 7h.ttf", size, "mono", 1)
+        f:setFallbacks(getFallbackFonts(size))
+        smolCache[size] = f
+    end
+    return smolCache[size]
+end
+
+---@param path string
+function g.requireFolder(path)
+    local results = {}
+    g.walkDirectory(path:gsub("%.", "/"), function(pth)
+        if pth:sub(-4, -1) == ".lua" then
+            pth = pth:sub(1, -5)
+            results[pth] = require(pth:gsub("%/", "."))
+        end
+    end)
+    return results
+end
+
+---@param num number
+function g.formatNumber(num)
+    local isNegative = num < 0
+    num = math.abs(num)
+    local prefix = (isNegative and "-" or "")
+
+    if num < 1000 then
+        if num == math.floor(num) then
+            return prefix .. ("%d"):format(num)
+        elseif num < 1 then
+            return prefix .. ("%.2f"):format(num)
+        elseif num < 3 then
+            return prefix .. ("%.1f"):format(num)
+        end
+        return prefix .. tostring(math.floor(num))
+    end
+
+    for _, suffix in ipairs(suffixes) do
+        if num >= suffix[1] then
+            local scaled = num / suffix[1]
+            local formatted
+            if scaled >= 100 then
+                formatted = string.format("%.0f", math.floor(scaled))
+            elseif scaled >= 10 then
+                formatted = string.format("%.14g", math.floor(scaled * 10) / 10)
+            else
+                formatted = string.format("%.14g", math.floor(scaled * 100) / 100)
+            end
+            return prefix .. formatted .. suffix[2]
+        end
+    end
+    return prefix .. tostring(num)
+end
+
 return g
