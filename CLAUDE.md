@@ -25,6 +25,13 @@ src/BattleField.lua: Represents a battlefield. Stores entities. Discarded after 
 src/consts.lua: Constants.
 
 
+## catx11 reference
+- _catx11 (folder `_catx11/**`) is an older standalone game kept in this repo.
+- It contains some patterns that are useful; hence why it's copied over.
+- Use it as a reference if asked. It has a CLAUDE.md file that explains the project.
+
+
+
 # IMPORTANT AGENT INSTRUCTIONS:
 <IMPORTANT-INSTRUCTIONS>
 - IN ALL INTERACTIONS, BE EXTREMELY CONCISE, EVEN IF IT MEANS GRAMMATICAL INCORRECTNESS.
@@ -33,7 +40,6 @@ src/consts.lua: Constants.
 - Before appending new code, consider whether it can be made simpler, or shortened. Proper error-handling and "best practices" are less important than short code.
 - Try not to add more data structures, layers, or indirections. ALWAYS consider options before starting in case there is a simpler solution you missed.
 </IMPORTANT-INSTRUCTIONS>
-
 
 
 
