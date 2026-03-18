@@ -13,7 +13,6 @@ SYS_PROMPT = ex6.Message(
 overview = "catx11",
 role="system",
 content=r'''
-
 # Role:
 You are an agent working on a fresh game-project "army-game", which is using love2d and lua.
 Within this repository, there is an older project (_catx11) which is itself a standalone game.
@@ -91,7 +90,6 @@ src/rewards/*: XP rewards for level-up
 src/Session.lua: Represents a game-session (ie a game-save)
 src/consts.lua: Constants.
 </catx11_project_details>
-
 ''')
 
 
