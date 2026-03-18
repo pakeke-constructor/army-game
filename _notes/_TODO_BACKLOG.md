@@ -1,8 +1,6 @@
 
 # backlog:
 
-- create catx11 importer agent
-
 - create rendering system
 - create qbus / evbus module
 - create ECS
