@@ -206,10 +206,10 @@ end
 ---@param event _Analytics.EventType
 function analytics.send(event)
     if disableAnalytics then return end
-    if not g.hasSession() then return end
+    if not g.hasRun() then return end
     assert(steamId, "forgot to call analytics.init()?")
 
-    local sn = g.getSn()
+    local sn = g.getRun()
     local _, scname = sceneManager.getCurrentScene()
     queuedSendData[#queuedSendData+1] = {
         event = event,

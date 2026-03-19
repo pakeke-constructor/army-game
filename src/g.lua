@@ -13,6 +13,51 @@ pcall(function() richtext = require("src.modules.richtext.exports") end)
 
 local sceneManager = require("src.scenes.sceneManager")
 
+local Run = require("src.Run")
+
+local currentRun
+
+function g.newRun()
+    currentRun = Run()
+    return currentRun
+end
+
+function g.hasRun()
+    return currentRun ~= nil
+end
+
+function g.getRun()
+    return assert(currentRun, "run not loaded")
+end
+
+function g.delRun()
+    currentRun = nil
+end
+
+function g.saveRun()
+    if not currentRun or not currentRun.serialize then
+        return
+    end
+    local data = currentRun:serialize()
+    local contents = json.encode(data)
+    love.filesystem.write("saves/run1.json", contents)
+end
+
+function g.loadRun(path)
+    local contents = assert(love.filesystem.read(path))
+    local data = json.decode(contents)
+    currentRun = Run.deserialize(data)
+end
+
+function g.saveAndInvalidateRun()
+    if not currentRun or not currentRun.serialize then
+        return
+    end
+    g.saveRun()
+    g.delRun()
+end
+
+
 ---@return love.Texture
 function g.getAtlas()
     return atlas:getTexture()
