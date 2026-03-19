@@ -343,4 +343,108 @@ function g.getCurrentScene()
     return sceneManager.getCurrentScene()
 end
 
+
+-- Event Bus / Question Bus
+local reducers = require("src.modules.reducers")
+
+
+local definedEvents = {}
+local questions = {}
+local eventCache = {}
+local questionCache = {}
+
+function g.defineEvent(ev)
+    assert(not definedEvents[ev], "Event already defined: " .. ev)
+    definedEvents[ev] = true
+end
+
+function g.isEvent(ev)
+    return definedEvents[ev] == true
+end
+
+function g.defineQuestion(question, reducer, defaultValue)
+    assert(not questions[question], "Question already defined: " .. question)
+    questions[question] = {
+        reducer = reducer,
+        defaultValue = defaultValue,
+    }
+end
+
+function g.getQuestionInfo(q)
+    return questions[q]
+end
+
+local function getOrCreateSet(cache, name)
+    local set = cache[name]
+    if not set then
+        set = objects.Set()
+        cache[name] = set
+    end
+    return set
+end
+
+function g.addResponder(handlers)
+    local entries = {}
+    local dead = false
+    for key, func in pairs(handlers) do
+        assert(type(func) == "function", "Handler must be function for key: " .. tostring(key))
+        local entry = {func = func}
+        local set
+        if g.isEvent(key) then
+            set = getOrCreateSet(eventCache, key)
+        elseif g.getQuestionInfo(key) then
+            set = getOrCreateSet(questionCache, key)
+        else
+            error("Unknown event/question: " .. tostring(key))
+        end
+        set:add(entry)
+        entries[#entries + 1] = {set = set, entry = entry}
+    end
+    return {
+        remove = function(self)
+            if dead then return end
+            dead = true
+            for _, rec in ipairs(entries) do
+                rec.set:remove(rec.entry)
+            end
+        end,
+        isAlive = function() return not dead end,
+    }
+end
+
+function g.call(ev, arg1, ...)
+    if (type(arg1) == "table") and arg1[ev] then
+        arg1[ev](arg1, ...)
+    end
+
+    local set = eventCache[ev]
+    if set then
+        for i = 1, set.len do
+            set[i].func(arg1, ...)
+        end
+    end
+end
+
+function g.ask(q, arg1, ...)
+    local t = questions[q]
+    if not t then
+        error("Invalid question: " .. tostring(q))
+    end
+    local reducer, val = t.reducer, t.defaultValue
+
+    if (type(arg1) == "table") and arg1[q] then
+        val = reducer(val, arg1[q](arg1, ...))
+    end
+
+    local set = questionCache[q]
+    if set then
+        for i = 1, set.len do
+            val = reducer(val, set[i].func(arg1, ...))
+        end
+    end
+
+    return val
+end
+
+
 return g

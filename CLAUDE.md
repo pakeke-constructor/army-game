@@ -22,7 +22,7 @@ After 8 turns, the map is reset; and the player fights a boss.
 
 <high_level_concepts>
 - Units: A singular Enemy or ally; e.g. a soldier that fights for you. ranged or melee.
-- Squad: A bundle of Units that the player can deploy
+- Squad: A bundle of Units that the player can click to deploy. (Traits and Perks are shared across every unit.)
 - Blessings: A per-run buff that gives global benefits: e.g: "Gain +2 mana after battle". Use question/event buses.
 - Spells: Spells can be cast during battle. Generally cost mana, and have a cooldown.
 - Perks: Per-unit buffs/blessings. Use question/event buses. Eg: "This unit gains +2 damage"
@@ -35,8 +35,7 @@ src/g.lua: All core functions stored here, exposed via `g.*` namespace
 src/scenes/*: All scenes defined here, in folders.
 src/map/*: Map stuff goes here
 src/modules/*: Extra modules (analytics, lighting, richtext, typechecking)
-src/world/*: Stuff to do with the world (used by harvest_scene)
-src/Run.lua: Represents a run (can be serialized)
+src/Run.lua: Represents a run. Stores health, food, squads,  (can be serialized)
 src/BattleField.lua: Represents a battlefield. Stores entities. Discarded after battle.
 src/consts.lua: Constants.
 
