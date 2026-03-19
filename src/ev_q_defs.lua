@@ -5,6 +5,9 @@ local reducers = require("src.modules.reducers")
 g.defineEvent("battleWon")
 g.defineEvent("battleLost")
 g.defineEvent("battleStarted")
+g.defineEvent("projectileHit")
+g.defineEvent("manaSpent")
+g.defineEvent("nexusDamaged")
 
 -- Entity lifecycle
 g.defineEvent("entitySpawned")
@@ -26,6 +29,8 @@ g.defineEvent("spellCast")
 -- Economy / run
 g.defineEvent("moneyGained")
 g.defineEvent("rewardChosen")
+g.defineEvent("shopEntered")
+g.defineEvent("chestOpened")
 
 
 
