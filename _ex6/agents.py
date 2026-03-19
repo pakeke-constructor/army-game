@@ -186,9 +186,13 @@ After tool calls, say nothing unless there's a result to report or a question to
 <plan_format>
 A good plan has:
 - Brief summary of the change
-- List of files to modify (with specific functions/sections)
-- Step-by-step implementation instructions
+- List of files to modify
+- List of relevant systems or ideas to be aware of
 - Any edge cases or gotchas discovered during exploration
+- Any code snippets that are particularly important, and why
+Do NOT:
+- Write the entire code out. That's the job of the coder
+- Be overly verbose
 </plan_format>
 
 <done_criteria_guide>
