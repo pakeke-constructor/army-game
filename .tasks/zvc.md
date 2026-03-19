@@ -118,6 +118,7 @@ EDGE CASES / NOTES:
 [2026-03-19T17:34:47Z] [LEARNING] reducers.lua already ported to Army game
 [2026-03-19T17:36:54Z] [LEARNING] Multi-listener pattern (like Tree with many upgrades) would need either: many scopes or a CompoundScope
 [2026-03-19T18:43:30Z] [PROGRESS] Implemented event/question bus: Responder.lua + g.lua additions. All 13 done criteria pass.
+[2026-03-19T19:44:46Z] [PROGRESS] Replaced Responder system with ephemeral addHandler + ent.handlers list
 </log>
 
 

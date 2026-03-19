@@ -36,6 +36,7 @@ function love.load()
 end
 
 function love.update(dt)
+    g.clearHandlers()
     local sc = sceneManager.getCurrentScene()
     if sc and sc.update then
         sc:update(dt)

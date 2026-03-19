@@ -43,6 +43,29 @@ src/consts.lua: Constants.
 </architecture>
 
 
+<event_question_bus>
+Events and Questions are the core abstraction for decoupled game logic.
+Defined via g.defineEvent / g.defineQuestion in advance.
+
+**Events** = dispatching information. Fire-and-forget, no return value.
+  g.call("onUnitDeath", unit)
+  "Something happened. React if you care."
+
+**Questions** = gathering information. Returns a reduced value from all listeners.
+  local dmg = g.ask("getDamageReduction", unit)
+  "I need to know something. Everyone contribute."
+
+Questions use reducers (ADD, MULTIPLY, OR, AND, PRIORITY, etc) to combine answers.
+
+Three levels of listeners, dispatched in order:
+1. Scene-level handlers: added via g.addHandler({...}) every frame. Cleared each frame by g.clearHandlers(). Used by blessings, global systems.
+2. Direct entity handler: ent[eventName] or ent[questionName]. Defined on entity def.
+3. Entity handler list: ent.handlers = {{eventName=func}, ...}. Used by perks.
+
+g.call/g.ask auto-dispatch to all three when arg1 is a table (entity).
+</event_question_bus>
+
+
 <catx11_reference>
 - _catx11 (folder `_catx11/**`) is an older standalone game kept in this repo.
 - It contains some patterns that are useful; hence why it's copied over.
@@ -59,39 +82,3 @@ src/consts.lua: Constants.
 - If a feature needs >300 new lines, stop and ask how to simplify.
 </IMPORTANT-INSTRUCTIONS>
 
-
-
-<overarching_goals>
-This is a brief list of stuff the user is working on right now, in a broad sense.
-Don't treat it as a task-list; but rather as a guiding-force, helping you gain an understanding of the current objectives.
-
-<epic core-systems>
-A big part right now is getting the "core systems" set up.
-Core systems include:
-- Dead-simple ECS framework; entities are lua-tables, can have functions.
-- Set up scene manager. (Import a lot of ideas from catx11.)
-- UI system: Use `iml` from catx11
-- Create title-scene; dead-simple START-RUN button
-- Create Run object. Should contain current squads, health, money, food, blessings, map-position, and day-number.
-</epic>
-
-<epic event-question-buses>
-We are working on getting the event bus and question bus system set up.
-They'll be similar to catx11. 
-In future, this will be used for basically all blessing/perk interactions.
-Super important to get these correct; look at catx11 for inspiration.
-</epic>
-
-<epic agent-game-tools>
-We are also working on the UI system, and crucially, alongside it, we are working on the Agent-game-tools.
-Agent-game-tools are essentially a set of tools that the agent can use to "play" the game, inspect the current gamestate, view UI, edit and interact with the world.
-The intention is for agents to be able to test the game themselves after implementing a feature, and also work through UI flows instead of having the human test it.
-The idea is that the agent can spawn entities, inspect events, trace logs, track certain entities, etc.
-
-API idea; the agent submits a "packet" of lua code, and it runs, interacting directly with the game engine.
-
-The UI will obviously be harder for the LLM natively, since no image recognition. To accommodate this, the UI library spits out XML tags that mirror the shape of the UI, but in XML. The agent can then click through the UI, view any screen in XML, test whether it's happy with it, etc.
-...
-</epic>
-
-</overarching_goals>

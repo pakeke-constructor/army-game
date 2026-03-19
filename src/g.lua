@@ -347,15 +347,17 @@ end
 -- Event Bus / Question Bus
 local reducers = require("src.modules.reducers")
 
-
 local definedEvents = {}
 local questions = {}
-local eventCache = {}
-local questionCache = {}
+-- Scene-level handler caches: name -> {func1, func2, ...}
+-- Built incrementally by g.addHandler, wiped by g.clearHandlers.
+local table_clear = require("table.clear")
+local handlerCache = {} -- [eventOrQuestionName] -> {func, func, ...}
 
 function g.defineEvent(ev)
     assert(not definedEvents[ev], "Event already defined: " .. ev)
     definedEvents[ev] = true
+    handlerCache[ev] = {}
 end
 
 function g.isEvent(ev)
@@ -368,63 +370,58 @@ function g.defineQuestion(question, reducer, defaultValue)
         reducer = reducer,
         defaultValue = defaultValue,
     }
+    handlerCache[question] = {}
 end
 
 function g.getQuestionInfo(q)
     return questions[q]
 end
 
-local function getOrCreateSet(cache, name)
-    local set = cache[name]
-    if not set then
-        set = objects.Set()
-        cache[name] = set
+-- Add a handler table for this frame only.
+-- Must be re-added every frame (e.g. in scene:preUpdate).
+function g.addHandler(handler)
+    for key, func in pairs(handler) do
+        local list = handlerCache[key]
+        assert(list, "Unknown event/question: " .. tostring(key))
+        list[#list + 1] = func
     end
-    return set
 end
 
-function g.addResponder(handlers)
-    local entries = {}
-    local dead = false
-    for key, func in pairs(handlers) do
-        assert(type(func) == "function", "Handler must be function for key: " .. tostring(key))
-        local entry = {func = func}
-        local set
-        if g.isEvent(key) then
-            set = getOrCreateSet(eventCache, key)
-        elseif g.getQuestionInfo(key) then
-            set = getOrCreateSet(questionCache, key)
-        else
-            error("Unknown event/question: " .. tostring(key))
-        end
-        set:add(entry)
-        entries[#entries + 1] = {set = set, entry = entry}
+-- Called once per frame to clear all ephemeral handlers.
+function g.clearHandlers()
+    for _, list in pairs(handlerCache) do
+        table_clear(list)
     end
-    return {
-        remove = function(self)
-            if dead then return end
-            dead = true
-            for _, rec in ipairs(entries) do
-                rec.set:remove(rec.entry)
-            end
-        end,
-        isAlive = function() return not dead end,
-    }
 end
 
+-- Fire an event. No return value.
+-- Order: scene-level handlers, then ent[ev], then ent.handlers
 function g.call(ev, arg1, ...)
-    if (type(arg1) == "table") and arg1[ev] then
+    -- 1. scene-level handlers
+    local list = handlerCache[ev]
+    for i = 1, #list do
+        list[i](arg1, ...)
+    end
+
+    if type(arg1) ~= "table" then return end
+
+    -- 2. direct entity handler
+    if arg1[ev] then
         arg1[ev](arg1, ...)
     end
 
-    local set = eventCache[ev]
-    if set then
-        for i = 1, set.len do
-            set[i].func(arg1, ...)
+    -- 3. entity handler list (perks etc)
+    local handlers = arg1.handlers
+    if handlers then
+        for i = 1, #handlers do
+            local fn = handlers[i][ev]
+            if fn then fn(arg1, ...) end
         end
     end
 end
 
+-- Ask a question. Returns reduced value.
+-- Order: scene-level handlers, then ent[q], then ent.handlers
 function g.ask(q, arg1, ...)
     local t = questions[q]
     if not t then
@@ -432,19 +429,29 @@ function g.ask(q, arg1, ...)
     end
     local reducer, val = t.reducer, t.defaultValue
 
-    if (type(arg1) == "table") and arg1[q] then
-        val = reducer(val, arg1[q](arg1, ...))
+    -- 1. scene-level handlers
+    local list = handlerCache[q]
+    for i = 1, #list do
+        val = reducer(val, list[i](arg1, ...))
     end
 
-    local set = questionCache[q]
-    if set then
-        for i = 1, set.len do
-            val = reducer(val, set[i].func(arg1, ...))
+    if type(arg1) == "table" then
+        -- 2. direct entity handler
+        if arg1[q] then
+            val = reducer(val, arg1[q](arg1, ...))
+        end
+
+        -- 3. entity handler list (perks etc)
+        local handlers = arg1.handlers
+        if handlers then
+            for i = 1, #handlers do
+                local fn = handlers[i][q]
+                if fn then val = reducer(val, fn(arg1, ...)) end
+            end
         end
     end
 
     return val
 end
-
 
 return g
