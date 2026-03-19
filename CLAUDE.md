@@ -73,7 +73,7 @@ Core systems include:
 - Set up scene manager. (Import a lot of ideas from catx11.)
 - UI system: Use `iml` from catx11
 - Create title-scene; dead-simple START-RUN button
-- Create Session object. Should contain current squads, health, money, food, blessings, map-position, and day-number.
+- Create Run object. Should contain current squads, health, money, food, blessings, map-position, and day-number.
 </epic>
 
 <epic event-question-buses>

@@ -11,6 +11,31 @@ local function sortOrder(a, b)
     return (a.y + (a.drawOrder or 0)) < (b.y + (b.drawOrder or 0))
 end
 
+function BattleField:update(dt)
+    for _, e in ipairs(self.entities) do
+        if e.update then
+            e:update(dt)
+        end
+        if e.lifetime then
+            e.lifetime = e.lifetime - dt
+            if e.lifetime <= 0 then
+                self.entities:removeBuffered(e)
+            end
+        end
+    end
+    self.entities:flush()
+end
+
+function BattleField:spawnEntity(id, x, y, ...)
+    local ent = g.spawnEntity(id, x, y, ...)
+    self.entities:addBuffered(ent)
+    return ent
+end
+
+function BattleField:removeEntity(ent)
+    self.entities:removeBuffered(ent)
+end
+
 function BattleField:draw()
     local list = {}
     for _, e in ipairs(self.entities) do

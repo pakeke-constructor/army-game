@@ -152,6 +152,52 @@ function g.defineSquad(id, tabl)
 
 end
 
+-- Entity system
+local ENTITY_DEFS = {}
+local ENTITY_LIST = {}
+local currentEntityId = 0
+
+function g.defineEntityType(id, def)
+    assert(not ENTITY_DEFS[id], "Duplicate entity type: " .. id)
+    assert(def.x == nil and def.y == nil and def.type == nil, "x/y/type are reserved")
+    def.type = id
+    def.image = def.image or id
+    local mt = {__index = def}
+    ENTITY_DEFS[id] = mt
+    ENTITY_LIST[#ENTITY_LIST + 1] = id
+end
+
+function g.spawnEntity(id, x, y, ...)
+    local mt = ENTITY_DEFS[id]
+    assert(mt, "Unknown entity type: " .. tostring(id))
+    currentEntityId = currentEntityId + 1
+    local ent = setmetatable({
+        id = currentEntityId,
+        x = x, y = y, type = id,
+    }, mt)
+    if ent.init then
+        ent:init(...)
+    end
+    return ent
+end
+
+function g.drawEntity(ent, x, y)
+    local sx, sy = ent.sx or 1, ent.sy or 1
+    if ent.draw then
+        ent:draw(x, y)
+        return
+    end
+    if ent.image then
+        love.graphics.setColor(1, 1, 1, ent.alpha or 1)
+        g.drawImage(ent.image, x + (ent.ox or 0), y + (ent.oy or 0), ent.rot or 0, sx, sy)
+    end
+end
+
+function g.getEntityDef(id)
+    local mt = ENTITY_DEFS[id]
+    return mt and mt.__index
+end
+
 local suffixes = {
     {1e12, "t"},
     {1e9,  "b"},
