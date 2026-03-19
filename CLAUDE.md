@@ -36,7 +36,7 @@ src/scenes/*: All scenes defined here, in folders.
 src/map/*: Map stuff goes here
 src/modules/*: Extra modules (analytics, lighting, richtext, typechecking)
 src/world/*: Stuff to do with the world (used by harvest_scene)
-src/Session.lua: Represents a game-session (ie a game-save)
+src/Run.lua: Represents a run (can be serialized)
 src/BattleField.lua: Represents a battlefield. Stores entities. Discarded after battle.
 src/consts.lua: Constants.
 
