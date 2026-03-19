@@ -10,3 +10,8 @@
 - IMPLEMENT: Dispatch agent to write code (codex53)
 - TEST: codex53 tests against test code
 
+
+## TO THINK ABOUT:
+How do we make the plan -> execute step more seamless?
+Maybe the planner gets allocated an agent: `start_agent`?
+

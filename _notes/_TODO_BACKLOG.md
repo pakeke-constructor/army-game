@@ -9,6 +9,11 @@
 - create squad definition
 - create blessing definition
 
+- add push-ifs-up methodology (inside `_ex6/coding_style`)  https://gieseanw.wordpress.com/2024/06/24/dont-push-ifs-up-put-them-as-close-to-the-source-of-data-as-possible/
+
+
+- tell planning-agent NOT to write code in the plann.
+
 
 ## BIG:
 - create agent-usable codebase and tools. 
@@ -18,6 +23,6 @@
 - import iml core
 - create UI core (MAKE IT AGENT-INTERACTABLE; via xml?)
 - agent tool:  ui_click(elem_id)
-- ui_push_button()
+
 
 

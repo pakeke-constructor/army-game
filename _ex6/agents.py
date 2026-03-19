@@ -144,7 +144,8 @@ coder = Context("c_opus", model=M.OPUS_46.id, reasoning="medium", messages=[
         read_file, glob, search, read_headers, read_body,
         write_file, edit_file, edit_file_lines,
         explore_agent, web_search, websearch_agent,
-        escalate
+        escalate,
+        task_focus, task_read, task_write_plan, task_write_done_criteria, task_add_log, task_close, task_query_logs
     ]),
     ENV_PROMPT,
     CLAUDE_MD,
