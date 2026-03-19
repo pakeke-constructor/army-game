@@ -11,6 +11,8 @@ local nameToQuad = {}
 local richtext = nil
 pcall(function() richtext = require("src.modules.richtext.exports") end)
 
+local sceneManager = require("src.scenes.sceneManager")
+
 ---@return love.Texture
 function g.getAtlas()
     return atlas:getTexture()
@@ -282,6 +284,18 @@ function g.formatNumber(num)
         end
     end
     return prefix .. tostring(num)
+end
+
+function g.gotoScene(sceneName)
+    return sceneManager.gotoScene(sceneName)
+end
+
+function g.gotoLastScene()
+    return sceneManager.gotoLastScene()
+end
+
+function g.getCurrentScene()
+    return sceneManager.getCurrentScene()
 end
 
 return g

@@ -1,9 +1,10 @@
 local objects = require("src.modules.objects.objects")
 
----@class g.Session: objects.Class
-local Session = objects.Class("g:Session")
+---@class g.Run: objects.Class
+local Run = objects.Class("g:Session")
 
-function Session:init()
+
+function Run:init()
     self.squads = {}      -- list of squad ids
     self.health = 20
     self.maxHealth = 20
@@ -15,4 +16,15 @@ function Session:init()
     self.mapPosition = nil -- current node on map
 end
 
-return Session
+
+function Run:serialize()
+
+end
+
+
+function Run:deserialize()
+
+end
+
+return Run
+
