@@ -94,17 +94,6 @@ src/consts.lua: Constants.
 
 
 
-Context("catx11_cheap", model=M.GEMINI25_FLASH_LITE.id, yolo=False, reasoning="none", messages=[
-    SYS_PROMPT,
-    make_code_mode_system_prompt([
-        read_file, glob, search, read_headers, read_body,
-        web_search, websearch_agent, escalate,
-        write_file, edit_file, edit_file_lines
-    ]),
-    CLAUDE_MD,
-])
-
-
 Context("catx11_strong", model=M.GPT52_CODEX.id, yolo=True, reasoning="none", messages=[
     SYS_PROMPT,
     make_code_mode_system_prompt([

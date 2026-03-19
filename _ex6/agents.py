@@ -231,20 +231,6 @@ planner = Context("planner_opus", model=M.OPUS_46.id, reasoning="medium", messag
 ])
 
 
-planner = Context("planner_cheap", model=M.GEMINI3_FLASH.id, reasoning="medium", messages=[
-    PLANNER_SYSTEM_PROMPT,
-    make_code_mode_system_prompt([
-        read_file, glob, search, read_headers, read_body,
-        explore_agent, web_search, websearch_agent,
-        escalate,
-        task_create, task_focus, task_read, task_write_plan, task_write_done_criteria, task_add_log, task_close, task_query_logs, task_list,
-    ]),
-    ENV_PROMPT,
-    CLAUDE_MD,
-])
-
-
-
 
 
 
