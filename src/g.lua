@@ -203,16 +203,12 @@ end
 local ENTITY_DEFS = {}
 local ENTITY_LIST = {}
 local currentEntityId = 0
-local Entity = require("src.ecs.Entity")
-
 function g.defineEntityType(id, def)
     assert(not ENTITY_DEFS[id], "Duplicate entity type: " .. id)
     assert(def.x == nil and def.y == nil and def.type == nil, "x/y/type are reserved")
     def.type = id
     def.image = def.image or id
-    def.addComponent = Entity.addComponent
-    def.removeComponent = Entity.removeComponent
-    local mt = {__index = def, __newindex = Entity.__newindex}
+    local mt = {__index = def}
     ENTITY_DEFS[id] = mt
     ENTITY_LIST[#ENTITY_LIST + 1] = id
 end

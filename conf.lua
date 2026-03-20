@@ -10,7 +10,7 @@ if isMobile then
 end
 
 function _G.love.conf(t)
-    t.identity = "catx11"                    -- The name of the save directory (string)
+    t.identity = "karpathia"                    -- The name of the save directory (string)
     t.appendidentity = false            -- Search files in source directory before save directory (boolean)
     -- t.version = we are using "12.0"                  -- The LÖVE version this game was made for (string)
     t.console = true                    -- Attach a console (boolean, Windows only)
@@ -24,8 +24,8 @@ function _G.love.conf(t)
     t.audio.mic = false                 -- Request and use microphone capabilities in Android (boolean)
     t.audio.mixwithsystem = true        -- Keep background music playing when opening LOVE (boolean, iOS and Android only)
 
-    t.window.title = "CATX11"         -- The window title (string)
-    t.window.icon = "assets/icon.png"  -- Filepath to an image to use as the window's icon (string)
+    t.window.title = "KARPATHIA"         -- The window title (string)
+    t.window.icon = nil -- "assets/icon.png"  -- Filepath to an image to use as the window's icon (string)
     t.window.width = 900                -- The window width (number)
     t.window.height = 600               -- The window height (number)
     t.window.borderless = false         -- Remove all border visuals from the window (boolean)
