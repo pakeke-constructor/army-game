@@ -13,7 +13,13 @@ function battle_scene:enter()
     self.ecs = ECSWorld()
     self.camera = Camera(0, 0, CAMERA_ZOOM)
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
-    g.spawnEntity("militia", 100,100)
+
+    -- spawn test ents
+    for x=100, 200, 30 do
+        for y=100, 200, 20 do
+            g.spawnEntity("militia", x,y)
+        end
+    end
 end
 
 function battle_scene:leave()

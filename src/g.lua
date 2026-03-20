@@ -210,10 +210,53 @@ do
 end
 
 
+-- Forward-declare for use in squad functions
+local PERK_DEFS = {}
+local PERK_LIST = {}
+
 ---@param id string
 ---@param tabl g.SquadInfo
 function g.defineSquad(id, tabl)
 
+end
+
+--- Create a new squad table
+function g.newSquad(entityId)
+    return {id = entityId, perks = {}}
+end
+
+--- Add a squad to the current run
+function g.addSquad(entityId)
+    local run = g.getRun()
+    local squad = g.newSquad(entityId)
+    run.squads[#run.squads + 1] = squad
+    return squad
+end
+
+--- Add a perk to a squad (applied to entities on spawn)
+function g.addPerkToSquad(squad, perkId)
+    assert(PERK_DEFS[perkId], "Unknown perk: " .. tostring(perkId))
+    squad.perks[#squad.perks + 1] = perkId
+end
+
+--- Remove a perk from a squad
+function g.removePerkFromSquad(squad, perkId)
+    for i = #squad.perks, 1, -1 do
+        if squad.perks[i] == perkId then
+            table.remove(squad.perks, i)
+            return true
+        end
+    end
+    return false
+end
+
+--- Spawn an entity from a squad, applying squad perks
+function g.spawnSquad(squad, x, y, ...)
+    local ent = g.spawnEntity(squad.id, x, y, ...)
+    for i = 1, #squad.perks do
+        g.addPerk(ent, squad.perks[i])
+    end
+    return ent
 end
 
 -- Blessing system
@@ -255,9 +298,7 @@ function g.removeBlessing(id)
     return false
 end
 
--- Perk system
-local PERK_DEFS = {}
-local PERK_LIST = {}
+-- Perk system (PERK_DEFS/PERK_LIST declared above squad section)
 
 ---@param id string
 ---@param info g.PerkInfo
@@ -270,10 +311,6 @@ end
 
 function g.getPerkInfo(id)
     return assert(PERK_DEFS[id], "Unknown perk: " .. tostring(id))
-end
-
-function g.getPerkList()
-    return PERK_LIST
 end
 
 function g.addPerk(ent, id)
