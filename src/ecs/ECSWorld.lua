@@ -4,9 +4,15 @@ local table_clear = require("table.clear")
 ---@class ecs.ECSWorld: objects.Class
 local ECSWorld = objects.Class("ecs:ECSWorld")
 
-function ECSWorld:init()
+function ECSWorld:init(systemNames)
     self.entities = objects.BufferedSet()
     self.componentIndex = {} -- [componentName] -> {ent, ent, ...}
+
+    -- Load systems (each system is a plain table of event/question handlers)
+    self.systems = {}
+    for _, name in ipairs(systemNames or {}) do
+        self.systems[#self.systems + 1] = require("src.ecs.systems." .. name)
+    end
 end
 
 function ECSWorld:addEntity(e)
@@ -48,9 +54,16 @@ function ECSWorld:_rebuildIndex()
     end
 end
 
+function ECSWorld:addSystemHandlers()
+    for i = 1, #self.systems do
+        g.addHandler(self.systems[i])
+    end
+end
+
 function ECSWorld:update(dt)
     self.entities:flush()
     self:_rebuildIndex()
+    g.call("preUpdate", self, dt)
     for i = 1, self.entities.len do
         local e = self.entities[i]
         if e.update then
@@ -63,6 +76,7 @@ function ECSWorld:update(dt)
             end
         end
     end
+    g.call("postUpdate", self, dt)
 end
 
 local function sortOrder(a, b)
@@ -70,6 +84,7 @@ local function sortOrder(a, b)
 end
 
 function ECSWorld:draw()
+    g.call("preDraw", self)
     local list = {}
     for i = 1, self.entities.len do
         list[#list + 1] = self.entities[i]
@@ -79,6 +94,7 @@ function ECSWorld:draw()
         local e = list[i]
         g.drawEntity(e, e.x, e.y)
     end
+    g.call("postDraw", self)
 end
 
 function ECSWorld:iterate(component)
