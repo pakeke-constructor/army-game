@@ -5,7 +5,7 @@ local Run = objects.Class("g:Run")
 
 
 function Run:init()
-    self.squads = {}      -- list of {id=string, perks={string,...}}
+    self.squads = {}      -- list of squad definition ids
     self.health = 20
     self.maxHealth = 20
     self.money = 0

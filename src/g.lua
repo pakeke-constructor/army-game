@@ -210,53 +210,75 @@ do
 end
 
 
--- Forward-declare for use in squad functions
+-- Forward-declare perk tables (used by both squad and perk systems below)
 local PERK_DEFS = {}
 local PERK_LIST = {}
 
+-- Squad system
+local SQUAD_DEFS = {}
+local SQUAD_LIST = {}
+
+---@class g.SquadInfo
+---@field id string
+---@field entityId string
+---@field count number
+---@field image string
+---@field perks string[]
+---@field onDeploy (fun(squad: g.SquadInfo, entities: table[]))?
+
 ---@param id string
----@param tabl g.SquadInfo
-function g.defineSquad(id, tabl)
-
+---@param info g.SquadInfo
+function g.defineSquad(id, info)
+    assert(not SQUAD_DEFS[id], "Duplicate squad: " .. id)
+    info.id = id
+    info.perks = info.perks or {}
+    info.count = info.count or 1
+    SQUAD_DEFS[id] = info
+    SQUAD_LIST[#SQUAD_LIST + 1] = id
 end
 
---- Create a new squad table
-function g.newSquad(entityId)
-    return {id = entityId, perks = {}}
+function g.getSquadInfo(id)
+    return assert(SQUAD_DEFS[id], "Unknown squad: " .. tostring(id))
 end
 
---- Add a squad to the current run
-function g.addSquad(entityId)
-    local run = g.getRun()
-    local squad = g.newSquad(entityId)
-    run.squads[#run.squads + 1] = squad
-    return squad
+function g.getSquadList()
+    return SQUAD_LIST
 end
 
---- Add a perk to a squad (applied to entities on spawn)
-function g.addPerkToSquad(squad, perkId)
+--- Add a perk to a squad definition (applied to entities on spawn)
+function g.addPerkToSquad(squadId, perkId)
+    local info = assert(SQUAD_DEFS[squadId], "Unknown squad: " .. tostring(squadId))
     assert(PERK_DEFS[perkId], "Unknown perk: " .. tostring(perkId))
-    squad.perks[#squad.perks + 1] = perkId
+    info.perks[#info.perks + 1] = perkId
 end
 
---- Remove a perk from a squad
-function g.removePerkFromSquad(squad, perkId)
-    for i = #squad.perks, 1, -1 do
-        if squad.perks[i] == perkId then
-            table.remove(squad.perks, i)
+--- Remove a perk from a squad definition
+function g.removePerkFromSquad(squadId, perkId)
+    local info = assert(SQUAD_DEFS[squadId], "Unknown squad: " .. tostring(squadId))
+    for i = #info.perks, 1, -1 do
+        if info.perks[i] == perkId then
+            table.remove(info.perks, i)
             return true
         end
     end
     return false
 end
 
---- Spawn an entity from a squad, applying squad perks
-function g.spawnSquad(squad, x, y, ...)
-    local ent = g.spawnEntity(squad.id, x, y, ...)
-    for i = 1, #squad.perks do
-        g.addPerk(ent, squad.perks[i])
+--- Spawn all entities for a squad, applying perks and calling onDeploy
+function g.spawnSquad(squadId, x, y, ...)
+    local info = assert(SQUAD_DEFS[squadId], "Unknown squad: " .. tostring(squadId))
+    local entities = {}
+    for i = 1, info.count do
+        local ent = g.spawnEntity(info.entityId, x, y, ...)
+        for j = 1, #info.perks do
+            g.addPerk(ent, info.perks[j])
+        end
+        entities[i] = ent
     end
-    return ent
+    if info.onDeploy then
+        info.onDeploy(info, entities)
+    end
+    return entities
 end
 
 -- Blessing system
@@ -298,7 +320,7 @@ function g.removeBlessing(id)
     return false
 end
 
--- Perk system (PERK_DEFS/PERK_LIST declared above squad section)
+-- Perk system
 
 ---@param id string
 ---@param info g.PerkInfo
