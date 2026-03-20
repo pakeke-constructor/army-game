@@ -1,4 +1,10 @@
 
+
+---@class g.BlessingInfo
+---@field id string
+---@field image string
+---@field handlers table
+
 ---@class g
 local g = {}
 
@@ -196,16 +202,33 @@ do
     nameToQuad["1x1"] = q
 end
 
----@param id string
----@param tabl g.UnitInfo
-function g.defineUnit(id, tabl)
-
-end
 
 ---@param id string
 ---@param tabl g.SquadInfo
 function g.defineSquad(id, tabl)
 
+end
+
+-- Blessing system
+local BLESSING_DEFS = {}
+local BLESSING_LIST = {}
+
+---@param id string
+---@param info g.BlessingInfo
+function g.defineBlessing(id, info)
+    assert(not BLESSING_DEFS[id], "Duplicate blessing: " .. id)
+    info.id = id
+    BLESSING_DEFS[id] = info
+    BLESSING_LIST[#BLESSING_LIST + 1] = id
+end
+
+---@return g.BlessingInfo
+function g.getBlessingInfo(id)
+    return assert(BLESSING_DEFS[id], "Unknown blessing: " .. tostring(id))
+end
+
+function g.getBlessingList()
+    return BLESSING_LIST
 end
 
 -- Entity system
