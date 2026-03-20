@@ -3,9 +3,6 @@
 
 
 - create squad definition
-- create blessing definition
-
-- adding/removal of blessings
 
 
 - add push-ifs-up methodology (inside `_ex6/coding_style`)  https://gieseanw.wordpress.com/2024/06/24/dont-push-ifs-up-put-them-as-close-to-the-source-of-data-as-possible/

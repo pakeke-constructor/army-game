@@ -3,7 +3,14 @@
 ---@class g.BlessingInfo
 ---@field id string
 ---@field image string
----@field handlers table
+---@field handlers table<string, function>
+
+
+---@class g.PerkInfo
+---@field id string
+---@field image string
+---@field handlers table<string, function>
+
 
 ---@class g
 local g = {}
@@ -242,6 +249,47 @@ function g.removeBlessing(id)
     for i = #run.blessings, 1, -1 do
         if run.blessings[i] == id then
             table.remove(run.blessings, i)
+            return true
+        end
+    end
+    return false
+end
+
+-- Perk system
+local PERK_DEFS = {}
+local PERK_LIST = {}
+
+---@param id string
+---@param info g.PerkInfo
+function g.definePerk(id, info)
+    assert(not PERK_DEFS[id], "Duplicate perk: " .. id)
+    info.id = id
+    PERK_DEFS[id] = info
+    PERK_LIST[#PERK_LIST + 1] = id
+end
+
+function g.getPerkInfo(id)
+    return assert(PERK_DEFS[id], "Unknown perk: " .. tostring(id))
+end
+
+function g.getPerkList()
+    return PERK_LIST
+end
+
+function g.addPerk(ent, id)
+    local info = assert(PERK_DEFS[id], "Unknown perk: " .. tostring(id))
+    assert(info.handlers, "Perk has no handlers: " .. id)
+    if not ent.handlers then ent.handlers = {} end
+    local h = {_perkId = id}
+    for k, v in pairs(info.handlers) do h[k] = v end
+    ent.handlers[#ent.handlers + 1] = h
+end
+
+function g.removePerk(ent, id)
+    if not ent.handlers then return false end
+    for i = #ent.handlers, 1, -1 do
+        if ent.handlers[i]._perkId == id then
+            table.remove(ent.handlers, i)
             return true
         end
     end
