@@ -1,11 +1,9 @@
 local title_scene = {}
 
 function title_scene:init()
-    self.started = false
 end
 
 function title_scene:enter()
-    self.startTime = love.timer.getTime()
 end
 
 function title_scene:update(dt)
@@ -15,8 +13,8 @@ function title_scene:start()
     if self.started then
         return
     end
-    self.started = true
     g.newRun()
+    g.gotoScene("battle_scene")
 end
 
 function title_scene:mousepressed()
@@ -39,18 +37,16 @@ function title_scene:draw()
     local titleText = "ARMY GAME"
     lg.setFont(titleFont)
     lg.setColor(1, 1, 1, 1)
+    local SC=2
+    lg.scale(SC)
+    w,h = w/SC,h/SC
     lg.print(titleText, (w - titleFont:getWidth(titleText)) / 2, h * 0.3)
 
     lg.setFont(smallFont)
-    if self.started then
-        local msg = "STARTED (TODO: NEXT SCENE)"
+    local t = love.timer.getTime()
+    if math.floor(t * 2) % 2 == 0 then
+        local msg = "PRESS ANY KEY"
         lg.print(msg, (w - smallFont:getWidth(msg)) / 2, h * 0.55)
-    else
-        local t = love.timer.getTime() - self.startTime
-        if math.floor(t * 2) % 2 == 0 then
-            local msg = "PRESS ANY KEY"
-            lg.print(msg, (w - smallFont:getWidth(msg)) / 2, h * 0.55)
-        end
     end
 end
 

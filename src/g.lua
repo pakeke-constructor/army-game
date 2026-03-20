@@ -25,7 +25,10 @@ end
 
 ---@return ecs.ECSWorld?
 function g.getBattleECS()
-    return nil
+    local scene, name = g.getCurrentScene()
+    if name == "battle_scene" then
+        return scene.ecs or nil
+    end
 end
 
 
