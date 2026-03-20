@@ -57,6 +57,8 @@ _G.localization = require("src.modules.localization")
 _G.loc = _G.localization.localize
 _G.interp = _G.localization.newInterpolator
 _G.iml = require("lib.iml.iml")
+_G.Kirigami = require("lib.kirigami")
+_G.ui = require("src.ui.ui")
 
 _G.analytics = require("src.modules.analytics.analytics")
 
@@ -78,6 +80,7 @@ function love.load()
         love.keyboard.setTextInput(true)
     end
     g.loadImagesFrom("assets")
+    g.requireFolder("src/entities")
     sceneManager.loadScenes()
     sceneManager.gotoScene("title_scene")
     love.window.setFullscreen(settings.isFullscreen())

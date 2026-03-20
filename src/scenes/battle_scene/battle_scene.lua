@@ -7,6 +7,7 @@ end
 
 function battle_scene:enter()
     self.ecs = ECSWorld()
+    g.spawnEntity("militia", 100,100)
 end
 
 function battle_scene:leave()
@@ -21,6 +22,10 @@ function battle_scene:draw()
     local lg = love.graphics
     lg.clear(0.08, 0.06, 0.06, 1)
     self.ecs:draw()
+
+    ui.startUI()
+    -- HERE.
+    ui.endUI()
 end
 
 return battle_scene

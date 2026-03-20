@@ -1,4 +1,5 @@
 local ECSWorld = require("src.ecs.ECSWorld")
+require("src.ev_q_defs")
 
 local function test(name, fn)
     local ok, err = pcall(fn)

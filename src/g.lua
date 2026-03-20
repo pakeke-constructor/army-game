@@ -212,7 +212,7 @@ end
 local ENTITY_DEFS = {}
 local ENTITY_LIST = {}
 local currentEntityId = 0
-function g.defineEntityType(id, def)
+function g.defineEntity(id, def)
     assert(not ENTITY_DEFS[id], "Duplicate entity type: " .. id)
     assert(def.x == nil and def.y == nil and def.type == nil, "x/y/type are reserved")
     def.type = id
