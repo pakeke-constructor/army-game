@@ -4,6 +4,9 @@
 - create rendering system
 - create qbus / evbus module
 - create ECS
+
+- TEST ALL THIS. Create basic unit / entity; spawn it.
+
 - create basic ui module
 
 - create unit definition
@@ -12,8 +15,6 @@
 
 - add push-ifs-up methodology (inside `_ex6/coding_style`)  https://gieseanw.wordpress.com/2024/06/24/dont-push-ifs-up-put-them-as-close-to-the-source-of-data-as-possible/
 
-
-- tell planning-agent NOT to write code in the plann.
 
 
 ## BIG:

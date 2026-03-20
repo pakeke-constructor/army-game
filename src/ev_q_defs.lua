@@ -20,6 +20,11 @@ g.defineEvent("entityBuffed")
 g.defineEvent("entityKillsEnemy")
 g.defineEvent("entityShootsProjectile")
 
+-- Entity misc:
+g.defineEvent("drawEntity")
+
+
+
 -- Squad / deployment
 g.defineEvent("squadDeployed")
 

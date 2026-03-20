@@ -8,8 +8,7 @@ local atlas = AutoAtlas(2048, 2048)
 
 local nameToQuad = {}
 
-local richtext = nil
-pcall(function() richtext = require("src.modules.richtext.exports") end)
+local richtext = require("src.modules.richtext.exports")
 
 local sceneManager = require("src.scenes.sceneManager")
 
@@ -353,6 +352,12 @@ end
 
 function g.getCurrentScene()
     return sceneManager.getCurrentScene()
+end
+
+
+function g.getWorldTime()
+    -- todo: add a proper counter here; allows for faster game-speed
+    return love.timer.getTime()
 end
 
 
