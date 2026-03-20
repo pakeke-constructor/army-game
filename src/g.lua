@@ -231,6 +231,23 @@ function g.getBlessingList()
     return BLESSING_LIST
 end
 
+function g.addBlessing(id)
+    assert(BLESSING_DEFS[id], "Unknown blessing: " .. tostring(id))
+    local run = g.getRun()
+    run.blessings[#run.blessings + 1] = id
+end
+
+function g.removeBlessing(id)
+    local run = g.getRun()
+    for i = #run.blessings, 1, -1 do
+        if run.blessings[i] == id then
+            table.remove(run.blessings, i)
+            return true
+        end
+    end
+    return false
+end
+
 -- Entity system
 local ENTITY_DEFS = {}
 local ENTITY_LIST = {}
