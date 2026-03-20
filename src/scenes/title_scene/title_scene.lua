@@ -1,16 +1,14 @@
 local title_scene = {}
 
 function title_scene:init()
-    self.t = 0
     self.started = false
 end
 
 function title_scene:enter()
-    self.t = 0
+    self.startTime = love.timer.getTime()
 end
 
 function title_scene:update(dt)
-    self.t = self.t + dt
 end
 
 function title_scene:start()
@@ -48,7 +46,8 @@ function title_scene:draw()
         local msg = "STARTED (TODO: NEXT SCENE)"
         lg.print(msg, (w - smallFont:getWidth(msg)) / 2, h * 0.55)
     else
-        if math.floor(self.t * 2) % 2 == 0 then
+        local t = love.timer.getTime() - self.startTime
+        if math.floor(t * 2) % 2 == 0 then
             local msg = "PRESS ANY KEY"
             lg.print(msg, (w - smallFont:getWidth(msg)) / 2, h * 0.55)
         end

@@ -22,6 +22,13 @@ function g.newRun()
     return currentRun
 end
 
+
+---@return ecs.ECSWorld?
+function g.getBattleECS()
+    return nil
+end
+
+
 function g.hasRun()
     return currentRun ~= nil
 end
@@ -224,6 +231,9 @@ function g.spawnEntity(id, x, y, ...)
     if ent.init then
         ent:init(...)
     end
+    local ecs = g.getBattleECS()
+    assert(ecs, "g.spawnEntity called outside of battle")
+    ecs:addEntity(ent)
     return ent
 end
 

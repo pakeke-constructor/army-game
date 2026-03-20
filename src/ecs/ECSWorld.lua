@@ -56,6 +56,28 @@ function ECSWorld:update(dt)
         if e.update then
             e:update(dt)
         end
+        if e.lifetime then
+            e.lifetime = e.lifetime - dt
+            if e.lifetime <= 0 then
+                self.entities:removeBuffered(e)
+            end
+        end
+    end
+end
+
+local function sortOrder(a, b)
+    return (a.y + (a.drawOrder or 0)) < (b.y + (b.drawOrder or 0))
+end
+
+function ECSWorld:draw()
+    local list = {}
+    for i = 1, self.entities.len do
+        list[#list + 1] = self.entities[i]
+    end
+    table.sort(list, sortOrder)
+    for i = 1, #list do
+        local e = list[i]
+        g.drawEntity(e, e.x, e.y)
     end
 end
 
