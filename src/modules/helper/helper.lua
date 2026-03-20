@@ -266,6 +266,23 @@ function helper.magnitude(x,y)
 end
 
 
+---@param x number
+---@param y number
+---@return number angle
+---@return number radius
+function helper.toPolar(x, y)
+    return math.atan2(y, x), (x*x + y*y)^0.5
+end
+
+---@param angle number
+---@param radius number
+---@return number x
+---@return number y
+function helper.fromPolar(angle, radius)
+    return math.cos(angle) * radius, math.sin(angle) * radius
+end
+
+
 ---@generic T, U, V
 ---@param b T
 ---@param er U
