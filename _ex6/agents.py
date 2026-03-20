@@ -138,7 +138,7 @@ reader = Context("reader_codex",model=ANALYTICAL_MODEL, reasoning="medium", mess
 
 
 
-coder = Context("c_opus", model=M.OPUS_46.id, reasoning="medium", messages=[
+coder = Context("c_opus", yolo=True, model=M.OPUS_46.id, reasoning="medium", messages=[
     MAIN_SYSTEM_PROMPT,
     make_code_mode_system_prompt([
         read_file, glob, search, read_headers, read_body,

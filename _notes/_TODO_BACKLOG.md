@@ -4,6 +4,7 @@
 - create rendering system
 - create qbus / evbus module
 - create ECS
+- create basic ui module
 
 - create unit definition
 - create squad definition
