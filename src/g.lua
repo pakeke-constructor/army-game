@@ -564,26 +564,62 @@ end
 local Scope = objects.Class("g:Scope")
 
 function Scope:init()
-    self.questionCache = {--[[
-        [question] -> func list
-    ]]}
-    self.eventCache = {--[[
-        [event] -> func list
-    ]]}
+    self.handlers = {}
+    self.cache = {} -- [eventOrQuestionName] -> {func, func, ...}
+end
+
+function Scope:_rebuild()
+    local cache = self.cache
+    for k in pairs(cache) do
+        table_clear(cache[k])
+    end
+    for _, handler in ipairs(self.handlers) do
+        for key, func in pairs(handler) do
+            if definedEvents[key] or questions[key] then
+                if not cache[key] then cache[key] = {} end
+                local list = cache[key]
+                list[#list + 1] = func
+            end
+        end
+    end
 end
 
 function Scope:addHandler(handler)
-    -- rebuild 
+    self.handlers[#self.handlers + 1] = handler
+    self:_rebuild()
 end
 
 function Scope:removeHandler(handler)
-    -- rebuild 
-end
-
-function Scope:ask(question, ...)
+    for i = #self.handlers, 1, -1 do
+        if self.handlers[i] == handler then
+            table.remove(self.handlers, i)
+            self:_rebuild()
+            return true
+        end
+    end
+    return false
 end
 
 function Scope:call(event, ...)
+    local list = self.cache[event]
+    if not list then return end
+    for i = 1, #list do
+        list[i](...)
+    end
+end
+
+function Scope:ask(question, ...)
+    local t = questions[question]
+    if not t then
+        error("Invalid question: " .. tostring(question))
+    end
+    local reducer, val = t.reducer, t.defaultValue
+    local list = self.cache[question]
+    if not list then return val end
+    for i = 1, #list do
+        val = reducer(val, list[i](...))
+    end
+    return val
 end
 
 
