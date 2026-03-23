@@ -343,21 +343,13 @@ function g.addPerk(ent, id)
     local info = assert(PERK_DEFS[id], "Unknown perk: " .. tostring(id))
     assert(info.handlers, "Perk has no handlers: " .. id)
     if not ent.scope then ent.scope = g.newScope() end
-    local h = {_perkId = id}
-    for k, v in pairs(info.handlers) do h[k] = v end
-    ent.scope:addHandler(h)
+    ent.scope:addHandler(info.handlers)
 end
 
 function g.removePerk(ent, id)
     if not ent.scope then return false end
-    for i = #ent.scope.handlers, 1, -1 do
-        if ent.scope.handlers[i]._perkId == id then
-            table.remove(ent.scope.handlers, i)
-            ent.scope:_rebuild()
-            return true
-        end
-    end
-    return false
+    local info = assert(PERK_DEFS[id], "Unknown perk: " .. tostring(id))
+    return ent.scope:removeHandler(info.handlers)
 end
 
 -- Entity system
@@ -569,6 +561,7 @@ local Scope = objects.Class("g:Scope")
 
 function Scope:init()
     self.handlers = {}
+    self.expiry = {} -- [handler] -> expire time
     self.cache = {} -- [eventOrQuestionName] -> {func, func, ...}
     self.lastPrune = 0
 end
@@ -579,8 +572,9 @@ function Scope:_rebuild()
         table_clear(cache[k])
     end
     local now = love.timer.getTime()
+    local expiry = self.expiry
     for _, handler in ipairs(self.handlers) do
-        if not handler._expires or handler._expires > now then
+        if not expiry[handler] or expiry[handler] > now then
             for key, func in pairs(handler) do
                 if definedEvents[key] or questions[key] then
                     if not cache[key] then cache[key] = {} end
@@ -597,9 +591,12 @@ function Scope:_pruneIfNeeded()
     if now - self.lastPrune < 0.2 then return end
     self.lastPrune = now
     local dirty = false
+    local expiry = self.expiry
     for i = #self.handlers, 1, -1 do
-        if self.handlers[i]._expires and self.handlers[i]._expires <= now then
+        local h = self.handlers[i]
+        if expiry[h] and expiry[h] <= now then
             table.remove(self.handlers, i)
+            expiry[h] = nil
             dirty = true
         end
     end
@@ -608,12 +605,10 @@ end
 
 function Scope:addHandler(handler, duration)
     for key in pairs(handler) do
-        if type(key) == "string" and key:sub(1, 1) ~= "_" then
-            assert(definedEvents[key] or questions[key], "Unknown event/question: " .. tostring(key))
-        end
+        assert(definedEvents[key] or questions[key], "Unknown event/question: " .. tostring(key))
     end
     if duration then
-        handler._expires = love.timer.getTime() + duration
+        self.expiry[handler] = love.timer.getTime() + duration
     end
     self.handlers[#self.handlers + 1] = handler
     self:_rebuild()
@@ -623,6 +618,7 @@ function Scope:removeHandler(handler)
     for i = #self.handlers, 1, -1 do
         if self.handlers[i] == handler then
             table.remove(self.handlers, i)
+            self.expiry[handler] = nil
             self:_rebuild()
             return true
         end
