@@ -566,6 +566,7 @@ local Scope = objects.Class("g:Scope")
 function Scope:init()
     self.handlers = {}
     self.cache = {} -- [eventOrQuestionName] -> {func, func, ...}
+    self.lastPrune = 0
 end
 
 function Scope:_rebuild()
@@ -573,18 +574,41 @@ function Scope:_rebuild()
     for k in pairs(cache) do
         table_clear(cache[k])
     end
+    local now = love.timer.getTime()
     for _, handler in ipairs(self.handlers) do
-        for key, func in pairs(handler) do
-            if definedEvents[key] or questions[key] then
-                if not cache[key] then cache[key] = {} end
-                local list = cache[key]
-                list[#list + 1] = func
+        if not handler._expires or handler._expires > now then
+            for key, func in pairs(handler) do
+                if definedEvents[key] or questions[key] then
+                    if not cache[key] then cache[key] = {} end
+                    local list = cache[key]
+                    list[#list + 1] = func
+                end
             end
         end
     end
 end
 
-function Scope:addHandler(handler)
+function Scope:_pruneIfNeeded()
+    local now = love.timer.getTime()
+    if now - self.lastPrune < 0.2 then return end
+    self.lastPrune = now
+    local dirty = false
+    for i = #self.handlers, 1, -1 do
+        if self.handlers[i]._expires and self.handlers[i]._expires <= now then
+            table.remove(self.handlers, i)
+            dirty = true
+        end
+    end
+    if dirty then self:_rebuild() end
+end
+
+function Scope:addHandler(handler, duration)
+    for key in pairs(handler) do
+        assert(definedEvents[key] or questions[key], "Unknown event/question: " .. tostring(key))
+    end
+    if duration then
+        handler._expires = love.timer.getTime() + duration
+    end
     self.handlers[#self.handlers + 1] = handler
     self:_rebuild()
 end
@@ -601,6 +625,7 @@ function Scope:removeHandler(handler)
 end
 
 function Scope:call(event, ...)
+    self:_pruneIfNeeded()
     local list = self.cache[event]
     if not list then return end
     for i = 1, #list do
@@ -609,6 +634,7 @@ function Scope:call(event, ...)
 end
 
 function Scope:ask(question, ...)
+    self:_pruneIfNeeded()
     local t = questions[question]
     if not t then
         error("Invalid question: " .. tostring(question))

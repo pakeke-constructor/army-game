@@ -4,33 +4,6 @@
 
 
 
-create scopes system for ev/q handlers.
-```lua
----@class g.Scope: objects.Class
-local Scope
-
-function Scope:addHandler(handler)
-
-end
-
-function Scope:removeHandler(handler)
-
-end
-
-function Scope:ask(question, ...)
-end
-
-function Scope:call(event, ...)
-end
-
-
----@return g.Scope
-local function newScope()
-    return {}
-end
-```
-
-
 - Create stats system.
 
 

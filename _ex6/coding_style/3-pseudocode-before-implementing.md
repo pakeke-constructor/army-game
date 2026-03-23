@@ -20,4 +20,6 @@ function buildNavMesh(world)
     -- 5. return { polygons, adjacency }
 end
 ```
-Then implement each step. The shape is locked in before any real code is written.
+Then implement each step with another edit-file call.
+The shape is locked in before any real code is written.
+It's OKAY to do it in 2 passes; the human wants simplicity and correctness.
