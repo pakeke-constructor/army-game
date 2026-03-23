@@ -150,8 +150,21 @@ coder = Context("c_opus", yolo=True, model=M.OPUS_46.id, reasoning="medium", mes
     ENV_PROMPT,
     CLAUDE_MD,
 ])
-if SMART_MODEL.startswith("anthropic/"):
-    cache_manually(coder)
+cache_manually(coder)
+
+
+coder = Context("c_codex", yolo=True, model=M.GPT52_CODEX.id, reasoning="medium", messages=[
+    MAIN_SYSTEM_PROMPT,
+    make_code_mode_system_prompt([
+        read_file, glob, search, read_headers, read_body,
+        write_file, edit_file, edit_file_lines,
+        explore_agent, web_search, websearch_agent,
+        escalate,
+        task_focus, task_read, task_write_plan, task_write_done_criteria, task_add_log, task_close, task_query_logs
+    ]),
+    ENV_PROMPT,
+    CLAUDE_MD,
+])
 
 
 PLANNER_SYSTEM_PROMPT = ex6.Message(

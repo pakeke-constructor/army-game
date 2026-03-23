@@ -37,9 +37,10 @@ end
 
 ---@return ecs.ECSWorld?
 function g.getBattleECS()
+    -- gets the ECS for battle
     local scene, name = g.getCurrentScene()
     if name == "battle_scene" then
-        return scene.ecs or nil
+        return scene.ecs
     end
 end
 
@@ -558,6 +559,40 @@ function g.clearHandlers()
     end
 end
 
+
+---@class g.Scope: objects.Class
+local Scope = objects.Class("g:Scope")
+
+function Scope:init()
+    self.questionCache = {--[[
+        [question] -> func list
+    ]]}
+    self.eventCache = {--[[
+        [event] -> func list
+    ]]}
+end
+
+function Scope:addHandler(handler)
+    -- rebuild 
+end
+
+function Scope:removeHandler(handler)
+    -- rebuild 
+end
+
+function Scope:ask(question, ...)
+end
+
+function Scope:call(event, ...)
+end
+
+
+---@return g.Scope
+function g.newScope()
+    return Scope()
+end
+
+
 -- Fire an event. No return value.
 -- Order: scene-level handlers, then ent[ev], then ent.handlers
 function g.call(ev, arg1, ...)
@@ -575,6 +610,7 @@ function g.call(ev, arg1, ...)
     end
 
     -- 3. entity handler list (perks etc)
+    -- TODO; remove this, use scopes instead (for efficiency)
     local handlers = arg1.handlers
     if handlers then
         for i = 1, #handlers do
@@ -606,6 +642,7 @@ function g.ask(q, arg1, ...)
         end
 
         -- 3. entity handler list (perks etc)
+        -- TODO; remove this, use scopes instead (for efficiency)
         local handlers = arg1.handlers
         if handlers then
             for i = 1, #handlers do

@@ -4,6 +4,11 @@ local table_clear = require("table.clear")
 ---@class ecs.ECSWorld: objects.Class
 local ECSWorld = objects.Class("ecs:ECSWorld")
 
+
+---@class ecs.System
+---@field public ecs ecs.ECSWorld
+
+
 function ECSWorld:init(systemNames)
     self.entities = objects.BufferedSet()
     self.componentIndex = {} -- [componentName] -> {ent, ent, ...}
@@ -97,10 +102,13 @@ function ECSWorld:draw()
     g.call("postDraw", self)
 end
 
+
+local EMPTY = {}
+
 function ECSWorld:iterate(component)
     local list = self.componentIndex[component]
     if not list then
-        return ipairs({})
+        return ipairs(EMPTY)
     end
     return ipairs(list)
 end
