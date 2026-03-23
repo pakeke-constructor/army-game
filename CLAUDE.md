@@ -26,19 +26,20 @@ After 8 turns, the map is reset; and the player fights a boss.
 - Blessings: A per-run buff that gives global benefits: e.g: "Gain +2 mana after battle". Use question/event buses.
 - Spells: Spells can be cast during battle. Generally cost mana, and have a cooldown.
 - Perks: Per-unit buffs/blessings. Use question/event buses. Eg: "This unit gains +2 damage"
-- Traits: Keywords for units. Kinda like tags; they don't do anything on their own, but may interact with other systems. (Examples: Stoneskin, Townsfolk, Gremlin, Mancer, Beast, Alchemist, Wild)
+- Traits: Keywords for units. Kinda like tags; they don't do anything on their own, but may interact with other systems. (Examples: Stoneskin, Townsfolk, Gremlin, Mancer)
 </high_level_concepts>
 
 
 <architecture>
 src/g.lua: All core functions stored here, exposed via `g.*` namespace
 src/scenes/*: All scenes defined here, in folders.
-src/ecs/*: Entity-component-system defined here.
-src/ecs/systems/*: ECS Systems defined here; (projectile, ent movement, pathing, etc etc)
-src/map/*: Map stuff goes here
+src/ecs/*: Entity-component-system stuff.
+src/ecs/systems/*: ECS Systems. (projectile, ent movement, pathing, etc)
+src/ecs/components.lua: All component type-definitions
 src/modules/*: Extra modules (analytics, lighting, richtext, typechecking)
-src/Run.lua: Represents a run. Stores health, food, squads,  (can be serialized)
-src/BattleField.lua: Represents a battlefield. Stores entities. Discarded after battle.
+src/Run.lua: Represents a run. Stores health, food, squads, (can be serialized)
+src/BattleField.lua: Represents a battlefield. Holds an ECS-World. Discarded after battle.
+src/map/*: Map stuff. Holds an ECS-World.
 src/consts.lua: Constants.
 
 (^^^ NOTE: SOME OF THIS ISN'T COMPLETED YET.)

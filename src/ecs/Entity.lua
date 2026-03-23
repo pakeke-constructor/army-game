@@ -8,10 +8,7 @@ function Entity:isShared(key)
     if rawget(self, key) ~= nil then return false end
     local mt = getmetatable(self)
     local def = mt and rawget(mt, "__index")
-    if type(def) == "table" then
-        return def[key] ~= nil
-    end
-    return false
+    return def[key] ~= nil
 end
 
 function Entity:getDef()
