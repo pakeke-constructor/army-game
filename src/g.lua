@@ -341,10 +341,7 @@ function g.getPerkInfo(id)
     return assert(PERK_DEFS[id], "Unknown perk: " .. tostring(id))
 end
 
---- Add a buff (handler table) to an entity, with optional duration (seconds).
---- If the entity's scope is shared (e.g. a squad scope), we promote:
---- a new personal scope is created with parent = the shared scope,
---- so the buff only affects this entity, not the whole squad.
+--- Add a buff to an entity. Promotes shared scopes so buff only affects this entity.
 function g.addBuff(ent, handler, duration)
     if not ent.scope then
         ent.scope = g.newScope()
@@ -565,22 +562,12 @@ function g.clearHandlers()
 end
 
 
--- Scopes: a container for event/question handlers, attached to entities.
--- Scopes support parent chaining: call/ask dispatch own handlers, then parent's.
---
--- SHARED SCOPES:
---   When a squad spawns, all entities share the SAME scope object (scope.shared = true).
---   This avoids duplicating handler tables for every unit in the squad.
---   e.g. 20 militia all point to one scope with the squad's perks.
---
---   When a personal buff is added to an entity (g.addBuff), we check scope.shared.
---   If shared, we "promote": create a new personal scope whose parent is the shared one.
---   The entity's .scope is swapped to this new personal scope.
---   This way, the personal buff lives on the entity alone, but the squad
---   perks are still inherited via the parent chain — no copying needed.
---
---   Entities without any personal buffs keep pointing to the shared scope directly,
---   so no extra allocations happen for unbuffed units.
+-- Scopes: handler containers on entities for events/questions.
+-- (Each scope is a collection of handlers; each Handler is a table containing events/question funcs)
+-- Support parent chaining.
+-- Squad entities share one scope (shared=true) to avoid duplication.
+-- When a buff for a single ent is added, we create a "personal" scope for that entity, 
+-- that "inherits" it's old shared scope.
 ---@class g.Scope: objects.Class
 local Scope = objects.Class("g:Scope")
 
