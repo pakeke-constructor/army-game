@@ -270,6 +270,7 @@ end
 function g.spawnSquad(squadId, x, y, ...)
     local info = assert(SQUAD_DEFS[squadId], "Unknown squad: " .. tostring(squadId))
     local squadScope = g.newScope()
+    squadScope.shared = true
     for j = 1, #info.perks do
         local perkInfo = g.getPerkInfo(info.perks[j])
         squadScope:addHandler(perkInfo.handlers)
@@ -277,7 +278,7 @@ function g.spawnSquad(squadId, x, y, ...)
     local entities = {}
     for i = 1, info.count do
         local ent = g.spawnEntity(info.entityId, x, y, ...)
-        ent.squadScope = squadScope
+        ent.scope = squadScope
         entities[i] = ent
     end
     if info.onDeploy then
@@ -340,17 +341,17 @@ function g.getPerkInfo(id)
     return assert(PERK_DEFS[id], "Unknown perk: " .. tostring(id))
 end
 
-function g.addPerk(ent, id)
-    local info = assert(PERK_DEFS[id], "Unknown perk: " .. tostring(id))
-    assert(info.handlers, "Perk has no handlers: " .. id)
-    if not ent.scope then ent.scope = g.newScope() end
-    ent.scope:addHandler(info.handlers)
-end
-
-function g.removePerk(ent, id)
-    if not ent.scope then return false end
-    local info = assert(PERK_DEFS[id], "Unknown perk: " .. tostring(id))
-    return ent.scope:removeHandler(info.handlers)
+--- Add a buff (handler table) to an entity, with optional duration (seconds).
+--- If the entity's scope is shared (e.g. a squad scope), we promote:
+--- a new personal scope is created with parent = the shared scope,
+--- so the buff only affects this entity, not the whole squad.
+function g.addBuff(ent, handler, duration)
+    if not ent.scope then
+        ent.scope = g.newScope()
+    elseif ent.scope.shared then
+        ent.scope = g.newScope(ent.scope)
+    end
+    ent.scope:addHandler(handler, duration)
 end
 
 -- Entity system
@@ -564,10 +565,28 @@ function g.clearHandlers()
 end
 
 
+-- Scopes: a container for event/question handlers, attached to entities.
+-- Scopes support parent chaining: call/ask dispatch own handlers, then parent's.
+--
+-- SHARED SCOPES:
+--   When a squad spawns, all entities share the SAME scope object (scope.shared = true).
+--   This avoids duplicating handler tables for every unit in the squad.
+--   e.g. 20 militia all point to one scope with the squad's perks.
+--
+--   When a personal buff is added to an entity (g.addBuff), we check scope.shared.
+--   If shared, we "promote": create a new personal scope whose parent is the shared one.
+--   The entity's .scope is swapped to this new personal scope.
+--   This way, the personal buff lives on the entity alone, but the squad
+--   perks are still inherited via the parent chain — no copying needed.
+--
+--   Entities without any personal buffs keep pointing to the shared scope directly,
+--   so no extra allocations happen for unbuffed units.
 ---@class g.Scope: objects.Class
 local Scope = objects.Class("g:Scope")
 
-function Scope:init()
+function Scope:init(parent)
+    self.parent = parent or nil
+    self.shared = false
     self.handlers = {}
     self.expiry = {} -- [handler] -> expire time
     self.cache = {} -- [eventOrQuestionName] -> {func, func, ...}
@@ -637,9 +656,13 @@ end
 function Scope:call(event, ...)
     self:_pruneIfNeeded()
     local list = self.cache[event]
-    if not list then return end
-    for i = 1, #list do
-        list[i](...)
+    if list then
+        for i = 1, #list do
+            list[i](...)
+        end
+    end
+    if self.parent then
+        self.parent:call(event, ...)
     end
 end
 
@@ -651,17 +674,21 @@ function Scope:ask(question, ...)
     end
     local reducer, val = t.reducer, t.defaultValue
     local list = self.cache[question]
-    if not list then return val end
-    for i = 1, #list do
-        val = reducer(val, list[i](...))
+    if list then
+        for i = 1, #list do
+            val = reducer(val, list[i](...))
+        end
+    end
+    if self.parent then
+        val = reducer(val, self.parent:ask(question, ...))
     end
     return val
 end
 
 
 ---@return g.Scope
-function g.newScope()
-    return Scope()
+function g.newScope(parent)
+    return Scope(parent)
 end
 
 
@@ -681,16 +708,9 @@ function g.call(ev, arg1, ...)
         arg1[ev](arg1, ...)
     end
 
-    -- 3. entity scope (perks etc)
-    local scope = arg1.scope
-    if scope then
-        scope:call(ev, arg1, ...)
-    end
-
-    -- 4. squad scope (shared squad perks)
-    local squadScope = arg1.squadScope
-    if squadScope then
-        squadScope:call(ev, arg1, ...)
+    -- 3. entity scope (perks, buffs, squad scope via parent chain)
+    if arg1.scope then
+        arg1.scope:call(ev, arg1, ...)
     end
 end
 
@@ -715,14 +735,9 @@ function g.ask(q, arg1, ...)
             val = reducer(val, arg1[q](arg1, ...))
         end
 
-        -- 3. entity scope (perks etc)
+        -- 3. entity scope (perks, buffs, squad scope via parent chain)
         if arg1.scope then
             val = reducer(val, arg1.scope:ask(q, arg1, ...))
-        end
-
-        -- 4. squad scope (shared squad perks)
-        if arg1.squadScope then
-            val = reducer(val, arg1.squadScope:ask(q, arg1, ...))
         end
     end
 
