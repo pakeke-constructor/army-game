@@ -48,7 +48,7 @@ src/consts.lua: Constants.
 
 <event_question_bus>
 Events and Questions are the core abstraction for decoupled game logic.
-Defined via g.defineEvent / g.defineQuestion in advance.
+Pre-declared via g.defineEvent(name) / g.defineQuestion(name, reducer, default).
 
 **Events** = dispatching information. Fire-and-forget, no return value.
   g.call("onUnitDeath", unit)
@@ -57,15 +57,27 @@ Defined via g.defineEvent / g.defineQuestion in advance.
 **Questions** = gathering information. Returns a reduced value from all listeners.
   local dmg = g.ask("getDamageReduction", unit)
   "I need to know something. Everyone contribute."
+  Reducers: ADD, MULTIPLY, OR, AND, MIN, MAX, PRIORITY, etc.
 
-Questions use reducers (ADD, MULTIPLY, OR, AND, PRIORITY, etc) to combine answers.
+A "handler" is a table mapping event/question names to functions: {onUnitDeath = func, getDmg = func2}
+g.addHandler(handler) registers a global handler; g.clearHandlers() wipes all. Called every frame for robustness (add handlers in preUpdate, clear in main loop). Since they are cleared per-frame, there's no need to remove them, lifecycle is robust.
 
-Three levels of listeners, dispatched in order:
-1. Scene-level handlers: added via g.addHandler({...}) every frame. Cleared each frame by g.clearHandlers(). Used by blessings, global systems.
-2. Direct entity handler: ent[eventName] or ent[questionName]. Defined on entity def.
-3. Entity handler list: ent.handlers = {{eventName=func}, ...}. Used by perks.
+Consider:
+- g.call("my_event", arg1, arg2, ...)
+- g.ask("my_question", arg1, arg2, ...)
 
-g.call/g.ask auto-dispatch to all three when arg1 is a table (entity).
+There are 3 "places" where events/questions can be dispatched to:
+- Scene-level: g.addHandler handlers. Used by blessings, ECS systems.
+- On the entity/table itself: If arg1 is an entity (table), g.call/g.ask auto-dispatch to that entity's handlers too. So g.call("onHit", ent) hits ent.onHit.
+- Entity scope: If arg1.scope is a Scope object, calls arg1.scope:call/ask. Used by perks/buffs.
+
+Scopes: essentially a collection of handlers, (with parent inheritance.)
+- Add handlers to scopes via `ent.scope:addHandler({my_event = func, my_question = func2})`
+- Squad spawn creates a shared scope (scope.shared=true); all squad ents point to it. Perks go here.
+- g.addBuff(ent, handler, duration) makes a per-entity scope if current is shared, so buff stays per-entity.
+- Handlers can auto-expire via optional duration arg, via `:addHandler(handler, duration)`. (how buffs work.)
+
+If you are ever need clarification about any of this, launch an explore agent and ask it to be brief.
 </event_question_bus>
 
 
