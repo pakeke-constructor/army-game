@@ -33,6 +33,8 @@ After 8 turns, the map is reset; and the player fights a boss.
 <architecture>
 src/g.lua: All core functions stored here, exposed via `g.*` namespace
 src/scenes/*: All scenes defined here, in folders.
+src/ecs/*: Entity-component-system defined here.
+src/ecs/systems/*: ECS Systems defined here; (projectile, ent movement, pathing, etc etc)
 src/map/*: Map stuff goes here
 src/modules/*: Extra modules (analytics, lighting, richtext, typechecking)
 src/Run.lua: Represents a run. Stores health, food, squads,  (can be serialized)
