@@ -268,12 +268,15 @@ end
 --- Spawn all entities for a squad, applying perks and calling onDeploy
 function g.spawnSquad(squadId, x, y, ...)
     local info = assert(SQUAD_DEFS[squadId], "Unknown squad: " .. tostring(squadId))
+    local squadScope = g.newScope()
+    for j = 1, #info.perks do
+        local perkInfo = g.getPerkInfo(info.perks[j])
+        squadScope:addHandler(perkInfo.handlers)
+    end
     local entities = {}
     for i = 1, info.count do
         local ent = g.spawnEntity(info.entityId, x, y, ...)
-        for j = 1, #info.perks do
-            g.addPerk(ent, info.perks[j])
-        end
+        ent.squadScope = squadScope
         entities[i] = ent
     end
     if info.onDeploy then
@@ -339,17 +342,18 @@ end
 function g.addPerk(ent, id)
     local info = assert(PERK_DEFS[id], "Unknown perk: " .. tostring(id))
     assert(info.handlers, "Perk has no handlers: " .. id)
-    if not ent.handlers then ent.handlers = {} end
+    if not ent.scope then ent.scope = g.newScope() end
     local h = {_perkId = id}
     for k, v in pairs(info.handlers) do h[k] = v end
-    ent.handlers[#ent.handlers + 1] = h
+    ent.scope:addHandler(h)
 end
 
 function g.removePerk(ent, id)
-    if not ent.handlers then return false end
-    for i = #ent.handlers, 1, -1 do
-        if ent.handlers[i]._perkId == id then
-            table.remove(ent.handlers, i)
+    if not ent.scope then return false end
+    for i = #ent.scope.handlers, 1, -1 do
+        if ent.scope.handlers[i]._perkId == id then
+            table.remove(ent.scope.handlers, i)
+            ent.scope:_rebuild()
             return true
         end
     end
@@ -604,7 +608,9 @@ end
 
 function Scope:addHandler(handler, duration)
     for key in pairs(handler) do
-        assert(definedEvents[key] or questions[key], "Unknown event/question: " .. tostring(key))
+        if type(key) == "string" and key:sub(1, 1) ~= "_" then
+            assert(definedEvents[key] or questions[key], "Unknown event/question: " .. tostring(key))
+        end
     end
     if duration then
         handler._expires = love.timer.getTime() + duration
@@ -656,7 +662,7 @@ end
 
 
 -- Fire an event. No return value.
--- Order: scene-level handlers, then ent[ev], then ent.handlers
+-- Order: scene-level handlers, then ent[ev], then ent.scope
 function g.call(ev, arg1, ...)
     -- 1. scene-level handlers
     local list = handlerCache[ev]
@@ -671,19 +677,21 @@ function g.call(ev, arg1, ...)
         arg1[ev](arg1, ...)
     end
 
-    -- 3. entity handler list (perks etc)
-    -- TODO; remove this, use scopes instead (for efficiency)
-    local handlers = arg1.handlers
-    if handlers then
-        for i = 1, #handlers do
-            local fn = handlers[i][ev]
-            if fn then fn(arg1, ...) end
-        end
+    -- 3. entity scope (perks etc)
+    local scope = arg1.scope
+    if scope then
+        scope:call(ev, arg1, ...)
+    end
+
+    -- 4. squad scope (shared squad perks)
+    local squadScope = arg1.squadScope
+    if squadScope then
+        squadScope:call(ev, arg1, ...)
     end
 end
 
 -- Ask a question. Returns reduced value.
--- Order: scene-level handlers, then ent[q], then ent.handlers
+-- Order: scene-level handlers, then ent[q], then ent.scope
 function g.ask(q, arg1, ...)
     local t = questions[q]
     if not t then
@@ -703,14 +711,14 @@ function g.ask(q, arg1, ...)
             val = reducer(val, arg1[q](arg1, ...))
         end
 
-        -- 3. entity handler list (perks etc)
-        -- TODO; remove this, use scopes instead (for efficiency)
-        local handlers = arg1.handlers
-        if handlers then
-            for i = 1, #handlers do
-                local fn = handlers[i][q]
-                if fn then val = reducer(val, fn(arg1, ...)) end
-            end
+        -- 3. entity scope (perks etc)
+        if arg1.scope then
+            val = reducer(val, arg1.scope:ask(q, arg1, ...))
+        end
+
+        -- 4. squad scope (shared squad perks)
+        if arg1.squadScope then
+            val = reducer(val, arg1.squadScope:ask(q, arg1, ...))
         end
     end
 
