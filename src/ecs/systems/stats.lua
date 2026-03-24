@@ -73,11 +73,24 @@ defineStat("armor", "baseArmor")
 defineStat("projectileAccuracy", "baseProjectileAccuracy")
 
 
+
 ---@class g.systems.stats: ecs.System
 local stats = {}
 
-function stats:preUpdate()
-    for _, ent in self.ecs:iterate() do
+function stats.entitySpawned(ent)
+    for _, stat in ipairs(statlist) do
+        local base = ent[stat.baseName]
+        if base then
+            ent[stat.name] = base
+        end
+    end
+    if ent.maxHealth and not ent.health then
+        ent.health = ent.maxHealth
+    end
+end
+
+function stats.preUpdate(world, dt)
+    for _, ent in world:iterate() do
         for _, stat in ipairs(statlist) do
             if ent[stat.baseName] or ent[stat.name] then
                 recomputeStat(ent, stat)

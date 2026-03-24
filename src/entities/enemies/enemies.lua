@@ -1,9 +1,9 @@
 
 
 
-g.defineEntity("militia", {
-    image = "militia",
-    side = "ally",
+g.defineEntity("demon", {
+    image = "demon",
+    side = "enemy",
     ai = {
         target = "enemy",
         getPriority = function(selfEnt, targEnt)
@@ -14,32 +14,32 @@ g.defineEntity("militia", {
     attack = {
         attackType = "melee",
     },
-    baseAttackDamage = 10,
+    baseAttackDamage = 8,
     baseAttackSpeed = 1,
-    baseAttackRange = 10,
-    baseMoveSpeed = 60,
-    baseMaxHealth = 50,
+    baseAttackRange = 80,
+    baseMoveSpeed = 50,
+    baseMaxHealth = 40,
 })
 
-g.defineEntity("archer", {
-    image = "militia", -- placeholder
-    side = "ally",
+g.defineEntity("imp", {
+    image = "archerdemon",
+    side = "enemy",
     ai = {
         target = "enemy",
         getPriority = function(selfEnt, targEnt)
             return 0
         end,
-        range = {200, 260},
+        range = {180, 240},
     },
     attack = {
         attackType = "ranged",
         projectileType = "arrow",
-        projectileSpeed = 250,
+        projectileSpeed = 200,
     },
-    baseAttackDamage = 8,
-    baseAttackSpeed = 0.8,
-    baseAttackRange = 200,
-    baseMoveSpeed = 50,
-    baseMaxHealth = 30,
+    baseAttackDamage = 6,
+    baseAttackSpeed = 0.7,
+    baseAttackRange = 180,
+    baseMoveSpeed = 45,
+    baseMaxHealth = 25,
 })
 

@@ -66,11 +66,14 @@ function ECSWorld:addSystemHandlers()
 end
 
 function ECSWorld:update(dt)
+    self:addSystemHandlers()
     self.entities:flush()
     self:_rebuildIndex()
     g.call("preUpdate", self, dt)
     for i = 1, self.entities.len do
         local e = self.entities[i]
+        if e.vx then e.x = e.x + e.vx * dt end
+        if e.vy then e.y = e.y + e.vy * dt end
         if e.update then
             e:update(dt)
         end

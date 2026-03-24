@@ -1,0 +1,118 @@
+
+--[[
+AI SYSTEM:
+==========
+Finds targets for entities with an `ai` component.
+Moves entities toward their targets based on ai.range.
+
+Each frame:
+1. Pick the best target (by priority, then distance).
+2. If too far, move toward it. If close enough, stop.
+3. Store the target on ent._aiTarget for the attack system to use.
+
+Entities need: ai, side, x, y, moveSpeed
+]]
+
+local aiSys = {}
+
+-- returns squared distance
+local function dist2(a, b)
+    local dx, dy = a.x - b.x, a.y - b.y
+    return dx * dx + dy * dy
+end
+
+local function isValidTarget(ent)
+    return ent.health and ent.health > 0
+end
+
+local function getOpposingSide(ent)
+    if ent.ai.target == "enemy" then
+        -- target the opposite side
+        return ent.side == "ally" and "enemy" or "ally"
+    else
+        -- target same side (for healers etc)
+        return ent.side
+    end
+end
+
+-- Find the best target for `ent` from `candidates`
+local function pickTarget(ent, candidates)
+    local best, bestScore = nil, -math.huge
+    local ai = ent.ai
+    for i = 1, #candidates do
+        local c = candidates[i]
+        if isValidTarget(c) then
+            local prio = ai.getPriority(ent, c)
+            -- tiebreak: closer is better (subtract tiny distance factor)
+            local d2 = dist2(ent, c)
+            local score = prio - d2 * 0.00001
+            if score > bestScore then
+                best, bestScore = c, score
+            end
+        end
+    end
+    return best
+end
+
+
+function aiSys.preUpdate(world, dt)
+    -- build side lists
+    local allies, enemies = {}, {}
+    for _, ent in world:iterate("side") do
+        if isValidTarget(ent) then
+            if ent.side == "ally" then
+                allies[#allies + 1] = ent
+            else
+                enemies[#enemies + 1] = ent
+            end
+        end
+    end
+
+    for _, ent in world:iterate("ai") do
+        local targetSide = getOpposingSide(ent)
+        local candidates = targetSide == "ally" and allies or enemies
+
+        -- pick target
+        local targ = pickTarget(ent, candidates)
+        ent._aiTarget = targ
+
+        if not targ then
+            ent.vx, ent.vy = 0, 0
+            goto continue
+        end
+
+        local dx, dy = targ.x - ent.x, targ.y - ent.y
+        local dist = (dx * dx + dy * dy) ^ 0.5
+        local ai = ent.ai
+        local minRange, maxRange = ai.range[1], ai.range[2]
+
+        -- use attackRange if available (stat system computes it)
+        if ent.attackRange then
+            minRange = ent.attackRange
+            maxRange = ent.attackRange * 1.3
+        end
+
+        local moving = ent._aiMoving
+
+        -- hysteresis: start moving if beyond maxRange, stop if within minRange
+        if dist > maxRange then
+            moving = true
+        elseif dist <= minRange then
+            moving = false
+        end
+        ent._aiMoving = moving
+
+        if moving and dist > 1 then
+            local speed = ent.moveSpeed or 60
+            local nx, ny = dx / dist, dy / dist
+            ent.vx = nx * speed
+            ent.vy = ny * speed
+        else
+            ent.vx, ent.vy = 0, 0
+        end
+
+        ::continue::
+    end
+end
+
+return aiSys

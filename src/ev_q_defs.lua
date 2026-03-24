@@ -26,6 +26,7 @@ g.defineEvent("entityHealed")
 g.defineEvent("entityBuffed")
 g.defineEvent("entityKillsEnemy")
 g.defineEvent("entityShootsProjectile")
+g.defineEvent("onAttack")
 
 -- Entity misc:
 g.defineEvent("drawEntity")
@@ -51,15 +52,7 @@ g.defineEvent("chestOpened")
 local ADD = reducers.ADD
 local MUL = reducers.MULTIPLY
 
-g.defineQuestion("getMoveSpeedModifier", ADD, 0)
-g.defineQuestion("getDamageModifier", ADD, 0)
-g.defineQuestion("getDamageMultiplier", MUL, 1)
-g.defineQuestion("getMaxHealthModifier", ADD, 0)
-g.defineQuestion("getAttackSpeedMultiplier", MUL, 1)
-g.defineQuestion("getMoveSpeedMultiplier", MUL, 1)
-g.defineQuestion("getRangeModifier", ADD, 0)
 g.defineQuestion("getDamageReduction", ADD, 0)
--- g.defineQuestion("getArmorMultiplier", MUL, 1) -- TODO: do we even want armor?
 
 -- Questions: spells/mana
 g.defineQuestion("getManaCostMultiplier", MUL, 1)

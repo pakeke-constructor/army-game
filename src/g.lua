@@ -386,6 +386,7 @@ function g.spawnEntity(id, x, y, ...)
         ent:init(...)
     end
     ecs:addEntity(ent)
+    g.call("entitySpawned", ent)
     return ent
 end
 

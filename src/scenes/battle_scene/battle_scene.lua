@@ -1,6 +1,6 @@
 local ECSWorld = require("src.ecs.ECSWorld")
 local Camera = require("lib.cam11")
-local ParticleService = require("src.world.particle.ParticleService")
+local ParticleService = require(".particles.ParticleService")
 
 local CAMERA_SPEED = 400
 local CAMERA_ZOOM = 2
@@ -10,18 +10,28 @@ local battle_scene = {}
 function battle_scene:init()
 end
 
+
+local function test()
+    -- spawn test allies
+    for x=100, 200, 30 do
+        for y=100, 200, 20 do
+            g.spawnEntity("militia", x, y)
+        end
+    end
+    -- spawn test enemies
+    for x=400, 500, 30 do
+        for y=100, 200, 20 do
+            g.spawnEntity("demon", x, y)
+        end
+    end
+end
+
+
 function battle_scene:enter()
-    self.ecs = ECSWorld()
+    self.ecs = ECSWorld({"stats", "ai", "attacking"})
     self.camera = Camera(0, 0, CAMERA_ZOOM)
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
     self.particles = ParticleService()
-
-    -- spawn test ents
-    for x=100, 200, 30 do
-        for y=100, 200, 20 do
-            g.spawnEntity("militia", x,y)
-        end
-    end
 end
 
 function battle_scene:leave()
@@ -55,6 +65,12 @@ function battle_scene:mousemoved(x, y, dx, dy)
         local cx, cy = self.camera:getPos()
         local z = self.camera:getZoom()
         self.camera:setPos(cx - dx / z, cy - dy / z)
+    end
+end
+
+function battle_scene:keypressed(k)
+    if consts.DEV_MODE and k == "q" then
+        test()
     end
 end
 
