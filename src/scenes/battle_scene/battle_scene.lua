@@ -1,5 +1,6 @@
 local ECSWorld = require("src.ecs.ECSWorld")
 local Camera = require("lib.cam11")
+local ParticleService = require("src.world.particle.ParticleService")
 
 local CAMERA_SPEED = 400
 local CAMERA_ZOOM = 2
@@ -13,6 +14,7 @@ function battle_scene:enter()
     self.ecs = ECSWorld()
     self.camera = Camera(0, 0, CAMERA_ZOOM)
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
+    self.particles = ParticleService()
 
     -- spawn test ents
     for x=100, 200, 30 do
@@ -25,11 +27,13 @@ end
 function battle_scene:leave()
     self.ecs = nil
     self.camera = nil
+    self.particles = nil
 end
 
 function battle_scene:update(dt)
     self:updateCamera(dt)
     self.ecs:update(dt)
+    self.particles:update(dt)
 end
 
 function battle_scene:updateCamera(dt)
@@ -61,6 +65,7 @@ function battle_scene:draw()
     self.camera:attach(false)
     iml.pushTransform(self.camera:getTransform())
     self.ecs:draw()
+    self.particles:draw()
     iml.popTransform()
     self.camera:detach()
 

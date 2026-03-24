@@ -511,6 +511,19 @@ function g.getWorldTime()
 end
 
 
+--- @param particleName string
+--- @param x number
+--- @param y number
+--- @param amount integer?
+function g.spawnParticle(particleName, x, y, amount)
+    local scene, name = g.getCurrentScene()
+    if name ~= "battle_scene" or (not scene.particles) then
+        return
+    end
+    return scene.particles:spawnParticles(particleName, x, y, amount)
+end
+
+
 -- Event Bus / Question Bus
 local reducers = require("src.modules.reducers")
 
