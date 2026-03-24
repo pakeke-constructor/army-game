@@ -10,10 +10,21 @@ Each frame:
 2. If too far, move toward it. If close enough, stop.
 3. Store the target on ent._aiTarget for the attack system to use.
 
+Targeting is amortized: only ~5% of entities re-target per frame,
+sorted by staleness (_lastTargetRefreshTime).
+
 Entities need: ai, side, x, y, moveSpeed
 ]]
 
+local table_clear = require("table.clear")
+
 local aiSys = {}
+
+local REFRESH_FRACTION = 0.05 -- re-target 5% of ents per frame
+local STALE_DEFAULT = -1000   -- never-targeted ents sort first
+
+-- reused across frames
+local _sortBuf = {}
 
 -- returns squared distance
 local function dist2(a, b)
@@ -54,6 +65,9 @@ local function pickTarget(ent, candidates)
     return best
 end
 
+local function staleSorter(a, b)
+    return (a._lastTargetRefreshTime or STALE_DEFAULT) < (b._lastTargetRefreshTime or STALE_DEFAULT)
+end
 
 function aiSys.preUpdate(world, dt)
     -- build side lists
@@ -68,13 +82,36 @@ function aiSys.preUpdate(world, dt)
         end
     end
 
+    -- collect ai ents, sort by staleness
+    table_clear(_sortBuf)
     for _, ent in world:iterate("ai") do
-        local targetSide = getOpposingSide(ent)
-        local candidates = targetSide == "ally" and allies or enemies
+        table.insert(_sortBuf, ent)
+    end
 
-        -- pick target
-        local targ = pickTarget(ent, candidates)
-        ent._aiTarget = targ
+    table.sort(_sortBuf, staleSorter)
+
+    -- how many to re-target this frame (at least 1)
+    local n = #_sortBuf
+    local refreshCount = math.max(1, math.ceil(n * REFRESH_FRACTION))
+    local now = love.timer.getTime()
+
+    for i = 1, n do
+        local ent = _sortBuf[i]
+
+        -- re-target only the stalest entities
+        if i <= refreshCount then
+            local targetSide = getOpposingSide(ent)
+            local candidates = targetSide == "ally" and allies or enemies
+            ent._aiTarget = pickTarget(ent, candidates)
+            ent._lastTargetRefreshTime = now
+        end
+
+        -- clear target if it died
+        local targ = ent._aiTarget
+        if targ and not isValidTarget(targ) then
+            targ = nil
+            ent._aiTarget = nil
+        end
 
         if not targ then
             ent.vx, ent.vy = 0, 0
