@@ -7,9 +7,10 @@ function Obj:update()
 end
 ```
 
-GOOD — avoid per-frame allocations if it's easy:
+GOOD — avoid per-frame allocations in tight loops if it's easy:
 ```lua
 local ARGS = {constant = 3}
+
 function Obj:update()
     if not bool then
         error("Error in parsing " .. self.txt)
