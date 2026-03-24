@@ -12,10 +12,11 @@ Each frame:
 5. Ranged: spawn a projectile entity.
 
 PROJECTILE SYSTEM (also in this file):
-Moves projectile entities toward their target. On arrival, deals damage.
+Projectiles fly with vx/vy velocity and a z arc (gravity).
+Hit opposing units via spatial partitioning, or hit ground when z<=0.
 
 Entities need: attack, attackDamage, attackSpeed, attackRange, side, x, y
-Projectile entities need: projectile component (targetEnt, damage, speed, ownerEnt)
+Projectile entities need: projectile component (damage, ownerEnt, gravity, side), vx, vy, vz, z
 ]]
 
 local atckSys = {}
@@ -56,23 +57,44 @@ local function dealDamage(attacker, target, damage)
     end
 end
 
+local PROJ_HIT_RADIUS = 10
+local PROJ_Z_MAX = 50 -- above this z, projectile doesn't hit anything
+
 ---@param attacker ecs.Entity
 ---@param target ecs.Entity
 local function spawnProjectile(attacker, target)
-    local atk = attacker.attack
+    local atk = assert(attacker.attack)
     local projSpeed = atk.projectileSpeed or 300
     projSpeed = projSpeed * g.ask("getProjectileSpeedMultiplier", attacker)
 
     local count = 1 + g.ask("getProjectileCountModifier", attacker)
     local projType = atk.projectileType or "_projectile"
 
+    local dx, dy = target.x - attacker.x, target.y - attacker.y
+    local dist = (dx * dx + dy * dy) ^ 0.5
+    if dist < 1 then dist = 1 end
+
+    -- compute arc height: higher arc for longer distances
+    local flightTime = dist / projSpeed
+    local arcHeight = math.min(dist * 0.3, 80)
+    -- vz such that projectile goes up then comes back to z=0 over flightTime
+    -- z(t) = vz*t - 0.5*gravity*t^2, z(flightTime)=0 => vz = 0.5*gravity*flightTime
+    -- peak = vz^2/(2*gravity) = arcHeight => gravity = vz^2/(2*arcHeight)
+    -- combining: vz = 2*arcHeight/flightTime, gravity = 2*arcHeight/(flightTime^2)
+    local vz = 2 * arcHeight / flightTime
+    local gravity = 2 * arcHeight / (flightTime * flightTime)
+
     for i = 1, count do
         local ent = g.spawnEntity(projType, attacker.x, attacker.y)
+        ent.vx = (dx / dist) * projSpeed
+        ent.vy = (dy / dist) * projSpeed
+        ent.z = 1
+        ent.vz = vz
         ent.projectile = {
-            targetEnt = target,
             damage = attacker.attackDamage or 0,
-            speed = projSpeed,
             ownerEnt = attacker,
+            gravity = gravity,
+            side = attacker.side,
         }
     end
 
@@ -155,29 +177,41 @@ end
 function atckSys.postUpdate(world, dt)
     for _, ent in world:iterate("projectile") do
         local proj = ent.projectile
-        local target = proj.targetEnt
 
-        -- if target is dead, just remove projectile
-        if not target or not isAlive(target) then
+        -- apply gravity to vz, update z
+        ent.vz = ent.vz - proj.gravity * dt
+        ent.z = (ent.z or 0) + ent.vz * dt
+
+        -- face movement direction
+        ent.rot = math.atan2(ent.vy, ent.vx)
+
+        -- hit ground
+        if ent.z <= 0 then
+            ent.z = 0
+            g.call("projectileHit", ent, nil)
             world:removeEntity(ent)
             goto continue
         end
 
-        local dx, dy = target.x - ent.x, target.y - ent.y
-        local dist = (dx * dx + dy * dy) ^ 0.5
-        local step = proj.speed * dt
-
-        if dist <= step then
-            -- hit!
-            dealDamage(proj.ownerEnt, target, proj.damage)
-            g.call("projectileHit", ent, target)
-            world:removeEntity(ent)
-        else
-            -- move toward target
-            ent.x = ent.x + (dx / dist) * step
-            ent.y = ent.y + (dy / dist) * step
-            -- face target
-            ent.rot = math.atan2(dy, dx)
+        -- check collision with units (only if z is low enough)
+        if ent.z < PROJ_Z_MAX then
+            local opposingSide = proj.side == "ally" and "enemy" or "ally"
+            local hitEnt = nil
+            g.iteratePartition(opposingSide, ent.x, ent.y, function(other)
+                if hitEnt then return end
+                if not isAlive(other) then return end
+                local dx, dy = other.x - ent.x, other.y - ent.y
+                local d2 = dx * dx + dy * dy
+                if d2 <= PROJ_HIT_RADIUS * PROJ_HIT_RADIUS then
+                    hitEnt = other
+                end
+            end, PROJ_HIT_RADIUS)
+            if hitEnt then
+                dealDamage(proj.ownerEnt, hitEnt, proj.damage)
+                g.call("projectileHit", ent, hitEnt)
+                world:removeEntity(ent)
+                goto continue
+            end
         end
 
         ::continue::

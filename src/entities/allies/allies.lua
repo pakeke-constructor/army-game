@@ -4,6 +4,7 @@
 g.defineEntity("militia", {
     image = "militia",
     physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+    partitions = {"unit", "ally"},
     side = "ally",
     ai = {
         target = "enemy",
@@ -24,6 +25,7 @@ g.defineEntity("militia", {
 g.defineEntity("archer", {
     image = "militia", -- placeholder
     physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+    partitions = {"unit", "ally"},
     side = "ally",
     ai = {
         target = "enemy",

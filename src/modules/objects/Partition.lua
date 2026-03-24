@@ -24,7 +24,7 @@ end
 
 
 function Partition:init(chunkSize)
-    self.chunkSize = chunkSize
+    self.chunkSize = assert(chunkSize, "Wasn't given chunkSize")
     self.bins = {}
     return self
 end

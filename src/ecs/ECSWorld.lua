@@ -10,6 +10,8 @@ local ECSWorld = objects.Class("ecs:ECSWorld")
 ---@field public ecs ecs.ECSWorld
 
 
+local PARTITION_CHUNKSIZE = 32
+
 function ECSWorld:init(systemNames)
     self.entities = objects.BufferedSet()
 
@@ -18,10 +20,10 @@ function ECSWorld:init(systemNames)
     self.componentIndex = {} -- [componentName] -> {ent, ent, ...}
     self.partitions = {
         -- [partitionId] -> objects.Partition
-        unit = objects.Partition(),
-        projectile = objects.Partition(),
-        ally = objects.Partition(),
-        enemy = objects.Partition()
+        unit = objects.Partition(PARTITION_CHUNKSIZE),
+        projectile = objects.Partition(PARTITION_CHUNKSIZE),
+        ally = objects.Partition(PARTITION_CHUNKSIZE),
+        enemy = objects.Partition(PARTITION_CHUNKSIZE)
     }
 
     -- Load systems (each system is a plain table of event/question handlers)

@@ -4,6 +4,7 @@
 g.defineEntity("demon", {
     image = "demon",
     physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+    partitions = {"unit", "enemy"},
     side = "enemy",
     ai = {
         target = "enemy",
@@ -25,6 +26,7 @@ g.defineEntity("demon", {
 g.defineEntity("imp", {
     image = "archerdemon",
     physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+    partitions = {"unit", "enemy"},
     side = "enemy",
     ai = {
         target = "enemy",

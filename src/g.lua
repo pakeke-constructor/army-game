@@ -378,6 +378,12 @@ function g.defineEntity(id, def)
     ENTITY_LIST[#ENTITY_LIST + 1] = id
 end
 
+
+---@param id string
+---@param x number
+---@param y number
+---@param ... unknown
+---@return ecs.Entity
 function g.spawnEntity(id, x, y, ...)
     local mt = ENTITY_DEFS[id]
     assert(mt, "Unknown entity type: " .. tostring(id))

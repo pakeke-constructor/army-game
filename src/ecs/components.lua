@@ -27,12 +27,12 @@ local attack = {
 
 
 ---@class ecs.components.Projectile
----@field public targetEnt ecs.Entity
 ---@field public damage number
----@field public speed number
 ---@field public ownerEnt ecs.Entity?
+---@field public gravity number
+---@field public side "ally"|"enemy"
 local projectile = {
-    -- targetEnt, damage, speed are set on spawn
+    -- damage, ownerEnt, gravity, side are set on spawn
 }
 
 

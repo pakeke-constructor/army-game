@@ -63,7 +63,7 @@ _G.ui = require("src.ui.ui")
 _G.analytics = require("src.modules.analytics.analytics")
 
 _G.g = require("src.g")
-
+require("src.ev_q_defs")
 
 if consts.TEST then
     require("src.ecs.ecs_tests")
