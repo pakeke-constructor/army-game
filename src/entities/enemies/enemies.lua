@@ -11,7 +11,6 @@ g.defineEntity("demon", {
         getPriority = function(selfEnt, targEnt)
             return 0
         end,
-        range = {80, 120},
     },
     attack = {
         attackType = "melee",
@@ -33,7 +32,6 @@ g.defineEntity("imp", {
         getPriority = function(selfEnt, targEnt)
             return 0
         end,
-        range = {180, 240},
     },
     attack = {
         attackType = "ranged",
@@ -42,7 +40,7 @@ g.defineEntity("imp", {
     },
     baseAttackDamage = 6,
     baseAttackSpeed = 0.7,
-    baseAttackRange = 180,
+    baseAttackRange = 600,
     baseMoveSpeed = 45,
     baseMaxHealth = 25,
 })
