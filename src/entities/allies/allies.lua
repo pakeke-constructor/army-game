@@ -20,6 +20,9 @@ g.defineEntity("militia", {
     baseAttackRange = 18,
     baseMoveSpeed = 60,
     baseMaxHealth = 50,
+    onDraw = function (ent)
+        love.graphics.circle("line", ent.x,ent.y, ent.attackRange)
+    end
 })
 
 g.defineEntity("archer", {
@@ -43,5 +46,8 @@ g.defineEntity("archer", {
     baseAttackRange = 200,
     baseMoveSpeed = 50,
     baseMaxHealth = 30,
+    onDraw = function (ent)
+        love.graphics.circle("line", ent.x,ent.y, ent.attackRange)
+    end
 })
 

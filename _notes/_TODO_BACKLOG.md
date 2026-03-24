@@ -1,7 +1,7 @@
 
 # backlog:
 
-- projectile-rework: Make it properly collission-based.
+- projectile-rework: Make it properly collision-based.
 
 
 - create agent-usable codebase and tools. 

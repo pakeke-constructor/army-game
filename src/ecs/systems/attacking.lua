@@ -16,7 +16,7 @@ Projectiles fly with vx/vy velocity and a z arc (gravity).
 Hit opposing units via spatial partitioning, or hit ground when z<=0.
 
 Entities need: attack, attackDamage, attackSpeed, attackRange, side, x, y
-Projectile entities need: projectile component (damage, ownerEnt, gravity, side), vx, vy, vz, z
+Projectile entities need: projectile component (damage, ownerEnt, side), vx, vy, vz, z, gravity
 ]]
 
 local atckSys = {}
@@ -90,11 +90,12 @@ local function spawnProjectile(attacker, target)
         ent.vy = (dy / dist) * projSpeed
         ent.z = 1
         ent.vz = vz
+        ent.gravity = gravity
         ent.projectile = {
             damage = attacker.attackDamage or 0,
             ownerEnt = attacker,
-            gravity = gravity,
             side = attacker.side,
+            pierceCount = 1,
         }
     end
 
@@ -174,49 +175,48 @@ end
 
 
 -- PROJECTILE SYSTEM
-function atckSys.postUpdate(world, dt)
-    for _, ent in world:iterate("projectile") do
-        local proj = ent.projectile
+local function updateProjectile(world, ent, dt)
+    local proj = ent.projectile
 
-        -- apply gravity to vz, update z
-        ent.vz = ent.vz - proj.gravity * dt
-        ent.z = (ent.z or 0) + ent.vz * dt
+    -- face movement direction
+    ent.rot = math.atan2(ent.vy, ent.vx)
 
-        -- face movement direction
-        ent.rot = math.atan2(ent.vy, ent.vx)
+    -- hit ground (z is updated generically in ECSWorld:update)
+    if (ent.z or 0) <= 0 then
+        g.call("projectileHit", ent, nil)
+        world:removeEntity(ent)
+        return
+    end
 
-        -- hit ground
-        if ent.z <= 0 then
-            ent.z = 0
-            g.call("projectileHit", ent, nil)
-            world:removeEntity(ent)
-            goto continue
-        end
-
-        -- check collision with units (only if z is low enough)
-        if ent.z < PROJ_Z_MAX then
-            local opposingSide = proj.side == "ally" and "enemy" or "ally"
-            local hitEnt = nil
-            g.iteratePartition(opposingSide, ent.x, ent.y, function(other)
-                if hitEnt then return end
-                if not isAlive(other) then return end
-                local dx, dy = other.x - ent.x, other.y - ent.y
-                local d2 = dx * dx + dy * dy
-                if d2 <= PROJ_HIT_RADIUS * PROJ_HIT_RADIUS then
-                    hitEnt = other
-                end
-            end, PROJ_HIT_RADIUS)
-            if hitEnt then
-                dealDamage(proj.ownerEnt, hitEnt, proj.damage)
-                g.call("projectileHit", ent, hitEnt)
+    -- check collision with units (only if z is low enough)
+    if ent.z < PROJ_Z_MAX then
+        local opposingSide = proj.side == "ally" and "enemy" or "ally"
+        local hitEnt = nil
+        g.iteratePartition(opposingSide, ent.x, ent.y, function(other)
+            if hitEnt then return end
+            if not isAlive(other) then return end
+            local dx, dy = other.x - ent.x, other.y - ent.y
+            local d2 = dx * dx + dy * dy
+            if d2 <= PROJ_HIT_RADIUS * PROJ_HIT_RADIUS then
+                hitEnt = other
+            end
+        end, PROJ_HIT_RADIUS)
+        if hitEnt then
+            dealDamage(proj.ownerEnt, hitEnt, proj.damage)
+            g.call("projectileHit", ent, hitEnt)
+            proj.pierceCount = proj.pierceCount - 1
+            if proj.pierceCount <= 0 then
                 world:removeEntity(ent)
-                goto continue
+                return
             end
         end
-
-        ::continue::
     end
 end
 
+function atckSys.postUpdate(world, dt)
+    for _, ent in world:iterate("projectile") do
+        updateProjectile(world, ent, dt)
+    end
+end
 
 return atckSys

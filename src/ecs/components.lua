@@ -21,7 +21,7 @@ local ai = {
 local attack = {
     attackType = "melee",
     -- ranged attacks spawn a projectile entity type (e.g. "arrow")
-    projectileType = nil,
+    projectileType = "basic_arrow",
     projectileSpeed = 300, -- pixels/sec for projectiles
 }
 
@@ -29,10 +29,10 @@ local attack = {
 ---@class ecs.components.Projectile
 ---@field public damage number
 ---@field public ownerEnt ecs.Entity?
----@field public gravity number
 ---@field public side "ally"|"enemy"
+---@field public pierceCount number
 local projectile = {
-    -- damage, ownerEnt, gravity, side are set on spawn
+    -- damage, ownerEnt, side, pierceCount are set on spawn
 }
 
 
@@ -69,6 +69,7 @@ local physics = {
 ---@field public vx number?
 ---@field public vy number?
 ---@field public vz number?
+---@field public gravity number?
 ---@field public health number?
 ---@field public maxHealth number?
 ---@field public attackDamage number?

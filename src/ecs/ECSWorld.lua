@@ -106,6 +106,10 @@ function ECSWorld:update(dt)
             if e.vx then e.x = e.x + e.vx * dt end
             if e.vy then e.y = e.y + e.vy * dt end
         end
+        if e.vz then
+            if e.gravity then e.vz = e.vz - e.gravity * dt end
+            e.z = math.max(0, (e.z or 0) + e.vz * dt)
+        end
         if e.update then
             e:update(dt)
         end
@@ -119,8 +123,12 @@ function ECSWorld:update(dt)
     g.call("postUpdate", self, dt)
 end
 
+local function getDrawY(e)
+    return e.y - (e.z or 0) / 2
+end
+
 local function sortOrder(a, b)
-    return (a.y + (a.drawOrder or 0)) < (b.y + (b.drawOrder or 0))
+    return (getDrawY(a) + (a.drawOrder or 0)) < (getDrawY(b) + (b.drawOrder or 0))
 end
 
 function ECSWorld:draw()
@@ -132,7 +140,7 @@ function ECSWorld:draw()
     table.sort(list, sortOrder)
     for i = 1, #list do
         local e = list[i]
-        g.drawEntity(e, e.x, e.y)
+        g.drawEntity(e, e.x, getDrawY(e))
     end
     g.call("postDraw", self)
 end
