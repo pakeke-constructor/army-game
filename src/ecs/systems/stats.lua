@@ -70,6 +70,7 @@ defineStat("attackSpeed", "baseAttackSpeed")
 defineStat("moveSpeed", "baseMoveSpeed")
 defineStat("attackRange", "baseAttackRange")
 defineStat("armor", "baseArmor")
+defineStat("projectileAccuracy", "baseProjectileAccuracy")
 
 
 ---@class g.systems.stats: ecs.System

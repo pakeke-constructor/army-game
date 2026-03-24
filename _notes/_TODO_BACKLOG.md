@@ -3,10 +3,6 @@
 
 
 
-
-- Create stats system.
-
-
 - create agent-usable codebase and tools. 
 - Agents should literally be able to play the game, and inspect state.
 

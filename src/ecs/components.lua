@@ -17,6 +17,25 @@ local ai = {
     -- then, if the enemy moves more than 400 units away, it moves again.
 }
 
+
+
+---@class ecs.components.Attack
+---@field public type "melee"|"ranged"
+---@field public getPriority fun(selfEnt: ecs.Entity, targEnt:ecs.Entity): number
+---@field public range number
+local attack = {
+    target = "enemy",
+    getPriority = function(selfEnt, targEnt)
+        -- higher priority = target earlier
+        return 0
+    end,
+
+    range = 100
+}
+
+
+
+
 ---@class ecs.Entity
 ---@field public ai ecs.components.AI?
 ---@field public color objects.Color?
@@ -33,6 +52,7 @@ local ai = {
 ---@field public onSpawn fun(ecs.Entity)?
 ---@field public onUpdate fun(ecs.Entity, number)?
 ---@field public onDraw fun(ecs.Entity)?
+---@field public onAttack fun(ecs.Entity)?
 local ecs_Entity = {}
 
 
