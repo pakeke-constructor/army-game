@@ -3,33 +3,33 @@
 
 g.defineEntity("militia", {
     image = "militia",
+    physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
     side = "ally",
     ai = {
         target = "enemy",
         getPriority = function(selfEnt, targEnt)
             return 0
         end,
-        range = {80, 120},
     },
     attack = {
         attackType = "melee",
     },
     baseAttackDamage = 10,
     baseAttackSpeed = 1,
-    baseAttackRange = 10,
+    baseAttackRange = 18,
     baseMoveSpeed = 60,
     baseMaxHealth = 50,
 })
 
 g.defineEntity("archer", {
     image = "militia", -- placeholder
+    physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
     side = "ally",
     ai = {
         target = "enemy",
         getPriority = function(selfEnt, targEnt)
             return 0
         end,
-        range = {200, 260},
     },
     attack = {
         attackType = "ranged",

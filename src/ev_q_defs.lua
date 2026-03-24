@@ -2,6 +2,7 @@ local g = require("src.g")
 local reducers = require("src.modules.reducers")
 
 -- basic event flow
+g.defineEvent("initECS")
 g.defineEvent("preUpdate")
 g.defineEvent("postUpdate")
 g.defineEvent("preDraw")

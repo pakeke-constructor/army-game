@@ -28,7 +28,7 @@ end
 
 
 function battle_scene:enter()
-    self.ecs = ECSWorld({"stats", "ai", "attacking"})
+    self.ecs = ECSWorld({"stats", "ai", "attacking", "physics"})
     self.camera = Camera(0, 0, CAMERA_ZOOM)
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
     self.particles = ParticleService()

@@ -2,6 +2,7 @@ local objects = require("src.modules.objects.objects")
 local table_clear = require("table.clear")
 
 ---@class ecs.ECSWorld: objects.Class
+---@field public data table
 local ECSWorld = objects.Class("ecs:ECSWorld")
 
 
@@ -11,6 +12,9 @@ local ECSWorld = objects.Class("ecs:ECSWorld")
 
 function ECSWorld:init(systemNames)
     self.entities = objects.BufferedSet()
+
+    self.data = {}
+
     self.componentIndex = {} -- [componentName] -> {ent, ent, ...}
     self.partitions = {
         -- [partitionId] -> objects.Partition
@@ -25,6 +29,9 @@ function ECSWorld:init(systemNames)
     for _, name in ipairs(systemNames or {}) do
         self.systems[#self.systems + 1] = require("src.ecs.systems." .. name)
     end
+
+    self:addSystemHandlers()
+    g.call("initECS", self)
 end
 
 function ECSWorld:addEntity(e)
@@ -93,8 +100,10 @@ function ECSWorld:update(dt)
     g.call("preUpdate", self, dt)
     for i = 1, self.entities.len do
         local e = self.entities[i]
-        if e.vx then e.x = e.x + e.vx * dt end
-        if e.vy then e.y = e.y + e.vy * dt end
+        if not e.physics then
+            if e.vx then e.x = e.x + e.vx * dt end
+            if e.vy then e.y = e.y + e.vy * dt end
+        end
         if e.update then
             e:update(dt)
         end

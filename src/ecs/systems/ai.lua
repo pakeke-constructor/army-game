@@ -90,9 +90,9 @@ function aiSys.preUpdate(world, dt)
 
     table.sort(_sortBuf, staleSorter)
 
-    -- how many to re-target this frame (at least 1)
+    -- how many to re-target this frame
     local n = #_sortBuf
-    local refreshCount = math.max(1, math.ceil(n * REFRESH_FRACTION))
+    local refreshCount = math.max(10, math.ceil(n * REFRESH_FRACTION))
     local now = love.timer.getTime()
 
     for i = 1, n do

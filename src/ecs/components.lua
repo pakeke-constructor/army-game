@@ -36,6 +36,27 @@ local projectile = {
 }
 
 
+---@class ecs.components.Physics
+---@field public shape "circle"|"rect"
+---@field public radius number?
+---@field public w number?
+---@field public h number?
+---@field public ox number
+---@field public oy number
+---@field public mass number
+---@field public isStatic boolean?
+---@field public damping number?
+local physics = {
+    shape = "circle",
+    radius = 10,
+    ox = 0,
+    oy = 0,
+    mass = 1,
+    isStatic = false,
+    damping = 10,
+}
+
+
 ---@class ecs.Entity
 ---@field public ai ecs.components.AI?
 ---@field public attack ecs.components.Attack?
@@ -64,6 +85,7 @@ local projectile = {
 ---@field public onUpdate fun(ecs.Entity, number)?
 ---@field public onDraw fun(ecs.Entity)?
 ---@field public onAttack fun(ecs.Entity)?
+---@field public physics ecs.components.Physics?
 ---@field public partitions string[]?
 local ecs_Entity = {}
 
