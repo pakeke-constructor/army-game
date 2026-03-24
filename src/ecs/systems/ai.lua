@@ -3,7 +3,7 @@
 AI SYSTEM:
 ==========
 Finds targets for entities with an `ai` component.
-Moves entities toward their targets based on ai.range.
+Moves entities toward their targets based on attackRange.
 
 Each frame:
 1. Pick the best target (by priority, then distance).
@@ -120,14 +120,9 @@ function aiSys.preUpdate(world, dt)
 
         local dx, dy = targ.x - ent.x, targ.y - ent.y
         local dist = (dx * dx + dy * dy) ^ 0.5
-        local ai = ent.ai
-        local minRange, maxRange = ai.range[1], ai.range[2]
-
-        -- use attackRange if available (stat system computes it)
-        if ent.attackRange then
-            minRange = ent.attackRange * 0.7
-            maxRange = ent.attackRange * 1
-        end
+        local attackRange = ent.attackRange or 100
+        local minRange = attackRange * 0.7
+        local maxRange = attackRange
 
         local moving = ent._aiMoving
 
