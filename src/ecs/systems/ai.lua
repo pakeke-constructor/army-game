@@ -88,8 +88,8 @@ function aiSys.preUpdate(world, dt)
 
         -- use attackRange if available (stat system computes it)
         if ent.attackRange then
-            minRange = ent.attackRange
-            maxRange = ent.attackRange * 1.3
+            minRange = ent.attackRange * 0.7
+            maxRange = ent.attackRange * 1
         end
 
         local moving = ent._aiMoving

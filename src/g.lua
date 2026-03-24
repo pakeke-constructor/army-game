@@ -45,6 +45,13 @@ function g.getBattleECS()
     end
 end
 
+function g.iteratePartition(partitionId, x, y, fn, range)
+    local ecs = g.getBattleECS()
+    if ecs then
+        ecs:iteratePartition(partitionId, x, y, fn, range)
+    end
+end
+
 
 function g.hasRun()
     return currentRun ~= nil

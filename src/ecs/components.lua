@@ -69,6 +69,7 @@ local projectile = {
 ---@field public onUpdate fun(ecs.Entity, number)?
 ---@field public onDraw fun(ecs.Entity)?
 ---@field public onAttack fun(ecs.Entity)?
+---@field public partitions string[]?
 local ecs_Entity = {}
 
 

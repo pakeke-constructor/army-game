@@ -12,6 +12,13 @@ local ECSWorld = objects.Class("ecs:ECSWorld")
 function ECSWorld:init(systemNames)
     self.entities = objects.BufferedSet()
     self.componentIndex = {} -- [componentName] -> {ent, ent, ...}
+    self.partitions = {
+        -- [partitionId] -> objects.Partition
+        unit = objects.Partition(),
+        projectile = objects.Partition(),
+        ally = objects.Partition(),
+        enemy = objects.Partition()
+    }
 
     -- Load systems (each system is a plain table of event/question handlers)
     self.systems = {}
@@ -34,6 +41,9 @@ function ECSWorld:_rebuildIndex()
     for _, list in pairs(idx) do
         table_clear(list)
     end
+    for _, part in pairs(self.partitions) do
+        part:clear()
+    end
     for i = 1, self.entities.len do
         local e = self.entities[i]
         -- own keys
@@ -54,6 +64,17 @@ function ECSWorld:_rebuildIndex()
                     if not list then list = {}; idx[k] = list end
                     list[#list + 1] = e
                 end
+            end
+        end
+        -- spatial partitions
+        local p = e.partitions
+        if p then
+            for j = 1, #p do
+                local pid = p[j]
+                assert(self.partitions[pid], "Unknown partition: " .. tostring(pid))
+                local part = self.partitions[pid]
+                if not part then part = objects.Partition(64); self.partitions[pid] = part end
+                part:add(e, e.x, e.y)
             end
         end
     end
@@ -114,6 +135,13 @@ function ECSWorld:iterate(component)
         return ipairs(EMPTY)
     end
     return ipairs(list)
+end
+
+function ECSWorld:iteratePartition(partitionId, x, y, fn, range)
+    local part = self.partitions[partitionId]
+    if part then
+        part:query(x, y, fn, range)
+    end
 end
 
 return ECSWorld
