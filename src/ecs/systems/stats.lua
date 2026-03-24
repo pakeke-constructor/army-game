@@ -1,4 +1,48 @@
 
+--[[
+
+STATS SYSTEM:
+=============
+Recomputes entity stats every frame from base values + question bus modifiers.
+This keeps stats as a single source of truth; no stale caches.
+
+HOW IT WORKS:
+  Each stat has a base field and a computed field.
+  e.g. `baseAttackDamage` -> `attackDamage`
+
+  Formula:  stat = (base + modifier) * multiplier
+
+  `defineStat("attackDamage", "baseAttackDamage")` auto-generates two questions:
+    - "getAttackDamageModifier"   (ADD reducer, default 0)   -- flat bonuses
+    - "getAttackDamageMultiplier" (MULTIPLY reducer, default 1) -- scaling
+
+  Entities only need the base field. The system writes the computed field each frame.
+  If an entity doesn't have the base field, the stat is skipped.
+
+USAGE (adding a buff/perk/blessing):
+  Just answer the generated questions via handlers or scopes:
+
+  -- Perk: "this unit gains +5 attack damage"
+  scope:addHandler({
+      getAttackDamageModifier = function(ent) return 5 end
+  })
+
+  -- Blessing: "all units deal 1.5x damage"
+  g.addHandler({
+      getAttackDamageMultiplier = function(ent) return 1.5 end
+  })
+
+  -- Conditional modifier via scope:
+  scope:addHandler({
+      getMoveSpeedMultiplier = function(ent)
+          if ent.health < ent.maxHealth * 0.2 then
+              return 2 -- double speed when low HP
+          end
+      end
+  })
+
+]]
+
 local reducers = require("src.modules.reducers")
 
 local statlist = {}
