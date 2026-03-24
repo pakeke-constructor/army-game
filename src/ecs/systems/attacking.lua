@@ -20,15 +20,23 @@ Projectile entities need: projectile component (targetEnt, damage, speed, ownerE
 
 local atckSys = {}
 
+---@param a ecs.Entity
+---@param b ecs.Entity
+---@return number
 local function dist2(a, b)
     local dx, dy = a.x - b.x, a.y - b.y
     return dx * dx + dy * dy
 end
 
+---@param ent ecs.Entity
+---@return boolean
 local function isAlive(ent)
     return ent.health and ent.health > 0
 end
 
+---@param attacker ecs.Entity?
+---@param target ecs.Entity
+---@param damage number
 local function dealDamage(attacker, target, damage)
     if not isAlive(target) then return end
 
@@ -48,6 +56,8 @@ local function dealDamage(attacker, target, damage)
     end
 end
 
+---@param attacker ecs.Entity
+---@param target ecs.Entity
 local function spawnProjectile(attacker, target)
     local atk = attacker.attack
     local projSpeed = atk.projectileSpeed or 300
@@ -69,6 +79,8 @@ local function spawnProjectile(attacker, target)
     g.call("entityShootsProjectile", attacker, target)
 end
 
+---@param attacker ecs.Entity
+---@param target ecs.Entity
 local function doAttack(attacker, target)
     if not isAlive(target) then return end
 
@@ -85,6 +97,24 @@ local function doAttack(attacker, target)
 end
 
 
+---@param ent ecs.Entity
+---@param world ecs.ECSWorld
+---@param range number
+---@return ecs.Entity?
+local function findNearbyTarget(ent, world, range)
+    local opposingSide = ent.side == "ally" and "enemy" or "ally"
+    local best, bestD2 = nil, range * range
+    for _, other in world:iterate("side") do
+        if other.side == opposingSide and isAlive(other) then
+            local d2 = dist2(ent, other)
+            if d2 <= bestD2 then
+                best, bestD2 = other, d2
+            end
+        end
+    end
+    return best
+end
+
 -- ATTACK SYSTEM
 function atckSys.preUpdate(world, dt)
     for _, ent in world:iterate("attack") do
@@ -99,7 +129,11 @@ function atckSys.preUpdate(world, dt)
         local range = ent.attackRange or 100
         local d2 = dist2(ent, target)
         if d2 > range * range then
-            goto continue
+            -- melee: try to find a nearby target we CAN hit
+            if ent.attack.attackType ~= "ranged" then
+                target = findNearbyTarget(ent, world, range)
+            end
+            if not target then goto continue end
         end
 
         -- tick cooldown
