@@ -47,6 +47,17 @@ src/consts.lua: Constants.
 </architecture>
 
 
+<gotchas>
+A bunch of common pitfalls/traps to look out for:
+
+- Don't set ent.x/ent.y directly on entities with a .physics component; use g.setPos(ent, x, y) which syncs the Box2D body.
+- For `localize(txt)` calls, you MUST NOT localize text at runtime. It must be done at load-time. The idiomatic way is to have constants at the top, like `LOC_TXT = loc("...")`
+- Don't add buffs to squads directly. Use g.addBuff instead.
+- table-valued fields on the def are shared across all entities of that type. Mutating them (e.g. `table.insert(ent.tags, ...)`) affects every entity. 
+- Before adding/removing handlers to ent.scopes, look for a g.* function first.
+</gotchas>
+
+
 <event_question_bus>
 Events and Questions are the core abstraction for decoupled game logic.
 Pre-declared via g.defineEvent(name) / g.defineQuestion(name, reducer, default).
@@ -66,7 +77,7 @@ If a handler has keys that are NOT an event/question; throws an error.
 
 Scopes: essentially a collection of handlers, (with parent inheritance.)
 - Entities can own a scope, which allows you to add effects/behaviour to entities.
-- Add handlers to scopes via `ent.scope:addHandler({my_event = func, my_question = func2})`
+- Scopes contain handlers, which is just a table of functions: `handler: {my_event = func, my_question = func2}`
 - Handlers can auto-expire via optional duration arg, via `:addHandler(handler, duration)`. (how temporary buffs work.)
 - Squad spawn creates a shared scope for all units. g.addBuff(ent, handler, duration) layers a per-entity scope on top (with the shared scope as parent), so buffs stay per-entity.
 - If the scope has a parent (ent.scope = Scope(parent)) then the parent's handlers are called too. This is useful when we have a scope shared between entities, but we want to add a buff for just ONE entity; we create a new scope, and have it inherit from the old one.

@@ -403,6 +403,20 @@ function g.spawnEntity(id, x, y, ...)
     return ent
 end
 
+function g.setPos(ent, x, y)
+    ent.x = x
+    ent.y = y
+    if ent.physics then
+        local world = ent:getWorld()
+        if world then
+            local body = world.data.physicsBodies[ent]
+            if body then
+                body:setPosition(x + ent.physics.ox, y + ent.physics.oy)
+            end
+        end
+    end
+end
+
 function g.drawEntity(ent, x, y)
     local sx, sy = ent.sx or 1, ent.sy or 1
     if ent.draw then
