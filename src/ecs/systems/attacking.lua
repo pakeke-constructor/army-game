@@ -76,7 +76,7 @@ local function spawnProjectile(attacker, target)
 
     -- compute arc height: higher arc for longer distances
     local flightTime = dist / projSpeed
-    local arcHeight = math.min(dist * 0.3, 80)
+    local arcHeight = math.min(dist * 0.15, 40)
     -- vz such that projectile goes up then comes back to z=0 over flightTime
     -- z(t) = vz*t - 0.5*gravity*t^2, z(flightTime)=0 => vz = 0.5*gravity*flightTime
     -- peak = vz^2/(2*gravity) = arcHeight => gravity = vz^2/(2*arcHeight)
@@ -160,11 +160,11 @@ function atckSys.preUpdate(world, dt)
         end
 
         -- tick cooldown
-        local timer = ent._attackTimer or 0
+        local speed = ent.attackSpeed or 1
+        local timer = ent._attackTimer or (math.random() * (1 / speed))
         timer = timer - dt
         if timer <= 0 then
             doAttack(ent, target)
-            local speed = ent.attackSpeed or 1 -- attacks per second
             timer = 1 / speed
         end
         ent._attackTimer = timer
@@ -178,8 +178,9 @@ end
 local function updateProjectile(world, ent, dt)
     local proj = ent.projectile
 
-    -- face movement direction
-    ent.rot = math.atan2(ent.vy, ent.vx)
+    -- face movement direction (account for z arc in visual rotation)
+    local visualVy = ent.vy - (ent.vz or 0) / 2
+    ent.rot = math.atan2(visualVy, ent.vx)
 
     -- hit ground (z is updated generically in ECSWorld:update)
     if (ent.z or 0) <= 0 then

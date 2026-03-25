@@ -56,7 +56,7 @@ local function pickTarget(ent, candidates)
             local prio = ai.getPriority(ent, c)
             -- tiebreak: closer is better (subtract tiny distance factor)
             local d2 = dist2(ent, c)
-            local score = prio - d2 * 0.00001
+            local score = prio - d2 * 0.00001 + love.math.random() * 0.5
             if score > bestScore then
                 best, bestScore = c, score
             end
