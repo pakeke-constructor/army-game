@@ -20,7 +20,7 @@ class GameClient:
         self._buf = b""
         self._id = 0
 
-    def _send(self, cmd, **kwargs):
+    def send(self, cmd, **kwargs):
         self._id += 1
         msg = {"cmd": cmd, "id": self._id, **kwargs}
         raw = json.dumps(msg) + "\n"
@@ -34,44 +34,12 @@ class GameClient:
                 raise ConnectionError("connection closed")
             self._buf += chunk
         line, self._buf = self._buf.split(b"\n", 1)
-        return json.loads(line)
-
-    def ping(self):
-        """Health check. Returns {pong: true}."""
-        return self._send("ping")
-
-    def get_scene(self):
-        """Get the current scene name. Returns {scene: str}."""
-        return self._send("get_scene")
-
-    def get_state(self):
-        """Get full game state: current scene, all entities (id, type, x, y, health, maxHealth, side), and run info (health, maxHealth, mana, money, food, day). Returns a dict."""
-        return self._send("get_state")
-
-    def spawn_entity(self, entity_id, x, y):
-        """Spawn an entity by type id at position (x,y). Only works during battle. Known types: militia, archer, demon, imp. Returns {spawned: int, type: str}."""
-        return self._send("spawn_entity", entityId=entity_id, x=x, y=y)
-
-    def deploy_squad(self, squad_id, x, y):
-        """Deploy a squad at position (x,y). Only works during battle with a run active. Returns {deployed: [int]}."""
-        return self._send("deploy_squad", squadId=squad_id, x=x, y=y)
-
-    def goto_scene(self, scene):
-        """Switch to a scene by name. Known scenes: title_scene, battle_scene, map_scene. Returns {ok: true}."""
-        return self._send("goto_scene", scene=scene)
-
-    def keypressed(self, key):
-        """Simulate a key press. Uses Love2D key names (e.g. 'q', 'space', 'return'). Returns {ok: true}."""
-        return self._send("keypressed", key=key)
-
-    def click(self, x, y, button=1):
-        """Simulate a mouse click at screen position (x,y). button=1 for left, 2 for right. Returns {ok: true}."""
-        return self._send("click", x=x, y=y, button=button)
-
-    def eval(self, code):
-        """Run arbitrary Lua code in the game's main thread. Can access all globals (g, consts, etc). If the code returns a value, it's in {result: ...}. Otherwise {ok: true}. Errors return {error: str}."""
-        return self._send("eval", code=code)
-
+        resp = json.loads(line)
+        resp.pop("id", None)
+        resp.pop("cmd", None)
+        if len(resp) == 1:
+            return next(iter(resp.values()))
+        return resp
     def close(self):
         """Close the connection."""
         self.sock.close()
@@ -81,24 +49,6 @@ class GameClient:
 
     def __exit__(self, *args):
         self.close()
-
-
-# -------------------------------------------------------
-# Collect command docs for agent injection
-# -------------------------------------------------------
-def _get_command_docs():
-    """Build a help string from GameClient method docstrings."""
-    import inspect
-    lines = []
-    for name, method in inspect.getmembers(GameClient, predicate=inspect.isfunction):
-        if name.startswith("_"):
-            continue
-        doc = (method.__doc__ or "").strip()
-        sig = inspect.signature(method)
-        params = [p for p in sig.parameters if p != "self"]
-        param_str = ", ".join(params)
-        lines.append(f"  {name}({param_str}) - {doc}")
-    return "\n".join(sorted(lines))
 
 
 # -------------------------------------------------------
@@ -124,7 +74,7 @@ def start_game(port=_DEFAULT_PORT):
     global _game_process, _game_client
     if _game_client:
         try:
-            _game_client.ping()
+            _game_client.send("ping")
             return _game_client
         except Exception:
             _game_client = None
@@ -141,7 +91,7 @@ def start_game(port=_DEFAULT_PORT):
         time.sleep(0.2)
         try:
             _game_client = GameClient(port=port)
-            _game_client.ping()
+            _game_client.send("ping")
             return _game_client
         except (ConnectionRefusedError, OSError):
             continue

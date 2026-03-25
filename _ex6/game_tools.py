@@ -3,14 +3,15 @@ Agent tools for interacting with the running Love2D game.
 Provides: game_start, game_interact, game_wait, test_game
 """
 import time
-from _ex6.game_client import GameClient, start_game, stop_game, _get_command_docs
+from _ex6.game_client import GameClient, start_game, stop_game
 
 _client = None
 
 
-GAME_TESTING_PROMPT = f"""\
+GAME_TESTING_PROMPT = """\
 <game_testing>
-You have tools to interact with the running Love2D game for testing.
+A game instance has started.
+You now have tools to interact with the running Love2D game for testing.
 
 WORKFLOW:
 1. Call game_start() to launch the game and connect.
@@ -18,7 +19,15 @@ WORKFLOW:
 3. Use game_wait(frames) to let the game simulate between commands.
 
 AVAILABLE COMMANDS (via game_interact):
-{_get_command_docs()}
+  ping - Health check.
+  get_scene - Get the current scene name.
+  get_state - Get full game state: scene, entities, run info.
+  spawn_entity(entityId, x, y) - Spawn an entity by type id at position.
+  deploy_squad(squadId, x, y) - Deploy a squad at position.
+  goto_scene(scene) - Switch to a scene by name.
+  keypressed(key) - Simulate a key press.
+  click(x, y, button) - Simulate a mouse click.
+  eval(code) - Run arbitrary Lua code.
 
 TIPS:
 - The game boots to "title_scene". Use game_interact("goto_scene", scene="battle_scene") to enter battle.
@@ -33,7 +42,7 @@ TIPS:
 
 EXAMPLE SESSION:
   game_start()
-  game_interact("ping")                           # => {{"pong": true}}
+  game_interact("ping")                           # => {"pong": true}
   game_interact("eval", code="g.newRun()")         # create a run
   game_interact("goto_scene", scene="battle_scene") # enter battle
   game_wait(30)                                     # let scene initialize
@@ -57,7 +66,7 @@ def game_interact(ctx, cmd: str, **kwargs) -> dict:
     if not _client:
         raise RuntimeError("game not started. call game_start() first.")
     try:
-        return _client._send(cmd, **kwargs)
+        return _client.send(cmd, **kwargs)
     except Exception as e:
         _client = None
         raise RuntimeError(f"connection lost: {e}")
