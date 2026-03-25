@@ -61,6 +61,7 @@ _G.Kirigami = require("lib.kirigami")
 _G.ui = require("src.ui.ui")
 
 _G.analytics = require("src.modules.analytics.analytics")
+_G.agentbridge = require("src.modules.agentbridge.agentbridge")
 
 _G.g = require("src.g")
 require("src.ev_q_defs")
@@ -84,10 +85,14 @@ function love.load()
     sceneManager.loadScenes()
     sceneManager.gotoScene("title_scene")
     love.window.setFullscreen(settings.isFullscreen())
+    if consts.DEV_MODE then
+        agentbridge.start()
+    end
 end
 
 function love.update(dt)
     g.clearHandlers()
+    agentbridge.update()
     local sc = sceneManager.getCurrentScene()
     if sc and sc.update then
         sc:update(dt)
@@ -95,6 +100,7 @@ function love.update(dt)
 end
 
 function love.quit()
+    agentbridge.stop()
     settings.save()
     g.saveAndInvalidateRun()
 end
