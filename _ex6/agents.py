@@ -6,7 +6,7 @@ from _ex6.code_mode import make_code_mode_system_prompt
 from _ex6.tools import read_headers, read_body, glob, search, write_file, edit_file, read_file, edit_file_lines, escalate, CLAUDE_MD
 from _ex6.tasks import task_focus, task_create, task_read, task_write_plan, task_write_done_criteria, task_add_log, task_close, task_query_logs, task_list
 from _ex6.web.web_tools import web_search, websearch_agent
-from _ex6.game_tools import game_start, game_interact, game_wait
+from _ex6.game_tools import game_start, game_interact
 from _ex6.provider import cache_manually
 import ex6
 from ex6 import Context, Message
@@ -147,7 +147,7 @@ coder = Context("c_opus", yolo=True, model=M.OPUS_46.id, reasoning="medium", mes
         explore_agent, web_search, websearch_agent,
         escalate,
         task_focus, task_read, task_write_plan, task_write_done_criteria, task_add_log, task_close, task_query_logs,
-        game_start, game_interact, game_wait,
+        game_start, game_interact,
     ]),
     ENV_PROMPT,
     CLAUDE_MD,
@@ -163,7 +163,7 @@ coder = Context("c_codex", yolo=True, model=M.GPT52_CODEX.id, reasoning="medium"
         explore_agent, web_search, websearch_agent,
         escalate,
         task_focus, task_read, task_write_plan, task_write_done_criteria, task_add_log, task_close, task_query_logs,
-        game_start, game_interact, game_wait,
+        game_start, game_interact,
     ]),
     ENV_PROMPT,
     CLAUDE_MD,
