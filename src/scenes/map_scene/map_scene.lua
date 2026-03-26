@@ -21,6 +21,10 @@ function map_scene:leave()
     self.camera = nil
 end
 
+function map_scene:pollHandlers()
+    self.ecs:addSystemHandlers()
+end
+
 function map_scene:update(dt)
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
     self.camera:setPos(self.x, self.y)

@@ -92,7 +92,7 @@ function love.load()
 end
 
 function love.update(dt)
-    g.clearHandlers()
+    g.pollHandlers()
     agentbridge.update()
     local sc = sceneManager.getCurrentScene()
     if sc and sc.update then

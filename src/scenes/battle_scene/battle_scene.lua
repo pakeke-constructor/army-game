@@ -46,6 +46,10 @@ function battle_scene:leave()
     self.particles = nil
 end
 
+function battle_scene:pollHandlers()
+    self.ecs:addSystemHandlers()
+end
+
 function battle_scene:update(dt)
     self:updateCamera(dt)
     self.ecs:update(dt)

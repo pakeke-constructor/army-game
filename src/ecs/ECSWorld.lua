@@ -32,8 +32,12 @@ function ECSWorld:init(systemNames)
         self.systems[#self.systems + 1] = require("src.ecs.systems." .. name)
     end
 
-    self:addSystemHandlers()
-    g.call("initECS", self)
+    -- Call initECS directly on systems (before pollHandlers has run)
+    for i = 1, #self.systems do
+        if self.systems[i].initECS then
+            self.systems[i].initECS(self)
+        end
+    end
 end
 
 function ECSWorld:addEntity(e)
@@ -96,7 +100,6 @@ function ECSWorld:addSystemHandlers()
 end
 
 function ECSWorld:update(dt)
-    self:addSystemHandlers()
     self.entities:flush()
     self:_rebuildIndex()
     g.call("preUpdate", self, dt)

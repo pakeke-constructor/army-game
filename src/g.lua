@@ -558,7 +558,7 @@ local reducers = require("src.modules.reducers")
 local definedEvents = {}
 local questions = {}
 -- Scene-level handler caches: name -> {func1, func2, ...}
--- Built incrementally by g.addHandler, wiped by g.clearHandlers.
+-- Rebuilt atomically each frame by g.pollHandlers.
 local table_clear = require("table.clear")
 local handlerCache = {} -- [eventOrQuestionName] -> {func, func, ...}
 
@@ -585,9 +585,12 @@ function g.getQuestionInfo(q)
     return questions[q]
 end
 
+local _polling = false
+
 -- Add a handler table for this frame only.
--- Must be re-added every frame (e.g. in scene:preUpdate).
+-- Must only be called inside scene:pollHandlers.
 function g.addHandler(handler)
+    assert(_polling, "g.addHandler called outside of g.pollHandlers!")
     for key, func in pairs(handler) do
         local list = handlerCache[key]
         assert(list, "Unknown event/question: " .. tostring(key))
@@ -595,11 +598,17 @@ function g.addHandler(handler)
     end
 end
 
--- Called once per frame to clear all ephemeral handlers.
-function g.clearHandlers()
+-- Called once per frame. Clears all handlers, then asks the scene to re-register them.
+function g.pollHandlers()
     for _, list in pairs(handlerCache) do
         table_clear(list)
     end
+    _polling = true
+    local sc = sceneManager.getCurrentScene()
+    if sc and sc.pollHandlers then
+        sc:pollHandlers()
+    end
+    _polling = false
 end
 
 
