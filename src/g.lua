@@ -600,7 +600,7 @@ local reducers = require("src.modules.reducers")
 
 local definedEvents = {}
 local questions = {}
--- Scene-level handler caches: name -> {func1, func2, ...}
+-- global handler caches: name -> {func1, func2, ...}
 -- Rebuilt atomically each frame by g.pollHandlers.
 local table_clear = require("table.clear")
 local handlerCache = {} -- [eventOrQuestionName] -> {func, func, ...}
@@ -773,9 +773,9 @@ end
 
 
 -- Fire an event. No return value.
--- Order: scene-level handlers, then ent[ev], then ent.scope
+-- Order: global handlers, then ent[ev], then ent.scope
 function g.call(ev, arg1, ...)
-    -- 1. scene-level handlers
+    -- 1. global handlers (via g.addHandler)
     local list = handlerCache[ev]
     for i = 1, #list do
         list[i](arg1, ...)
@@ -795,7 +795,7 @@ function g.call(ev, arg1, ...)
 end
 
 -- Ask a question. Returns reduced value.
--- Order: scene-level handlers, then ent[q], then ent.scope
+-- Order: global handlers, then ent[q], then ent.scope
 function g.ask(q, arg1, ...)
     local t = questions[q]
     if not t then
@@ -803,7 +803,7 @@ function g.ask(q, arg1, ...)
     end
     local reducer, val = t.reducer, t.defaultValue
 
-    -- 1. scene-level handlers
+    -- 1. global handlers (via g.addHandler)
     local list = handlerCache[q]
     for i = 1, #list do
         val = reducer(val, list[i](arg1, ...))
