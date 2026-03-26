@@ -35,6 +35,10 @@ end
 
 function battle_scene:enter()
     self.ecs = ECSWorld({"stats", "ai", "attacking", "physics"})
+    local run = g.getRun()
+    for _, squad in ipairs(run.squads) do
+        squad.deployed = false
+    end
     self.camera = Camera(0, 0, CAMERA_ZOOM)
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
     self.particles = ParticleService()

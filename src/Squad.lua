@@ -7,6 +7,7 @@ local objects = require("src.modules.objects.objects")
 ---@field perks string[]
 ---@field unitCount integer?
 ---@field formation "square"|"circle"|"horizontal"|"vertical"|"diamond"
+---@field deployed boolean?
 local Squad = objects.Class("g:Squad")
 
 --- Formation functions: (n, spacing) -> {{x,y}, ...}
@@ -82,8 +83,11 @@ end
 ---@param y number
 ---@return ecs.Entity[]
 function Squad:spawn(x, y)
+    assert(not self.deployed, "Squad already deployed")
     g = g or require("src.g")
-    return g.spawnSquad(self, x, y)
+    local entities = g.spawnSquad(self, x, y)
+    self.deployed = true
+    return entities
 end
 
 ---@param spacing number? defaults to 20
