@@ -102,6 +102,7 @@ end
 
 function devcmd.textinput(text)
     if not active then return false end
+    if text == "/" then return true end
     cmdBuf = cmdBuf .. text
     return true
 end
