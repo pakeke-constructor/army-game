@@ -3,8 +3,6 @@ local Squad = require("src.Squad")
 
 ---@class g.Run: objects.Class
 ---@field squads g.Squad[]
----@field health number
----@field maxHealth number
 ---@field money number
 ---@field food number
 ---@field mana number
@@ -16,8 +14,6 @@ local Run = objects.Class("g:Run")
 
 function Run:init()
     self.squads = {}
-    self.health = 20
-    self.maxHealth = 20
     self.money = 0
     self.food = 3
     self.mana = 3
@@ -35,8 +31,6 @@ function Run:serialize()
     end
     return {
         squads = squads,
-        health = self.health,
-        maxHealth = self.maxHealth,
         money = self.money,
         food = self.food,
         mana = self.mana,
@@ -57,8 +51,6 @@ function Run.deserialize(data)
     for i = 1, #(data.squads or {}) do
         run.squads[i] = Squad.deserialize(data.squads[i])
     end
-    run.health = data.health or run.health
-    run.maxHealth = data.maxHealth or run.maxHealth
     run.money = data.money or run.money
     run.food = data.food or run.food
     run.mana = data.mana or run.mana

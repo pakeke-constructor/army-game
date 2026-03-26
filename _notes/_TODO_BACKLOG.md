@@ -3,6 +3,15 @@
 
 
 - Formalize squads / formation code
+
+- DEVTOOLS SO WE AINT FLYING BLIND:
+
+
+- Create an example squad
+- Create an example perk
+- Create an example blessing
+
+
 - Wire up perks to squads
 - Get squad placement working
 

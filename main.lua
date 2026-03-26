@@ -64,6 +64,7 @@ _G.analytics = require("src.modules.analytics.analytics")
 _G.agentbridge = require("src.modules.agentbridge.agentbridge")
 
 _G.g = require("src.g")
+_G.devcmd = require("src.devcmd")
 require("src.ev_q_defs")
 
 if consts.TEST then
@@ -116,6 +117,7 @@ function love.draw()
         sc:draw()
         iml.endFrame()
     end
+    devcmd.draw()
 end
 
 function love.mousepressed(mx, my, button, istouch, presses)
@@ -142,6 +144,7 @@ function love.mousemoved(mx, my, dx, dy, istouch)
 end
 
 function love.keypressed(key, scancode, isrep)
+    if devcmd.keypressed(key) then return end
     if scancode == "[" then
         consts.SHOW_DEV_STUFF = consts.DEV_MODE and (not consts.SHOW_DEV_STUFF)
     elseif scancode == "return" and love.keyboard.isDown("lalt", "ralt") then
@@ -163,6 +166,7 @@ function love.keyreleased(key, scancode)
 end
 
 function love.textinput(text)
+    if devcmd.textinput(text) then return end
     iml.textinput(text)
     local sc = sceneManager.getCurrentScene()
     if sc and sc.textinput then
