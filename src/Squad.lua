@@ -71,6 +71,21 @@ Squad.FORMATIONS.diamond = function(n, spacing)
     return offsets
 end
 
+local g
+
+function Squad:getUnitCount()
+    g = g or require("src.g")
+    return self.unitCount or g.getSquadInfo(self.squadId).count
+end
+
+---@param x number
+---@param y number
+---@return ecs.Entity[]
+function Squad:spawn(x, y)
+    g = g or require("src.g")
+    return g.spawnSquad(self, x, y)
+end
+
 ---@param spacing number? defaults to 20
 ---@return table[] offsets {{x,y}, ...}
 function Squad:getFormationOffsets(spacing)

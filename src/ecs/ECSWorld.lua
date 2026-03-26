@@ -45,6 +45,10 @@ function ECSWorld:addEntity(e)
 end
 
 function ECSWorld:removeEntity(e)
+    if e.___removed then
+        return
+    end
+    e.___removed = true
     self.entities:removeBuffered(e)
 end
 
