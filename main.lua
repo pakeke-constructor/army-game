@@ -85,8 +85,9 @@ function love.load()
     sceneManager.loadScenes()
     sceneManager.gotoScene("title_scene")
     love.window.setFullscreen(settings.isFullscreen())
-    if consts.DEV_MODE then
-        agentbridge.start()
+    for _, a in ipairs(arg or {}) do
+        local port = a:match("^%-%-devport=(%d+)$")
+        if port then agentbridge.start(tonumber(port)); break end
     end
 end
 

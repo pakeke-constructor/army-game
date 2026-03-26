@@ -5,7 +5,13 @@ local CMD_CHAN, RECV_CHAN, SEND_CHAN, PORT = ...
 ---@cast RECV_CHAN love.Channel -- thread pushes received messages here
 ---@cast SEND_CHAN love.Channel -- main pushes responses here
 
-local server = assert(socket.bind("127.0.0.1", PORT))
+local server
+for attempt = 1, 10 do
+    local s, err = socket.bind("127.0.0.1", PORT)
+    if s then server = s; break end
+    socket.sleep(0.5)
+end
+if not server then error("agentbridge: could not bind port " .. PORT) end
 server:settimeout(0)
 
 local clients = {}

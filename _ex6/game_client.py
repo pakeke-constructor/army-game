@@ -1,6 +1,6 @@
 """
 TCP client for communicating with the Love2D agent bridge.
-The game exposes a JSON-over-TCP socket on port 27015 (DEV_MODE only).
+The game exposes a JSON-over-TCP socket when launched with --devport=PORT.
 """
 import socket
 import json
@@ -9,6 +9,14 @@ import subprocess
 import os
 
 _DEFAULT_PORT = 27015
+
+def _find_free_port():
+    """Bind to port 0 and let the OS pick a free port."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind(("127.0.0.1", 0))
+    port = s.getsockname()[1]
+    s.close()
+    return port
 
 class GameClient:
     """Connects to the running Love2D game's agent bridge."""
@@ -69,7 +77,7 @@ def _find_love_exe():
             return c
     return "love"  # hope it's on PATH
 
-def start_game(port=_DEFAULT_PORT):
+def start_game(port=None):
     """Launch the Love2D game and connect. Returns a GameClient."""
     global _game_process, _game_client
     if _game_client:
@@ -79,10 +87,13 @@ def start_game(port=_DEFAULT_PORT):
         except Exception:
             _game_client = None
 
+    if port is None:
+        port = _find_free_port()
+
     love_exe = _find_love_exe()
     game_dir = os.getcwd()
     _game_process = subprocess.Popen(
-        [love_exe, game_dir],
+        [love_exe, game_dir, "--devport=" + str(port)],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )

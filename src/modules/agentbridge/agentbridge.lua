@@ -1,6 +1,6 @@
 local agentbridge = {}
 
-local PORT = 27015
+local PORT = nil
 local thread
 local cmdChan = love.thread.newChannel()   -- main -> thread: quit command
 local recvChan = love.thread.newChannel()  -- thread -> main: incoming messages
@@ -8,8 +8,9 @@ local sendChan = love.thread.newChannel()  -- main -> thread: outgoing responses
 
 local commandHandlers = {}
 
-function agentbridge.start()
+function agentbridge.start(port)
     if thread and thread:isRunning() then return end
+    PORT = port
     thread = love.thread.newThread("src/modules/agentbridge/thread.lua")
     thread:start(cmdChan, recvChan, sendChan, PORT)
     log.info("[agentbridge] listening on port " .. PORT)
