@@ -26,6 +26,7 @@ local richtext = require("src.modules.richtext.exports")
 local sceneManager = require("src.scenes.sceneManager")
 
 local Run = require("src.Run")
+local Squad = require("src.Squad")
 local Entity = require("src.ecs.Entity")
 
 local currentRun
@@ -246,44 +247,85 @@ function g.defineSquad(id, info)
     SQUAD_LIST[#SQUAD_LIST + 1] = id
 end
 
-function g.getSquadInfo(id)
-    return assert(SQUAD_DEFS[id], "Unknown squad: " .. tostring(id))
+
+---@param squadId string
+---@return g.Squad
+function g.newSquad(squadId)
+    assert(SQUAD_DEFS[squadId], "Unknown squad: " .. tostring(squadId))
+    return Squad(squadId)
 end
 
-function g.getSquadList()
-    return SQUAD_LIST
+---@param squad g.Squad
+function g.addSquadToArmy(squad)
+    local run = g.getRun()
+    run.squads[#run.squads + 1] = squad
 end
 
---- Add a perk to a squad definition (applied to entities on spawn)
-function g.addPerkToSquad(squadId, perkId)
-    local info = assert(SQUAD_DEFS[squadId], "Unknown squad: " .. tostring(squadId))
-    assert(PERK_DEFS[perkId], "Unknown perk: " .. tostring(perkId))
-    info.perks[#info.perks + 1] = perkId
-end
-
---- Remove a perk from a squad definition
-function g.removePerkFromSquad(squadId, perkId)
-    local info = assert(SQUAD_DEFS[squadId], "Unknown squad: " .. tostring(squadId))
-    for i = #info.perks, 1, -1 do
-        if info.perks[i] == perkId then
-            table.remove(info.perks, i)
+---@param squad g.Squad
+---@return boolean
+function g.removeSquadFromArmy(squad)
+    local run = g.getRun()
+    for i = #run.squads, 1, -1 do
+        if run.squads[i] == squad then
+            table.remove(run.squads, i)
             return true
         end
     end
     return false
 end
 
---- Spawn all entities for a squad, applying perks and calling onDeploy
-function g.spawnSquad(squadId, x, y, ...)
-    local info = assert(SQUAD_DEFS[squadId], "Unknown squad: " .. tostring(squadId))
+---@return g.Squad[]
+function g.getArmy()
+    return g.getRun().squads
+end
+
+
+---@param id string
+---@return g.SquadInfo
+function g.getSquadInfo(id)
+    return assert(SQUAD_DEFS[id], "Unknown squad: " .. tostring(id))
+end
+
+---@return string[]
+function g.getSquadList()
+    return SQUAD_LIST
+end
+
+---@param squad g.Squad
+---@param perkId string
+function g.addPerkToSquad(squad, perkId)
+    assert(PERK_DEFS[perkId], "Unknown perk: " .. tostring(perkId))
+    squad.perks[#squad.perks + 1] = perkId
+end
+
+---@param squad g.Squad
+---@param perkId string
+---@return boolean
+function g.removePerkFromSquad(squad, perkId)
+    for i = #squad.perks, 1, -1 do
+        if squad.perks[i] == perkId then
+            table.remove(squad.perks, i)
+            return true
+        end
+    end
+    return false
+end
+
+---@param squad g.Squad
+---@param x number
+---@param y number
+---@return ecs.Entity[]
+function g.spawnSquad(squad, x, y, ...)
+    local info = assert(SQUAD_DEFS[squad.squadId], "Unknown squad: " .. tostring(squad.squadId))
     local squadScope = g.newScope()
     squadScope.shared = true
-    for j = 1, #info.perks do
-        local perkInfo = g.getPerkInfo(info.perks[j])
+    for j = 1, #squad.perks do
+        local perkInfo = g.getPerkInfo(squad.perks[j])
         squadScope:addHandler(perkInfo.handlers)
     end
+    local count = squad:getUnitCount()
     local entities = {}
-    for i = 1, info.count do
+    for i = 1, count do
         local ent = g.spawnEntity(info.entityId, x, y, ...)
         ent.scope = squadScope
         entities[i] = ent
@@ -293,6 +335,7 @@ function g.spawnSquad(squadId, x, y, ...)
     end
     return entities
 end
+
 
 -- Blessing system
 local BLESSING_DEFS = {}

@@ -117,15 +117,6 @@ agentbridge.registerCommand("spawn_entity", function(msg)
     return {spawned = ent.id, type = ent.type}
 end)
 
-agentbridge.registerCommand("deploy_squad", function(msg)
-    assert(msg.squadId, "missing squadId")
-    assert(msg.x and msg.y, "missing x/y")
-    local ents = g.spawnSquad(msg.squadId, msg.x, msg.y)
-    local ids = {}
-    for i = 1, #ents do ids[i] = ents[i].id end
-    return {deployed = ids}
-end)
-
 agentbridge.registerCommand("goto_scene", function(msg)
     assert(msg.scene, "missing scene")
     g.gotoScene(msg.scene)

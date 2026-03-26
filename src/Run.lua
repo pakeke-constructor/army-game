@@ -1,25 +1,40 @@
 local objects = require("src.modules.objects.objects")
+local Squad = require("src.Squad")
 
 ---@class g.Run: objects.Class
+---@field squads g.Squad[]
+---@field health number
+---@field maxHealth number
+---@field money number
+---@field food number
+---@field mana number
+---@field blessings string[]
+---@field day integer
+---@field mapPosition any?
 local Run = objects.Class("g:Run")
 
 
 function Run:init()
-    self.squads = {}      -- list of squad definition ids
+    self.squads = {}
     self.health = 20
     self.maxHealth = 20
     self.money = 0
     self.food = 3
     self.mana = 3
-    self.blessings = {}   -- list of blessing ids
+    self.blessings = {}
     self.day = 1
-    self.mapPosition = nil -- current node on map
+    self.mapPosition = nil
 end
 
 
+---@return table
 function Run:serialize()
+    local squads = {}
+    for i = 1, #self.squads do
+        squads[i] = self.squads[i]:serialize()
+    end
     return {
-        squads = self.squads,
+        squads = squads,
         health = self.health,
         maxHealth = self.maxHealth,
         money = self.money,
@@ -31,12 +46,17 @@ function Run:serialize()
     }
 end
 
+---@param data table?
+---@return g.Run
 function Run.deserialize(data)
     local run = Run()
     if not data then
         return run
     end
-    run.squads = data.squads or {}
+    run.squads = {}
+    for i = 1, #(data.squads or {}) do
+        run.squads[i] = Squad.deserialize(data.squads[i])
+    end
     run.health = data.health or run.health
     run.maxHealth = data.maxHealth or run.maxHealth
     run.money = data.money or run.money
@@ -49,4 +69,3 @@ function Run.deserialize(data)
 end
 
 return Run
-

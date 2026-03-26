@@ -2,12 +2,18 @@
 # backlog:
 
 
-- create agent-usable codebase and tools. 
-- Agents should literally be able to play the game, and inspect state.
+- Formalize squads / formation code
+- Wire up perks to squads
+- Get squad placement working
 
-- Get rid of bloated task tools.
-- Instead, have a `write-task`, `read-task`, and `log-task` tool.
+- Add simple rarity system
+- Add simple trait system
 
+- Plan enemy encounter system.
+
+- Clear / regenerate the world ECS when leaving/entering world-scene (much more robust for saving)
+
+- Make it so weapons can be held/used
 
 - import iml core
 - create UI core (MAKE IT AGENT-INTERACTABLE; via xml?)
