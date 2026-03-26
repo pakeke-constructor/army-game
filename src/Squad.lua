@@ -6,49 +6,78 @@ local objects = require("src.modules.objects.objects")
 ---@field level integer
 ---@field perks string[]
 ---@field unitCount integer?
+---@field formation "square"|"circle"|"horizontal"|"vertical"|"diamond"
 local Squad = objects.Class("g:Squad")
 
+--- Formation functions: (n, spacing) -> {{x,y}, ...}
+Squad.FORMATIONS = {}
 
----@param squadId string
-function Squad:init(squadId)
-    self.squadId = squadId
-    self.level = 1
-    self.perks = {}
-    self.unitCount = nil -- nil means "use default from SquadInfo"
-end
-
-
----@return table
-function Squad:serialize()
-    return {
-        squadId = self.squadId,
-        level = self.level,
-        perks = self.perks,
-        unitCount = self.unitCount,
-    }
-end
-
-
----@return integer
-function Squad:getUnitCount()
-    if self.unitCount then
-        return self.unitCount
+Squad.FORMATIONS.square = function(n, spacing)
+    local offsets = {}
+    local cols = math.ceil(math.sqrt(n))
+    local totalW = (cols - 1) * spacing
+    local totalH = (math.ceil(n / cols) - 1) * spacing
+    for i = 1, n do
+        local col = (i - 1) % cols
+        local row = math.floor((i - 1) / cols)
+        offsets[i] = {x = -totalW / 2 + col * spacing, y = -totalH / 2 + row * spacing}
     end
-    local info = g.getSquadInfo(self.squadId)
-    return info.count or 1
+    return offsets
 end
 
-
-function Squad:drawPreview()
-    -- draws a preview of the units
-    -- DONT IMPLEMENT YET.
+Squad.FORMATIONS.circle = function(n, spacing)
+    if n == 1 then return {{x = 0, y = 0}} end
+    local offsets = {}
+    local r = spacing * math.max(1, n / 6)
+    for i = 1, n do
+        local angle = (i - 1) / n * math.pi * 2
+        offsets[i] = {x = math.cos(angle) * r, y = math.sin(angle) * r}
+    end
+    return offsets
 end
 
-function Squad:drawUI()
-    -- draws UI for squad (description)
-    -- DONT IMPLEMENT YET.
+Squad.FORMATIONS.horizontal = function(n, spacing)
+    local offsets = {}
+    local totalW = (n - 1) * spacing
+    for i = 1, n do
+        offsets[i] = {x = -totalW / 2 + (i - 1) * spacing, y = 0}
+    end
+    return offsets
 end
 
+Squad.FORMATIONS.vertical = function(n, spacing)
+    local offsets = {}
+    local totalH = (n - 1) * spacing
+    for i = 1, n do
+        offsets[i] = {x = 0, y = -totalH / 2 + (i - 1) * spacing}
+    end
+    return offsets
+end
+
+Squad.FORMATIONS.diamond = function(n, spacing)
+    if n == 1 then return {{x = 0, y = 0}} end
+    local offsets = {}
+    local r = spacing * math.max(1, n / 6)
+    for i = 1, n do
+        local t = (i - 1) / n * 4
+        local x, y
+        if t < 1 then     x, y =  t,      1 - t
+        elseif t < 2 then x, y =  2 - t,  -(t - 1)
+        elseif t < 3 then x, y =  -(t-2), -(3 - t)
+        else              x, y =  -(4-t),  t - 3
+        end
+        offsets[i] = {x = x * r, y = y * r}
+    end
+    return offsets
+end
+
+---@param spacing number? defaults to 20
+---@return table[] offsets {{x,y}, ...}
+function Squad:getFormationOffsets(spacing)
+    spacing = spacing or 20
+    local fn = Squad.FORMATIONS[self.formation] or Squad.FORMATIONS.square
+    return fn(self:getUnitCount(), spacing)
+end
 
 
 ---@param data table
@@ -58,6 +87,7 @@ function Squad.deserialize(data)
     sq.level = data.level or 1
     sq.perks = data.perks or {}
     sq.unitCount = data.unitCount
+    sq.formation = data.formation or "square"
     return sq
 end
 
