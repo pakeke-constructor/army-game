@@ -4,6 +4,7 @@
 from _ex6.models import M
 from _ex6.code_mode import make_code_mode_system_prompt
 from _ex6.tools import read_headers, read_body, glob, search, write_file, edit_file, read_file, edit_file_lines, escalate, CLAUDE_MD
+from _ex6.lua_coding_style import SYSTEM_PROMPT_CODING_STYLE
 from _ex6.tasks import plan_add_log, plan_done, plan_list, plan_read, plan_write
 from _ex6.web.web_tools import web_search, websearch_agent
 from _ex6.game_tools import game_start, game_interact
@@ -128,6 +129,8 @@ def _env_content(ctx):
 
 ENV_PROMPT = ex6.Message(role="system", overview="env", content=_env_content)
 
+CODING_STYLE_PROMPT = ex6.Message(role="system", overview="coding-style", content=SYSTEM_PROMPT_CODING_STYLE)
+
 
 
 coder = Context("c_opus", yolo=True, model=M.OPUS_46.id, reasoning="medium", messages=[
@@ -141,6 +144,7 @@ coder = Context("c_opus", yolo=True, model=M.OPUS_46.id, reasoning="medium", mes
         game_start, game_interact,
     ]),
     ENV_PROMPT,
+    CODING_STYLE_PROMPT,
     CLAUDE_MD,
 ])
 cache_manually(coder)
@@ -157,6 +161,7 @@ coder = Context("c_codex", yolo=True, model=M.GPT52_CODEX.id, reasoning="medium"
         game_start, game_interact,
     ]),
     ENV_PROMPT,
+    CODING_STYLE_PROMPT,
     CLAUDE_MD,
 ])
 
