@@ -4,7 +4,7 @@
 from _ex6.models import M
 from _ex6.code_mode import make_code_mode_system_prompt
 from _ex6.tools import read_headers, read_body, glob, search, write_file, edit_file, read_file, edit_file_lines, escalate, CLAUDE_MD
-from _ex6.tasks import task_focus, task_create, task_read, task_write_plan, task_write_done_criteria, task_add_log, task_close, task_query_logs, task_list
+from _ex6.tasks import plan_add_log, plan_done, plan_list, plan_read, plan_write
 from _ex6.web.web_tools import web_search, websearch_agent
 from _ex6.game_tools import game_start, game_interact
 from _ex6.provider import cache_manually
@@ -130,15 +130,6 @@ ENV_PROMPT = ex6.Message(role="system", overview="env", content=_env_content)
 
 
 
-reader = Context("reader_codex",model=ANALYTICAL_MODEL, reasoning="medium", messages=[
-    MAIN_SYSTEM_PROMPT,
-    make_code_mode_system_prompt([read_file, glob, search, read_headers, read_body, explore_agent, web_search, websearch_agent, escalate]),
-    ENV_PROMPT,
-    CLAUDE_MD,
-])
-
-
-
 coder = Context("c_opus", yolo=True, model=M.OPUS_46.id, reasoning="medium", messages=[
     MAIN_SYSTEM_PROMPT,
     make_code_mode_system_prompt([
@@ -146,7 +137,7 @@ coder = Context("c_opus", yolo=True, model=M.OPUS_46.id, reasoning="medium", mes
         write_file, edit_file, edit_file_lines,
         explore_agent, web_search, websearch_agent,
         escalate,
-        task_focus, task_read, task_write_plan, task_write_done_criteria, task_add_log, task_close, task_query_logs,
+        plan_add_log, plan_done, plan_list, plan_read, plan_write,
         game_start, game_interact,
     ]),
     ENV_PROMPT,
@@ -162,7 +153,7 @@ coder = Context("c_codex", yolo=True, model=M.GPT52_CODEX.id, reasoning="medium"
         write_file, edit_file, edit_file_lines,
         explore_agent, web_search, websearch_agent,
         escalate,
-        task_focus, task_read, task_write_plan, task_write_done_criteria, task_add_log, task_close, task_query_logs,
+        plan_add_log, plan_done, plan_list, plan_read, plan_write,
         game_start, game_interact,
     ]),
     ENV_PROMPT,
@@ -170,10 +161,8 @@ coder = Context("c_codex", yolo=True, model=M.GPT52_CODEX.id, reasoning="medium"
 ])
 
 
-PLANNER_SYSTEM_PROMPT = ex6.Message(
-role="system",
-overview="planner-system",
-content="""\
+
+_PLANNING_PROMPT_UNUSED ="""\
 You are a planning agent working alongside an experienced engineer in a terminal UI.
 You CANNOT write code. You can only read, explore, and research.
 
@@ -231,21 +220,6 @@ If the project has tests, include running them. If it doesn't, include a bash co
 Each criterion should be one line, verifiable with a single tool call.
 </done_criteria_guide>
 """
-)
-
-
-planner = Context("planner_opus", model=M.OPUS_46.id, reasoning="medium", messages=[
-    PLANNER_SYSTEM_PROMPT,
-    make_code_mode_system_prompt([
-        read_file, glob, search, read_headers, read_body,
-        explore_agent, web_search, websearch_agent,
-        escalate,
-        task_create, task_focus, task_read, task_write_plan, task_write_done_criteria, task_add_log, task_close, task_query_logs, task_list,
-    ]),
-    ENV_PROMPT,
-    CLAUDE_MD,
-])
-
 
 
 
