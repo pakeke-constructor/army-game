@@ -93,7 +93,7 @@ agentbridge.registerCommand("get_state", function(msg)
                 x = e.x, y = e.y,
                 health = e.health,
                 maxHealth = e.maxHealth,
-                side = e.side,
+                team = e.team,
             }
         end
         result.entities = ents

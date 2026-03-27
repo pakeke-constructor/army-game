@@ -15,8 +15,8 @@ PROJECTILE SYSTEM (also in this file):
 Projectiles fly with vx/vy velocity and a z arc (gravity).
 Hit opposing units via spatial partitioning, or hit ground when z<=0.
 
-Entities need: attack, attackDamage, attackSpeed, attackRange, side, x, y
-Projectile entities need: projectile component (damage, ownerEnt, side), vx, vy, vz, z, gravity
+Entities need: attack, attackDamage, attackSpeed, attackRange, team, x, y
+Projectile entities need: projectile component (damage, ownerEnt, team), vx, vy, vz, z, gravity
 ]]
 
 local atckSys = {}
@@ -32,7 +32,7 @@ end
 ---@param ent ecs.Entity
 ---@return boolean
 local function isAlive(ent)
-    return ent.health and ent.health > 0
+    return not not (ent.health and ent.health > 0)
 end
 
 ---@param attacker ecs.Entity?
@@ -94,7 +94,7 @@ local function spawnProjectile(attacker, target)
         ent.projectile = {
             damage = attacker.attackDamage or 0,
             ownerEnt = attacker,
-            side = attacker.side,
+            team = attacker.team,
             pierceCount = 1,
         }
     end
@@ -125,10 +125,10 @@ end
 ---@param range number
 ---@return ecs.Entity?
 local function findNearbyTarget(ent, world, range)
-    local opposingSide = ent.side == "ally" and "enemy" or "ally"
+    local opTeam = ent.team == "ally" and "enemy" or "ally"
     local best, bestD2 = nil, range * range
-    for _, other in world:iterate("side") do
-        if other.side == opposingSide and isAlive(other) then
+    for _, other in world:iterate("team") do
+        if other.team == opTeam and isAlive(other) then
             local d2 = dist2(ent, other)
             if d2 <= bestD2 then
                 best, bestD2 = other, d2
@@ -191,9 +191,9 @@ local function updateProjectile(world, ent, dt)
 
     -- check collision with units (only if z is low enough)
     if ent.z < PROJ_Z_MAX then
-        local opposingSide = proj.side == "ally" and "enemy" or "ally"
+        local opTeam = proj.team == "ally" and "enemy" or "ally"
         local hitEnt = nil
-        g.iteratePartition(opposingSide, ent.x, ent.y, function(other)
+        g.iteratePartition(opTeam, ent.x, ent.y, function(other)
             if hitEnt then return end
             if not isAlive(other) then return end
             local dx, dy = other.x - ent.x, other.y - ent.y

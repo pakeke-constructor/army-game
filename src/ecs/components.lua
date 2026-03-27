@@ -29,10 +29,10 @@ local attack = {
 ---@class ecs.components.Projectile
 ---@field public damage number
 ---@field public ownerEnt ecs.Entity?
----@field public side "ally"|"enemy"
+---@field public team "ally"|"enemy"
 ---@field public pierceCount number
 local projectile = {
-    -- damage, ownerEnt, side, pierceCount are set on spawn
+    -- damage, ownerEnt, team, pierceCount are set on spawn
 }
 
 
@@ -61,7 +61,7 @@ local physics = {
 ---@field public ai ecs.components.AI?
 ---@field public attack ecs.components.Attack?
 ---@field public projectile ecs.components.Projectile?
----@field public side "ally"|"enemy"
+---@field public team "ally"|"enemy"
 ---@field public color objects.Color?
 ---@field public x number
 ---@field public y number

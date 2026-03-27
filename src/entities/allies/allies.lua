@@ -5,7 +5,7 @@ g.defineEntity("militia", {
     image = "militia",
     physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
     partitions = {"unit", "ally"},
-    side = "ally",
+    team = "ally",
     ai = {
         target = "enemy",
         getPriority = function(selfEnt, targEnt)
@@ -29,7 +29,7 @@ g.defineEntity("archer", {
     image = "militia", -- placeholder
     physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
     partitions = {"unit", "ally"},
-    side = "ally",
+    team = "ally",
     ai = {
         target = "enemy",
         getPriority = function(selfEnt, targEnt)

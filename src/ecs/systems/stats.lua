@@ -96,7 +96,7 @@ function stats.entitySpawned(ent)
 end
 
 function stats.preUpdate(world, dt)
-    for _, ent in world:iterate("side") do
+    for _, ent in world:iterate("team") do
         for _, stat in ipairs(statlist) do
             if ent[stat.baseName] or ent[stat.name] then
                 recomputeStat(ent, stat)

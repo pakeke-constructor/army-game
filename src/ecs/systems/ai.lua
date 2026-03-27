@@ -39,10 +39,10 @@ end
 local function getOpposingSide(ent)
     if ent.ai.target == "enemy" then
         -- target the opposite side
-        return ent.side == "ally" and "enemy" or "ally"
+        return ent.team == "ally" and "enemy" or "ally"
     else
         -- target same side (for healers etc)
-        return ent.side
+        return ent.team
     end
 end
 
@@ -72,9 +72,9 @@ end
 function aiSys.preUpdate(world, dt)
     -- build side lists
     local allies, enemies = {}, {}
-    for _, ent in world:iterate("side") do
+    for _, ent in world:iterate("team") do
         if isValidTarget(ent) then
-            if ent.side == "ally" then
+            if ent.team == "ally" then
                 allies[#allies + 1] = ent
             else
                 enemies[#enemies + 1] = ent

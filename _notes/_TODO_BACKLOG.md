@@ -9,8 +9,10 @@
 - ~~dumb/simple map-generation~~
 - ~~map-navigation~~
 - ~~starting squad~~
-- battle-scene
+- ~~battle-scene~~
+- battle-scene goes back to map-scene when done
 - enemy generation (SAME ARMY EVERY TIME; KISS.)
+- rendering of squads (placement preview)
 - placing units
 ### OK; CAN EAT RICEBALL NOW.
 
