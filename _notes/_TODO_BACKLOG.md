@@ -15,7 +15,6 @@
 - rendering of squads (placement preview)
 - placing units
 - If game crashed => agent should know.
-### OK; CAN EAT RICEBALL NOW.
 
 
 - Formalize squads / formation code

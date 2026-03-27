@@ -13,7 +13,7 @@ function _G.love.conf(t)
     t.identity = "karpathia"                    -- The name of the save directory (string)
     t.appendidentity = false            -- Search files in source directory before save directory (boolean)
     -- t.version = we are using "12.0"                  -- The LÖVE version this game was made for (string)
-    t.console = true                    -- Attach a console (boolean, Windows only)
+    t.console = false                   -- lovec.exe provides console; AllocConsole not needed
     t.externalstorage = false           -- True to save files (and read from the save directory) in external storage on Android (boolean)
 
     t.highdpi = true                   -- Enable high-dpi mode for the window on a Retina display (boolean)

@@ -84,14 +84,12 @@ _game_client = None
 _crash_info = None
 
 def _find_love_exe():
-    """Try common locations for love.exe on Windows."""
-    candidates = [
-        r"C:\Program Files\LOVE\love.exe",
-        r"C:\Program Files (x86)\LOVE\love.exe",
-    ]
-    for c in candidates:
-        if os.path.isfile(c):
-            return c
+    """Try common locations for love.exe on Windows. Prefers lovec.exe (console variant) for pipe capture."""
+    for name in ["lovec.exe", "love.exe"]:
+        for d in [r"C:\Program Files\LOVE", r"C:\Program Files (x86)\LOVE"]:
+            c = os.path.join(d, name)
+            if os.path.isfile(c):
+                return c
     return "love"  # hope it's on PATH
 
 def check_crash():
