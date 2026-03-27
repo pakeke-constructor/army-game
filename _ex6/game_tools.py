@@ -3,7 +3,7 @@ Agent tools for interacting with the running Love2D game.
 Provides: game_start, game_interact
 """
 import ex6
-from _ex6.game_client import GameClient, start_game, stop_game
+from _ex6.game_client import GameClient, start_game, stop_game, check_crash, get_stdout, get_stderr
 
 
 GAME_TESTING_PROMPT = """\
@@ -26,6 +26,7 @@ AVAILABLE COMMANDS (via game_interact):
   keypressed(key) - Simulate a key press.
   click(x, y, button) - Simulate a mouse click.
   eval(code) - Run arbitrary Lua code.
+  read_stdout(limit) - Read last `limit` lines of game stdout (default 100). The agent cannot see game output otherwise.
 
 TIPS:
 - The game boots to "title_scene". Use game_interact("goto_scene", scene="battle_scene") to enter battle.
@@ -37,6 +38,7 @@ TIPS:
 - Entity types: militia, archer (allies), demon, imp (enemies).
 - Entity fields: id, type, x, y, health, maxHealth, side, moveSpeed, attackDamage, attackSpeed, attackRange.
 - After spawning entities, wait a few frames for physics/AI to kick in, then get_state to verify.
+- Use game_interact("read_stdout", limit=100) to see recent game console output.
 
 EXAMPLE SESSION:
   game_start()
@@ -53,6 +55,12 @@ EXAMPLE SESSION:
 
 KEY = "game_tools:client"
 
+def _check_crash_gate():
+    """If the game has crashed, raise with crash info immediately."""
+    crash = check_crash()
+    if crash:
+        raise RuntimeError(crash)
+
 def game_start(ctx: ex6.Context) -> str:
     """Launch the Love2D game and connect to it. Must be called before game_interact. Returns 'connected' on success."""
     ctx.data[KEY] = start_game()
@@ -61,13 +69,22 @@ def game_start(ctx: ex6.Context) -> str:
 
 def game_interact(ctx, cmd: str, **kwargs) -> dict:
     """Send a command to the running game and get a response. First arg is the command name (e.g. 'ping', 'get_state', 'eval'). Remaining kwargs are command-specific parameters. Returns the JSON response as a dict."""
+    _check_crash_gate()
+
+    # Local-only commands (don't need a live connection)
+    if cmd == "read_stdout":
+        limit = kwargs.get("limit", 100)
+        lines = get_stdout(limit)
+        return "\n".join(lines) if lines else "(no output)"
+
     _client = ctx.data.get(KEY)
     if not _client:
         raise RuntimeError("game not started. call game_start() first.")
     try:
         return _client.send(cmd, **kwargs)
     except Exception as e:
+        crash = check_crash()
+        if crash:
+            raise RuntimeError(crash)
         _client = None
         raise RuntimeError(f"connection lost: {e}")
-
-

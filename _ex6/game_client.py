@@ -7,6 +7,8 @@ import json
 import time
 import subprocess
 import os
+import threading
+import collections
 
 _DEFAULT_PORT = 27015
 
@@ -60,10 +62,26 @@ class GameClient:
 
 
 # -------------------------------------------------------
+# Stdout/stderr capture
+# -------------------------------------------------------
+_stdout_buf = collections.deque(maxlen=2000)
+_stderr_buf = collections.deque(maxlen=2000)
+
+def _drain_pipe(pipe, buf):
+    """Background thread: read lines from pipe into deque."""
+    try:
+        for line in iter(pipe.readline, ''):
+            buf.append(line.rstrip('\n'))
+        pipe.close()
+    except Exception:
+        pass
+
+# -------------------------------------------------------
 # Boot the game
 # -------------------------------------------------------
 _game_process = None
 _game_client = None
+_crash_info = None
 
 def _find_love_exe():
     """Try common locations for love.exe on Windows."""
@@ -71,21 +89,58 @@ def _find_love_exe():
         r"C:\Program Files\LOVE\love.exe",
         r"C:\Program Files (x86)\LOVE\love.exe",
     ]
-    # also check PATH
     for c in candidates:
         if os.path.isfile(c):
             return c
     return "love"  # hope it's on PATH
 
+def check_crash():
+    """Check if the game process has crashed. Returns crash string or None."""
+    global _game_process, _game_client, _crash_info
+    if _crash_info:
+        return _crash_info
+    if _game_process is None:
+        return None
+    rc = _game_process.poll()
+    if rc is None:
+        return None
+    # Process exited
+    stderr_lines = list(_stderr_buf)
+    stdout_lines = list(_stdout_buf)
+    trace = "\n".join(stderr_lines[-100:]) if stderr_lines else "(no stderr)"
+    stdout_tail = "\n".join(stdout_lines[-50:]) if stdout_lines else "(no stdout)"
+    _crash_info = f"CRASH: THE GAME HAS CRASHED (exit code {rc}).\n\nStderr:\n{trace}\n\nStdout (last 50 lines):\n{stdout_tail}"
+    # Clean up
+    if _game_client:
+        try:
+            _game_client.close()
+        except Exception:
+            pass
+        _game_client = None
+    return _crash_info
+
+def get_stdout(limit=100):
+    """Return last `limit` lines of game stdout."""
+    return list(_stdout_buf)[-limit:]
+
+def get_stderr(limit=100):
+    """Return last `limit` lines of game stderr."""
+    return list(_stderr_buf)[-limit:]
+
 def start_game(port=None):
     """Launch the Love2D game and connect. Returns a GameClient."""
-    global _game_process, _game_client
+    global _game_process, _game_client, _crash_info
     if _game_client:
         try:
             _game_client.send("ping")
             return _game_client
         except Exception:
             _game_client = None
+
+    # Clear old crash info on fresh start
+    _crash_info = None
+    _stdout_buf.clear()
+    _stderr_buf.clear()
 
     if port is None:
         port = _find_free_port()
@@ -94,12 +149,23 @@ def start_game(port=None):
     game_dir = os.getcwd()
     _game_process = subprocess.Popen(
         [love_exe, game_dir, "--devport=" + str(port)],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        bufsize=1,
     )
+    # Drain stdout/stderr in background threads so pipes don't block
+    t1 = threading.Thread(target=_drain_pipe, args=(_game_process.stdout, _stdout_buf), daemon=True)
+    t2 = threading.Thread(target=_drain_pipe, args=(_game_process.stderr, _stderr_buf), daemon=True)
+    t1.start()
+    t2.start()
+
     # wait for the socket to be ready
     for attempt in range(50):
         time.sleep(0.2)
+        crash = check_crash()
+        if crash:
+            raise RuntimeError(crash)
         try:
             _game_client = GameClient(port=port)
             _game_client.send("ping")
@@ -110,7 +176,7 @@ def start_game(port=None):
 
 def stop_game():
     """Kill the game process and close the connection."""
-    global _game_process, _game_client
+    global _game_process, _game_client, _crash_info
     if _game_client:
         try:
             _game_client.close()
@@ -120,3 +186,4 @@ def stop_game():
     if _game_process:
         _game_process.terminate()
         _game_process = None
+    _crash_info = None
