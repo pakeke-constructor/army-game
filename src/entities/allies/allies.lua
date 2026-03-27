@@ -51,3 +51,10 @@ g.defineEntity("archer", {
     end
 })
 
+
+g.defineSquad("militia_squad", {
+    entityId = "militia",
+    count = 4,
+    image = "militia",
+})
+

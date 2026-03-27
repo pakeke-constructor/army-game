@@ -5,10 +5,14 @@
 
 
 ### OK:: what do we need for a minimum-playable game?
+- ~~dumb ui system~~
 - dumb/simple map-generation
 - map-navigation
 - starting squad
 - battle-scene
+- enemy generation (SAME ARMY EVERY TIME; KISS.)
+- placing units
+### OK; CAN EAT RICEBALL NOW.
 
 
 - Formalize squads / formation code

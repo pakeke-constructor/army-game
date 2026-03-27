@@ -237,7 +237,7 @@ local SQUAD_LIST = {}
 ---@field onDeploy (fun(squad: g.SquadInfo, entities: table[]))?
 
 ---@param id string
----@param info g.SquadInfo
+---@param info g.SquadInfo|{id:nil}|{perks:nil}
 function g.defineSquad(id, info)
     assert(not SQUAD_DEFS[id], "Duplicate squad: " .. id)
     info.id = id

@@ -1,5 +1,6 @@
 local objects = require("src.modules.objects.objects")
 local Squad = require("src.Squad")
+local MapGraph = require("src.scenes.map_scene.MapGraph")
 
 ---@class g.Run: objects.Class
 ---@field squads g.Squad[]
@@ -8,7 +9,7 @@ local Squad = require("src.Squad")
 ---@field mana number
 ---@field blessings string[]
 ---@field day integer
----@field mapPosition any?
+---@field mapGraph MapGraph
 local Run = objects.Class("g:Run")
 
 
@@ -19,7 +20,7 @@ function Run:init()
     self.mana = 3
     self.blessings = {}
     self.day = 1
-    self.mapPosition = nil
+    self.mapGraph = nil
 end
 
 
@@ -36,7 +37,7 @@ function Run:serialize()
         mana = self.mana,
         blessings = self.blessings,
         day = self.day,
-        mapPosition = self.mapPosition,
+        mapGraph = self.mapGraph and self.mapGraph:serialize(),
     }
 end
 
@@ -56,7 +57,7 @@ function Run.deserialize(data)
     run.mana = data.mana or run.mana
     run.blessings = data.blessings or {}
     run.day = data.day or run.day
-    run.mapPosition = data.mapPosition
+    run.mapGraph = data.mapGraph and MapGraph.deserialize(data.mapGraph)
     return run
 end
 

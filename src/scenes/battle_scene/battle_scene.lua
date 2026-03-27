@@ -83,8 +83,13 @@ function battle_scene:mousemoved(x, y, dx, dy)
 end
 
 function battle_scene:keypressed(k)
-    if consts.DEV_MODE and k == "q" then
-        test()
+    if consts.DEV_MODE then
+        if k == "q" then
+            test()
+        end
+        if k == "m" then
+            g.gotoScene("map_scene")
+        end
     end
 end
 
