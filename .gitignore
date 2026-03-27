@@ -7,9 +7,6 @@ _notes/private
 _notes/.obsidian
 .cosmetics
 
-*.ase
-*.aseprite
-
 luasteam.dll
 steam_api64.dll
 
