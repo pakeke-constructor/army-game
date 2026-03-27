@@ -119,10 +119,31 @@ function MapGraph:getNeighbors(x, y)
     return result
 end
 
+---@class MapGraph.GenArgs
+---@field width integer
+---@field height integer
+---@field nodePruneChance number
+---@field edgePruneChance number
+---@field distanceBetweenNodes number
+---@field randomDiagonalChance number
+---@field nodeOffsetFactor number
+---@field scaleX number
+---@field scaleY number
+
 --- Generate a map procedurally.
---- rng: a function() returning [0,1), e.g. math.random
-function MapGraph.generate(width, height, rng)
+---@param args MapGraph.GenArgs
+---@param rng? fun():number a function returning [0,1), e.g. math.random
+function MapGraph.generate(args, rng)
+    local width = args.width
+    local height = args.height
+    local nodePrune = args.nodePruneChance
+    local edgePrune = args.edgePruneChance
+    local diagChance = args.randomDiagonalChance
+
     local self = MapGraph(width, height)
+    self.distanceBetweenNodes = args.distanceBetweenNodes
+    self.scaleX = args.scaleX
+    self.scaleY = args.scaleY
     rng = rng or math.random
 
     local hw = math.floor(width / 2)
@@ -150,10 +171,10 @@ function MapGraph.generate(width, height, rng)
     for y = y0, y1 - 1 do
         for x = x0, x1 - 1 do
             local r = rng()
-            if r < 0.35 then
+            if r < diagChance / 2 then
                 self:addEdge(x, y, x + 1, y + 1)
                 hasSE[nodeKey(x, y)] = true
-            elseif r < 0.7 then
+            elseif r < diagChance then
                 if not hasSE[nodeKey(x, y)] then
                     self:addEdge(x + 1, y, x, y + 1)
                 end
@@ -163,7 +184,7 @@ function MapGraph.generate(width, height, rng)
 
     -- 4. Prune random nodes (punch holes), but never the center node
     for key, node in pairs(self.nodes) do
-        if not (node.x == 0 and node.y == 0) and rng() < 0.1 then
+        if not (node.x == 0 and node.y == 0) and rng() < nodePrune then
             self:removeNode(node.x, node.y)
         end
     end
@@ -174,7 +195,7 @@ function MapGraph.generate(width, height, rng)
         edgeList[#edgeList + 1] = ek
     end
     for _, ek in ipairs(edgeList) do
-        if rng() < 0.1 then
+        if rng() < edgePrune then
             self.edges[ek] = nil
         end
     end
@@ -205,10 +226,10 @@ function MapGraph.generate(width, height, rng)
     end
 
     -- 7. Random visual offsets per node
-    local MAX_OFFSET = 16
+    local maxOff = args.distanceBetweenNodes * args.nodeOffsetFactor
     for _, node in pairs(self.nodes) do
-        node.ox = (rng() - 0.5) * 2 * MAX_OFFSET
-        node.oy = (rng() - 0.5) * 2 * MAX_OFFSET
+        node.ox = (rng() - 0.5) * 2 * maxOff
+        node.oy = (rng() - 0.5) * 2 * maxOff
     end
 
     -- 8. Player starts at center
@@ -249,7 +270,7 @@ function MapGraph:serialize()
         i = i + 1
         edges[i] = ek
     end
-    return { width = self.width, height = self.height, nodes = nodes, edges = edges, playerPosition = self.playerPosition }
+    return { width = self.width, height = self.height, distanceBetweenNodes = self.distanceBetweenNodes, scaleX = self.scaleX, scaleY = self.scaleY, nodes = nodes, edges = edges, playerPosition = self.playerPosition }
 end
 
 --- Deserialize from a plain table
@@ -262,6 +283,9 @@ function MapGraph.deserialize(data)
         self.edges[ek] = true
     end
     self.playerPosition = data.playerPosition
+    self.distanceBetweenNodes = data.distanceBetweenNodes
+    self.scaleX = data.scaleX or 1
+    self.scaleY = data.scaleY or 1
     return self
 end
 

@@ -3,8 +3,7 @@ local Camera = require("lib.cam11")
 local MapGraph = require("src.scenes.map_scene.MapGraph")
 
 local CAMERA_ZOOM = 2
-local NODE_SPACING = 64
-local NODE_RADIUS = 8
+local NODE_RADIUS = 4
 local PLAYER_RADIUS = 5
 local PAN_SPEED = 200
 
@@ -13,8 +12,9 @@ local map_scene = {}
 function map_scene:init()
 end
 
-local function getNodeWorldPos(node)
-    return node.x * NODE_SPACING + node.ox, node.y * NODE_SPACING + node.oy
+local function getNodeWorldPos(graph, node)
+    local sp = graph.distanceBetweenNodes
+    return (node.x * sp + node.ox) * graph.scaleX, (node.y * sp + node.oy) * graph.scaleY
 end
 
 function map_scene:enter()
@@ -25,12 +25,22 @@ function map_scene:enter()
 
     local run = g.getRun()
     if not run.mapGraph then
-        run.mapGraph = MapGraph.generate(70, 50)
+        run.mapGraph = MapGraph.generate({
+            width = 50,
+            height = 30,
+            nodePruneChance = 0.2,
+            edgePruneChance = 0.02,
+            distanceBetweenNodes = 64,
+            randomDiagonalChance = 0.4,
+            nodeOffsetFactor = 0.35,
+            scaleX = 1,
+            scaleY = 0.6,
+        })
     end
 
     local pnode = run.mapGraph:getPlayerNode()
     if pnode then
-        self.camX, self.camY = getNodeWorldPos(pnode)
+        self.camX, self.camY = getNodeWorldPos(run.mapGraph, pnode)
     else
         self.camX, self.camY = 0, 0
     end
@@ -97,24 +107,22 @@ function map_scene:draw()
         lg.setColor(0.4, 0.4, 0.4, 1)
         lg.setLineWidth(2)
         graph:forEachEdge(function(a, b)
-            local ax, ay = getNodeWorldPos(a)
-            local bx, by = getNodeWorldPos(b)
+            local ax, ay = getNodeWorldPos(graph, a)
+            local bx, by = getNodeWorldPos(graph, b)
             lg.line(ax, ay, bx, by)
         end)
 
         -- draw nodes
         graph:forEachNode(function(node)
-            local nx, ny = getNodeWorldPos(node)
+            local nx, ny = getNodeWorldPos(graph, node)
             lg.setColor(0.6, 0.6, 0.6, 1)
             lg.circle("fill", nx, ny, NODE_RADIUS)
-            lg.setColor(0.9, 0.9, 0.9, 1)
-            lg.circle("line", nx, ny, NODE_RADIUS)
         end)
 
         -- draw player
         local pnode = graph:getPlayerNode()
         if pnode then
-            local px, py = getNodeWorldPos(pnode)
+            local px, py = getNodeWorldPos(graph, pnode)
             lg.setColor(1, 0.8, 0.2, 1)
             lg.circle("fill", px, py, PLAYER_RADIUS)
         end
