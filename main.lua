@@ -118,6 +118,15 @@ function love.draw()
         iml.endFrame()
     end
     devcmd.draw()
+    if consts.DEV_MODE then
+        local _, sceneName = sceneManager.getCurrentScene()
+        love.graphics.setColor(1, 1, 1, 0.5)
+        love.graphics.push()
+        love.graphics.scale(2)
+        love.graphics.printf(sceneName or "", 0, 2, love.graphics.getWidth() / 2 - 4, "right")
+        love.graphics.pop()
+        love.graphics.setColor(1, 1, 1, 1)
+    end
 end
 
 function love.mousepressed(mx, my, button, istouch, presses)
