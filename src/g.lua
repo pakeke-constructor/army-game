@@ -33,6 +33,12 @@ local currentRun
 
 function g.newRun()
     currentRun = Run()
+
+    -- TODO; do some thinking about this in future.
+    -- how do we actually want to "Start" the game off?
+    -- Perhaps players start with a preset squad depending on their commander?
+    g.addSquadToArmy(g.newSquad("militia_squad"))
+
     return currentRun
 end
 

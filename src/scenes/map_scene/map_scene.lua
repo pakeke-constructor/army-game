@@ -6,6 +6,7 @@ local CAMERA_ZOOM = 2
 local NODE_RADIUS = 4
 local PLAYER_RADIUS = 5
 local PAN_SPEED = 200
+local HOVER_DIST_FRAC = 0.4 -- fraction of distanceBetweenNodes
 
 local map_scene = {}
 
@@ -15,6 +16,37 @@ end
 local function getNodeWorldPos(graph, node)
     local sp = graph.distanceBetweenNodes
     return (node.x * sp + node.ox) * graph.scaleX, (node.y * sp + node.oy) * graph.scaleY
+end
+
+local function renderEdge(graph, a, b, r, g_c, b_c, a_c, width)
+    local lg = love.graphics
+    local ax, ay = getNodeWorldPos(graph, a)
+    local bx, by = getNodeWorldPos(graph, b)
+    lg.setColor(r, g_c, b_c, a_c or 1)
+    lg.setLineWidth(width or 2)
+    lg.line(ax, ay, bx, by)
+end
+
+local function renderNode(graph, node, r, g_c, b_c, a_c, radius)
+    local lg = love.graphics
+    local nx, ny = getNodeWorldPos(graph, node)
+    lg.setColor(r, g_c, b_c, a_c or 1)
+    lg.circle("fill", nx, ny, radius or NODE_RADIUS)
+end
+
+local function getHoveredNode(graph, wx, wy)
+    local hoverDist = graph.distanceBetweenNodes * HOVER_DIST_FRAC
+    local best, bestDist = nil, hoverDist * hoverDist
+    graph:forEachNode(function(node)
+        local nx, ny = getNodeWorldPos(graph, node)
+        local dx, dy = nx - wx, ny - wy
+        local d2 = dx * dx + dy * dy
+        if d2 < bestDist then
+            best = node
+            bestDist = d2
+        end
+    end)
+    return best
 end
 
 function map_scene:enter()
@@ -103,28 +135,37 @@ function map_scene:draw()
     local run = g.getRun()
     local graph = run.mapGraph
     if graph then
-        -- draw edges
-        lg.setColor(0.4, 0.4, 0.4, 1)
-        lg.setLineWidth(2)
+        -- edges
         graph:forEachEdge(function(a, b)
-            local ax, ay = getNodeWorldPos(graph, a)
-            local bx, by = getNodeWorldPos(graph, b)
-            lg.line(ax, ay, bx, by)
+            renderEdge(graph, a, b, 0.4, 0.4, 0.4)
         end)
 
-        -- draw nodes
+        -- nodes
         graph:forEachNode(function(node)
-            local nx, ny = getNodeWorldPos(graph, node)
-            lg.setColor(0.6, 0.6, 0.6, 1)
-            lg.circle("fill", nx, ny, NODE_RADIUS)
+            renderNode(graph, node, 0.6, 0.6, 0.6)
         end)
 
-        -- draw player
+        -- hover highlight: path from player to hovered node
         local pnode = graph:getPlayerNode()
         if pnode then
-            local px, py = getNodeWorldPos(graph, pnode)
-            lg.setColor(1, 0.8, 0.2, 1)
-            lg.circle("fill", px, py, PLAYER_RADIUS)
+            local mx, my = love.mouse.getPosition()
+            local wx, wy = self.camera:toWorld(mx, my)
+            local hovered = getHoveredNode(graph, wx, wy)
+            if hovered and hovered ~= pnode then
+                local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, 3)
+                if path and #path >= 2 then
+                    -- first edge bold yellow, rest pale yellow
+                    renderEdge(graph, path[1], path[2], 1, 1, 0.2, 1, 3)
+                    renderNode(graph, path[2], 1, 1, 0.2, 1, NODE_RADIUS + 1)
+                    for i = 2, #path - 1 do
+                        renderEdge(graph, path[i], path[i + 1], 1, 1, 0.4, 0.35, 2)
+                        renderNode(graph, path[i + 1], 1, 1, 0.4, 0.35, NODE_RADIUS + 1)
+                    end
+                end
+            end
+
+            -- player
+            renderNode(graph, pnode, 1, 0.8, 0.2, 1, PLAYER_RADIUS)
         end
     end
 
@@ -137,3 +178,4 @@ function map_scene:draw()
 end
 
 return map_scene
+

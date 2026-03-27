@@ -246,6 +246,54 @@ function MapGraph:forEachNode(fn)
     end
 end
 
+--- BFS shortest path from node at (ax,ay) to node at (bx,by).
+--- Returns list of nodes from start to end (inclusive), or nil if unreachable/too deep.
+function MapGraph:findPath(ax, ay, bx, by, maxDepth)
+    local startKey = nodeKey(ax, ay)
+    local goalKey = nodeKey(bx, by)
+    if startKey == goalKey then return { self.nodes[startKey] } end
+    if not self.nodes[startKey] or not self.nodes[goalKey] then return nil end
+
+    maxDepth = maxDepth or math.huge
+    local prev = {}
+    local depth = {}
+    local queue = { startKey }
+    local head = 1
+    prev[startKey] = false
+    depth[startKey] = 0
+    while head <= #queue do
+        local key = queue[head]
+        head = head + 1
+        if key == goalKey then
+            -- reconstruct
+            local path = {}
+            local k = goalKey
+            while k do
+                path[#path + 1] = self.nodes[k]
+                k = prev[k]
+            end
+            -- reverse
+            for i = 1, math.floor(#path / 2) do
+                path[i], path[#path - i + 1] = path[#path - i + 1], path[i]
+            end
+            return path
+        end
+        local d = depth[key]
+        if d < maxDepth then
+            local node = self.nodes[key]
+            for _, nb in ipairs(self:getNeighbors(node.x, node.y)) do
+                local nk = nodeKey(nb.x, nb.y)
+                if prev[nk] == nil then
+                    prev[nk] = key
+                    depth[nk] = d + 1
+                    queue[#queue + 1] = nk
+                end
+            end
+        end
+    end
+    return nil
+end
+
 --- Iterate all edges, calling fn(nodeA, nodeB)
 function MapGraph:forEachEdge(fn)
     for ek in pairs(self.edges) do

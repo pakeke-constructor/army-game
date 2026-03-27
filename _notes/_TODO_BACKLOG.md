@@ -6,7 +6,7 @@
 
 ### OK:: what do we need for a minimum-playable game?
 - ~~dumb ui system~~
-- dumb/simple map-generation
+- ~~dumb/simple map-generation~~
 - map-navigation
 - starting squad
 - battle-scene
