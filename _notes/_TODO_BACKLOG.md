@@ -2,6 +2,15 @@
 # backlog:
 
 
+
+
+### OK:: what do we need for a minimum-playable game?
+- dumb/simple map-generation
+- map-navigation
+- starting squad
+- battle-scene
+
+
 - Formalize squads / formation code
 
 - DEVTOOLS SO WE AINT FLYING BLIND:

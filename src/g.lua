@@ -575,6 +575,22 @@ function g.getCurrentScene()
     return sceneManager.getCurrentScene()
 end
 
+function g.screenToWorld(x, y)
+    local scene = g.getCurrentScene()
+    if scene and scene.camera then
+        return scene.camera:toWorld(x, y)
+    end
+    return x, y
+end
+
+function g.worldToScreen(x, y)
+    local scene = g.getCurrentScene()
+    if scene and scene.camera then
+        return scene.camera:toScreen(x, y)
+    end
+    return x, y
+end
+
 
 function g.getWorldTime()
     -- todo: add a proper counter here; allows for faster game-speed
