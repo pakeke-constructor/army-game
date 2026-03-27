@@ -25,8 +25,8 @@ proc generation algorithm:
 local MapGraph = Class("MapGraph")
 
 ---@class MapGraph.Node
----@field x integer grid x (0-indexed)
----@field y integer grid y (0-indexed)
+---@field x integer grid x (centered around 0)
+---@field y integer grid y (centered around 0)
 ---@field ox number visual offset x
 ---@field oy number visual offset y
 ---@field nodeType string
@@ -63,7 +63,8 @@ function MapGraph:removeNode(x, y)
     self.nodes[key] = nil
     -- remove all edges touching this node
     for ek in pairs(self.edges) do
-        if ek:find(key, 1, true) then
+        local ka, kb = ek:match("^(.-)>(.+)$")
+        if ka == key or kb == key then
             self.edges[ek] = nil
         end
     end
@@ -101,17 +102,17 @@ end
 --- Get all neighbors of a node
 function MapGraph:getNeighbors(x, y)
     local result = {}
+    local key = nodeKey(x, y)
     for ek in pairs(self.edges) do
-        local key = nodeKey(x, y)
-        if ek:find(key, 1, true) then
-            -- parse both keys out of edge
-            local ka, kb = ek:match("^(.-)>(.+)$")
-            local other = (ka == key) and kb or ka
-            if other ~= key then
-                local node = self.nodes[other]
-                if node then
-                    result[#result + 1] = node
-                end
+        local ka, kb = ek:match("^(.-)>(.+)$")
+        local other
+        if ka == key then other = kb
+        elseif kb == key then other = ka
+        end
+        if other then
+            local node = self.nodes[other]
+            if node then
+                result[#result + 1] = node
             end
         end
     end
@@ -124,53 +125,46 @@ function MapGraph.generate(width, height, rng)
     local self = MapGraph(width, height)
     rng = rng or math.random
 
-    -- 1. Create all nodes
-    for y = 0, height - 1 do
-        for x = 0, width - 1 do
+    local hw = math.floor(width / 2)
+    local hh = math.floor(height / 2)
+    local x0, x1 = -hw, hw
+    local y0, y1 = -hh, hh
+
+    -- 1. Create all nodes centered around (0,0)
+    for y = y0, y1 do
+        for x = x0, x1 do
             self:addNode(x, y, "battle")
         end
     end
 
     -- 2. Connect lattice (right and down)
-    for y = 0, height - 1 do
-        for x = 0, width - 1 do
-            if x < width - 1 then
-                self:addEdge(x, y, x + 1, y)
-            end
-            if y < height - 1 then
-                self:addEdge(x, y, x, y + 1)
-            end
+    for y = y0, y1 do
+        for x = x0, x1 do
+            if x < x1 then self:addEdge(x, y, x + 1, y) end
+            if y < y1 then self:addEdge(x, y, x, y + 1) end
         end
     end
 
     -- 3. Add random diagonals (no crossing)
-    -- For each cell (x,y) where x<width-1 and y<height-1,
-    -- pick either SE or SW diagonal (or neither)
-    local hasSE = {} -- hasSE[x..","..y] = true if SE diagonal from (x,y)
-    for y = 0, height - 2 do
-        for x = 0, width - 2 do
+    local hasSE = {}
+    for y = y0, y1 - 1 do
+        for x = x0, x1 - 1 do
             local r = rng()
             if r < 0.35 then
-                -- SE diagonal: (x,y) -> (x+1,y+1)
                 self:addEdge(x, y, x + 1, y + 1)
                 hasSE[nodeKey(x, y)] = true
             elseif r < 0.7 then
-                -- SW diagonal: (x+1,y) -> (x,y+1)
-                -- only if SE from (x,y) doesn't exist (they'd cross)
                 if not hasSE[nodeKey(x, y)] then
                     self:addEdge(x + 1, y, x, y + 1)
                 end
             end
-            -- else: no diagonal
         end
     end
 
-    -- 4. Prune random nodes (punch holes), but never first or last row
-    for y = 1, height - 2 do
-        for x = 0, width - 1 do
-            if rng() < 0.15 then
-                self:removeNode(x, y)
-            end
+    -- 4. Prune random nodes (punch holes), but never the center node
+    for key, node in pairs(self.nodes) do
+        if not (node.x == 0 and node.y == 0) and rng() < 0.1 then
+            self:removeNode(node.x, node.y)
         end
     end
 
@@ -185,15 +179,29 @@ function MapGraph.generate(width, height, rng)
         end
     end
 
-    -- 6. Prune disconnected nodes (0 edges)
-    local toRemove = {}
-    for key, node in pairs(self.nodes) do
-        if #self:getNeighbors(node.x, node.y) == 0 then
-            toRemove[#toRemove + 1] = node
+    -- 6. DFS from (0,0) — prune all unreachable nodes
+    local reachable = {}
+    local stack = { nodeKey(0, 0) }
+    while #stack > 0 do
+        local key = table.remove(stack)
+        if not reachable[key] then
+            reachable[key] = true
+            local node = self.nodes[key]
+            if node then
+                for _, nb in ipairs(self:getNeighbors(node.x, node.y)) do
+                    local nk = nodeKey(nb.x, nb.y)
+                    if not reachable[nk] then
+                        stack[#stack + 1] = nk
+                    end
+                end
+            end
         end
     end
-    for _, node in ipairs(toRemove) do
-        self:removeNode(node.x, node.y)
+    for key in pairs(self.nodes) do
+        if not reachable[key] then
+            local node = self.nodes[key]
+            self:removeNode(node.x, node.y)
+        end
     end
 
     -- 7. Random visual offsets per node
@@ -202,6 +210,9 @@ function MapGraph.generate(width, height, rng)
         node.ox = (rng() - 0.5) * 2 * MAX_OFFSET
         node.oy = (rng() - 0.5) * 2 * MAX_OFFSET
     end
+
+    -- 8. Player starts at center
+    self:setPlayerPosition(0, 0)
 
     return self
 end

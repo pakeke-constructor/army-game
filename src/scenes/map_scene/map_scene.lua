@@ -25,13 +25,7 @@ function map_scene:enter()
 
     local run = g.getRun()
     if not run.mapGraph then
-        run.mapGraph = MapGraph.generate(7, 8)
-        for x = 0, run.mapGraph.width - 1 do
-            if run.mapGraph:hasNode(x, 0) then
-                run.mapGraph:setPlayerPosition(x, 0)
-                break
-            end
-        end
+        run.mapGraph = MapGraph.generate(70, 50)
     end
 
     local pnode = run.mapGraph:getPlayerNode()
