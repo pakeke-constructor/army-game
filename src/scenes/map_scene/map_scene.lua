@@ -113,6 +113,7 @@ function map_scene:update(dt)
             graph:setPlayerPosition(trav.toNode.x, trav.toNode.y)
             self.traveling = nil
             enterNode(trav.toNode)
+            return
         end
     end
 
