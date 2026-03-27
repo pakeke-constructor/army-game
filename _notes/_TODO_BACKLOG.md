@@ -7,8 +7,8 @@
 ### OK:: what do we need for a minimum-playable game?
 - ~~dumb ui system~~
 - ~~dumb/simple map-generation~~
-- map-navigation
-- starting squad
+- ~~map-navigation~~
+- ~~starting squad~~
 - battle-scene
 - enemy generation (SAME ARMY EVERY TIME; KISS.)
 - placing units

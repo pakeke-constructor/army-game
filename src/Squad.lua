@@ -99,6 +99,18 @@ function Squad:getFormationOffsets(spacing)
 end
 
 
+---@return g.Squad
+function Squad:serialize()
+    return {
+        squadId = self.squadId,
+        level = self.level,
+        perks = self.perks,
+        unitCount = self.unitCount,
+        formation = self.formation,
+    }
+end
+
+
 ---@param data table
 ---@return g.Squad
 function Squad.deserialize(data)

@@ -34,6 +34,8 @@ After 8 turns, the map is reset; and the player fights a boss.
 _ex6/** folder is your coding harness. includes plugins (python files) and includes your own agent definition.
 src/g.lua: All core functions stored here, exposed via `g.*` namespace
 src/scenes/*: All scenes defined here, in folders.
+src/scenes/map_scene/*: Map-scene stuff. Has a graph of nodes for players to navigate
+src/scenes/battle_scene/*: Battle-scene stuff. Contains an ECS. Nodes on the map may trigger battles.
 src/ecs/*: Entity-component-system stuff.
 src/ecs/systems/*: ECS Systems. (projectile, ent movement, pathing, etc)
 src/ecs/components.lua: All component type-definitions

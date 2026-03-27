@@ -7,6 +7,7 @@ local NODE_RADIUS = 4
 local PLAYER_RADIUS = 5
 local PAN_SPEED = 200
 local HOVER_DIST_FRAC = 0.4 -- fraction of distanceBetweenNodes
+local COMMANDER_SPEED = 80 -- world pixels per second
 
 local map_scene = {}
 
@@ -87,6 +88,12 @@ function map_scene:pollHandlers()
     self.ecs:addSystemHandlers()
 end
 
+local function enterNode(node)
+    -- For now, just enter a battle
+    local sceneManager = require("src.scenes.sceneManager")
+    sceneManager.gotoScene("battle_scene")
+end
+
 function map_scene:update(dt)
     -- WASD panning
     local dx, dy = 0, 0
@@ -97,30 +104,82 @@ function map_scene:update(dt)
     self.camX = self.camX + dx * PAN_SPEED * dt
     self.camY = self.camY + dy * PAN_SPEED * dt
 
+    -- Commander travel
+    if self.traveling then
+        local trav = self.traveling
+        trav.t = trav.t + trav.speed * dt
+        if trav.t >= 1 then
+            local graph = g.getRun().mapGraph
+            graph:setPlayerPosition(trav.toNode.x, trav.toNode.y)
+            self.traveling = nil
+            enterNode(trav.toNode)
+        end
+    end
+
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
     self.camera:setPos(self.camX, self.camY)
     self.ecs:update(dt)
 end
 
+
 function map_scene:mousepressed(mx, my, button)
     if button == 1 then
         self.dragging = true
-        self.dragLastX, self.dragLastY = mx, my
+        self.dragMoved = false
     end
 end
 
 function map_scene:mousereleased(mx, my, button)
     if button == 1 then
         self.dragging = false
+        -- If we didn't drag, treat as a click
+        if not self.dragMoved and not self.traveling then
+            local run = g.getRun()
+            local graph = run.mapGraph
+            local pnode = graph and graph:getPlayerNode()
+            if pnode then
+                local wx, wy = self.camera:toWorld(mx, my)
+                local hovered = getHoveredNode(graph, wx, wy)
+                if hovered and hovered ~= pnode then
+                    local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, 3)
+                    if path and #path >= 2 then
+                        local ax, ay = getNodeWorldPos(graph, path[1])
+                        local bx, by = getNodeWorldPos(graph, path[2])
+                        local dist = math.sqrt((bx - ax)^2 + (by - ay)^2)
+                        self.traveling = {
+                            toNode = path[2],
+                            ax = ax, ay = ay, bx = bx, by = by,
+                            t = 0, speed = dist > 0 and (COMMANDER_SPEED / dist) or 1,
+                        }
+                    end
+                end
+            end
+        end
     end
 end
 
 function map_scene:mousemoved(mx, my, dmx, dmy)
     if self.dragging then
+        if math.abs(dmx) + math.abs(dmy) > 2 then
+            self.dragMoved = true
+        end
         local zoom = self.camera:getZoom()
         self.camX = self.camX - dmx / zoom
         self.camY = self.camY - dmy / zoom
     end
+end
+
+local function drawCommander(scene, graph, pnode)
+    local cx, cy
+    if scene.traveling then
+        local trav = scene.traveling
+        cx = trav.ax + (trav.bx - trav.ax) * trav.t
+        cy = trav.ay + (trav.by - trav.ay) * trav.t
+    else
+        cx, cy = getNodeWorldPos(graph, pnode)
+    end
+    love.graphics.setColor(1, 0.8, 0.2, 1)
+    love.graphics.circle("fill", cx, cy, PLAYER_RADIUS)
 end
 
 function map_scene:draw()
@@ -164,8 +223,8 @@ function map_scene:draw()
                 end
             end
 
-            -- player
-            renderNode(graph, pnode, 1, 0.8, 0.2, 1, PLAYER_RADIUS)
+            -- player / commander
+            drawCommander(self, graph, pnode)
         end
     end
 
