@@ -90,12 +90,10 @@ function Squad:spawn(x, y)
     return entities
 end
 
----@param spacing number? defaults to 20
 ---@return table[] offsets {{x,y}, ...}
-function Squad:getFormationOffsets(spacing)
-    spacing = spacing or 20
+function Squad:getFormationOffsets()
     local fn = Squad.FORMATIONS[self.formation] or Squad.FORMATIONS.square
-    return fn(self:getUnitCount(), spacing)
+    return fn(self:getUnitCount(), consts.SQUAD_SPACING)
 end
 
 

@@ -35,6 +35,18 @@ local function test()
 end
 
 
+
+local function spawnTestEnemies()
+    for x=400, 500, 30 do
+        for y=100, 160, 20 do
+            g.spawnEntity("demon", x, y)
+        end
+        for y=180, 200, 20 do
+            g.spawnEntity("imp", x, y)
+        end
+    end
+end
+
 function battle_scene:enter()
     self.ecs = ECSWorld({"stats", "ai", "attacking", "physics"})
     local run = g.getRun()
@@ -47,6 +59,9 @@ function battle_scene:enter()
     self.noEnemyTimer = 0
     self.victoryPopup = false
     self.victoryPopupTime = 0
+
+    spawnTestEnemies()
+    -- TODO: remove / replace this with actual proper enemies from pool
 end
 
 function battle_scene:leave()

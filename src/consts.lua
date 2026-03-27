@@ -9,5 +9,6 @@ consts.ANALYTICS_URL = nil
 consts.GAME_VERSION = 0
 consts.IS_MOBILE = false
 consts.SHOW_DEV_STUFF = false
+consts.SQUAD_SPACING = 20
 
 return consts

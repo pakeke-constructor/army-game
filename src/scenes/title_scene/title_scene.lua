@@ -14,7 +14,7 @@ function title_scene:start()
         return
     end
     g.newRun()
-    g.gotoScene("battle_scene")
+    g.gotoScene("map_scene")
 end
 
 function title_scene:mousepressed()

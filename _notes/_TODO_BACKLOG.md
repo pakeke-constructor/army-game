@@ -10,8 +10,8 @@
 - ~~map-navigation~~
 - ~~starting squad~~
 - ~~battle-scene~~
-- battle-scene goes back to map-scene when done
-- enemy generation (SAME ARMY EVERY TIME; KISS.)
+- ~~battle-scene goes back to map-scene when done~~
+- ~~enemy generation (SAME ARMY EVERY TIME; KISS.)~~
 - rendering of squads (placement preview)
 - placing units
 - If game crashed => agent should know.
