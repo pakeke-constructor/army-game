@@ -98,8 +98,6 @@ end
 ---@param ky number?
 ---@overload fun(txt:richtext.ParsedText|string, font:love.Font, x:love.Transform, limit: number, align: love.AlignMode?)
 function text.printRich(txt, font, x, y, limit, align, rot, sx, sy, ox, oy, kx, ky)
-    prof_push("drawRichText")
-
     if typecheck.isType(x, "love:Transform") then
         align = limit
         limit = y
@@ -116,8 +114,6 @@ function text.printRich(txt, font, x, y, limit, align, rot, sx, sy, ox, oy, kx, 
     love.graphics.applyTransform(x, y, rot, sx, sy, ox, oy, kx, ky)
     layout:draw(0, 0)
     love.graphics.pop()
-
-    prof_pop()
 end
 
 ---@param txt richtext.ParsedText|string

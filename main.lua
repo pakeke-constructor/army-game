@@ -95,6 +95,7 @@ end
 function love.update(dt)
     g.pollHandlers()
     agentbridge.update()
+    iml.setPointer(love.mouse.getPosition())
     local sc = sceneManager.getCurrentScene()
     if sc and sc.update then
         sc:update(dt)

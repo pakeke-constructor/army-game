@@ -40,10 +40,8 @@ src/ecs/*: Entity-component-system stuff.
 src/ecs/systems/*: ECS Systems. (projectile, ent movement, pathing, etc)
 src/ecs/components.lua: All component type-definitions
 src/modules/*: Extra modules (analytics, lighting, richtext, typechecking)
-src/Run.lua: Represents a run. Stores health, food, squads, (can be serialized)
-src/battle/*: Battle stuff
-src/battle/BattleField.lua: Represents a battlefield. Holds an ECS-World. Discarded after battle.
-src/map/*: Map stuff. Holds an ECS-World.
+src/Run.lua: Represents a run. Stores food, squads, map-state, blessings etc. (can be serialized)
+src/Squad.lua: Represents a Squad; list of units (+ perks)
 src/consts.lua: Constants.
 
 (^^^ NOTE: SOME OF THIS ISN'T COMPLETED YET.)
