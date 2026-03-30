@@ -1,6 +1,7 @@
 local ECSWorld = require("src.ecs.ECSWorld")
 local Camera = require("lib.cam11")
 local ParticleService = require(".particles.ParticleService")
+local HUD = require("src.hud.hud")
 
 local CAMERA_SPEED = 400
 local CAMERA_ZOOM = 2
@@ -66,6 +67,7 @@ function battle_scene:enter()
     self.camera = Camera(0, 0, CAMERA_ZOOM)
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
     self.particles = ParticleService()
+    self.hud = HUD()
     self.noEnemyTimer = 0
     self.victoryPopup = false
     self.victoryPopupTime = 0
@@ -200,6 +202,7 @@ function battle_scene:draw()
     self.camera:detach()
 
     ui.startUI()
+    self.hud:drawUI({ battleScene = true })
     if self.victoryPopup then
         victoryPopup(self)
     end

@@ -477,14 +477,16 @@ end
 ---@param x number
 ---@param y number
 local function drawHealthBar(ent, x,y)
-    local w, h = 20, 3
+    local w, h = 16, 2
     local frac = ent.health / ent.maxHealth
     -- black outline
+    local out=2
+    local oy=10
     lg.setColor(0, 0, 0)
-    lg.rectangle("fill", x - w/2 - 1, y - 1, w + 2, h + 2)
+    lg.rectangle("fill", x - w/2 - out, y + oy - out, w + out*2, h + out*2)
     -- red health
     lg.setColor(1, 0, 0)
-    lg.rectangle("fill", x - w/2, y, w * frac, h)
+    lg.rectangle("fill", x - w/2, y + oy, w * frac, h)
 end
 
 function g.drawEntity(ent, x, y)
