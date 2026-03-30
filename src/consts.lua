@@ -10,5 +10,6 @@ consts.GAME_VERSION = 0
 consts.IS_MOBILE = false
 consts.SHOW_DEV_STUFF = false
 consts.SQUAD_SPACING = 20
+consts.LAGGED_HEALTHBAR_DURATION = 0.3
 
 return consts

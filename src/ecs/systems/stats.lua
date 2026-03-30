@@ -96,6 +96,7 @@ function stats.preUpdate(world, dt)
     for _, ent in world:iterate("team") do
         if ent.maxHealth and not ent.health then
             ent.health = ent.maxHealth
+            ent._timeSinceDamaged = 0xfffffffff
         end
         for _, stat in ipairs(statlist) do
             if ent[stat.baseName] or ent[stat.name] then

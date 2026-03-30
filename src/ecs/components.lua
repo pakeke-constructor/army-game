@@ -81,6 +81,9 @@ local physics = {
 ---@field public scope g.Scope?
 ---@field public _attackTimer number?
 ---@field public _attackTarget ecs.Entity?
+---@field public _knockVx number?
+---@field public _knockVy number?
+---@field public _timeSinceDamaged number?
 ---@field public onDeath fun(ecs.Entity)?
 ---@field public onSpawn fun(ecs.Entity)?
 ---@field public onUpdate fun(ecs.Entity, number)?

@@ -111,13 +111,16 @@ function ECSWorld:update(dt)
             if vx ~= 0 then e.x = e.x + vx * dt end
             if vy ~= 0 then e.y = e.y + vy * dt end
         end
-        if e.knockVx then
+        if e._knockVx then
             local decay = math.exp(-10 * dt)
-            e.knockVx = e.knockVx * decay
-            e.knockVy = e.knockVy * decay
-            if math.abs(e.knockVx) < 0.5 and math.abs(e.knockVy) < 0.5 then
-                e.knockVx, e.knockVy = nil, nil
+            e._knockVx = e._knockVx * decay
+            e._knockVy = e._knockVy * decay
+            if math.abs(e._knockVx) < 0.5 and math.abs(e._knockVy) < 0.5 then
+                e._knockVx, e._knockVy = nil, nil
             end
+        end
+        if e.health then
+            e._timeSinceDamaged = (e._timeSinceDamaged or 0xfffffffff) + dt
         end
         if e.vz then
             if e.gravity then e.vz = e.vz - e.gravity * dt end

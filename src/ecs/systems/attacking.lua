@@ -45,7 +45,9 @@ local function dealDamage(attacker, target, damage)
 
     local reduction = g.ask("getDamageReduction", target)
     local finalDmg = math.max(0, damage - reduction)
+
     target.health = target.health - finalDmg
+    target._timeSinceDamaged = 0
 
     g.call("entityHurt", target, finalDmg, attacker)
 

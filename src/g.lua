@@ -481,13 +481,13 @@ function g.knockback(ent, x, y, strength)
     local dx, dy = ent.x - x, ent.y - y
     local dist = math.sqrt(dx * dx + dy * dy)
     if dist < 0.001 then dx, dy = 0, -1; dist = 1 end
-    ent.knockVx = (ent.knockVx or 0) + dx / dist * strength
-    ent.knockVy = (ent.knockVy or 0) + dy / dist * strength
+    ent._knockVx = (ent._knockVx or 0) + dx / dist * strength
+    ent._knockVy = (ent._knockVy or 0) + dy / dist * strength
 end
 
 function g.getVel(ent)
-    return (ent.vx or 0) + (ent.knockVx or 0),
-           (ent.vy or 0) + (ent.knockVy or 0)
+    return (ent.vx or 0) + (ent._knockVx or 0),
+           (ent.vy or 0) + (ent._knockVy or 0)
 end
 
 
@@ -496,6 +496,7 @@ end
 ---@param x number
 ---@param y number
 local function drawHealthBar(ent, x,y)
+    if not ent.maxHealth then return end
     local w, h = 16, 2
     local frac = ent.health / ent.maxHealth
     -- black outline
@@ -503,6 +504,13 @@ local function drawHealthBar(ent, x,y)
     local oy=10
     lg.setColor(0, 0, 0)
     lg.rectangle("fill", x - w/2 - out, y + oy - out, w + out*2, h + out*2)
+
+    local t = helper.clamp((ent._timeSinceDamaged or 0xfffffffff) / consts.LAGGED_HEALTHBAR_DURATION, 0, 1)
+    t = helper.clamp(helper.EASINGS.easeInCubic(t), 0, 1)
+    local lagFrac = helper.lerp(1, frac, t)
+    -- white lagged
+    lg.setColor(1, 1, 1)
+    lg.rectangle("fill", x - w/2, y + oy, w * lagFrac, h)
     -- red health
     lg.setColor(1, 0, 0)
     lg.rectangle("fill", x - w/2, y + oy, w * frac, h)

@@ -17,6 +17,11 @@ end
 local hudArgs
 
 
+local function drawSquadSelect(squads, r)
+    for _, sq in ipairs(squads)do
+        
+    end
+end
 
 ---@param opt g.hudArgs
 function HUD:drawUI(opt)
@@ -42,6 +47,7 @@ function HUD:getSelectedArmy()
         return squad, self.selectedSquadIndex
     end
 end
+
 
 
 function HUD:wheelmoved(dx,dy)
