@@ -84,9 +84,6 @@ function stats.entitySpawned(ent)
             ent[stat.name] = base
         end
     end
-    if ent.maxHealth and not ent.health then
-        ent.health = ent.maxHealth
-    end
     -- melee units must be able to reach past their own collision
     if ent.physics and ent.attack and ent.attack.attackType == "melee" then
         local minRange = ent.physics.radius * 2
@@ -97,6 +94,9 @@ end
 
 function stats.preUpdate(world, dt)
     for _, ent in world:iterate("team") do
+        if ent.maxHealth and not ent.health then
+            ent.health = ent.maxHealth
+        end
         for _, stat in ipairs(statlist) do
             if ent[stat.baseName] or ent[stat.name] then
                 recomputeStat(ent, stat)
