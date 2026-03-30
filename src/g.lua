@@ -471,6 +471,22 @@ function g.setPos(ent, x, y)
     end
 end
 
+
+
+---@param ent ecs.Entity
+---@param x number
+---@param y number
+local function drawHealthBar(ent, x,y)
+    local w, h = 20, 3
+    local frac = ent.health / ent.maxHealth
+    -- black outline
+    lg.setColor(0, 0, 0)
+    lg.rectangle("fill", x - w/2 - 1, y - 1, w + 2, h + 2)
+    -- red health
+    lg.setColor(1, 0, 0)
+    lg.rectangle("fill", x - w/2, y, w * frac, h)
+end
+
 function g.drawEntity(ent, x, y)
     local sx, sy = ent.sx or 1, ent.sy or 1
     if ent.draw then
@@ -480,6 +496,9 @@ function g.drawEntity(ent, x, y)
     if ent.image then
         love.graphics.setColor(1, 1, 1, ent.alpha or 1)
         g.drawImage(ent.image, x + (ent.ox or 0), y + (ent.oy or 0), ent.rot or 0, sx, sy)
+    end
+    if ent.health then
+        drawHealthBar(ent, x,y)
     end
 end
 

@@ -1,6 +1,7 @@
 local love = require("love")
 io.stdout:setvbuf("line")
 
+_G.lg = love.graphics
 
 
 
