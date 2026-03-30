@@ -98,6 +98,7 @@ local function spawnProjectile(attacker, target)
             ownerEnt = attacker,
             team = attacker.team,
             pierceCount = 1,
+            knockback = atk.projectileKnockback or 80,
         }
     end
 
@@ -206,6 +207,7 @@ local function updateProjectile(world, ent, dt)
         end, PROJ_HIT_RADIUS)
         if hitEnt then
             dealDamage(proj.ownerEnt, hitEnt, proj.damage)
+            g.knockback(hitEnt, proj.ownerEnt.x, proj.ownerEnt.y, proj.knockback or 50)
             g.call("projectileHit", ent, hitEnt)
             proj.pierceCount = proj.pierceCount - 1
             if proj.pierceCount <= 0 then

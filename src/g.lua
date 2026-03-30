@@ -476,6 +476,25 @@ end
 ---@param ent ecs.Entity
 ---@param x number
 ---@param y number
+---@param strength number?
+function g.knockback(ent, x, y, strength)
+    local dx, dy = ent.x - x, ent.y - y
+    local dist = math.sqrt(dx * dx + dy * dy)
+    if dist < 0.001 then dx, dy = 0, -1; dist = 1 end
+    ent.knockVx = (ent.knockVx or 0) + dx / dist * strength
+    ent.knockVy = (ent.knockVy or 0) + dy / dist * strength
+end
+
+function g.getVel(ent)
+    return (ent.vx or 0) + (ent.knockVx or 0),
+           (ent.vy or 0) + (ent.knockVy or 0)
+end
+
+
+
+---@param ent ecs.Entity
+---@param x number
+---@param y number
 local function drawHealthBar(ent, x,y)
     local w, h = 16, 2
     local frac = ent.health / ent.maxHealth

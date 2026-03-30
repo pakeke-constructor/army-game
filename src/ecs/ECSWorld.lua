@@ -107,8 +107,17 @@ function ECSWorld:update(dt)
     for i = 1, self.entities.len do
         local e = self.entities[i]
         if not e.physics then
-            if e.vx then e.x = e.x + e.vx * dt end
-            if e.vy then e.y = e.y + e.vy * dt end
+            local vx, vy = g.getVel(e)
+            if vx ~= 0 then e.x = e.x + vx * dt end
+            if vy ~= 0 then e.y = e.y + vy * dt end
+        end
+        if e.knockVx then
+            local decay = math.exp(-10 * dt)
+            e.knockVx = e.knockVx * decay
+            e.knockVy = e.knockVy * decay
+            if math.abs(e.knockVx) < 0.5 and math.abs(e.knockVy) < 0.5 then
+                e.knockVx, e.knockVy = nil, nil
+            end
         end
         if e.vz then
             if e.gravity then e.vz = e.vz - e.gravity * dt end
