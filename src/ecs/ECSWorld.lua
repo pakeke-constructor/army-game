@@ -120,7 +120,7 @@ function ECSWorld:update(dt)
         if e.lifetime then
             e.lifetime = e.lifetime - dt
             if e.lifetime <= 0 then
-                self.entities:removeBuffered(e)
+                self:removeEntity(e)
             end
         end
     end

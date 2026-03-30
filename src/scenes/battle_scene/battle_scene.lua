@@ -45,6 +45,16 @@ local function spawnTestEnemies()
             g.spawnEntity("imp", x, y)
         end
     end
+
+
+    for x=100, 200, 30 do
+        for y=100, 160, 20 do
+            g.spawnEntity("militia", x, y)
+        end
+        for y=180, 200, 20 do
+            g.spawnEntity("archer", x, y)
+        end
+    end
 end
 
 function battle_scene:enter()
@@ -86,7 +96,7 @@ end
 
 function battle_scene:update(dt)
     self:updateCamera(dt)
-    if not self.victoryPopup then
+    if not self.victoryPopup and not self.paused then
         self.ecs:update(dt)
         self.particles:update(dt)
         -- track how long no enemies have existed
@@ -133,6 +143,9 @@ function battle_scene:keypressed(k)
         end
         if k == "m" then
             g.gotoScene("map_scene")
+        end
+        if k == "p" then
+            self.paused = not self.paused
         end
     end
 end
