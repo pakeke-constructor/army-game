@@ -452,6 +452,11 @@ function g.spawnEntity(id, x, y, ...)
     return ent
 end
 
+function g.isAlive(ent)
+    -- todo: check if inside ECS too
+    return not ent.___removed
+end
+
 function g.setPos(ent, x, y)
     ent.x = x
     ent.y = y

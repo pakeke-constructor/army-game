@@ -33,7 +33,7 @@ local function dist2(a, b)
 end
 
 local function isValidTarget(ent)
-    return ent.health and ent.health > 0
+    return g.isAlive(ent)
 end
 
 local function getOpposingSide(ent)

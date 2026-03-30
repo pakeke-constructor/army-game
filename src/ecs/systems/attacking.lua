@@ -29,17 +29,19 @@ local function dist2(a, b)
     return dx * dx + dy * dy
 end
 
+
 ---@param ent ecs.Entity
 ---@return boolean
-local function isAlive(ent)
-    return not not (ent.health and ent.health > 0)
+local function isValid(ent)
+    return not not (ent.health and g.isAlive(ent))
 end
+
 
 ---@param attacker ecs.Entity?
 ---@param target ecs.Entity
 ---@param damage number
 local function dealDamage(attacker, target, damage)
-    if not isAlive(target) then return end
+    if not isValid(target) then return end
 
     local reduction = g.ask("getDamageReduction", target)
     local finalDmg = math.max(0, damage - reduction)
@@ -105,7 +107,7 @@ end
 ---@param attacker ecs.Entity
 ---@param target ecs.Entity
 local function doAttack(attacker, target)
-    if not isAlive(target) then return end
+    if not g.isAlive(target) then return end
 
     g.call("onAttack", attacker, target)
 
@@ -128,7 +130,7 @@ local function findNearbyTarget(ent, world, range)
     local opTeam = ent.team == "ally" and "enemy" or "ally"
     local best, bestD2 = nil, range * range
     for _, other in world:iterate("team") do
-        if other.team == opTeam and isAlive(other) then
+        if other.team == opTeam and isValid(other) then
             local d2 = dist2(ent, other)
             if d2 <= bestD2 then
                 best, bestD2 = other, d2
@@ -141,10 +143,10 @@ end
 -- ATTACK SYSTEM
 function atckSys.preUpdate(world, dt)
     for _, ent in world:iterate("attack") do
-        if not isAlive(ent) then goto continue end
+        if not isValid(ent) then goto continue end
 
         local target = ent._aiTarget
-        if not target or not isAlive(target) then
+        if not target or not isValid(target) then
             goto continue
         end
 
@@ -195,7 +197,7 @@ local function updateProjectile(world, ent, dt)
         local hitEnt = nil
         g.iteratePartition(opTeam, ent.x, ent.y, function(other)
             if hitEnt then return end
-            if not isAlive(other) then return end
+            if not isValid(other) then return end
             local dx, dy = other.x - ent.x, other.y - ent.y
             local d2 = dx * dx + dy * dy
             if d2 <= PROJ_HIT_RADIUS * PROJ_HIT_RADIUS then

@@ -77,7 +77,7 @@ end
 local function countEnemies(ecs)
     local count = 0
     for _, ent in ecs:iterate("team") do
-        if ent.team == "enemy" then
+        if ent.team == "enemy" and g.isAlive(ent) then
             count = count + 1
         end
     end

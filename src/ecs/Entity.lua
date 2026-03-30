@@ -1,3 +1,6 @@
+
+---@class ecs.Entity
+---@field public _world ecs.ECSWorld
 local Entity = {}
 
 function Entity:isOwn(key)
