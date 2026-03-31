@@ -87,12 +87,10 @@ EXAMPLE:
 - g.call("my_event", arg1, arg2, ...)
 - g.ask("my_question", arg1, arg2, ...)
 
-There are 3 "places" where events/questions can be dispatched to:
+There are 3 places where events/questions can be dispatched to:
 - Scene-level: g.addHandler handlers. Used by blessings, ECS systems.
 - On the entity/table itself: If arg1 is an entity (table), g.call/g.ask auto-dispatch to that entity's handlers too. So g.call("onHit", ent) hits ent.onHit.
 - Entity scope: If arg1.scope is a Scope object, calls arg1.scope:call or arg1.scope:ask. Used by perks/buffs.
-
-If you ever need clarification about any of this, launch an explore agent and ask it to be brief.
 </event_question_bus>
 
 

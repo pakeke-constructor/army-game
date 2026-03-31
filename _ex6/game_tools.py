@@ -88,7 +88,7 @@ def game_interact(ctx, cmd: str, **kwargs) -> dict:
         lines = get_stdout(state, limit)
         return "\n".join(lines) if lines else "(no output)"
 
-    client = state["client"]
+    client = state.client
     if not client:
         raise RuntimeError("game not started. call game_start() first.")
     try:
@@ -98,5 +98,7 @@ def game_interact(ctx, cmd: str, **kwargs) -> dict:
         crash = check_crash(state)
         if crash:
             raise RuntimeError(crash)
-        state["client"] = None
-        raise RuntimeError(f"connection lost: {e}")
+        state.client = None
+        stderr = "\n".join(get_stderr(state, 50))
+        stdout = "\n".join(get_stdout(state, 50))
+        raise RuntimeError(f"connection lost: {e}\n\nStderr:\n{stderr or '(empty)'}\n\nStdout (last 50):\n{stdout or '(empty)'}")
