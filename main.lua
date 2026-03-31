@@ -3,6 +3,8 @@ io.stdout:setvbuf("line")
 
 _G.lg = love.graphics
 
+lg.setDefaultFilter("nearest", "nearest")
+
 
 
 -- relative-require
