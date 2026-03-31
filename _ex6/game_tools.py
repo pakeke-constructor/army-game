@@ -3,7 +3,7 @@ Agent tools for interacting with the running Love2D game.
 Provides: game_start, game_interact
 """
 import ex6
-from _ex6.game_client import GameClient, GameState, GameCrashed, start_game, stop_game, get_stdout
+from _ex6.game_client import GameClient, start_game, get_stdout
 
 
 GAME_TESTING_PROMPT = """\
@@ -52,48 +52,58 @@ EXAMPLE SESSION:
 """
 
 
-KEY = "game_tools:state"
+KEY = "game_tools:client"
 
 
-def _get_state(ctx) -> GameState:
+def _get_client(ctx) -> GameClient:
     if KEY not in ctx.data:
-        ctx.data[KEY] = GameState()
+        ctx.data[KEY] = GameClient()
     return ctx.data[KEY]
 
 
 def game_start(ctx: ex6.Context) -> str:
     """Launch the Love2D game and connect to it. Must be called before game_interact. Returns 'connected' on success."""
-    state = _get_state(ctx)
-    start_game(state)
+    start_game(_get_client(ctx))
     return GAME_TESTING_PROMPT
+
+
+def _parse_response(resp):
+    """Extract the useful value from a raw JSON response dict."""
+    resp.pop("id", None)
+    resp.pop("cmd", None)
+    if len(resp) == 1:
+        return next(iter(resp.values()))
+    return resp
 
 
 def game_interact(ctx, cmd: str, **kwargs) -> dict:
     """Send a command to the running game and get a response. First arg is the command name (e.g. 'ping', 'get_state', 'eval'). Remaining kwargs are command-specific parameters. Returns the JSON response as a dict."""
-    state = _get_state(ctx)
-
-    if state.crash_info:
-        raise RuntimeError(state.crash_info)
+    gc = _get_client(ctx)
 
     # Local-only commands
     if cmd == "read_stdout":
         limit = kwargs.get("limit", 100)
-        lines = get_stdout(state, limit)
-        return "\n".join(lines) if lines else "(no output)"
+        stdout = "\n".join(get_stdout(gc, limit)) or "(no output)"
+        if gc.crash_info:
+            raise RuntimeError(f"{stdout}\n\nGAME CRASHED:\n{gc.crash_info}")
+        return stdout
 
-    client = state.client
-    if not client:
+    if gc.crash_info:
+        raise RuntimeError(gc.crash_info)
+
+    if not gc._sock:
         raise RuntimeError("game not started. call game_start() first.")
 
     try:
-        result = client.send(cmd, **kwargs)
-        return str(result) if isinstance(result, bool) else result
-    except GameCrashed as e:
-        state.client = None
-        state.crash_info = str(e)
-        stop_game(state)
-        raise RuntimeError(f"GAME CRASHED:\n{e}")
+        resp = gc.send(cmd, **kwargs)
     except Exception as e:
-        state.client = None
-        stop_game(state)
+        gc.stop()
         raise RuntimeError(f"connection lost: {e}")
+
+    if "crash" in resp:
+        gc.crash_info = resp["crash"]
+        gc.stop()
+        raise RuntimeError(f"GAME CRASHED:\n{gc.crash_info}")
+
+    result = _parse_response(resp)
+    return str(result) if isinstance(result, bool) else result

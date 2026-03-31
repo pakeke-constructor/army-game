@@ -20,59 +20,44 @@ def _find_free_port():
     return port
 
 
-class GameCrashed(RuntimeError):
-    """Raised when the game sends a crash notification."""
-    pass
-
-
+@dataclass
 class GameClient:
-    """Connects to the running Love2D game's agent bridge."""
-
-    def __init__(self, host="127.0.0.1", port=27015, timeout=5.0):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.settimeout(timeout)
-        self.sock.connect((host, port))
-        self._buf = b""
-        self._id = 0
+    process: subprocess.Popen | None = None
+    crash_info: str | None = None
+    stdout_buf: collections.deque = field(default_factory=lambda: collections.deque(maxlen=2000))
+    _sock: socket.socket | None = field(default=None, repr=False)
+    _buf: bytes = field(default=b"", repr=False)
+    _id: int = field(default=0, repr=False)
 
     def send(self, cmd, **kwargs):
+        """Send a command, return parsed JSON response dict."""
         self._id += 1
         msg = {"cmd": cmd, "id": self._id, **kwargs}
-        raw = json.dumps(msg) + "\n"
-        self.sock.sendall(raw.encode())
-        return self._recv()
-
-    def _recv(self):
+        self._sock.sendall((json.dumps(msg) + "\n").encode())
+        # read one newline-delimited JSON response
         while b"\n" not in self._buf:
-            chunk = self.sock.recv(4096)
+            chunk = self._sock.recv(4096)
             if not chunk:
                 raise ConnectionError("connection closed")
             self._buf += chunk
         line, self._buf = self._buf.split(b"\n", 1)
-        resp = json.loads(line)
-        # Crash notification from the game
-        if "crash" in resp:
-            raise GameCrashed(resp["crash"])
-        resp.pop("id", None)
-        resp.pop("cmd", None)
-        if len(resp) == 1:
-            return next(iter(resp.values()))
-        return resp
+        return json.loads(line)
 
-    def close(self):
-        self.sock.close()
+    def connect(self, host, port, timeout=5.0):
+        self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._sock.settimeout(timeout)
+        self._sock.connect((host, port))
+        self._buf = b""
+        self._id = 0
 
-
-# -------------------------------------------------------
-# Game state
-# -------------------------------------------------------
-
-@dataclass
-class GameState:
-    process: subprocess.Popen | None = None
-    client: GameClient | None = None
-    crash_info: str | None = None
-    stdout_buf: collections.deque = field(default_factory=lambda: collections.deque(maxlen=2000))
+    def stop(self):
+        if self._sock:
+            try: self._sock.close()
+            except Exception: pass
+            self._sock = None
+        if self.process:
+            self.process.terminate()
+            self.process = None
 
 
 # -------------------------------------------------------
@@ -98,63 +83,48 @@ def _find_love_exe():
 
 
 # -------------------------------------------------------
-# State-based API
+# API
 # -------------------------------------------------------
 
-def start_game(gs: GameState, port=None) -> GameClient:
-    """Launch the Love2D game and connect. Mutates gs. Returns a GameClient."""
-    if gs.client:
+def start_game(gc: GameClient, port=None):
+    """Launch the Love2D game and connect."""
+    if gc._sock:
         try:
-            gs.client.send("ping")
-            return gs.client
+            gc.send("ping")
+            return
         except Exception:
-            gs.client = None
+            gc.stop()
 
-    gs.crash_info = None
+    gc.crash_info = None
+    gc.stdout_buf.clear()
 
     if port is None:
         port = _find_free_port()
 
     love_exe = _find_love_exe()
     game_dir = os.getcwd()
-    gs.stdout_buf.clear()
-    gs.process = subprocess.Popen(
+    gc.process = subprocess.Popen(
         [love_exe, game_dir, "--devport=" + str(port)],
         stdout=subprocess.PIPE,
         stderr=subprocess.DEVNULL,
         text=True,
         bufsize=1,
     )
-    threading.Thread(target=_drain_pipe, args=(gs.process.stdout, gs.stdout_buf), daemon=True).start()
+    threading.Thread(target=_drain_pipe, args=(gc.process.stdout, gc.stdout_buf), daemon=True).start()
 
     for attempt in range(50):
         time.sleep(0.2)
-        rc = gs.process.poll()
+        rc = gc.process.poll()
         if rc is not None:
             raise RuntimeError(f"Game exited during startup (exit code {rc}).")
         try:
-            client = GameClient(port=port)
-            client.send("ping")
-            gs.client = client
-            return client
+            gc.connect("127.0.0.1", port)
+            gc.send("ping")
+            return
         except (ConnectionRefusedError, OSError):
             continue
     raise RuntimeError("Could not connect to game after 10s. Is Love2D installed?")
 
 
-def get_stdout(gs: GameState, limit=100) -> list[str]:
-    return list(gs.stdout_buf)[-limit:]
-
-
-def stop_game(gs: GameState):
-    """Kill the game process and close the connection."""
-    if gs.client:
-        try:
-            gs.client.close()
-        except Exception:
-            pass
-        gs.client = None
-    if gs.process:
-        gs.process.terminate()
-        gs.process = None
-    gs.crash_info = None
+def get_stdout(gc: GameClient, limit=100) -> list[str]:
+    return list(gc.stdout_buf)[-limit:]
