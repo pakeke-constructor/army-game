@@ -21,17 +21,17 @@ local hudArgs
 ---@param sq g.Squad
 ---@param rr kirigami.Region
 local function renderSquad(sq, rr)
-    g.drawImageContained(sq.icon, rr:get())
+    lg.setColor(1,1,1)
+    g.drawImageContained(sq:getIcon(), rr:get())
 end
 
 
----@param squads g.Squad[]
 ---@param r kirigami.Region
-local function drawSquadSelect(squads, r)
-    local len = #squads
+local function drawSquadSelect(r)
+    local squads = g.getArmy()
     local rr = r:grid(consts.MAX_SQUAD_COUNT, 1)
     for i, sq in ipairs(squads)do
-        renderSquad(sq, rr[i])
+        renderSquad(sq, rr[i]:padUnit(2))
     end
 end
 
@@ -48,6 +48,11 @@ function HUD:drawUI(opt)
     ui.drawSingleColorPanel(a:padRatio(0.1):get())
     lg.setColor(0.3,0.3,0.4)
     ui.drawSingleColorPanel(b:padRatio(0.1):get())
+
+    if opt.battleScene then
+        local aa,bb,cc = b:splitHorizontal(2,1,1)
+        drawSquadSelect(aa:padUnit(6))
+    end
 end
 
 

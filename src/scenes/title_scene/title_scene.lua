@@ -14,11 +14,12 @@ function title_scene:start()
         return
     end
     g.newRun()
+    g.addSquadToArmy(g.newSquad("militia_squad"))
+    g.addSquadToArmy(g.newSquad("archer_squad"))
     g.gotoScene("map_scene")
 end
 
 function title_scene:mousepressed()
-    self:start()
 end
 
 function title_scene:keypressed()

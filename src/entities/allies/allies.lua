@@ -56,13 +56,13 @@ g.defineEntity("archer", {
 g.defineSquad("militia_squad", {
     entityId = "militia",
     count = 4,
-    icon = "militia",
+    icon = "squadborder_gold",
 })
 
 g.defineSquad("archer_squad", {
     entityId = "archer",
     count = 4,
-    icon = "longbowman",
+    icon = "squadborder_gold",
 })
 
 

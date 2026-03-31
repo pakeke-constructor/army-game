@@ -81,6 +81,13 @@ function Squad:init(squadId)
     self.perks = {}
     self.formation = "square"
     self.deployed = false
+    self.icon = nil
+end
+
+function Squad:getIcon()
+    g = g or require("src.g")
+    self.icon = self.icon or g.getSquadInfo(self.squadId).icon
+    return self.icon
 end
 
 function Squad:getUnitCount()
