@@ -18,9 +18,12 @@ local hudArgs
 
 
 
+---@param sq g.Squad
+---@param rr kirigami.Region
 local function renderSquad(sq, rr)
-    lg.rectangle("fill", rr:padRatio(0.1):get())
+    g.drawImageContained(sq.icon, rr:get())
 end
+
 
 ---@param squads g.Squad[]
 ---@param r kirigami.Region
@@ -41,9 +44,9 @@ function HUD:drawUI(opt)
     -- if army has changed; make sure it's clamped
     self.selectedSquadIndex = helper.clamp(math.floor(self.selectedSquadIndex + 0.5), 1, #army)
 
-    lg.setColor(1,1,1)
+    lg.setColor(0.3,0.3,0.4)
     ui.drawSingleColorPanel(a:padRatio(0.1):get())
-    lg.setColor(1,1,1)
+    lg.setColor(0.3,0.3,0.4)
     ui.drawSingleColorPanel(b:padRatio(0.1):get())
 end
 

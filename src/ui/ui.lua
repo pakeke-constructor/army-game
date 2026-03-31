@@ -381,13 +381,12 @@ local function getUIScaledSafeArea()
     return gx / globalScale, gy / globalScale, gw / globalScale, gh / globalScale
 end
 
+
+local UI_HEIGHT = 360
+
 local function recalculateEverything()
     local w,h = lg.getDimensions()
-    local wscale = w / 600
-    local hscale = h / 400
-    local scale = math.min(wscale, hscale)
-    local gscale = math.floor(scale / GLOBAL_SCALE_INCREMENT + 0.5) * GLOBAL_SCALE_INCREMENT
-    globalScale = math.max(gscale, 1)
+    globalScale = math.max(math.floor(h / UI_HEIGHT), 1)
     globalScaleTransform:reset():scale(globalScale)
 
     gx, gy, gw, gh = love.window.getSafeArea()
@@ -506,6 +505,9 @@ function ui.assertUIStarted()
     end
 end
 
+
+-- Super useful for rendering text inside boxes (see boxes.lua for API)
 ui.Box = Box.new
+
 
 return ui

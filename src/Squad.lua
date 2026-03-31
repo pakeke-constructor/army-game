@@ -4,6 +4,7 @@ local objects = require("src.modules.objects.objects")
 ---@class g.Squad: objects.Class
 ---@field squadId string
 ---@field level integer
+---@field icon string
 ---@field perks string[]
 ---@field unitCount integer?
 ---@field formation "square"|"circle"|"horizontal"|"vertical"|"diamond"
@@ -73,6 +74,14 @@ Squad.FORMATIONS.diamond = function(n, spacing)
 end
 
 local g
+
+function Squad:init(squadId)
+    self.squadId = squadId
+    self.level = 1
+    self.perks = {}
+    self.formation = "square"
+    self.deployed = false
+end
 
 function Squad:getUnitCount()
     g = g or require("src.g")

@@ -238,7 +238,7 @@ local SQUAD_LIST = {}
 ---@field id string
 ---@field entityId string
 ---@field count number
----@field image string
+---@field icon string
 ---@field perks string[]
 ---@field onDeploy (fun(squad: g.SquadInfo, entities: table[]))?
 
