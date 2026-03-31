@@ -330,10 +330,10 @@ function g.spawnSquad(squad, x, y, ...)
         local perkInfo = g.getPerkInfo(squad.perks[j])
         squadScope:addHandler(perkInfo.handlers)
     end
-    local count = squad:getUnitCount()
+    local offsets = squad:getFormationOffsets()
     local entities = {}
-    for i = 1, count do
-        local ent = g.spawnEntity(info.entityId, x, y, ...)
+    for i = 1, #offsets do
+        local ent = g.spawnEntity(info.entityId, x + offsets[i].x, y + offsets[i].y, ...)
         ent.scope = squadScope
         entities[i] = ent
     end

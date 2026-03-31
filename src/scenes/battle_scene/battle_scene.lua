@@ -222,7 +222,7 @@ function battle_scene:draw()
             local offsets = sq:getFormationOffsets()
             lg.setColor(0.2, 1, 0.3, 0.5)
             for i = 1, #offsets do
-                local ox, oy = offsets[i][1], offsets[i][2]
+                local ox, oy = offsets[i].x, offsets[i].y
                 if def and def.image then
                     g.drawImage(def.image, wx + ox, wy + oy)
                 else
