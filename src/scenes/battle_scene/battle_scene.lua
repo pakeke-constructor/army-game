@@ -5,7 +5,7 @@ local HUD = require("src.hud.hud")
 
 local CAMERA_SPEED = 400
 local CAMERA_ZOOM = 2
-local WIN_DELAY = 1.5
+local WIN_DELAY = 2.5
 local VICTORY_FADE_IN = 0.25
 
 local battle_scene = {}

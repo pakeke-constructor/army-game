@@ -38,7 +38,8 @@ end
 local function renderSquad(sq, x, y, size, selected)
     if selected then
         lg.setColor(1, 1, 1, 0.3)
-        lg.rectangle("fill", x - 2, y - 2, size + 4, size + 4, 4, 4)
+        --lg.rectangle("fill", x - 2, y - 2, size + 4, size + 4, 4, 4)
+        ui.drawSingleColorPanel(x - 2, y - 2, size + 4, size + 4)
     end
     if sq.deployed then
         lg.setColor(1, 1, 1, 0.3)
