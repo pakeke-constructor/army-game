@@ -79,6 +79,33 @@ end
 
 local sceneManager = require("src.scenes.sceneManager")
 
+
+local function assertValid()
+    for _, id in ipairs(g.getSquadList()) do
+        local info = g.getSquadInfo(id)
+        assert(g.isImage(info.icon), "Invalid squad icon: " .. tostring(info.icon) .. " for " .. tostring(id))
+    end
+
+    for _, id in ipairs(g.getEntityList()) do
+        local def = g.getEntityDef(id)
+        if def.image ~= nil then
+            assert(g.isImage(def.image), "Invalid entity image: " .. tostring(def.image) .. " for " .. tostring(id))
+        end
+    end
+
+    for _, id in ipairs(g.getPerkList()) do
+        local info = g.getPerkInfo(id)
+        assert(g.isImage(info.image), "Invalid perk image: " .. tostring(info.image) .. " for " .. tostring(id))
+    end
+
+    for _, id in ipairs(g.getBlessingList()) do
+        local info = g.getBlessingInfo(id)
+        assert(g.isImage(info.image), "Invalid blessing image: " .. tostring(info.image) .. " for " .. tostring(id))
+    end
+end
+
+
+
 function love.load()
     assert(love.filesystem.createDirectory("saves"))
     analytics.init(nil)
@@ -87,6 +114,7 @@ function love.load()
     end
     g.loadImagesFrom("assets")
     g.requireFolder("src/entities")
+    assertValid()
     sceneManager.loadScenes()
     sceneManager.gotoScene("title_scene")
     love.window.setFullscreen(settings.isFullscreen())

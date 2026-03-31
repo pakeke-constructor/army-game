@@ -18,40 +18,46 @@ local hudArgs
 
 
 
+local SQUAD_ICON_SIZE = 32
+local SQUAD_PADDING = 4
+
 ---@param sq g.Squad
----@param rr kirigami.Region
-local function renderSquad(sq, rr)
-    lg.setColor(1,1,1)
-    g.drawImageContained(sq:getIcon(), rr:get())
-end
-
-
----@param r kirigami.Region
-local function drawSquadSelect(r)
-    local squads = g.getArmy()
-    local rr = r:grid(consts.MAX_SQUAD_COUNT, 1)
-    for i, sq in ipairs(squads)do
-        renderSquad(sq, rr[i]:padUnit(2))
+---@param x number
+---@param y number
+---@param size number
+---@param selected boolean
+local function renderSquad(sq, x, y, size, selected)
+    if selected then
+        lg.setColor(1, 1, 1, 0.3)
+        lg.rectangle("fill", x - 2, y - 2, size + 4, size + 4, 4, 4)
     end
+    lg.setColor(1, 1, 1)
+    local img = sq:getIcon()
+    g.drawImageContained(img, x, y, size, size)
 end
 
 ---@param opt g.hudArgs
 function HUD:drawUI(opt)
-    local r = Kirigami(0,0, ui.getScaledUIDimensions())
-    local a,_,b = r:splitVertical(1,11,2)
+    local sw, sh = ui.getScaledUIDimensions()
 
     local army = g.getArmy()
     -- if army has changed; make sure it's clamped
     self.selectedSquadIndex = helper.clamp(math.floor(self.selectedSquadIndex + 0.5), 1, #army)
 
-    lg.setColor(0.3,0.3,0.4)
-    ui.drawSingleColorPanel(a:padRatio(0.1):get())
-    lg.setColor(0.3,0.3,0.4)
-    ui.drawSingleColorPanel(b:padRatio(0.1):get())
-
-    if opt.battleScene then
-        local aa,bb,cc = b:splitHorizontal(2,1,1)
-        drawSquadSelect(aa:padUnit(6))
+    if opt.battleScene and #army > 0 then
+        local count = #army
+        local totalW = count * SQUAD_ICON_SIZE + (count - 1) * SQUAD_PADDING
+        local startX = 20
+        local baseY = sh - SQUAD_ICON_SIZE - 10
+        for i, sq in ipairs(army) do
+            local x = startX + (i - 1) * (SQUAD_ICON_SIZE + SQUAD_PADDING)
+            local y = baseY
+            local selected = (i == self.selectedSquadIndex)
+            if selected then
+                y = y - 6
+            end
+            renderSquad(sq, x, y, SQUAD_ICON_SIZE, selected)
+        end
     end
 end
 

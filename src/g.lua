@@ -398,6 +398,10 @@ function g.getPerkInfo(id)
     return assert(PERK_DEFS[id], "Unknown perk: " .. tostring(id))
 end
 
+function g.getPerkList()
+    return PERK_LIST
+end
+
 --- Add a buff to an entity. Promotes shared scopes so buff only affects this entity.
 function g.addBuff(ent, handler, duration)
     if not ent.scope then
@@ -535,6 +539,10 @@ end
 function g.getEntityDef(id)
     local mt = ENTITY_DEFS[id]
     return mt and mt.__index
+end
+
+function g.getEntityList()
+    return ENTITY_LIST
 end
 
 local suffixes = {
