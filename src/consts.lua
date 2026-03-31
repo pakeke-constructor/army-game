@@ -1,3 +1,5 @@
+
+---@class g.consts
 local consts = {}
 
 consts.DEV_MODE = not not (love.filesystem.getInfo(".git", "directory") and os.getenv("DISABLE_DEV_MODE") ~= "1")
@@ -10,6 +12,8 @@ consts.GAME_VERSION = 0
 consts.IS_MOBILE = false
 consts.SHOW_DEV_STUFF = false
 consts.SQUAD_SPACING = 20
-consts.LAGGED_HEALTHBAR_DURATION = 0.3
+consts.LAGGED_HEALTHBAR_DURATION = 0.25
+
+consts.MAX_SQUAD_COUNT = 10
 
 return consts

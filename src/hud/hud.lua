@@ -17,9 +17,18 @@ end
 local hudArgs
 
 
+
+local function renderSquad(sq, rr)
+    lg.rectangle("fill", rr:padRatio(0.1):get())
+end
+
+---@param squads g.Squad[]
+---@param r kirigami.Region
 local function drawSquadSelect(squads, r)
-    for _, sq in ipairs(squads)do
-        
+    local len = #squads
+    local rr = r:grid(consts.MAX_SQUAD_COUNT, 1)
+    for i, sq in ipairs(squads)do
+        renderSquad(sq, rr[i])
     end
 end
 

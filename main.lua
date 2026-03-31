@@ -48,7 +48,9 @@ _G.lg = love.graphics
 _G.utf8 = require("utf8")
 _G.json = require("lib.json")
 
+---@type g.consts
 _G.consts = require("src.consts")
+
 _G.settings = require("src.settings")
 _G.log = require("src.modules.log")
 _G.typecheck = require("src.modules.typecheck.typecheck")
