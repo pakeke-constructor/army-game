@@ -138,6 +138,10 @@ function battle_scene:mousemoved(x, y, dx, dy)
     end
 end
 
+function battle_scene:wheelmoved(dx, dy)
+    self.hud:wheelmoved(dx, dy)
+end
+
 function battle_scene:keypressed(k)
     if consts.DEV_MODE then
         if k == "q" then

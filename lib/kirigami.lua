@@ -552,19 +552,12 @@ end
 
 
 ---Split region by exact amounts. Size of 0 on it automatically uses the rest
----@param r kirigami.Region
----@param direction "horizontal"|"vertical"
----@param size1 number
----@param size2 number
----@param ... number
----@return kirigami.Region ...
-function helper.splitRegionByExactSizes(r, direction, size1, size2, ...)
-    assert(direction == "horizontal" or direction == "vertical")
+local function splitExact(self, isHorizontal, size1, size2, ...)
     local size
-    if direction == "horizontal" then
-        size = r.w
+    if isHorizontal then
+        size = self.w
     else
-        size = r.h
+        size = self.h
     end
 
     local sizes = {size1, size2, ...}
@@ -585,11 +578,27 @@ function helper.splitRegionByExactSizes(r, direction, size1, size2, ...)
         end
     end
 
-    if direction == "horizontal" then
-        return r:splitHorizontal(unpack(sizes))
+    if isHorizontal then
+        return self:splitHorizontal(unpack(sizes))
     else
-        return r:splitVertical(unpack(sizes))
+        return self:splitVertical(unpack(sizes))
     end
+end
+
+---@param size1 number
+---@param size2 number
+---@param ... number
+---@return kirigami.Region ...
+function Region:splitHorizontalExact(size1, size2, ...)
+    return splitExact(self, true, size1, size2, ...)
+end
+
+---@param size1 number
+---@param size2 number
+---@param ... number
+---@return kirigami.Region ...
+function Region:splitVerticalExact(size1, size2, ...)
+    return splitExact(self, false, size1, size2, ...)
 end
 
 
