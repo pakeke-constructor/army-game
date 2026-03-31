@@ -9,6 +9,7 @@ import subprocess
 import os
 import threading
 import collections
+from dataclasses import dataclass, field
 
 _DEFAULT_PORT = 27015
 
@@ -19,6 +20,7 @@ def _find_free_port():
     port = s.getsockname()[1]
     s.close()
     return port
+
 
 class GameClient:
     """Connects to the running Love2D game's agent bridge."""
@@ -50,8 +52,8 @@ class GameClient:
         if len(resp) == 1:
             return next(iter(resp.values()))
         return resp
+
     def close(self):
-        """Close the connection."""
         self.sock.close()
 
     def __enter__(self):
@@ -62,10 +64,21 @@ class GameClient:
 
 
 # -------------------------------------------------------
-# Stdout/stderr capture
+# Game state
 # -------------------------------------------------------
-_stdout_buf = collections.deque(maxlen=2000)
-_stderr_buf = collections.deque(maxlen=2000)
+
+@dataclass
+class GameState:
+    process: subprocess.Popen | None = None
+    client: GameClient | None = None
+    crash_info: str | None = None
+    stdout_buf: collections.deque = field(default_factory=lambda: collections.deque(maxlen=2000))
+    stderr_buf: collections.deque = field(default_factory=lambda: collections.deque(maxlen=2000))
+
+
+# -------------------------------------------------------
+# Helpers
+# -------------------------------------------------------
 
 def _drain_pipe(pipe, buf):
     """Background thread: read lines from pipe into deque."""
@@ -76,12 +89,6 @@ def _drain_pipe(pipe, buf):
     except Exception:
         pass
 
-# -------------------------------------------------------
-# Boot the game
-# -------------------------------------------------------
-_game_process = None
-_game_client = None
-_crash_info = None
 
 def _find_love_exe():
     """Try common locations for love.exe on Windows. Prefers lovec.exe (console variant) for pipe capture."""
@@ -92,96 +99,97 @@ def _find_love_exe():
                 return c
     return "love"  # hope it's on PATH
 
-def check_crash():
+
+# -------------------------------------------------------
+# State-based API
+# -------------------------------------------------------
+
+def check_crash(gs: GameState) -> str | None:
     """Check if the game process has crashed. Returns crash string or None."""
-    global _game_process, _game_client, _crash_info
-    if _crash_info:
-        return _crash_info
-    if _game_process is None:
+    if gs.crash_info:
+        return gs.crash_info
+    if gs.process is None:
         return None
-    rc = _game_process.poll()
+    rc = gs.process.poll()
     if rc is None:
         return None
     # Process exited
-    stderr_lines = list(_stderr_buf)
-    stdout_lines = list(_stdout_buf)
+    stderr_lines = list(gs.stderr_buf)
+    stdout_lines = list(gs.stdout_buf)
     trace = "\n".join(stderr_lines[-100:]) if stderr_lines else "(no stderr)"
     stdout_tail = "\n".join(stdout_lines[-50:]) if stdout_lines else "(no stdout)"
-    _crash_info = f"CRASH: THE GAME HAS CRASHED (exit code {rc}).\n\nStderr:\n{trace}\n\nStdout (last 50 lines):\n{stdout_tail}"
-    # Clean up
-    if _game_client:
+    gs.crash_info = f"CRASH: THE GAME HAS CRASHED (exit code {rc}).\n\nStderr:\n{trace}\n\nStdout (last 50 lines):\n{stdout_tail}"
+    if gs.client:
         try:
-            _game_client.close()
+            gs.client.close()
         except Exception:
             pass
-        _game_client = None
-    return _crash_info
+        gs.client = None
+    return gs.crash_info
 
-def get_stdout(limit=100):
-    """Return last `limit` lines of game stdout."""
-    return list(_stdout_buf)[-limit:]
 
-def get_stderr(limit=100):
-    """Return last `limit` lines of game stderr."""
-    return list(_stderr_buf)[-limit:]
+def get_stdout(gs: GameState, limit=100) -> list[str]:
+    return list(gs.stdout_buf)[-limit:]
 
-def start_game(port=None):
-    """Launch the Love2D game and connect. Returns a GameClient."""
-    global _game_process, _game_client, _crash_info
-    if _game_client:
+
+def get_stderr(gs: GameState, limit=100) -> list[str]:
+    return list(gs.stderr_buf)[-limit:]
+
+
+def start_game(gs: GameState, port=None) -> GameClient:
+    """Launch the Love2D game and connect. Mutates gs. Returns a GameClient."""
+    if gs.client:
         try:
-            _game_client.send("ping")
-            return _game_client
+            gs.client.send("ping")
+            return gs.client
         except Exception:
-            _game_client = None
+            gs.client = None
 
-    # Clear old crash info on fresh start
-    _crash_info = None
-    _stdout_buf.clear()
-    _stderr_buf.clear()
+    gs.crash_info = None
+    gs.stdout_buf.clear()
+    gs.stderr_buf.clear()
 
     if port is None:
         port = _find_free_port()
 
     love_exe = _find_love_exe()
     game_dir = os.getcwd()
-    _game_process = subprocess.Popen(
+    gs.process = subprocess.Popen(
         [love_exe, game_dir, "--devport=" + str(port)],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
         bufsize=1,
     )
-    # Drain stdout/stderr in background threads so pipes don't block
-    t1 = threading.Thread(target=_drain_pipe, args=(_game_process.stdout, _stdout_buf), daemon=True)
-    t2 = threading.Thread(target=_drain_pipe, args=(_game_process.stderr, _stderr_buf), daemon=True)
+    t1 = threading.Thread(target=_drain_pipe, args=(gs.process.stdout, gs.stdout_buf), daemon=True)
+    t2 = threading.Thread(target=_drain_pipe, args=(gs.process.stderr, gs.stderr_buf), daemon=True)
     t1.start()
     t2.start()
 
-    # wait for the socket to be ready
     for attempt in range(50):
         time.sleep(0.2)
-        crash = check_crash()
+        crash = check_crash(gs)
         if crash:
             raise RuntimeError(crash)
         try:
-            _game_client = GameClient(port=port)
-            _game_client.send("ping")
-            return _game_client
+            client = GameClient(port=port)
+            client.send("ping")
+            gs.client = client
+            return client
         except (ConnectionRefusedError, OSError):
             continue
     raise RuntimeError("Could not connect to game after 10s. Is Love2D installed?")
 
-def stop_game():
+
+def stop_game(gs: GameState):
     """Kill the game process and close the connection."""
-    global _game_process, _game_client, _crash_info
-    if _game_client:
+    if gs.client:
         try:
-            _game_client.close()
+            gs.client.close()
         except Exception:
             pass
-        _game_client = None
-    if _game_process:
-        _game_process.terminate()
-        _game_process = None
-    _crash_info = None
+        gs.client = None
+    if gs.process:
+        gs.process.terminate()
+        gs.process = None
+    gs.crash_info = None

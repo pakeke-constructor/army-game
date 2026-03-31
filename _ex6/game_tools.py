@@ -3,7 +3,7 @@ Agent tools for interacting with the running Love2D game.
 Provides: game_start, game_interact
 """
 import ex6
-from _ex6.game_client import GameClient, start_game, stop_game, check_crash, get_stdout, get_stderr
+from _ex6.game_client import GameClient, GameState, start_game, stop_game, check_crash, get_stdout, get_stderr
 
 
 GAME_TESTING_PROMPT = """\
@@ -53,39 +53,50 @@ EXAMPLE SESSION:
 """
 
 
-KEY = "game_tools:client"
+KEY = "game_tools:state"
 
-def _check_crash_gate():
+
+def _get_state(ctx) -> GameState:
+    """Get or create the GameState from ctx.data."""
+    if KEY not in ctx.data:
+        ctx.data[KEY] = GameState()
+    return ctx.data[KEY]
+
+
+def _check_crash_gate(ctx):
     """If the game has crashed, raise with crash info immediately."""
-    crash = check_crash()
+    crash = check_crash(_get_state(ctx))
     if crash:
         raise RuntimeError(crash)
 
+
 def game_start(ctx: ex6.Context) -> str:
     """Launch the Love2D game and connect to it. Must be called before game_interact. Returns 'connected' on success."""
-    ctx.data[KEY] = start_game()
+    state = _get_state(ctx)
+    start_game(state)
     return GAME_TESTING_PROMPT
 
 
 def game_interact(ctx, cmd: str, **kwargs) -> dict:
     """Send a command to the running game and get a response. First arg is the command name (e.g. 'ping', 'get_state', 'eval'). Remaining kwargs are command-specific parameters. Returns the JSON response as a dict."""
-    _check_crash_gate()
+    state = _get_state(ctx)
+    _check_crash_gate(ctx)
 
     # Local-only commands (don't need a live connection)
     if cmd == "read_stdout":
         limit = kwargs.get("limit", 100)
-        lines = get_stdout(limit)
+        lines = get_stdout(state, limit)
         return "\n".join(lines) if lines else "(no output)"
 
-    _client = ctx.data.get(KEY)
-    if not _client:
+    client = state["client"]
+    if not client:
         raise RuntimeError("game not started. call game_start() first.")
     try:
-        result = _client.send(cmd, **kwargs)
+        result = client.send(cmd, **kwargs)
         return str(result) if isinstance(result, bool) else result
     except Exception as e:
-        crash = check_crash()
+        crash = check_crash(state)
         if crash:
             raise RuntimeError(crash)
-        _client = None
+        state["client"] = None
         raise RuntimeError(f"connection lost: {e}")
