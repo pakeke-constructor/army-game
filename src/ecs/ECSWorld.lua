@@ -16,6 +16,7 @@ function ECSWorld:init(systemNames)
     self.entities = objects.BufferedSet()
 
     self.data = {}
+    self.border = nil -- {0, 0, w, h} or nil for no border
 
     self.componentIndex = {} -- [componentName] -> {ent, ent, ...}
     self.partitions = {
@@ -38,6 +39,10 @@ function ECSWorld:init(systemNames)
             self.systems[i].initECS(self)
         end
     end
+end
+
+function ECSWorld:setBorder(w, h)
+    self.border = {0, 0, w, h}
 end
 
 function ECSWorld:addEntity(e)
@@ -133,6 +138,19 @@ function ECSWorld:update(dt)
             e.lifetime = e.lifetime - dt
             if e.lifetime <= 0 then
                 self:removeEntity(e)
+            end
+        end
+    end
+    local border = self.border
+    if border then
+        for i = 1, self.entities.len do
+            local e = self.entities[i]
+            if e.team then
+                local cx = math.min(math.max(e.x, border[1]), border[3])
+                local cy = math.min(math.max(e.y, border[2]), border[4])
+                if cx ~= e.x or cy ~= e.y then
+                    g.setPos(e, cx, cy)
+                end
             end
         end
     end

@@ -177,13 +177,6 @@ function ui.jaggedRectangle(mode, radius, x,y,w,h)
 end
 
 
----For debugging purpose only
----@param region kirigami.Region
----@param mode love.DrawMode?
-function ui.debugRegion(region, mode)
-    lg.rectangle(mode or "line", region:get())
-end
-
 
 local singleColorPanel = nil
 ---@param x number

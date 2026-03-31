@@ -60,6 +60,8 @@ end
 
 function battle_scene:enter()
     self.ecs = ECSWorld({"stats", "ai", "attacking", "physics"})
+    local b = consts.BATTLE_BORDER
+    self.ecs:setBorder(b * 2, b * 2)
     local run = g.getRun()
     for _, squad in ipairs(run.squads) do
         squad.deployed = false
@@ -202,6 +204,13 @@ function battle_scene:draw()
     iml.pushTransform(self.camera:getTransform())
     self.ecs:draw()
     self.particles:draw()
+    if consts.DEV_MODE and self.ecs.border then
+        local b = self.ecs.border
+        lg.setColor(1, 1, 0, 0.5)
+        lg.setLineWidth(2)
+        lg.rectangle("line", b[1], b[2], b[3] - b[1], b[4] - b[2])
+        lg.setColor(1, 1, 1, 1)
+    end
     iml.popTransform()
     self.camera:detach()
 
