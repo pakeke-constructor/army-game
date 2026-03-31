@@ -382,7 +382,8 @@ local function getUIScaledSafeArea()
 end
 
 
-local UI_HEIGHT = 360
+local UI_HEIGHT = 270
+-- other values:  180, 360
 
 local function recalculateEverything()
     local w,h = lg.getDimensions()
