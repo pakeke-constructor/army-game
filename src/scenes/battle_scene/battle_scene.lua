@@ -15,15 +15,6 @@ end
 
 
 local function test()
-    -- spawn test allies
-    for x=100, 200, 30 do
-        for y=100, 160, 20 do
-            g.spawnEntity("militia", x, y)
-        end
-        for y=180, 200, 20 do
-            g.spawnEntity("archer", x, y)
-        end
-    end
     -- spawn test enemies
     for x=400, 500, 30 do
         for y=100, 160, 20 do
@@ -44,16 +35,6 @@ local function spawnTestEnemies()
         end
         for y=180, 200, 20 do
             g.spawnEntity("imp", x, y)
-        end
-    end
-
-
-    for x=100, 200, 30 do
-        for y=100, 160, 20 do
-            g.spawnEntity("militia", x, y)
-        end
-        for y=180, 200, 20 do
-            g.spawnEntity("archer", x, y)
         end
     end
 end

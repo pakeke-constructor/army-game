@@ -34,11 +34,6 @@ local currentRun
 function g.newRun()
     currentRun = Run()
 
-    -- TODO; do some thinking about this in future.
-    -- how do we actually want to "Start" the game off?
-    -- Perhaps players start with a preset squad depending on their commander?
-    g.addSquadToArmy(g.newSquad("militia_squad"))
-
     return currentRun
 end
 
@@ -522,7 +517,7 @@ local function drawHealthBar(ent, x,y)
 end
 
 function g.drawEntity(ent, x, y)
-    local sx, sy = ent.sx or 1, ent.sy or 1
+    local sx, sy = (ent.sx or 1) * (ent.faceDir or 1), ent.sy or 1
     if ent.draw then
         ent:draw(x, y)
         return

@@ -14,8 +14,8 @@
 - ~~enemy generation (SAME ARMY EVERY TIME; KISS.)~~
 - ~~ui at bottom of the screen~~
 - ~~rendering of squads (placement preview)~~
-- placing units
-- If game crashed => agent should know.
+- ~~placing units~~
+- ~~If game crashed => agent should know.~~
 
 
 - Formalize squads / formation code

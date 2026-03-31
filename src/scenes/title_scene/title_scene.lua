@@ -15,6 +15,10 @@ function title_scene:start()
     end
     g.newRun()
     g.addSquadToArmy(g.newSquad("militia_squad"))
+    g.addSquadToArmy(g.newSquad("militia_squad"))
+    g.addSquadToArmy(g.newSquad("militia_squad"))
+    g.addSquadToArmy(g.newSquad("archer_squad"))
+    g.addSquadToArmy(g.newSquad("archer_squad"))
     g.addSquadToArmy(g.newSquad("archer_squad"))
     g.gotoScene("map_scene")
 end
