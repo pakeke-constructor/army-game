@@ -1,130 +1,104 @@
-
-
----@class ui.Child
----@field draw fun(self:table, x:number, y:number, w:number, h:number)
----@field getSize fun(self:table): number,number
-local Child
-
-
----@alias boxes.Region {x:number, y:number, w:number, h:number}
-
----@class ui.BoxArgs
----@field maxWidth number if children want to be bigger, they can request to expand to this size
----@field maxHeight number if children want to be bigger, they can request to expand to this size
----@field childSeparation number 
----@field padding number
----@field region boxes.Region
-local BoxArgs
-
-
-local boxes = {}
-
-
----@param args ui.BoxArgs
----@param children ui.Child[]
-function boxes.horizontalBox(args, children)
-    if #children == 0 then return end
-    local pad = args.padding or 0
-    local sep = args.childSeparation or 0
-    local rx, ry, rw, rh = args.region.x, args.region.y, args.region.w, args.region.h
-
-    -- inner area after padding
-    local ix = rx + pad
-    local iy = ry + pad
-    local iw = rw - pad * 2
-    local ih = rh - pad * 2
-
-    -- measure children
-    local sizes = {}
-    local totalW = 0
-    for i, child in ipairs(children) do
-        local cw, ch = child:getSize()
-        sizes[i] = {w = cw, h = ch}
-        totalW = totalW + cw
-    end
-    totalW = totalW + sep * (#children - 1)
-
-    -- clamp total width to available inner width
-    local maxW = args.maxWidth or iw
-    local availW = math.min(maxW, iw)
-
-    -- scale factor if children overflow
-    local scale = (totalW > availW) and (availW / totalW) or 1
-
-    -- lay out left to right
-    local cx = ix
-    for i, child in ipairs(children) do
-        local cw = sizes[i].w * scale
-        local ch = math.min(sizes[i].h, args.maxHeight or ih, ih)
-        child:draw(cx, iy, cw, ch)
-        cx = cx + cw + sep * scale
-    end
-end
-
-
----@param args ui.BoxArgs
----@param children ui.Child[]
-function boxes.verticalBox(args, children)
-    if #children == 0 then return end
-    local pad = args.padding or 0
-    local sep = args.childSeparation or 0
-    local rx, ry, rw, rh = args.region.x, args.region.y, args.region.w, args.region.h
-
-    -- inner area after padding
-    local ix = rx + pad
-    local iy = ry + pad
-    local iw = rw - pad * 2
-    local ih = rh - pad * 2
-
-    -- measure children
-    local sizes = {}
-    local totalH = 0
-    for i, child in ipairs(children) do
-        local cw, ch = child:getSize()
-        sizes[i] = {w = cw, h = ch}
-        totalH = totalH + ch
-    end
-    totalH = totalH + sep * (#children - 1)
-
-    -- clamp total height to available inner height
-    local maxH = args.maxHeight or ih
-    local availH = math.min(maxH, ih)
-
-    -- scale factor if children overflow
-    local scale = (totalH > availH) and (availH / totalH) or 1
-
-    -- lay out top to bottom
-    local cy = iy
-    for i, child in ipairs(children) do
-        local cw = math.min(sizes[i].w, args.maxWidth or iw, iw)
-        local ch = sizes[i].h * scale
-        child:draw(ix, cy, cw, ch)
-        cy = cy + ch + sep * scale
-    end
-end
-
-
-function boxes.text(txt, background)
-    local font = g.getSmallFont(16)
-    -- if background, then: draws single-color-ui-panel behind txt
-
-    local stripped = richtext.getWrap(txt, font, )
-    local w,h = font:getWidth()
-end
-
-
-return boxes
-
-
 --[[
-
-API IDEA:
-
-- we want 2-pass
-- we ALSO want the ease and strength of kirigami.
-
-IS THERE A WAY WE CAN HAVE 2-PASS WITH KIRIGAMI?
-
-
+EXAMPLE:
+    local box = ui.Box(
+        {maxWidth = 200, padding = 8, spacing = 4},
+        function(x, y, w, h)  -- optional background drawer
+            lg.setColor(0.1, 0.1, 0.15, 0.9)
+            lg.rectangle("fill", x, y, w, h, 4, 4)
+        end
+    )
+    box:addText("Title", titleFont)
+    box:addSpacing(2)
+    box:addText("Body text with {o}rich text{/o}.", bodyFont)
+    box:add({
+        getHeight = function() return 20 end,
+        draw = function(x, y, w, h)
+            lg.setColor(0.3, 0.7, 0.4)
+            lg.rectangle("fill", x, y, w, h)
+        end,
+    })
+    local totalW, totalH = box:render(10, 10)
 ]]
 
+
+---@class ui.Box
+---@field private entries table[]
+---@field private padding number
+---@field private spacing number
+---@field private maxWidth number
+---@field private drawBg fun(x:number,y:number,w:number,h:number)?
+local Box = {}
+Box.__index = Box
+
+function Box.new(args, drawBg)
+    return setmetatable({
+        entries = {},
+        padding = args.padding or 0,
+        spacing = args.spacing or 0,
+        maxWidth = args.maxWidth,
+        drawBg = drawBg,
+    }, Box)
+end
+
+function Box:addText(txt, font)
+    self.entries[#self.entries + 1] = { type = "text", txt = txt, font = font }
+end
+
+function Box:add(child)
+    self.entries[#self.entries + 1] = { type = "custom", child = child }
+end
+
+function Box:addSpacing(h)
+    self.entries[#self.entries + 1] = { type = "spacing", h = h }
+end
+
+function Box:render(x, y)
+    local pad = self.padding
+    local sp = self.spacing
+    local innerW = self.maxWidth - pad * 2
+
+    -- pass 1: measure heights
+    local heights = {}
+    local totalH = 0
+    for i, e in ipairs(self.entries) do
+        local h
+        if e.type == "text" then
+            local _, lines = richtext.getWrap(e.txt, e.font, innerW)
+            h = lines * e.font:getHeight()
+        elseif e.type == "custom" then
+            h = e.child.getHeight()
+        else -- spacing
+            h = e.h
+        end
+        heights[i] = h
+        totalH = totalH + h
+    end
+
+    local n = #self.entries
+    local totalW = self.maxWidth
+    local totalHeight = totalH + (n > 1 and sp * (n - 1) or 0) + pad * 2
+
+    -- pass 2: draw bg
+    if self.drawBg then
+        self.drawBg(x, y, totalW, totalHeight)
+    end
+
+    -- pass 3: draw entries
+    local cy = y + pad
+    for i, e in ipairs(self.entries) do
+        local ex = x + pad
+        if e.type == "text" then
+            richtext.printRich(e.txt, e.font, ex, cy, innerW, "left")
+        elseif e.type == "custom" then
+            e.child.draw(ex, cy, innerW, heights[i])
+        end
+        cy = cy + heights[i]
+        if i < n then
+            cy = cy + sp
+        end
+    end
+
+    return totalW, totalHeight
+end
+
+return Box

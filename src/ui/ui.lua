@@ -1,4 +1,5 @@
 local n9slice = require("src.modules.n9slice.n9slice")
+local Box = require("src.ui.boxes")
 
 ---@class ui
 local ui = {}
@@ -504,5 +505,7 @@ function ui.assertUIStarted()
         error("Not in UI context!", 2)
     end
 end
+
+ui.Box = Box.new
 
 return ui
