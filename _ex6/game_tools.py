@@ -93,6 +93,9 @@ def game_interact(ctx, cmd: str, **kwargs) -> dict:
         raise RuntimeError("game not started. call game_start() first.")
     try:
         result = client.send(cmd, **kwargs)
+        if isinstance(result, str) and result.startswith("GAME CRASHED:"):
+            state.client = None
+            raise RuntimeError(result)
         return str(result) if isinstance(result, bool) else result
     except Exception as e:
         crash = check_crash(state)

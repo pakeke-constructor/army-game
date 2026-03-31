@@ -136,6 +136,30 @@ agentbridge.registerCommand("click", function(msg)
     return {ok = true}
 end)
 
+function agentbridge.drainWithError(errorMsg)
+    if not thread or not thread:isRunning() then return end
+    local ok, jsonLib = pcall(function() return json end)
+    if not ok or not jsonLib then return end
+    while true do
+        local raw = recvChan:pop()
+        if not raw then break end
+        local ok2, clientIdx, id = pcall(function()
+            local sep = raw:find("|", 1, true)
+            if not sep then return nil, nil end
+            local idx = raw:sub(1, sep - 1)
+            local payload = raw:sub(sep + 1)
+            local msg = jsonLib.decode(payload)
+            return idx, msg and msg.id
+        end)
+        if ok2 and clientIdx then
+            local ok3, resp = pcall(jsonLib.encode, {error = "GAME CRASHED: " .. tostring(errorMsg), id = id})
+            if ok3 then
+                sendChan:push(clientIdx .. "|" .. resp)
+            end
+        end
+    end
+end
+
 agentbridge.registerCommand("eval", function(msg)
     assert(msg.code, "missing code")
     local fn, err = loadstring(msg.code)

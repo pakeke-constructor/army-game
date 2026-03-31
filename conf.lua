@@ -162,7 +162,17 @@ function love.errorhandler(msg)
 		p = p .. "\n\nPress Ctrl+C or tap to copy this error"
 	end
 
+	-- Drain agentbridge so the Python side gets crash info instead of a timeout
+	local function _drainBridge()
+		local ok, ab = pcall(function() return agentbridge end)
+		if ok and ab and ab.drainWithError then
+			pcall(ab.drainWithError, fullErrorText)
+		end
+	end
+	_drainBridge()
+
 	return function()
+		_drainBridge()
 		love.event.pump(0.1)
 
 		for e, a, b, c in love.event.poll() do
