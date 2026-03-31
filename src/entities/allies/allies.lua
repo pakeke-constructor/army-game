@@ -25,8 +25,9 @@ g.defineEntity("militia", {
     end
 })
 
+
 g.defineEntity("archer", {
-    image = "militia", -- placeholder
+    image = "longbowman", -- placeholder
     physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
     partitions = {"unit", "ally"},
     team = "ally",
@@ -55,6 +56,13 @@ g.defineEntity("archer", {
 g.defineSquad("militia_squad", {
     entityId = "militia",
     count = 4,
-    image = "militia",
+    icon = "militia",
 })
+
+g.defineSquad("archer_squad", {
+    entityId = "archer",
+    count = 4,
+    icon = "longbowman",
+})
+
 

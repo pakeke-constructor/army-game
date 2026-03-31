@@ -249,6 +249,7 @@ function g.defineSquad(id, info)
     info.id = id
     info.perks = info.perks or {}
     info.count = info.count or 1
+    assert(info.icon)
     SQUAD_DEFS[id] = info
     SQUAD_LIST[#SQUAD_LIST + 1] = id
 end
