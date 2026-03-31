@@ -5,6 +5,7 @@ local thread
 local cmdChan = love.thread.newChannel()   -- main -> thread: quit command
 local recvChan = love.thread.newChannel()  -- thread -> main: incoming messages
 local sendChan = love.thread.newChannel()  -- main -> thread: outgoing responses
+local crashChan = love.thread.newChannel() -- main -> thread: crash payload to broadcast
 
 local commandHandlers = {}
 
@@ -12,7 +13,7 @@ function agentbridge.start(port)
     if thread and thread:isRunning() then return end
     PORT = port
     thread = love.thread.newThread("src/modules/agentbridge/thread.lua")
-    thread:start(cmdChan, recvChan, sendChan, PORT)
+    thread:start(cmdChan, recvChan, sendChan, crashChan, PORT)
     log.info("[agentbridge] listening on port " .. PORT)
 end
 
@@ -136,27 +137,14 @@ agentbridge.registerCommand("click", function(msg)
     return {ok = true}
 end)
 
-function agentbridge.drainWithError(errorMsg)
+---@param errorMsg string
+function agentbridge.notifyCrash(errorMsg)
     if not thread or not thread:isRunning() then return end
     local ok, jsonLib = pcall(function() return json end)
     if not ok or not jsonLib then return end
-    while true do
-        local raw = recvChan:pop()
-        if not raw then break end
-        local ok2, clientIdx, id = pcall(function()
-            local sep = raw:find("|", 1, true)
-            if not sep then return nil, nil end
-            local idx = raw:sub(1, sep - 1)
-            local payload = raw:sub(sep + 1)
-            local msg = jsonLib.decode(payload)
-            return idx, msg and msg.id
-        end)
-        if ok2 and clientIdx then
-            local ok3, resp = pcall(jsonLib.encode, {error = "GAME CRASHED: " .. tostring(errorMsg), id = id})
-            if ok3 then
-                sendChan:push(clientIdx .. "|" .. resp)
-            end
-        end
+    local ok2, payload = pcall(jsonLib.encode, {crash = tostring(errorMsg)})
+    if ok2 then
+        crashChan:push(payload)
     end
 end
 

@@ -1,9 +1,10 @@
 local socket = require("socket")
 
-local CMD_CHAN, RECV_CHAN, SEND_CHAN, PORT = ...
----@cast CMD_CHAN love.Channel  -- main sends "quit" here
----@cast RECV_CHAN love.Channel -- thread pushes received messages here
----@cast SEND_CHAN love.Channel -- main pushes responses here
+local CMD_CHAN, RECV_CHAN, SEND_CHAN, CRASH_CHAN, PORT = ...
+---@cast CMD_CHAN love.Channel   -- main sends "quit" here
+---@cast RECV_CHAN love.Channel  -- thread pushes received messages here
+---@cast SEND_CHAN love.Channel  -- main pushes responses here
+---@cast CRASH_CHAN love.Channel -- main pushes crash payload to broadcast
 
 local server
 for attempt = 1, 10 do
@@ -56,6 +57,14 @@ while true do
             if idx and clients[idx] then
                 clients[idx]:send(payload .. "\n")
             end
+        end
+    end
+
+    -- broadcast crash to all clients
+    local crash = CRASH_CHAN:pop()
+    if crash then
+        for j = 1, #clients do
+            clients[j]:send(crash .. "\n")
         end
     end
 
