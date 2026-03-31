@@ -12,7 +12,7 @@
 - ~~battle-scene~~
 - ~~battle-scene goes back to map-scene when done~~
 - ~~enemy generation (SAME ARMY EVERY TIME; KISS.)~~
-- ui at bottom of the screen
+- ~~ui at bottom of the screen~~
 - rendering of squads (placement preview)
 - placing units
 - If game crashed => agent should know.

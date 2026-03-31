@@ -211,6 +211,27 @@ function battle_scene:draw()
         lg.rectangle("line", b[1], b[2], b[3] - b[1], b[4] - b[2])
         lg.setColor(1, 1, 1, 1)
     end
+    -- Draw squad placement preview
+    if not self.victoryPopup then
+        local sq = self.hud:getSelectedSquad()
+        if sq and not sq.deployed then
+            local mx, my = love.mouse.getPosition()
+            local wx, wy = self.camera:toWorld(mx, my)
+            local info = g.getSquadInfo(sq.squadId)
+            local def = g.getEntityDef(info.entityId)
+            local offsets = sq:getFormationOffsets()
+            lg.setColor(0.2, 1, 0.3, 0.5)
+            for i = 1, #offsets do
+                local ox, oy = offsets[i][1], offsets[i][2]
+                if def and def.image then
+                    g.drawImage(def.image, wx + ox, wy + oy)
+                else
+                    lg.circle("fill", wx + ox, wy + oy, 5)
+                end
+            end
+            lg.setColor(1, 1, 1, 1)
+        end
+    end
     iml.popTransform()
     self.camera:detach()
 
