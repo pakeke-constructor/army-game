@@ -81,7 +81,7 @@ end
 
 
 
-function HUD:getSelectedArmy()
+function HUD:getSelectedSquad()
     local army = g.getArmy()
     -- find nearest undeployed, searching forward then backward
     local idx = findNextUndeployed(army, self.selectedSquadIndex, 1)

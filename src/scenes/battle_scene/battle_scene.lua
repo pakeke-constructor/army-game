@@ -206,6 +206,15 @@ function battle_scene:draw()
     self.camera:detach()
 
     ui.startUI()
+    local sw, sh = love.graphics.getDimensions()
+    if not self.victoryPopup and iml.wasJustClicked(0, 0, sw, sh, 1, "deploy_click") then
+        local sq = self.hud:getSelectedSquad()
+        if sq and not sq.deployed then
+            local mx, my = love.mouse.getPosition()
+            local wx, wy = self.camera:toWorld(mx, my)
+            sq:spawn(wx, wy)
+        end
+    end
     self.hud:drawUI({ battleScene = true })
     if self.victoryPopup then
         victoryPopup(self)
