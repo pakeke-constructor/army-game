@@ -6,14 +6,8 @@
 
 ### OK:: what do we need for a minimum-playable game?
 
-- Add trait system
 - Add squad-select UI
-- Add blessing UI
-
-- Formalize squads / formation code
-
-- DEVTOOLS SO WE AINT FLYING BLIND:
-
+- Add blessing-select UI
 
 - Create an example squad
 - Create an example perk

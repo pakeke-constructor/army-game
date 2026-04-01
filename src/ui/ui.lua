@@ -193,6 +193,25 @@ function ui.drawSingleColorPanel(x, y, w, h)
 end
 
 
+---@param trait g.Trait
+---@param x number
+---@param y number
+---@return number w, number h
+function ui.drawTraitBox(trait, x, y)
+    local font = g.getSmallFont(16)
+    local text = trait.name
+    local pad = 4
+    local w = font:getWidth(text) + pad * 2
+    local h = font:getHeight() + pad * 2
+    lg.setColor(trait.color:getRGBA())
+    ui.drawSingleColorPanel(x, y, w, h)
+    lg.setColor(1, 1, 1)
+    lg.setFont(font)
+    lg.print(text, x + pad, y + pad)
+    return w, h
+end
+
+
 local simpleUIPanel = nil
 ---@param x number
 ---@param y number
