@@ -930,5 +930,31 @@ g.RARITIES = {
 }
 
 
+---@alias g.Trait {id:string, name:string, color:objects.Color}
+
+---@param id string
+---@param name string
+---@param color objects.Color
+---@return g.Trait
+local function newTrait(id, name, color)
+    return {
+        id = id,
+        name = loc(name, {}, {
+            context = "A trait/keyword for a unit type, e.g. 'Wild', 'Beast', 'Noble'."
+        }),
+        color = color
+    }
+end
+
+---@class g.traits
+g.TRAITS = {
+    WILD = newTrait("WILD", "Wild", objects.Color(0.3, 0.85, 0.3)),
+    ALCHEMY = newTrait("ALCHEMY", "Alchemy", objects.Color(0.75, 0.45, 0.9)),
+    BEAST = newTrait("BEAST", "Beast", objects.Color(0.85, 0.55, 0.3)),
+    ARTIFICE = newTrait("ARTIFICE", "Artifice", objects.Color(0.65, 0.2, 0.25)),
+    NOBLE = newTrait("NOBLE", "Noble", objects.Color(0.95, 0.8, 0.3)),
+    TOWNSFOLK = newTrait("TOWNSFOLK", "Townsfolk", objects.Color(0.4, 0.65, 0.95)),
+}
+
 
 return g
