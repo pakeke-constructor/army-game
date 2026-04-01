@@ -94,13 +94,16 @@ src/consts.lua: Constants.
 
 
 
-Context("catx11_strong", model=M.GPT52_CODEX.id, yolo=True, reasoning="none", messages=[
-    SYS_PROMPT,
-    make_code_mode_system_prompt([
-        read_file, glob, search, read_headers, read_body,
-        web_search, websearch_agent, escalate,
-        write_file, edit_file, edit_file_lines
-    ]),
-    CLAUDE_MD,
-])
+def def_catx_agent():
+    Context("catx11_strong", model=M.GPT52_CODEX.id, yolo=True, reasoning="none", messages=[
+        SYS_PROMPT,
+        make_code_mode_system_prompt([
+            read_file, glob, search, read_headers, read_body,
+            web_search, websearch_agent, escalate,
+            write_file, edit_file, edit_file_lines
+        ]),
+        CLAUDE_MD,
+    ])
+
+# def_catx_agent()
 

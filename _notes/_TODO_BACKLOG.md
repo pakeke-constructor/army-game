@@ -6,7 +6,6 @@
 
 ### OK:: what do we need for a minimum-playable game?
 
-- Add rarity system
 - Add trait system
 - Add squad-select UI
 - Add blessing UI
