@@ -43,19 +43,6 @@ USAGE (adding a buff/perk/blessing):
 
 ]]
 
-local reducers = require("src.modules.reducers")
-
-local statlist = {}
-
-local function defineStat(name, baseName)
-    local Name = name:sub(1,1):upper() .. name:sub(2)
-    local modQ = "get" .. Name .. "Modifier"
-    local mulQ = "get" .. Name .. "Multiplier"
-    g.defineQuestion(modQ, reducers.ADD, 0)
-    g.defineQuestion(mulQ, reducers.MULTIPLY, 1)
-    table.insert(statlist, {name = name, baseName = baseName, modQ = modQ, mulQ = mulQ})
-end
-
 local function recomputeStat(ent, stat)
     local base = ent[stat.baseName]
     if not base then return end
@@ -64,21 +51,13 @@ local function recomputeStat(ent, stat)
     ent[stat.name] = val
 end
 
-defineStat("attackDamage", "baseAttackDamage")
-defineStat("maxHealth", "baseMaxHealth")
-defineStat("attackSpeed", "baseAttackSpeed")
-defineStat("moveSpeed", "baseMoveSpeed")
-defineStat("attackRange", "baseAttackRange")
-defineStat("armor", "baseArmor")
-defineStat("projectileAccuracy", "baseProjectileAccuracy")
-
 
 
 ---@class g.systems.stats: ecs.System
 local stats = {}
 
 function stats.entitySpawned(ent)
-    for _, stat in ipairs(statlist) do
+    for _, stat in ipairs(g.getStatList()) do
         local base = ent[stat.baseName]
         if base then
             ent[stat.name] = base
@@ -98,7 +77,7 @@ function stats.preUpdate(world, dt)
             ent.health = ent.maxHealth
             ent._timeSinceDamaged = 0xfffffffff
         end
-        for _, stat in ipairs(statlist) do
+        for _, stat in ipairs(g.getStatList()) do
             if ent[stat.baseName] or ent[stat.name] then
                 recomputeStat(ent, stat)
             end

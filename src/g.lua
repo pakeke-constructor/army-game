@@ -957,4 +957,93 @@ g.TRAITS = {
 }
 
 
+---@alias g.Stat {id:string, name:string, baseName:string, modQ:string, mulQ:string, color:objects.Color, icon:string, isImportant:fun(ent:ecs.Entity):boolean}
+
+local STAT_LIST = {}
+local STAT_DEFS = {}
+
+---@param id string
+---@param baseName string
+---@param info {color:objects.Color, icon:string, isImportant:fun(ent:ecs.Entity):boolean}
+function g.defineStat(id, baseName, info)
+    local Name = id:sub(1,1):upper() .. id:sub(2)
+    local modQ = "get" .. Name .. "Modifier"
+    local mulQ = "get" .. Name .. "Multiplier"
+    g.defineQuestion(modQ, reducers.ADD, 0)
+    g.defineQuestion(mulQ, reducers.MULTIPLY, 1)
+    local stat = {
+        id = id,
+        name = id,
+        baseName = baseName,
+        modQ = modQ,
+        mulQ = mulQ,
+        color = info.color,
+        icon = info.icon,
+        isImportant = info.isImportant,
+    }
+    STAT_LIST[#STAT_LIST + 1] = stat
+    STAT_DEFS[id] = stat
+end
+
+function g.getStatList()
+    return STAT_LIST
+end
+
+function g.getStatInfo(id)
+    return STAT_DEFS[id]
+end
+
+local function _alwaysImportant()
+    return true
+end
+
+local function _importantIfMelee(ent)
+    return ent.attack and ent.attack.attackType == "melee"
+end
+
+local function _importantIfRanged(ent)
+    return ent.attack and ent.attack.attackType == "ranged"
+end
+
+local function _importantIfNonZero(ent, stat)
+    return (ent[stat.baseName] or 0) > 0
+end
+
+g.defineStat("maxHealth", "baseMaxHealth", {
+    color = objects.Color(0.3, 0.9, 0.3),
+    icon = "life_icon",
+    isImportant = _alwaysImportant,
+})
+g.defineStat("attackDamage", "baseAttackDamage", {
+    color = objects.Color(0.95, 0.3, 0.3),
+    icon = "demonhealthbar_icon",
+    isImportant = _alwaysImportant,
+})
+g.defineStat("attackSpeed", "baseAttackSpeed", {
+    color = objects.Color(0.95, 0.85, 0.3),
+    icon = "hourglass_icon",
+    isImportant = _importantIfRanged,
+})
+g.defineStat("moveSpeed", "baseMoveSpeed", {
+    color = objects.Color(0.4, 0.7, 0.95),
+    icon = "hourglass_icon",
+    isImportant = _importantIfMelee,
+})
+g.defineStat("attackRange", "baseAttackRange", {
+    color = objects.Color(0.8, 0.5, 0.2),
+    icon = "hourglass_icon",
+    isImportant = _importantIfRanged,
+})
+g.defineStat("armor", "baseArmor", {
+    color = objects.Color(0.6, 0.6, 0.7),
+    icon = "hourglass_icon",
+    isImportant = _importantIfNonZero,
+})
+g.defineStat("projectileAccuracy", "baseProjectileAccuracy", {
+    color = objects.Color(0.9, 0.9, 0.9),
+    icon = "hourglass_icon",
+    isImportant = _importantIfRanged,
+})
+
+
 return g
