@@ -43,6 +43,11 @@ end
 
 
 
+local _loadtime = true
+function _G.isLoadTime()
+    return _loadtime
+end
+
 
 
 _G.lg = love.graphics
@@ -124,6 +129,7 @@ function love.load()
         local port = a:match("^%-%-devport=(%d+)$")
         if port then agentbridge.start(tonumber(port)); break end
     end
+    _loadtime = false
 end
 
 function love.update(dt)

@@ -912,7 +912,6 @@ end
 ---@param color objects.Color
 ---@return g.Rarity
 local function newRarity(id, name, color)
-    print(_G.isLoadTime)
     return {
         id = id,
         name = loc(name, {}, {
