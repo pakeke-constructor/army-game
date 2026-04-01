@@ -54,19 +54,9 @@ function battle_scene:enter()
     self.noEnemyTimer = 0
     self.victoryPopup = false
     self.victoryPopupTime = 0
+    self.squadChoices = nil
 
     spawnTestEnemies()
-    -- TODO: remove / replace this with actual proper enemies from pool
-end
-
-function battle_scene:leave()
-    self.ecs = nil
-    self.camera = nil
-    self.particles = nil
-end
-
-function battle_scene:pollHandlers()
-    self.ecs:addSystemHandlers()
 end
 
 local function countEnemies(ecs)
@@ -77,6 +67,23 @@ local function countEnemies(ecs)
         end
     end
     return count
+end
+
+local function buildVictoryChoices()
+    -- copy squad list
+    -- shuffle list
+    -- take first 3
+    local list = {}
+    for _, id in ipairs(g.getSquadList()) do
+        list[#list + 1] = id
+    end
+    helper.shuffle(list)
+    local choices = {}
+    local count = math.min(3, #list)
+    for i = 1, count do
+        choices[i] = list[i]
+    end
+    return choices
 end
 
 function battle_scene:update(dt)
@@ -93,6 +100,9 @@ function battle_scene:update(dt)
         if self.noEnemyTimer >= WIN_DELAY then
             self.victoryPopup = true
             self.victoryPopupTime = 0
+            if not self.squadChoices then
+                self.squadChoices = buildVictoryChoices()
+            end
         end
     else
         self.victoryPopupTime = self.victoryPopupTime + dt
@@ -141,8 +151,6 @@ end
 
 local VICTORY_COL1 = objects.Color(0.12, 0.08, 0.20)
 local VICTORY_COL2 = objects.Color(0.06, 0.04, 0.14)
-local BTN_COL1 = objects.Color(0.15, 0.55, 0.25)
-local BTN_COL2 = objects.Color(0.08, 0.30, 0.15)
 
 local function victoryPopup(self)
     local r = ui.getScreenRegion()
@@ -156,7 +164,7 @@ local function victoryPopup(self)
 
     -- popup area
     local popup = r:padRatio(0.15 + (1 - progress) * 0.1)
-    local panelArea, buttonArea = popup:splitVertical(3, 1)
+    local panelArea = popup
 
     -- panel background
     love.graphics.setColor(1, 1, 1)
@@ -167,30 +175,40 @@ local function victoryPopup(self)
     love.graphics.setColor(1, 1, 1)
     local font = g.getSmallFont(16)
     love.graphics.setFont(font)
-    local tx, ty, tw, th = panelArea:padRatio(0.3):get()
+    local titleArea, cardsArea = panelArea:splitVertical(0.2, 0.8)
+    local tx, ty, tw, th = titleArea:padRatio(0.3):get()
     love.graphics.printf("Victory!", tx, ty + th / 2 - font:getHeight() / 2, tw, "center")
 
-    -- OK button
-    buttonArea = buttonArea:padRatio(0.3, 0.2)
-    if ui.Button("{o}OK{/o}", BTN_COL1, BTN_COL2, buttonArea) then
-        g.gotoScene("map_scene")
+    local cardArea = cardsArea:padRatio(0.05, 0.1)
+    local c1, c2, c3 = cardArea:splitHorizontal(1, 1, 1)
+    local choices = self.squadChoices or {}
+    local regions = {c1, c2, c3}
+    for i = 1, #regions do
+        local id = choices[i]
+        if id then
+            if ui.drawSquadCard(id, regions[i]) then
+                g.addSquadToArmy(g.newSquad(id))
+                g.gotoScene("map_scene")
+            end
+        end
     end
 end
 
 function battle_scene:draw()
     local lg = love.graphics
-    lg.clear(0.08, 0.06, 0.06, 1)
-
-    self.camera:attach(false)
-    iml.pushTransform(self.camera:getTransform())
-    self.ecs:draw()
-    self.particles:draw()
-    if consts.DEV_MODE and self.ecs.border then
-        local b = self.ecs.border
-        lg.setColor(1, 1, 0, 0.5)
-        lg.setLineWidth(2)
-        lg.rectangle("line", b[1], b[2], b[3] - b[1], b[4] - b[2])
-        lg.setColor(1, 1, 1, 1)
+    local cardArea = cardsArea:padRatio(0.05, 0.1)
+    local c1, c2, c3 = cardArea:splitHorizontal(1, 1, 1)
+    local choices = self.squadChoices or {}
+    local regions = {c1, c2, c3}
+    for i = 1, #regions do
+        local id = choices[i]
+        if id then
+            if ui.drawSquadCard(id, regions[i]) then
+                g.addSquadToArmy(g.newSquad(id))
+                g.gotoScene("map_scene")
+            end
+        end
+    end
     end
     -- Draw squad placement preview
     if not self.victoryPopup then
