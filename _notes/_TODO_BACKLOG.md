@@ -5,18 +5,11 @@
 
 
 ### OK:: what do we need for a minimum-playable game?
-- ~~dumb ui system~~
-- ~~dumb/simple map-generation~~
-- ~~map-navigation~~
-- ~~starting squad~~
-- ~~battle-scene~~
-- ~~battle-scene goes back to map-scene when done~~
-- ~~enemy generation (SAME ARMY EVERY TIME; KISS.)~~
-- ~~ui at bottom of the screen~~
-- ~~rendering of squads (placement preview)~~
-- ~~placing units~~
-- ~~If game crashed => agent should know.~~
 
+- Add rarity system
+- Add trait system
+- Add squad-select UI
+- Add blessing UI
 
 - Formalize squads / formation code
 
@@ -29,10 +22,7 @@
 
 
 - Wire up perks to squads
-- Get squad placement working
 
-- Add simple rarity system
-- Add simple trait system
 
 - Plan enemy encounter system.
 

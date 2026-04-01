@@ -903,4 +903,33 @@ function g.ask(q, arg1, ...)
     return val
 end
 
+
+
+---@alias g.Rarity {id:string, name:string, color:objects.Color}
+
+---@param id string
+---@param name string
+---@param color objects.Color
+---@return g.Rarity
+local function newRarity(id, name, color)
+    print(_G.isLoadTime)
+    return {
+        id = id,
+        name = loc(name, {}, {
+            context = "Represents a rarity with roman numerals, as in `UNCOMMON (II)` or `RARE (III)`."
+        }),
+        color = color
+    }
+end
+
+---@class g.rarities
+g.RARITIES = {
+    COMMON = newRarity("COMMON", "COMMON (I)", objects.Color.GRAY),
+    UNCOMMON = newRarity("UNCOMMON", "UNCOMMON (II)", objects.Color.BLUE),
+    RARE = newRarity("RARE", "RARE (III)", objects.Color.PURPLE),
+    LEGENDARY = newRarity("LEGENDARY", "LEGENDARY (IV)", objects.Color.CRIMSON)
+}
+
+
+
 return g
