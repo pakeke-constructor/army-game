@@ -16,7 +16,7 @@ Draw a single squad card in a kirigami region. Returns true if clicked.
 - Icon + Title row (icon from squad def, title = squadId for now)
 - Trait boxes row (from squad def — NOTE: squads don't have traits yet, skip for now or add field)
 - Unit count line ("x4", "x6")
-- 3x2 stat grid: health, damage, attackSpeed, armor, speed, attackRange (pull from entity def via `g.getEntityDef(info.entityId)`)
+- 2x3 stat grid: (2 width, 3 height.) health, damage, attackSpeed, armor, speed, attackRange (pull from entity def via `g.getEntityDef(info.entityId)`)
 - Perk list (squad.perks → g.getPerkInfo each, show name)
 
 ## Visual style

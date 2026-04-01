@@ -985,26 +985,27 @@ function g.defineStat(id, baseName, info)
     STAT_DEFS[id] = stat
 end
 
+
 function g.getStatList()
     return STAT_LIST
 end
+
 
 function g.getStatInfo(id)
     return STAT_DEFS[id]
 end
 
+
+
 local function _alwaysImportant()
     return true
 end
-
 local function _importantIfMelee(ent)
     return ent.attack and ent.attack.attackType == "melee"
 end
-
 local function _importantIfRanged(ent)
     return ent.attack and ent.attack.attackType == "ranged"
 end
-
 local function _importantIfNonZero(ent, stat)
     return (ent[stat.baseName] or 0) > 0
 end

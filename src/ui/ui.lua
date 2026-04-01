@@ -523,4 +523,7 @@ end
 ui.Box = Box.new
 
 
+ui.drawSquadCard = require(".squad_card")
+
+
 return ui
