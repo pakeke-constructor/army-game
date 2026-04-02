@@ -939,10 +939,10 @@ end
 
 ---@class g.rarities
 g.RARITIES = {
-    COMMON = newRarity("COMMON", "COMMON (I)", objects.Color.GRAY),
-    UNCOMMON = newRarity("UNCOMMON", "UNCOMMON (II)", objects.Color.DARK_BLUE),
-    RARE = newRarity("RARE", "RARE (III)", objects.Color.PURPLE),
-    LEGENDARY = newRarity("LEGENDARY", "LEGENDARY (IV)", objects.Color.CRIMSON),
+    COMMON = newRarity("COMMON", "COMMON (I)", objects.Color(99,99,99)),
+    UNCOMMON = newRarity("UNCOMMON", "UNCOMMON (II)", objects.Color(53,125,210)),
+    RARE = newRarity("RARE", "RARE (III)", objects.Color(200,82,164)),
+    LEGENDARY = newRarity("LEGENDARY", "LEGENDARY (IV)", objects.Color(241,241,25)),
 
     UNIQUE = newRarity("UNIQUE", "UNIQUE", objects.Color.WHITE),
 }
