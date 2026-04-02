@@ -19,7 +19,7 @@ g.defineEntity("militia", {
     baseAttackSpeed = 1,
     baseAttackRange = 18,
     baseMoveSpeed = 60,
-    baseMaxHealth = 50,
+    baseMaxHealth = 120,
     onDraw = function (ent)
         love.graphics.circle("line", ent.x,ent.y, ent.attackRange)
     end

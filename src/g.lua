@@ -235,6 +235,7 @@ local SQUAD_LIST = {}
 ---@field count number
 ---@field icon string
 ---@field perks string[]
+---@field traits string[]
 ---@field onDeploy (fun(squad: g.SquadInfo, entities: table[]))?
 
 ---@param id string
@@ -407,10 +408,12 @@ function g.addBuff(ent, handler, duration)
     ent.scope:addHandler(handler, duration)
 end
 
+
 -- Entity system
 local ENTITY_DEFS = {}
 local ENTITY_LIST = {}
 local currentEntityId = 0
+
 function g.defineEntity(id, def)
     assert(not ENTITY_DEFS[id], "Duplicate entity type: " .. id)
     assert(def.x == nil and def.y == nil and def.type == nil and def._world == nil, "x/y/type/_world are reserved")

@@ -19,7 +19,7 @@ g.defineEntity("demon", {
     baseAttackSpeed = 1,
     baseAttackRange = 80,
     baseMoveSpeed = 50,
-    baseMaxHealth = 40,
+    baseMaxHealth = 80,
 })
 
 g.defineEntity("imp", {

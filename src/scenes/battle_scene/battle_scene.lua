@@ -40,6 +40,10 @@ local function spawnTestEnemies()
     end
 end
 
+function battle_scene:pollHandlers()
+    self.ecs:addSystemHandlers()
+end
+
 function battle_scene:enter()
     self.ecs = ECSWorld({"stats", "ai", "attacking", "physics"})
     local b = consts.BATTLE_BORDER
@@ -269,7 +273,7 @@ function battle_scene:draw()
     end
     self.hud:drawUI({ battleScene = true })
     if self.victoryPopup then
-        victoryPopup(self)
+        --victoryPopup(self)
     end
     ui.endUI()
 end
