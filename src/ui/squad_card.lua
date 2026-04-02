@@ -35,7 +35,7 @@ local function drawSquadCard(squadId, region)
     STAT_FONT = STAT_FONT or g.getSmallFont(16)
     TITLE_FONT = TITLE_FONT or g.getSmallFont(16)
 
-    local box = ui.Box({maxWidth = w, padding = 6, spacing = 4}, function(bx, by, bw, bh)
+    local box = ui.Box({maxWidth = w, padding = 12, spacing = 4}, function(bx, by, bw, bh)
         love.graphics.setColor(1, 1, 1)
         helper.gradientRect("vertical", bgCol1, darkCol, x, y, w, h)
         love.graphics.setColor(liteCol:getRGBA())
@@ -102,24 +102,37 @@ local function drawSquadCard(squadId, region)
                 local cw = cellW - 2
                 local ch = statCellH - 2
 
-                local stat = g.getStatInfo(STAT_LIST[i].id)
+                local statId = STAT_LIST[i].id
+                local stat = g.getStatInfo(statId)
                 local value = def and def[stat.baseName] or 0
 
                 -- background
-                love.graphics.setColor(darkCol:getRGBA())
+                local important = g.isStatImportant(statId, info.entityId)
+                local alpha = 0.3
+                if important then
+                    alpha = 1
+                end
+
+                do
+                local r,g,b,a = darkCol:getRGBA()
+                love.graphics.setColor(r,g,b,a*alpha)
                 ui.drawSingleColorPanel(cx, cy, cw, ch)
+                end
 
                 -- icon
                 if stat.icon and g.isImage(stat.icon) then
-                    love.graphics.setColor(1, 1, 1)
+                    love.graphics.setColor(1, 1, 1, alpha)
                     g.drawImageContained(stat.icon, cx + 2, cy + 2, ch - 4, ch - 4)
                 end
 
                 -- text
+                do
                 love.graphics.setFont(STAT_FONT)
-                love.graphics.setColor(stat.color:getRGBA())
+                local r,g,b,a = stat.color:getRGBA()
+                love.graphics.setColor(r,g,b,a*alpha)
                 local textX = cx + ch
                 richtext.printRich(tostring(value), STAT_FONT, textX, cy + ch / 2 - STAT_FONT:getHeight() / 2, cw - ch, "left")
+                end
             end
         end,
     })

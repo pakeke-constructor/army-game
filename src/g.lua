@@ -939,10 +939,10 @@ end
 
 ---@class g.rarities
 g.RARITIES = {
-    COMMON = newRarity("COMMON", "COMMON (I)", objects.Color(99,99,99)),
-    UNCOMMON = newRarity("UNCOMMON", "UNCOMMON (II)", objects.Color(53,125,210)),
-    RARE = newRarity("RARE", "RARE (III)", objects.Color(200,82,164)),
-    LEGENDARY = newRarity("LEGENDARY", "LEGENDARY (IV)", objects.Color(241,241,25)),
+    COMMON = newRarity("COMMON", "COMMON (I)", objects.Color.fromByteRGBA(99,99,99)),
+    UNCOMMON = newRarity("UNCOMMON", "UNCOMMON (II)", objects.Color.fromByteRGBA(53,125,210)),
+    RARE = newRarity("RARE", "RARE (III)", objects.Color.fromByteRGBA(200,82,164)),
+    LEGENDARY = newRarity("LEGENDARY", "LEGENDARY (IV)", objects.Color.fromByteRGBA(241,241,25)),
 
     UNIQUE = newRarity("UNIQUE", "UNIQUE", objects.Color.WHITE),
 }
@@ -975,7 +975,7 @@ g.TRAITS = {
 }
 
 
----@alias g.Stat {id:string, name:string, baseName:string, modQ:string, mulQ:string, color:objects.Color, icon:string, isImportant:fun(ent:ecs.Entity):boolean}
+---@alias g.Stat {id:string, name:string, baseName:string, modQ:string, mulQ:string, color:objects.Color, icon:string, isImportant:fun(ent:ecs.Entity, stat:string):boolean}
 
 local STAT_LIST = {}
 local STAT_DEFS = {}
@@ -1004,11 +1004,24 @@ function g.defineStat(id, baseName, info)
 end
 
 
+
+---@param statId string
+---@param ent_or_etype string|ecs.Entity
+function g.isStatImportant(statId, ent_or_etype)
+    local stinfo = g.getStatInfo(statId)
+    if type(ent_or_etype) == "string" then
+        ent_or_etype = assert(g.getEntityDef(ent_or_etype))
+    end
+    return stinfo.isImportant(ent_or_etype, statId)
+end
+
 function g.getStatList()
     return STAT_LIST
 end
 
 
+---@param id string
+---@return g.Stat
 function g.getStatInfo(id)
     return STAT_DEFS[id]
 end
@@ -1031,10 +1044,10 @@ g.COLORS = {
 local function _alwaysImportant()
     return true
 end
-local function _importantIfMelee(ent)
+local function _importantIfMelee(ent, stat)
     return ent.attack and ent.attack.attackType == "melee"
 end
-local function _importantIfRanged(ent)
+local function _importantIfRanged(ent, stat)
     return ent.attack and ent.attack.attackType == "ranged"
 end
 local function _importantIfNonZero(ent, stat)

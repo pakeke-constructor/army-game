@@ -46,6 +46,11 @@ local function getOpposingSide(ent)
     end
 end
 
+local function zero(ent, c)
+    return 0
+end
+
+
 -- Find the best target for `ent` from `candidates`
 local function pickTarget(ent, candidates)
     local best, bestScore = nil, -math.huge
@@ -53,7 +58,8 @@ local function pickTarget(ent, candidates)
     for i = 1, #candidates do
         local c = candidates[i]
         if isValidTarget(c) then
-            local prio = ai.getPriority(ent, c)
+            local getPrio = ai.getPriority or zero
+            local prio = getPrio(ent, c)
             -- tiebreak: closer is better (subtract tiny distance factor)
             local d2 = dist2(ent, c)
             local score = prio - d2 * 0.00001 + love.math.random() * 0.5

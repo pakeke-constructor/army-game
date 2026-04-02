@@ -9,9 +9,6 @@ g.defineEntity("militia", {
     team = "ally",
     ai = {
         target = "enemy",
-        getPriority = function(selfEnt, targEnt)
-            return 0
-        end,
     },
     attack = {
         attackType = "melee",
@@ -21,9 +18,6 @@ g.defineEntity("militia", {
     baseAttackRange = 18,
     baseMoveSpeed = 60,
     baseMaxHealth = 120,
-    onDraw = function (ent)
-        love.graphics.circle("line", ent.x,ent.y, ent.attackRange)
-    end
 })
 
 
@@ -35,9 +29,6 @@ g.defineEntity("archer", {
     team = "ally",
     ai = {
         target = "enemy",
-        getPriority = function(selfEnt, targEnt)
-            return 0
-        end,
     },
     attack = {
         attackType = "ranged",
@@ -49,18 +40,6 @@ g.defineEntity("archer", {
     baseAttackRange = 200,
     baseMoveSpeed = 50,
     baseMaxHealth = 30,
-    onDraw = function (ent)
-        love.graphics.circle("line", ent.x,ent.y, ent.attackRange)
-    end
-})
-
-
-g.defineSquad("militia_squad", {
-    name = loc("Militia squad"),
-    entityId = "militia",
-    rarity = g.RARITIES.UNCOMMON,
-    count = 4,
-    icon = "squadborder_gold",
 })
 
 g.defineSquad("archer_squad", {
@@ -72,3 +51,12 @@ g.defineSquad("archer_squad", {
 })
 
 
+
+
+g.defineSquad("militia_squad", {
+    name = loc("Militia squad"),
+    entityId = "militia",
+    rarity = g.RARITIES.UNCOMMON,
+    count = 4,
+    icon = "squadborder_gold",
+})
