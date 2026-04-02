@@ -8,6 +8,7 @@ local CAMERA_ZOOM = 2
 local WIN_DELAY = 2.5
 local VICTORY_FADE_IN = 0.25
 
+---@class g.BattleScene
 local battle_scene = {}
 
 function battle_scene:init()
@@ -86,10 +87,11 @@ local function buildVictoryChoices()
     return choices
 end
 
+
 function battle_scene:update(dt)
     self:updateCamera(dt)
-    if not self.victoryPopup and not self.paused then
-        self.ecs:update(dt)
+    self.ecs:update(dt)
+    if not self.paused then
         self.particles:update(dt)
         -- track how long no enemies have existed
         if countEnemies(self.ecs) == 0 then
@@ -108,6 +110,7 @@ function battle_scene:update(dt)
         self.victoryPopupTime = self.victoryPopupTime + dt
     end
 end
+
 
 function battle_scene:updateCamera(dt)
     local cam = self.camera
@@ -194,12 +197,16 @@ local function victoryPopup(self)
     end
 end
 
-function battle_scene:draw()
+
+
+---@param self g.BattleScene
+local function drawCardSelect(self)
     local lg = love.graphics
-    local cardArea = cardsArea:padRatio(0.05, 0.1)
+    local r = ui.getFullScreenRegion()
+    local cardArea = r:padRatio(0.05, 0.1)
     local c1, c2, c3 = cardArea:splitHorizontal(1, 1, 1)
     local choices = self.squadChoices or {}
-    local regions = {c1, c2, c3}
+    local regions = {c1:padRatio(0.1), c2:padRatio(0.1), c3:padRatio(0.1)}
     for i = 1, #regions do
         local id = choices[i]
         if id then
@@ -209,8 +216,18 @@ function battle_scene:draw()
             end
         end
     end
-    end
-    -- Draw squad placement preview
+end
+
+
+
+function battle_scene:draw()
+    self.camera:attach()
+    love.graphics.clear(0.15, 0.15, 0.15)
+    iml.pushTransform(self.camera:getTransform())
+
+    self.ecs:draw()
+    self.particles:draw()
+
     if not self.victoryPopup then
         local sq = self.hud:getSelectedSquad()
         if sq and not sq.deployed then
@@ -231,10 +248,16 @@ function battle_scene:draw()
             lg.setColor(1, 1, 1, 1)
         end
     end
+
     iml.popTransform()
     self.camera:detach()
 
     ui.startUI()
+
+    if self.victoryPopup then
+        drawCardSelect(self)
+    end
+
     local sw, sh = love.graphics.getDimensions()
     if not self.victoryPopup and iml.wasJustClicked(0, 0, sw, sh, 1, "deploy_click") then
         local sq = self.hud:getSelectedSquad()
