@@ -58,12 +58,14 @@ g.defineEntity("archer", {
 g.defineSquad("militia_squad", {
     name = loc("Militia squad"),
     entityId = "militia",
+    rarity = g.RARITIES.UNCOMMON,
     count = 4,
     icon = "squadborder_gold",
 })
 
 g.defineSquad("archer_squad", {
     name = loc("Archer squad"),
+    rarity = g.RARITIES.RARE,
     entityId = "archer",
     count = 4,
     icon = "squadborder_gold",

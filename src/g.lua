@@ -232,6 +232,7 @@ local SQUAD_LIST = {}
 ---@class g.SquadInfo
 ---@field id string
 ---@field entityId string
+---@field rarity g.Rarity
 ---@field name string
 ---@field count number
 ---@field icon string
@@ -247,6 +248,7 @@ function g.defineSquad(id, info)
     info.perks = info.perks or {}
     info.count = info.count or 1
     info.name = assert(info.name)
+    info.rarity = assert(info.rarity)
     assert(info.icon)
     SQUAD_DEFS[id] = info
     SQUAD_LIST[#SQUAD_LIST + 1] = id
@@ -931,7 +933,9 @@ g.RARITIES = {
     COMMON = newRarity("COMMON", "COMMON (I)", objects.Color.GRAY),
     UNCOMMON = newRarity("UNCOMMON", "UNCOMMON (II)", objects.Color.BLUE),
     RARE = newRarity("RARE", "RARE (III)", objects.Color.PURPLE),
-    LEGENDARY = newRarity("LEGENDARY", "LEGENDARY (IV)", objects.Color.CRIMSON)
+    LEGENDARY = newRarity("LEGENDARY", "LEGENDARY (IV)", objects.Color.CRIMSON),
+
+    UNIQUE = newRarity("UNIQUE", "UNIQUE", objects.Color.WHITE),
 }
 
 

@@ -24,7 +24,7 @@ local function drawSquadCard(squadId, region)
 
     local info = g.getSquadInfo(squadId)
     local def = g.getEntityDef(info.entityId)
-    local rarity = g.RARITIES.COMMON
+    local rarity = info.rarity or g.RARITIES.COMMON
     local borderCol = rarity.color
     local bgCol1 = objects.Color(0.05, 0.05, 0.06)
     local bgCol2 = borderCol * 0.12
@@ -37,7 +37,7 @@ local function drawSquadCard(squadId, region)
 
     local box = ui.Box({maxWidth = w, padding = 6, spacing = 4}, function(bx, by, bw, bh)
         love.graphics.setColor(1, 1, 1)
-        helper.gradientRect("vertical", bgCol1, bgCol2, x, y, w, h)
+        helper.gradientRect("vertical", bgCol1, borderCol * 0.3, x, y, w, h)
         love.graphics.setColor(borderCol:getRGBA())
         ui.drawPanel(x, y, w, h)
     end)
@@ -106,7 +106,7 @@ local function drawSquadCard(squadId, region)
                 local value = def and def[stat.baseName] or 0
 
                 -- background
-                love.graphics.setColor(stat.color:getRGBA())
+                love.graphics.setColor(borderCol:getRGBA())
                 ui.drawSingleColorPanel(cx, cy, cw, ch)
 
                 -- icon
@@ -117,7 +117,7 @@ local function drawSquadCard(squadId, region)
 
                 -- text
                 love.graphics.setFont(STAT_FONT)
-                love.graphics.setColor(0, 0, 0)
+                love.graphics.setColor(stat.color:getRGBA())
                 local textX = cx + ch
                 richtext.printRich(tostring(value), STAT_FONT, textX, cy + ch / 2 - STAT_FONT:getHeight() / 2, cw - ch, "left")
             end
