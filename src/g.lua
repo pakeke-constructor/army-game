@@ -912,7 +912,15 @@ end
 
 
 
----@alias g.Rarity {id:string, name:string, color:objects.Color, darkColor:objects.Color}
+---@class g.Rarity
+---@field id string
+---@field name string
+---@field color objects.Color
+---@field lightTextEffect string
+---@field darkTextEffect string
+---@field lightColor objects.Color
+---@field darkColor objects.Color
+local Rarity
 
 local function darkenColor(col, val)
     local a = select(4, col:getRGBA())
@@ -926,14 +934,34 @@ end
 ---@param color objects.Color
 ---@return g.Rarity
 local function newRarity(id, name, color)
-    return {
+    local lightTextEffect = id .. "_COLOR_LIGHT"
+    local darkTextEffect = id .. "_COLOR_DARK"
+    richtext.defineEffect(lightTextEffect, function (args, x, y, context, next)
+        local r, gg, b, a = love.graphics.getColor()
+        love.graphics.setColor(color.r or 1, color.g or 1, color.b or 1, (color.a or 1) * a)
+        next(context.textOrDrawable, x, y)
+        love.graphics.setColor(r, gg, b, a)
+    end)
+
+    richtext.defineEffect(darkTextEffect, function (args, x, y, context, next)
+        local r, gg, b, a = love.graphics.getColor()
+        love.graphics.setColor(color.r or 1, color.g or 1, color.b or 1, (color.a or 1) * a)
+        next(context.textOrDrawable, x, y)
+        love.graphics.setColor(r, gg, b, a)
+    end)
+
+    local rar = {
         id = id,
+        lightTextEffect = "{" .. lightTextEffect .. "}",
+        darkTextEffect = "{" .. darkTextEffect .. "}",
         name = loc(name, {}, {
             context = "Represents a rarity with roman numerals, as in `UNCOMMON (II)` or `RARE (III)`."
         }),
         color = color,
         darkColor = darkenColor(color, 0.45)
     }
+
+    return rar
 end
 
 
@@ -966,12 +994,12 @@ end
 
 ---@class g.traits
 g.TRAITS = {
-    WILD = newTrait("WILD", "Wild", objects.Color(0.3, 0.85, 0.3)),
-    ALCHEMY = newTrait("ALCHEMY", "Alchemy", objects.Color(0.75, 0.45, 0.9)),
-    BEAST = newTrait("BEAST", "Beast", objects.Color(0.85, 0.55, 0.3)),
-    ARTIFICE = newTrait("ARTIFICE", "Artifice", objects.Color(0.65, 0.2, 0.25)),
-    NOBLE = newTrait("NOBLE", "Noble", objects.Color(0.95, 0.8, 0.3)),
-    TOWNSFOLK = newTrait("TOWNSFOLK", "Townsfolk", objects.Color(0.4, 0.65, 0.95)),
+    WILD = newTrait("WILD", "Wild", objects.Color("FF359416")),
+    ALCHEMY = newTrait("ALCHEMY", "Alchemy", objects.Color("FF7A1990")),
+    BEAST = newTrait("BEAST", "Beast", objects.Color("FFAE5C14")),
+    ARTIFICE = newTrait("ARTIFICE", "Artifice", objects.Color("FF4968CE")),
+    NOBLE = newTrait("NOBLE", "Noble", objects.Color("FFF5C60D")),
+    TOWNSFOLK = newTrait("TOWNSFOLK", "Townsfolk", objects.Color("FF866856")),
 }
 
 

@@ -200,14 +200,15 @@ end
 function ui.drawTraitBox(trait, x, y)
     local font = g.getSmallFont(16)
     local text = trait.name
-    local pad = 4
-    local w = font:getWidth(text) + pad * 2
-    local h = font:getHeight() + pad * 2
+    local padW = 4
+    local padH = 2
+    local w = font:getWidth(text) + padW * 2
+    local h = font:getHeight() + padH * 1
     lg.setColor(trait.color:getRGBA())
     ui.drawSingleColorPanel(x, y, w, h)
-    lg.setColor(1, 1, 1)
     lg.setFont(font)
-    lg.print(text, x + pad, y + pad)
+    lg.setColor(0,0,0)
+    lg.print(text, math.floor(x + padW), math.floor(y + padH))
     return w, h
 end
 

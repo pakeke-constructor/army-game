@@ -54,23 +54,21 @@ local function drawSquadCard(squadId, region)
             love.graphics.setColor(1, 1, 1)
             love.graphics.setFont(TITLE_FONT)
             local nameX = ex + iconSize + 4
-            richtext.printRich(squadId, TITLE_FONT, nameX, ey + eh / 2 - TITLE_FONT:getHeight() / 2, ew - iconSize - 4, "left")
+            local name = info.name
+            richtext.printRich(name, TITLE_FONT, nameX, ey + eh / 2 - TITLE_FONT:getHeight() / 2, ew - iconSize - 4, "left")
         end,
     })
 
     -- Traits row
-    local traits = info.traits or {}
+    local traits = def.traits or {}
     if #traits > 0 then
         box:add({
             getHeight = function() return STAT_FONT:getHeight() + 8 end,
             draw = function(ex, ey, ew, eh)
                 local tx = ex
-                for i = 1, #traits do
-                    local trait = g.TRAITS[traits[i]]
-                    if trait then
-                        local tw, th = ui.drawTraitBox(trait, tx, ey)
-                        tx = tx + tw + 4
-                    end
+                for i, trait in ipairs(traits)do
+                    local tw, th = ui.drawTraitBox(trait, tx, ey)
+                    tx = tx + tw + 4
                 end
             end,
         })
