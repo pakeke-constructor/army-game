@@ -142,10 +142,29 @@ function battle_scene:wheelmoved(dx, dy)
     self.hud:wheelmoved(dx, dy)
 end
 
+
+local function killAllEnemies(self)
+    for _, ent in self.ecs:iterate("team") do
+        if ent.team == "enemy" and g.isAlive(ent) then
+            g.call("entityDeath", ent, nil)
+            ent:getWorld():removeEntity(ent)
+        end
+    end
+    self.noEnemyTimer = WIN_DELAY
+    self.victoryPopup = true
+    self.victoryPopupTime = 0
+    if not self.squadChoices then
+        self.squadChoices = buildVictoryChoices()
+    end
+end
+
 function battle_scene:keypressed(k)
     if consts.DEV_MODE then
         if k == "q" then
             test()
+        end
+        if k == "k" then
+            killAllEnemies(self)
         end
         if k == "m" then
             g.gotoScene("map_scene")
