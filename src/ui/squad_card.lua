@@ -25,9 +25,9 @@ local function drawSquadCard(squadId, region)
     local info = g.getSquadInfo(squadId)
     local def = g.getEntityDef(info.entityId)
     local rarity = info.rarity or g.RARITIES.COMMON
-    local borderCol = rarity.darkColor
+    local darkCol = rarity.darkColor
+    local liteCol = rarity.color
     local bgCol1 = objects.Color(0.05, 0.05, 0.06, 0.7)
-    local bgCol2 = borderCol * 0.12
 
     local x, y, w, h = region:get()
     iml.panel(x, y, w, h, squadId)
@@ -37,8 +37,8 @@ local function drawSquadCard(squadId, region)
 
     local box = ui.Box({maxWidth = w, padding = 6, spacing = 4}, function(bx, by, bw, bh)
         love.graphics.setColor(1, 1, 1)
-        helper.gradientRect("vertical", bgCol1, rarity.darkColor, x, y, w, h)
-        love.graphics.setColor(borderCol:getRGBA())
+        helper.gradientRect("vertical", bgCol1, darkCol, x, y, w, h)
+        love.graphics.setColor(liteCol:getRGBA())
         ui.drawPanel(x, y, w, h)
     end)
 
@@ -106,7 +106,7 @@ local function drawSquadCard(squadId, region)
                 local value = def and def[stat.baseName] or 0
 
                 -- background
-                love.graphics.setColor(borderCol:getRGBA())
+                love.graphics.setColor(darkCol:getRGBA())
                 ui.drawSingleColorPanel(cx, cy, cw, ch)
 
                 -- icon
