@@ -912,7 +912,14 @@ end
 
 
 
----@alias g.Rarity {id:string, name:string, color:objects.Color}
+---@alias g.Rarity {id:string, name:string, color:objects.Color, darkColor:objects.Color}
+
+local function darkenColor(col, val)
+    local a = select(4, col:getRGBA())
+    local h, s, v = col:getHSV()
+    local nr, ng, nb = objects.Color.HSVtoRGB(h, s, v * val)
+    return objects.Color(nr, ng, nb, a)
+end
 
 ---@param id string
 ---@param name string
@@ -924,7 +931,8 @@ local function newRarity(id, name, color)
         name = loc(name, {}, {
             context = "Represents a rarity with roman numerals, as in `UNCOMMON (II)` or `RARE (III)`."
         }),
-        color = color
+        color = color,
+        darkColor = darkenColor(color, 0.35)
     }
 end
 
