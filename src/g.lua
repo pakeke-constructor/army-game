@@ -232,6 +232,7 @@ local SQUAD_LIST = {}
 ---@class g.SquadInfo
 ---@field id string
 ---@field entityId string
+---@field name string
 ---@field count number
 ---@field icon string
 ---@field perks string[]
@@ -245,6 +246,7 @@ function g.defineSquad(id, info)
     info.id = id
     info.perks = info.perks or {}
     info.count = info.count or 1
+    info.name = assert(info.name)
     assert(info.icon)
     SQUAD_DEFS[id] = info
     SQUAD_LIST[#SQUAD_LIST + 1] = id

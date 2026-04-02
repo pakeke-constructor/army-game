@@ -1,46 +1,4 @@
 
-
---[[
-
-squad-card:
-A representation of a squad, it's stats, traits + perks.
-
-
-CARD UI: Vertical card. Title at top.
-Border = same color as rarity.
-Background = black with a small fade towards rarity-color; but mostly dark.
-
-<CARD LAYOUT>
-Icon (squad.icon), Title (white-text)
-Layout of Traits (use ui.drawTraitBox). Should be DIRECTLY below title.
-
-On it's own line: Unit count, x6, x4
-
-A 3x2 grid of stats:
-- health
-- damage
-- attackSpeed
-- armor
-- speed
-- attackRange
-
-List of perks below:
-<perk>
-perk title (+ rarity color)
-perk description (richtext)
-</perk>
-
-<perk>
-...
-</perk>
-
-
-
-</CARD LAYOUT>
-
-]]
-
-
 local STAT_LIST = {
     {id = "maxHealth", label = "HP"},
     {id = "attackDamage", label = "DMG"},
@@ -53,12 +11,10 @@ local STAT_LIST = {
 local STAT_FONT = nil
 local TITLE_FONT = nil
 
--- PSEUDOCODE:
--- 1. Read squad + entity def, pick rarity colors.
--- 2. Draw background + border, build padded content region.
--- 3. Split layout into header, traits, count, stats, perks.
--- 4. Draw icon/title, trait boxes, count line, stat grid, perks list.
--- 5. Handle click and return.
+local function addPerk(box, perk)
+    -- TODO: fill in later
+end
+
 ---Draw a single squad card in a kirigami region. Returns true if clicked.
 ---@param squadId string
 ---@param region kirigami.Region
@@ -76,98 +32,108 @@ local function drawSquadCard(squadId, region)
     local x, y, w, h = region:get()
     iml.panel(x, y, w, h, squadId)
 
-    love.graphics.setColor(1, 1, 1)
-    helper.gradientRect("vertical", bgCol1, bgCol2, x, y, w, h)
-    love.graphics.setColor(borderCol:getRGBA())
-    ui.drawPanel(x, y, w, h)
-
-    local pad = 6
-    local content = region:padUnit(pad)
-    local header = content:splitVertical(0.22, 0.78)
-
     STAT_FONT = STAT_FONT or g.getSmallFont(16)
     TITLE_FONT = TITLE_FONT or g.getSmallFont(16)
 
-    do
-        local iconR, titleR = header:splitHorizontal(0.28, 0.72)
-        local ix, iy, iw, ih = iconR:padRatio(0.2):get()
-        g.drawImageContained(info.icon, ix, iy, iw, ih)
-
+    local box = ui.Box({maxWidth = w, padding = 6, spacing = 4}, function(bx, by, bw, bh)
         love.graphics.setColor(1, 1, 1)
-        love.graphics.setFont(TITLE_FONT)
-        local tx, ty, tw, th = titleR:get()
-        richtext.printRich(squadId, TITLE_FONT, tx, ty + th / 2 - TITLE_FONT:getHeight() / 2, tw, "left")
-    end
+        helper.gradientRect("vertical", bgCol1, bgCol2, x, y, w, h)
+        love.graphics.setColor(borderCol:getRGBA())
+        ui.drawPanel(x, y, w, h)
+    end)
 
-    local body = select(2, content:splitVertical(0.22, 0.78))
-    local traitsR, countR, statsR, perksR = helper.splitRegionByExactSizes(body, "vertical", 18, 16, 54, 0)
-
-    do
-        local traits = info.traits or {}
-        local tx = traitsR.x
-        local ty = traitsR.y
-        for i = 1, #traits do
-            local trait = g.TRAITS[traits[i]]
-            if trait then
-                local w2, h2 = ui.drawTraitBox(trait, tx, ty)
-                tx = tx + w2 + 4
-            end
-        end
-    end
-
-    do
-        local font = STAT_FONT
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.setFont(font)
-        local cx, cy, cw, ch = countR:get()
-        local txt = "x" .. tostring(info.count)
-        richtext.printRich(txt, font, cx, cy + ch / 2 - font:getHeight() / 2, cw, "left")
-    end
-
-    do
-        local grid = statsR:grid(2, 3)
-        for i = 1, #STAT_LIST do
-            local cell = grid[i]
-            local stat = g.getStatInfo(STAT_LIST[i].id)
-            local value = def and def[stat.baseName] or 0
-            local label = STAT_LIST[i].label
-
-            local cx, cy, cw, ch = cell:get()
-            local left = cell:padUnit(2)
-            local iconR, textR = left:splitHorizontal(0.25, 0.75)
-            if stat.icon and g.isImage(stat.icon) then
-                local ix, iy, iw, ih = iconR:padRatio(0.2):get()
-                love.graphics.setColor(1, 1, 1)
-                g.drawImageContained(stat.icon, ix, iy, iw, ih)
-            end
-            love.graphics.setFont(STAT_FONT)
+    -- Header: icon + name + traits
+    local iconSize = 32
+    box:add({
+        getHeight = function() return iconSize end,
+        draw = function(ex, ey, ew, eh)
+            -- icon
             love.graphics.setColor(1, 1, 1)
-            local tx, ty, tw, th = textR:get()
-            richtext.printRich(label .. " " .. tostring(value), STAT_FONT, tx, ty + th / 2 - STAT_FONT:getHeight() / 2, tw, "left")
+            g.drawImageContained(info.icon, ex, ey, iconSize, iconSize)
+            -- name
+            love.graphics.setColor(1, 1, 1)
+            love.graphics.setFont(TITLE_FONT)
+            local nameX = ex + iconSize + 4
+            richtext.printRich(squadId, TITLE_FONT, nameX, ey + eh / 2 - TITLE_FONT:getHeight() / 2, ew - iconSize - 4, "left")
+        end,
+    })
+
+    -- Traits row
+    local traits = info.traits or {}
+    if #traits > 0 then
+        box:add({
+            getHeight = function() return STAT_FONT:getHeight() + 8 end,
+            draw = function(ex, ey, ew, eh)
+                local tx = ex
+                for i = 1, #traits do
+                    local trait = g.TRAITS[traits[i]]
+                    if trait then
+                        local tw, th = ui.drawTraitBox(trait, tx, ey)
+                        tx = tx + tw + 4
+                    end
+                end
+            end,
+        })
+    end
+
+    -- Count line
+    box:add({
+        getHeight = function() return STAT_FONT:getHeight() end,
+        draw = function(ex, ey, ew, eh)
+            love.graphics.setColor(1, 1, 1)
+            love.graphics.setFont(STAT_FONT)
+            richtext.printRich("x" .. tostring(info.count), STAT_FONT, ex, ey, ew, "left")
+        end,
+    })
+
+    -- Stats: 3 wide, 2 high grid
+    local statCellH = 22
+    local statRows = 2
+    local statCols = 3
+    box:add({
+        getHeight = function() return statCellH * statRows end,
+        draw = function(ex, ey, ew, eh)
+            local cellW = math.floor(ew / statCols)
+            for i = 1, #STAT_LIST do
+                local row = math.floor((i - 1) / statCols)
+                local col = (i - 1) % statCols
+                local cx = ex + col * cellW
+                local cy = ey + row * statCellH
+                local cw = cellW - 2
+                local ch = statCellH - 2
+
+                local stat = g.getStatInfo(STAT_LIST[i].id)
+                local value = def and def[stat.baseName] or 0
+
+                -- background
+                love.graphics.setColor(0.15, 0.15, 0.18)
+                ui.drawSingleColorPanel(cx, cy, cw, ch)
+
+                -- icon
+                if stat.icon and g.isImage(stat.icon) then
+                    love.graphics.setColor(1, 1, 1)
+                    g.drawImageContained(stat.icon, cx + 2, cy + 2, ch - 4, ch - 4)
+                end
+
+                -- text
+                love.graphics.setFont(STAT_FONT)
+                love.graphics.setColor(1, 1, 1)
+                local textX = cx + ch
+                richtext.printRich(tostring(value), STAT_FONT, textX, cy + ch / 2 - STAT_FONT:getHeight() / 2, cw - ch, "left")
+            end
+        end,
+    })
+
+    -- Perks
+    local perks = info.perks or {}
+    for i = 1, #perks do
+        local perkInfo = g.getPerkInfo(perks[i])
+        if perkInfo then
+            addPerk(box, perkInfo)
         end
     end
 
-    do
-        local box = ui.Box({maxWidth = perksR.w, padding = 4, spacing = 2})
-        local perks = info.perks or {}
-        for i = 1, #perks do
-            local perkInfo = g.getPerkInfo(perks[i])
-            if perkInfo then
-                local r, g2, b, a = borderCol:getRGBA()
-                local title = string.format("{c r=%s g=%s b=%s a=%s}%s{/c}", r, g2, b, a, perkInfo.id)
-                box:addText(title, TITLE_FONT)
-                if perkInfo.desc then
-                    box:addText(perkInfo.desc, STAT_FONT)
-                end
-                if i < #perks then
-                    box:addSpacing(2)
-                end
-            end
-        end
-        if #perks > 0 then
-            box:render(perksR.x, perksR.y)
-        end
-    end
+    box:render(x, y)
 
     if iml.wasJustClicked(x, y, w, h, 1, squadId) then
         if g.playUISound then

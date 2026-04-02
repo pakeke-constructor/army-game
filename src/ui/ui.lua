@@ -485,9 +485,6 @@ local uiPushed = false
 
 function ui.startUI()
     assert(not uiPushed, "attempt to call startUI twice")
-    if prof_push then
-        prof_push("ui")
-    end
     uiPushed = true
     lg.push()
     local t = ui.getUIScalingTransform()
@@ -501,15 +498,8 @@ function ui.endUI()
     assert(uiPushed, "attempt to call endUI before startUI")
     uiPushed = false
 
-    if simulatedSafeArea then
-        ui.debugRegion(ui.getScreenRegion())
-    end
-
     iml.popTransform()
     lg.pop()
-    if prof_pop then
-        prof_pop()
-    end
 end
 
 function ui.assertUIStarted()
