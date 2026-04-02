@@ -932,14 +932,15 @@ local function newRarity(id, name, color)
             context = "Represents a rarity with roman numerals, as in `UNCOMMON (II)` or `RARE (III)`."
         }),
         color = color,
-        darkColor = darkenColor(color, 0.35)
+        darkColor = darkenColor(color, 0.45)
     }
 end
+
 
 ---@class g.rarities
 g.RARITIES = {
     COMMON = newRarity("COMMON", "COMMON (I)", objects.Color.GRAY),
-    UNCOMMON = newRarity("UNCOMMON", "UNCOMMON (II)", objects.Color.BLUE),
+    UNCOMMON = newRarity("UNCOMMON", "UNCOMMON (II)", objects.Color.DARK_BLUE),
     RARE = newRarity("RARE", "RARE (III)", objects.Color.PURPLE),
     LEGENDARY = newRarity("LEGENDARY", "LEGENDARY (IV)", objects.Color.CRIMSON),
 
@@ -1011,6 +1012,19 @@ end
 function g.getStatInfo(id)
     return STAT_DEFS[id]
 end
+
+
+
+g.COLORS = {
+    --[[
+    
+    todo: figure out what do put here:
+    
+    ]]
+    HEALTH = objects.Color("FF397634"),
+    ATTACK = objects.Color("FFA2741E"),
+}
+
 
 
 
