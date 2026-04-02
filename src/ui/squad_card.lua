@@ -96,7 +96,7 @@ local function drawSquadCard(squadId, region)
         love.graphics.setColor(1, 1, 1)
         love.graphics.setFont(TITLE_FONT)
         local tx, ty, tw, th = titleR:get()
-        love.graphics.printf(squadId, tx, ty + th / 2 - TITLE_FONT:getHeight() / 2, tw, "left")
+        richtext.printRich(squadId, TITLE_FONT, tx, ty + th / 2 - TITLE_FONT:getHeight() / 2, tw, "left")
     end
 
     local body = select(2, content:splitVertical(0.22, 0.78))
@@ -121,7 +121,7 @@ local function drawSquadCard(squadId, region)
         love.graphics.setFont(font)
         local cx, cy, cw, ch = countR:get()
         local txt = "x" .. tostring(info.count)
-        love.graphics.printf(txt, cx, cy + ch / 2 - font:getHeight() / 2, cw, "left")
+        richtext.printRich(txt, font, cx, cy + ch / 2 - font:getHeight() / 2, cw, "left")
     end
 
     do
@@ -143,7 +143,7 @@ local function drawSquadCard(squadId, region)
             love.graphics.setFont(STAT_FONT)
             love.graphics.setColor(1, 1, 1)
             local tx, ty, tw, th = textR:get()
-            love.graphics.printf(label .. " " .. tostring(value), tx, ty + th / 2 - STAT_FONT:getHeight() / 2, tw, "left")
+            richtext.printRich(label .. " " .. tostring(value), STAT_FONT, tx, ty + th / 2 - STAT_FONT:getHeight() / 2, tw, "left")
         end
     end
 
