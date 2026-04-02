@@ -1017,32 +1017,32 @@ end
 
 g.defineStat("maxHealth", "baseMaxHealth", {
     color = objects.Color(0.3, 0.9, 0.3),
-    icon = "life_icon",
+    icon = "health",
     isImportant = _alwaysImportant,
 })
 g.defineStat("attackDamage", "baseAttackDamage", {
     color = objects.Color(0.95, 0.3, 0.3),
-    icon = "demonhealthbar_icon",
+    icon = "damage",
     isImportant = _alwaysImportant,
 })
 g.defineStat("attackSpeed", "baseAttackSpeed", {
     color = objects.Color(0.95, 0.85, 0.3),
-    icon = "hourglass_icon",
+    icon = "atkspeed",
     isImportant = _importantIfRanged,
 })
 g.defineStat("moveSpeed", "baseMoveSpeed", {
     color = objects.Color(0.4, 0.7, 0.95),
-    icon = "hourglass_icon",
+    icon = "movespeed",
     isImportant = _importantIfMelee,
 })
 g.defineStat("attackRange", "baseAttackRange", {
     color = objects.Color(0.8, 0.5, 0.2),
-    icon = "hourglass_icon",
+    icon = "range",
     isImportant = _importantIfRanged,
 })
 g.defineStat("armor", "baseArmor", {
     color = objects.Color(0.6, 0.6, 0.7),
-    icon = "hourglass_icon",
+    icon = "armor",
     isImportant = _importantIfNonZero,
 })
 g.defineStat("projectileAccuracy", "baseProjectileAccuracy", {

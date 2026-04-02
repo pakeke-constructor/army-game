@@ -106,7 +106,7 @@ local function drawSquadCard(squadId, region)
                 local value = def and def[stat.baseName] or 0
 
                 -- background
-                love.graphics.setColor(0.15, 0.15, 0.18)
+                love.graphics.setColor(stat.color:getRGBA())
                 ui.drawSingleColorPanel(cx, cy, cw, ch)
 
                 -- icon
@@ -117,7 +117,7 @@ local function drawSquadCard(squadId, region)
 
                 -- text
                 love.graphics.setFont(STAT_FONT)
-                love.graphics.setColor(1, 1, 1)
+                love.graphics.setColor(0, 0, 0)
                 local textX = cx + ch
                 richtext.printRich(tostring(value), STAT_FONT, textX, cy + ch / 2 - STAT_FONT:getHeight() / 2, cw - ch, "left")
             end
