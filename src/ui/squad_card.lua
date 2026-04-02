@@ -33,7 +33,7 @@ local function drawSquadCard(squadId, region)
     iml.panel(x, y, w, h, squadId)
 
     STAT_FONT = STAT_FONT or g.getSmallFont(16)
-    TITLE_FONT = TITLE_FONT or g.getSmallFont(16)
+    TITLE_FONT = TITLE_FONT or g.getBigFont(16)
 
     local box = ui.Box({maxWidth = w, padding = 12, spacing = 4}, function(bx, by, bw, bh)
         love.graphics.setColor(1, 1, 1)
@@ -53,8 +53,8 @@ local function drawSquadCard(squadId, region)
             -- name
             love.graphics.setColor(1, 1, 1)
             love.graphics.setFont(TITLE_FONT)
-            local nameX = ex + iconSize + 4
-            local name = info.name
+            local nameX = ex + iconSize + 10
+            local name = "{wavy amp=0.5 freq=1}" .. info.name
             richtext.printRich(name, TITLE_FONT, nameX, ey + eh / 2 - TITLE_FONT:getHeight() / 2, ew - iconSize - 4, "left")
         end,
     })
