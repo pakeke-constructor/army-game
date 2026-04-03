@@ -147,9 +147,7 @@ local function drawSquadCard(squadId, region)
     box:render(x, y)
 
     if iml.wasJustClicked(x, y, w, h, 1, squadId) then
-        if g.playUISound then
-            g.playUISound("ui_click_basic", 1.4, 0.8)
-        end
+        g.playUISound("ui_click_basic", 1.4, 0.8)
         return true
     end
     return false
