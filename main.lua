@@ -1,7 +1,10 @@
+
 local love = require("love")
 io.stdout:setvbuf("line")
 
 _G.lg = love.graphics
+_G.table.clear = require("table.clear")
+
 
 lg.setDefaultFilter("nearest", "nearest")
 

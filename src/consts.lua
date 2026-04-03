@@ -11,6 +11,7 @@ consts.ANALYTICS_URL = nil
 consts.GAME_VERSION = 0
 consts.IS_MOBILE = false
 consts.SHOW_DEV_STUFF = false
+consts.MAX_PLAYING_SOURCES = 14
 consts.SQUAD_SPACING = 20
 consts.LAGGED_HEALTHBAR_DURATION = 0.25
 

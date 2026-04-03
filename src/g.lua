@@ -29,6 +29,11 @@ local Run = require("src.Run")
 local Squad = require("src.Squad")
 local Entity = require("src.ecs.Entity")
 
+local bgm = require("src.sound.bgm")
+local sfx = require("src.sound.sfx")
+
+
+
 local currentRun
 
 function g.newRun()
@@ -182,14 +187,14 @@ function g.walkDirectory(path, func)
     end
 end
 
-local validExtensions = {
+local validImgExtensions = {
     [".png"] = true,
     [".jpg"] = true,
 }
 
 local function loadImage(path)
     local ext = path:sub(-4):lower()
-    if validExtensions[ext] then
+    if validImgExtensions[ext] then
         local name = path:match("([^/]+)%.%w+$")
         local quad = atlas:add(love.image.newImageData(path))
         if nameToQuad[name] then
@@ -219,6 +224,135 @@ do
     q:setViewport(x + 1, y + 1, 1, 1, g.getAtlas():getDimensions())
     nameToQuad["1x1"] = q
 end
+
+
+
+
+-- g.playWorldSound
+-- g.playUISound
+do
+
+----------
+-- SFXs --
+----------
+
+---@param soundname string
+---@param pitch number? (defaults to 1)
+---@param volume number? (defaults to 1)
+---@param pitchVar number? (pitch variance, default 0)
+---@param volumeVar number? (volume variance, default 0)
+function g.playWorldSound(soundname, pitch, volume, pitchVar, volumeVar)
+    if love.audio.getActiveSourceCount() > consts.MAX_PLAYING_SOURCES then
+        return false
+    end
+    if select(2, sceneManager.getCurrentScene()) == "harvest_scene" then
+        return sfx.play(soundname, pitch, volume, pitchVar, volumeVar)
+    end
+    return false
+end
+
+
+---@param soundname string
+---@param pitch number? (defaults to 1)
+---@param volume number? (defaults to 1)
+---@param pitchVar number? (pitch variance, default 0)
+---@param volumeVar number? (volume variance, default 0)
+function g.playUISound(soundname, pitch, volume, pitchVar, volumeVar)
+    return sfx.play(soundname, pitch, volume, pitchVar, volumeVar)
+end
+
+
+local validExtensions = {
+    wav = true,
+    mp3 = true,
+    ogg = true,
+    flac = true
+}
+
+---@param path string
+local function loadSound(path)
+    local pathrev = path:reverse()
+    local ext = pathrev:sub(1, (pathrev:find(".", 1, true) or 1) - 1):reverse():lower()
+
+    if validExtensions[ext] then
+        local basename = pathrev:sub(1, pathrev:find("/", 1, true)-1):reverse()
+
+        if #basename > 0 then
+            local name = basename:sub(1, -#ext - 2)
+            if name:sub(1,1) ~= "_" then
+                sfx.defineSound(name, path)
+            end
+        end
+    end
+end
+
+g.walkDirectory("assets/sfx", loadSound)
+
+
+----------
+-- BGMs --
+----------
+
+-- Higher number means higher priority.
+g.BGMID = {
+    TITLE = 999, -- Title and settings
+    MAP = 1, -- Map scene
+    AMBIENT = 2, -- Harvest scene / Upgrade scene
+    CUSTOMIZATION = 3, -- Customization scene
+    BOSS = 100, -- Boss theme
+}
+
+
+---@param path string
+---@param prio integer
+---@param isAmbient boolean?
+local function registerBGMFromDirectories(path, prio, isAmbient)
+    ---@type string[]
+    local files = {}
+
+    g.walkDirectory(path, function(filename)
+        local pathrev = filename:reverse()
+        local ext = pathrev:sub(1, (pathrev:find(".", 1, true) or 1) - 1):reverse():lower()
+
+        if validExtensions[ext] then
+            local basename = pathrev:sub(1, pathrev:find("/", 1, true)-1):reverse()
+
+            if #basename > 0 then
+                local name = basename:sub(1, -#ext - 2)
+                if name:sub(1,1) ~= "_" then
+                    files[#files+1] = filename
+                end
+            end
+        end
+    end)
+
+    if #files == 0 then
+        error("no bgm files in "..path)
+    end
+
+    return bgm.register(prio, files, isAmbient)
+end
+
+-- We cannot use g.walkDirectory because we need all the files first then register
+-- the BGM in one go using `bgm.register`.
+registerBGMFromDirectories("assets/bgm/boss", g.BGMID.BOSS, false)
+registerBGMFromDirectories("assets/bgm/customization", g.BGMID.CUSTOMIZATION, true)
+registerBGMFromDirectories("assets/bgm/ambient", g.BGMID.AMBIENT, true)
+registerBGMFromDirectories("assets/bgm/map", g.BGMID.MAP, true)
+registerBGMFromDirectories("assets/bgm/ambient", g.BGMID.TITLE, true)
+
+
+---Request playing specific BGM ID
+---@param id integer BGM ID. Use `g.BGMID` for the fixed constants.
+function g.requestBGM(id)
+    return bgm.request(id)
+end
+
+
+end
+
+
+
 
 
 -- Forward-declare perk tables (used by both squad and perk systems below)
