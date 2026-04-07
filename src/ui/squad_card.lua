@@ -35,7 +35,7 @@ local function drawSquadCard(squadId, region)
     STAT_FONT = STAT_FONT or g.getSmallFont(16)
     TITLE_FONT = TITLE_FONT or g.getBigFont(16)
 
-    local box = ui.Box({maxWidth = w, padding = 12, spacing = 4}, function(bx, by, bw, bh)
+    local box = ui.Box({maxWidth = w, padding = 12, spacing = 8}, function(bx, by, bw, bh)
 
         love.graphics.setColor(1, 1, 1)
         helper.gradientRect("vertical", bgCol1, darkCol, x, y, w, h)
@@ -87,6 +87,9 @@ local function drawSquadCard(squadId, region)
             local count = info.count or 1
             local totalW = count * unitWidth + (count - 1) * unitGap
             local startX = ex + (ew - totalW) / 2
+            local r,gg,b,a = darkCol:getRGBA()
+            love.graphics.setColor(r, gg, b, a * 0.6)
+            ui.drawSingleColorPanel(startX - 4, ey, totalW + 8, eh)
             love.graphics.setColor(1, 1, 1, 0.85)
             for i = 1, count do
                 local ux = startX + (i - 1) * (unitWidth + unitGap)
