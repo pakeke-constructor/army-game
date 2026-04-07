@@ -202,9 +202,9 @@ local function drawTraitBox(trait, x, y, noDraw)
     local font = g.getSmallFont(16)
     local text = trait.name
     local padW = 4
-    local padH = 2
+    local padH = 1
     local w = font:getWidth(text) + padW * 2
-    local h = font:getHeight() + padH * 1
+    local h = font:getHeight() + padH * 0
     if not noDraw then
         lg.setColor(trait.color:getRGBA())
         ui.drawSingleColorPanel(x, y, w, h)

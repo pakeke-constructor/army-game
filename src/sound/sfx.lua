@@ -67,10 +67,6 @@ end
 ---@param pitchVar number?
 ---@param volumeVar number?
 function sfx.play(soundname, pitch, volume, pitchVar, volumeVar)
-    if g.isBeingSimulated() then
-        return false
-    end
-
     if numSoundsPlayedThisFrame > MAX_SOUNDS_PER_FRAME then
         return
     end

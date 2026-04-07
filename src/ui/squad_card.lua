@@ -65,9 +65,10 @@ local function drawSquadCard(squadId, region)
     box:add({
         getHeight = function(innerW)
             local titleH = TITLE_FONT:getHeight()
+            local countHeight = STAT_FONT:getHeight()
             local textW = innerW - iconSize - iconGap
             local traitsH = (#traits > 0) and (ui.drawTraitBoxes(traits, 0, 0, textW, true) + 2) or 0
-            return math.max(iconSize, titleH + traitsH)
+            return math.max(iconSize + iconGap/2 + countHeight, titleH + traitsH)
         end,
         draw = function(ex, ey, ew, eh)
             -- icon
@@ -76,6 +77,11 @@ local function drawSquadCard(squadId, region)
             -- name to right of icon
             local textX = ex + iconSize + iconGap
             local textW = ew - iconSize - iconGap
+
+            love.graphics.setColor(1, 1, 1)
+            love.graphics.setFont(STAT_FONT)
+            richtext.printRich("x" .. tostring(info.count), STAT_FONT, ex + 4, ey + iconSize+iconGap/2, ew, "left")
+
             love.graphics.setColor(1, 1, 1)
             love.graphics.setFont(TITLE_FONT)
             local name = "{c r=0.8 g=0.8 b=0.85}{wavy amp=0.5 freq=1}" .. info.name
@@ -89,14 +95,14 @@ local function drawSquadCard(squadId, region)
     })
 
     -- Count line
-    box:add({
-        getHeight = function() return STAT_FONT:getHeight() end,
-        draw = function(ex, ey, ew, eh)
-            love.graphics.setColor(1, 1, 1)
-            love.graphics.setFont(STAT_FONT)
-            richtext.printRich("x" .. tostring(info.count), STAT_FONT, ex, ey, ew, "left")
-        end,
-    })
+    -- box:add({
+    --     getHeight = function() return  end,
+    --     draw = function(ex, ey, ew, eh)
+    --         love.graphics.setColor(1, 1, 1)
+    --         love.graphics.setFont(STAT_FONT)
+    --         richtext.printRich("x" .. tostring(info.count), STAT_FONT, ex, ey, ew, "left")
+    --     end,
+    -- })
 
     -- Stats: 3 wide, 2 high grid
     local statCellH = 22
