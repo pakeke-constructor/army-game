@@ -6,27 +6,11 @@
 
 ### OK:: what do we need for a minimum-playable game?
 
-- Add squad-select UI
-- ==> add `importance` to stats
-- ==> make non-important stats grayed
-- ==> add food-count below icon
-- ==> make `x 4` unit count better, clearer
-- ==> wire up actual unit name
-
 - Add blessing-select UI
-
-
-- Create an example squad
-- Create an example perk
-- Create an example blessing
-
-
-- Wire up perks to squads
 
 
 - Plan enemy encounter system.
 
-- Clear / regenerate the world ECS when leaving/entering world-scene (much more robust for saving)
 
 - Make it so weapons can be held/used
 
