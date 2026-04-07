@@ -335,11 +335,13 @@ end
 
 -- We cannot use g.walkDirectory because we need all the files first then register
 -- the BGM in one go using `bgm.register`.
+--[[
 registerBGMFromDirectories("assets/bgm/boss", g.BGMID.BOSS, false)
 registerBGMFromDirectories("assets/bgm/customization", g.BGMID.CUSTOMIZATION, true)
 registerBGMFromDirectories("assets/bgm/ambient", g.BGMID.AMBIENT, true)
 registerBGMFromDirectories("assets/bgm/map", g.BGMID.MAP, true)
 registerBGMFromDirectories("assets/bgm/ambient", g.BGMID.TITLE, true)
+]]
 
 
 ---Request playing specific BGM ID

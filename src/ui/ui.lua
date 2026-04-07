@@ -213,6 +213,32 @@ function ui.drawTraitBox(trait, x, y)
 end
 
 
+---@param traitlist g.Trait[]
+---@param x number
+---@param y number
+---@param w number
+---@return number h
+function ui.drawTraitBoxes(traitlist, x, y, w)
+    local gap = 4
+    local cx, cy = x, y
+    local lineH = 0
+    for _, trait in ipairs(traitlist) do
+        local tw, th = ui.drawTraitBox(trait, cx, cy)
+        lineH = math.max(lineH, th)
+        cx = cx + tw + gap
+        if cx - x > w and cx ~= x + tw + gap then
+            -- wrap: redraw this trait on next line
+            cy = cy + lineH + gap
+            cx = x
+            tw, th = ui.drawTraitBox(trait, cx, cy)
+            lineH = th
+            cx = cx + tw + gap
+        end
+    end
+    return (cy - y) + lineH
+end
+
+
 local simpleUIPanel = nil
 ---@param x number
 ---@param y number

@@ -42,37 +42,35 @@ local function drawSquadCard(squadId, region)
         ui.drawPanel(x, y, w, h)
     end)
 
-    -- Header: icon + name + traits
+    -- Header: icon on left, name + traits on right
     local iconSize = 32
+    local iconGap = 10
+    local traits = def.traits or {}
     box:add({
-        getHeight = function() return iconSize end,
+        getHeight = function()
+            -- title line + traits (estimate; at least iconSize)
+            local titleH = TITLE_FONT:getHeight()
+            local traitsH = (#traits > 0) and (STAT_FONT:getHeight() + 4) or 0
+            return math.max(iconSize, titleH + traitsH)
+        end,
         draw = function(ex, ey, ew, eh)
             -- icon
             love.graphics.setColor(1, 1, 1)
             g.drawImageContained(info.icon, ex, ey, iconSize, iconSize)
-            -- name
+            -- name to right of icon
+            local textX = ex + iconSize + iconGap
+            local textW = ew - iconSize - iconGap
             love.graphics.setColor(1, 1, 1)
             love.graphics.setFont(TITLE_FONT)
-            local nameX = ex + iconSize + 10
             local name = "{wavy amp=0.5 freq=1}" .. info.name
-            richtext.printRich(name, TITLE_FONT, nameX, ey + eh / 2 - TITLE_FONT:getHeight() / 2, ew - iconSize - 4, "left")
+            richtext.printRich(name, TITLE_FONT, textX, ey, textW, "left")
+            -- traits below name
+            if #traits > 0 then
+                local traitsY = ey + TITLE_FONT:getHeight() + 2
+                ui.drawTraitBoxes(traits, textX, traitsY, textW)
+            end
         end,
     })
-
-    -- Traits row
-    local traits = def.traits or {}
-    if #traits > 0 then
-        box:add({
-            getHeight = function() return STAT_FONT:getHeight() + 8 end,
-            draw = function(ex, ey, ew, eh)
-                local tx = ex
-                for i, trait in ipairs(traits)do
-                    local tw, th = ui.drawTraitBox(trait, tx, ey)
-                    tx = tx + tw + 4
-                end
-            end,
-        })
-    end
 
     -- Count line
     box:add({
