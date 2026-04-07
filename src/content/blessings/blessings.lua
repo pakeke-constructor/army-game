@@ -1,34 +1,19 @@
-local LOC_IRON_HIDE = loc("Iron Hide")
-local LOC_IRON_HIDE_DESC = loc("All units take 3 less damage from attacks.")
 
-local LOC_GOLDEN_COFFERS = loc("Golden Coffers")
-local LOC_GOLDEN_COFFERS_DESC = loc("Gain 50% more money from all sources.")
-
-local LOC_SWIFT_FEET = loc("Swift Feet")
-local LOC_SWIFT_FEET_DESC = loc("All spells cool down 20% faster.")
-
-local LOC_BLOOD_TITHE = loc("Blood Tithe")
-local LOC_BLOOD_TITHE_DESC = loc("Gain 5 gold after winning a battle.")
-
-local LOC_BARRAGE = loc("Barrage")
-local LOC_BARRAGE_DESC = loc("All ranged units fire 1 extra projectile.")
-
-
-g.defineBlessing("iron_hide", {
-    name = LOC_IRON_HIDE,
-    description = LOC_IRON_HIDE_DESC,
+g.defineBlessing("iron_hide", "Iron Hide", {
+    description = loc("Allies take 3 less damage from attacks."),
     image = "coin_icon",
     rarity = g.RARITIES.UNCOMMON,
     handlers = {
         getDamageReduction = function(ent)
-            return 3
+            if ent.team == "ally" then
+                return 3
+            end
         end,
     },
 })
 
-g.defineBlessing("golden_coffers", {
-    name = LOC_GOLDEN_COFFERS,
-    description = LOC_GOLDEN_COFFERS_DESC,
+g.defineBlessing("golden_coffers", "Golden Coffers", {
+    description = loc("Gain 50% more money from all sources."),
     image = "coin_icon",
     rarity = g.RARITIES.RARE,
     handlers = {
@@ -38,9 +23,8 @@ g.defineBlessing("golden_coffers", {
     },
 })
 
-g.defineBlessing("swift_feet", {
-    name = LOC_SWIFT_FEET,
-    description = LOC_SWIFT_FEET_DESC,
+g.defineBlessing("swift_feet", "Swift Feet", {
+    description = loc("spells cool down 20% faster."),
     image = "coin_icon",
     rarity = g.RARITIES.COMMON,
     handlers = {
@@ -50,9 +34,8 @@ g.defineBlessing("swift_feet", {
     },
 })
 
-g.defineBlessing("blood_tithe", {
-    name = LOC_BLOOD_TITHE,
-    description = LOC_BLOOD_TITHE_DESC,
+g.defineBlessing("blood_tithe", "Blood Tithe", {
+    description = loc("Gain 5 gold after winning a battle."),
     image = "coin_icon",
     rarity = g.RARITIES.UNCOMMON,
     handlers = {
@@ -63,9 +46,8 @@ g.defineBlessing("blood_tithe", {
     },
 })
 
-g.defineBlessing("barrage", {
-    name = LOC_BARRAGE,
-    description = LOC_BARRAGE_DESC,
+g.defineBlessing("barrage", "Barrage", {
+    description = loc("All ranged units fire 1 extra projectile."),
     image = "coin_icon",
     rarity = g.RARITIES.LEGENDARY,
     handlers = {

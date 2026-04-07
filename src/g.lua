@@ -11,6 +11,7 @@
 
 ---@class g.PerkInfo
 ---@field id string
+---@field description string
 ---@field image string
 ---@field handlers table<string, function>
 
@@ -498,9 +499,13 @@ local BLESSING_DEFS = {}
 local BLESSING_LIST = {}
 
 ---@param id string
----@param info g.BlessingInfo
-function g.defineBlessing(id, info)
+---@param name string
+---@param info g.BlessingInfo|{id:nil,name:nil}
+function g.defineBlessing(id, name, info)
     assert(not BLESSING_DEFS[id], "Duplicate blessing: " .. id)
+    info.name = loc(name, {}, {
+        context = "The name of a blessing"
+    })
     info.id = id
     BLESSING_DEFS[id] = info
     BLESSING_LIST[#BLESSING_LIST + 1] = id
@@ -546,9 +551,13 @@ end
 -- Perk system
 
 ---@param id string
----@param info g.PerkInfo
-function g.definePerk(id, info)
+---@param name string
+---@param info g.PerkInfo|{id:nil,name:nil}
+function g.definePerk(id, name, info)
     assert(not PERK_DEFS[id], "Duplicate perk: " .. id)
+    info.name = loc(name, {}, {
+        context = "The name of a perk"
+    })
     info.id = id
     PERK_DEFS[id] = info
     PERK_LIST[#PERK_LIST + 1] = id
