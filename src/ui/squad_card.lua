@@ -46,16 +46,6 @@ local function drawSquadCard(squadId, region)
         helper.gradientRect("vertical", bgCol1, darkCol, x, y, w, h)
         love.graphics.setColor(liteCol:getRGBA())
         ui.drawPanel(x, y, w, h)
-
-        -- Draw formation preview behind gradient
-        if def and def.image then
-            local cx, cy = x + w * (1/2), y + h * (3/4)
-            love.graphics.setColor(1, 1, 1, 0.55)
-            for i = 1, #formationOffsets do
-                local ox, oy = formationOffsets[i].x, formationOffsets[i].y
-                g.drawImage(def.image, cx + ox, cy + oy)
-            end
-        end
     end)
 
     -- Header: icon on left, name + traits on right
@@ -94,15 +84,23 @@ local function drawSquadCard(squadId, region)
         end,
     })
 
-    -- Count line
-    -- box:add({
-    --     getHeight = function() return  end,
-    --     draw = function(ex, ey, ew, eh)
-    --         love.graphics.setColor(1, 1, 1)
-    --         love.graphics.setFont(STAT_FONT)
-    --         richtext.printRich("x" .. tostring(info.count), STAT_FONT, ex, ey, ew, "left")
-    --     end,
-    -- })
+    -- squad-units: Layed out in a simple line.
+    box:add({
+        getHeight = function()
+
+        end,
+        draw = function(ex, ey, ew, eh)
+            -- Draw formation preview behind gradient
+            if def and def.image then
+                local cx, cy = x + w * (1/2), y + h * (3/4)
+                love.graphics.setColor(1, 1, 1, 0.55)
+                for i = 1, #formationOffsets do
+                    local ox, oy = formationOffsets[i].x, formationOffsets[i].y
+                    g.drawImage(def.image, cx + ox, cy + oy)
+                end
+            end
+        end
+    })
 
     -- Stats: 3 wide, 2 high grid
     local statCellH = 22
