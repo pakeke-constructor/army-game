@@ -110,6 +110,16 @@ function g.getImageQuad(imageName)
     return quad
 end
 
+
+---@param imageName string
+---@return number w
+---@return number h
+function g.getImageSize(imageName)
+    local quad = g.getImageQuad(imageName)
+    local _, _, w, h = quad:getViewport()
+    return w, h
+end
+
 ---@param imageName any
 ---@return boolean
 function g.isImage(imageName)

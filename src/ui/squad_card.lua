@@ -1,6 +1,4 @@
 
-local Squad = require("src.Squad")
-
 local STAT_LIST = {
     {id = "maxHealth", label = "HP"},
     {id = "attackDamage", label = "DMG"},
@@ -36,9 +34,6 @@ local function drawSquadCard(squadId, region)
 
     STAT_FONT = STAT_FONT or g.getSmallFont(16)
     TITLE_FONT = TITLE_FONT or g.getBigFont(16)
-
-    -- Formation preview offsets (computed once per card)
-    local formationOffsets = Squad.FORMATIONS.square(info.count or 1, consts.SQUAD_SPACING)
 
     local box = ui.Box({maxWidth = w, padding = 12, spacing = 4}, function(bx, by, bw, bh)
 
@@ -84,20 +79,23 @@ local function drawSquadCard(squadId, region)
         end,
     })
 
-    -- squad-units: Layed out in a simple line.
+    -- squad-units: Layed out in a flat horizontal line.
+    local unitGap = 2
+    local unitWidth, unitHeight = 0, 0
+    if def and def.image then
+        unitWidth, unitHeight = g.getImageSize(def.image)
+    end
     box:add({
-        getHeight = function()
-
-        end,
+        getHeight = function() return unitHeight + 4 end,
         draw = function(ex, ey, ew, eh)
-            -- Draw formation preview behind gradient
-            if def and def.image then
-                local cx, cy = x + w * (1/2), y + h * (3/4)
-                love.graphics.setColor(1, 1, 1, 0.55)
-                for i = 1, #formationOffsets do
-                    local ox, oy = formationOffsets[i].x, formationOffsets[i].y
-                    g.drawImage(def.image, cx + ox, cy + oy)
-                end
+            if unitHeight == 0 then return end
+            local count = info.count or 1
+            local totalW = count * unitWidth + (count - 1) * unitGap
+            local startX = ex + (ew - totalW) / 2
+            love.graphics.setColor(1, 1, 1, 0.85)
+            for i = 1, count do
+                local ux = startX + (i - 1) * (unitWidth + unitGap)
+                g.drawImageContained(def.image, ux, ey + 2, unitWidth, unitHeight)
             end
         end
     })
