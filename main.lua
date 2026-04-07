@@ -123,6 +123,7 @@ function love.load()
         love.keyboard.setTextInput(true)
     end
     g.loadImagesFrom("assets")
+    g.loadImagesFrom("src/content")
     g.requireFolder("src/entities")
     g.requireFolder("src/content")
     assertValid()

@@ -225,6 +225,7 @@ end
 
 ---@param self g.BattleScene
 local function drawCardSelect(self)
+    do return victoryPopup(self) end
     local lg = love.graphics
     local r = ui.getFullScreenRegion()
     local cardArea = r:padRatio(0.05, 0.1)
