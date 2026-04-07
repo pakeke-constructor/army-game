@@ -86,6 +86,7 @@ end
 
 function map_scene:pollHandlers()
     self.ecs:addSystemHandlers()
+    g.addBlessingHandlers()
 end
 
 local function enterNode(node)

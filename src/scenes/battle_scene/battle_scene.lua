@@ -42,6 +42,7 @@ end
 
 function battle_scene:pollHandlers()
     self.ecs:addSystemHandlers()
+    g.addBlessingHandlers()
 end
 
 function battle_scene:enter()

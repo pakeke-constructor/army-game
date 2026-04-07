@@ -93,13 +93,17 @@ There are 3 places where events/questions can be dispatched to:
 - Entity scope: If arg1.scope is a Scope object, calls arg1.scope:call or arg1.scope:ask. Used by perks/buffs.
 </event_question_bus>
 
-
-<catx11_reference>
-- _catx11 (folder `_catx11/**`) is an older standalone game kept in this repo.
-- It contains some patterns that are useful; hence why it's copied over.
-- Use it as a reference if asked. It has a CLAUDE.md file that explains the project.
-</catx11_reference>
-
+<localization>
+Do NOT add text to entities, blessings, or UI without wrapping it in a `loc()` call.
+Use `loc(txt, variables, context)` to translate text.
+Example:
+```lua
+BUTTON = loc("Pole button %{n}", {n = 5}, {
+  context = "As in, a button at the south pole"
+})
+```
+loc MUST be called at load-time, before the draw/update loop begins.
+</localization>
 
 
 <IMPORTANT-INSTRUCTIONS>

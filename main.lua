@@ -124,6 +124,7 @@ function love.load()
     end
     g.loadImagesFrom("assets")
     g.requireFolder("src/entities")
+    g.requireFolder("src/content")
     assertValid()
     sceneManager.loadScenes()
     sceneManager.gotoScene("title_scene")

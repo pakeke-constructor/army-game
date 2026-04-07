@@ -3,6 +3,9 @@
 ---@class g.BlessingInfo
 ---@field id string
 ---@field image string
+---@field description string
+---@field name string
+---@field rarity g.Rarity
 ---@field handlers table<string, function>
 
 
@@ -527,6 +530,17 @@ function g.removeBlessing(id)
         end
     end
     return false
+end
+
+function g.addBlessingHandlers()
+    if not g.hasRun() then return end
+    local run = g.getRun()
+    for i = 1, #run.blessings do
+        local info = BLESSING_DEFS[run.blessings[i]]
+        if info and info.handlers then
+            g.addHandler(info.handlers)
+        end
+    end
 end
 
 -- Perk system
@@ -1136,7 +1150,7 @@ local function newRarity(id, name, color)
 end
 
 
----@class g.rarities
+---@class _g._rarities
 g.RARITIES = {
     COMMON = newRarity("COMMON", "COMMON (I)", objects.Color.fromByteRGBA(99,99,99)),
     UNCOMMON = newRarity("UNCOMMON", "UNCOMMON (II)", objects.Color.fromByteRGBA(53,125,210)),
