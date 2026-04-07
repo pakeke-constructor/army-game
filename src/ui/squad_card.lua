@@ -11,8 +11,43 @@ local STAT_LIST = {
 local STAT_FONT = nil
 local TITLE_FONT = nil
 
+local PERK_FONT = nil
+local PERK_DESC_FONT = nil
+
 local function addPerk(box, perk)
-    -- TODO: fill in later
+    PERK_FONT = PERK_FONT or g.getBigFont(16)
+    PERK_DESC_FONT = PERK_DESC_FONT or g.getSmallFont(16)
+    local iconSize = 20
+    local gap = 6
+    -- icon + title row (centered)
+    box:add({
+        getHeight = function() return iconSize end,
+        draw = function(ex, ey, ew, eh)
+            local textW = PERK_FONT:getWidth(perk.name)
+            local totalW = iconSize + gap + textW
+            local sx = ex + (ew - totalW) / 2
+            love.graphics.setColor(1, 1, 1)
+            if perk.image and g.isImage(perk.image) then
+                g.drawImageContained(perk.image, sx, ey, iconSize, iconSize)
+            end
+            love.graphics.setFont(PERK_FONT)
+            love.graphics.setColor(0.9, 0.85, 0.6)
+            love.graphics.print(perk.name, sx + iconSize + gap, ey + iconSize / 2 - PERK_FONT:getHeight() / 2)
+        end,
+    })
+    -- description row
+    box:add({
+        getHeight = function(innerW)
+            love.graphics.setFont(PERK_DESC_FONT)
+            local _, lines = PERK_DESC_FONT:getWrap(perk.description, innerW)
+            return #lines * PERK_DESC_FONT:getHeight()
+        end,
+        draw = function(ex, ey, ew, eh)
+            love.graphics.setFont(PERK_DESC_FONT)
+            love.graphics.setColor(0.7, 0.7, 0.75)
+            love.graphics.printf(perk.description, ex, ey, ew, "center")
+        end,
+    })
 end
 
 ---Draw a single squad card in a kirigami region. Returns true if clicked.

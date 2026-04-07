@@ -89,9 +89,11 @@ local function spawnProjectile(attacker, target)
     local gravity = 2 * arcHeight / (flightTime * flightTime)
 
     for i = 1, count do
+        local spread = count > 1 and ((i - 1) / (count - 1) - 0.5) or 0
+        local angle = math.atan2(dy, dx) + spread * 0.3
         local ent = g.spawnEntity(projType, attacker.x, attacker.y)
-        ent.vx = (dx / dist) * projSpeed
-        ent.vy = (dy / dist) * projSpeed
+        ent.vx = math.cos(angle) * projSpeed
+        ent.vy = math.sin(angle) * projSpeed
         ent.z = 1
         ent.vz = vz
         ent.gravity = gravity

@@ -48,6 +48,7 @@ g.defineSquad("archer_squad", {
     entityId = "archer",
     count = 4,
     icon = "squadborder_gold",
+    perks = {"sharpshooter"},
 })
 
 
@@ -59,4 +60,5 @@ g.defineSquad("militia_squad", {
     rarity = g.RARITIES.UNCOMMON,
     count = 4,
     icon = "squadborder_gold",
+    perks = {"tough"},
 })
