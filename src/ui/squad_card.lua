@@ -63,10 +63,10 @@ local function drawSquadCard(squadId, region)
     local iconGap = 10
     local traits = def.traits or {}
     box:add({
-        getHeight = function()
-            -- title line + traits (estimate; at least iconSize)
+        getHeight = function(innerW)
             local titleH = TITLE_FONT:getHeight()
-            local traitsH = (#traits > 0) and (STAT_FONT:getHeight() + 4) or 0
+            local textW = innerW - iconSize - iconGap
+            local traitsH = (#traits > 0) and (ui.drawTraitBoxes(traits, 0, 0, textW, true) + 2) or 0
             return math.max(iconSize, titleH + traitsH)
         end,
         draw = function(ex, ey, ew, eh)

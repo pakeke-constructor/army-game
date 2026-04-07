@@ -219,8 +219,9 @@ end
 ---@param x number
 ---@param y number
 ---@param w number
+---@param noDraw? boolean
 ---@return number h
-function ui.drawTraitBoxes(traitlist, x, y, w)
+function ui.drawTraitBoxes(traitlist, x, y, w, noDraw)
     local gap = 4
     local cx, cy = x, y
     local lineH = 0
@@ -232,7 +233,9 @@ function ui.drawTraitBoxes(traitlist, x, y, w)
             cx = x
             lineH = th
         end
-        drawTraitBox(trait, cx, cy)
+        if not noDraw then
+            drawTraitBox(trait, cx, cy)
+        end
         cx = cx + tw + gap
     end
     return (cy - y) + lineH

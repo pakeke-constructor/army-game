@@ -66,7 +66,7 @@ function Box:render(x, y)
             local _, lines = richtext.getWrap(e.txt, e.font, innerW)
             h = lines * e.font:getHeight()
         elseif e.type == "custom" then
-            h = e.child.getHeight()
+            h = e.child.getHeight(innerW)
         else -- spacing
             h = e.h
         end
