@@ -1153,8 +1153,8 @@ end
 ---@class _g._rarities
 g.RARITIES = {
     COMMON = newRarity("COMMON", "COMMON (I)", objects.Color.fromByteRGBA(99,99,99)),
-    UNCOMMON = newRarity("UNCOMMON", "UNCOMMON (II)", objects.Color.fromByteRGBA(53,125,210)),
-    RARE = newRarity("RARE", "RARE (III)", objects.Color.fromByteRGBA(200,82,164)),
+    UNCOMMON = newRarity("UNCOMMON", "UNCOMMON (II)", objects.Color.fromByteRGBA(43,105,180)),
+    RARE = newRarity("RARE", "RARE (III)", objects.Color.fromByteRGBA(160,62,144)),
     LEGENDARY = newRarity("LEGENDARY", "LEGENDARY (IV)", objects.Color.fromByteRGBA(241,241,25)),
 
     UNIQUE = newRarity("UNIQUE", "UNIQUE", objects.Color.WHITE),
