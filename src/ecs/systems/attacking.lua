@@ -90,7 +90,7 @@ local function spawnProjectile(attacker, target)
 
     for i = 1, count do
         local spread = count > 1 and ((i - 1) / (count - 1) - 0.5) or 0
-        local angle = math.atan2(dy, dx) + spread * 0.3
+        local angle = math.atan2(dy, dx) + spread * 0.15
         local ent = g.spawnEntity(projType, attacker.x, attacker.y)
         ent.vx = math.cos(angle) * projSpeed
         ent.vy = math.sin(angle) * projSpeed

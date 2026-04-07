@@ -75,10 +75,10 @@ end
 
 local g
 
-function Squad:init(squadId)
+function Squad:init(squadId, def)
     self.squadId = squadId
     self.level = 1
-    self.perks = {}
+    self.perks = def and {unpack(def.perks)} or {}
     self.formation = "square"
     self.deployed = false
     self.icon = nil

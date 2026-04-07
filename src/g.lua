@@ -408,8 +408,8 @@ end
 ---@param squadId string
 ---@return g.Squad
 function g.newSquad(squadId)
-    assert(SQUAD_DEFS[squadId], "Unknown squad: " .. tostring(squadId))
-    return Squad(squadId)
+    local def = assert(SQUAD_DEFS[squadId], "Unknown squad: " .. tostring(squadId))
+    return Squad(squadId, def)
 end
 
 ---@param squad g.Squad
