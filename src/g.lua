@@ -684,6 +684,31 @@ function g.drawEntity(ent, x, y)
     end
 end
 
+---@param entityId string
+---@return number w, number h
+function g.getUnitDrawSize(entityId)
+    local def = g.getEntityDef(entityId)
+    if def and def.image then
+        return g.getImageSize(def.image)
+    end
+    return 10, 10
+end
+
+---@param entityId string
+---@param x number
+---@param y number
+---@param maxW number?
+---@param maxH number?
+function g.drawUnit(entityId, x, y, maxW, maxH)
+    local def = g.getEntityDef(entityId)
+    if not def or not def.image then return end
+    if maxW and maxH then
+        g.drawImageContained(def.image, x, y, maxW, maxH)
+    else
+        g.drawImage(def.image, x, y)
+    end
+end
+
 function g.getEntityDef(id)
     local mt = ENTITY_DEFS[id]
     return mt and mt.__index

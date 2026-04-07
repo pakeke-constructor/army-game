@@ -76,10 +76,7 @@ local function drawSquadCard(squadId, region)
 
     -- squad-units: Layed out in a flat horizontal line.
     local unitGap = 2
-    local unitWidth, unitHeight = 0, 0
-    if def and def.image then
-        unitWidth, unitHeight = g.getImageSize(def.image)
-    end
+    local unitWidth, unitHeight = g.getUnitDrawSize(info.entityId)
     box:add({
         getHeight = function() return unitHeight + 4 end,
         draw = function(ex, ey, ew, eh)
@@ -93,7 +90,7 @@ local function drawSquadCard(squadId, region)
             love.graphics.setColor(1, 1, 1, 0.85)
             for i = 1, count do
                 local ux = startX + (i - 1) * (unitWidth + unitGap)
-                g.drawImageContained(def.image, ux, ey + 2, unitWidth, unitHeight)
+                g.drawUnit(info.entityId, ux, ey + 2, unitWidth, unitHeight)
             end
         end
     })

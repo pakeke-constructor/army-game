@@ -257,16 +257,11 @@ function battle_scene:draw()
             local mx, my = love.mouse.getPosition()
             local wx, wy = self.camera:toWorld(mx, my)
             local info = g.getSquadInfo(sq.squadId)
-            local def = g.getEntityDef(info.entityId)
             local offsets = sq:getFormationOffsets()
             lg.setColor(0.2, 1, 0.3, 0.5)
             for i = 1, #offsets do
                 local ox, oy = offsets[i].x, offsets[i].y
-                if def and def.image then
-                    g.drawImage(def.image, wx + ox, wy + oy)
-                else
-                    lg.circle("fill", wx + ox, wy + oy, 5)
-                end
+                g.drawUnit(info.entityId, wx + ox, wy + oy)
             end
             lg.setColor(1, 1, 1, 1)
         end
