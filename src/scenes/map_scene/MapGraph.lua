@@ -19,9 +19,14 @@ STAGE-1: structure generation algorithm:
 - prune random edges
 
 STAGE-2: Node-generation (essentially 'filling in' the existing structure)
+- pass-1:
 - Make 25% of nodes enemy-nodes. 
-- Make 15% of nodes "special" nodes. Random choice between FeastNode, FountainNode for now. Will add more later
-- If there are any "special" nodes of the same type 
+- Make 15% of nodes "special" nodes. Random choice between FeastNode, FountainNode for now. (Will add more later)
+- pass-2:
+- Iterate over all enemy-nodes. 5% chance to increase difficulty by 2. 25% to increase difficulty by 1
+- Iterate over all enemy-nodes. For every node of difficulty 2: decrease difficulty by 1.
+- pass-3: Set pieces
+- (SKIP FOR NOW; WILL DO THIS IN FUTURE. Create a method stub so i dont forget)
 
 ]]
 

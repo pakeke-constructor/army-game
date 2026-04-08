@@ -52,6 +52,12 @@ function nodes.getClass(id)
     return NODE_TYPES[id]
 end
 
+---@param node MapNode
+---@return string
+function nodes.getType(node)
+    return getmetatable(node).nodeType
+end
+
 
 nodes.Node = Node
 
@@ -60,11 +66,21 @@ nodes.Node = Node
 -- BattleNode
 -------------------------------
 ---@class MapNode.BattleNode: MapNode
+---@field difficulty integer
 local BattleNode = nodes.newClass("battle")
 
+function BattleNode:init()
+    self.difficulty = 0
+    --[[
+    relative difficulty of node, relative to current level:
+    0 = normal enemy
+    1 = harder enemy
+    2 = elite-level enemy
+    ]]
+end
+
 function BattleNode:enter()
-    local sceneManager = require("src.scenes.sceneManager")
-    sceneManager.gotoScene("battle_scene")
+    g.gotoScene("battle_scene")
 end
 
 function BattleNode:draw(wx, wy)
@@ -100,6 +116,9 @@ nodes.FeastNode = FeastNode
 local FountainNode = nodes.newClass("fountain")
 
 function FountainNode:enter()
+    -- TODO:
+    -- in future, should offer options for player to get new spells,
+    -- or upgrade existing mana pool
 end
 
 function FountainNode:draw(wx, wy)
