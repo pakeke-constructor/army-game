@@ -22,13 +22,18 @@ proc generation algorithm:
 ---@field height integer
 ---@field nodes table<string, MapGraph.Node>
 ---@field edges table<string, true>
-local MapGraph = Class("MapGraph")
+local MapGraph = Class("g:MapGraph")
+
+
+---@alias MapGraph.NodeType "empty"|"enemy"|"shrine"|"feast"|"market"|"town"
 
 ---@class MapGraph.Node
 ---@field x integer grid x (centered around 0)
 ---@field y integer grid y (centered around 0)
 ---@field ox number visual offset x
 ---@field oy number visual offset y
+---@field seed number
+---@field data table
 ---@field nodeType string
 
 
@@ -70,14 +75,24 @@ function MapGraph:removeNode(x, y)
     end
 end
 
+
+---@param x number
+---@param y number
+---@return MapGraph.Node
 function MapGraph:getNode(x, y)
     return self.nodes[nodeKey(x, y)]
 end
 
+
+---@param x number
+---@param y number
+---@return boolean
 function MapGraph:hasNode(x, y)
     return self.nodes[nodeKey(x, y)] ~= nil
 end
 
+---@param x number
+---@param y number
 function MapGraph:setPlayerPosition(x, y)
     self.playerPosition = nodeKey(x, y)
 end
@@ -100,6 +115,9 @@ function MapGraph:hasEdge(ax, ay, bx, by)
 end
 
 --- Get all neighbors of a node
+---@param x number
+---@param y number
+---@return MapGraph.Node[]
 function MapGraph:getNeighbors(x, y)
     local result = {}
     local key = nodeKey(x, y)

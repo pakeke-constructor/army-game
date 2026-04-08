@@ -9,7 +9,8 @@
 - Add blessing-select UI
 
 
-- Plan enemy encounter system.
+- ~~Plan enemy encounter system.~~
+- Add example enemy-encounter
 
 
 - Make it so weapons can be held/used
