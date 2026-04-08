@@ -1,5 +1,6 @@
 
 local Class = require("src.modules.objects.Class")
+local nodes = require("src.scenes.map_scene.nodes")
 
 --[[
 
@@ -20,21 +21,12 @@ proc generation algorithm:
 ---@class MapGraph: objects.Class
 ---@field width integer
 ---@field height integer
----@field nodes table<string, MapGraph.Node>
+---@field nodes table<string, MapNode>
 ---@field edges table<string, true>
 local MapGraph = Class("g:MapGraph")
 
 
----@alias MapGraph.NodeType "empty"|"enemy"|"shrine"|"feast"|"market"|"town"
 
----@class MapGraph.Node
----@field x integer grid x (centered around 0)
----@field y integer grid y (centered around 0)
----@field ox number visual offset x
----@field oy number visual offset y
----@field seed number
----@field data table
----@field nodeType string
 
 
 local function nodeKey(x, y)
@@ -57,9 +49,16 @@ function MapGraph:init(width, height)
 end
 
 
+---@param x integer
+---@param y integer
+---@param nodeType string|MapNode a node type string or a Node class
 function MapGraph:addNode(x, y, nodeType)
     local key = nodeKey(x, y)
-    self.nodes[key] = { x = x, y = y, ox = 0, oy = 0, nodeType = nodeType or "battle" }
+    local NodeClass = type(nodeType) == "string" and nodes.getClass(nodeType) or nodeType
+    NodeClass = NodeClass or nodes.getClass("battle")
+    local node = NodeClass(x, y)
+    node.nodeType = NodeClass.nodeType or "battle"
+    self.nodes[key] = node
 end
 
 function MapGraph:removeNode(x, y)
@@ -78,7 +77,7 @@ end
 
 ---@param x number
 ---@param y number
----@return MapGraph.Node
+---@return MapNode
 function MapGraph:getNode(x, y)
     return self.nodes[nodeKey(x, y)]
 end
@@ -117,7 +116,7 @@ end
 --- Get all neighbors of a node
 ---@param x number
 ---@param y number
----@return MapGraph.Node[]
+---@return MapNode[]
 function MapGraph:getNeighbors(x, y)
     local result = {}
     local key = nodeKey(x, y)
@@ -328,7 +327,7 @@ end
 function MapGraph:serialize()
     local nodes = {}
     for key, node in pairs(self.nodes) do
-        nodes[key] = { x = node.x, y = node.y, ox = node.ox, oy = node.oy, nodeType = node.nodeType }
+        nodes[key] = node:serialize()
     end
     local edges = {}
     local i = 0
@@ -342,8 +341,8 @@ end
 --- Deserialize from a plain table
 function MapGraph.deserialize(data)
     local self = MapGraph(data.width, data.height)
-    for key, node in pairs(data.nodes) do
-        self.nodes[key] = { x = node.x, y = node.y, ox = node.ox or 0, oy = node.oy or 0, nodeType = node.nodeType }
+    for key, nodeData in pairs(data.nodes) do
+        self.nodes[key] = nodes.deserialize(nodeData)
     end
     for _, ek in ipairs(data.edges) do
         self.edges[ek] = true

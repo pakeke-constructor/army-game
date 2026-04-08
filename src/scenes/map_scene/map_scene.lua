@@ -31,8 +31,12 @@ end
 local function renderNode(graph, node, r, g_c, b_c, a_c, radius)
     local lg = love.graphics
     local nx, ny = getNodeWorldPos(graph, node)
-    lg.setColor(r, g_c, b_c, a_c or 1)
-    lg.circle("fill", nx, ny, radius or NODE_RADIUS)
+    if r then
+        lg.setColor(r, g_c, b_c, a_c or 1)
+        lg.circle("fill", nx, ny, radius or NODE_RADIUS)
+    else
+        node:draw(nx, ny)
+    end
 end
 
 local function getHoveredNode(graph, wx, wy)
@@ -90,9 +94,7 @@ function map_scene:pollHandlers()
 end
 
 local function enterNode(node)
-    -- For now, just enter a battle
-    local sceneManager = require("src.scenes.sceneManager")
-    sceneManager.gotoScene("battle_scene")
+    node:enter()
 end
 
 function map_scene:update(dt)
@@ -196,6 +198,12 @@ function map_scene:draw()
     local run = g.getRun()
     local graph = run.mapGraph
     if graph then
+        -- drawBelow (under edges)
+        graph:forEachNode(function(node)
+            local nx, ny = getNodeWorldPos(graph, node)
+            node:drawBelow(nx, ny)
+        end)
+
         -- edges
         graph:forEachEdge(function(a, b)
             renderEdge(graph, a, b, 0.4, 0.4, 0.4)
@@ -203,7 +211,7 @@ function map_scene:draw()
 
         -- nodes
         graph:forEachNode(function(node)
-            renderNode(graph, node, 0.6, 0.6, 0.6)
+            renderNode(graph, node)
         end)
 
         -- hover highlight: path from player to hovered node
