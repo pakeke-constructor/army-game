@@ -46,8 +46,7 @@ local function renderSquad(sq, x, y, size, selected)
     else
         lg.setColor(1, 1, 1)
     end
-    local img = sq:getIcon()
-    g.drawImageContained(img, x, y, size, size)
+    g.drawSquadIcon(sq.squadId, x, y, size, size)
 end
 
 ---@param opt g.hudArgs

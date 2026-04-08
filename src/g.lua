@@ -185,6 +185,32 @@ function g.drawImageContained(imageName, x, y, w, h, rot)
     atlas:draw(quad, centerX + scaledW/2, centerY + scaledH/2, rot or 0, scale, scale, qw/2, qh/2)
 end
 
+---@param squadId string
+---@param x number
+---@param y number
+---@param w number?
+---@param h number?
+function g.drawSquadIcon(squadId, x, y, w, h)
+    local info = g.getSquadInfo(squadId)
+    local rarityColor = (info.rarity or g.RARITIES.COMMON).color
+    if w and h then
+        local bq = g.getImageQuad("squadicon_border")
+        local _,_,bw,bh = bq:getViewport()
+        local scale = math.min(w / bw, h / bh)
+        local iq = g.getImageQuad(info.icon)
+        local _,_,iw,ih = iq:getViewport()
+        love.graphics.setColor(1, 1, 1)
+        atlas:draw(iq, x + w/2, y + h/2, 0, scale, scale, iw/2, ih/2)
+        love.graphics.setColor(rarityColor:getRGBA())
+        atlas:draw(bq, x + w/2, y + h/2, 0, scale, scale, bw/2, bh/2)
+    else
+        love.graphics.setColor(1, 1, 1)
+        g.drawImage(info.icon, x, y)
+        love.graphics.setColor(rarityColor:getRGBA())
+        g.drawImage("squadicon_border", x, y)
+    end
+end
+
 ---@param path string
 ---@param func fun(path: string)
 function g.walkDirectory(path, func)
