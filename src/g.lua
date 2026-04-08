@@ -199,15 +199,19 @@ function g.drawSquadIcon(squadId, x, y, w, h)
         local scale = math.min(w / bw, h / bh)
         local iq = g.getImageQuad(info.icon)
         local _,_,iw,ih = iq:getViewport()
-        love.graphics.setColor(1, 1, 1)
+        local c = gsman.mulColor(1, 1, 1)
         atlas:draw(iq, x + w/2, y + h/2, 0, scale, scale, iw/2, ih/2)
-        love.graphics.setColor(rarityColor:getRGBA())
+        c:pop()
+        c = gsman.mulColor(rarityColor:getRGBA())
         atlas:draw(bq, x + w/2, y + h/2, 0, scale, scale, bw/2, bh/2)
+        c:pop()
     else
-        love.graphics.setColor(1, 1, 1)
+        local c = gsman.mulColor(1, 1, 1)
         g.drawImage(info.icon, x, y)
-        love.graphics.setColor(rarityColor:getRGBA())
+        c:pop()
+        c = gsman.mulColor(rarityColor:getRGBA())
         g.drawImage("squadicon_border", x, y)
+        c:pop()
     end
 end
 

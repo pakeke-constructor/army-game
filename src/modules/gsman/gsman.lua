@@ -1,4 +1,21 @@
 -- Graphics state maanger
+--
+-- Example:
+-- local c = gsman.setColor(1, 0, 1)
+-- love.graphics.rectangle("fill", 0, 0, 10, 10)
+-- c:pop()
+--
+-- local c = gsman.mulColor(0.5, 1, 1)
+-- love.graphics.rectangle("fill", 0, 0, 10, 10)
+-- c:pop()
+--
+-- local t = gsman.translate(10, 20)
+-- love.graphics.rectangle("fill", 0, 0, 10, 10)
+-- t:pop()
+--
+-- local lw = gsman.setLineWidth(3)
+-- love.graphics.rectangle("line", 0, 0, 10, 10)
+-- lw:pop()
 
 local love = require("love")
 

@@ -176,57 +176,8 @@ function battle_scene:keypressed(k)
     end
 end
 
-local VICTORY_COL1 = objects.Color(0.12, 0.08, 0.20)
-local VICTORY_COL2 = objects.Color(0.06, 0.04, 0.14)
-
-local function victoryPopup(self)
-    local r = ui.getScreenRegion()
-    iml.panel(r:get())
-
-    local progress = math.min(1, self.victoryPopupTime / VICTORY_FADE_IN)
-
-    -- darken background
-    love.graphics.setColor(0, 0, 0, 0.6 * progress)
-    love.graphics.rectangle("fill", r:get())
-
-    -- popup area
-    local popup = r:padRatio(0.15 + (1 - progress) * 0.1)
-    local panelArea = popup
-
-    -- panel background
-    love.graphics.setColor(1, 1, 1)
-    helper.gradientRect("horizontal", VICTORY_COL1, VICTORY_COL2, panelArea:get())
-    ui.drawSingleColorPanel(panelArea:get())
-
-    -- title text
-    love.graphics.setColor(1, 1, 1)
-    local font = g.getSmallFont(16)
-    love.graphics.setFont(font)
-    local titleArea, cardsArea = panelArea:splitVertical(0.2, 0.8)
-    local tx, ty, tw, th = titleArea:padRatio(0.3):get()
-    love.graphics.printf("Victory!", tx, ty + th / 2 - font:getHeight() / 2, tw, "center")
-
-    local cardArea = cardsArea:padRatio(0.05, 0.1)
-    local c1, c2, c3 = cardArea:splitHorizontal(1, 1, 1)
-    local choices = self.squadChoices or {}
-    local regions = {c1, c2, c3}
-    for i = 1, #regions do
-        local id = choices[i]
-        if id then
-            if ui.drawSquadCard(id, regions[i]) then
-                g.addSquadToArmy(g.newSquad(id))
-                g.gotoScene("map_scene")
-            end
-        end
-    end
-end
-
-
-
 ---@param self g.BattleScene
 local function drawCardSelect(self)
-    do return victoryPopup(self) end
-    local lg = love.graphics
     local r = ui.getFullScreenRegion()
     local cardArea = r:padRatio(0.05, 0.1)
     local c1, c2, c3 = cardArea:splitHorizontal(1, 1, 1)

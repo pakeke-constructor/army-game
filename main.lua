@@ -68,6 +68,7 @@ _G.objects = require("src.modules.objects.objects")
 _G.helper = require("src.modules.helper.helper")
 _G.richtext = require("src.modules.richtext.exports")
 _G.localization = require("src.modules.localization")
+_G.gsman = require("src.modules.gsman.gsman")
 _G.loc = _G.localization.localize
 _G.interp = _G.localization.newInterpolator
 _G.iml = require("lib.iml.iml")
