@@ -254,6 +254,10 @@ function MapGraph.generate(args, rng)
         end
     end
 
+    -- STAGE 2: Node generation
+    self:setPlayerPosition(0, 0)
+    self:_generateNodes(rng)
+
     -- 7. Random visual offsets per node
     local maxOff = args.distanceBetweenNodes * args.nodeOffsetFactor
     for _, node in pairs(self.nodes) do
@@ -261,14 +265,9 @@ function MapGraph.generate(args, rng)
         node.oy = (rng() - 0.5) * 2 * maxOff
     end
 
-    -- 8. Player starts at center
-    self:setPlayerPosition(0, 0)
-
-    -- STAGE 2: Node generation
-    self:_generateNodes(rng)
-
     return self
 end
+
 
 
 local SPECIAL_NODES = {"feast", "fountain"}

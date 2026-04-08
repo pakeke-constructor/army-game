@@ -69,7 +69,8 @@ nodes.Node = Node
 ---@field difficulty integer
 local BattleNode = nodes.newClass("battle")
 
-function BattleNode:init()
+function BattleNode:init(x,y)
+    Node.init(self,x,y)
     self.difficulty = 0
     --[[
     relative difficulty of node, relative to current level:
@@ -103,7 +104,8 @@ function FeastNode:enter()
 end
 
 function FeastNode:draw(wx, wy)
-    g.drawImage("map/nodes/node_banquet", wx, wy)
+    lg.setColor(1,1,1)
+    g.drawImage("node_banquet", wx, wy)
 end
 
 nodes.FeastNode = FeastNode
@@ -122,7 +124,8 @@ function FountainNode:enter()
 end
 
 function FountainNode:draw(wx, wy)
-    g.drawImage("map/nodes/node_fountain", wx, wy)
+    lg.setColor(1,1,1)
+    g.drawImage("node_fountain", wx, wy)
 end
 
 nodes.FountainNode = FountainNode

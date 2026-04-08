@@ -67,7 +67,7 @@ function map_scene:enter()
             height = 30,
             nodePruneChance = 0.2,
             edgePruneChance = 0.02,
-            distanceBetweenNodes = 64,
+            distanceBetweenNodes = 100,
             randomDiagonalChance = 0.4,
             nodeOffsetFactor = 0.35,
             scaleX = 1,
