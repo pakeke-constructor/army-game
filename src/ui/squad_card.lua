@@ -61,7 +61,8 @@ local function drawSquadCard(squadId, region)
     local def = g.getEntityDef(info.entityId)
     local rarity = info.rarity or g.RARITIES.COMMON
     local darkCol = rarity.darkColor
-    local liteCol = rarity.color
+    local liteCol = rarity.lightColor
+    local col = rarity.color
     local bgCol1 = objects.Color(0.05, 0.05, 0.06, 0.7)
 
     local x, y, w, h = region:get()
@@ -72,10 +73,14 @@ local function drawSquadCard(squadId, region)
 
     local box = ui.Box({maxWidth = w, padding = 12, spacing = 8}, function(bx, by, bw, bh)
 
-        love.graphics.setColor(1, 1, 1)
+        love.graphics.setColor(0,0,0)
+        ui.drawPanel(x-3,y-3, w+6,h+6)
+        love.graphics.setColor(1,1,1)
         helper.gradientRect("vertical", bgCol1, darkCol, x, y, w, h)
-        love.graphics.setColor(liteCol:getRGBA())
         ui.drawPanel(x, y, w, h)
+        helper.gradientRectStencil("vertical", col, darkCol, x, y, w, h, function()
+            ui.drawPanel(x, y, w, h)
+        end)
     end)
 
     -- Header: icon on left, name + traits on right

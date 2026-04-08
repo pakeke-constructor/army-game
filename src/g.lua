@@ -1153,6 +1153,13 @@ local function darkenColor(col, val)
     return objects.Color(nr, ng, nb, a)
 end
 
+local function lightenColor(col, val)
+    local a = select(4, col:getRGBA())
+    local h, s, v = col:getHSV()
+    local nr, ng, nb = objects.Color.HSVtoRGB(h, math.max(0, s - val), math.min(1, v + val))
+    return objects.Color(nr, ng, nb, a)
+end
+
 ---@param id string
 ---@param name string
 ---@param color objects.Color
@@ -1182,7 +1189,8 @@ local function newRarity(id, name, color)
             context = "Represents a rarity with roman numerals, as in `UNCOMMON (II)` or `RARE (III)`."
         }),
         color = color,
-        darkColor = darkenColor(color, 0.45)
+        darkColor = darkenColor(color, 0.45),
+        lightColor = lightenColor(color, 0.3)
     }
 
     return rar

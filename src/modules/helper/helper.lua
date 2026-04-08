@@ -475,6 +475,56 @@ function helper.gradientRect(dir, col1, col2, x,y,w,h)
     love.graphics.draw(mesh, x,y, 0, w,h)
 end
 
+---@param dir "vertical"|"horizontal"
+---@param col1 objects.Color|[number,number,number,number?]
+---@param col2 objects.Color|[number,number,number,number?]
+---@param x number
+---@param y number
+---@param w number
+---@param h number
+---@param lineWidth? number
+function helper.gradientOutlineRect(dir, col1, col2, x,y,w,h, lineWidth)
+    local lw = lineWidth or 1
+    if dir == "vertical" then
+        helper.gradientRect("vertical", col1, col2, x, y, lw, h)         -- left
+        helper.gradientRect("vertical", col1, col2, x+w-lw, y, lw, h)   -- right
+        helper.gradientRect("horizontal", col1, col1, x, y, w, lw)       -- top
+        helper.gradientRect("horizontal", col2, col2, x, y+h-lw, w, lw) -- bottom
+    else
+        helper.gradientRect("horizontal", col1, col2, x, y, w, lw)       -- top
+        helper.gradientRect("horizontal", col1, col2, x, y+h-lw, w, lw) -- bottom
+        helper.gradientRect("vertical", col1, col1, x, y, lw, h)         -- left
+        helper.gradientRect("vertical", col2, col2, x+w-lw, y, lw, h)   -- right
+    end
+end
+
+local alphaTestShader = love.graphics.newShader([[
+vec4 effect(vec4 color, Image tex, vec2 tc, vec2 sc) {
+    vec4 pixel = Texel(tex, tc) * color;
+    if (pixel.a < 0.01) discard;
+    return pixel;
+}
+]])
+
+---Draws a gradient rect, but clipped to whatever `drawFunc` draws as a stencil.
+---@param dir "vertical"|"horizontal"
+---@param col1 objects.Color|[number,number,number,number?]
+---@param col2 objects.Color|[number,number,number,number?]
+---@param x number
+---@param y number
+---@param w number
+---@param h number
+---@param drawFunc fun()
+function helper.gradientRectStencil(dir, col1, col2, x,y,w,h, drawFunc)
+    love.graphics.setStencilMode("draw", 1)
+    love.graphics.setShader(alphaTestShader)
+    drawFunc()
+    love.graphics.setShader()
+    love.graphics.setStencilMode("test", 1)
+    helper.gradientRect(dir, col1, col2, x, y, w, h)
+    love.graphics.setStencilMode()
+end
+
 end
 
 
