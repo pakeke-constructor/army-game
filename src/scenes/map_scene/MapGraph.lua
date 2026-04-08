@@ -9,12 +9,19 @@ MapGraph
 Stores a big (serializable) map of nodes, for world-map.
 Each node is a map-location.
 
-proc generation algorithm:
+
+Procedural generation is done in 2 stages:
+STAGE-1: structure generation algorithm:
 - generate a big grid of nodes (N x M)
 - connect all nodes to each other (lattice)
 - connect diagonals randomly (but no overlaps; it's either south-east, or south-west)
 - prune random nodes (punch holes in map)
 - prune random edges
+
+STAGE-2: Node-generation (essentially 'filling in' the existing structure)
+- Make 25% of nodes enemy-nodes. 
+- Make 15% of nodes "special" nodes. Random choice between FeastNode, FountainNode for now. Will add more later
+- If there are any "special" nodes of the same type 
 
 ]]
 
@@ -323,11 +330,25 @@ function MapGraph:forEachEdge(fn)
 end
 
 
+local function serializeNode(node)
+    local data = {}
+    for k, v in pairs(node) do
+        data[k] = v
+    end
+    data.nodeType = node.nodeType
+    return data
+end
+
+local function deserializeNode(data)
+    local cls = nodes.getClass(data.nodeType) or nodes.getClass("battle")
+    return setmetatable(data, cls)
+end
+
 --- Serialize to a plain table (no metatables)
 function MapGraph:serialize()
-    local nodes = {}
+    local serializedNodes = {}
     for key, node in pairs(self.nodes) do
-        nodes[key] = node:serialize()
+        serializedNodes[key] = serializeNode(node)
     end
     local edges = {}
     local i = 0
@@ -335,14 +356,14 @@ function MapGraph:serialize()
         i = i + 1
         edges[i] = ek
     end
-    return { width = self.width, height = self.height, distanceBetweenNodes = self.distanceBetweenNodes, scaleX = self.scaleX, scaleY = self.scaleY, nodes = nodes, edges = edges, playerPosition = self.playerPosition }
+    return { width = self.width, height = self.height, distanceBetweenNodes = self.distanceBetweenNodes, scaleX = self.scaleX, scaleY = self.scaleY, nodes = serializedNodes, edges = edges, playerPosition = self.playerPosition }
 end
 
 --- Deserialize from a plain table
 function MapGraph.deserialize(data)
     local self = MapGraph(data.width, data.height)
     for key, nodeData in pairs(data.nodes) do
-        self.nodes[key] = nodes.deserialize(nodeData)
+        self.nodes[key] = deserializeNode(nodeData)
     end
     for _, ek in ipairs(data.edges) do
         self.edges[ek] = true

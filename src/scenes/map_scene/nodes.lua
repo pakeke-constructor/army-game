@@ -30,22 +30,6 @@ end
 function Node:drawBelow(wx, wy)
 end
 
----@return table
-function Node:serialize()
-    return { x = self.x, y = self.y, ox = self.ox, oy = self.oy, nodeType = self.nodeType }
-end
-
---- Override in subclasses to restore extra fields.
----@param data table
----@return MapNode
-function Node:fromData(data)
-    local n = self(data.x, data.y)
-    n.ox = data.ox or 0
-    n.oy = data.oy or 0
-    n.nodeType = data.nodeType
-    return n
-end
-
 
 -- Registry + module
 local nodes = {}
@@ -56,6 +40,7 @@ local NODE_TYPES = {}
 ---@return MapNode
 function nodes.newClass(id)
     local cls = Class("g:MapNode." .. id):implement(Node)
+    ---@cast cls any
     cls.nodeType = id
     NODE_TYPES[id] = cls
     return cls
@@ -67,12 +52,6 @@ function nodes.getClass(id)
     return NODE_TYPES[id]
 end
 
----@param data table
----@return MapNode
-function nodes.deserialize(data)
-    local cls = NODE_TYPES[data.nodeType] or NODE_TYPES["battle"]
-    return cls:fromData(data)
-end
 
 nodes.Node = Node
 
@@ -80,6 +59,7 @@ nodes.Node = Node
 -------------------------------
 -- BattleNode
 -------------------------------
+---@class MapNode.BattleNode: MapNode
 local BattleNode = nodes.newClass("battle")
 
 function BattleNode:enter()
@@ -93,5 +73,39 @@ function BattleNode:draw(wx, wy)
 end
 
 nodes.BattleNode = BattleNode
+
+
+-------------------------------
+-- FeastNode
+-------------------------------
+---@class MapNode.FeastNode: MapNode
+local FeastNode = nodes.newClass("feast")
+
+function FeastNode:enter()
+    local run = g.getRun()
+    run.food = run.maxFood
+end
+
+function FeastNode:draw(wx, wy)
+    g.drawImage("map/nodes/node_banquet", wx, wy)
+end
+
+nodes.FeastNode = FeastNode
+
+
+-------------------------------
+-- FountainNode
+-------------------------------
+---@class MapNode.FountainNode: MapNode
+local FountainNode = nodes.newClass("fountain")
+
+function FountainNode:enter()
+end
+
+function FountainNode:draw(wx, wy)
+    g.drawImage("map/nodes/node_fountain", wx, wy)
+end
+
+nodes.FountainNode = FountainNode
 
 return nodes
