@@ -127,4 +127,25 @@ end
 
 nodes.FountainNode = FountainNode
 
+
+
+
+-------------------------------
+-- EmptyNode
+-------------------------------
+---@class MapNode.EmptyNode: MapNode
+local EmptyNode = nodes.newClass("Empty")
+
+function EmptyNode:enter()
+    -- this node does nothing.
+end
+
+function EmptyNode:draw(wx, wy)
+    -- g.drawImage("map/nodes/node_fountain", wx, wy)
+end
+
+nodes.EmptyNode = EmptyNode
+
+
+
 return nodes

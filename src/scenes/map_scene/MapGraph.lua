@@ -264,7 +264,64 @@ function MapGraph.generate(args, rng)
     -- 8. Player starts at center
     self:setPlayerPosition(0, 0)
 
+    -- STAGE 2: Node generation
+    self:_generateNodes(rng)
+
     return self
+end
+
+
+local SPECIAL_NODES = {"feast", "fountain"}
+
+---@param rng fun():number
+function MapGraph:_generateNodes(rng)
+    local playerKey = self.playerPosition
+
+    -- pass-1: Assign node types.
+    -- 25% battle, 15% special (feast/fountain), 60% empty
+    for key, node in pairs(self.nodes) do
+        if key == playerKey then goto continue end
+        local r = rng()
+        if r < 0.25 then
+            -- stays as battle (already is)
+        elseif r < 0.40 then
+            local pick = SPECIAL_NODES[math.floor(rng() * #SPECIAL_NODES) + 1]
+            self:addNode(node.x, node.y, pick)
+        else
+            self:addNode(node.x, node.y, "Empty")
+        end
+        ::continue::
+    end
+
+    -- pass-2: Adjust battle node difficulty
+    -- 5% chance +2 difficulty, 25% chance +1 difficulty
+    -- Then clamp: any difficulty 2 nodes get reduced to 1
+    for _, node in pairs(self.nodes) do
+        if node.nodeType == "battle" then
+            ---@cast node MapNode.BattleNode
+            local r = rng()
+            if r < 0.05 then
+                node.difficulty = node.difficulty + 2
+            elseif r < 0.30 then
+                node.difficulty = node.difficulty + 1
+            end
+        end
+    end
+    for _, node in pairs(self.nodes) do
+        if node.nodeType == "battle" and node.difficulty >= 2 then
+            ---@cast node MapNode.BattleNode
+            node.difficulty = node.difficulty - 1
+        end
+    end
+
+    -- pass-3: Set pieces (TODO)
+    self:_placeSetPieces(rng)
+end
+
+
+---@param rng fun():number
+function MapGraph:_placeSetPieces(rng)
+    -- TODO: pass-3 implementation
 end
 
 
