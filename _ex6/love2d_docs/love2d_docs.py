@@ -234,10 +234,15 @@ for mod in _DATA.modules:
 
 
 def love2d_docs(query: str, verbosity: int = 0):
-    # "love.X" -> module
-    # "love.X.func" -> module function
-    # "TypeName" -> type lookup
-    # "TypeName:method" -> type method lookup
+    """
+    Look up Love2D API docs. Returns signatures, descriptions, and method lists.
+    You MUST use this
+    query formats:
+      love2d_docs("love.graphics")            - list module functions, types, enums
+      love2d_docs("love.graphics.newCanvas")  - look up a specific function
+      love2d_docs("Canvas")                   - look up a class/object and list its methods
+      love2d_docs("Canvas:getFilter")         - look up a specific method on a type
+    verbosity: 0 = signatures only (default), 1 = full descriptions + argument details."""
     parts = query.split(".")
 
     if parts[0] == "love" and len(parts) == 2:
