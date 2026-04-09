@@ -5,7 +5,6 @@ local M = {}
 ---@field radius number exclusion radius
 ---@field chance number per-cell roll chance
 ---@field image string? image name (used for draw + radius)
----@field draw fun(wx: number, wy: number)
 
 local registry = {}
 

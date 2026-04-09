@@ -78,7 +78,7 @@ function map_scene:enter()
             nodeOffsetFactor = 0.35,
             scaleX = 1,
             scaleY = 0.6,
-            decorTypes = {"mountain_large", "mountain_small_1", "mountain_small_2"},
+            decorTypes = {"mountain_large", "tree_large_1", "tree_small_1"},
         })
     end
 
@@ -219,7 +219,10 @@ function map_scene:draw()
         if self.decorList then
             for _, d in ipairs(self.decorList) do
                 local dtype = decor_types.get(d.decorType)
-                if dtype and dtype.draw then dtype.draw(d.x, d.y) end
+                if dtype and dtype.image then
+                    love.graphics.setColor(1, 1, 1, 1)
+                    g.drawImage(dtype.image, d.x, d.y)
+                end
             end
         end
 
