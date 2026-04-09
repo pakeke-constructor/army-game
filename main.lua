@@ -7,6 +7,7 @@ _G.table.clear = require("table.clear")
 
 
 lg.setDefaultFilter("nearest", "nearest")
+lg.setLineStyle("rough")
 
 
 

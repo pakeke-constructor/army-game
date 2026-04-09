@@ -25,7 +25,7 @@ local function renderEdge(graph, a, b, r, g_c, b_c, a_c, width)
     local ax, ay = getNodeWorldPos(graph, a)
     local bx, by = getNodeWorldPos(graph, b)
     lg.setColor(r, g_c, b_c, a_c or 1)
-    lg.setLineWidth(width or 2)
+    lg.setLineWidth(width or 6)
     lg.line(ax, ay, bx, by)
 end
 
@@ -228,10 +228,10 @@ function map_scene:draw()
                 local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, 7)
                 if path and #path >= 2 then
                     -- first edge bold yellow, rest pale yellow
-                    renderEdge(graph, path[1], path[2], 1, 1, 0.2, 1, 3)
+                    renderEdge(graph, path[1], path[2], 1, 1, 0.2, 1, 6)
                     renderNode(graph, path[2], 1, 1, 0.2, 1, NODE_RADIUS + 1)
                     for i = 2, #path - 1 do
-                        renderEdge(graph, path[i], path[i + 1], 1, 1, 0.2, 1, 2)
+                        renderEdge(graph, path[i], path[i + 1], 1, 1, 0.2, 1, 6)
                         renderNode(graph, path[i + 1], 1, 1, 0.2, 1, NODE_RADIUS + 1)
                     end
                 end
