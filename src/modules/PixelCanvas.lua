@@ -1,5 +1,3 @@
-
-
 --[[
 
 PixelCanvas class:
@@ -11,7 +9,7 @@ upscaling that canvas to fit the entire screen.
 
 
 function love.draw()
-    pc = PixelCanvas(screenWidth, screenHeight)
+    pc = PixelCanvas.new(screenWidth, screenHeight)
 
     transform = camera:getTransform() or love.math.newTransform()
 
@@ -37,24 +35,82 @@ then, when ps:finish() is called, the canvas portion is scaled such that it FITS
 
 The PS objects will also scale their pixels to be the size of scale of THE TRANSFORM.
 
-## Agent instructions:
-All of this is a bit complex; so make sure you do planning and thinking before proceeding.
-
 ]]
 
-local PixelCanvas = objects.Class("g:PixelCanvas")
+local lg = love.graphics
 
 
+---@class PixelCanvas
+---@field screenW number
+---@field screenH number
+---@field canvas love.Texture|nil
+---@field active boolean
+---@field scale number
+local PixelCanvas = {}
+PixelCanvas.__index = PixelCanvas
 
-function PixelCanvas:init()
+---@param screenW number
+---@param screenH number
+---@return PixelCanvas
+function PixelCanvas.new(screenW, screenH)
+    return setmetatable({
+        screenW = screenW,
+        screenH = screenH,
+        canvas = nil,
+        active = false,
+        scale = 1,
+    }, PixelCanvas)
 end
 
-
-function PixelCanvas:init()
+--- Extract uniform scale from a Love2D Transform
+---@param transform love.Transform
+local function getTransformScale(transform)
+    local m11, m12, _, _, m21, m22 = transform:getMatrix()
+    return math.sqrt(m11 * m11 + m21 * m21)
 end
 
+---@param transform love.Transform
+function PixelCanvas:start(transform)
+    assert(not self.active, "PixelCanvas:start called twice without finish")
+    self.active = true
 
+    local scale = getTransformScale(transform)
+    -- round to nearest integer for clean pixels (min 1)
+    local pixelScale = math.max(1, math.floor(scale + 0.5))
+    self.scale = pixelScale
+
+    local cw = math.ceil(self.screenW / pixelScale)
+    local ch = math.ceil(self.screenH / pixelScale)
+
+    -- reuse canvas if size matches
+    if not self.canvas or self.canvas:getWidth() ~= cw or self.canvas:getHeight() ~= ch then
+        self.canvas = lg.newCanvas(cw, ch)
+    end
+    self.canvas:setFilter("nearest", "nearest")
+
+    lg.push("all")
+    lg.setCanvas(self.canvas)
+    lg.clear(0, 0, 0, 0)
+
+    -- apply transform scaled down by pixelScale so content maps to smaller canvas
+    local rescaled = love.math.newTransform()
+    rescaled:scale(1 / pixelScale, 1 / pixelScale)
+    rescaled:apply(transform)
+    lg.replaceTransform(rescaled)
+end
+
+function PixelCanvas:finish()
+    assert(self.active, "PixelCanvas:finish called without start")
+    self.active = false
+
+    lg.pop()
+
+    -- draw small canvas scaled up to fill screen
+    lg.push()
+    lg.origin()
+    lg.setColor(1, 1, 1, 1)
+    lg.draw(self.canvas, 0, 0, 0, self.scale, self.scale)
+    lg.pop()
+end
 
 return PixelCanvas
-
-
