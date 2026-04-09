@@ -21,14 +21,16 @@ defineDecor(id, {
 ### Placement algorithm (MapGraph.generate step 8)
 - GenArgs.decorTypes = {"mountain", "tree", ...} — just a list of type names
 - Lookup each from registry, sort by radius descending
-- Build exclusion grid from nodes + edges (same as now)
-- Iteration grid: cellSize / 8 resolution (fine grid)
-- For each fine-grid cell:
-  - For each type (biggest first):
+- One fine grid (cellSize = sp / 8 roughly). Used for BOTH iteration and exclusion.
+- Mark exclusion: nodes mark cells within nodeRadius. Edges sample points and mark cells within edgeRadius.
+  Big decor (radius=40) marks many fine cells. Small decor (radius=10) marks few cells.
+  This means small decor can squeeze into tight gaps between nodes/edges/big decor.
+- Iterate every fine-grid cell:
+  - For each type (biggest radius first):
     - Roll rng() < chance
-    - If passes, check exclusion grid clear for that type's radius
-    - If clear: place, mark occupied, break to next cell
-- Result: big stuff placed first, small stuff fills remaining gaps, density emergent
+    - Check all fine-grid cells within type's radius are clear
+    - If clear: place decor, mark cells within radius as occupied, break to next cell
+- Result: dense, messy map. Big stuff placed first claims space. Small stuff fills remaining gaps.
 
 ### map_scene changes
 - Remove DECOR_TYPES / defineDecor from map_scene
@@ -45,7 +47,7 @@ defineDecor(id, {
 2. MapGraph.lua
    - Require decor_types
    - GenArgs: replace decorDefs with decorTypes (list of strings)
-   - Step 8: new algorithm (iterate fine grid, roll per type biggest-first)
+   - Step 8: new algorithm — single fine grid, iterate cells, roll per type biggest-first
 
 3. map_scene.lua
    - Require decor_types
