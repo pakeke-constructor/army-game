@@ -234,7 +234,7 @@ function map_scene:draw()
 
         -- edges
         graph:forEachEdge(function(a, b)
-            renderEdge(graph, a, b, 0.4, 0.4, 0.4)
+            renderEdge(graph, a, b, 0.16, 0.28, 0.18)
         end)
 
         -- nodes
