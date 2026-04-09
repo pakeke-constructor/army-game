@@ -59,6 +59,14 @@ _G.lg = love.graphics
 _G.utf8 = require("utf8")
 _G.json = require("lib.json")
 
+
+local love_docs = require("_ex6.love2d-api.love_api")
+local enc = json.encode(love_docs)
+assert(love.filesystem.write("a.json", enc))
+do return end
+
+do return end
+
 ---@type g.consts
 _G.consts = require("src.consts")
 

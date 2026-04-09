@@ -26,6 +26,7 @@ ex6.bat
 
 __pycache__
 
+_ex6/love2d-api
 
 .EX6_CONTEXT_DUMP.txt
 
