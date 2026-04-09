@@ -1,29 +1,36 @@
 
 '''
-LOVE2D-DOCS TOOL FOR AGENTS:
+Love2D API documentation lookup tool for coding agents.
 
-usage:
-love2d_docs("love.graphics") -- returns information about love.graphics namespace
-love2d_docs("love.graphics.newCanvas") -- returns information about newCanvas function
-love2d_docs("love.audio.newSource") -- returns information about newSource function
+Parses the love2d API (from love2d_docs.json) into typed dataclasses,
+and exposes a single `love2d_docs(query, verbosity)` function for lookup.
+Agents can quickly check function signatures, object methods, and module
+contents without reading the massive JSON directly.
 
-love2d_docs("Canvas") -- returns information about the Canvas object
+Usage:
+  love2d_docs("love.graphics")           -- list all functions/types in a module
+  love2d_docs("love.graphics.newCanvas")  -- look up a specific function
+  love2d_docs("love.audio.newSource")     -- look up a specific function
+  love2d_docs("Canvas")                   -- look up a type and its methods
+  love2d_docs("Canvas:getFilter")         -- look up a specific method on a type
 
+Verbosity:
+  0 (default) -- signatures only, concise. Good for browsing.
+  1           -- full descriptions, all variants, argument details.
 
-HOW IT WORKS:
-Currently; love api exists as `_ex6/love2d_docs/love2d_docs.json`.
+Example output (verbosity=0):
+  love2d_docs("love.graphics.rectangle")
+  => rectangle(mode: DrawMode, x: number, y: number, width: number, height: number)
+     rectangle(mode: DrawMode, x: number, y: number, width: number, height: number, rx: number, ry: number)
 
-## Agent instructions:
-look through the structure (BFS FIRST!!!!) with python,
-and then work out how best to implement.
-
-DO NOT READ THE JSON FILE DIRECTLY. IT IS WAY WAY WAY WAY TOO BIG.
-
-(So you should start by writing python scripts to explore the file, and ask me to run them.)
-Also, DO NOT try to code everything instantly.
-
-
+  love2d_docs("Canvas")
+  => Canvas
+     Supertypes: Texture, Drawable, Object
+       getFilter() -> min, mag, anisotropy
+       getDimensions() -> width, height
+       ...
 '''
+
 
 from __future__ import annotations
 from dataclasses import dataclass, field
