@@ -2,7 +2,7 @@ local ECSWorld = require("src.ecs.ECSWorld")
 local Camera = require("lib.cam11")
 local MapGraph = require("src.scenes.map_scene.MapGraph")
 
-local CAMERA_ZOOM = 2
+local CAMERA_ZOOM = 0.5
 local NODE_RADIUS = 4
 local PLAYER_RADIUS = 5
 local PAN_SPEED = 200
@@ -121,6 +121,7 @@ function map_scene:update(dt)
     end
 
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
+    self.camera:setZoom(CAMERA_ZOOM * ui.getUIScaling())
     self.camera:setPos(self.camX, self.camY)
     self.ecs:update(dt)
 end
@@ -145,7 +146,7 @@ function map_scene:mousereleased(mx, my, button)
                 local wx, wy = self.camera:toWorld(mx, my)
                 local hovered = getHoveredNode(graph, wx, wy)
                 if hovered and hovered ~= pnode then
-                    local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, 3)
+                    local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, 6)
                     if path and #path >= 2 then
                         local ax, ay = getNodeWorldPos(graph, path[1])
                         local bx, by = getNodeWorldPos(graph, path[2])
@@ -221,14 +222,14 @@ function map_scene:draw()
             local wx, wy = self.camera:toWorld(mx, my)
             local hovered = getHoveredNode(graph, wx, wy)
             if hovered and hovered ~= pnode then
-                local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, 3)
+                local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, 7)
                 if path and #path >= 2 then
                     -- first edge bold yellow, rest pale yellow
                     renderEdge(graph, path[1], path[2], 1, 1, 0.2, 1, 3)
                     renderNode(graph, path[2], 1, 1, 0.2, 1, NODE_RADIUS + 1)
                     for i = 2, #path - 1 do
-                        renderEdge(graph, path[i], path[i + 1], 1, 1, 0.4, 0.35, 2)
-                        renderNode(graph, path[i + 1], 1, 1, 0.4, 0.35, NODE_RADIUS + 1)
+                        renderEdge(graph, path[i], path[i + 1], 1, 1, 0.2, 1, 2)
+                        renderNode(graph, path[i + 1], 1, 1, 0.2, 1, NODE_RADIUS + 1)
                     end
                 end
             end
