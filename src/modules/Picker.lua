@@ -26,8 +26,13 @@ https://www.keithschwarz.com/darts-dice-coins/
 ---
 ---If the item list is dynamic or it only needs be picked once then consider
 ---`generation.pickWeighted` or `generation.pickWeightedPlanar`.
----@class generation.Picker: objects.Class
-local Picker = objects.Class("generation:Picker")
+---@class generation.Picker
+---@field entryList any[]
+---@field alias table<integer, integer>
+---@field prob table<integer, number>
+---@field n integer
+local Picker = {}
+Picker.__index = Picker
 
 
 local function shallowCpy(t)
@@ -42,7 +47,10 @@ end
 
 ---@param items any[]
 ---@param weights number[]
-function Picker:init(items, weights)
+---@return picker.Picker
+local function newPicker(items, weights)
+    local self = setmetatable({}, Picker)
+
     self.entryList = shallowCpy(items)
 
     local total = 0
@@ -90,13 +98,7 @@ function Picker:init(items, weights)
     self.alias = alias
     self.prob = prob
     self.n = #weights
-end
-
-if false then
-    ---@param items any[]
-    ---@param weights number[]
-    ---@return generation.Picker
-    function Picker(items, weights) end ---@diagnostic disable-line: cast-local-type, missing-return
+    return self
 end
 
 
@@ -131,9 +133,4 @@ function Picker:pick(rng)
 end
 
 
-
-
-return Picker
-
-
-
+return newPicker
