@@ -21,7 +21,9 @@ end
 
 defineDecor("mountain", function(wx, wy)
     love.graphics.setColor(0.4, 0.35, 0.3, 1)
-    love.graphics.circle("fill", wx, wy, 8)
+    love.graphics.polygon("fill", wx, wy - 12, wx - 10, wy + 6, wx + 10, wy + 6)
+    love.graphics.setColor(0.35, 0.3, 0.25, 1)
+    love.graphics.polygon("fill", wx + 2, wy - 8, wx - 6, wy + 6, wx + 10, wy + 6)
 end)
 --[[
 add more decor-types here.
@@ -93,8 +95,18 @@ function map_scene:enter()
             nodeOffsetFactor = 0.35,
             scaleX = 1,
             scaleY = 0.6,
+            decorDefs = {
+                { type = "mountain", count = 80, radius = 40 },
+            },
         })
     end
+
+    -- Build sorted decor list for drawing
+    self.decorList = {}
+    run.mapGraph:forEachDecor(function(d)
+        self.decorList[#self.decorList + 1] = d
+    end)
+    table.sort(self.decorList, function(a, b) return a.y < b.y end)
 
     local pnode = run.mapGraph:getPlayerNode()
     if pnode then
@@ -107,6 +119,7 @@ end
 function map_scene:leave()
     self.ecs = nil
     self.camera = nil
+    self.decorList = nil
 end
 
 function map_scene:pollHandlers()
@@ -221,6 +234,14 @@ function map_scene:draw()
     local run = g.getRun()
     local graph = run.mapGraph
     if graph then
+        -- decor (behind everything)
+        if self.decorList then
+            for _, d in ipairs(self.decorList) do
+                local drawFn = DECOR_TYPES[d.decorType]
+                if drawFn then drawFn(d.x, d.y) end
+            end
+        end
+
         -- drawBelow (under edges)
         graph:forEachNode(function(node)
             local nx, ny = getNodeWorldPos(graph, node)

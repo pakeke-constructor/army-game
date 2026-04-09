@@ -74,27 +74,6 @@ function MapGraph:addNode(x, y, nodeType)
     node.nodeType = NodeClass.nodeType or "battle"
     self.nodes[key] = node
 end
-
---- Delete all nodes within radius of (cx, cy). Iterates only the bounding box, not all nodes.
----@param self MapGraph
----@param cx number
----@param cy number
----@param radius number
-local function deleteNodesInRadius(self, cx, cy, radius)
-    local r2 = radius * radius
-    local x0 = math.ceil(cx - radius)
-    local x1 = math.floor(cx + radius)
-    local y0 = math.ceil(cy - radius)
-    local y1 = math.floor(cy + radius)
-    for x = x0, x1 do
-        for y = y0, y1 do
-            if (x - cx) * (x - cx) + (y - cy) * (y - cy) <= r2 then
-                self:removeNode(x, y)
-            end
-        end
-    end
-end
-
 function MapGraph:removeNode(x, y)
     local key = nodeKey(x, y)
     if not self.nodes[key] then return end
@@ -170,6 +149,11 @@ function MapGraph:getNeighbors(x, y)
     return result
 end
 
+---@class MapGraph.DecorDef
+---@field type string
+---@field count integer
+---@field radius number exclusion radius for spatial checks
+
 ---@class MapGraph.GenArgs
 ---@field width integer
 ---@field height integer
@@ -180,6 +164,7 @@ end
 ---@field nodeOffsetFactor number
 ---@field scaleX number
 ---@field scaleY number
+---@field decorDefs? MapGraph.DecorDef[]
 
 --- Generate a map procedurally.
 ---@param args MapGraph.GenArgs
@@ -287,6 +272,77 @@ function MapGraph.generate(args, rng)
         node.oy = (rng() - 0.5) * 2 * maxOff
     end
 
+    -- 8. Place decor in gaps using spatial grid
+    local decorDefs = args.decorDefs
+    if decorDefs and #decorDefs > 0 then
+        local sp = args.distanceBetweenNodes
+        local sx, sy = args.scaleX, args.scaleY
+        local cellSize = sp * 0.5
+        local occupied = {} -- grid cells: "gx,gy" -> true
+
+        local function toCell(wx, wy)
+            return math.floor(wx / cellSize), math.floor(wy / cellSize)
+        end
+
+        local function markRadius(wx, wy, r)
+            local cx0 = math.floor((wx - r) / cellSize)
+            local cx1 = math.floor((wx + r) / cellSize)
+            local cy0 = math.floor((wy - r) / cellSize)
+            local cy1 = math.floor((wy + r) / cellSize)
+            for cy = cy0, cy1 do
+                for cx = cx0, cx1 do
+                    occupied[cx .. "," .. cy] = true
+                end
+            end
+        end
+
+        -- Mark all node positions
+        local nodeRadius = sp * 0.2
+        for _, node in pairs(self.nodes) do
+            local wx = (node.x * sp + node.ox) * sx
+            local wy = (node.y * sp + node.oy) * sy
+            markRadius(wx, wy, nodeRadius)
+        end
+
+        -- Mark all edges (sample points along each edge)
+        local edgeRadius = sp * 0.15
+        self:forEachEdge(function(a, b)
+            local ax = (a.x * sp + a.ox) * sx
+            local ay = (a.y * sp + a.oy) * sy
+            local bx = (b.x * sp + b.ox) * sx
+            local by = (b.y * sp + b.oy) * sy
+            local dist = math.sqrt((bx - ax)^2 + (by - ay)^2)
+            local steps = math.max(1, math.ceil(dist / (cellSize * 0.5)))
+            for i = 0, steps do
+                local t = i / steps
+                markRadius(ax + (bx - ax) * t, ay + (by - ay) * t, edgeRadius)
+            end
+        end)
+
+        -- World bounds for random placement
+        local hw, hh = math.floor(width / 2), math.floor(height / 2)
+        local worldW = hw * sp * sx
+        local worldH = hh * sp * sy
+
+        for _, def in ipairs(decorDefs) do
+            local placed = 0
+            local attempts = def.count * 10
+            for _ = 1, attempts do
+                if placed >= def.count then break end
+                local wx = (rng() * 2 - 1) * worldW
+                local wy = (rng() * 2 - 1) * worldH
+                local gx, gy = toCell(wx, wy)
+                if not occupied[gx .. "," .. gy] then
+                    self.decor[#self.decor + 1] = {
+                        x = wx, y = wy, decorType = def.type
+                    }
+                    markRadius(wx, wy, def.radius)
+                    placed = placed + 1
+                end
+            end
+        end
+    end
+
     return self
 end
 
@@ -350,6 +406,13 @@ end
 function MapGraph:forEachNode(fn)
     for _, node in pairs(self.nodes) do
         fn(node)
+    end
+end
+
+--- Iterate all decor
+function MapGraph:forEachDecor(fn)
+    for _, d in ipairs(self.decor) do
+        fn(d)
     end
 end
 
