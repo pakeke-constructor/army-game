@@ -157,6 +157,18 @@ for mod in _DATA.modules:
         _TYPES[t.name] = t
 
 
+def _sig(fn: Function, variant: Variant | None = None):
+    """One-line signature: name(arg: type, ...) -> ret_type"""
+    v = variant or (fn.variants[0] if fn.variants else None)
+    args = ""
+    ret = ""
+    if v:
+        args = ", ".join(f"{a.name}: {a.type}" for a in v.arguments)
+        if v.returns:
+            ret = " -> " + ", ".join(r.type for r in v.returns)
+    return f"{fn.name}({args}){ret}"
+
+
 def _fmt_variant(v: Variant):
     lines = []
     if v.description:
@@ -172,16 +184,30 @@ def _fmt_variant(v: Variant):
     return "\n".join(lines)
 
 
-def _fmt_function(fn: Function):
+def _fmt_function(fn: Function, verbosity: int = 0):
+    if verbosity == 0:
+        lines = []
+        for i, v in enumerate(fn.variants):
+            lines.append(_sig(fn, v))
+        return "\n".join(lines)
     lines = [f"{fn.name}: {fn.description}"]
     for i, v in enumerate(fn.variants):
         if len(fn.variants) > 1:
-            lines.append(f"  Variant {i+1}:")
+            lines.append(f"  Variant {i+1}: {_sig(fn, v)}")
         lines.append(_fmt_variant(v))
     return "\n".join(lines)
 
 
-def _fmt_module(mod: Module):
+def _fmt_module(mod: Module, verbosity: int = 0):
+    if verbosity == 0:
+        lines = [f"love.{mod.name}"]
+        for fn in mod.functions:
+            lines.append(f"  {_sig(fn)}")
+        if mod.types:
+            lines.append(f"Types: {', '.join(t.name for t in mod.types)}")
+        if mod.enums:
+            lines.append(f"Enums: {', '.join(e.name for e in mod.enums)}")
+        return "\n".join(lines)
     lines = [f"love.{mod.name}: {mod.description}"]
     fns = [f.name for f in mod.functions]
     if fns:
@@ -195,7 +221,14 @@ def _fmt_module(mod: Module):
     return "\n".join(lines)
 
 
-def _fmt_type(t: LoveType):
+def _fmt_type(t: LoveType, verbosity: int = 0):
+    if verbosity == 0:
+        lines = [t.name]
+        if t.supertypes:
+            lines.append(f"Supertypes: {', '.join(t.supertypes)}")
+        for fn in t.functions:
+            lines.append(f"  {_sig(fn)}")
+        return "\n".join(lines)
     lines = [f"{t.name}: {t.description}"]
     if t.supertypes:
         lines.append(f"Supertypes: {', '.join(t.supertypes)}")
@@ -205,7 +238,7 @@ def _fmt_type(t: LoveType):
     return "\n".join(lines)
 
 
-def love2d_docs(query: str):
+def love2d_docs(query: str, verbosity: int = 0):
     # "love.X" -> module
     # "love.X.func" -> module function
     # "TypeName" -> type lookup
@@ -215,7 +248,7 @@ def love2d_docs(query: str):
     if parts[0] == "love" and len(parts) == 2:
         mod = _MODULES.get(parts[1])
         if mod:
-            return _fmt_module(mod)
+            return _fmt_module(mod, verbosity)
         return f"Module '{parts[1]}' not found"
 
     if parts[0] == "love" and len(parts) == 3:
@@ -224,7 +257,7 @@ def love2d_docs(query: str):
             return f"Module '{parts[1]}' not found"
         for fn in mod.functions:
             if fn.name == parts[2]:
-                return _fmt_function(fn)
+                return _fmt_function(fn, verbosity)
         return f"Function '{parts[2]}' not found in love.{parts[1]}"
 
     # Type or Type:method
@@ -235,27 +268,33 @@ def love2d_docs(query: str):
             return f"Type '{type_name}' not found"
         for fn in t.functions:
             if fn.name == method_name:
-                return _fmt_function(fn)
+                return _fmt_function(fn, verbosity)
         return f"Method '{method_name}' not found on {type_name}"
 
     # Plain type name
     t = _TYPES.get(query)
     if t:
-        return _fmt_type(t)
+        return _fmt_type(t, verbosity)
 
     return f"'{query}' not found"
 
 
 # Quick smoke test when run directly
 if __name__ == "__main__":
-    print("=== love.graphics ===")
-    print(love2d_docs("love.graphics")[:300])
+    print("=== love.graphics v0 ===")
+    print(love2d_docs("love.graphics")[:600])
     print()
-    print("=== love.graphics.newCanvas ===")
+    print("=== love.graphics.newCanvas v0 ===")
     print(love2d_docs("love.graphics.newCanvas"))
     print()
-    print("=== Canvas ===")
+    print("=== love.graphics.newCanvas v1 ===")
+    print(love2d_docs("love.graphics.newCanvas", 1))
+    print()
+    print("=== Canvas v0 ===")
     print(love2d_docs("Canvas"))
     print()
-    print("=== Canvas:getFilter ===")
+    print("=== Canvas:getFilter v0 ===")
     print(love2d_docs("Canvas:getFilter"))
+    print()
+    print("=== Canvas:getFilter v1 ===")
+    print(love2d_docs("Canvas:getFilter", 1))
