@@ -34,25 +34,13 @@ function M.getSortedByRadius(ids)
     return result
 end
 
---- Called after g and atlas are ready, to finalize image-based decor
-function M.init()
-    for _, def in pairs(registry) do
-        if def.image and not def._inited then
-            local w, h = g.getImageSize(def.image)
-            def.radius = math.max(w, h)
-            local img = def.image
-            def.draw = function(wx, wy)
-                love.graphics.setColor(1, 1, 1, 1)
-                g.drawImage(img, wx, wy)
-            end
-            def._inited = true
-        end
-    end
-end
 
 -- Define built-in decor types (radius set by M.init() from image size)
-M.define("mountain_large", { image = "mountain_large_1", chance = 0.04, radius = 0 })
-M.define("mountain_small_1", { image = "mountain_small_1", chance = 0.06, radius = 0 })
-M.define("mountain_small_2", { image = "mountain_small_2", chance = 0.06, radius = 0 })
+M.define("mountain_large", { image = "mountain_large_1", chance = 0.04, radius = 80 })
+
+M.define("tree_large_1", { image = "tree_large_1", chance = 0.2, radius = 20 })
+
+M.define("tree_small_1", { image = "tree_small_1", chance = 0.1, radius = 16 })
+
 
 return M

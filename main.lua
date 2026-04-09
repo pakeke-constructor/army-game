@@ -127,7 +127,6 @@ function love.load()
     end
     g.loadImagesFrom("assets")
     g.loadImagesFrom("src/content")
-    require("src.scenes.map_scene.decor_types").init()
     g.requireFolder("src/entities")
     g.requireFolder("src/content")
     assertValid()

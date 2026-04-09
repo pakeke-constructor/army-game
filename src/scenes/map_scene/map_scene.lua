@@ -16,8 +16,6 @@ local PATH_SEARCH_DEPTH = 3
 
 local map_scene = {}
 
-local map_scene = {}
-
 function map_scene:init()
 end
 
