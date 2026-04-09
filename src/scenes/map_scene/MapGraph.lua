@@ -363,6 +363,15 @@ end
 
 local SPECIAL_NODES = {"feast", "fountain"}
 
+local function isNextToNodeOfSameType(self, x, y, nodeType)
+    for _, nb in ipairs(self:getNeighbors(x, y)) do
+        if nb.nodeType == nodeType then
+            return true
+        end
+    end
+    return false
+end
+
 ---@param rng fun():number
 function MapGraph:_generateNodes(rng)
     local playerKey = self.playerPosition
@@ -376,7 +385,9 @@ function MapGraph:_generateNodes(rng)
             -- stays as battle (already is)
         elseif r < 0.40 then
             local pick = SPECIAL_NODES[math.floor(rng() * #SPECIAL_NODES) + 1]
-            self:addNode(node.x, node.y, pick)
+            if not isNextToNodeOfSameType(self, node.x, node.y, pick) then
+                self:addNode(node.x, node.y, pick)
+            end
         else
             self:addNode(node.x, node.y, "Empty")
         end

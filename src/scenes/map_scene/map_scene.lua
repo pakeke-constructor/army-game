@@ -4,7 +4,7 @@ local MapGraph = require("src.scenes.map_scene.MapGraph")
 local PixelCanvas = require("src.modules.PixelCanvas")
 local decor_types = require("src.scenes.map_scene.decor_types")
 
-local CAMERA_ZOOM = 1
+local CAMERA_ZOOM = 0.5
 local NODE_RADIUS = 4
 local PLAYER_RADIUS = 5
 local PAN_SPEED = 200
@@ -73,7 +73,7 @@ function map_scene:enter()
             height = 30,
             nodePruneChance = 0.2,
             edgePruneChance = 0.02,
-            distanceBetweenNodes = 100,
+            distanceBetweenNodes = 120,
             randomDiagonalChance = 0.4,
             nodeOffsetFactor = 0.35,
             scaleX = 1,

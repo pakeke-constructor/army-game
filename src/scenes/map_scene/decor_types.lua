@@ -36,7 +36,7 @@ end
 
 
 -- Define built-in decor types
-M.define("mountain_large", { image = "mountain_large_1", chance = 0.5, nodeRadius = 35, decorRadius = 30 })
+M.define("mountain_large", { image = "mountain_large_1", chance = 0.5, nodeRadius = 35, decorRadius = 20 })
 
 M.define("tree_large_1", { image = "tree_large_1", chance = 0.2, nodeRadius = 20, decorRadius = 8 })
 
