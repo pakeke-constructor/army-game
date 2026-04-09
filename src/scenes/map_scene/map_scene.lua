@@ -1,8 +1,9 @@
 local ECSWorld = require("src.ecs.ECSWorld")
 local Camera = require("lib.cam11")
 local MapGraph = require("src.scenes.map_scene.MapGraph")
+local PixelCanvas = require("src.modules.PixelCanvas")
 
-local CAMERA_ZOOM = 0.5
+local CAMERA_ZOOM = 1
 local NODE_RADIUS = 4
 local PLAYER_RADIUS = 5
 local PAN_SPEED = 200
@@ -58,6 +59,7 @@ function map_scene:enter()
     self.ecs = ECSWorld()
     self.camera = Camera(0, 0, CAMERA_ZOOM)
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
+    self.pixelCanvas = PixelCanvas.new(love.graphics.getDimensions())
     self.dragging = false
 
     local run = g.getRun()
@@ -121,6 +123,7 @@ function map_scene:update(dt)
     end
 
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
+    self.pixelCanvas:resize(love.graphics.getDimensions())
     self.camera:setZoom(CAMERA_ZOOM * ui.getUIScaling())
     self.camera:setPos(self.camX, self.camY)
     self.ecs:update(dt)
@@ -191,7 +194,7 @@ function map_scene:draw()
     local lg = love.graphics
     lg.clear(0.08, 0.06, 0.06, 1)
 
-    self.camera:attach(false)
+    self.pixelCanvas:start(self.camera:getTransform())
     iml.pushTransform(self.camera:getTransform())
 
     self.ecs:draw()
@@ -241,7 +244,7 @@ function map_scene:draw()
 
     lg.setColor(1, 1, 1, 1)
     iml.popTransform()
-    self.camera:detach()
+    self.pixelCanvas:finish()
 
     ui.startUI()
     ui.endUI()

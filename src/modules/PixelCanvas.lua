@@ -53,13 +53,27 @@ PixelCanvas.__index = PixelCanvas
 ---@param screenH number
 ---@return PixelCanvas
 function PixelCanvas.new(screenW, screenH)
-    return setmetatable({
+    local self = setmetatable({
         screenW = screenW,
         screenH = screenH,
-        canvas = nil,
+        canvas = lg.newCanvas(screenW, screenH),
         active = false,
         scale = 1,
     }, PixelCanvas)
+    self.canvas:setFilter("nearest", "nearest")
+    return self
+end
+
+---@param w number
+---@param h number
+function PixelCanvas:resize(w, h)
+    self.screenW = w
+    self.screenH = h
+    if self.canvas and w <= self.canvas:getWidth() and h <= self.canvas:getHeight() then
+        return
+    end
+    self.canvas = lg.newCanvas(w, h)
+    self.canvas:setFilter("nearest", "nearest")
 end
 
 --- Extract uniform scale from a Love2D Transform
@@ -79,15 +93,6 @@ function PixelCanvas:start(transform)
     local pixelScale = math.max(1, math.floor(scale + 0.5))
     self.scale = pixelScale
 
-    local cw = math.ceil(self.screenW / pixelScale)
-    local ch = math.ceil(self.screenH / pixelScale)
-
-    -- reuse canvas if size matches
-    if not self.canvas or self.canvas:getWidth() ~= cw or self.canvas:getHeight() ~= ch then
-        self.canvas = lg.newCanvas(cw, ch)
-    end
-    self.canvas:setFilter("nearest", "nearest")
-
     lg.push("all")
     lg.setCanvas(self.canvas)
     lg.clear(0, 0, 0, 0)
@@ -105,7 +110,7 @@ function PixelCanvas:finish()
 
     lg.pop()
 
-    -- draw small canvas scaled up to fill screen
+    -- draw canvas scaled up to fill screen
     lg.push()
     lg.origin()
     lg.setColor(1, 1, 1, 1)
