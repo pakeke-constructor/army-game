@@ -6,7 +6,14 @@
 
 ### OK:: what do we need for a minimum-playable game?
 
+
+- Make map-scene render nicely (trees, mountains, etc)
+
+
 - Add blessing-select UI
+
+
+- Add images to traits
 
 
 - ~~Plan enemy encounter system.~~
@@ -15,8 +22,6 @@
 
 - Make it so weapons can be held/used
 
-
-- agents can query love API:  git@github.com:MikuAuahDark/love2d-api.git
 
 
 - agents have `forget` mechanism. (forget/summarize chunks of work; compresses ctx window)

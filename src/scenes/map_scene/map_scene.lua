@@ -10,6 +10,25 @@ local PAN_SPEED = 200
 local HOVER_DIST_FRAC = 0.4 -- fraction of distanceBetweenNodes
 local COMMANDER_SPEED = 80 -- world pixels per second
 
+local PATH_SEARCH_DEPTH = 3
+
+
+local DECOR_TYPES = {}
+
+local function defineDecor(id, drawFn)
+    DECOR_TYPES[id] = drawFn
+end
+
+defineDecor("mountain", function(wx, wy)
+    love.graphics.setColor(0.4, 0.35, 0.3, 1)
+    love.graphics.circle("fill", wx, wy, 8)
+end)
+--[[
+add more decor-types here.
+]]
+
+
+
 local map_scene = {}
 
 function map_scene:init()
@@ -149,7 +168,7 @@ function map_scene:mousereleased(mx, my, button)
                 local wx, wy = self.camera:toWorld(mx, my)
                 local hovered = getHoveredNode(graph, wx, wy)
                 if hovered and hovered ~= pnode then
-                    local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, 6)
+                    local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, PATH_SEARCH_DEPTH)
                     if path and #path >= 2 then
                         local ax, ay = getNodeWorldPos(graph, path[1])
                         local bx, by = getNodeWorldPos(graph, path[2])
@@ -225,7 +244,7 @@ function map_scene:draw()
             local wx, wy = self.camera:toWorld(mx, my)
             local hovered = getHoveredNode(graph, wx, wy)
             if hovered and hovered ~= pnode then
-                local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, 7)
+                local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, PATH_SEARCH_DEPTH)
                 if path and #path >= 2 then
                     -- first edge bold yellow, rest pale yellow
                     renderEdge(graph, path[1], path[2], 1, 1, 0.2, 1, 6)

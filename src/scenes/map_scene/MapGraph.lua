@@ -35,6 +35,7 @@ STAGE-2: Node-generation (essentially 'filling in' the existing structure)
 ---@field height integer
 ---@field nodes table<string, MapNode>
 ---@field edges table<string, true>
+---@field decor table[]
 local MapGraph = Class("g:MapGraph")
 
 
@@ -57,6 +58,7 @@ function MapGraph:init(width, height)
     self.height = height
     self.nodes = {}
     self.edges = {}
+    self.decor = {}
     self.playerPosition = nil -- node key string, e.g. "2,0"
 end
 
@@ -71,6 +73,26 @@ function MapGraph:addNode(x, y, nodeType)
     local node = NodeClass(x, y)
     node.nodeType = NodeClass.nodeType or "battle"
     self.nodes[key] = node
+end
+
+--- Delete all nodes within radius of (cx, cy). Iterates only the bounding box, not all nodes.
+---@param self MapGraph
+---@param cx number
+---@param cy number
+---@param radius number
+local function deleteNodesInRadius(self, cx, cy, radius)
+    local r2 = radius * radius
+    local x0 = math.ceil(cx - radius)
+    local x1 = math.floor(cx + radius)
+    local y0 = math.ceil(cy - radius)
+    local y1 = math.floor(cy + radius)
+    for x = x0, x1 do
+        for y = y0, y1 do
+            if (x - cx) * (x - cx) + (y - cy) * (y - cy) <= r2 then
+                self:removeNode(x, y)
+            end
+        end
+    end
 end
 
 function MapGraph:removeNode(x, y)
@@ -405,6 +427,7 @@ local function deserializeNode(data)
     return setmetatable(data, cls)
 end
 
+
 --- Serialize to a plain table (no metatables)
 function MapGraph:serialize()
     local serializedNodes = {}
@@ -417,7 +440,8 @@ function MapGraph:serialize()
         i = i + 1
         edges[i] = ek
     end
-    return { width = self.width, height = self.height, distanceBetweenNodes = self.distanceBetweenNodes, scaleX = self.scaleX, scaleY = self.scaleY, nodes = serializedNodes, edges = edges, playerPosition = self.playerPosition }
+    
+    return { width = self.width, height = self.height, distanceBetweenNodes = self.distanceBetweenNodes, scaleX = self.scaleX, scaleY = self.scaleY, nodes = serializedNodes, edges = edges, decor = self.decor, playerPosition = self.playerPosition }
 end
 
 --- Deserialize from a plain table
@@ -433,6 +457,7 @@ function MapGraph.deserialize(data)
     self.distanceBetweenNodes = data.distanceBetweenNodes
     self.scaleX = data.scaleX or 1
     self.scaleY = data.scaleY or 1
+    self.decor = data.decor or {}
     return self
 end
 
