@@ -1,6 +1,7 @@
 
 local Class = require("src.modules.objects.Class")
 local nodes = require("src.scenes.map_scene.nodes")
+local decor_types = require("src.scenes.map_scene.decor_types")
 
 --[[
 
@@ -149,11 +150,6 @@ function MapGraph:getNeighbors(x, y)
     return result
 end
 
----@class MapGraph.DecorDef
----@field type string
----@field count integer
----@field radius number exclusion radius for spatial checks
-
 ---@class MapGraph.GenArgs
 ---@field width integer
 ---@field height integer
@@ -164,7 +160,7 @@ end
 ---@field nodeOffsetFactor number
 ---@field scaleX number
 ---@field scaleY number
----@field decorDefs? MapGraph.DecorDef[]
+---@field decorTypes? string[] list of decor type ids
 
 --- Generate a map procedurally.
 ---@param args MapGraph.GenArgs
@@ -272,17 +268,13 @@ function MapGraph.generate(args, rng)
         node.oy = (rng() - 0.5) * 2 * maxOff
     end
 
-    -- 8. Place decor in gaps using spatial grid
-    local decorDefs = args.decorDefs
-    if decorDefs and #decorDefs > 0 then
+    -- 8. Place decor in gaps using fine spatial grid
+    local decorTypeIds = args.decorTypes
+    if decorTypeIds and #decorTypeIds > 0 then
         local sp = args.distanceBetweenNodes
         local sx, sy = args.scaleX, args.scaleY
-        local cellSize = sp * 0.5
-        local occupied = {} -- grid cells: "gx,gy" -> true
-
-        local function toCell(wx, wy)
-            return math.floor(wx / cellSize), math.floor(wy / cellSize)
-        end
+        local cellSize = sp / 8
+        local occupied = {} -- fine grid: "cx,cy" -> true
 
         local function markRadius(wx, wy, r)
             local cx0 = math.floor((wx - r) / cellSize)
@@ -294,6 +286,19 @@ function MapGraph.generate(args, rng)
                     occupied[cx .. "," .. cy] = true
                 end
             end
+        end
+
+        local function isRadiusClear(wx, wy, r)
+            local cx0 = math.floor((wx - r) / cellSize)
+            local cx1 = math.floor((wx + r) / cellSize)
+            local cy0 = math.floor((wy - r) / cellSize)
+            local cy1 = math.floor((wy + r) / cellSize)
+            for cy = cy0, cy1 do
+                for cx = cx0, cx1 do
+                    if occupied[cx .. "," .. cy] then return false end
+                end
+            end
+            return true
         end
 
         -- Mark all node positions
@@ -319,25 +324,32 @@ function MapGraph.generate(args, rng)
             end
         end)
 
-        -- World bounds for random placement
-        local hw, hh = math.floor(width / 2), math.floor(height / 2)
-        local worldW = hw * sp * sx
-        local worldH = hh * sp * sy
+        -- Get sorted decor types (biggest radius first)
+        local sortedTypes = decor_types.getSortedByRadius(decorTypeIds)
 
-        for _, def in ipairs(decorDefs) do
-            local placed = 0
-            local attempts = def.count * 10
-            for _ = 1, attempts do
-                if placed >= def.count then break end
-                local wx = (rng() * 2 - 1) * worldW
-                local wy = (rng() * 2 - 1) * worldH
-                local gx, gy = toCell(wx, wy)
+        -- Iterate every fine-grid cell in world bounds
+        local hw, hh = math.floor(width / 2), math.floor(height / 2)
+        local gx0 = math.floor((-hw * sp * sx) / cellSize)
+        local gx1 = math.floor(( hw * sp * sx) / cellSize)
+        local gy0 = math.floor((-hh * sp * sy) / cellSize)
+        local gy1 = math.floor(( hh * sp * sy) / cellSize)
+
+        for gy = gy0, gy1 do
+            for gx = gx0, gx1 do
                 if not occupied[gx .. "," .. gy] then
-                    self.decor[#self.decor + 1] = {
-                        x = wx, y = wy, decorType = def.type
-                    }
-                    markRadius(wx, wy, def.radius)
-                    placed = placed + 1
+                    local wx = (gx + rng()) * cellSize
+                    local wy = (gy + rng()) * cellSize
+                    for _, dtype in ipairs(sortedTypes) do
+                        if rng() < dtype.chance then
+                            if isRadiusClear(wx, wy, dtype.radius) then
+                                self.decor[#self.decor + 1] = {
+                                    x = wx, y = wy, decorType = dtype.id
+                                }
+                                markRadius(wx, wy, dtype.radius)
+                                break
+                            end
+                        end
+                    end
                 end
             end
         end

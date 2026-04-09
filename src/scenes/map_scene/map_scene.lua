@@ -2,6 +2,7 @@ local ECSWorld = require("src.ecs.ECSWorld")
 local Camera = require("lib.cam11")
 local MapGraph = require("src.scenes.map_scene.MapGraph")
 local PixelCanvas = require("src.modules.PixelCanvas")
+local decor_types = require("src.scenes.map_scene.decor_types")
 
 local CAMERA_ZOOM = 1
 local NODE_RADIUS = 4
@@ -13,23 +14,7 @@ local COMMANDER_SPEED = 80 -- world pixels per second
 local PATH_SEARCH_DEPTH = 3
 
 
-local DECOR_TYPES = {}
-
-local function defineDecor(id, drawFn)
-    DECOR_TYPES[id] = drawFn
-end
-
-defineDecor("mountain", function(wx, wy)
-    love.graphics.setColor(0.4, 0.35, 0.3, 1)
-    love.graphics.polygon("fill", wx, wy - 12, wx - 10, wy + 6, wx + 10, wy + 6)
-    love.graphics.setColor(0.35, 0.3, 0.25, 1)
-    love.graphics.polygon("fill", wx + 2, wy - 8, wx - 6, wy + 6, wx + 10, wy + 6)
-end)
---[[
-add more decor-types here.
-]]
-
-
+local map_scene = {}
 
 local map_scene = {}
 
@@ -95,9 +80,7 @@ function map_scene:enter()
             nodeOffsetFactor = 0.35,
             scaleX = 1,
             scaleY = 0.6,
-            decorDefs = {
-                { type = "mountain", count = 80, radius = 40 },
-            },
+            decorTypes = {"mountain_large", "mountain_small_1", "mountain_small_2"},
         })
     end
 
@@ -237,8 +220,8 @@ function map_scene:draw()
         -- decor (behind everything)
         if self.decorList then
             for _, d in ipairs(self.decorList) do
-                local drawFn = DECOR_TYPES[d.decorType]
-                if drawFn then drawFn(d.x, d.y) end
+                local dtype = decor_types.get(d.decorType)
+                if dtype and dtype.draw then dtype.draw(d.x, d.y) end
             end
         end
 
