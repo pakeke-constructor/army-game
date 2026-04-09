@@ -268,49 +268,50 @@ function MapGraph.generate(args, rng)
         node.oy = (rng() - 0.5) * 2 * maxOff
     end
 
-    -- 8. Place decor in gaps using fine spatial grid
+    -- 8. Place decor in gaps using two-grid spatial check
     local decorTypeIds = args.decorTypes
     if decorTypeIds and #decorTypeIds > 0 then
         local sp = args.distanceBetweenNodes
         local sx, sy = args.scaleX, args.scaleY
         local cellSize = sp / 8
-        local occupied = {} -- fine grid: "cx,cy" -> true
+        local nodeGrid = {} -- nodes + edges (static)
+        local decorGrid = {} -- placed decor (grows)
 
-        local function markRadius(wx, wy, r)
+        local function markGrid(grid, wx, wy, r)
             local cx0 = math.floor((wx - r) / cellSize)
             local cx1 = math.floor((wx + r) / cellSize)
             local cy0 = math.floor((wy - r) / cellSize)
             local cy1 = math.floor((wy + r) / cellSize)
             for cy = cy0, cy1 do
                 for cx = cx0, cx1 do
-                    occupied[cx .. "," .. cy] = true
+                    grid[cx .. "," .. cy] = true
                 end
             end
         end
 
-        local function isRadiusClear(wx, wy, r)
+        local function isGridClear(grid, wx, wy, r)
             local cx0 = math.floor((wx - r) / cellSize)
             local cx1 = math.floor((wx + r) / cellSize)
             local cy0 = math.floor((wy - r) / cellSize)
             local cy1 = math.floor((wy + r) / cellSize)
             for cy = cy0, cy1 do
                 for cx = cx0, cx1 do
-                    if occupied[cx .. "," .. cy] then return false end
+                    if grid[cx .. "," .. cy] then return false end
                 end
             end
             return true
         end
 
-        -- Mark all node positions
-        local nodeRadius = sp * 0.2
+        -- Mark all node positions into nodeGrid
+        local nodeR = sp * 0.2
         for _, node in pairs(self.nodes) do
             local wx = (node.x * sp + node.ox) * sx
             local wy = (node.y * sp + node.oy) * sy
-            markRadius(wx, wy, nodeRadius)
+            markGrid(nodeGrid, wx, wy, nodeR)
         end
 
-        -- Mark all edges (sample points along each edge)
-        local edgeRadius = sp * 0.15
+        -- Mark all edges into nodeGrid
+        local edgeR = sp * 0.15
         self:forEachEdge(function(a, b)
             local ax = (a.x * sp + a.ox) * sx
             local ay = (a.y * sp + a.oy) * sy
@@ -320,11 +321,11 @@ function MapGraph.generate(args, rng)
             local steps = math.max(1, math.ceil(dist / (cellSize * 0.5)))
             for i = 0, steps do
                 local t = i / steps
-                markRadius(ax + (bx - ax) * t, ay + (by - ay) * t, edgeRadius)
+                markGrid(nodeGrid, ax + (bx - ax) * t, ay + (by - ay) * t, edgeR)
             end
         end)
 
-        -- Get sorted decor types (biggest radius first)
+        -- Get sorted decor types (biggest nodeRadius first)
         local sortedTypes = decor_types.getSortedByRadius(decorTypeIds)
 
         -- Iterate every fine-grid cell in world bounds
@@ -336,16 +337,16 @@ function MapGraph.generate(args, rng)
 
         for gy = gy0, gy1 do
             for gx = gx0, gx1 do
-                if not occupied[gx .. "," .. gy] then
+                if not nodeGrid[gx .. "," .. gy] then
                     local wx = (gx + rng()) * cellSize
                     local wy = (gy + rng()) * cellSize
                     for _, dtype in ipairs(sortedTypes) do
                         if rng() < dtype.chance then
-                            if isRadiusClear(wx, wy, dtype.radius) then
+                            if isGridClear(nodeGrid, wx, wy, dtype.nodeRadius) and isGridClear(decorGrid, wx, wy, dtype.decorRadius) then
                                 self.decor[#self.decor + 1] = {
                                     x = wx, y = wy, decorType = dtype.id
                                 }
-                                markRadius(wx, wy, dtype.radius)
+                                markGrid(decorGrid, wx, wy, dtype.decorRadius)
                                 break
                             end
                         end

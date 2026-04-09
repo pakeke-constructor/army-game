@@ -2,7 +2,8 @@ local M = {}
 
 ---@class DecorTypeDef
 ---@field id string
----@field radius number exclusion radius
+---@field nodeRadius number clearance from nodes/edges
+---@field decorRadius number clearance from other decor
 ---@field chance number per-cell roll chance
 ---@field image string? image name (used for draw + radius)
 
@@ -21,7 +22,7 @@ function M.get(id)
     return registry[id]
 end
 
---- Returns decor types sorted by radius descending
+--- Returns decor types sorted by nodeRadius descending
 ---@param ids string[]
 ---@return DecorTypeDef[]
 function M.getSortedByRadius(ids)
@@ -29,17 +30,17 @@ function M.getSortedByRadius(ids)
     for _, id in ipairs(ids) do
         result[#result + 1] = registry[id]
     end
-    table.sort(result, function(a, b) return a.radius > b.radius end)
+    table.sort(result, function(a, b) return a.nodeRadius > b.nodeRadius end)
     return result
 end
 
 
--- Define built-in decor types (radius set by M.init() from image size)
-M.define("mountain_large", { image = "mountain_large_1", chance = 0.04, radius = 80 })
+-- Define built-in decor types
+M.define("mountain_large", { image = "mountain_large_1", chance = 0.5, nodeRadius = 35, decorRadius = 30 })
 
-M.define("tree_large_1", { image = "tree_large_1", chance = 0.2, radius = 20 })
+M.define("tree_large_1", { image = "tree_large_1", chance = 0.2, nodeRadius = 20, decorRadius = 8 })
 
-M.define("tree_small_1", { image = "tree_small_1", chance = 0.1, radius = 16 })
+M.define("tree_small_1", { image = "tree_small_1", chance = 0.1, nodeRadius = 16, decorRadius = 6 })
 
 
 return M
