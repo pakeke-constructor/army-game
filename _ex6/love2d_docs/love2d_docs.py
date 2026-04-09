@@ -59,12 +59,43 @@ class Variant:
     arguments: list[Argument] = field(default_factory=list)
     returns: list[ReturnValue] = field(default_factory=list)
 
+    def sig(self, name: str):
+        args = ", ".join(f"{a.name}: {a.type}" for a in self.arguments)
+        ret = ""
+        if self.returns:
+            ret = " -> " + ", ".join(r.type for r in self.returns)
+        return f"{name}({args}){ret}"
+
+    def fmt(self):
+        lines = []
+        if self.description:
+            lines.append(self.description)
+        if self.arguments:
+            lines.append("  Arguments:")
+            for a in self.arguments:
+                lines.append(f"    {a.name} ({a.type or '?'}): {a.description}")
+        if self.returns:
+            lines.append("  Returns:")
+            for r in self.returns:
+                lines.append(f"    {r.name} ({r.type or '?'}): {r.description}")
+        return "\n".join(lines)
+
 
 @dataclass
 class Function:
     name: str = ""
     description: str = ""
     variants: list[Variant] = field(default_factory=list)
+
+    def fmt(self, verbosity: int = 0):
+        if verbosity == 0:
+            return "\n".join(v.sig(self.name) for v in self.variants)
+        lines = [f"{self.name}: {self.description}"]
+        for i, v in enumerate(self.variants):
+            if len(self.variants) > 1:
+                lines.append(f"  Variant {i+1}: {v.sig(self.name)}")
+            lines.append(v.fmt())
+        return "\n".join(lines)
 
 
 @dataclass
@@ -88,6 +119,22 @@ class LoveType:
     functions: list[Function] = field(default_factory=list)
     constructors: list[str] = field(default_factory=list)
 
+    def fmt(self, verbosity: int = 0):
+        if verbosity == 0:
+            lines = [self.name]
+            if self.supertypes:
+                lines.append(f"Supertypes: {', '.join(self.supertypes)}")
+            for fn in self.functions:
+                lines.append(f"  {fn.variants[0].sig(fn.name) if fn.variants else fn.name}")
+            return "\n".join(lines)
+        lines = [f"{self.name}: {self.description}"]
+        if self.supertypes:
+            lines.append(f"Supertypes: {', '.join(self.supertypes)}")
+        fns = [f.name for f in self.functions]
+        if fns:
+            lines.append(f"Methods: {', '.join(fns)}")
+        return "\n".join(lines)
+
 
 @dataclass
 class Module:
@@ -96,6 +143,28 @@ class Module:
     functions: list[Function] = field(default_factory=list)
     types: list[LoveType] = field(default_factory=list)
     enums: list[Enum] = field(default_factory=list)
+
+    def fmt(self, verbosity: int = 0):
+        if verbosity == 0:
+            lines = [f"love.{self.name}"]
+            for fn in self.functions:
+                lines.append(f"  {fn.variants[0].sig(fn.name) if fn.variants else fn.name}")
+            if self.types:
+                lines.append(f"Types: {', '.join(t.name for t in self.types)}")
+            if self.enums:
+                lines.append(f"Enums: {', '.join(e.name for e in self.enums)}")
+            return "\n".join(lines)
+        lines = [f"love.{self.name}: {self.description}"]
+        fns = [f.name for f in self.functions]
+        if fns:
+            lines.append(f"Functions: {', '.join(fns)}")
+        types = [t.name for t in self.types]
+        if types:
+            lines.append(f"Types: {', '.join(types)}")
+        enums = [e.name for e in self.enums]
+        if enums:
+            lines.append(f"Enums: {', '.join(enums)}")
+        return "\n".join(lines)
 
 
 @dataclass
@@ -164,87 +233,6 @@ for mod in _DATA.modules:
         _TYPES[t.name] = t
 
 
-def _sig(fn: Function, variant: Variant | None = None):
-    """One-line signature: name(arg: type, ...) -> ret_type"""
-    v = variant or (fn.variants[0] if fn.variants else None)
-    args = ""
-    ret = ""
-    if v:
-        args = ", ".join(f"{a.name}: {a.type}" for a in v.arguments)
-        if v.returns:
-            ret = " -> " + ", ".join(r.type for r in v.returns)
-    return f"{fn.name}({args}){ret}"
-
-
-def _fmt_variant(v: Variant):
-    lines = []
-    if v.description:
-        lines.append(v.description)
-    if v.arguments:
-        lines.append("  Arguments:")
-        for a in v.arguments:
-            lines.append(f"    {a.name} ({a.type or '?'}): {a.description}")
-    if v.returns:
-        lines.append("  Returns:")
-        for r in v.returns:
-            lines.append(f"    {r.name} ({r.type or '?'}): {r.description}")
-    return "\n".join(lines)
-
-
-def _fmt_function(fn: Function, verbosity: int = 0):
-    if verbosity == 0:
-        lines = []
-        for i, v in enumerate(fn.variants):
-            lines.append(_sig(fn, v))
-        return "\n".join(lines)
-    lines = [f"{fn.name}: {fn.description}"]
-    for i, v in enumerate(fn.variants):
-        if len(fn.variants) > 1:
-            lines.append(f"  Variant {i+1}: {_sig(fn, v)}")
-        lines.append(_fmt_variant(v))
-    return "\n".join(lines)
-
-
-def _fmt_module(mod: Module, verbosity: int = 0):
-    if verbosity == 0:
-        lines = [f"love.{mod.name}"]
-        for fn in mod.functions:
-            lines.append(f"  {_sig(fn)}")
-        if mod.types:
-            lines.append(f"Types: {', '.join(t.name for t in mod.types)}")
-        if mod.enums:
-            lines.append(f"Enums: {', '.join(e.name for e in mod.enums)}")
-        return "\n".join(lines)
-    lines = [f"love.{mod.name}: {mod.description}"]
-    fns = [f.name for f in mod.functions]
-    if fns:
-        lines.append(f"Functions: {', '.join(fns)}")
-    types = [t.name for t in mod.types]
-    if types:
-        lines.append(f"Types: {', '.join(types)}")
-    enums = [e.name for e in mod.enums]
-    if enums:
-        lines.append(f"Enums: {', '.join(enums)}")
-    return "\n".join(lines)
-
-
-def _fmt_type(t: LoveType, verbosity: int = 0):
-    if verbosity == 0:
-        lines = [t.name]
-        if t.supertypes:
-            lines.append(f"Supertypes: {', '.join(t.supertypes)}")
-        for fn in t.functions:
-            lines.append(f"  {_sig(fn)}")
-        return "\n".join(lines)
-    lines = [f"{t.name}: {t.description}"]
-    if t.supertypes:
-        lines.append(f"Supertypes: {', '.join(t.supertypes)}")
-    fns = [f.name for f in t.functions]
-    if fns:
-        lines.append(f"Methods: {', '.join(fns)}")
-    return "\n".join(lines)
-
-
 def love2d_docs(query: str, verbosity: int = 0):
     # "love.X" -> module
     # "love.X.func" -> module function
@@ -255,7 +243,7 @@ def love2d_docs(query: str, verbosity: int = 0):
     if parts[0] == "love" and len(parts) == 2:
         mod = _MODULES.get(parts[1])
         if mod:
-            return _fmt_module(mod, verbosity)
+            return mod.fmt(verbosity)
         return f"Module '{parts[1]}' not found"
 
     if parts[0] == "love" and len(parts) == 3:
@@ -264,7 +252,7 @@ def love2d_docs(query: str, verbosity: int = 0):
             return f"Module '{parts[1]}' not found"
         for fn in mod.functions:
             if fn.name == parts[2]:
-                return _fmt_function(fn, verbosity)
+                return fn.fmt(verbosity)
         return f"Function '{parts[2]}' not found in love.{parts[1]}"
 
     # Type or Type:method
@@ -275,13 +263,13 @@ def love2d_docs(query: str, verbosity: int = 0):
             return f"Type '{type_name}' not found"
         for fn in t.functions:
             if fn.name == method_name:
-                return _fmt_function(fn, verbosity)
+                return fn.fmt(verbosity)
         return f"Method '{method_name}' not found on {type_name}"
 
     # Plain type name
     t = _TYPES.get(query)
     if t:
-        return _fmt_type(t, verbosity)
+        return t.fmt(verbosity)
 
     return f"'{query}' not found"
 
