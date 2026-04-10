@@ -67,6 +67,7 @@ end
 ---@param x integer
 ---@param y integer
 ---@param nodeType string|MapNode a node type string or a Node class
+---@return MapNode
 function MapGraph:addNode(x, y, nodeType)
     local key = nodeKey(x, y)
     local NodeClass = type(nodeType) == "string" and nodes.getClass(nodeType) or nodeType
@@ -74,7 +75,9 @@ function MapGraph:addNode(x, y, nodeType)
     local node = NodeClass(x, y)
     node.nodeType = NodeClass.nodeType or "battle"
     self.nodes[key] = node
+    return node
 end
+
 function MapGraph:removeNode(x, y)
     local key = nodeKey(x, y)
     if not self.nodes[key] then return end
@@ -232,7 +235,40 @@ function MapGraph.generate(args, rng)
         end
     end
 
-    -- 6. DFS from (0,0) — prune all unreachable nodes
+    -- 6. Random visual offsets per node
+    local function ensureNodeOffsets()
+        local maxOff = args.distanceBetweenNodes * args.nodeOffsetFactor
+        for _, node in pairs(self.nodes) do
+            if (not node.ox) or (node.ox == 0) then
+                node.ox = (rng() - 0.5) * 2 * maxOff
+                node.oy = (rng() - 0.5) * 2 * maxOff
+            end
+        end
+    end
+    ensureNodeOffsets()
+
+    -- 7. Prune edges with similar angles from the same node
+    local DOT_THRESHOLD = 1.92 -- ~23 degrees
+    local sp = args.distanceBetweenNodes
+    for _, node in pairs(self.nodes) do
+        local nx, ny = node.x * sp + node.ox, node.y * sp + node.oy
+        local nbs = self:getNeighbors(node.x, node.y)
+        for i = 1, #nbs do
+            for j = i + 1, #nbs do
+                local dx1, dy1 = nbs[i].x * sp + nbs[i].ox - nx, nbs[i].y * sp + nbs[i].oy - ny
+                local dx2, dy2 = nbs[j].x * sp + nbs[j].ox - nx, nbs[j].y * sp + nbs[j].oy - ny
+                local len1 = math.sqrt(dx1*dx1 + dy1*dy1)
+                local len2 = math.sqrt(dx2*dx2 + dy2*dy2)
+                local dot = (dx1*dx2 + dy1*dy2) / (len1 * len2)
+                if dot > DOT_THRESHOLD then
+                    local v = len1 > len2 and nbs[i] or nbs[j]
+                    self.edges[edgeKey(node.x, node.y, v.x, v.y)] = nil
+                end
+            end
+        end
+    end
+
+    -- 8. DFS from (0,0) — prune all unreachable nodes
     local reachable = {}
     local stack = { nodeKey(0, 0) }
     while #stack > 0 do
@@ -261,14 +297,9 @@ function MapGraph.generate(args, rng)
     self:setPlayerPosition(0, 0)
     self:_generateNodes(rng)
 
-    -- 7. Random visual offsets per node
-    local maxOff = args.distanceBetweenNodes * args.nodeOffsetFactor
-    for _, node in pairs(self.nodes) do
-        node.ox = (rng() - 0.5) * 2 * maxOff
-        node.oy = (rng() - 0.5) * 2 * maxOff
-    end
+    ensureNodeOffsets() -- since more nodes were generated; add more here.
 
-    -- 8. Place decor in gaps using two-grid spatial check
+    -- 9. Place decor in gaps using two-grid spatial check
     local decorTypeIds = args.decorTypes
     if decorTypeIds and #decorTypeIds > 0 then
         local sp = args.distanceBetweenNodes
@@ -396,7 +427,6 @@ function MapGraph:_generateNodes(rng)
 
     -- pass-2: Adjust battle node difficulty
     -- 5% chance +2 difficulty, 25% chance +1 difficulty
-    -- Then clamp: any difficulty 2 nodes get reduced to 1
     for _, node in pairs(self.nodes) do
         if node.nodeType == "battle" then
             ---@cast node MapNode.BattleNode
@@ -406,12 +436,6 @@ function MapGraph:_generateNodes(rng)
             elseif r < 0.30 then
                 node.difficulty = node.difficulty + 1
             end
-        end
-    end
-    for _, node in pairs(self.nodes) do
-        if node.nodeType == "battle" and node.difficulty >= 2 then
-            ---@cast node MapNode.BattleNode
-            node.difficulty = node.difficulty - 1
         end
     end
 

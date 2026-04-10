@@ -40,7 +40,8 @@ M.define("mountain_large", { image = "mountain_large_1", chance = 0.5, nodeRadiu
 
 M.define("tree_large_1", { image = "tree_large_1", chance = 0.2, nodeRadius = 20, decorRadius = 8 })
 
-M.define("tree_small_1", { image = "tree_small_1", chance = 0.1, nodeRadius = 16, decorRadius = 6 })
+M.define("tree_small_1", { image = "tree_small_1", chance = 0.3, nodeRadius = 12, decorRadius = 6 })
+-- M.define("tree_small_1_b", { image = "tree_small_1", chance = 0.05, nodeRadius = 8, decorRadius = 4 })
 
 
 return M

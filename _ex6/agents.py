@@ -133,18 +133,21 @@ CODING_STYLE_PROMPT = ex6.Message(role="system", overview="coding-style", conten
 
 
 
+CODE_MODE_SYS_PROMPT = make_code_mode_system_prompt([
+    read_file, glob, search, read_headers, read_body,
+    write_file, edit_file, edit_file_lines,
+    explore_agent, web_search, websearch_agent,
+    plan_done, plan_read, plan_write,
+    game_start, game_interact,
+])
+
+
+
 coder = Context("c_opus", yolo=True, model=M.OPUS_46.id, reasoning="medium", messages=[
     MAIN_SYSTEM_PROMPT,
-    make_code_mode_system_prompt([
-        read_file, glob, search, read_headers, read_body,
-        write_file, edit_file, edit_file_lines,
-        explore_agent, web_search, websearch_agent,
-        escalate,
-        plan_add_log, plan_done, plan_list, plan_read, plan_write,
-        game_start, game_interact,
-    ]),
+    CODE_MODE_SYS_PROMPT,
     ENV_PROMPT,
-    CODING_STYLE_PROMPT,
+    # CODING_STYLE_PROMPT,
     CLAUDE_MD,
 ])
 cache_manually(coder)
@@ -152,16 +155,9 @@ cache_manually(coder)
 
 coder = Context("c_codex", yolo=True, model=M.GPT52_CODEX.id, reasoning="medium", messages=[
     MAIN_SYSTEM_PROMPT,
-    make_code_mode_system_prompt([
-        read_file, glob, search, read_headers, read_body,
-        write_file, edit_file, edit_file_lines,
-        explore_agent, web_search, websearch_agent,
-        escalate,
-        plan_add_log, plan_done, plan_list, plan_read, plan_write,
-        game_start, game_interact,
-    ]),
+    CODE_MODE_SYS_PROMPT,
     ENV_PROMPT,
-    CODING_STYLE_PROMPT,
+    # CODING_STYLE_PROMPT,
     CLAUDE_MD,
 ])
 
