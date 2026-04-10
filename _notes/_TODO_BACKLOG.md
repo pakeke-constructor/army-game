@@ -7,12 +7,11 @@
 ### OK:: what do we need for a minimum-playable game?
 
 
+
+- agents have `condense` and `checkpoint` mechanism. (forget/summarize chunks of work; compresses ctx)
+
 - agents can have comments when writing code; these are removed.
 
-- agents have `condense` mechanism. (forget/summarize chunks of work; compresses ctx)
-
-- remove `escalate` tool
-- remove `plan_log` and `plan_list` tools
 
 - Remove bloat from context window (add `skills` system?)
 
