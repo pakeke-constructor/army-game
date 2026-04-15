@@ -7,8 +7,7 @@
 ### OK:: what do we need for a minimum-playable game?
 
 
-
-- Make map-scene render nicely (trees, mountains, etc)
+- ~~Make map-scene render nicely (trees, mountains, etc)~~
 
 
 - Add demon-rage system

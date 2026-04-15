@@ -78,6 +78,22 @@ function MapGraph:addNode(x, y, nodeType)
     return node
 end
 
+---@param x integer
+---@param y integer
+---@param nodeType string|MapNode a node type string or a Node class
+---@return MapNode
+function MapGraph:setNode(x, y, nodeType)
+    local key = nodeKey(x, y)
+    if not self.nodes[key] then return nil end
+    local NodeClass = type(nodeType) == "string" and nodes.getClass(nodeType) or nodeType
+    NodeClass = NodeClass or nodes.getClass("battle")
+    local node = NodeClass(x, y)
+    node.nodeType = NodeClass.nodeType or "battle"
+    self.nodes[key] = node
+    return node
+end
+
+
 function MapGraph:removeNode(x, y)
     local key = nodeKey(x, y)
     if not self.nodes[key] then return end
@@ -299,6 +315,7 @@ function MapGraph.generate(args, rng)
 
     ensureNodeOffsets() -- since more nodes were generated; add more here.
 
+
     -- 9. Place decor in gaps using two-grid spatial check
     local decorTypeIds = args.decorTypes
     if decorTypeIds and #decorTypeIds > 0 then
@@ -366,19 +383,19 @@ function MapGraph.generate(args, rng)
         local gy0 = math.floor((-hh * sp * sy) / cellSize)
         local gy1 = math.floor(( hh * sp * sy) / cellSize)
 
-        for gy = gy0, gy1 do
-            for gx = gx0, gx1 do
-                if not nodeGrid[gx .. "," .. gy] then
-                    local wx = (gx + rng()) * cellSize
-                    local wy = (gy + rng()) * cellSize
-                    for _, dtype in ipairs(sortedTypes) do
+        for _, dtype in ipairs(sortedTypes) do
+            for gy = gy0, gy1 do
+                for gx = gx0, gx1 do
+                    if not nodeGrid[gx .. "," .. gy] then
+                        local wx = (gx + rng()) * cellSize
+                        local wy = (gy + rng()) * cellSize
                         if rng() < dtype.chance then
                             if isGridClear(nodeGrid, wx, wy, dtype.nodeRadius) and isGridClear(decorGrid, wx, wy, dtype.decorRadius) then
                                 self.decor[#self.decor + 1] = {
                                     x = wx, y = wy, decorType = dtype.id
                                 }
                                 markGrid(decorGrid, wx, wy, dtype.decorRadius)
-                                break
+                                -- break
                             end
                         end
                     end
@@ -417,10 +434,10 @@ function MapGraph:_generateNodes(rng)
         elseif r < 0.40 then
             local pick = SPECIAL_NODES[math.floor(rng() * #SPECIAL_NODES) + 1]
             if not isNextToNodeOfSameType(self, node.x, node.y, pick) then
-                self:addNode(node.x, node.y, pick)
+                self:setNode(node.x, node.y, pick)
             end
         else
-            self:addNode(node.x, node.y, "Empty")
+            self:setNode(node.x, node.y, "Empty")
         end
         ::continue::
     end
