@@ -24,23 +24,23 @@ local function getNodeWorldPos(graph, node)
     return (node.x * sp + node.ox) * graph.scaleX, (node.y * sp + node.oy) * graph.scaleY
 end
 
-local function renderEdge(graph, a, b, r, g_c, b_c, a_c, width)
+local function renderEdge(graph, a, b, rr, gg, bb, aa, width)
     local lg = love.graphics
     local ax, ay = getNodeWorldPos(graph, a)
     local bx, by = getNodeWorldPos(graph, b)
-    lg.setColor(r, g_c, b_c, a_c or 1)
-    lg.setLineWidth(width or 6)
+    lg.setColor(rr, gg, bb, aa or 1)
+    lg.setLineWidth(width or 4)
     lg.line(ax, ay, bx, by)
 end
 
-local function renderNode(graph, node, r, g_c, b_c, a_c, radius)
+local function renderNode(graph, node, r, g, b, a, radius)
     local lg = love.graphics
     local nx, ny = getNodeWorldPos(graph, node)
-    if r then
-        lg.setColor(r, g_c, b_c, a_c or 1)
-        lg.circle("fill", nx, ny, radius or NODE_RADIUS)
-    else
+    if node and node.draw then
         node:draw(nx, ny)
+    else
+        lg.setColor(r, g, b, a or 1)
+        lg.ellipse("fill", nx, ny, radius or NODE_RADIUS, (radius or NODE_RADIUS) * 0.5)
     end
 end
 

@@ -22,7 +22,7 @@ end
 ---@param wy number world y
 function Node:draw(wx, wy)
     love.graphics.setColor(0.6, 0.6, 0.6, 1)
-    love.graphics.circle("fill", wx, wy, 4)
+    love.graphics.ellipse("fill", wx, wy, 4, 2)
 end
 
 ---@param wx number world x
@@ -86,7 +86,7 @@ end
 
 function BattleNode:draw(wx, wy)
     love.graphics.setColor(0.8, 0.3, 0.3, 1)
-    love.graphics.circle("fill", wx, wy, 5)
+    love.graphics.ellipse("fill", wx, wy, 7, 4)
 end
 
 nodes.BattleNode = BattleNode
