@@ -63,6 +63,11 @@ function MapGraph:init(width, height)
     self.playerPosition = nil -- node key string, e.g. "2,0"
 end
 
+function MapGraph:getDrawPos(node)
+    local sp = self.distanceBetweenNodes
+    return (node.x * sp + node.ox) * self.scaleX, (node.y * sp + node.oy) * self.scaleY
+end
+
 
 ---@param x integer
 ---@param y integer
@@ -264,15 +269,16 @@ function MapGraph.generate(args, rng)
     ensureNodeOffsets()
 
     -- 7. Prune edges with similar angles from the same node
-    local DOT_THRESHOLD = 1.92 -- ~23 degrees
-    local sp = args.distanceBetweenNodes
+    local DOT_THRESHOLD = 0.82 -- ~23 degrees
     for _, node in pairs(self.nodes) do
-        local nx, ny = node.x * sp + node.ox, node.y * sp + node.oy
+        local nx, ny = self:getDrawPos(node)
         local nbs = self:getNeighbors(node.x, node.y)
         for i = 1, #nbs do
             for j = i + 1, #nbs do
-                local dx1, dy1 = nbs[i].x * sp + nbs[i].ox - nx, nbs[i].y * sp + nbs[i].oy - ny
-                local dx2, dy2 = nbs[j].x * sp + nbs[j].ox - nx, nbs[j].y * sp + nbs[j].oy - ny
+                local ix, iy = self:getDrawPos(nbs[i])
+                local jx, jy = self:getDrawPos(nbs[j])
+                local dx1, dy1 = ix - nx, iy - ny
+                local dx2, dy2 = jx - nx, jy - ny
                 local len1 = math.sqrt(dx1*dx1 + dy1*dy1)
                 local len2 = math.sqrt(dx2*dx2 + dy2*dy2)
                 local dot = (dx1*dx2 + dy1*dy2) / (len1 * len2)
@@ -320,7 +326,6 @@ function MapGraph.generate(args, rng)
     local decorTypeIds = args.decorTypes
     if decorTypeIds and #decorTypeIds > 0 then
         local sp = args.distanceBetweenNodes
-        local sx, sy = args.scaleX, args.scaleY
         local cellSize = sp / 8
         local nodeGrid = {} -- nodes + edges (static)
         local decorGrid = {} -- placed decor (grows)
@@ -353,18 +358,15 @@ function MapGraph.generate(args, rng)
         -- Mark all node positions into nodeGrid
         local nodeR = sp * 0.2
         for _, node in pairs(self.nodes) do
-            local wx = (node.x * sp + node.ox) * sx
-            local wy = (node.y * sp + node.oy) * sy
+            local wx, wy = self:getDrawPos(node)
             markGrid(nodeGrid, wx, wy, nodeR)
         end
 
         -- Mark all edges into nodeGrid
         local edgeR = sp * 0.15
         self:forEachEdge(function(a, b)
-            local ax = (a.x * sp + a.ox) * sx
-            local ay = (a.y * sp + a.oy) * sy
-            local bx = (b.x * sp + b.ox) * sx
-            local by = (b.y * sp + b.oy) * sy
+            local ax, ay = self:getDrawPos(a)
+            local bx, by = self:getDrawPos(b)
             local dist = math.sqrt((bx - ax)^2 + (by - ay)^2)
             local steps = math.max(1, math.ceil(dist / (cellSize * 0.5)))
             for i = 0, steps do
@@ -378,10 +380,10 @@ function MapGraph.generate(args, rng)
 
         -- Iterate every fine-grid cell in world bounds
         local hw, hh = math.floor(width / 2), math.floor(height / 2)
-        local gx0 = math.floor((-hw * sp * sx) / cellSize)
-        local gx1 = math.floor(( hw * sp * sx) / cellSize)
-        local gy0 = math.floor((-hh * sp * sy) / cellSize)
-        local gy1 = math.floor(( hh * sp * sy) / cellSize)
+        local gx0 = math.floor((-hw * sp * self.scaleX) / cellSize)
+        local gx1 = math.floor(( hw * sp * self.scaleX) / cellSize)
+        local gy0 = math.floor((-hh * sp * self.scaleY) / cellSize)
+        local gy1 = math.floor(( hh * sp * self.scaleY) / cellSize)
 
         for _, dtype in ipairs(sortedTypes) do
             for gy = gy0, gy1 do

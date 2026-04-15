@@ -19,23 +19,20 @@ local map_scene = {}
 function map_scene:init()
 end
 
-local function getNodeWorldPos(graph, node)
-    local sp = graph.distanceBetweenNodes
-    return (node.x * sp + node.ox) * graph.scaleX, (node.y * sp + node.oy) * graph.scaleY
-end
-
+---@param graph MapGraph
 local function renderEdge(graph, a, b, rr, gg, bb, aa, width)
     local lg = love.graphics
-    local ax, ay = getNodeWorldPos(graph, a)
-    local bx, by = getNodeWorldPos(graph, b)
+    local ax, ay = graph:getDrawPos(a)
+    local bx, by = graph:getDrawPos(b)
     lg.setColor(rr, gg, bb, aa or 1)
     lg.setLineWidth(width or 4)
     lg.line(ax, ay, bx, by)
 end
 
+---@param graph MapGraph
 local function renderNode(graph, node, r, g, b, a, radius)
     local lg = love.graphics
-    local nx, ny = getNodeWorldPos(graph, node)
+    local nx, ny = graph:getDrawPos(node)
     if node and node.draw then
         node:draw(nx, ny)
     else
@@ -44,11 +41,12 @@ local function renderNode(graph, node, r, g, b, a, radius)
     end
 end
 
+---@param graph MapGraph
 local function getHoveredNode(graph, wx, wy)
     local hoverDist = graph.distanceBetweenNodes * HOVER_DIST_FRAC
     local best, bestDist = nil, hoverDist * hoverDist
     graph:forEachNode(function(node)
-        local nx, ny = getNodeWorldPos(graph, node)
+        local nx, ny = graph:getDrawPos(node)
         local dx, dy = nx - wx, ny - wy
         local d2 = dx * dx + dy * dy
         if d2 < bestDist then
@@ -91,7 +89,7 @@ function map_scene:enter()
 
     local pnode = run.mapGraph:getPlayerNode()
     if pnode then
-        self.camX, self.camY = getNodeWorldPos(run.mapGraph, pnode)
+        self.camX, self.camY = run.mapGraph:getDrawPos(pnode)
     else
         self.camX, self.camY = 0, 0
     end
@@ -164,8 +162,8 @@ function map_scene:mousereleased(mx, my, button)
                 if hovered and hovered ~= pnode then
                     local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, PATH_SEARCH_DEPTH)
                     if path and #path >= 2 then
-                        local ax, ay = getNodeWorldPos(graph, path[1])
-                        local bx, by = getNodeWorldPos(graph, path[2])
+                        local ax, ay = graph:getDrawPos(path[1])
+                        local bx, by = graph:getDrawPos(path[2])
                         local dist = math.sqrt((bx - ax)^2 + (by - ay)^2)
                         self.traveling = {
                             toNode = path[2],
@@ -197,7 +195,7 @@ local function drawCommander(scene, graph, pnode)
         cx = trav.ax + (trav.bx - trav.ax) * trav.t
         cy = trav.ay + (trav.by - trav.ay) * trav.t
     else
-        cx, cy = getNodeWorldPos(graph, pnode)
+        cx, cy = graph:getDrawPos(pnode)
     end
     love.graphics.setColor(1, 0.8, 0.2, 1)
     love.graphics.circle("fill", cx, cy, PLAYER_RADIUS)
@@ -228,7 +226,7 @@ function map_scene:draw()
 
         -- drawBelow (under edges)
         graph:forEachNode(function(node)
-            local nx, ny = getNodeWorldPos(graph, node)
+            local nx, ny = graph:getDrawPos(node)
             node:drawBelow(nx, ny)
         end)
 
