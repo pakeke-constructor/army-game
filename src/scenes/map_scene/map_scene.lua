@@ -201,6 +201,10 @@ local function drawCommander(scene, graph, pnode)
     love.graphics.circle("fill", cx, cy, PLAYER_RADIUS)
 end
 
+local function hash(x,y)
+    return math.abs(math.sin(x * 12.9898 + y * 78.233) * 43758.5453)
+end
+
 function map_scene:draw()
     local lg = love.graphics
     lg.clear(0.08, 0.06, 0.06, 1)
@@ -219,7 +223,9 @@ function map_scene:draw()
                 local dtype = decor_types.get(d.decorType)
                 if dtype and dtype.image then
                     love.graphics.setColor(1, 1, 1, 1)
-                    g.drawImage(dtype.image, d.x, d.y)
+                    local sx = (math.floor(hash(d.x,d.y))%2==0) and -1 or 1
+                    -- 50% chance to draw flipped on scaleX
+                    g.drawImage(dtype.image, d.x, d.y, 0, sx,1)
                 end
             end
         end
