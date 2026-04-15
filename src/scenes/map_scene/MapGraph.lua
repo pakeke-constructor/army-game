@@ -26,7 +26,9 @@ STAGE-2: Node-generation (essentially 'filling in' the existing structure)
 - pass-2:
 - Iterate over all enemy-nodes. 5% chance to increase difficulty by 2. 25% to increase difficulty by 1
 - Iterate over all enemy-nodes. For every node of difficulty 2: decrease difficulty by 1.
-- pass-3: Set pieces
+- pass-3: Fill in super empty nodes. If >51% of neighbors are empty, become battle node.
+- pass-4: Dead-end nodes (1 neighbor) become special nodes.
+- pass-5: Set pieces
 - (SKIP FOR NOW; WILL DO THIS IN FUTURE. Create a method stub so i dont forget)
 
 ]]
@@ -412,6 +414,7 @@ end
 
 
 local SPECIAL_NODES = {"feast", "fountain"}
+-- TODO: add `town` in here too.
 
 local function isNextToNodeOfSameType(self, x, y, nodeType)
     for _, nb in ipairs(self:getNeighbors(x, y)) do
@@ -458,7 +461,32 @@ function MapGraph:_generateNodes(rng)
         end
     end
 
-    -- pass-3: Set pieces (TODO)
+    -- pass-3: Fill in super empty nodes
+    for _, node in pairs(self.nodes) do
+        if node.nodeType == "Empty" then
+            local nbs = self:getNeighbors(node.x, node.y)
+            local emptyCount = 0
+            for _, nb in ipairs(nbs) do
+                if nb.nodeType == "Empty" then emptyCount = emptyCount + 1 end
+            end
+            if #nbs > 0 and emptyCount / #nbs > 0.51 then
+                -- if node has too many empty neighbors, make it a battle-node.
+                -- ensures that the world isn't "too" empty.
+                self:setNode(node.x, node.y, "battle")
+            end
+        end
+    end
+
+    -- pass-4: Dead-end nodes become special
+    for _, node in pairs(self.nodes) do
+        local nbs = self:getNeighbors(node.x, node.y)
+        if #nbs == 1 then
+            local pick = SPECIAL_NODES[math.floor(rng() * #SPECIAL_NODES) + 1]
+            self:setNode(node.x, node.y, pick)
+        end
+    end
+
+    -- pass-5: Set pieces (TODO)
     self:_placeSetPieces(rng)
 end
 
