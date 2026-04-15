@@ -69,10 +69,10 @@ function map_scene:enter()
         run.mapGraph = MapGraph.generate({
             width = 50,
             height = 30,
-            nodePruneChance = 0.2,
+            nodePruneChance = 0.35,
             edgePruneChance = 0.02,
-            distanceBetweenNodes = 120,
-            randomDiagonalChance = 0.4,
+            distanceBetweenNodes = 130,
+            randomDiagonalChance = 0.5,
             nodeOffsetFactor = 0.35,
             scaleX = 1,
             scaleY = 0.6,
