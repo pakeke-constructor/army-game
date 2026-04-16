@@ -29,18 +29,6 @@ local function test()
 end
 
 
-
-local function spawnTestEnemies()
-    for x=400, 500, 30 do
-        for y=100, 160, 20 do
-            g.spawnEntity("demon", x, y)
-        end
-        for y=180, 200, 20 do
-            g.spawnEntity("imp", x, y)
-        end
-    end
-end
-
 function battle_scene:pollHandlers()
     self.ecs:addSystemHandlers()
     g.addBlessingHandlers()
@@ -48,7 +36,7 @@ end
 
 function battle_scene:enter()
     self.ecs = ECSWorld({"stats", "ai", "attacking", "physics"})
-    self.ecs:setBorder(400, 250)
+    self.ecs:setBorder(600, 350)
     local border = self.ecs.border
     local run = g.getRun()
     for _, squad in ipairs(run.squads) do
