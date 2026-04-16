@@ -231,7 +231,7 @@ end
 
 function map_scene:draw()
     local lg = love.graphics
-    lg.clear(0.08, 0.06, 0.06, 1)
+    lg.clear(g.COLORS.GROUND_COLOR)
 
     self.pixelCanvas:start(self.camera:getTransform())
     iml.pushTransform(self.camera:getTransform())
@@ -245,7 +245,7 @@ function map_scene:draw()
 
         -- edges
         graph:forEachEdge(function(a, b)
-            renderEdge(graph, a, b, 0.16, 0.28, 0.18)
+            renderEdge(graph, a, b, g.COLORS.MAP_EDGE:getRGBA())
         end)
 
         -- decor + nodes (sorted by y)
@@ -280,11 +280,12 @@ function map_scene:draw()
                 local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, PATH_SEARCH_DEPTH)
                 if path and #path >= 2 then
                     -- first edge bold yellow, rest pale yellow
-                    renderEdge(graph, path[1], path[2], 1, 1, 0.2, 1, 6)
-                    renderNode(graph, path[2], 1, 1, 0.2, 1, NODE_RADIUS + 1)
+                    local r, gg, b, a = g.COLORS.MAP_EDGE_HIGHLIGHT:getRGBA()
+                    renderEdge(graph, path[1], path[2], r, gg, b, a, 6)
+                    renderNode(graph, path[2], r, gg, b, a, NODE_RADIUS + 1)
                     for i = 2, #path - 1 do
-                        renderEdge(graph, path[i], path[i + 1], 1, 1, 0.2, 1, 6)
-                        renderNode(graph, path[i + 1], 1, 1, 0.2, 1, NODE_RADIUS + 1)
+                        renderEdge(graph, path[i], path[i + 1], r, gg, b, a, 6)
+                        renderNode(graph, path[i + 1], r, gg, b, a, NODE_RADIUS + 1)
                     end
                 end
             end

@@ -23,7 +23,7 @@ end
 ---@param wx number world x
 ---@param wy number world y
 function Node:draw(wx, wy)
-    love.graphics.setColor(0.6, 0.6, 0.6, 1)
+    love.graphics.setColor(g.COLORS.MAP_EDGE:getRGBA())
     love.graphics.ellipse("fill", wx, wy, 4, 2)
 end
 
@@ -125,7 +125,7 @@ function BattleNode:enter()
 end
 
 function BattleNode:draw(wx, wy)
-    love.graphics.setColor(0.1,0.3,0.1)
+    love.graphics.setColor(g.COLORS.MAP_EDGE:getRGBA())
     love.graphics.ellipse("fill", wx, wy, 8, 5)
     love.graphics.setColor(0.8, 0.3, 0.3, 1)
     love.graphics.ellipse("fill", wx, wy, 6, 3)
@@ -190,9 +190,9 @@ function EmptyNode:enter()
 end
 
 function EmptyNode:draw(wx, wy)
-    love.graphics.setColor(0.1,0.3,0.1)
+    love.graphics.setColor(g.COLORS.MAP_EDGE:getRGBA())
     love.graphics.ellipse("fill", wx, wy, 9, 5)
-    love.graphics.setColor(0.05, 0.1, 0.05)
+    love.graphics.setColor(g.COLORS.GROUND_COLOR:getRGBA())
     love.graphics.ellipse("fill", wx, wy, 6, 3)
 end
 

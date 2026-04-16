@@ -1296,6 +1296,9 @@ g.COLORS = {
     ]]
     HEALTH = objects.Color("FF397634"),
     ATTACK = objects.Color("FFA2741E"),
+    MAP_EDGE = objects.Color(0.16, 0.28, 0.18),
+    MAP_EDGE_HIGHLIGHT = objects.Color(1, 1, 0.2, 1),
+    GROUND_COLOR = objects.Color(0.08, 0.06, 0.06, 1),
 }
 
 
