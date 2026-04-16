@@ -70,20 +70,31 @@ nodes.Node = Node
 local DEMON_DISTANCE = 20
 local DEMON_OY = -10
 
+-- rudimentary hash; takes any number of integer keys
+local function hash(...)
+    local h = 2654435761
+    for i = 1, select("#", ...) do
+        h = bit.bxor(h * 73856093 + select(i, ...) * 19349663, 0x5bd1e995)
+    end
+    return math.abs(h)
+end
+
+-- returns 0..1 deterministic float
+local function hashf(...)
+    return (hash(...) % 10000) / 10000
+end
+
 ---@param node MapNode
 ---@param x number
 ---@param y number
 local function tryDrawDemons(node, x,y)
     if node.demonEncounter then
         local count = node.demonEncounter + 1
-        local hash0 = bit.bxor(node.id * 73856093, 2654435761)
-        local baseAngle = (hash0 % 1000) / 1000 * math.pi * 2
+        local baseAngle = hashf(node.id) * math.pi * 2
         for i = 1, count do
             local angle = baseAngle + (i - 1) * (math.pi * 2 / count)
-            local hash = bit.bxor(node.id * 73856093 + i * 19349663, bit.lshift(i, 5))
-            hash = bit.bxor(hash, bit.rshift(hash, 7))
-            local angleOff = ((hash % 1000) / 1000 - 0.5) * 0.4
-            local radiusMul = 0.85 + ((hash * 37) % 1000) / 1000 * 0.3
+            local angleOff = (hashf(node.id, i) - 0.5) * 0.4
+            local radiusMul = 0.85 + hashf(node.id, i, 1) * 0.3
             local r = DEMON_DISTANCE * radiusMul
             if count == 1 then
                 r = r / 2 -- only 1 demon, make it sit closer to center
