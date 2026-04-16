@@ -80,7 +80,14 @@ function map_scene:enter()
             nodeOffsetFactor = 0.35,
             scaleX = 1,
             scaleY = 0.6,
-            decorTypes = {"mountain_large", "tree_large_1", "tree_small_1"},
+            decorTypes = {
+                "mountain_large",
+                "tree_large_1",
+                "tree_small_1",
+                "grass_1",
+                "grass_2",
+                "grass_3"
+            },
         })
     end
 

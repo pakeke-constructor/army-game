@@ -10,7 +10,7 @@ local M = {}
 local registry = {}
 
 ---@param id string
----@param def DecorTypeDef
+---@param def DecorTypeDef|{id:nil}
 function M.define(id, def)
     def.id = id
     registry[id] = def
@@ -35,11 +35,17 @@ function M.getSortedByRadius(ids)
 end
 
 
+
+M.define("grass_1", { image = "grass_1", chance = 0.15, nodeRadius = 4, decorRadius = 8 })
+M.define("grass_2", { image = "grass_2", chance = 0.3, nodeRadius = 4, decorRadius = 8 })
+M.define("grass_3", { image = "grass_3", chance = 0.2, nodeRadius = 4, decorRadius = 8 })
+
+
 -- Define built-in decor types
 M.define("mountain_large", { image = "mountain_large_1", chance = 0.5, nodeRadius = 35, decorRadius = 20 })
+M.define("mountain_large_2", { image = "mountain_small_1", chance = 0.3, nodeRadius = 21, decorRadius = 10 })
 
 M.define("tree_large_1", { image = "tree_large_1", chance = 0.2, nodeRadius = 20, decorRadius = 8 })
-
 M.define("tree_small_1", { image = "tree_small_1", chance = 0.3, nodeRadius = 12, decorRadius = 6 })
 -- M.define("tree_small_1_b", { image = "tree_small_1", chance = 0.05, nodeRadius = 8, decorRadius = 4 })
 

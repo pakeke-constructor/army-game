@@ -389,7 +389,8 @@ function MapGraph.generate(args, rng)
         local gy0 = math.floor((-hh * sp * self.scaleY) / cellSize)
         local gy1 = math.floor(( hh * sp * self.scaleY) / cellSize)
 
-        for _, dtype in ipairs(sortedTypes) do
+        for i=1,#sortedTypes do
+            local dtype = sortedTypes[i]
             for gy = gy0, gy1 do
                 for gx = gx0, gx1 do
                     if not nodeGrid[gx .. "," .. gy] then
