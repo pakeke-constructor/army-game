@@ -103,6 +103,28 @@ end
 
 
 
+local function drawTopBar()
+    local r = ui.getScreenRegion()
+    local topBar = r:splitVertical(0.2,0.9)
+
+    -- 3 steps:
+
+    local demonRage, gold, daysTillIncursion, zoneString, pausePanel = topBar:splitVertical(2,2,4,4,1)
+    --[[
+    each of these ^^^ are panels.
+
+    demonRage: shows current demon-rage. When hovered, explains what demonRage is (use hoverService) 
+    gold: shows gold-text. When hovered, simple explanation explains what gold is (used to buy stuff)
+    days till incursion: shows gold-text. When hovered, simple explanation explains what gold is (used to buy stuff)
+    zoneString: eg. "Zone 1 - Forest" (just hardcode for now)
+    pausePanel: Pause-button (stub for now.)
+
+    (days-till-incursion should be a *slightly* taller panel than others, maybe 5% higher h.)
+    ]]
+
+end
+
+
 ---@param self g.HUD
 local function drawBattleHUD(self)
     drawArmyWidgets(self)
