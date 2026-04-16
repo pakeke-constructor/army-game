@@ -67,17 +67,30 @@ nodes.Node = Node
 
 
 
+local DEMON_DISTANCE = 20
+local DEMON_OY = -10
+
 ---@param node MapNode
 ---@param x number
 ---@param y number
 local function tryDrawDemons(node, x,y)
     if node.demonEncounter then
-        local denc = node.demonEncounter
-        -- denc 1 = 2 demons
-        -- denc 2 = 3 demons
-        -- denc 3 = 4 demons
-        -- demons should be offset randomly in different directions
-        g.drawImage("node_combat_demon", x,y+10)
+        local count = node.demonEncounter + 1
+        local hash0 = bit.bxor(node.id * 73856093, 2654435761)
+        local baseAngle = (hash0 % 1000) / 1000 * math.pi * 2
+        for i = 1, count do
+            local angle = baseAngle + (i - 1) * (math.pi * 2 / count)
+            local hash = bit.bxor(node.id * 73856093 + i * 19349663, bit.lshift(i, 5))
+            hash = bit.bxor(hash, bit.rshift(hash, 7))
+            local angleOff = ((hash % 1000) / 1000 - 0.5) * 0.4
+            local radiusMul = 0.85 + ((hash * 37) % 1000) / 1000 * 0.3
+            local r = DEMON_DISTANCE * radiusMul
+            if count == 1 then
+                r = r / 2 -- only 1 demon, make it sit closer to center
+            end
+            local a = angle + angleOff
+            g.drawImage("node_combat_demon", x + math.cos(a) * r, y + DEMON_OY + math.sin(a) * r)
+        end
     end
 end
 
