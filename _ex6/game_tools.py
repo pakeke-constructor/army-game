@@ -56,9 +56,9 @@ KEY = "game_tools:client"
 
 
 def _get_client(ctx) -> GameClient:
-    if KEY not in ctx.data:
-        ctx.data[KEY] = GameClient()
-    return ctx.data[KEY]
+    if KEY not in ctx.data_volatile:
+        ctx.data_volatile[KEY] = GameClient()
+    return ctx.data_volatile[KEY]
 
 
 def game_start(ctx: ex6.Context) -> str:

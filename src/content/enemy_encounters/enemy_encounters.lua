@@ -40,12 +40,6 @@ end)
 
 
 
-
-
-
-
-
-
 -- MELEE PIT
 encounters.defineEnemyEncounter(3, function(es)
     es:add("demon", 55)

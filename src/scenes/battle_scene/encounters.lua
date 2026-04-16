@@ -15,15 +15,6 @@ end
 
 
 
----@param difficulty integer
----@param relativeDifficulty integer 
----@param seed number
-function encounters.startRandomEncounter(relativeDifficulty, seed)
-    local arr = enemyPool[difficulty]
-
-    -- 
-end
-
 
 
 
@@ -117,6 +108,20 @@ function EnemySpawner:finalize()
 end
 
 
+
+---@param difficulty integer
+---@param ecs ecs.ECSWorld
+function encounters.startRandomEncounter(difficulty, ecs)
+    local arr = enemyPool[difficulty]
+    if not arr or #arr == 0 then
+        arr = enemyPool[1]
+    end
+    local rng = love.math.newRandomGenerator(os.time())
+    local spawn = arr[rng:random(1, #arr)]
+    local es = EnemySpawner(ecs, rng)
+    spawn(es)
+    es:finalize()
+end
 
 return encounters
 

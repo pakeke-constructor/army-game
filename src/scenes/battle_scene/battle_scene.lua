@@ -1,4 +1,5 @@
 local ECSWorld = require("src.ecs.ECSWorld")
+local encounters = require("src.scenes.battle_scene.encounters")
 local Camera = require("lib.cam11")
 local ParticleService = require(".particles.ParticleService")
 local HUD = require("src.hud.hud")
@@ -63,7 +64,8 @@ function battle_scene:enter()
     self.victoryPopupTime = 0
     self.squadChoices = nil
 
-    spawnTestEnemies()
+    local run = g.getRun()
+    encounters.startRandomEncounter(run.day, self.ecs)
 end
 
 local function countEnemies(ecs)
