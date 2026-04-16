@@ -190,7 +190,10 @@ function EmptyNode:enter()
 end
 
 function EmptyNode:draw(wx, wy)
-    -- g.drawImage("map/nodes/node_fountain", wx, wy)
+    love.graphics.setColor(0.1,0.3,0.1)
+    love.graphics.ellipse("fill", wx, wy, 9, 5)
+    love.graphics.setColor(0.05, 0.1, 0.05)
+    love.graphics.ellipse("fill", wx, wy, 6, 3)
 end
 
 nodes.EmptyNode = EmptyNode

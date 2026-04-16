@@ -16,6 +16,5 @@ consts.SQUAD_SPACING = 20
 consts.LAGGED_HEALTHBAR_DURATION = 0.25
 
 consts.MAX_SQUAD_COUNT = 10
-consts.BATTLE_BORDER = 400 -- half-width of the battle area
 
 return consts

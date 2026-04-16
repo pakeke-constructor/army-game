@@ -47,14 +47,15 @@ end
 
 function battle_scene:enter()
     self.ecs = ECSWorld({"stats", "ai", "attacking", "physics"})
-    local b = consts.BATTLE_BORDER
-    self.ecs:setBorder(b * 2, b * 2)
+    self.ecs:setBorder(400, 250)
+    local border = self.ecs.border
     local run = g.getRun()
     for _, squad in ipairs(run.squads) do
         squad.deployed = false
     end
     self.camera = Camera(0, 0, CAMERA_ZOOM)
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
+    self.camera:setPos(border[3] * 0.45, border[4] * 0.5)
     self.particles = ParticleService()
     self.hud = HUD()
     self.noEnemyTimer = 0
@@ -200,6 +201,9 @@ function battle_scene:draw()
     self.camera:attach()
     love.graphics.clear(0.15, 0.15, 0.15)
     iml.pushTransform(self.camera:getTransform())
+
+    local border = self.ecs.border
+    love.graphics.rectangle("line", border[1], border[2], border[3], border[4])
 
     self.ecs:draw()
     self.particles:draw()
