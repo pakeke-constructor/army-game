@@ -79,6 +79,7 @@ _G.ui = require("src.ui.ui")
 
 _G.analytics = require("src.modules.analytics.analytics")
 _G.agentbridge = require("src.modules.agentbridge.agentbridge")
+_G.vignette = require("src.modules.vignette.vignette")
 
 _G.g = require("src.g")
 _G.devcmd = require("src.devcmd")
@@ -121,6 +122,7 @@ end
 
 function love.load()
     assert(love.filesystem.createDirectory("saves"))
+    vignette.setStrength(0.5)
     analytics.init(nil)
     if consts.DEV_MODE then
         love.keyboard.setTextInput(true)
@@ -165,6 +167,7 @@ function love.draw()
         iml.beginFrame()
         sc:draw()
         iml.endFrame()
+        vignette.draw()
     end
     devcmd.draw()
     if consts.DEV_MODE then
@@ -241,6 +244,7 @@ function love.wheelmoved(dx, dy)
 end
 
 function love.resize(w, h)
+    vignette.resize()
     local sc = sceneManager.getCurrentScene()
     if sc and sc.resize then
         sc:resize(w, h)

@@ -109,17 +109,20 @@ local function drawTopBar()
 
     -- 3 steps:
 
-    local demonRage, gold, daysTillIncursion, zoneString, pausePanel = topBar:splitVertical(2,2,4,4,1)
+    local demonRage, gold, daysTillIncursion, zoneString, pausePanel = topBar:splitHorizontal(2,2,4,4,1)
     --[[
     each of these ^^^ are panels.
 
     demonRage: shows current demon-rage. When hovered, explains what demonRage is (use hoverService) 
     gold: shows gold-text. When hovered, simple explanation explains what gold is (used to buy stuff)
-    days till incursion: shows gold-text. When hovered, simple explanation explains what gold is (used to buy stuff)
+    days till incursion: shows text. When hovered, simple explanation explains stuff about incursion (TODO; stub for now)
+        - {day_icon} {white}20{/white}{gray} days until {/gray}{red}attack{/red}
     zoneString: eg. "Zone 1 - Forest" (just hardcode for now)
     pausePanel: Pause-button (stub for now.)
 
     (days-till-incursion should be a *slightly* taller panel than others, maybe 5% higher h.)
+
+    AGENT INSTRUCTIONS: KEEP THESE COMMENTS; DONT REMOVE.
     ]]
 
 end

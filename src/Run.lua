@@ -30,6 +30,15 @@ function Run:init()
 end
 
 
+
+
+local DAYS_UNTIL_ATTACK = 20 -- todo: do this better in future
+function Run:getDaysUntilIncursion()
+    return math.max(0, DAYS_UNTIL_ATTACK - self.day)
+end
+
+
+
 ---@return table
 function Run:serialize()
     local squads = {}
