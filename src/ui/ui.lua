@@ -257,6 +257,24 @@ function ui.drawPanel(x, y, w, h)
 end
 
 
+
+local darkUIPanel = nil
+---@param x number
+---@param y number
+---@param w number
+---@param h number
+function ui.drawDarkPanel(x, y, w, h)
+    darkUIPanel = darkUIPanel or n9slice.new {
+        image = g.getAtlas(),
+        padding = 7,
+        quad = g.getImageQuad("dark_ui_panel")
+    }
+    return darkUIPanel:draw(x, y, w, h)
+end
+
+
+
+
 ---@param col objects.Color
 ---@param val number Value multiplier for HSV
 local function multiplyHSVValue(col, val)
