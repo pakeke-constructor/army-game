@@ -3,14 +3,19 @@
 
 
 
+- Make map-scene render nicely (trees, mountains, demons, etc)
 
 ### OK:: what do we need for a minimum-playable game?
 
 
-- Make map-scene render nicely (trees, mountains, demons, etc)
+
+- Add map UI (xp, demon-rage, )
 
 
 - Add demon-rage system
+
+- Add enemy-encounter system
+
 
 
 - Add blessing-select UI
