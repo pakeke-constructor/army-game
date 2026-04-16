@@ -205,10 +205,6 @@ function battle_scene:draw()
 
     ui.startUI()
 
-    if self.victoryPopup then
-        drawCardSelect(self)
-    end
-
     local sw, sh = love.graphics.getDimensions()
     if not self.victoryPopup and iml.wasJustClicked(0, 0, sw, sh, 1, "deploy_click") then
         local sq = self.hud:getSelectedSquad()
@@ -219,9 +215,11 @@ function battle_scene:draw()
         end
     end
     self.hud:drawUI({ battleScene = true })
+
     if self.victoryPopup then
-        --victoryPopup(self)
+        drawCardSelect(self)
     end
+
     ui.endUI()
 end
 
