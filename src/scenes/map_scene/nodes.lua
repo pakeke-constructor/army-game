@@ -3,6 +3,8 @@ local Class = require("src.modules.objects.Class")
 ---@class MapNode: objects.Class
 ---@field x integer grid x
 ---@field y integer grid y
+---@field id integer random id
+---@field demonEncounter integer? (0 1 2) Demon-encounters can exist on any kind of node
 ---@field ox number visual offset x
 ---@field oy number visual offset y
 ---@field nodeType string serialization key
@@ -62,16 +64,33 @@ end
 nodes.Node = Node
 
 
+
+
+
+---@param node MapNode
+---@param x number
+---@param y number
+local function tryDrawDemons(node, x,y)
+    if node.demonEncounter then
+        local denc = node.demonEncounter
+        -- denc 1 = 2 demons
+        -- denc 2 = 3 demons
+        -- denc 3 = 4 demons
+        -- demons should be offset randomly in different directions
+        g.drawImage("node_combat_demon", x,y+10)
+    end
+end
+
 -------------------------------
 -- BattleNode
 -------------------------------
 ---@class MapNode.BattleNode: MapNode
----@field difficulty integer
+---@field demonEncounter integer
 local BattleNode = nodes.newClass("battle")
 
 function BattleNode:init(x,y)
     Node.init(self,x,y)
-    self.difficulty = 0
+    self.demonEncounter = 0
     --[[
     relative difficulty of node, relative to current level:
     0 = normal enemy
@@ -85,8 +104,11 @@ function BattleNode:enter()
 end
 
 function BattleNode:draw(wx, wy)
+    love.graphics.setColor(0.1,0.3,0.1)
+    love.graphics.ellipse("fill", wx, wy, 8, 5)
     love.graphics.setColor(0.8, 0.3, 0.3, 1)
-    love.graphics.ellipse("fill", wx, wy, 7, 4)
+    love.graphics.ellipse("fill", wx, wy, 6, 3)
+    tryDrawDemons(self, wx,wy)
 end
 
 nodes.BattleNode = BattleNode
@@ -106,6 +128,7 @@ end
 function FeastNode:draw(wx, wy)
     lg.setColor(1,1,1)
     g.drawImage("node_banquet", wx, wy)
+    tryDrawDemons(self, wx,wy)
 end
 
 nodes.FeastNode = FeastNode
@@ -126,6 +149,7 @@ end
 function FountainNode:draw(wx, wy)
     lg.setColor(1,1,1)
     g.drawImage("node_fountain", wx, wy)
+    tryDrawDemons(self, wx,wy)
 end
 
 nodes.FountainNode = FountainNode

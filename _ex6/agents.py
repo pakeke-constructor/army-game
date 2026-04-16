@@ -153,7 +153,7 @@ coder = Context("c_opus", yolo=True, model=M.OPUS_46.id, reasoning="medium", mes
 cache_manually(coder)
 
 
-coder = Context("c_codex", yolo=True, model=M.GPT52_CODEX.id, reasoning="medium", messages=[
+coder = Context("c_codex", yolo=True, model=M.GPT53_CODEX.id, reasoning="medium", messages=[
     MAIN_SYSTEM_PROMPT,
     CODE_MODE_SYS_PROMPT,
     ENV_PROMPT,

@@ -80,6 +80,7 @@ function MapGraph:addNode(x, y, nodeType)
     local NodeClass = type(nodeType) == "string" and nodes.getClass(nodeType) or nodeType
     NodeClass = NodeClass or nodes.getClass("battle")
     local node = NodeClass(x, y)
+    node.id = math.floor((love.math.random)() * 2147483647) + 1
     node.nodeType = NodeClass.nodeType or "battle"
     self.nodes[key] = node
     return node
@@ -88,13 +89,13 @@ end
 ---@param x integer
 ---@param y integer
 ---@param nodeType string|MapNode a node type string or a Node class
----@return MapNode
 function MapGraph:setNode(x, y, nodeType)
     local key = nodeKey(x, y)
     if not self.nodes[key] then return nil end
     local NodeClass = type(nodeType) == "string" and nodes.getClass(nodeType) or nodeType
     NodeClass = NodeClass or nodes.getClass("battle")
     local node = NodeClass(x, y)
+    node.id = math.floor((love.math.random)() * 2147483647) + 1
     node.nodeType = NodeClass.nodeType or "battle"
     self.nodes[key] = node
     return node
@@ -203,6 +204,7 @@ function MapGraph.generate(args, rng)
     self.scaleX = args.scaleX
     self.scaleY = args.scaleY
     rng = rng or math.random
+    self.rng = rng
 
     local hw = math.floor(width / 2)
     local hh = math.floor(height / 2)
@@ -450,13 +452,13 @@ function MapGraph:_generateNodes(rng)
     -- pass-2: Adjust battle node difficulty
     -- 5% chance +2 difficulty, 25% chance +1 difficulty
     for _, node in pairs(self.nodes) do
-        if node.nodeType == "battle" then
-            ---@cast node MapNode.BattleNode
+        if node.demonEncounter then
+            ---@cast node MapNode
             local r = rng()
             if r < 0.05 then
-                node.difficulty = node.difficulty + 2
+                node.demonEncounter = node.demonEncounter + 2
             elseif r < 0.30 then
-                node.difficulty = node.difficulty + 1
+                node.demonEncounter = node.demonEncounter + 1
             end
         end
     end
