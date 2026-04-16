@@ -22,7 +22,7 @@ g.defineEntity("demon", {
     baseMaxHealth = 80,
 })
 
-g.defineEntity("imp", {
+g.defineEntity("archerdemon", {
     image = "archerdemon",
     physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
     partitions = {"unit", "enemy"},

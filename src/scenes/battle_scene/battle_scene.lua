@@ -16,17 +16,6 @@ function battle_scene:init()
 end
 
 
-local function test()
-    -- spawn test enemies
-    for x=400, 500, 30 do
-        for y=100, 160, 20 do
-            g.spawnEntity("demon", x, y)
-        end
-        for y=180, 200, 20 do
-            g.spawnEntity("imp", x, y)
-        end
-    end
-end
 
 
 function battle_scene:pollHandlers()
@@ -152,9 +141,6 @@ end
 
 function battle_scene:keypressed(k)
     if consts.DEV_MODE then
-        if k == "q" then
-            test()
-        end
         if k == "k" then
             killAllEnemies(self)
         end
