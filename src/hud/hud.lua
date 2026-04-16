@@ -23,6 +23,18 @@ local hudArgs
 local SQUAD_ICON_SIZE = 32
 local SQUAD_PADDING = 4
 
+local LOC_DEMON_RAGE = interp("{demon_pitchfork}Demon Rage: %{n}", {context="HUD top bar, shows current demon rage level"})
+local LOC_GOLD = interp("{coin_icon} Coins: %{n}", {context="HUD top bar, shows player's coin currency"})
+local LOC_DAYS = interp("%{n} days until {c r=1 g=0.3 b=0.3}attack", {context="HUD top bar, countdown to next demon incursion. 'attack' is richtext-colored red"})
+local LOC_ZONE = loc("Zone 1 - Forest", {}, {context="HUD top bar, current zone name. Hardcoded stub"})
+local LOC_PAUSE = loc("II", {}, {context="HUD top bar, pause button icon text"})
+
+local LOC_HOVER_RAGE = loc("Demon Rage increases over time, making enemies stronger.", {}, {context="Tooltip when hovering demon rage in HUD"})
+local LOC_HOVER_GOLD = loc("Gold is used to buy items and upgrades at shops.", {}, {context="Tooltip when hovering gold in HUD"})
+local LOC_HOVER_DAYS = loc("Days remaining until the next Incursion!", {}, {context="Tooltip when hovering days-till-incursion in HUD. After X number of days, players will be forced to fight a 'boss'"})
+
+local TOP_BAR_FONT = g.getSmallFont(16)
+
 ---@param army g.Squad[]
 ---@param from integer
 ---@param dir integer -- +1 or -1
@@ -105,7 +117,7 @@ end
 
 local function drawTopBar()
     local r = ui.getScreenRegion()
-    local topBar = r:splitVertical(0.2,0.9)
+    local topBar = r:splitVertical(0.1,0.9)
 
     -- 3 steps:
 
@@ -124,7 +136,36 @@ local function drawTopBar()
 
     AGENT INSTRUCTIONS: KEEP THESE COMMENTS; DONT REMOVE.
     ]]
+    -- draw panels
+    local run = g.getRun()
+    local font = TOP_BAR_FONT
+    local fh = font:getHeight()
 
+    local function drawPanel(region, text, hoverText)
+        local x, y, w, h = region:get()
+        ui.drawDarkPanel(x, y, w, h)
+        lg.setColor(1, 1, 1)
+        richtext.printRich(text, font, x, y + h / 2 - fh / 2, w, "center")
+        if hoverText and iml.isHovered(x, y, w, h, text) then
+            local mx, my = ui.getMouse()
+            hoverService.requestHover(mx, my, function(box, fonts)
+                box:addText("{c r=0.7 g=0.7 b=0.75}" .. hoverText, fonts.body)
+            end)
+        end
+    end
+
+    drawPanel(demonRage, LOC_DEMON_RAGE({n = run.demonRage}), LOC_HOVER_RAGE)
+    drawPanel(gold, LOC_GOLD({n = run.money}), LOC_HOVER_GOLD)
+
+    -- days till incursion: slightly taller
+    local dx, dy, dw, dh = daysTillIncursion:get()
+    local extraH = dh * 0.05
+    local dtiRegion = daysTillIncursion:padUnit(0, -extraH, 0, 0)
+    drawPanel(dtiRegion, LOC_DAYS({n = run:getDaysUntilIncursion()}), LOC_HOVER_DAYS)
+
+    drawPanel(zoneString, LOC_ZONE)
+
+    drawPanel(pausePanel, LOC_PAUSE)
 end
 
 
@@ -143,6 +184,8 @@ end
 ---@param opt g.hudArgs
 function HUD:drawUI(opt)
     local sw, sh = ui.getScaledUIDimensions()
+
+    drawTopBar()
 
     if opt.battleScene then
         drawBattleHUD(self)

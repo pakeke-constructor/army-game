@@ -3,6 +3,7 @@ local Camera = require("lib.cam11")
 local MapGraph = require("src.scenes.map_scene.MapGraph")
 local PixelCanvas = require("src.modules.PixelCanvas")
 local decor_types = require("src.scenes.map_scene.decor_types")
+local HUD = require("src.hud.hud")
 
 local CAMERA_ZOOM = 0.5
 local NODE_RADIUS = 4
@@ -66,6 +67,7 @@ function map_scene:enter()
     self.camera = Camera(0, 0, CAMERA_ZOOM)
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
     self.pixelCanvas = PixelCanvas.new(love.graphics.getDimensions())
+    self.hud = HUD()
     self.dragging = false
 
     local run = g.getRun()
@@ -300,6 +302,7 @@ function map_scene:draw()
     self.pixelCanvas:finish()
 
     ui.startUI()
+    self.hud:drawUI({ mapScene = true })
     ui.endUI()
 end
 
