@@ -5,7 +5,6 @@ Army-Game is a 2d roguelike / RTS / deckbuilder game made in love2d with lua.
 You are a coding assistant who writes extremely simple code, and is extremely concise.
 </project>
 
-
 <core_game_loop>
 - Do battles with your army, fight demons, deploy your troops RTS-style. (Battles generally last 1-3 minutes)
     - During battles, players may click to deploy their "squads".
@@ -19,7 +18,6 @@ You are a coding assistant who writes extremely simple code, and is extremely co
 After 8 turns, the map is reset; and the player fights a boss.
 </core_game_loop>
 
-
 <high_level_concepts>
 - Units: A singular Enemy or ally; e.g. a soldier that fights for you. ranged or melee.
 - Squad: A bundle of Units that the player can click to deploy. (Traits and Perks are shared across every unit.)
@@ -28,7 +26,6 @@ After 8 turns, the map is reset; and the player fights a boss.
 - Perks: Per-unit buffs/blessings. Use question/event buses. Eg: "This unit gains +2 damage"
 - Traits: Keywords for units. Kinda like tags; they don't do anything on their own, but may interact with other systems. (Examples: Stoneskin, Townsfolk, Gremlin, Mancer)
 </high_level_concepts>
-
 
 <architecture>
 _ex6/** folder is your coding harness. includes plugins (python files) and includes your own agent definition.
@@ -47,17 +44,16 @@ src/consts.lua: Constants.
 (^^^ NOTE: SOME OF THIS ISN'T COMPLETED YET.)
 </architecture>
 
-
 <gotchas>
 A bunch of common pitfalls/traps to look out for:
 
 - Don't set ent.x/ent.y directly on entities with a .physics component; use g.setPos(ent, x, y) which syncs the Box2D body.
 - For `localize(txt)` calls, you MUST NOT localize text at runtime. It must be done at load-time. The idiomatic way is to have constants at the top, like `LOC_TXT = loc("...")`
+- Pretty much ALL text in the game uses `richtext`, which has `{effect}` formatting tags, and `%{variable:.2f}` for interpolation.
 - Don't add buffs to squads directly. Use g.addBuff instead.
 - table-valued fields on the def are shared across all entities of that type. Mutating them (e.g. `table.insert(ent.tags, ...)`) affects every entity. 
 - Before adding/removing handlers to ent.scopes, look for a g.* function first.
 </gotchas>
-
 
 <event_question_bus>
 Events and Questions are the core abstraction for decoupled game logic.
@@ -105,7 +101,6 @@ BUTTON = loc("Pole button %{n}", {n = 5}, {
 loc MUST be called at load-time, before the draw/update loop begins.
 </localization>
 
-
 <IMPORTANT-INSTRUCTIONS>
 - IN ALL INTERACTIONS, BE EXTREMELY CONCISE, EVEN IF IT MEANS GRAMMATICAL INCORRECTNESS.
 - You are working with an experienced engineer. Be terse; don't over-explain.
@@ -113,4 +108,3 @@ loc MUST be called at load-time, before the draw/update loop begins.
 - No complex one-liners, no deep nesting, no clever abstractions.
 - If a feature needs >300 new lines, stop and ask how to simplify.
 </IMPORTANT-INSTRUCTIONS>
-
