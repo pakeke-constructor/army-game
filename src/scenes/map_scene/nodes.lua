@@ -96,9 +96,6 @@ local function tryDrawDemons(node, x,y)
             local angleOff = (hashf(node.id, i) - 0.5) * 0.4
             local radiusMul = 0.85 + hashf(node.id, i, 1) * 0.3
             local r = DEMON_DISTANCE * radiusMul
-            if count == 1 then
-                r = r / 2 -- only 1 demon, make it sit closer to center
-            end
             local a = angle + angleOff
             g.drawImage("node_combat_demon", x + math.cos(a) * r, y + DEMON_OY + math.sin(a) * r)
         end
@@ -132,6 +129,7 @@ function BattleNode:draw(wx, wy)
     love.graphics.ellipse("fill", wx, wy, 8, 5)
     love.graphics.setColor(0.8, 0.3, 0.3, 1)
     love.graphics.ellipse("fill", wx, wy, 6, 3)
+    g.drawImage("node_combat_flag", wx-14, wy-20)
     tryDrawDemons(self, wx,wy)
 end
 

@@ -29,16 +29,20 @@ local function renderEdge(graph, a, b, rr, gg, bb, aa, width)
     lg.line(ax, ay, bx, by)
 end
 
----@param graph MapGraph
-local function renderNode(graph, node, r, g, b, a, radius)
+local function renderNodeAt(node, nx, ny, r, g, b, a, radius)
     local lg = love.graphics
-    local nx, ny = graph:getDrawPos(node)
     if node and node.draw then
         node:draw(nx, ny)
     else
         lg.setColor(r, g, b, a or 1)
         lg.ellipse("fill", nx, ny, radius or NODE_RADIUS, (radius or NODE_RADIUS) * 0.5)
     end
+end
+
+---@param graph MapGraph
+local function renderNode(graph, node, r, g, b, a, radius)
+    local nx, ny = graph:getDrawPos(node)
+    renderNodeAt(node, nx, ny, r, g, b, a, radius)
 end
 
 ---@param graph MapGraph
@@ -85,7 +89,19 @@ function map_scene:enter()
     run.mapGraph:forEachDecor(function(d)
         self.decorList[#self.decorList + 1] = d
     end)
-    table.sort(self.decorList, function(a, b) return a.y < b.y end)
+
+    -- Build sorted node list for drawing
+    self.nodeList = {}
+    run.mapGraph:forEachNode(function(node)
+        local nx, ny = run.mapGraph:getDrawPos(node)
+        self.nodeList[#self.nodeList + 1] = {node = node, x = nx, y = ny}
+    end)
+
+    local function byY(a, b)
+        return a.y < b.y
+    end
+    table.sort(self.decorList, byY)
+    table.sort(self.nodeList, byY)
 
     local pnode = run.mapGraph:getPlayerNode()
     if pnode then
@@ -99,6 +115,7 @@ function map_scene:leave()
     self.ecs = nil
     self.camera = nil
     self.decorList = nil
+    self.nodeList = nil
 end
 
 function map_scene:pollHandlers()
@@ -217,9 +234,20 @@ function map_scene:draw()
     local run = g.getRun()
     local graph = run.mapGraph
     if graph then
-        -- decor (behind everything)
-        if self.decorList then
-            for _, d in ipairs(self.decorList) do
+        -- drawGround (TODO)
+
+        -- edges
+        graph:forEachEdge(function(a, b)
+            renderEdge(graph, a, b, 0.16, 0.28, 0.18)
+        end)
+
+        -- decor + nodes (sorted by y)
+        local i, j = 1, 1
+        while true do
+            local d = self.decorList and self.decorList[i]
+            local n = self.nodeList and self.nodeList[j]
+            if not d and not n then break end
+            if d and (not n or d.y <= n.y) then
                 local dtype = decor_types.get(d.decorType)
                 if dtype and dtype.image then
                     love.graphics.setColor(1, 1, 1, 1)
@@ -227,24 +255,13 @@ function map_scene:draw()
                     -- 50% chance to draw flipped on scaleX
                     g.drawImage(dtype.image, d.x, d.y, 0, sx,1)
                 end
+                i = i + 1
+            elseif n then
+                n.node:drawBelow(n.x, n.y)
+                renderNodeAt(n.node, n.x, n.y)
+                j = j + 1
             end
         end
-
-        -- drawBelow (under edges)
-        graph:forEachNode(function(node)
-            local nx, ny = graph:getDrawPos(node)
-            node:drawBelow(nx, ny)
-        end)
-
-        -- edges
-        graph:forEachEdge(function(a, b)
-            renderEdge(graph, a, b, 0.16, 0.28, 0.18)
-        end)
-
-        -- nodes
-        graph:forEachNode(function(node)
-            renderNode(graph, node)
-        end)
 
         -- hover highlight: path from player to hovered node
         local pnode = graph:getPlayerNode()
@@ -279,4 +296,3 @@ function map_scene:draw()
 end
 
 return map_scene
-
