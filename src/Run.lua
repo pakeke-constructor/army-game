@@ -18,6 +18,8 @@ local Run = objects.Class("g:Run")
 
 function Run:init()
     self.squads = {}
+    self.level = 1
+    self.xp = 0
     self.money = 0
     self.food = 3
     self.mana = 3
@@ -29,6 +31,16 @@ function Run:init()
     self.mapGraph = nil
 end
 
+
+
+function Run:getMaxSquads()
+    return math.min(4 + self.level, 9)
+end
+
+
+function Run:getXpRequirement()
+    return 100 -- TODO. implement properly.
+end
 
 
 
@@ -47,6 +59,8 @@ function Run:serialize()
     end
     return {
         squads = squads,
+        level = self.level,
+        xp = self.xp,
         money = self.money,
         food = self.food,
         mana = self.mana,
@@ -70,6 +84,8 @@ function Run.deserialize(data)
     for i = 1, #(data.squads or {}) do
         run.squads[i] = Squad.deserialize(data.squads[i])
     end
+    run.level = data.level or run.level
+    run.xp = data.xp or run.xp
     run.money = data.money or run.money
     run.food = data.food or run.food
     run.mana = data.mana or run.mana
