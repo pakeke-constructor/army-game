@@ -52,12 +52,11 @@ function Box:addSpacing(h)
     self.entries[#self.entries + 1] = { type = "spacing", h = h }
 end
 
-function Box:render(x, y)
+function Box:measure()
     local pad = self.padding
     local sp = self.spacing
     local innerW = self.maxWidth - pad * 2
 
-    -- pass 1: measure heights
     local heights = {}
     local totalH = 0
     for i, e in ipairs(self.entries) do
@@ -77,13 +76,22 @@ function Box:render(x, y)
     local n = #self.entries
     local totalW = self.maxWidth
     local totalHeight = totalH + (n > 1 and sp * (n - 1) or 0) + pad * 2
+    return totalW, totalHeight, heights
+end
 
-    -- pass 2: draw bg
+function Box:render(x, y)
+    local pad = self.padding
+    local sp = self.spacing
+    local innerW = self.maxWidth - pad * 2
+    local totalW, totalHeight, heights = self:measure()
+
+    -- draw bg
     if self.drawBg then
         self.drawBg(x, y, totalW, totalHeight)
     end
 
-    -- pass 3: draw entries
+    -- draw entries
+    local n = #self.entries
     local cy = y + pad
     for i, e in ipairs(self.entries) do
         local ex = x + pad
