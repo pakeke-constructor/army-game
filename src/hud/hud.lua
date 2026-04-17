@@ -198,6 +198,32 @@ end
 
 
 
+local function drawSpell(spellId, cell, index)
+    local info = g.getSpellInfo(spellId)
+    cell = cell:padRatio(0.3)
+    local _,iconRegion, costRegion,_ = cell:splitVertical(1, 3, 1, 1)
+    local ix, iy = iconRegion:getCenter()
+    local font = BOTTOM_BAR_FONT
+    local fh = font:getHeight()
+    local mc = g.COLORS.MANA
+    lg.setColor(1, 1, 1)
+    g.drawImage(info.icon, ix, iy)
+    local costText = tostring(info.manaCost)
+    local costW = font:getWidth(costText)
+    local ccx, ccy = costRegion:getCenter()
+    lg.setColor(mc.r, mc.g, mc.b)
+    lg.print(costText, font, ccx - costW / 2, ccy - fh / 2)
+    local cx, cy, cw, ch = cell:get()
+    if iml.isHovered(cx, cy, cw, ch, "spell" .. index) then
+        local mx, my = ui.getMouse()
+        hoverService.requestHover(mx, my, function(box, fonts)
+            box:addText("{c r=0.9 g=0.85 b=0.7}" .. info.name, fonts.title)
+            box:addSpacing(2)
+            box:addText("{c r=0.6 g=0.6 b=0.65}" .. info.description, fonts.body)
+        end)
+    end
+end
+
 ---@param self g.HUD
 ---@param barHeight number
 local function drawBottomBar(self, barHeight)
@@ -258,26 +284,7 @@ local function drawBottomBar(self, barHeight)
     if #spells > 0 then
         local cells = spellBox:grid(#spells, 1)
         for i, spellId in ipairs(spells) do
-            local info = g.getSpellInfo(spellId)
-            local cell = cells[i]:padRatio(0.3)
-            local _,iconRegion, costRegion,_ = cell:splitVertical(1, 3, 1, 1)
-            local ix, iy = iconRegion:getCenter()
-            lg.setColor(1, 1, 1)
-            g.drawImage(info.icon, ix, iy)
-            local costText = tostring(info.manaCost)
-            local costW = font:getWidth(costText)
-            local ccx, ccy = costRegion:getCenter()
-            lg.setColor(mc.r, mc.g, mc.b)
-            lg.print(costText, font, ccx - costW / 2, ccy - fh / 2)
-            local cx, cy, cw, ch = cell:get()
-            if iml.isHovered(cx, cy, cw, ch, "spell" .. i) then
-                local mx, my = ui.getMouse()
-                hoverService.requestHover(mx, my, function(box, fonts)
-                    box:addText("{c r=0.9 g=0.85 b=0.7}" .. info.name, fonts.title)
-                    box:addSpacing(2)
-                    box:addText("{c r=0.6 g=0.6 b=0.65}" .. info.description, fonts.body)
-                end)
-            end
+            drawSpell(spellId, cells[i], i)
         end
     end
 end
