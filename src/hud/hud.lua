@@ -46,10 +46,21 @@ local TOP_BAR_FONT = g.getSmallFont(16)
 -- Slots 1..#army are squads, slots #army+1..#army+#spells are spells.
 -- Scrolling/clicking wraps across both lists seamlessly.
 
+--- Returns sorted list of spell IDs from the run's spell map.
+---@return string[]
+local function getSpellIds()
+    local ids = {}
+    for spellId in pairs(g.getRun().spells) do
+        ids[#ids + 1] = spellId
+    end
+    table.sort(ids)
+    return ids
+end
+
 --- Returns total number of selectable slots (squads + spells)
 ---@return integer
 local function getSlotCount()
-    return #g.getArmy() + #g.getRun().spells
+    return #g.getArmy() + #getSpellIds()
 end
 
 --- Returns what a slot maps to.
@@ -62,9 +73,8 @@ local function getSlotInfo(slot)
     if slot <= #army then
         return "squad", army[slot], slot
     end
-    local spells = g.getRun().spells
     local si = slot - #army
-    return "spell", spells[si], si
+    return "spell", getSpellIds()[si], si
 end
 
 --- Returns whether a slot is currently available for selection.
@@ -79,28 +89,28 @@ local function isSlotAvailable(slot)
     end
 end
 
---- Finds the next available slot in direction, not wrapping.
+--- Returns the closest available slot to `from`, searching left first.
 ---@param from integer
----@param dir integer -- +1 or -1
 ---@return integer?
-local function findNextAvailableSlot(from, dir)
+local function getClosestAvailableSlot(from)
     local total = getSlotCount()
-    for i = from, dir > 0 and total or 1, dir do
-        if isSlotAvailable(i) then return i end
+    if total == 0 then return nil end
+    from = helper.clamp(from, 1, total)
+    for offset = 0, total - 1 do
+        local left = from - offset
+        if left >= 1 and isSlotAvailable(left) then return left end
+        local right = from + offset
+        if right <= total and isSlotAvailable(right) then return right end
     end
+    return nil
 end
 
---- Returns the selected slot index, clamped and snapped to nearest available.
+--- Returns the selected slot index, snapped to nearest available.
 ---@param self g.HUD
 ---@return integer?
 local function getSlotIndex(self)
-    local total = getSlotCount()
-    if total == 0 then return nil end
-    self.selectedSlot = helper.clamp(self.selectedSlot, 1, total)
-    local idx = findNextAvailableSlot(self.selectedSlot, 1)
-        or findNextAvailableSlot(self.selectedSlot, -1)
-    if not idx then return nil end
-    self.selectedSlot = idx
+    local idx = getClosestAvailableSlot(self.selectedSlot)
+    if idx then self.selectedSlot = idx end
     return idx
 end
 
@@ -332,12 +342,7 @@ local function drawBottomBar(self, barHeight)
     richtext.printRich(manaText, font, mbx, mby + mbh / 2 - fh / 2, mbw, "center")
 
     -- spells
-    local spells = run.spells
-    local spellIds = {}
-    for spellId, _ in pairs(spells) do
-        spellIds[#spellIds + 1] = spellId
-    end
-    table.sort(spellIds)
+    local spellIds = getSpellIds()
     if #spellIds > 0 then
         local cells = spellBox:grid(#spellIds, 1)
         for i, spellId in ipairs(spellIds) do
