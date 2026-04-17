@@ -43,7 +43,22 @@
 - ranged: bows, + bow pointing in direction they aim
 
 
+<agent_ideas>
+
+improvements to main-agent system-prompt.
+- Clearer defined workflow
+- explanation for how to use `condense/checkpoint`
+
+
+
+Set up omni-agent properly (maybe make an agent-creator helper in base-ex6?)
+
+
+
+- Have an agent that audits changes (git diffs) and checks for issues.
+That agent should utilize _ex6/coding_style.
+
 - add push-ifs-up methodology (inside `_ex6/coding_style`)  https://gieseanw.wordpress.com/2024/06/24/dont-push-ifs-up-put-them-as-close-to-the-source-of-data-as-possible/
 
-
+</agent_ideas>
 

@@ -4,6 +4,7 @@
 from _ex6.models import M
 from _ex6.code_mode import make_code_mode_system_prompt
 from _ex6.tools import read_headers, read_body, glob, search, write_file, edit_file, read_file, edit_file_lines, escalate, bash, explore_agent, CLAUDE_MD, ENV_PROMPT
+from _ex6.skills import load_skill
 from _ex6.lua_coding_style import SYSTEM_PROMPT_CODING_STYLE
 from _ex6.tasks import plan_add_log, plan_done, plan_list, plan_read, plan_write
 from _ex6.web.web_tools import web_search, websearch_agent
@@ -73,6 +74,7 @@ CODE_MODE_SYS_PROMPT = make_code_mode_system_prompt([
     explore_agent, web_search, websearch_agent,
     plan_done, plan_read, plan_write,
     game_start, game_interact,
+    load_skill
 ])
 
 
