@@ -184,18 +184,23 @@ function battle_scene:draw()
     self.particles:draw()
 
     if not self.victoryPopup then
-        local sq = self.hud:getSelectedSquad()
-        if sq and not sq.deployed then
-            local mx, my = love.mouse.getPosition()
-            local wx, wy = self.camera:toWorld(mx, my)
-            local info = g.getSquadInfo(sq.squadId)
-            local offsets = sq:getFormationOffsets()
+        local typ, entry = self.hud:getSelection()
+        local mx, my = love.mouse.getPosition()
+        local wx, wy = self.camera:toWorld(mx, my)
+        if typ == "squad" and not entry.deployed then
+            local info = g.getSquadInfo(entry.squadId)
+            local offsets = entry:getFormationOffsets()
             lg.setColor(0.2, 1, 0.3, 0.5)
             for i = 1, #offsets do
                 local ox, oy = offsets[i].x, offsets[i].y
                 g.drawUnit(info.entityId, wx + ox, wy + oy)
             end
             lg.setColor(1, 1, 1, 1)
+        elseif typ == "spell" then
+            local info = g.getSpellInfo(entry)
+            if info.drawSpellHover then
+                info.drawSpellHover(wx, wy)
+            end
         end
     end
 
@@ -206,11 +211,13 @@ function battle_scene:draw()
 
     local sw, sh = love.graphics.getDimensions()
     if not self.victoryPopup and iml.wasJustClicked(0, 0, sw, sh, 1, "deploy_click") then
-        local sq = self.hud:getSelectedSquad()
-        if sq and not sq.deployed then
-            local mx, my = love.mouse.getPosition()
-            local wx, wy = self.camera:toWorld(mx, my)
-            sq:spawn(wx, wy)
+        local typ, entry = self.hud:getSelection()
+        local mx, my = love.mouse.getPosition()
+        local wx, wy = self.camera:toWorld(mx, my)
+        if typ == "squad" and not entry.deployed then
+            entry:spawn(wx, wy)
+        elseif typ == "spell" then
+            g.tryCastSpell(entry, wx, wy)
         end
     end
     self.hud:drawUI({ battleScene = true })

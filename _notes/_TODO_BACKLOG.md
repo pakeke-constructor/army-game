@@ -13,13 +13,13 @@
 
 
 
-### OK:: what do we need for a minimum-playable game?
 
+
+### OK:: what do we need for a minimum-playable game?
 
 
 - Add spell selection and cast-hover
 - Add spell-casting system
-
 
 
 - Add blessing hover

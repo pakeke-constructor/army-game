@@ -90,6 +90,20 @@ local function findNextSlot(from, dir)
     end
 end
 
+--- Returns the selected slot index, clamped and snapped to nearest available.
+---@param self g.HUD
+---@return integer?
+local function getSlotIndex(self)
+    local total = getSlotCount()
+    if total == 0 then return nil end
+    self.selectedSlot = helper.clamp(self.selectedSlot, 1, total)
+    local idx = findNextSlot(self.selectedSlot, 1)
+        or findNextSlot(self.selectedSlot, -1)
+    if not idx then return nil end
+    self.selectedSlot = idx
+    return idx
+end
+
 ---@param sq g.Squad
 ---@param x number
 ---@param y number
@@ -113,10 +127,9 @@ end
 
 ---@param self g.HUD
 ---@param region kirigami.Region
-local function drawSquadBar(self, region)
+---@param currentSlot integer?
+local function drawSquadBar(self, region, currentSlot)
     local army = g.getArmy()
-    -- if army has changed; make sure it's clamped
-    self.selectedSlot = helper.clamp(math.floor(self.selectedSlot + 0.5), 1, math.max(getSlotCount(), 1))
 
     if #army <= 0 then
         return
@@ -153,7 +166,7 @@ local function drawSquadBar(self, region)
     for i, sq in ipairs(army) do
         local x = startX + (i - 1) * (SQUAD_ICON_SIZE + spacing)
         local y = baseY
-        local selected = (i == self.selectedSlot)
+        local selected = (i == currentSlot)
         if selected then
             y = y - 6
         end
@@ -287,8 +300,9 @@ local function drawBottomBar(self, barHeight)
     local region = Kirigami(0, sh - barHeight, sw, barHeight)
     local squadBar, manaBox, blessingBox = region:splitHorizontal(2,1,1)
 
+    local currentSlot = getSlotIndex(self)
     ui.drawDarkPanel(squadBar:get())
-    drawSquadBar(self, squadBar:padUnit(6))
+    drawSquadBar(self, squadBar:padUnit(6), currentSlot)
 
     -- mana-box:
     -- Spells layed out horizontally. Spell-icon, then mana-cost below the spell with g.COLORS.MANA color.
@@ -322,7 +336,7 @@ local function drawBottomBar(self, barHeight)
         local cells = spellBox:grid(#spellIds, 1)
         for i, spellId in ipairs(spellIds) do
             local slot = #g.getArmy() + i
-            drawSpell(self, spellId, cells[i], i, slot == self.selectedSlot)
+            drawSpell(self, spellId, cells[i], i, slot == currentSlot)
         end
     end
 
@@ -357,7 +371,7 @@ end
 local function drawMapHUD(self)
     local sw, sh = ui.getScaledUIDimensions()
     local region = Kirigami(0, sh - SQUAD_ICON_SIZE - 40, sw/2, SQUAD_ICON_SIZE + 40)
-    drawSquadBar(self, region)
+    drawSquadBar(self, region, getSlotIndex(self))
 end
 
 
@@ -378,16 +392,13 @@ function HUD:drawUI(opt)
 end
 
 
-
 --- Returns the type and entry of the current selection, snapping to nearest available.
 ---@return "squad"|"spell"|nil type
 ---@return g.Squad|string|nil entry
 ---@return integer|nil subIndex
 function HUD:getSelection()
-    local idx = findNextSlot(self.selectedSlot, 1)
-        or findNextSlot(self.selectedSlot, -1)
+    local idx = getSlotIndex(self)
     if not idx then return nil end
-    self.selectedSlot = idx
     return getSlotInfo(idx)
 end
 
