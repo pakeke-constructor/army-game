@@ -205,22 +205,23 @@ local function drawBottomBar(self, barHeight)
 
     local sw, sh = ui.getScaledUIDimensions()
 
-    local BAR_HEIGHT = 30
     local region = Kirigami(0, sh - barHeight, sw, barHeight)
     local squadBar, blessingBox, manaBox = region:splitHorizontal(2,1,1)
 
-    drawSquadBar(self, squadBar)
-    -- on top of squad-bar,
+    ui.drawDarkPanel(squadBar:get())
+    drawSquadBar(self, squadBar:padUnit(6))
 
     -- blessing box:
     -- a grid of blessings.  Use helper.getBestFitDimensions(numItems, widthRatio, heightRatio)
     -- Only show icons. when blessing is hovered, push a UI box. 
     -- (DONT IMPLEMENT HOVER FOR NOW, ITS TOO COMPLEX. JUST DO A STUB.)
     -- CRUCIALLY: images should be drawn AS IS; no scaling with g.drawImageContained.
+    lg.setColor(1,1,1)
+    ui.drawDarkPanel(blessingBox:get())
     local run = g.getRun()
     local blessings = run.blessings
     if #blessings > 0 then
-        local padded = blessingBox:padRatio(0.05)
+        local padded = blessingBox:padUnit(6)
         local cols, rows = helper.getBestFitDimensions(#blessings, padded.w, padded.h)
         local cells = padded:grid(cols, rows)
         for i, bId in ipairs(blessings) do
@@ -235,7 +236,8 @@ local function drawBottomBar(self, barHeight)
     -- Spells layed out horizontally. Spell-icon, then mana-cost below the spell with g.COLORS.MANA color.
     -- above, (manaBar) there is a mana-bar, alongside a 30/30 mana count.
     -- CRUCIALLY: images should be drawn AS IS; no scaling with g.drawImageContained.
-    local manaBar, spellBox = manaBox:padRatio(0.1):splitVertical(1, 3)
+    ui.drawDarkPanel(manaBox:get())
+    local manaBar, spellBox = manaBox:padUnit(6):splitVertical(1, 3)
 
     -- mana bar
     local mbx, mby, mbw, mbh = manaBar:get()
