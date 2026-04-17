@@ -127,8 +127,7 @@ end
 local function killAllEnemies(self)
     for _, ent in self.ecs:iterate("team") do
         if ent.team == "enemy" and g.isAlive(ent) then
-            g.call("entityDeath", ent, nil)
-            ent:getWorld():removeEntity(ent)
+            g.killEntity(ent)
         end
     end
     self.noEnemyTimer = WIN_DELAY

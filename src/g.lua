@@ -678,13 +678,20 @@ function g.dealDamage(target, damage, attacker)
     g.call("entityHurt", target, finalDmg, attacker)
 
     if target.health <= 0 then
-        target.health = 0
-        g.call("entityDeath", target, attacker)
-        if attacker then
-            g.call("entityKillsEnemy", attacker, target)
-        end
-        target:getWorld():removeEntity(target)
+        g.killEntity(target, attacker)
     end
+end
+
+---@param ent ecs.Entity
+---@param killer ecs.Entity?
+function g.killEntity(ent, killer)
+    if not g.isAlive(ent) then return end
+    ent.health = 0
+    g.call("entityDeath", ent, killer)
+    if killer then
+        g.call("entityKillsEnemy", killer, ent)
+    end
+    ent:getWorld():removeEntity(ent)
 end
 
 function g.setPos(ent, x, y)

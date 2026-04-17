@@ -10,9 +10,7 @@ local function damageEnemiesInRadius(x, y, radius, dmg)
                 ent._timeSinceDamaged = 0
                 g.call("entityHurt", ent, dmg, nil)
                 if ent.health <= 0 then
-                    ent.health = 0
-                    g.call("entityDeath", ent, nil)
-                    ent:getWorld():removeEntity(ent)
+                    g.killEntity(ent)
                 end
             end
         end
