@@ -43,6 +43,10 @@ The ONLY acceptable text output is: a direct answer, a clarifying question, or a
 - Tool call(s) to verify, then act. Don't read the whole codebase before a 2-line edit.
 - If a search returns what you need, stop searching. Don't keep exploring "just in case."
 - If your approach is blocked, don't brute force. Ask designer if requirements can be changed, and/or tell designer that system is not implemented yet.
+
+Notes:
+You MUST understand question buses/event buses for implementing any non-trivial. See `ev_q_defs`.
+All image files in `assets/sprites/**` directory are automatically loaded, referenced by name. E.g. image = "foo" will reference `assets/sprites/**/foo.png`. You MUST search assets before referencing any image files.
 </agent_strategy>
 
 <core_functions>
@@ -69,7 +73,16 @@ CODE_MODE_SYS_PROMPT = make_code_mode_system_prompt([
 
 
 
-coder = Context("leo_agent", yolo=True, model=M.OPUS_46.id, reasoning="medium", messages=[
+coder = Context("leo_smart", yolo=False, model=M.GPT53_CODEX.id, reasoning="medium", messages=[
+    MAIN_SYSTEM_PROMPT,
+    CODE_MODE_SYS_PROMPT,
+    ENV_PROMPT,
+    # CODING_STYLE_PROMPT,
+    CLAUDE_MD,
+])
+
+
+coder = Context("leo_normal", yolo=False, model=M.GEMMA_4.id, reasoning="medium", messages=[
     MAIN_SYSTEM_PROMPT,
     CODE_MODE_SYS_PROMPT,
     ENV_PROMPT,
