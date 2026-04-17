@@ -35,13 +35,16 @@ end
 
 
 
-local function spellRenderer(rad, color)
+local function spellRenderer(rad, c)
     local function drawSpellArea(x,y)
         local l = gsman.setLineWidth(5)
-        local col = gsman.setColor(color)
+        local col2 = gsman.setColor(c[1],c[2],c[3],0.08)
+        lg.circle("fill", x,y, rad-2)
+        local col = gsman.setColor(c)
         lg.circle("line", x,y, rad)
-        l:pop()
         col:pop()
+        col2:pop()
+        l:pop()
     end
     return drawSpellArea
 end
