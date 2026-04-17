@@ -84,9 +84,11 @@ function battle_scene:update(dt)
         else
             self.noEnemyTimer = 0
         end
-        if self.noEnemyTimer >= WIN_DELAY then
+        if self.noEnemyTimer >= WIN_DELAY and not self.victoryPopup then
             self.victoryPopup = true
             self.victoryPopupTime = 0
+            local run = g.getRun()
+            run:winBattle()
             if not self.squadChoices then
                 self.squadChoices = buildVictoryChoices()
             end
@@ -133,6 +135,8 @@ local function killAllEnemies(self)
     self.noEnemyTimer = WIN_DELAY
     self.victoryPopup = true
     self.victoryPopupTime = 0
+    local run = g.getRun()
+    run:winBattle()
     if not self.squadChoices then
         self.squadChoices = buildVictoryChoices()
     end

@@ -99,6 +99,12 @@ function Run:resetForBattle()
     self.mana = self.maxMana -- todo; do some designing around this system
 end
 
+function Run:winBattle()
+    self.demonRage = self.demonRage + 1
+    g.call("battleWon")
+end
+
+
 ---@return table
 function Run:serialize()
     local squads = {}
