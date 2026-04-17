@@ -1299,6 +1299,7 @@ g.COLORS = {
     MAP_EDGE = objects.Color(0.16, 0.28, 0.18),
     MAP_EDGE_HIGHLIGHT = objects.Color(1, 1, 0.2, 1),
     GROUND_COLOR = objects.Color(0.08, 0.06, 0.06, 1),
+    MANA = objects.Color("FF3DC8E8"),
 }
 
 
