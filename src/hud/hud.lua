@@ -66,9 +66,8 @@ end
 
 
 ---@param self g.HUD
-local function drawArmyWidgets(self)
-    local sw, sh = ui.getScaledUIDimensions()
-
+---@param region kirigami.Region
+local function drawSquadBar(self, region)
     local army = g.getArmy()
     -- if army has changed; make sure it's clamped
     self.selectedSquadIndex = helper.clamp(math.floor(self.selectedSquadIndex + 0.5), 1, #army)
@@ -77,11 +76,36 @@ local function drawArmyWidgets(self)
         return
     end
     local count = #army
-    local totalW = count * SQUAD_ICON_SIZE + (count - 1) * SQUAD_PADDING
-    local startX = 20
-    local baseY = sh - SQUAD_ICON_SIZE - 10
+    local EDGE_PAD = 20
+
+    -- expand region if too small
+    local neededW = count * SQUAD_ICON_SIZE + (count - 1) * SQUAD_PADDING + 2 * EDGE_PAD
+    local neededH = SQUAD_ICON_SIZE + 2 * EDGE_PAD
+    if region.w < neededW then
+        region = region:set(nil, nil, neededW, nil)
+    end
+    if region.h < neededH then
+        region = region:set(nil, nil, nil, neededH)
+    end
+
+    -- inner region after edge padding
+    local inner = region:padUnit(EDGE_PAD)
+
+    -- space squads evenly
+    local spacing
+    if count > 1 then
+        spacing = (inner.w - count * SQUAD_ICON_SIZE) / (count - 1)
+    else
+        spacing = 0
+    end
+    local startX = inner.x
+    if count == 1 then
+        startX = inner.x + (inner.w - SQUAD_ICON_SIZE) / 2
+    end
+    local baseY = inner.y + (inner.h - SQUAD_ICON_SIZE) / 2
+
     for i, sq in ipairs(army) do
-        local x = startX + (i - 1) * (SQUAD_ICON_SIZE + SQUAD_PADDING)
+        local x = startX + (i - 1) * (SQUAD_ICON_SIZE + spacing)
         local y = baseY
         local selected = (i == self.selectedSquadIndex)
         if selected then
@@ -169,14 +193,45 @@ local function drawTopBar()
 end
 
 
+
+
+---@param self g.HUD
+---@param barHeight number
+local function drawBottomBar(self, barHeight)
+    -- bottom bar:
+
+    local sw, sh = ui.getScaledUIDimensions()
+
+    local BAR_HEIGHT = 30
+    local region = Kirigami(0, sh - barHeight, sw/2, barHeight)
+    local squadBar, blessingBox, manaBox = region:splitHorizontal(2,1,1)
+
+    drawSquadBar(self, region)
+    -- on top of squad-bar,
+
+    -- blessing box:
+    -- a grid of blessings.  Use helper.getBestFitDimensions(numItems, widthRatio, heightRatio)
+    -- Only show icons. when blessing is hovered, push a UI box. 
+    -- (DONT IMPLEMENT HOVER FOR NOW, ITS TOO COMPLEX. JUST DO A STUB.)
+    -- CRUCIALLY: images should be drawn AS IS; no scaling with g.drawImageContained.
+
+    -- mana-box:
+    -- Spells layed out horizontally. Spell-icon, then mana-cost below the spell with g.COLORS.MANA color.
+    -- above, (manaBar) there is a mana-bar, alongside a 30/30 mana count.
+    -- CRUCIALLY: images should be drawn AS IS; no scaling with g.drawImageContained.
+    local manaBar, spellBox = manaBox:padRatio(0.1):splitVertical(1, 3)
+end
+
+
 ---@param self g.HUD
 local function drawBattleHUD(self)
-    drawArmyWidgets(self)
 end
 
 ---@param self g.HUD
 local function drawMapHUD(self)
-    drawArmyWidgets(self)
+    local sw, sh = ui.getScaledUIDimensions()
+    local region = Kirigami(0, sh - SQUAD_ICON_SIZE - 40, sw/2, SQUAD_ICON_SIZE + 40)
+    drawSquadBar(self, region)
 end
 
 
