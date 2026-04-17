@@ -6,28 +6,19 @@
 - Make map-scene render nicely (trees, mountains, demons, etc)
 - Add demon-rage system
 - Add enemy-encounter system
+- Add top UI (xp, demon-rage, gold, day-cycle, days-until-incursion)
+- Add bottom UI (squads, mana-bar, spells, blessings)
+
 
 
 
 ### OK:: what do we need for a minimum-playable game?
 
 
-
-- Add top UI (xp, demon-rage, gold, day-cycle, days-until-incursion)
-
-
-- Add bottom UI (squads, mana-bar, spells, blessings)
+- Add blessing hover
 
 
 - Add blessing-select UI
-
-
-- Add spell storage and definitions
--- IDEAS: 
-- spellinfo.manaCost: integer
-- spellinfo.castSpell: func(x,y)
-- spellinfo.drawSpellHover: func(x,y) -- called when the player is "holding" the spell, about to cast. (E.g. draws a circle or something, to show AOE area)
-
 
 
 - Add spell-select UI
