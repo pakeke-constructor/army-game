@@ -271,9 +271,14 @@ local function drawBottomBar(self, barHeight)
 
     -- spells
     local spells = run.spells
-    if #spells > 0 then
-        local cells = spellBox:grid(#spells, 1)
-        for i, spellId in ipairs(spells) do
+    local spellIds = {}
+    for spellId, _ in pairs(spells) do
+        spellIds[#spellIds + 1] = spellId
+    end
+    table.sort(spellIds)
+    if #spellIds > 0 then
+        local cells = spellBox:grid(#spellIds, 1)
+        for i, spellId in ipairs(spellIds) do
             drawSpell(self, spellId, cells[i], i)
         end
     end

@@ -10,7 +10,7 @@ local MapGraph = require("src.scenes.map_scene.MapGraph")
 ---@field maxFood number
 ---@field maxMana number
 ---@field blessings string[]
----@field spells string[]
+---@field spells table<string, number>
 ---@field day integer
 ---@field demonRage integer
 ---@field mapGraph MapGraph
@@ -39,7 +39,7 @@ function Run:init()
             "iron_hide", "golden_coffers", "swift_feet", "blood_tithe", "barrage",
             "iron_hide", "golden_coffers", "swift_feet", "blood_tithe", "barrage",
         }
-        self.spells = {"zap", "heal"}
+        self.spells = {zap = 0, heal = 0}
     end
 end
 
@@ -61,7 +61,21 @@ function Run:getDaysUntilIncursion()
     return math.max(0, DAYS_UNTIL_ATTACK - self.day)
 end
 
+function Run:getSpellCooldown(spellId)
+    local cd = self.spells[spellId]
+    if not cd or cd <= 0 then
+        return nil
+    end
+    return cd
+end
 
+function Run:setSpellCooldown(spellId, cd)
+    if cd and cd > 0 then
+        self.spells[spellId] = cd
+    else
+        self.spells[spellId] = nil
+    end
+end
 
 ---@return table
 function Run:serialize()
