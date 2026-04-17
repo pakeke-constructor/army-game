@@ -28,9 +28,7 @@ function battle_scene:enter()
     self.ecs:setBorder(600, 350)
     local border = self.ecs.border
     local run = g.getRun()
-    for _, squad in ipairs(run.squads) do
-        squad.deployed = false
-    end
+    run:resetForBattle()
     self.camera = Camera(0, 0, CAMERA_ZOOM)
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
     self.camera:setPos(border[3] * 0.45, border[4] * 0.5)

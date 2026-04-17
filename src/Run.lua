@@ -25,7 +25,7 @@ function Run:init()
     self.food = 3
     self.mana = 3
     self.maxFood = 100
-    self.maxMana = 30
+    self.maxMana = 10
     self.blessings = {}
     self.spells = {}
     self.spellList = {}
@@ -91,6 +91,14 @@ end
 ---@param cd number
 function Run:setSpellCooldown(spellId, cd)
     self.spells[spellId] = math.max(0, cd or 0)
+end
+
+
+function Run:resetForBattle()
+    for _, squad in ipairs(self.squads) do
+        squad.deployed = false
+    end
+    self.mana = self.maxMana -- todo; do some designing around this system
 end
 
 ---@return table
