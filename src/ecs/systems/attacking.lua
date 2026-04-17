@@ -37,29 +37,6 @@ local function isValid(ent)
 end
 
 
----@param attacker ecs.Entity?
----@param target ecs.Entity
----@param damage number
-local function dealDamage(attacker, target, damage)
-    if not isValid(target) then return end
-
-    local reduction = g.ask("getDamageReduction", target)
-    local finalDmg = math.max(0, damage - reduction)
-
-    target.health = target.health - finalDmg
-    target._timeSinceDamaged = 0
-
-    g.call("entityHurt", target, finalDmg, attacker)
-
-    if target.health <= 0 then
-        target.health = 0
-        g.call("entityDeath", target, attacker)
-        if attacker then
-            g.call("entityKillsEnemy", attacker, target)
-        end
-        target:getWorld():removeEntity(target)
-    end
-end
 
 local PROJ_HIT_RADIUS = 10
 local PROJ_Z_MAX = 50 -- above this z, projectile doesn't hit anything
@@ -122,7 +99,7 @@ local function doAttack(attacker, target)
     else
         -- melee: direct damage
         local dmg = attacker.attackDamage or 0
-        dealDamage(attacker, target, dmg)
+        g.dealDamage(target, dmg, attacker)
     end
 end
 
@@ -210,7 +187,7 @@ local function updateProjectile(world, ent, dt)
             end
         end, PROJ_HIT_RADIUS)
         if hitEnt then
-            dealDamage(proj.ownerEnt, hitEnt, proj.damage)
+            g.dealDamage(hitEnt, proj.damage, proj.ownerEnt)
             g.knockback(hitEnt, proj.ownerEnt.x, proj.ownerEnt.y, proj.knockback or 50)
             g.call("projectileHit", ent, hitEnt)
             proj.pierceCount = proj.pierceCount - 1

@@ -19,9 +19,9 @@ local function damageEnemiesInRadius(x, y, radius, dmg)
     end, radius)
 end
 
-local function healEnemiesInRadius(x, y, radius, amount)
+local function healAlliesInRadius(x, y, radius, amount)
     local r2 = radius * radius
-    g.iteratePartition("enemy", x, y, function(ent)
+    g.iteratePartition("ally", x, y, function(ent)
         if ent.health and ent.maxHealth and g.isAlive(ent) then
             local dx = ent.x - x
             local dy = ent.y - y
@@ -34,6 +34,7 @@ end
 
 g.defineSpell("zap", {
     name = loc("Zap"),
+    description = loc("Damages enemies in radius"),
     manaCost = 2,
     cooldown = 0,
     icon = "coin_icon",
@@ -44,10 +45,11 @@ g.defineSpell("zap", {
 
 g.defineSpell("heal", {
     name = loc("Heal"),
+    description = loc("Heals allies in radius"),
     manaCost = 2,
     cooldown = 0,
     icon = "coin_icon",
     castSpell = function(x, y)
-        healEnemiesInRadius(x, y, 60, 10)
+        healAlliesInRadius(x, y, 60, 10)
     end,
 })

@@ -174,6 +174,7 @@ end
 
 ## Conventions
 
+- `hud.lua` contains a lot of the UI - Look there if you are unsure.
 - Always use richtext for rendering text. Ensure text is localized with `loc()`.
 - Avoid scaling images. Use `g.drawImage` for native-size icons.
 - Use `ui.drawPanel` / `ui.drawDarkPanel` for borders (9-slice). Don't roll your own.

@@ -663,6 +663,30 @@ function g.isAlive(ent)
     return not ent.___removed
 end
 
+---@param target ecs.Entity
+---@param damage number
+---@param attacker ecs.Entity?
+function g.dealDamage(target, damage, attacker)
+    if not g.isAlive(target) then return end
+
+    local reduction = g.ask("getDamageReduction", target)
+    local finalDmg = math.max(0, damage - reduction)
+
+    target.health = target.health - finalDmg
+    target._timeSinceDamaged = 0
+
+    g.call("entityHurt", target, finalDmg, attacker)
+
+    if target.health <= 0 then
+        target.health = 0
+        g.call("entityDeath", target, attacker)
+        if attacker then
+            g.call("entityKillsEnemy", attacker, target)
+        end
+        target:getWorld():removeEntity(target)
+    end
+end
+
 function g.setPos(ent, x, y)
     ent.x = x
     ent.y = y
@@ -1362,6 +1386,7 @@ local SPELL_LIST = {}
 ---@class g.SpellInfo
 ---@field id string
 ---@field name string
+---@field description string
 ---@field manaCost number
 ---@field cooldown number
 ---@field icon string
