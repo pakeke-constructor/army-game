@@ -26,7 +26,11 @@ function Run:init()
     self.mana = 3
     self.maxFood = 100
     self.maxMana = 30
-    self.blessings = {}
+    self.blessings = {
+        "iron_hide", "golden_coffers", "swift_feet", "blood_tithe", "barrage",
+        "iron_hide", "golden_coffers", "swift_feet", "blood_tithe", "barrage",
+        "iron_hide", "golden_coffers", "swift_feet", "blood_tithe", "barrage",
+    }
     self.spells = {}
     self.day = 1
     self.demonRage = 0
