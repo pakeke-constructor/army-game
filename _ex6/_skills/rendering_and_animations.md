@@ -12,9 +12,11 @@ Instead of storing timer on the object/entity, use it's id, (or any deterministi
 
 for UI animations that have intrinsic state,
 eg: "Box increases in scale over 0.5 seconds, until filling screen",
+Or "When enemy is damaged, flash red for 0.2 seconds",
 The best way to solve this is to keep a robust value that tracks time since the box being opened.
 eg:  
 `scene.timeSinceBoxOpened = 0` - when this is between 0 and 0.5, animate it.
+`timeSinceBoxOpened` will increase every frame by dt.
 Can also store in the object if there's an object with `:update` method.
 `ent.timeSinceDamaged = X`
 or `scene.box = {...data, timeSinceOpened = t}`
