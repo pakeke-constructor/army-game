@@ -3,7 +3,7 @@
 
 from _ex6.models import M
 from _ex6.code_mode import make_code_mode_system_prompt
-from _ex6.tools import read_headers, read_body, glob, search, write_file, edit_file, read_file, edit_file_lines, escalate, bash, explore_agent, CLAUDE_MD
+from _ex6.tools import read_headers, read_body, glob, search, write_file, edit_file, read_file, edit_file_lines, escalate, bash, explore_agent, CLAUDE_MD, ENV_PROMPT
 from _ex6.lua_coding_style import SYSTEM_PROMPT_CODING_STYLE
 from _ex6.tasks import plan_add_log, plan_done, plan_list, plan_read, plan_write
 from _ex6.web.web_tools import web_search, websearch_agent
@@ -11,12 +11,6 @@ from _ex6.game_tools import game_start, game_interact
 from _ex6.provider import cache_manually
 import ex6
 from ex6 import Context, Message
-import time
-import math
-import os
-import platform
-import subprocess
-import datetime
 
 
 
@@ -69,20 +63,6 @@ ANALYTICAL_MODEL = M.GPT52_CODEX.id
 
 
 
-
-def _env_content(ctx):
-    cwd = os.getcwd()
-    plat = platform.system()
-    now = datetime.datetime.now().strftime("%Y-%m-%d")
-    try:
-        branch = subprocess.check_output(["git", "branch", "--show-current"], text=True, stderr=subprocess.DEVNULL).strip()
-    except Exception:
-        branch = "unknown"
-    return f"<environment>\n- cwd: {cwd}\n- platform: {plat}\n- date: {now}\n- git branch: {branch}\n</environment>"
-
-
-ENV_PROMPT = ex6.Message(role="system", overview="env", content=_env_content)
-
 CODING_STYLE_PROMPT = ex6.Message(role="system", overview="coding-style", content=SYSTEM_PROMPT_CODING_STYLE)
 
 
@@ -107,6 +87,7 @@ coder = Context("c_opus", yolo=True, model=M.OPUS_46.id, reasoning="medium", mes
 cache_manually(coder)
 
 
+
 coder = Context("c_codex", yolo=True, model=M.GPT53_CODEX.id, reasoning="medium", messages=[
     MAIN_SYSTEM_PROMPT,
     CODE_MODE_SYS_PROMPT,
@@ -114,6 +95,40 @@ coder = Context("c_codex", yolo=True, model=M.GPT53_CODEX.id, reasoning="medium"
     # CODING_STYLE_PROMPT,
     CLAUDE_MD,
 ])
+
+
+
+
+OMNI_PROMPT = ex6.Message(role = "system", 
+tools = [read_file, read_headers, search, glob,],
+content="""
+You have a specialized skill, on top of your existing coding abilities:
+*You can see other codebases*.
+
+As such, your main tasks will involve bringing code over from other codebases,
+or learning about other codebases in order to write better code in this codebase.
+""")
+
+# TODO: it makes a LOT of sense to extract OMNI-AGENT into core ex6.
+# Then we can reuse it for other stuff
+# IDEA:
+# . 
+# new_omni_agent({
+#     core_project = "army_game",
+#     projects = {
+#         "army_game": ("C:\\path...", "Army-game is a .... blah blah"),
+#         "ex6": ("C:\\path...", "ex6 is ... blah blah"),
+#         ...
+#     }
+# })
+# With this, we can reuse the idea of omni-agent across multiple projects.
+
+
+# coder = Context("c_omni", yolo=False, model=M.GPT53_CODEX.id, reasoning="medium", messages=[
+#     MAIN_SYSTEM_PROMPT,
+#     OMNI_PROMPT,
+#     ENV_PROMPT,
+# ])
 
 
 
