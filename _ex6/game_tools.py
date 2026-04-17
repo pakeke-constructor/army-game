@@ -62,7 +62,7 @@ def _get_client(ctx) -> GameClient:
 
 
 def game_start(ctx: ex6.Context) -> str:
-    """Launch the Love2D game and connect to it. Must be called before game_interact. Returns 'connected' on success."""
+    """Launch the Love2D game and connect to it. Must be called before game_interact. Returns 'connected' on success. Don't call this for testing UI."""
     start_game(_get_client(ctx))
     return GAME_TESTING_PROMPT
 
