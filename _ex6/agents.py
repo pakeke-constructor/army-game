@@ -8,6 +8,7 @@ from _ex6.skills import load_skill
 from _ex6.lua_coding_style import SYSTEM_PROMPT_CODING_STYLE
 from _ex6.tasks import plan_add_log, plan_done, plan_list, plan_read, plan_write
 from _ex6.web.web_tools import web_search, websearch_agent
+from _ex6.love2d_docs.love2d_docs import love2d_docs
 from _ex6.game_tools import game_start, game_interact
 from _ex6.provider import cache_manually
 import ex6
@@ -37,7 +38,7 @@ The ONLY acceptable text output is: a direct answer, a clarifying question, or a
 
 <agent_strategy>
 - Try the simplest approach first. Don't overthink.
-- One tool call to verify, then act. Don't read the whole codebase before a 2-line edit.
+- Tool call(s) to verify, then act. Don't read the whole codebase before a 2-line edit.
 - If a search returns what you need, stop searching. Don't keep exploring "just in case."
 - If your approach is blocked, don't brute force. Step back, try a different angle, or ask.
 - Avoid backwards-compatibility hacks. If something is unused, delete it.
@@ -74,6 +75,7 @@ CODE_MODE_SYS_PROMPT = make_code_mode_system_prompt([
     explore_agent, web_search, websearch_agent,
     plan_done, plan_read, plan_write,
     game_start, game_interact,
+    love2d_docs,
     load_skill
 ])
 
