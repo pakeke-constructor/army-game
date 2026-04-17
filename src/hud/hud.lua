@@ -240,7 +240,7 @@ local function drawBottomBar(self, barHeight)
     local manaBar, spellBox = manaBox:padUnit(6):splitVertical(1, 3)
 
     -- mana bar
-    local mbx, mby, mbw, mbh = manaBar:get()
+    local mbx, mby, mbw, mbh = manaBar:padRatio(0.3):get()
     local font = BOTTOM_BAR_FONT
     local fh = font:getHeight()
     lg.setColor(0.15, 0.15, 0.2, 0.8)
@@ -259,8 +259,8 @@ local function drawBottomBar(self, barHeight)
         local cells = spellBox:grid(#spells, 1)
         for i, spellId in ipairs(spells) do
             local info = g.getSpellInfo(spellId)
-            local cell = cells[i]
-            local iconRegion, costRegion = cell:splitVertical(3, 1)
+            local cell = cells[i]:padRatio(0.3)
+            local _,iconRegion, costRegion,_ = cell:splitVertical(1, 3, 1, 1)
             local ix, iy = iconRegion:getCenter()
             lg.setColor(1, 1, 1)
             g.drawImage(info.icon, ix, iy)
@@ -269,6 +269,15 @@ local function drawBottomBar(self, barHeight)
             local ccx, ccy = costRegion:getCenter()
             lg.setColor(mc.r, mc.g, mc.b)
             lg.print(costText, font, ccx - costW / 2, ccy - fh / 2)
+            local cx, cy, cw, ch = cell:get()
+            if iml.isHovered(cx, cy, cw, ch, "spell" .. i) then
+                local mx, my = ui.getMouse()
+                hoverService.requestHover(mx, my, function(box, fonts)
+                    box:addText("{c r=0.9 g=0.85 b=0.7}" .. info.name, fonts.title)
+                    box:addSpacing(2)
+                    box:addText("{c r=0.6 g=0.6 b=0.65}" .. info.description, fonts.body)
+                end)
+            end
         end
     end
 end

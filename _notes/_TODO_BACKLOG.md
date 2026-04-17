@@ -9,13 +9,13 @@
 - Add top UI (xp, demon-rage, gold, day-cycle, days-until-incursion)
 - Add bottom UI (squads, mana-bar, spells, blessings)
 - Add example enemy-encounter
+- Add spell ui hover
 
 
 
 ### OK:: what do we need for a minimum-playable game?
 
 
-- Add spell ui hover
 
 - Add spell selection and cast-hover
 - Add spell-casting system
