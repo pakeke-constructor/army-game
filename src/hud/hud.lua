@@ -8,8 +8,7 @@ local HUD = objects.Class("g:HUD")
 
 
 function HUD:init()
-    self.selectedSquadIndex = 1
-    self.selectedSpell = nil
+    self.selectedSlot = 1
 end
 
 
@@ -39,12 +38,55 @@ local LOC_HOVER_DAYS = loc("Days remaining until the next Incursion!", {}, {cont
 
 local TOP_BAR_FONT = g.getSmallFont(16)
 
----@param army g.Squad[]
+
+
+--- ===== Squad / Spell selection:   =====
+-- Unified slot system:
+-- Squads and spells share a single selection index.
+-- Slots 1..#army are squads, slots #army+1..#army+#spells are spells.
+-- Scrolling/clicking wraps across both lists seamlessly.
+
+--- Returns total number of selectable slots (squads + spells)
+---@return integer
+local function getSlotCount()
+    return #g.getArmy() + #g.getRun().spells
+end
+
+--- Returns what a slot maps to.
+---@param slot integer
+---@return "squad"|"spell" type
+---@return g.Squad|string entry -- squad object or spellId
+---@return integer subIndex -- index within army or spells
+local function getSlotInfo(slot)
+    local army = g.getArmy()
+    if slot <= #army then
+        return "squad", army[slot], slot
+    end
+    local spells = g.getRun().spells
+    local si = slot - #army
+    return "spell", spells[si], si
+end
+
+--- Returns whether a slot is currently available for selection.
+---@param slot integer
+---@return boolean
+local function isSlotAvailable(slot)
+    local typ, entry = getSlotInfo(slot)
+    if typ == "squad" then
+        return not entry.deployed
+    else
+        return g.getRun():getSpellCooldown(entry) == nil
+    end
+end
+
+--- Finds the next available slot in direction, not wrapping.
 ---@param from integer
 ---@param dir integer -- +1 or -1
-local function findNextUndeployed(army, from, dir)
-    for i = from, dir > 0 and #army or 1, dir do
-        if not army[i].deployed then return i end
+---@return integer?
+local function findNextSlot(from, dir)
+    local total = getSlotCount()
+    for i = from, dir > 0 and total or 1, dir do
+        if isSlotAvailable(i) then return i end
     end
 end
 
@@ -74,7 +116,7 @@ end
 local function drawSquadBar(self, region)
     local army = g.getArmy()
     -- if army has changed; make sure it's clamped
-    self.selectedSquadIndex = helper.clamp(math.floor(self.selectedSquadIndex + 0.5), 1, #army)
+    self.selectedSlot = helper.clamp(math.floor(self.selectedSlot + 0.5), 1, math.max(getSlotCount(), 1))
 
     if #army <= 0 then
         return
@@ -111,13 +153,13 @@ local function drawSquadBar(self, region)
     for i, sq in ipairs(army) do
         local x = startX + (i - 1) * (SQUAD_ICON_SIZE + spacing)
         local y = baseY
-        local selected = (i == self.selectedSquadIndex)
+        local selected = (i == self.selectedSlot)
         if selected then
             y = y - 6
         end
         renderSquad(sq, x, y, SQUAD_ICON_SIZE, selected)
         if not sq.deployed and iml.wasJustClicked(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, 1, i) then
-            self.selectedSquadIndex = i
+            self.selectedSlot = i
         end
         iml.panel(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, i)
         if iml.isHovered(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, i) then
@@ -202,8 +244,9 @@ end
 ---@param self g.HUD
 ---@param spellId string
 ---@param cell kirigami.Region
----@param index number
-local function drawSpell(self, spellId, cell, index)
+---@param index number -- spell sub-index (1-based within spells)
+---@param selected boolean
+local function drawSpell(self, spellId, cell, index, selected)
     local info = g.getSpellInfo(spellId)
     cell = cell:padRatio(0.3)
     local _,iconRegion, costRegion,_ = cell:splitVertical(1, 3, 1, 1)
@@ -229,8 +272,7 @@ local function drawSpell(self, spellId, cell, index)
         end)
     end
     if iml.wasJustClicked(cx, cy, cw, ch, uid) then
-        -- select the spell directly
-        -- (sets index appropriately)
+        self.selectedSlot = #g.getArmy() + index
     end
 end
 
@@ -279,7 +321,8 @@ local function drawBottomBar(self, barHeight)
     if #spellIds > 0 then
         local cells = spellBox:grid(#spellIds, 1)
         for i, spellId in ipairs(spellIds) do
-            drawSpell(self, spellId, cells[i], i)
+            local slot = #g.getArmy() + i
+            drawSpell(self, spellId, cells[i], i, slot == self.selectedSlot)
         end
     end
 
@@ -336,24 +379,39 @@ end
 
 
 
-function HUD:getSelectedSquad()
-    local army = g.getArmy()
-    -- find nearest undeployed, searching forward then backward
-    local idx = findNextUndeployed(army, self.selectedSquadIndex, 1)
-        or findNextUndeployed(army, self.selectedSquadIndex, -1)
+--- Returns the type and entry of the current selection, snapping to nearest available.
+---@return "squad"|"spell"|nil type
+---@return g.Squad|string|nil entry
+---@return integer|nil subIndex
+function HUD:getSelection()
+    local idx = findNextSlot(self.selectedSlot, 1)
+        or findNextSlot(self.selectedSlot, -1)
     if not idx then return nil end
-    self.selectedSquadIndex = idx
-    return army[idx], idx
+    self.selectedSlot = idx
+    return getSlotInfo(idx)
 end
 
+---@return g.Squad? squad
+---@return integer? armyIndex
+function HUD:getSelectedSquad()
+    local typ, entry, sub = self:getSelection()
+    if typ == "squad" then return entry, sub end
+    return nil
+end
 
+---@return string? spellId
+---@return integer? spellIndex
+function HUD:getSelectedSpell()
+    local typ, entry, sub = self:getSelection()
+    if typ == "spell" then return entry, sub end
+    return nil
+end
 
 function HUD:wheelmoved(dx, dy)
-    local army = g.getArmy()
     local dir = dy > 0 and 1 or -1
-    local next = findNextUndeployed(army, self.selectedSquadIndex + dir, dir)
+    local next = findNextSlot(self.selectedSlot + dir, dir)
     if next then
-        self.selectedSquadIndex = next
+        self.selectedSlot = next
     end
 end
 
