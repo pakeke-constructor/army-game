@@ -132,8 +132,13 @@ function map_scene:pollHandlers()
     g.addBlessingHandlers()
 end
 
+
+---@param node MapNode
 local function enterNode(node)
-    node:enter()
+    if not node.visited then
+        node.visited = true
+        node:enter()
+    end
 end
 
 function map_scene:update(dt)

@@ -7,7 +7,8 @@ local Class = require("src.modules.objects.Class")
 ---@field demonEncounter integer? (0 1 2) Demon-encounters can exist on any kind of node
 ---@field ox number visual offset x
 ---@field oy number visual offset y
----@field nodeType string serialization key
+---@field nodeType string the type of node it is
+---@field visited boolean? Has this node been visited or not?
 local Node = Class("g:MapNode")
 
 function Node:init(x, y)
@@ -129,8 +130,10 @@ function BattleNode:draw(wx, wy)
     love.graphics.ellipse("fill", wx, wy, 8, 5)
     love.graphics.setColor(0.8, 0.3, 0.3, 1)
     love.graphics.ellipse("fill", wx, wy, 6, 3)
-    g.drawImage("node_combat_flag", wx-14, wy-20)
-    tryDrawDemons(self, wx,wy)
+    if not self.visited then
+        g.drawImage("node_combat_flag", wx-14, wy-20)
+        tryDrawDemons(self, wx,wy)
+    end
 end
 
 nodes.BattleNode = BattleNode

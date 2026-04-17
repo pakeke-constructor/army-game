@@ -23,7 +23,7 @@ local hudArgs
 local SQUAD_ICON_SIZE = 32
 local SQUAD_PADDING = 4
 
-local LOC_DEMON_RAGE = interp("{demon_pitchfork} Rage: %{n}", {context="HUD top bar, shows current demon rage level"})
+local LOC_DEMON_RAGE = interp("{demon_pitchfork}{c r=0.6 g=0.1 b=0} Rage: %{n}", {context="HUD top bar, shows current demon rage level"})
 local LOC_GOLD = interp("{coin_icon} Coins: %{n}", {context="HUD top bar, shows player's coin currency"})
 local LOC_DAYS = interp("%{n} days until {c r=1 g=0.3 b=0.3}attack", {context="HUD top bar, countdown to next demon incursion. 'attack' is richtext-colored red"})
 local LOC_ZONE = loc("{c r=0.2 g=0.5 b=0.3}Zone 1 - Forest", {}, {context="HUD top bar, current zone name. Hardcoded stub"})
@@ -32,7 +32,7 @@ local LOC_PAUSE = loc("II", {}, {context="HUD top bar, pause button icon text"})
 local LOC_MANA = interp("%{cur}/%{max}", {context="HUD bottom bar, mana display e.g. 30/30"})
 local BOTTOM_BAR_FONT = g.getSmallFont(16)
 
-local LOC_HOVER_RAGE = loc("Demon Rage increases over time, making enemies stronger.", {}, {context="Tooltip when hovering demon rage in HUD"})
+local LOC_HOVER_RAGE = loc("Demon Rage increases when you win a battle, making enemies stronger.", {}, {context="Tooltip when hovering demon rage in HUD"})
 local LOC_HOVER_GOLD = loc("Gold is used to buy items and upgrades at shops.", {}, {context="Tooltip when hovering gold in HUD"})
 local LOC_HOVER_DAYS = loc("Days remaining until the next Incursion!", {}, {context="Tooltip when hovering days-till-incursion in HUD. After X number of days, players will be forced to fight a 'boss'"})
 

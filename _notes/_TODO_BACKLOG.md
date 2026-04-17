@@ -27,8 +27,10 @@
 - Blessing reward/select UI
 
 
+-- TODO: completely refactor `self.victoryChoices`; extract into a "cardSelect" object?
 - Battle-reward-screen (STS inspired)
 - (Also, Generic-reward-screen (STS inspired))
+
 
 - Special-nodes wired up
 
