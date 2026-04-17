@@ -21,16 +21,18 @@
 - Add spell-casting system
 
 
+
 - Add blessing hover
 
 
-- Add blessing-select UI
+- Spell reward/select UI
+
+- Blessing reward/select UI
 
 
-- Add spell-select UI
+- Special-nodes wired up
 
-
-- Add spell casting system
+- Battle-reward-screen (STS inspired)
 
 
 - Add images to traits

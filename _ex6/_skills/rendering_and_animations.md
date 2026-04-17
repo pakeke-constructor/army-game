@@ -4,27 +4,35 @@ description: Use when there is ANY kind of rendering or visual animation
 ---
 
 
+## Drawing Images
+All images are packed into an `AutoAtlas`. Reference images by string name.
 
-Explain a bunch of advanced rendering techniques.
-
-For animations, explains how to use hashes or ids to create deterministic animations.
-Instead of storing timer on the object/entity, use it's id, (or any deterministic hash,) and then use `love.timer.getTime()` to animate.
-<AGENT INSTRUCTIONS>
-Make the above section about hashing/deterministic animation a bit clearer. Look for examples in codebase already (MapGraph? nodes.lua? that do this)
-</AGENT INSTRUCTIONS>
-
-for UI animations that have intrinsic state,
-eg: "Box increases in scale over 0.5 seconds, until filling screen",
-Or "When enemy is damaged, flash red for 0.2 seconds",
-The best way to solve this is to keep a incrementing value that tracks time since the animation started.
-eg:  
-`scene.timeSinceBoxOpened = 0` - when this is between 0 and 0.5, animate it.
-`timeSinceBoxOpened` will increase every frame by dt.
-Can also store in the object if there's an object with `:update` method.
-`ent.timeSinceDamaged = X`
-or `scene.box = {...data, timeSinceOpened = t}`
-etc.
-
-This works well because it's so robust; you set the value once, and then there's no way for it to go wrong after that. The value increases uniformly every frame, until animation is done. Super simple. Foolproof.
+- `g.drawImage(name, x, y, r, sx, sy)` — draws centered (origin 0.5, 0.5).
+- `g.drawImageOffset(name, x, y, r, sx, sy, ox, oy)` — ox/oy are 0..1 fraction of image size.
+- `g.drawImageContained(name, x, y, w, h, rot)` — scales image to fit inside a w×h box, centered.
+- `g.drawEntity(ent, x, y)` — draws entity image (respects ent.faceDir, alpha, rot, ox, oy, sx, sy). Calls `ent:draw(x,y)` if it exists. Draws health bar if `ent.health`.
 
 
+## Scenes & Cameras
+Battle scene uses `cam11` for world-space. Call `iml.pushTransform(camera:getTransform())` to sync UI clicks with camera coords. Screen-space UI goes after `camera:detach()`.
+
+## Deterministic Animations (Hash + Time)
+For looping animations (bob, pulse, blink, shimmer) that don't need a start/end, use `love.timer.getTime()` + a deterministic offset derived from the object's id or index. No state stored on the object.
+
+Pattern: `math.sin(love.timer.getTime() * speed + offset) * amplitude`
+
+Where `offset` is any deterministic value derived from the object (its id, index, position, etc.), so each object animates at a different phase.
+
+Why: no state to store, no timer to manage, no cleanup. Works for objects that are created/destroyed freely. Animation is a pure function of time — draw it and forget it.
+
+
+## State-Based Animations (Timer on Object)
+For animations with a start and end — "flash red for 0.2s", "scale up over 0.5s" — store a timer that tracks time since animation started. Increment by `dt` each frame. Animate while value is in range.
+
+Can live on the entity (`ent.timeSinceDamaged = 0`), the scene (`scene.timeSinceBoxOpened = 0`), or any table.
+
+Set the value once, it increases uniformly every frame. No cleanup needed. Foolproof.
+
+
+## Lighting
+`Lighting` module renders lights to canvas with additive blending, then composites onto the scene with multiply blending. Ambient color is the canvas clear color.
