@@ -258,19 +258,22 @@ end
 ---@param self g.HUD
 ---@param spellId string
 ---@param cell kirigami.Region
----@param index number -- spell sub-index (1-based within spells)
+---@param slot number
 ---@param selected boolean
-local function drawSpell(self, spellId, cell, index, selected)
+local function drawSpell(self, spellId, cell, slot, selected)
     local info = g.getSpellInfo(spellId)
     cell = cell:padRatio(0.3)
+    if selected then
+        cell = cell:moveUnit(0, -6)
+    end
     local _,iconRegion, costRegion,_ = cell:splitVertical(1, 3, 1, 1)
     local ix, iy = iconRegion:getCenter()
     local font = BOTTOM_BAR_FONT
     local fh = font:getHeight()
     local mc = g.COLORS.MANA
     if selected then
-        lg.setColor(mc.r, mc.g, mc.b, 0.4)
-        local r = math.min(iconRegion.w, iconRegion.h) / 2
+        lg.setColor(mc.r,mc.g,mc.b, 0.4)
+        local r = math.min(iconRegion.w, iconRegion.h) * 0.6
         lg.circle("fill", ix, iy, r)
     end
     lg.setColor(1, 1, 1)
@@ -278,7 +281,7 @@ local function drawSpell(self, spellId, cell, index, selected)
     local costText = tostring(info.manaCost)
     local costW = font:getWidth(costText)
     local ccx, ccy = costRegion:getCenter()
-    lg.setColor(mc.r, mc.g, mc.b)
+    lg.setColor(g.COLORS.MANA)
     lg.print(costText, font, ccx - costW / 2, ccy - fh / 2)
     local cx, cy, cw, ch = cell:get()
     if iml.isHovered(cx, cy, cw, ch) then
@@ -290,7 +293,7 @@ local function drawSpell(self, spellId, cell, index, selected)
         end)
     end
     if iml.wasJustClicked(cx, cy, cw, ch) then
-        self.selectedSlot = #g.getArmy() + index
+        self.selectedSlot = slot
     end
 end
 
@@ -337,7 +340,7 @@ local function drawBottomBar(self, barHeight)
         local cells = spellBox:grid(#spellIds, 1)
         for i, spellId in ipairs(spellIds) do
             local slot = #g.getArmy() + i
-            drawSpell(self, spellId, cells[i], i, slot == currentSlot)
+            drawSpell(self, spellId, cells[i], slot, slot == currentSlot)
         end
     end
 
