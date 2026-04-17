@@ -83,7 +83,7 @@ end
 ---@param from integer
 ---@param dir integer -- +1 or -1
 ---@return integer?
-local function findNextSlot(from, dir)
+local function findNextAvailableSlot(from, dir)
     local total = getSlotCount()
     for i = from, dir > 0 and total or 1, dir do
         if isSlotAvailable(i) then return i end
@@ -97,8 +97,8 @@ local function getSlotIndex(self)
     local total = getSlotCount()
     if total == 0 then return nil end
     self.selectedSlot = helper.clamp(self.selectedSlot, 1, total)
-    local idx = findNextSlot(self.selectedSlot, 1)
-        or findNextSlot(self.selectedSlot, -1)
+    local idx = findNextAvailableSlot(self.selectedSlot, 1)
+        or findNextAvailableSlot(self.selectedSlot, -1)
     if not idx then return nil end
     self.selectedSlot = idx
     return idx
@@ -267,6 +267,11 @@ local function drawSpell(self, spellId, cell, index, selected)
     local font = BOTTOM_BAR_FONT
     local fh = font:getHeight()
     local mc = g.COLORS.MANA
+    if selected then
+        lg.setColor(mc.r, mc.g, mc.b, 0.4)
+        local r = math.min(iconRegion.w, iconRegion.h) / 2
+        lg.circle("fill", ix, iy, r)
+    end
     lg.setColor(1, 1, 1)
     g.drawImage(info.icon, ix, iy)
     local costText = tostring(info.manaCost)
@@ -308,6 +313,7 @@ local function drawBottomBar(self, barHeight)
     -- Spells layed out horizontally. Spell-icon, then mana-cost below the spell with g.COLORS.MANA color.
     -- above, (manaBar) there is a mana-bar, alongside a 30/30 mana count.
     -- CRUCIALLY: images should be drawn AS IS; no scaling with g.drawImageContained.
+    lg.setColor(1,1,1)
     ui.drawDarkPanel(manaBox:get())
     local manaBar, spellBox = manaBox:padUnit(6):splitVertical(1, 3)
 
@@ -420,8 +426,9 @@ end
 
 function HUD:wheelmoved(dx, dy)
     local dir = dy > 0 and 1 or -1
-    local next = findNextSlot(self.selectedSlot + dir, dir)
-    if next then
+    local total = getSlotCount()
+    local next = self.selectedSlot + dir
+    if next >= 1 and next <= total then
         self.selectedSlot = next
     end
 end
