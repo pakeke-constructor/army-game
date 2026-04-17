@@ -1,4 +1,5 @@
 
+
 local function damageEnemiesInRadius(x, y, radius, dmg)
     local r2 = radius * radius
     g.iteratePartition("enemy", x, y, function(ent)
@@ -17,6 +18,7 @@ local function damageEnemiesInRadius(x, y, radius, dmg)
     end, radius)
 end
 
+
 local function healAlliesInRadius(x, y, radius, amount)
     local r2 = radius * radius
     g.iteratePartition("ally", x, y, function(ent)
@@ -30,6 +32,23 @@ local function healAlliesInRadius(x, y, radius, amount)
     end, radius)
 end
 
+
+
+
+local function spellRenderer(rad, color)
+    local function drawSpellArea(x,y)
+        local l = gsman.setLineWidth(5)
+        local col = gsman.setColor(color)
+        lg.circle("line", x,y, rad)
+        l:pop()
+        col:pop()
+    end
+    return drawSpellArea
+end
+
+
+local ZAP_RAD = 100
+
 g.defineSpell("zap", {
     name = loc("Zap"),
     description = loc("Damages enemies in radius"),
@@ -37,9 +56,16 @@ g.defineSpell("zap", {
     cooldown = 0,
     icon = "coin_icon",
     castSpell = function(x, y)
-        damageEnemiesInRadius(x, y, 60, 12)
+        print("HI.")
+        damageEnemiesInRadius(x, y, ZAP_RAD, 12)
     end,
+    drawSpellHover = spellRenderer(ZAP_RAD, objects.Color.RED)
 })
+
+
+
+
+local HEAL_RAD = 60
 
 g.defineSpell("heal", {
     name = loc("Heal"),
@@ -48,6 +74,7 @@ g.defineSpell("heal", {
     cooldown = 0,
     icon = "coin_icon",
     castSpell = function(x, y)
-        healAlliesInRadius(x, y, 60, 10)
+        healAlliesInRadius(x, y, HEAL_RAD, 10)
     end,
+    drawSpellHover = spellRenderer(HEAL_RAD, objects.Color.GREEN)
 })

@@ -46,21 +46,12 @@ local TOP_BAR_FONT = g.getSmallFont(16)
 -- Slots 1..#army are squads, slots #army+1..#army+#spells are spells.
 -- Scrolling/clicking wraps across both lists seamlessly.
 
---- Returns sorted list of spell IDs from the run's spell map.
----@return string[]
-local function getSpellIds()
-    local ids = {}
-    for spellId in pairs(g.getRun().spells) do
-        ids[#ids + 1] = spellId
-    end
-    table.sort(ids)
-    return ids
-end
+--- Returns total number of selectable slots (squads + spells)
 
 --- Returns total number of selectable slots (squads + spells)
 ---@return integer
 local function getSlotCount()
-    return #g.getArmy() + #getSpellIds()
+    return #g.getArmy() + #g.getRun().spellList
 end
 
 --- Returns what a slot maps to.
@@ -74,7 +65,7 @@ local function getSlotInfo(slot)
         return "squad", army[slot], slot
     end
     local si = slot - #army
-    return "spell", getSpellIds()[si], si
+    return "spell", g.getRun().spellList[si], si
 end
 
 --- Returns whether a slot is currently available for selection.
@@ -342,7 +333,7 @@ local function drawBottomBar(self, barHeight)
     richtext.printRich(manaText, font, mbx, mby + mbh / 2 - fh / 2, mbw, "center")
 
     -- spells
-    local spellIds = getSpellIds()
+    local spellIds = g.getRun().spellList
     if #spellIds > 0 then
         local cells = spellBox:grid(#spellIds, 1)
         for i, spellId in ipairs(spellIds) do

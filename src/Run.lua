@@ -28,6 +28,7 @@ function Run:init()
     self.maxMana = 30
     self.blessings = {}
     self.spells = {}
+    self.spellList = {}
     self.day = 1
     self.demonRage = 0
     self.mapGraph = nil
@@ -46,11 +47,15 @@ end
 
 
 function Run:update(dt)
+    local list = {}
     for spellId, cd in pairs(self.spells) do
         if cd > 0 then
             self.spells[spellId] = math.max(0, cd - dt)
         end
+        list[#list + 1] = spellId
     end
+    table.sort(list)
+    self.spellList = list
 end
 
 function Run:getMaxSquads()

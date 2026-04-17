@@ -1397,6 +1397,7 @@ local SPELL_LIST = {}
 ---@field manaCost number
 ---@field cooldown number
 ---@field icon string
+---@field radius number for aoe spells
 ---@field castSpell fun(x:number, y:number)
 ---@field drawSpellHover fun(x:number, y:number)?
 
