@@ -45,6 +45,14 @@ end
 
 
 
+function Run:update(dt)
+    for spellId, cd in pairs(self.spells) do
+        if cd > 0 then
+            self.spells[spellId] = math.max(0, cd - dt)
+        end
+    end
+end
+
 function Run:getMaxSquads()
     return math.min(4 + self.level, 9)
 end
@@ -61,6 +69,10 @@ function Run:getDaysUntilIncursion()
     return math.max(0, DAYS_UNTIL_ATTACK - self.day)
 end
 
+
+--- gets spell cooldown. Returns nil if 
+---@param spellId string
+---@return number?
 function Run:getSpellCooldown(spellId)
     local cd = self.spells[spellId]
     if not cd or cd <= 0 then
@@ -69,12 +81,11 @@ function Run:getSpellCooldown(spellId)
     return cd
 end
 
+
+---@param spellId string
+---@param cd number
 function Run:setSpellCooldown(spellId, cd)
-    if cd and cd > 0 then
-        self.spells[spellId] = cd
-    else
-        self.spells[spellId] = nil
-    end
+    self.spells[spellId] = math.max(0, cd or 0)
 end
 
 ---@return table

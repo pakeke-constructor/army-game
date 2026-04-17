@@ -1429,10 +1429,14 @@ end
 function g.tryCastSpell(spellId, x, y)
     local info = assert(SPELL_DEFS[spellId], "Unknown spell: " .. tostring(spellId))
     local run = g.getRun()
+    if run:getSpellCooldown(spellId) then
+        return false
+    end
     if run.mana < info.manaCost then
         return false
     end
     run.mana = run.mana - info.manaCost
+    run:setSpellCooldown(spellId, info.cooldown)
     info.castSpell(x, y)
     return true
 end
