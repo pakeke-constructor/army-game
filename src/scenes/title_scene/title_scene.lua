@@ -37,12 +37,6 @@ function title_scene:draw()
     lg.clear(0.05, 0.05, 0.07, 1)
 
     lg.setColor(1, 1, 1, 1)
-    local panelSC = 3
-    lg.push()
-    lg.scale(panelSC)
-    ui.drawPanel(80 / panelSC, 120 / panelSC, 260 / panelSC, 140 / panelSC)
-    ui.drawDarkPanel(360 / panelSC, 120 / panelSC, 260 / panelSC, 140 / panelSC)
-    lg.pop()
 
     local titleFont = g.getBigFont(48)
     local smallFont = g.getSmallFont(16)

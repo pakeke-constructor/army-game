@@ -23,7 +23,7 @@ local hudArgs
 local SQUAD_ICON_SIZE = 32
 local SQUAD_PADDING = 4
 
-local LOC_DEMON_RAGE = interp("{demon_pitchfork}Demon Rage: %{n}", {context="HUD top bar, shows current demon rage level"})
+local LOC_DEMON_RAGE = interp("{demon_pitchfork} Rage: %{n}", {context="HUD top bar, shows current demon rage level"})
 local LOC_GOLD = interp("{coin_icon} Coins: %{n}", {context="HUD top bar, shows player's coin currency"})
 local LOC_DAYS = interp("%{n} days until {c r=1 g=0.3 b=0.3}attack", {context="HUD top bar, countdown to next demon incursion. 'attack' is richtext-colored red"})
 local LOC_ZONE = loc("{c r=0.2 g=0.5 b=0.3}Zone 1 - Forest", {}, {context="HUD top bar, current zone name. Hardcoded stub"})
@@ -361,6 +361,15 @@ local function drawBottomBar(self, barHeight)
             local cx, cy = cells[i]:getCenter()
             lg.setColor(1, 1, 1)
             g.drawImage(info.image, cx, cy)
+            local gx, gy, gw, gh = cells[i]:get()
+            if iml.isHovered(gx, gy, gw, gh, "blessing" .. i) then
+                local mx, my = ui.getMouse()
+                hoverService.requestHover(mx, my, function(box, fonts)
+                    box:addText("{c r=0.9 g=0.85 b=0.7}" .. info.name, fonts.title)
+                    box:addSpacing(2)
+                    box:addText("{c r=0.6 g=0.6 b=0.65}" .. info.description, fonts.body)
+                end)
+            end
         end
     end
 end

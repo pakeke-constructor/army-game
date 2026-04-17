@@ -68,17 +68,21 @@ local function drawSquadCard(squadId, region)
     local x, y, w, h = region:get()
     iml.panel(x, y, w, h, squadId)
 
+    local isHovered = iml.isHovered(x,y,w,h, squadId)
+
     STAT_FONT = STAT_FONT or g.getSmallFont(16)
     TITLE_FONT = TITLE_FONT or g.getBigFont(16)
 
     local box = ui.Box({maxWidth = w, padding = 12, spacing = 8}, function(bx, by, bw, bh)
-
         love.graphics.setColor(0,0,0)
         ui.drawPanel(x-3,y-3, w+6,h+6)
+        if isHovered then
+            darkCol = darkCol:lerp(col, 0.25)
+        end
         love.graphics.setColor(1,1,1)
         helper.gradientRect("vertical", bgCol1, darkCol, x, y, w, h)
         ui.drawPanel(x, y, w, h)
-        helper.gradientRectStencil("vertical", col, darkCol, x, y, w, h, function()
+        helper.gradientRectStencil("vertical", liteCol, col, x, y, w, h, function()
             ui.drawPanel(x, y, w, h)
         end)
     end)

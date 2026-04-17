@@ -512,6 +512,14 @@ function color:shiftHue(deg)
     return self
 end
 
+function color:lighten(x)
+    return color.lerp(self, color.WHITE, x)
+end
+
+function color:darken(x)
+    return color.lerp(self, color.BLACK, x)
+end
+
 ---------------
 -- Operators --
 ---------------

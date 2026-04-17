@@ -37,8 +37,6 @@ function Run:init()
         -- populate test stuff.
         self.blessings = {
             "iron_hide", "golden_coffers", "swift_feet", "blood_tithe", "barrage",
-            "iron_hide", "golden_coffers", "swift_feet", "blood_tithe", "barrage",
-            "iron_hide", "golden_coffers", "swift_feet", "blood_tithe", "barrage",
         }
         self.spells = {zap = 0, heal = 0}
     end

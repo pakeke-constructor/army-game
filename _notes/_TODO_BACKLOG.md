@@ -12,13 +12,14 @@
 - Add spell ui hover
 - Add spell selection and cast-hover
 - Add spell-casting system
+- Add blessing hover
+
+
 
 
 ### OK:: what do we need for a minimum-playable game?
 
 
-
-- Add blessing hover
 
 
 - Spell reward/select UI
@@ -26,9 +27,10 @@
 - Blessing reward/select UI
 
 
-- Special-nodes wired up
-
 - Battle-reward-screen (STS inspired)
+- (Also, Generic-reward-screen (STS inspired))
+
+- Special-nodes wired up
 
 
 - Add images to traits
