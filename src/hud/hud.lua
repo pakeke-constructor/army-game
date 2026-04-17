@@ -9,6 +9,7 @@ local HUD = objects.Class("g:HUD")
 
 function HUD:init()
     self.selectedSquadIndex = 1
+    self.selectedSpell = nil
 end
 
 
@@ -198,7 +199,11 @@ end
 
 
 
-local function drawSpell(spellId, cell, index)
+---@param self g.HUD
+---@param spellId string
+---@param cell kirigami.Region
+---@param index number
+local function drawSpell(self, spellId, cell, index)
     local info = g.getSpellInfo(spellId)
     cell = cell:padRatio(0.3)
     local _,iconRegion, costRegion,_ = cell:splitVertical(1, 3, 1, 1)
@@ -214,13 +219,18 @@ local function drawSpell(spellId, cell, index)
     lg.setColor(mc.r, mc.g, mc.b)
     lg.print(costText, font, ccx - costW / 2, ccy - fh / 2)
     local cx, cy, cw, ch = cell:get()
-    if iml.isHovered(cx, cy, cw, ch, "spell" .. index) then
+    local uid = "spell" .. index
+    if iml.isHovered(cx, cy, cw, ch, uid) then
         local mx, my = ui.getMouse()
         hoverService.requestHover(mx, my, function(box, fonts)
             box:addText("{c r=0.9 g=0.85 b=0.7}" .. info.name, fonts.title)
             box:addSpacing(2)
             box:addText("{c r=0.6 g=0.6 b=0.65}" .. info.description, fonts.body)
         end)
+    end
+    if iml.wasJustClicked(cx, cy, cw, ch, uid) then
+        -- select the spell directly
+        -- (sets index appropriately)
     end
 end
 
@@ -231,32 +241,12 @@ local function drawBottomBar(self, barHeight)
 
     local sw, sh = ui.getScaledUIDimensions()
 
+    local run = g.getRun()
     local region = Kirigami(0, sh - barHeight, sw, barHeight)
-    local squadBar, blessingBox, manaBox = region:splitHorizontal(2,1,1)
+    local squadBar, manaBox, blessingBox = region:splitHorizontal(2,1,1)
 
     ui.drawDarkPanel(squadBar:get())
     drawSquadBar(self, squadBar:padUnit(6))
-
-    -- blessing box:
-    -- a grid of blessings.  Use helper.getBestFitDimensions(numItems, widthRatio, heightRatio)
-    -- Only show icons. when blessing is hovered, push a UI box. 
-    -- (DONT IMPLEMENT HOVER FOR NOW, ITS TOO COMPLEX. JUST DO A STUB.)
-    -- CRUCIALLY: images should be drawn AS IS; no scaling with g.drawImageContained.
-    lg.setColor(1,1,1)
-    ui.drawDarkPanel(blessingBox:get())
-    local run = g.getRun()
-    local blessings = run.blessings
-    if #blessings > 0 then
-        local padded = blessingBox:padUnit(6)
-        local cols, rows = helper.getBestFitDimensions(#blessings, padded.w, padded.h)
-        local cells = padded:grid(cols, rows)
-        for i, bId in ipairs(blessings) do
-            local info = g.getBlessingInfo(bId)
-            local cx, cy = cells[i]:getCenter()
-            lg.setColor(1, 1, 1)
-            g.drawImage(info.image, cx, cy)
-        end
-    end
 
     -- mana-box:
     -- Spells layed out horizontally. Spell-icon, then mana-cost below the spell with g.COLORS.MANA color.
@@ -284,7 +274,27 @@ local function drawBottomBar(self, barHeight)
     if #spells > 0 then
         local cells = spellBox:grid(#spells, 1)
         for i, spellId in ipairs(spells) do
-            drawSpell(spellId, cells[i], i)
+            drawSpell(self, spellId, cells[i], i)
+        end
+    end
+
+    -- blessing box:
+    -- a grid of blessings.  Use helper.getBestFitDimensions(numItems, widthRatio, heightRatio)
+    -- Only show icons. when blessing is hovered, push a UI box. 
+    -- (DONT IMPLEMENT HOVER FOR NOW, ITS TOO COMPLEX. JUST DO A STUB.)
+    -- CRUCIALLY: images should be drawn AS IS; no scaling with g.drawImageContained.
+    lg.setColor(1,1,1)
+    ui.drawDarkPanel(blessingBox:get())
+    local blessings = run.blessings
+    if #blessings > 0 then
+        local padded = blessingBox:padUnit(6)
+        local cols, rows = helper.getBestFitDimensions(#blessings, padded.w, padded.h)
+        local cells = padded:grid(cols, rows)
+        for i, bId in ipairs(blessings) do
+            local info = g.getBlessingInfo(bId)
+            local cx, cy = cells[i]:getCenter()
+            lg.setColor(1, 1, 1)
+            g.drawImage(info.image, cx, cy)
         end
     end
 end
