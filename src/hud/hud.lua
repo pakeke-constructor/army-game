@@ -26,7 +26,7 @@ local SQUAD_PADDING = 4
 local LOC_DEMON_RAGE = interp("{demon_pitchfork}Demon Rage: %{n}", {context="HUD top bar, shows current demon rage level"})
 local LOC_GOLD = interp("{coin_icon} Coins: %{n}", {context="HUD top bar, shows player's coin currency"})
 local LOC_DAYS = interp("%{n} days until {c r=1 g=0.3 b=0.3}attack", {context="HUD top bar, countdown to next demon incursion. 'attack' is richtext-colored red"})
-local LOC_ZONE = loc("Zone 1 - Forest", {}, {context="HUD top bar, current zone name. Hardcoded stub"})
+local LOC_ZONE = loc("{c r=0.2 g=0.5 b=0.3}Zone 1 - Forest", {}, {context="HUD top bar, current zone name. Hardcoded stub"})
 local LOC_PAUSE = loc("II", {}, {context="HUD top bar, pause button icon text"})
 
 local LOC_MANA = interp("%{cur}/%{max}", {context="HUD bottom bar, mana display e.g. 30/30"})
@@ -281,8 +281,7 @@ local function drawSpell(self, spellId, cell, index, selected)
     lg.setColor(mc.r, mc.g, mc.b)
     lg.print(costText, font, ccx - costW / 2, ccy - fh / 2)
     local cx, cy, cw, ch = cell:get()
-    local uid = "spell" .. index
-    if iml.isHovered(cx, cy, cw, ch, uid) then
+    if iml.isHovered(cx, cy, cw, ch) then
         local mx, my = ui.getMouse()
         hoverService.requestHover(mx, my, function(box, fonts)
             box:addText("{c r=0.9 g=0.85 b=0.7}" .. info.name, fonts.title)
@@ -290,7 +289,7 @@ local function drawSpell(self, spellId, cell, index, selected)
             box:addText("{c r=0.6 g=0.6 b=0.65}" .. info.description, fonts.body)
         end)
     end
-    if iml.wasJustClicked(cx, cy, cw, ch, uid) then
+    if iml.wasJustClicked(cx, cy, cw, ch) then
         self.selectedSlot = #g.getArmy() + index
     end
 end

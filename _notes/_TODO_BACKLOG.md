@@ -10,16 +10,12 @@
 - Add bottom UI (squads, mana-bar, spells, blessings)
 - Add example enemy-encounter
 - Add spell ui hover
-
-
-
+- Add spell selection and cast-hover
+- Add spell-casting system
 
 
 ### OK:: what do we need for a minimum-playable game?
 
-
-- Add spell selection and cast-hover
-- Add spell-casting system
 
 
 - Add blessing hover
