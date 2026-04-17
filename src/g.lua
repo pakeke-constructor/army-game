@@ -1355,4 +1355,55 @@ g.defineStat("projectileAccuracy", "baseProjectileAccuracy", {
 })
 
 
+-- Spell system
+local SPELL_DEFS = {}
+local SPELL_LIST = {}
+
+---@class g.SpellInfo
+---@field id string
+---@field name string
+---@field manaCost number
+---@field cooldown number
+---@field icon string
+---@field castSpell fun(x:number, y:number)
+---@field drawSpellHover fun(x:number, y:number)?
+
+---@param id string
+---@param def g.SpellInfo|{id:nil}
+function g.defineSpell(id, def)
+    assert(not SPELL_DEFS[id], "Duplicate spell: " .. id)
+    def.id = id
+    def.manaCost = def.manaCost or 0
+    def.cooldown = def.cooldown or 0
+    SPELL_DEFS[id] = def
+    SPELL_LIST[#SPELL_LIST + 1] = id
+end
+
+---@param id string
+---@return g.SpellInfo
+function g.getSpellInfo(id)
+    return assert(SPELL_DEFS[id], "Unknown spell: " .. tostring(id))
+end
+
+---@return string[]
+function g.getAllSpellDefinitions()
+    return SPELL_LIST
+end
+
+---@param spellId string
+---@param x number
+---@param y number
+---@return boolean
+function g.tryCastSpell(spellId, x, y)
+    local info = assert(SPELL_DEFS[spellId], "Unknown spell: " .. tostring(spellId))
+    local run = g.getRun()
+    if run.mana < info.manaCost then
+        return false
+    end
+    run.mana = run.mana - info.manaCost
+    info.castSpell(x, y)
+    return true
+end
+
+
 return g

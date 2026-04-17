@@ -10,6 +10,7 @@ local MapGraph = require("src.scenes.map_scene.MapGraph")
 ---@field maxFood number
 ---@field maxMana number
 ---@field blessings string[]
+---@field spells string[]
 ---@field day integer
 ---@field demonRage integer
 ---@field mapGraph MapGraph
@@ -26,6 +27,7 @@ function Run:init()
     self.maxFood = 100
     self.maxMana = 30
     self.blessings = {}
+    self.spells = {}
     self.day = 1
     self.demonRage = 0
     self.mapGraph = nil
@@ -67,6 +69,7 @@ function Run:serialize()
         maxFood = self.maxFood,
         maxMana = self.maxMana,
         blessings = self.blessings,
+        spells = self.spells,
         day = self.day,
         demonRage = self.demonRage,
         mapGraph = self.mapGraph and self.mapGraph:serialize(),
@@ -92,6 +95,7 @@ function Run.deserialize(data)
     run.maxMana = data.maxMana
     run.maxFood = data.maxFood
     run.blessings = data.blessings or {}
+    run.spells = data.spells or {}
     run.day = data.day or run.day
     run.demonRage = data.demonRage or run.demonRage
     run.mapGraph = data.mapGraph and MapGraph.deserialize(data.mapGraph)
