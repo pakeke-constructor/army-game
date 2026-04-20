@@ -5,7 +5,6 @@ g.defineEntity("militia", {
     image = "militia",
     physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
     partitions = {"unit", "ally"},
-    traits = {g.TRAITS.TOWNSFOLK, g.TRAITS.ARTIFICE, g.TRAITS.BEAST},
     team = "ally",
     ai = {
         target = "enemy",
@@ -25,7 +24,6 @@ g.defineEntity("archer", {
     image = "longbowman", -- placeholder
     physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
     partitions = {"unit", "ally"},
-    traits = {g.TRAITS.TOWNSFOLK},
     team = "ally",
     ai = {
         target = "enemy",

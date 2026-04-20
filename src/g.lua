@@ -428,7 +428,7 @@ local SQUAD_LIST = {}
 ---@field count number
 ---@field icon string
 ---@field perks string[]
----@field traits string[]
+---@field cost g.ManaBundle
 ---@field onDeploy (fun(squad: g.SquadInfo, entities: table[]))?
 
 ---@param id string
@@ -1249,32 +1249,6 @@ g.RARITIES = {
     UNIQUE = newRarity("UNIQUE", "UNIQUE", objects.Color.WHITE),
 }
 
-
----@alias g.Trait {id:string, name:string, color:objects.Color}
-
----@param id string
----@param name string
----@param color objects.Color
----@return g.Trait
-local function newTrait(id, name, color)
-    return {
-        id = id,
-        name = loc(name, {}, {
-            context = "A trait/keyword for a unit type, e.g. 'Wild', 'Beast', 'Noble'."
-        }),
-        color = color
-    }
-end
-
----@class g.traits
-g.TRAITS = {
-    WILD = newTrait("WILD", "Wild", objects.Color("FF359416")),
-    ALCHEMY = newTrait("ALCHEMY", "Alchemy", objects.Color("FF7A1990")),
-    BEAST = newTrait("BEAST", "Beast", objects.Color("FFAE5C14")),
-    ARTIFICE = newTrait("ARTIFICE", "Artifice", objects.Color("FF4968CE")),
-    NOBLE = newTrait("NOBLE", "Noble", objects.Color("FFF5C60D")),
-    TOWNSFOLK = newTrait("TOWNSFOLK", "Townsfolk", objects.Color("FF866856")),
-}
 
 ---@alias g.Stat {id:string, name:string, baseName:string, modQ:string, mulQ:string, color:objects.Color, icon:string, isImportant:fun(ent:ecs.Entity, stat:string):boolean}
 ---@alias g.GlobalStat {id:string, name:string, baseName:string, modQ:string, mulQ:string}

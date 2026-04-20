@@ -87,16 +87,12 @@ local function drawSquadCard(squadId, region)
         end)
     end)
 
-    -- Header: icon on left, name + traits on right
+    -- Header: icon on left, name on right
     local iconSize = 32
     local iconGap = 10
-    local traits = def.traits or {}
     box:add({
         getHeight = function(innerW)
-            local titleH = TITLE_FONT:getHeight()
-            local textW = innerW - iconSize - iconGap
-            local traitsH = (#traits > 0) and (ui.drawTraitBoxes(traits, 0, 0, textW, true) + 2) or 0
-            return math.max(iconSize, titleH + traitsH)
+            return math.max(iconSize, TITLE_FONT:getHeight())
         end,
         draw = function(ex, ey, ew, eh)
             -- icon
@@ -110,11 +106,6 @@ local function drawSquadCard(squadId, region)
             love.graphics.setFont(TITLE_FONT)
             local name = "{c r=0.8 g=0.8 b=0.85}{wavy amp=0.5 freq=1}" .. info.name
             richtext.printRich(name, TITLE_FONT, textX, ey, textW, "left")
-            -- traits below name
-            if #traits > 0 then
-                local traitsY = ey + TITLE_FONT:getHeight() + 2
-                ui.drawTraitBoxes(traits, textX, traitsY, textW)
-            end
         end,
     })
 

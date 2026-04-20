@@ -193,54 +193,6 @@ function ui.drawSingleColorPanel(x, y, w, h)
 end
 
 
----@param trait g.Trait
----@param x number
----@param y number
----@param noDraw? boolean
----@return number w, number h
-local function drawTraitBox(trait, x, y, noDraw)
-    local font = g.getSmallFont(16)
-    local text = trait.name
-    local padW = 4
-    local padH = 1
-    local w = font:getWidth(text) + padW * 2
-    local h = font:getHeight() + padH * 0
-    if not noDraw then
-        lg.setColor(trait.color:getRGBA())
-        ui.drawSingleColorPanel(x, y, w, h)
-        lg.setFont(font)
-        lg.setColor(0,0,0)
-        lg.print(text, math.floor(x + padW), math.floor(y + padH))
-    end
-    return w, h
-end
-
----@param traitlist g.Trait[]
----@param x number
----@param y number
----@param w number
----@param noDraw? boolean
----@return number h
-function ui.drawTraitBoxes(traitlist, x, y, w, noDraw)
-    local gap = 4
-    local cx, cy = x, y
-    local lineH = 0
-    for _, trait in ipairs(traitlist) do
-        local tw, th = drawTraitBox(trait, 0, 0, true)
-        lineH = math.max(lineH, th)
-        if cx + tw - x > w and cx ~= x then
-            cy = cy + lineH + gap
-            cx = x
-            lineH = th
-        end
-        if not noDraw then
-            drawTraitBox(trait, cx, cy)
-        end
-        cx = cx + tw + gap
-    end
-    return (cy - y) + lineH
-end
-
 
 local simpleUIPanel = nil
 ---@param x number

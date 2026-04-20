@@ -25,8 +25,6 @@
 - add a little helper to render squad-icon + mana-cost
 - Remove trait system
 
-
-
 - Bench / Active-squads system. (Squad lineup)
 
 - Squad-lineup UI  (MAKE UX GOOD!)
