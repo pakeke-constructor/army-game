@@ -192,6 +192,27 @@ local function drawSquadCard(squadId, region)
 
     box:render(x, y)
 
+    -- Mana cost panel (top-right, extruding upward)
+    local cost = info.cost
+    if cost then
+        local costStr = g.manaCostString(cost)
+        if #costStr > 0 then
+            local bw,bh = box:measure()
+            local costFont = STAT_FONT
+            local costW = richtext.getWidth(costStr, costFont) + 8
+            local costH = costFont:getHeight() + 6
+            local cx = x + bw - costW - 4
+            local cy = y - costH / 2 + 4
+            local r = Kirigami(cx, cy, costW, costH)
+            lg.setColor(liteCol)
+            ui.drawPanel(r:padUnit(-6,-4):get())
+            lg.setColor(1, 1, 1)
+            ui.drawDarkPanel(r:padUnit(-2,0):get())
+            lg.setColor(1, 1, 1)
+            richtext.printRich(costStr, costFont, r.x + 4, r.y + 3, costW, "left")
+        end
+    end
+
     if iml.wasJustClicked(x, y, w, h, 1, squadId) then
         g.playUISound("ui_click_basic", 1.4, 0.8)
         return true

@@ -15,12 +15,12 @@
 - Add blessing hover
 - Store mana as a stat?  (Store as `globalStat` or something?)
 - mana bundle support in `g.*`
+- mana cost rendering (wrapper for printRich?)
 
 
 ### OK:: what do we need for a minimum-playable game?
 
 
-- mana cost rendering (wrapper for printRich?)
 - change squad-card to show mana-cost
 - add a little helper to render squad-icon + mana-cost
 - Remove trait system

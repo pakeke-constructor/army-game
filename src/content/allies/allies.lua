@@ -47,6 +47,7 @@ g.defineSquad("archer_squad", {
     count = 4,
     icon = "example_squad_icon",
     perks = {"sharpshooter"},
+    cost = {red = 3, blue = 1},
 })
 
 
@@ -59,4 +60,5 @@ g.defineSquad("militia_squad", {
     count = 4,
     icon = "example_squad_icon",
     perks = {"tough"},
+    cost = {green = 2},
 })
