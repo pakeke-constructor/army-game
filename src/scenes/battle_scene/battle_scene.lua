@@ -175,6 +175,15 @@ local function drawCardSelect(self)
 end
 
 
+local function printManaCost()
+    local testBundle = {red = 3, blue = 1}
+    local str = g.manaCostString(testBundle)
+    local w,h = ui.getScaledUIDimensions()
+    richtext.printRich(str, g.getSmallFont(16), w * 0.4, h * 0.7, 100, "center")
+end
+
+
+
 
 function battle_scene:draw()
     self.camera:attach()

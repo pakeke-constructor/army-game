@@ -1519,7 +1519,7 @@ g.defineManaType("white", "white_mana", objects.Color("#f4f4f4"))
 g.defineManaType("any", "any_mana", objects.Color("#c7c7c7"))
 g.postLoad(function()
     for _, manaType in ipairs(manaTypeList)do
-        local _, info = g.getManaInfo(manaType)
+        local info = manaInfos[manaType]
         local quad = g.getImageQuad(info.image)
         richtext.defineImage(manaType, atlas:getTexture(), quad)
     end
