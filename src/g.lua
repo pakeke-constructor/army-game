@@ -1497,6 +1497,7 @@ end
 
 ---@type table<string, g.ManaInfo>
 local manaInfos = {}
+local manaTypeList = {}
 
 ---@param id g.ManaType
 ---@param image string
@@ -1507,7 +1508,14 @@ function g.defineManaType(id, image, color)
         image = image,
         color = color,
     }
+    table.insert(manaTypeList, id)
     g.defineGlobalStat(id, id .. "Mana")
+end
+
+
+---@return g.ManaType[]
+function g.getManaTypes()
+    return manaTypeList
 end
 
 
