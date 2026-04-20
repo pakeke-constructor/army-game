@@ -492,6 +492,39 @@ function g.getArmy()
     return g.getRun().squads
 end
 
+---@return g.Squad[]
+function g.getLineup()
+    local lineup = {}
+    for _, squad in ipairs(g.getRun().squads) do
+        if squad.inLineup then
+            lineup[#lineup + 1] = squad
+        end
+    end
+    return lineup
+end
+
+---@param squad g.Squad
+---@return boolean
+function g.canAffordSquad(squad)
+    local costs = {}
+    for _, s in ipairs(g.getRun().squads) do
+        if s.inLineup and s ~= squad then
+            costs[#costs + 1] = g.getSquadInfo(s.squadId).cost
+        end
+    end
+    return g.canAfford(costs, g.getSquadInfo(squad.squadId).cost)
+end
+
+---@param squad g.Squad
+---@param active boolean
+---@return boolean ok
+function g.setSquadActive(squad, active)
+    if active and not g.canAffordSquad(squad) then
+        return false
+    end
+    squad.inLineup = active
+    return true
+end
 
 ---@param id string
 ---@return g.SquadInfo

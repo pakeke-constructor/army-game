@@ -51,7 +51,7 @@ local TOP_BAR_FONT = g.getSmallFont(16)
 --- Returns total number of selectable slots (squads + spells)
 ---@return integer
 local function getSlotCount()
-    return #g.getArmy() + #g.getRun().spellList
+    return #g.getLineup() + #g.getRun().spellList
 end
 
 --- Returns what a slot maps to.
@@ -60,7 +60,7 @@ end
 ---@return g.Squad|string entry -- squad object or spellId
 ---@return integer subIndex -- index within army or spells
 local function getSlotInfo(slot)
-    local army = g.getArmy()
+    local army = g.getLineup()
     if slot <= #army then
         return "squad", army[slot], slot
     end
@@ -130,7 +130,7 @@ end
 ---@param region kirigami.Region
 ---@param currentSlot integer?
 local function drawSquadBar(self, region, currentSlot)
-    local army = g.getArmy()
+    local army = g.getLineup()
 
     if #army <= 0 then
         return
@@ -339,7 +339,7 @@ local function drawBottomBar(self, barHeight)
     if #spellIds > 0 then
         local cells = spellBox:grid(#spellIds, 1)
         for i, spellId in ipairs(spellIds) do
-            local slot = #g.getArmy() + i
+            local slot = #g.getLineup() + i
             drawSpell(self, spellId, cells[i], slot, slot == currentSlot)
         end
     end
