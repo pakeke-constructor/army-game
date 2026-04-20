@@ -1488,6 +1488,7 @@ end
 ---@class g.ManaInfo
 ---@field id string
 ---@field image string
+---@field color objects.Color
 
 ---@alias g.ManaType "red"|"yellow"|"blue"|"green"|"purple"|"black"|"white"|"any"
 
@@ -1497,33 +1498,36 @@ end
 ---@type table<string, g.ManaInfo>
 local manaInfos = {}
 
----@param id string
+---@param id g.ManaType
 ---@param image string
-function g.defineManaType(id, image)
+---@param color objects.Color
+function g.defineManaType(id, image, color)
     manaInfos[id] = {
         id = id,
-        image = image
+        image = image,
+        color = color,
     }
 end
 
 
-function g.getMaxMana()
+---@param id g.ManaType
+function g.getMaxMana(id)
 
 end
 
 
-g.defineManaType("red", "red_mana")
-g.defineManaType("yellow", "yellow_mana")
-g.defineManaType("blue", "blue_mana")
-g.defineManaType("green", "green_mana")
-g.defineManaType("purple", "purple_mana")
-g.defineManaType("black", "black_mana")
-g.defineManaType("white", "white_mana")
-g.defineManaType("any", "any_mana")
+g.defineManaType("red", "red_mana", objects.Color("#ff4b4b"))
+g.defineManaType("yellow", "yellow_mana", objects.Color("#f5dd4b"))
+g.defineManaType("blue", "blue_mana", objects.Color("#4bb6ff"))
+g.defineManaType("green", "green_mana", objects.Color("#57d66b"))
+g.defineManaType("purple", "purple_mana", objects.Color("#b26bff"))
+g.defineManaType("black", "black_mana", objects.Color("#4a4a4a"))
+g.defineManaType("white", "white_mana", objects.Color("#f4f4f4"))
+g.defineManaType("any", "any_mana", objects.Color("#c7c7c7"))
 
----@param id string
----@param image string
-function g.getManaInfo(id, image)
+
+---@param id g.ManaType
+function g.getManaInfo(id)
     return manaInfos[id]
 end
 
