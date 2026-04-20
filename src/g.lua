@@ -1553,7 +1553,12 @@ function g.canAfford(manaBundles, xtra)
     local aggre = 0
     local stock = 0
     for i, bundle in ipairs(manaBundles)do
-        for k,v in pairs(manaBundles)do
+        for k,v in pairs(bundle)do
+            aggre = aggre + v
+        end
+    end
+    if xtra then
+        for k,v in pairs(xtra) do
             aggre = aggre + v
         end
     end
