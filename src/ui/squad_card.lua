@@ -197,14 +197,15 @@ local function drawSquadCard(squadId, region)
     if cost then
         local costStr = g.manaCostString(cost)
         if #costStr > 0 then
-            local bw,bh = box:measure()
+            -- local bw,bh = box:measure()
+            local rw,rh = region.w,region.h
             local costFont = STAT_FONT
             local costW = richtext.getWidth(costStr, costFont) + 8
             local costH = costFont:getHeight() + 6
-            local cx = x + bw - costW - 4
-            local cy = y - costH / 2 + 4
+            local cx = math.floor(x + rw/2 - costW/2)
+            local cy = math.floor(y + rh - costH / 2)
             local r = Kirigami(cx, cy, costW, costH)
-            lg.setColor(liteCol)
+            lg.setColor(col)
             ui.drawPanel(r:padUnit(-6,-4):get())
             lg.setColor(1, 1, 1)
             ui.drawDarkPanel(r:padUnit(-2,0):get())

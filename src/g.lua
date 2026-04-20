@@ -1539,15 +1539,26 @@ end
 ---@param bundle g.ManaBundle
 ---@return string
 function g.manaCostString(bundle)
+    local total = 0
+    for _, manaType in ipairs(manaTypeList) do
+        local n = bundle[manaType]
+        if n and n > 0 then total = total + n end
+    end
     local parts = {}
     for _, manaType in ipairs(manaTypeList) do
         local n = bundle[manaType]
         if n and n > 0 then
-            local s = (n > 1) and (n .. " ") or ""
-            table.insert(parts, s .. "{" .. manaType .. "}")
+            if total < 5 then
+                for i = 1, n do
+                    table.insert(parts, "{" .. manaType .. "}")
+                end
+            else
+                local s = (n > 1) and n or ""
+                table.insert(parts, s .. "{" .. manaType .. "}")
+            end
         end
     end
-    return table.concat(parts, " ")
+    return table.concat(parts, total < 5 and "" or " ")
 end
 
 
