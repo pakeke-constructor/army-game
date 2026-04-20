@@ -1443,4 +1443,62 @@ function g.tryCastSpell(spellId, x, y)
 end
 
 
+
+---@class g.ManaInfo
+---@field id string
+---@field image string
+
+---@alias g.ManaType "red"|"yellow"|"blue"|"green"|"purple"|"black"|"white"|"any"
+
+---@alias g.ManaBundle {[g.ManaType]: integer}
+
+
+---@type table<string, g.ManaInfo>
+local manaInfos = {}
+
+---@param id string
+---@param image string
+function g.defineManaType(id, image)
+    manaInfos[id] = {
+        id = id,
+        image = image
+    }
+end
+
+
+function g.getMaxMana()
+
+end
+
+
+g.defineManaType("red", "red_mana")
+g.defineManaType("yellow", "yellow_mana")
+g.defineManaType("blue", "blue_mana")
+g.defineManaType("green", "green_mana")
+g.defineManaType("purple", "purple_mana")
+g.defineManaType("black", "black_mana")
+g.defineManaType("white", "white_mana")
+g.defineManaType("any", "any_mana")
+
+---@param id string
+---@param image string
+function g.getManaInfo(id, image)
+    return manaInfos[id]
+end
+
+
+---@param manaBundles g.ManaBundle[]
+function g.canAfford(manaBundles)
+    -- loops over mana bundles, checks if can afford all non-any mana.
+    for i, bundle in ipairs(manaBundles)do
+    end
+
+    -- then, sums remaining `any` mana.
+    -- if remaining-mana > any-mana, then we are good.
+    for i, bundle in ipairs(manaBundles)do
+    end
+end
+
+
+
 return g

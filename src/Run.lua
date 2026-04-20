@@ -96,7 +96,6 @@ function Run:resetForBattle()
     for _, squad in ipairs(self.squads) do
         squad.deployed = false
     end
-    self.mana = self.maxMana -- todo; do some designing around this system
 end
 
 function Run:winBattle()

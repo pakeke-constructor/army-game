@@ -21,6 +21,23 @@
 
 
 
+idea: how do we ensure that mana-counts is well-stored?
+- Do we do mana as a stat? 
+- Store as `globalStat` or something? (<--- thats probably the best)
+
+
+- mana bundle support in `g.*`
+- mana cost rendering (wrapper for printRich?)
+- change squad-card to show mana-cost
+- add a little helper to render squad-icon + mana-cost
+- Remove trait system
+
+
+
+- Bench / Active-squads system. (Squad lineup)
+
+- Squad-lineup UI  (MAKE UX GOOD!)
+
 
 - Spell reward/select UI
 
