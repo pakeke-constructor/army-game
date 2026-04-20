@@ -1507,12 +1507,7 @@ function g.defineManaType(id, image, color)
         image = image,
         color = color,
     }
-end
-
-
----@param id g.ManaType
-function g.getMaxMana(id)
-
+    g.defineGlobalStat(id, id .. "Mana")
 end
 
 
@@ -1521,27 +1516,71 @@ g.defineManaType("yellow", "yellow_mana", objects.Color("#f5dd4b"))
 g.defineManaType("blue", "blue_mana", objects.Color("#4bb6ff"))
 g.defineManaType("green", "green_mana", objects.Color("#57d66b"))
 g.defineManaType("purple", "purple_mana", objects.Color("#b26bff"))
-g.defineManaType("black", "black_mana", objects.Color("#4a4a4a"))
+g.defineManaType("black", "black_mana", objects.Color("FF6B6B6B"))
 g.defineManaType("white", "white_mana", objects.Color("#f4f4f4"))
 g.defineManaType("any", "any_mana", objects.Color("#c7c7c7"))
 
 
 ---@param id g.ManaType
+---@return integer
+---@return g.ManaInfo
 function g.getManaInfo(id)
-    return manaInfos[id]
+    local manaInfo = manaInfos[id]
+    local maxMana = g.get(id)
+    return maxMana, manaInfo
 end
 
 
+---@param bundle g.ManaBundle
+---@param counts {[g.ManaType]: number}
+local function checkBundle(bundle, counts)
+    for k,v in pairs(bundle) do
+        if k ~= "any" then
+            counts[k] = (counts[k] or 0) + v
+            if counts[k] > g.getManaInfo(k) then
+                return false -- cant afford
+            end
+        end
+    end
+    return true
+end
+
 ---@param manaBundles g.ManaBundle[]
-function g.canAfford(manaBundles)
-    -- loops over mana bundles, checks if can afford all non-any mana.
+---@param xtra g.ManaBundle
+function g.canAfford(manaBundles, xtra)
+    -- first, sums all total mana.
+    -- if total-mana > total-max-mana, then it's bad; not enough.
+    local aggre = 0
+    local stock = 0
     for i, bundle in ipairs(manaBundles)do
+        for k,v in pairs(manaBundles)do
+            aggre = aggre + v
+        end
+    end
+    for k,v in pairs(manaInfos) do
+        local maxMana = g.getManaInfo(k)
+        stock = stock + maxMana
     end
 
-    -- then, sums remaining `any` mana.
-    -- if remaining-mana > any-mana, then we are good.
-    for i, bundle in ipairs(manaBundles)do
+    if aggre > stock then
+        return false -- we dont have enough `any` mana.
+        -- Return false; cheap, no allocations
     end
+
+    -- else, we allocate table, and do an extra pass
+    local counts = {}
+
+    -- loops over mana bundles, checks if can afford all non-any mana.
+    for i, bundle in ipairs(manaBundles)do
+        if not checkBundle(bundle, counts) then
+            return false --cant afford
+        end
+    end
+    if xtra and (not checkBundle(xtra, counts)) then
+        return false --cant afford
+    end
+
+    return true -- ALL OK. :)
 end
 
 

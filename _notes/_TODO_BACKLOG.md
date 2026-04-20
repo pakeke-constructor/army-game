@@ -13,17 +13,12 @@
 - Add spell selection and cast-hover
 - Add spell-casting system
 - Add blessing hover
-
+- Store mana as a stat?  (Store as `globalStat` or something?)
 
 
 
 ### OK:: what do we need for a minimum-playable game?
 
-
-
-idea: how do we ensure that mana-counts is well-stored?
-- Do we do mana as a stat? 
-- Store as `globalStat` or something? (<--- thats probably the best)
 
 
 - mana bundle support in `g.*`
