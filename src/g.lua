@@ -526,6 +526,7 @@ function g.spawnSquad(squad, x, y, ...)
     for i = 1, #offsets do
         local ent = g.spawnEntity(info.entityId, x + offsets[i].x, y + offsets[i].y, ...)
         ent.scope = squadScope
+        ent.squad = squad
         entities[i] = ent
     end
     if info.onDeploy then
