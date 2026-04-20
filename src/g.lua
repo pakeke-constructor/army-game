@@ -38,6 +38,21 @@ local sfx = require("src.sound.sfx")
 
 
 
+local postLoadCallbacks = {}
+
+function g.postLoad(func)
+    table.insert(postLoadCallbacks, func)
+end
+
+function g._runPostLoad()
+    for _, func in ipairs(postLoadCallbacks) do
+        func()
+    end
+    postLoadCallbacks = {}
+end
+
+
+
 local currentRun
 
 function g.newRun()
@@ -1502,6 +1517,13 @@ g.defineManaType("purple", "purple_mana", objects.Color("#b26bff"))
 g.defineManaType("black", "black_mana", objects.Color("FF6B6B6B"))
 g.defineManaType("white", "white_mana", objects.Color("#f4f4f4"))
 g.defineManaType("any", "any_mana", objects.Color("#c7c7c7"))
+g.postLoad(function()
+    for _, manaType in ipairs(manaTypeList)do
+        local _, info = g.getManaInfo(manaType)
+        local quad = g.getImageQuad(info.image)
+        richtext.defineImage(manaType, atlas:getTexture(), quad)
+    end
+end)
 
 
 ---@param id g.ManaType
@@ -1512,6 +1534,23 @@ function g.getManaInfo(id)
     local maxMana = g.get(id)
     return maxMana, manaInfo
 end
+
+
+---@param bundle g.ManaBundle
+---@return string
+function g.manaCostString(bundle)
+    local parts = {}
+    for _, manaType in ipairs(manaTypeList) do
+        local n = bundle[manaType]
+        if n and n > 0 then
+            local s = (n > 1) and (n .. " ") or ""
+            table.insert(parts, s .. "{" .. manaType .. "}")
+        end
+    end
+    return table.concat(parts, " ")
+end
+
+
 
 
 ---@param bundle g.ManaBundle
@@ -1570,7 +1609,6 @@ function g.canAfford(manaBundles, xtra)
 
     return true -- ALL OK. :)
 end
-
 
 
 return g

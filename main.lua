@@ -139,6 +139,7 @@ function love.load()
         local port = a:match("^%-%-devport=(%d+)$")
         if port then agentbridge.start(tonumber(port)); break end
     end
+    g._runPostLoad()
     _loadtime = false
 end
 
