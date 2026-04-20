@@ -1,7 +1,13 @@
 local FONT = nil
 local COST_FONT = nil
 
-local function drawSquadEntry(squad, region, idSuffix)
+
+---@param squad g.Squad
+---@param x number
+---@param y number
+---@param idSuffix string
+---@return boolean
+local function drawSquadEntry(squad, x,y, idSuffix)
     FONT = FONT or g.getBigFont(16)
     COST_FONT = COST_FONT or g.getSmallFont(16)
 
@@ -10,11 +16,12 @@ local function drawSquadEntry(squad, region, idSuffix)
     local col = rarity.color
     local darkCol = rarity.darkColor
 
-    local x, y, w, h = region:get()
     local id = squad.squadId .. idSuffix
-    iml.panel(x, y, w, h, id)
+    local SZ = 18
+    local xx,yy,ww,hh = x-SZ/2, y-SZ/2, SZ, SZ
+    iml.panel(xx,yy,ww,hh, id)
 
-    local isHovered = iml.isHovered(x, y, w, h, id)
+    local isHovered = iml.isHovered(xx,yy,ww,hh, id)
     local canAfford = squad.inLineup or g.canAffordSquad(squad)
 
     local alpha = (canAfford or squad.inLineup) and 1 or 0.35
@@ -24,11 +31,11 @@ local function drawSquadEntry(squad, region, idSuffix)
 
     -- icon
     local iconPad = 4
-    local iconSize = math.min(w - iconPad * 2, h * 0.6)
-    local ix = x + (w - iconSize) / 2
+    local iconSize = math.min(ww - iconPad * 2, hh * 0.6)
+    local ix = x + (ww - iconSize) / 2
     local iy = y + iconPad
     love.graphics.setColor(1, 1, 1, alpha)
-    g.drawSquadIcon(squad.squadId, ix, iy, iconSize, iconSize)
+    g.drawSquadIcon(squad.squadId, ix, iy)
 
     -- mana cost (bottom, same style as squad_card)
     local cost = info.cost
@@ -37,17 +44,17 @@ local function drawSquadEntry(squad, region, idSuffix)
         if #costStr > 0 then
             local costW = richtext.getWidth(costStr, COST_FONT) + 8
             local costH = COST_FONT:getHeight() + 6
-            local cx = math.floor(x + w / 2 - costW / 2)
-            local cy = math.floor(y + h - costH / 2)
+            local cx = math.floor(x + ww / 2 - costW / 2)
+            local cy = math.floor(y + hh - costH / 2)
             local cr = Kirigami(cx, cy, costW, costH)
             love.graphics.setColor(1, 1, 1, alpha)
             ui.drawDarkPanel(cr:padUnit(-2, 0):get())
             love.graphics.setColor(1, 1, 1, alpha)
-            richtext.printRich(costStr, COST_FONT, cr.x + 4, cr.y + 3, costW, "left")
+            richtext.printRich(costStr, COST_FONT, cr.x, cr.y + 3, costW, "left")
         end
     end
 
-    if iml.wasJustClicked(x, y, w, h, 1, id) then
+    if iml.wasJustClicked(xx,yy, ww, hh, 1, id) then
         return true
     end
     return false
@@ -56,6 +63,7 @@ end
 local function drawManaBar(region)
     COST_FONT = COST_FONT or g.getSmallFont(16)
     local x, y, w, h = region:get()
+    iml.panel(region:get())
     ui.drawDarkPanel(x, y, w, h)
 
     local manaTypes = g.getManaTypes()
@@ -112,7 +120,8 @@ local function drawSquadLineUp(region)
         if #lineupSquads > 0 then
             local cells = r:padUnit(4):grid(math.max(#lineupSquads, 1), 1)
             for i, squad in ipairs(lineupSquads) do
-                if drawSquadEntry(squad, cells[i]:padUnit(4), "_lineup_" .. i) then
+                local x,y = cells[i]:getCenter()
+                if drawSquadEntry(squad, x,y, "_lineup_" .. i) then
                     g.setSquadActive(squad, false)
                 end
             end
@@ -138,7 +147,8 @@ local function drawSquadLineUp(region)
             local cols, rows = helper.getBestFitDimensions(#benchSquads, padded.w, padded.h)
             local cells = padded:grid(cols, rows)
             for i, squad in ipairs(benchSquads) do
-                if drawSquadEntry(squad, cells[i]:padUnit(4), "_bench_" .. i) then
+                local x,y = cells[i]:getCenter()
+                if drawSquadEntry(squad, x,y, "_bench_" .. i) then
                     g.setSquadActive(squad, true)
                 end
             end
