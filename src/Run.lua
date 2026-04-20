@@ -14,6 +14,7 @@ local MapGraph = require("src.scenes.map_scene.MapGraph")
 ---@field day integer
 ---@field demonRage integer
 ---@field mapGraph MapGraph
+---@field stats table<string, number>
 local Run = objects.Class("g:Run")
 
 
@@ -32,6 +33,7 @@ function Run:init()
     self.day = 1
     self.demonRage = 0
     self.mapGraph = nil
+    self.stats = {}
 
     if consts.DEV_MODE then
         -- populate test stuff.
@@ -54,6 +56,14 @@ function Run:update(dt)
     end
     table.sort(list)
     self.spellList = list
+
+    for _, stat in ipairs(g.getGlobalStatList()) do
+        if self.stats[stat.baseName] ~= nil or self.stats[stat.name] ~= nil then
+            local val = (self.stats[stat.baseName] or 0) + g.ask(stat.modQ, self)
+            val = val * g.ask(stat.mulQ, self)
+            self.stats[stat.name] = val
+        end
+    end
 end
 
 function Run:getMaxSquads()
@@ -124,6 +134,7 @@ function Run:serialize()
         day = self.day,
         demonRage = self.demonRage,
         mapGraph = self.mapGraph and self.mapGraph:serialize(),
+        stats = self.stats,
     }
 end
 
@@ -150,6 +161,7 @@ function Run.deserialize(data)
     run.day = data.day or run.day
     run.demonRage = data.demonRage or run.demonRage
     run.mapGraph = data.mapGraph and MapGraph.deserialize(data.mapGraph)
+    run.stats = data.stats or {}
     return run
 end
 

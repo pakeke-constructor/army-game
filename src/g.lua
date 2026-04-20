@@ -72,6 +72,17 @@ function g.getRun()
     return assert(currentRun, "run not loaded")
 end
 
+
+---@param globalStatId string
+---@return number
+function g.get(globalStatId)
+    local run = g.getRun()
+    local info = g.getGlobalStatInfo(globalStatId)
+    assert(info, "Unknown global stat: " .. tostring(globalStatId))
+    return run.stats[info.name] or 0
+end
+
+
 function g.delRun()
     currentRun = nil
 end
@@ -1265,11 +1276,14 @@ g.TRAITS = {
     TOWNSFOLK = newTrait("TOWNSFOLK", "Townsfolk", objects.Color("FF866856")),
 }
 
-
 ---@alias g.Stat {id:string, name:string, baseName:string, modQ:string, mulQ:string, color:objects.Color, icon:string, isImportant:fun(ent:ecs.Entity, stat:string):boolean}
+---@alias g.GlobalStat {id:string, name:string, baseName:string, modQ:string, mulQ:string}
 
 local STAT_LIST = {}
 local STAT_DEFS = {}
+
+local GLOBAL_STAT_LIST = {}
+local GLOBAL_STAT_DEFS = {}
 
 ---@param id string
 ---@param baseName string
@@ -1294,7 +1308,24 @@ function g.defineStat(id, baseName, info)
     STAT_DEFS[id] = stat
 end
 
-
+---@param id string
+---@param baseName string
+function g.defineGlobalStat(id, baseName)
+    local Name = id:sub(1,1):upper() .. id:sub(2)
+    local modQ = "get" .. Name .. "Modifier"
+    local mulQ = "get" .. Name .. "Multiplier"
+    g.defineQuestion(modQ, reducers.ADD, 0)
+    g.defineQuestion(mulQ, reducers.MULTIPLY, 1)
+    local stat = {
+        id = id,
+        name = id,
+        baseName = baseName,
+        modQ = modQ,
+        mulQ = mulQ,
+    }
+    GLOBAL_STAT_LIST[#GLOBAL_STAT_LIST + 1] = stat
+    GLOBAL_STAT_DEFS[id] = stat
+end
 
 ---@param statId string
 ---@param ent_or_etype string|ecs.Entity
@@ -1310,11 +1341,21 @@ function g.getStatList()
     return STAT_LIST
 end
 
+---@return g.GlobalStat[]
+function g.getGlobalStatList()
+    return GLOBAL_STAT_LIST
+end
 
 ---@param id string
 ---@return g.Stat
 function g.getStatInfo(id)
     return STAT_DEFS[id]
+end
+
+---@param id string
+---@return g.GlobalStat?
+function g.getGlobalStatInfo(id)
+    return GLOBAL_STAT_DEFS[id]
 end
 
 
