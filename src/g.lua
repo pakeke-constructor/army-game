@@ -1568,39 +1568,13 @@ function g.getManaInfo(id)
     return maxMana, manaInfo
 end
 
-
----@param bundle g.ManaBundle
----@return string
-function g.manaCostString(bundle)
-    local total = 0
-    for _, manaType in ipairs(manaTypeList) do
-        local n = bundle[manaType]
-        if n and n > 0 then total = total + n end
-    end
-    local parts = {}
-    for _, manaType in ipairs(manaTypeList) do
-        local n = bundle[manaType]
-        if n and n > 0 then
-            if total < 5 then
-                for i = 1, n do
-                    table.insert(parts, "{" .. manaType .. "}")
-                end
-            else
-                local s = (n > 1) and n or ""
-                table.insert(parts, s .. "{" .. manaType .. "}")
-            end
-        end
-    end
-    return table.concat(parts, total < 5 and "" or " ")
-end
-
 --- Draw mana cost as individual beads, centered at (x,y), fitting within w.
 ---@param bundle g.ManaBundle
 ---@param x number center x
 ---@param y number center y
 ---@param w number? max width to fit within
 function g.drawManaCost(bundle, x, y, w)
-    w = w or 9999999999999
+    w = w or 9999
     -- Build flat list of mana types
     local beads = {}
     for _, manaType in ipairs(manaTypeList) do
