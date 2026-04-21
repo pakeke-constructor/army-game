@@ -37,21 +37,11 @@ local function drawSquadEntry(squad, x,y, idSuffix)
     love.graphics.setColor(1, 1, 1, alpha)
     g.drawSquadIcon(squad.squadId, ix, iy)
 
-    -- mana cost (bottom, same style as squad_card)
+    -- mana cost beads (bottom center)
     local cost = info.cost
     if cost then
-        local costStr = g.manaCostString(cost)
-        if #costStr > 0 then
-            local costW = richtext.getWidth(costStr, COST_FONT) + 8
-            local costH = COST_FONT:getHeight() + 6
-            local cx = math.floor(x + ww / 2 - costW / 2)
-            local cy = math.floor(y + hh - costH / 2)
-            local cr = Kirigami(cx, cy, costW, costH)
-            love.graphics.setColor(1, 1, 1, alpha)
-            ui.drawDarkPanel(cr:padUnit(-2, 0):get())
-            love.graphics.setColor(1, 1, 1, alpha)
-            richtext.printRich(costStr, COST_FONT, cr.x, cr.y + 3, costW, "left")
-        end
+        love.graphics.setColor(1, 1, 1, alpha)
+        g.drawManaCost(cost, x + ww / 2, y + hh, 24)
     end
 
     if iml.wasJustClicked(xx,yy, ww, hh, 1, id) then

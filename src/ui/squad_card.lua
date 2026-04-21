@@ -192,26 +192,12 @@ local function drawSquadCard(squadId, region)
 
     box:render(x, y)
 
-    -- Mana cost panel (top-right, extruding upward)
+    -- Mana cost beads (bottom center)
     local cost = info.cost
     if cost then
-        local costStr = g.manaCostString(cost)
-        if #costStr > 0 then
-            -- local bw,bh = box:measure()
-            local rw,rh = region.w,region.h
-            local costFont = STAT_FONT
-            local costW = richtext.getWidth(costStr, costFont) + 8
-            local costH = costFont:getHeight() + 6
-            local cx = math.floor(x + rw/2 - costW/2)
-            local cy = math.floor(y + rh - costH / 2)
-            local r = Kirigami(cx, cy, costW, costH)
-            lg.setColor(col)
-            ui.drawPanel(r:padUnit(-6,-4):get())
-            lg.setColor(1, 1, 1)
-            ui.drawDarkPanel(r:padUnit(-2,0):get())
-            lg.setColor(1, 1, 1)
-            richtext.printRich(costStr, costFont, r.x + 4, r.y + 3, costW, "left")
-        end
+        local rw, rh = region.w, region.h
+        lg.setColor(1, 1, 1)
+        g.drawManaCost(cost, x + rw / 2, y + rh, 24)
     end
 
     if iml.wasJustClicked(x, y, w, h, 1, squadId) then
