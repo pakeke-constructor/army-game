@@ -55,7 +55,7 @@ local ZAP_RAD = 100
 g.defineSpell("zap", {
     name = loc("Zap"),
     description = loc("Damages enemies in radius"),
-    manaCost = 2,
+    cost = {red = 1},
     cooldown = 0,
     icon = "coin_icon",
     castSpell = function(x, y)
@@ -73,7 +73,7 @@ local HEAL_RAD = 60
 g.defineSpell("heal", {
     name = loc("Heal"),
     description = loc("Heals allies in radius"),
-    manaCost = 2,
+    cost = {green = 1},
     cooldown = 0,
     icon = "coin_icon",
     castSpell = function(x, y)

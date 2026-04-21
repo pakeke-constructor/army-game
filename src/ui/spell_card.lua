@@ -3,7 +3,6 @@ local TITLE_FONT = nil
 local DESC_FONT = nil
 local COST_FONT = nil
 
-local LOC_MANA = loc("Mana: %{n}", nil, {context = "Mana cost on spell card"})
 local LOC_CD = loc("CD: %{n}s", nil, {context = "Cooldown on spell card"})
 
 ---Draw a spell card in a kirigami region. Returns true if clicked.
@@ -57,15 +56,11 @@ local function drawSpellCard(spellId, region)
         getHeight = function() return COST_FONT:getHeight() end,
         draw = function(ex, ey, ew, eh)
             love.graphics.setFont(COST_FONT)
-            local parts = {}
-            if info.manaCost and info.manaCost > 0 then
-                parts[#parts + 1] = "{c r=0.3 g=0.5 b=1}" .. LOC_MANA({n = info.manaCost})
-            end
+            love.graphics.setColor(1, 1, 1)
+            g.drawManaCost(info.cost, ex + ew / 2, ey + eh / 2, ew)
             if info.cooldown and info.cooldown > 0 then
-                parts[#parts + 1] = "{c r=0.7 g=0.7 b=0.7}" .. LOC_CD({n = info.cooldown})
-            end
-            if #parts > 0 then
-                richtext.printRich(table.concat(parts, "  "), COST_FONT, ex, ey, ew, "center")
+                local cdText = "{c r=0.7 g=0.7 b=0.7}" .. LOC_CD({n = info.cooldown})
+                richtext.printRich(cdText, COST_FONT, ex, ey, ew, "center")
             end
         end,
     })

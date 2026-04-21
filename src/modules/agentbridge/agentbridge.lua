@@ -103,7 +103,6 @@ agentbridge.registerCommand("get_state", function(msg)
         local run = g.getRun()
         result.health = run.health
         result.maxHealth = run.maxHealth
-        result.mana = run.mana
         result.money = run.money
         result.food = run.food
         result.day = run.day

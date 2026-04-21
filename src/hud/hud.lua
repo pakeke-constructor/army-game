@@ -29,7 +29,6 @@ local LOC_DAYS = interp("%{n} days until {c r=1 g=0.3 b=0.3}attack", {context="H
 local LOC_ZONE = loc("{c r=0.2 g=0.5 b=0.3}Zone 1 - Forest", {}, {context="HUD top bar, current zone name. Hardcoded stub"})
 local LOC_PAUSE = loc("II", {}, {context="HUD top bar, pause button icon text"})
 
-local LOC_MANA = interp("%{cur}/%{max}", {context="HUD bottom bar, mana display e.g. 30/30"})
 local BOTTOM_BAR_FONT = g.getSmallFont(16)
 
 local LOC_HOVER_RAGE = loc("Demon Rage increases when you win a battle, making enemies stronger.", {}, {context="Tooltip when hovering demon rage in HUD"})
@@ -268,21 +267,17 @@ local function drawSpell(self, spellId, cell, slot, selected)
     end
     local _,iconRegion, costRegion,_ = cell:splitVertical(1, 3, 1, 1)
     local ix, iy = iconRegion:getCenter()
-    local font = BOTTOM_BAR_FONT
-    local fh = font:getHeight()
-    local mc = g.COLORS.MANA
     if selected then
+        local mc = g.COLORS.MANA
         lg.setColor(mc.r,mc.g,mc.b, 0.4)
         local r = math.min(iconRegion.w, iconRegion.h) * 0.6
         lg.circle("fill", ix, iy, r)
     end
     lg.setColor(1, 1, 1)
     g.drawImage(info.icon, ix, iy)
-    local costText = tostring(info.manaCost)
-    local costW = font:getWidth(costText)
     local ccx, ccy = costRegion:getCenter()
-    lg.setColor(g.COLORS.MANA)
-    lg.print(costText, font, ccx - costW / 2, ccy - fh / 2)
+    lg.setColor(1, 1, 1)
+    g.drawManaCost(info.cost, ccx, ccy, costRegion.w)
     local cx, cy, cw, ch = cell:get()
     if iml.isHovered(cx, cy, cw, ch) then
         local mx, my = ui.getMouse()
@@ -312,28 +307,11 @@ local function drawBottomBar(self, barHeight)
     ui.drawDarkPanel(squadBar:get())
     drawSquadBar(self, squadBar:padUnit(6), currentSlot)
 
-    -- mana-box:
-    -- Spells layed out horizontally. Spell-icon, then mana-cost below the spell with g.COLORS.MANA color.
-    -- above, (manaBar) there is a mana-bar, alongside a 30/30 mana count.
-    -- CRUCIALLY: images should be drawn AS IS; no scaling with g.drawImageContained.
+    -- spell-box:
+    -- Spells layed out horizontally. Spell-icon, then mana-cost below.
     lg.setColor(1,1,1)
     ui.drawDarkPanel(manaBox:get())
-    local manaBar, spellBox = manaBox:padUnit(6):splitVertical(1, 3)
-
-    -- mana bar
-    local mbx, mby, mbw, mbh = manaBar:padRatio(0.3):get()
-    local font = BOTTOM_BAR_FONT
-    local fh = font:getHeight()
-    lg.setColor(0.15, 0.15, 0.2, 0.8)
-    lg.rectangle("fill", mbx, mby, mbw, mbh)
-    local manaRatio = run.maxMana > 0 and (run.mana / run.maxMana) or 0
-    local mc = g.COLORS.MANA
-    lg.setColor(mc.r, mc.g, mc.b, 0.7)
-    lg.rectangle("fill", mbx, mby, mbw * manaRatio, mbh)
-    lg.setColor(1, 1, 1)
-    local manaText = LOC_MANA({cur = math.floor(run.mana), max = math.floor(run.maxMana)})
-    richtext.printRich(manaText, font, mbx, mby + mbh / 2 - fh / 2, mbw, "center")
-
+    local spellBox = manaBox:padUnit(6)
     -- spells
     local spellIds = g.getRun().spellList
     if #spellIds > 0 then

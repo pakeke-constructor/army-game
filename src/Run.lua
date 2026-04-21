@@ -6,9 +6,7 @@ local MapGraph = require("src.scenes.map_scene.MapGraph")
 ---@field squads g.Squad[]
 ---@field money number
 ---@field food number
----@field mana number
 ---@field maxFood number
----@field maxMana number
 ---@field blessings string[]
 ---@field spells table<string, number>
 ---@field day integer
@@ -24,9 +22,7 @@ function Run:init()
     self.xp = 0
     self.money = 0
     self.food = 3
-    self.mana = 3
     self.maxFood = 100
-    self.maxMana = 10
     self.blessings = {}
     self.spells = {}
     self.spellList = {}
@@ -34,6 +30,9 @@ function Run:init()
     self.demonRage = 0
     self.mapGraph = nil
     self.stats = {}
+    for _, manaType in ipairs(g.getManaTypes()) do
+        self.stats[manaType .. "Mana"] = 10
+    end
 
     if consts.DEV_MODE then
         -- populate test stuff.
@@ -126,9 +125,7 @@ function Run:serialize()
         xp = self.xp,
         money = self.money,
         food = self.food,
-        mana = self.mana,
         maxFood = self.maxFood,
-        maxMana = self.maxMana,
         blessings = self.blessings,
         spells = self.spells,
         day = self.day,
@@ -153,8 +150,6 @@ function Run.deserialize(data)
     run.xp = data.xp or run.xp
     run.money = data.money or run.money
     run.food = data.food or run.food
-    run.mana = data.mana or run.mana
-    run.maxMana = data.maxMana
     run.maxFood = data.maxFood
     run.blessings = data.blessings or {}
     run.spells = data.spells or {}

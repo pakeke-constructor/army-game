@@ -1458,7 +1458,7 @@ local SPELL_LIST = {}
 ---@field id string
 ---@field name string
 ---@field description string
----@field manaCost number
+---@field cost g.ManaBundle
 ---@field cooldown number
 ---@field icon string
 ---@field radius number for aoe spells
@@ -1470,7 +1470,7 @@ local SPELL_LIST = {}
 function g.defineSpell(id, def)
     assert(not SPELL_DEFS[id], "Duplicate spell: " .. id)
     def.id = id
-    def.manaCost = def.manaCost or 0
+    def.cost = def.cost or {}
     def.cooldown = def.cooldown or 0
     SPELL_DEFS[id] = def
     SPELL_LIST[#SPELL_LIST + 1] = id
@@ -1497,10 +1497,6 @@ function g.tryCastSpell(spellId, x, y)
     if run:getSpellCooldown(spellId) then
         return false
     end
-    if run.mana < info.manaCost then
-        return false
-    end
-    run.mana = run.mana - info.manaCost
     run:setSpellCooldown(spellId, info.cooldown)
     info.castSpell(x, y)
     return true
