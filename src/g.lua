@@ -1575,7 +1575,6 @@ end
 ---@param w number? max width to fit within
 function g.drawManaCost(bundle, x, y, w)
     w = w or 9999
-    -- Build flat list of mana types
     local beads = {}
     for _, manaType in ipairs(manaTypeList) do
         local n = bundle[manaType]
@@ -1588,25 +1587,14 @@ function g.drawManaCost(bundle, x, y, w)
     local count = #beads
     if count == 0 then return end
 
-    -- Get bead size from the first mana quad
     local quad = g.getImageQuad(manaInfos[beads[1]].image)
-    local _, _, qw, qh = quad:getViewport()
+    local _, _, qw, _ = quad:getViewport()
 
-    -- Compute spacing: ideally beads touch (spacing = qw), but compress if needed
-    local idealWidth = count * qw
-    local spacing = qw
-    if idealWidth > w then
-        -- Must fit in w: first bead is full width, rest overlap
-        spacing = (w - qw) / (count - 1)
-    end
-
-    -- Total width of the drawn beads
-    local totalW = (count - 1) * spacing + qw
-    local startX = x - totalW / 2 + qw / 2
+    local spacing = math.min(qw, count > 1 and (w - qw) / (count - 1) or qw)
+    local startX = x - (count - 1) * spacing / 2
 
     for i, manaType in ipairs(beads) do
-        local bx = startX + (i - 1) * spacing
-        g.drawImage(manaInfos[manaType].image, bx, y)
+        g.drawImage(manaInfos[manaType].image, startX + (i - 1) * spacing, y)
     end
 end
 

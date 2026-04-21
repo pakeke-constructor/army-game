@@ -17,8 +17,8 @@ local function drawSquadEntry(squad, x,y, idSuffix)
     local darkCol = rarity.darkColor
 
     local id = squad.squadId .. idSuffix
-    local SZ = 18
-    local xx,yy,ww,hh = x-SZ/2, y-SZ/2, SZ, SZ
+    local SZ = 24
+    local xx,yy,ww,hh = x-SZ/2, y-SZ/2, SZ,SZ
     iml.panel(xx,yy,ww,hh, id)
 
     local isHovered = iml.isHovered(xx,yy,ww,hh, id)
@@ -32,16 +32,14 @@ local function drawSquadEntry(squad, x,y, idSuffix)
     -- icon
     local iconPad = 4
     local iconSize = math.min(ww - iconPad * 2, hh * 0.6)
-    local ix = x + (ww - iconSize) / 2
-    local iy = y + iconPad
     love.graphics.setColor(1, 1, 1, alpha)
-    g.drawSquadIcon(squad.squadId, ix, iy)
+    g.drawSquadIcon(squad.squadId, x, y)
 
     -- mana cost beads (bottom center)
     local cost = info.cost
     if cost then
         love.graphics.setColor(1, 1, 1, alpha)
-        g.drawManaCost(cost, x + ww / 2, y + hh, 24)
+        g.drawManaCost(cost, xx + ww / 2, yy + hh + 4, SZ*2)
     end
 
     if iml.wasJustClicked(xx,yy, ww, hh, 1, id) then
@@ -50,10 +48,10 @@ local function drawSquadEntry(squad, x,y, idSuffix)
     return false
 end
 
+
 local function drawManaBar(region)
     COST_FONT = COST_FONT or g.getSmallFont(16)
     local x, y, w, h = region:get()
-    iml.panel(region:get())
     ui.drawDarkPanel(x, y, w, h)
 
     local manaTypes = g.getManaTypes()
@@ -99,6 +97,12 @@ end
 ---@param region kirigami.Region
 local function drawSquadLineUp(region)
     ui.assertUIStarted()
+
+    -- draw faded bg:
+    lg.setColor(0.1,0.1,0.2,0.7)
+    lg.rectangle("fill", region:padRatio(-1):get())
+    lg.setColor(1,1,1)
+    iml.panel(region:get())
 
     local manaBar, lineup, bench = region:splitVertical(1, 3, 6)
 
