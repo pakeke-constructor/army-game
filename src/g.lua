@@ -437,7 +437,9 @@ local SQUAD_LIST = {}
 ---@field icon string
 ---@field perks string[]
 ---@field cost g.ManaBundle
----@field onDeploy (fun(squad: g.SquadInfo, entities: table[]))?
+---@field onDeploy (fun(squad: g.SquadInfo, entities: table[], x: number, y:number))?
+---@field drawSquadHover fun(x:number, y:number)?
+
 
 ---@param id string
 ---@param info g.SquadInfo|{id:nil}|{perks:nil}
@@ -1393,59 +1395,6 @@ g.defineStat("projectileAccuracy", "baseProjectileAccuracy", {
     icon = "hourglass_icon",
     isImportant = _importantIfRanged,
 })
-
-
--- Spell system
-local SPELL_DEFS = {}
-local SPELL_LIST = {}
-
----@class g.SpellInfo
----@field id string
----@field name string
----@field description string
----@field cost g.ManaBundle
----@field cooldown number
----@field icon string
----@field radius number for aoe spells
----@field castSpell fun(x:number, y:number)
----@field drawSpellHover fun(x:number, y:number)?
-
----@param id string
----@param def g.SpellInfo|{id:nil}
-function g.defineSpell(id, def)
-    assert(not SPELL_DEFS[id], "Duplicate spell: " .. id)
-    def.id = id
-    def.cost = def.cost or {}
-    def.cooldown = def.cooldown or 0
-    SPELL_DEFS[id] = def
-    SPELL_LIST[#SPELL_LIST + 1] = id
-end
-
----@param id string
----@return g.SpellInfo
-function g.getSpellInfo(id)
-    return assert(SPELL_DEFS[id], "Unknown spell: " .. tostring(id))
-end
-
----@return string[]
-function g.getAllSpellDefinitions()
-    return SPELL_LIST
-end
-
----@param spellId string
----@param x number
----@param y number
----@return boolean
-function g.tryCastSpell(spellId, x, y)
-    local info = assert(SPELL_DEFS[spellId], "Unknown spell: " .. tostring(spellId))
-    local run = g.getRun()
-    if run:getSpellCooldown(spellId) then
-        return false
-    end
-    run:setSpellCooldown(spellId, info.cooldown)
-    info.castSpell(x, y)
-    return true
-end
 
 
 

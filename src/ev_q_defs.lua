@@ -14,7 +14,6 @@ g.defineEvent("battleWon")
 g.defineEvent("battleLost")
 g.defineEvent("battleStarted")
 g.defineEvent("projectileHit")
-g.defineEvent("manaSpent")
 g.defineEvent("nexusDamaged")
 
 -- Entity lifecycle
@@ -37,8 +36,6 @@ g.defineEvent("drawEntity")
 -- Squad / deployment
 g.defineEvent("squadDeployed")
 
--- Spells
-g.defineEvent("spellCast")
 
 -- Economy / run
 g.defineEvent("moneyGained")
@@ -54,10 +51,6 @@ local ADD = reducers.ADD
 local MUL = reducers.MULTIPLY
 
 g.defineQuestion("getDamageReduction", ADD, 0)
-
--- Questions: spells/mana
-g.defineQuestion("getManaCostMultiplier", MUL, 1)
-g.defineQuestion("getCooldownMultiplier", MUL, 1)
 
 -- Questions: economy/rewards
 g.defineQuestion("getMoneyMultiplier", MUL, 1)

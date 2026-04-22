@@ -1,24 +1,17 @@
 
-
 local hoverService = require("src.hud.hoverService")
 
 ---@class g.HUD: objects.Class
 local HUD = objects.Class("g:HUD")
 
-
-
 function HUD:init()
     self.selectedSlot = 1
 end
-
-
 
 ---@class g.hudArgs
 ---@field battleScene boolean?
 ---@field mapScene boolean?
 local hudArgs
-
-
 
 local SQUAD_ICON_SIZE = 32
 local SQUAD_PADDING = 4
@@ -29,57 +22,32 @@ local LOC_DAYS = interp("%{n} days until {c r=1 g=0.3 b=0.3}attack", {context="H
 local LOC_ZONE = loc("{c r=0.2 g=0.5 b=0.3}Zone 1 - Forest", {}, {context="HUD top bar, current zone name. Hardcoded stub"})
 local LOC_PAUSE = loc("II", {}, {context="HUD top bar, pause button icon text"})
 
-local BOTTOM_BAR_FONT = g.getSmallFont(16)
-
 local LOC_HOVER_RAGE = loc("Demon Rage increases when you win a battle, making enemies stronger.", {}, {context="Tooltip when hovering demon rage in HUD"})
 local LOC_HOVER_GOLD = loc("Gold is used to buy items and upgrades at shops.", {}, {context="Tooltip when hovering gold in HUD"})
 local LOC_HOVER_DAYS = loc("Days remaining until the next Incursion!", {}, {context="Tooltip when hovering days-till-incursion in HUD. After X number of days, players will be forced to fight a 'boss'"})
 
 local TOP_BAR_FONT = g.getSmallFont(16)
 
-
-
---- ===== Squad / Spell selection:   =====
--- Unified slot system:
--- Squads and spells share a single selection index.
--- Slots 1..#army are squads, slots #army+1..#army+#spells are spells.
--- Scrolling/clicking wraps across both lists seamlessly.
-
---- Returns total number of selectable slots (squads + spells)
-
---- Returns total number of selectable slots (squads + spells)
----@return integer
 local function getSlotCount()
-    return #g.getLineup() + #g.getRun().spellList
+    return #g.getLineup()
 end
 
---- Returns what a slot maps to.
 ---@param slot integer
----@return "squad"|"spell" type
----@return g.Squad|string entry -- squad object or spellId
----@return integer subIndex -- index within army or spells
+---@return "squad" type
+---@return g.Squad entry
+---@return integer subIndex
 local function getSlotInfo(slot)
     local army = g.getLineup()
-    if slot <= #army then
-        return "squad", army[slot], slot
-    end
-    local si = slot - #army
-    return "spell", g.getRun().spellList[si], si
+    return "squad", army[slot], slot
 end
 
---- Returns whether a slot is currently available for selection.
 ---@param slot integer
 ---@return boolean
 local function isSlotAvailable(slot)
-    local typ, entry = getSlotInfo(slot)
-    if typ == "squad" then
-        return not entry.deployed
-    else
-        return g.getRun():getSpellCooldown(entry) == nil
-    end
+    local _, entry = getSlotInfo(slot)
+    return not entry.deployed
 end
 
---- Returns the closest available slot to `from`, searching left first.
 ---@param from integer
 ---@return integer?
 local function getClosestAvailableSlot(from)
@@ -95,7 +63,6 @@ local function getClosestAvailableSlot(from)
     return nil
 end
 
---- Returns the selected slot index, snapped to nearest available.
 ---@param self g.HUD
 ---@return integer?
 local function getSlotIndex(self)
@@ -112,7 +79,6 @@ end
 local function renderSquad(sq, x, y, size, selected)
     if selected then
         lg.setColor(1, 1, 1, 0.3)
-        --lg.rectangle("fill", x - 2, y - 2, size + 4, size + 4, 4, 4)
         ui.drawSingleColorPanel(x - 2, y - 2, size + 4, size + 4)
     end
     if sq.deployed then
@@ -123,21 +89,18 @@ local function renderSquad(sq, x, y, size, selected)
     g.drawSquadIcon(sq.squadId, x, y, size, size)
 end
 
-
-
 ---@param self g.HUD
 ---@param region kirigami.Region
 ---@param currentSlot integer?
 local function drawSquadBar(self, region, currentSlot)
     local army = g.getLineup()
-
     if #army <= 0 then
         return
     end
+
     local count = #army
     local EDGE_PAD = 20
 
-    -- expand region if too small
     local neededW = count * SQUAD_ICON_SIZE + (count - 1) * SQUAD_PADDING + 2 * EDGE_PAD
     local neededH = SQUAD_ICON_SIZE + 2 * EDGE_PAD
     if region.w < neededW then
@@ -147,16 +110,13 @@ local function drawSquadBar(self, region, currentSlot)
         region = region:set(nil, nil, nil, neededH)
     end
 
-    -- inner region after edge padding
     local inner = region:padUnit(EDGE_PAD)
 
-    -- space squads evenly
-    local spacing
+    local spacing = 0
     if count > 1 then
         spacing = (inner.w - count * SQUAD_ICON_SIZE) / (count - 1)
-    else
-        spacing = 0
     end
+
     local startX = inner.x
     if count == 1 then
         startX = inner.x + (inner.w - SQUAD_ICON_SIZE) / 2
@@ -196,13 +156,9 @@ local function drawSquadBar(self, region, currentSlot)
     end
 end
 
-
-
 local function drawTopBar()
     local r = ui.getScreenRegion()
     local topBar = r:splitVertical(0.1,0.9)
-
-    -- 3 steps:
 
     local demonRage, gold, daysTillIncursion, zoneString, pausePanel = topBar:splitHorizontal(2,2,4,4,1)
     --[[
@@ -219,7 +175,7 @@ local function drawTopBar()
 
     AGENT INSTRUCTIONS: KEEP THESE COMMENTS; DONT REMOVE.
     ]]
-    -- draw panels
+
     local run = g.getRun()
     local font = TOP_BAR_FONT
     local fh = font:getHeight()
@@ -240,93 +196,27 @@ local function drawTopBar()
     drawPanel(demonRage, LOC_DEMON_RAGE({n = run.demonRage}), LOC_HOVER_RAGE)
     drawPanel(gold, LOC_GOLD({n = run.money}), LOC_HOVER_GOLD)
 
-    -- days till incursion: slightly taller
-    local dx, dy, dw, dh = daysTillIncursion:get()
+    local _, _, _, dh = daysTillIncursion:get()
     local extraH = dh * 0.05
     local dtiRegion = daysTillIncursion:padUnit(0, -extraH, 0, 0)
     drawPanel(dtiRegion, LOC_DAYS({n = run:getDaysUntilIncursion()}), LOC_HOVER_DAYS)
 
     drawPanel(zoneString, LOC_ZONE)
-
     drawPanel(pausePanel, LOC_PAUSE)
-end
-
-
-
-
----@param self g.HUD
----@param spellId string
----@param cell kirigami.Region
----@param slot number
----@param selected boolean
-local function drawSpell(self, spellId, cell, slot, selected)
-    local info = g.getSpellInfo(spellId)
-    cell = cell:padRatio(0.3)
-    if selected then
-        cell = cell:moveUnit(0, -6)
-    end
-    local _,iconRegion, costRegion,_ = cell:splitVertical(1, 3, 1, 1)
-    local ix, iy = iconRegion:getCenter()
-    if selected then
-        local mc = g.COLORS.MANA
-        lg.setColor(mc.r,mc.g,mc.b, 0.4)
-        local r = math.min(iconRegion.w, iconRegion.h) * 0.6
-        lg.circle("fill", ix, iy, r)
-    end
-    lg.setColor(1, 1, 1)
-    g.drawImage(info.icon, ix, iy)
-    local ccx, ccy = costRegion:getCenter()
-    lg.setColor(1, 1, 1)
-    g.drawManaCost(info.cost, ccx, ccy, costRegion.w)
-    local cx, cy, cw, ch = cell:get()
-    if iml.isHovered(cx, cy, cw, ch) then
-        local mx, my = ui.getMouse()
-        hoverService.requestHover(mx, my, function(box, fonts)
-            box:addText("{c r=0.9 g=0.85 b=0.7}" .. info.name, fonts.title)
-            box:addSpacing(2)
-            box:addText("{c r=0.6 g=0.6 b=0.65}" .. info.description, fonts.body)
-        end)
-    end
-    if iml.wasJustClicked(cx, cy, cw, ch) then
-        self.selectedSlot = slot
-    end
 end
 
 ---@param self g.HUD
 ---@param barHeight number
 local function drawBottomBar(self, barHeight)
-    -- bottom bar:
-
     local sw, sh = ui.getScaledUIDimensions()
-
     local run = g.getRun()
     local region = Kirigami(0, sh - barHeight, sw, barHeight)
-    local squadBar, manaBox, blessingBox = region:splitHorizontal(2,1,1)
+    local squadBar, blessingBox = region:splitHorizontal(2,1)
 
     local currentSlot = getSlotIndex(self)
     ui.drawDarkPanel(squadBar:get())
     drawSquadBar(self, squadBar:padUnit(6), currentSlot)
 
-    -- spell-box:
-    -- Spells layed out horizontally. Spell-icon, then mana-cost below.
-    lg.setColor(1,1,1)
-    ui.drawDarkPanel(manaBox:get())
-    local spellBox = manaBox:padUnit(6)
-    -- spells
-    local spellIds = g.getRun().spellList
-    if #spellIds > 0 then
-        local cells = spellBox:grid(#spellIds, 1)
-        for i, spellId in ipairs(spellIds) do
-            local slot = #g.getLineup() + i
-            drawSpell(self, spellId, cells[i], slot, slot == currentSlot)
-        end
-    end
-
-    -- blessing box:
-    -- a grid of blessings.  Use helper.getBestFitDimensions(numItems, widthRatio, heightRatio)
-    -- Only show icons. when blessing is hovered, push a UI box. 
-    -- (DONT IMPLEMENT HOVER FOR NOW, ITS TOO COMPLEX. JUST DO A STUB.)
-    -- CRUCIALLY: images should be drawn AS IS; no scaling with g.drawImageContained.
     lg.setColor(1,1,1)
     ui.drawDarkPanel(blessingBox:get())
     local blessings = run.blessings
@@ -352,7 +242,6 @@ local function drawBottomBar(self, barHeight)
     end
 end
 
-
 ---@param self g.HUD
 local function drawBattleHUD(self)
     drawBottomBar(self, SQUAD_ICON_SIZE + 60)
@@ -365,12 +254,8 @@ local function drawMapHUD(self)
     drawSquadBar(self, region, getSlotIndex(self))
 end
 
-
-
 ---@param opt g.hudArgs
 function HUD:drawUI(opt)
-    local sw, sh = ui.getScaledUIDimensions()
-
     drawTopBar()
 
     if opt.battleScene then
@@ -382,10 +267,8 @@ function HUD:drawUI(opt)
     hoverService.draw()
 end
 
-
---- Returns the type and entry of the current selection, snapping to nearest available.
----@return "squad"|"spell"|nil type
----@return g.Squad|string|nil entry
+---@return "squad"|nil type
+---@return g.Squad|nil entry
 ---@return integer|nil subIndex
 function HUD:getSelection()
     local idx = getSlotIndex(self)
@@ -401,14 +284,6 @@ function HUD:getSelectedSquad()
     return nil
 end
 
----@return string? spellId
----@return integer? spellIndex
-function HUD:getSelectedSpell()
-    local typ, entry, sub = self:getSelection()
-    if typ == "spell" then return entry, sub end
-    return nil
-end
-
 function HUD:wheelmoved(dx, dy)
     local dir = dy > 0 and 1 or -1
     local total = getSlotCount()
@@ -418,7 +293,4 @@ function HUD:wheelmoved(dx, dy)
     end
 end
 
-
-
 return HUD
-

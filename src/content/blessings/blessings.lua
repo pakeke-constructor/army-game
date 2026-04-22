@@ -23,17 +23,6 @@ g.defineBlessing("golden_coffers", "Golden Coffers", {
     },
 })
 
-g.defineBlessing("swift_feet", "Swift Feet", {
-    description = loc("spells cool down 20% faster."),
-    image = "coin_icon",
-    rarity = g.RARITIES.COMMON,
-    handlers = {
-        getCooldownMultiplier = function()
-            return 0.8
-        end,
-    },
-})
-
 g.defineBlessing("blood_tithe", "Blood Tithe", {
     description = loc("Gain 5 gold after winning a battle."),
     image = "coin_icon",

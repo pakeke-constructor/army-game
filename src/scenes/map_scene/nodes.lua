@@ -166,9 +166,6 @@ nodes.FeastNode = FeastNode
 local FountainNode = nodes.newClass("fountain")
 
 function FountainNode:enter()
-    -- TODO:
-    -- in future, should offer options for player to get new spells,
-    -- or upgrade existing mana pool
 end
 
 function FountainNode:draw(wx, wy)

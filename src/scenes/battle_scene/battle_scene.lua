@@ -208,11 +208,6 @@ function battle_scene:draw()
                 g.drawUnit(info.entityId, wx + ox, wy + oy)
             end
             lg.setColor(1, 1, 1, 1)
-        elseif typ == "spell" then
-            local info = g.getSpellInfo(entry)
-            if info.drawSpellHover then
-                info.drawSpellHover(wx, wy)
-            end
         end
     end
 
@@ -228,8 +223,6 @@ function battle_scene:draw()
         local wx, wy = self.camera:toWorld(mx, my)
         if typ == "squad" and not entry.deployed then
             entry:spawn(wx, wy)
-        elseif typ == "spell" then
-            g.tryCastSpell(entry, wx, wy)
         end
     end
     self.hud:drawUI({ battleScene = true })

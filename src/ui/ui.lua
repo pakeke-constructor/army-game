@@ -515,7 +515,7 @@ ui.Box = Box.new
 
 ui.drawSquadCard = require(".squad_card")
 ui.drawBlessingCard = require(".blessing_card")
-ui.drawSpellCard = require(".spell_card")
+
 
 
 return ui
