@@ -58,6 +58,7 @@ end
 ---@field name string
 ---@field description string
 ---@field image string
+---@field startMana g.ManaBundle
 ---@field onStart (fun(run: g.Run))?
 
 local COMMANDERS = {}
@@ -100,7 +101,7 @@ function g.newRun(lopt)
     currentRun = Run()
 
     lopt = lopt or {
-        commander = "basic",
+        commander = consts.STARTING_COMMANDER,
         difficulty = 0
     }
 
@@ -108,6 +109,13 @@ function g.newRun(lopt)
     currentRun.difficulty = lopt.difficulty
 
     local cmdInfo = g.getCommanderInfo(lopt.commander)
+    if cmdInfo.startMana then
+        for manaType, count in pairs(cmdInfo.startMana) do
+            for _ = 1, count do
+                g.addPermanentMana(manaType)
+            end
+        end
+    end
     if cmdInfo.onStart then
         cmdInfo.onStart(currentRun)
     end
@@ -1597,6 +1605,27 @@ end
 ---@return g.ManaInfo
 function g.getManaInfo(id)
     return manaInfos[id]
+end
+
+---@param manaCell g.ManaCell
+function g.addPermanentMana(manaCell)
+    assert(g.isValidManaCell(manaCell), "Invalid mana cell: " .. tostring(manaCell))
+    local run = g.getRun()
+    run.mana[#run.mana + 1] = manaCell
+end
+
+---@param manaCell g.ManaCell
+---@return boolean
+function g.removePermanentMana(manaCell)
+    assert(g.isValidManaCell(manaCell), "Invalid mana cell: " .. tostring(manaCell))
+    local run = g.getRun()
+    for i = #run.mana, 1, -1 do
+        if run.mana[i] == manaCell then
+            table.remove(run.mana, i)
+            return true
+        end
+    end
+    return false
 end
 
 --- Draw mana cost as individual beads, centered at (x,y), fitting within w.

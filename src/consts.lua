@@ -15,6 +15,8 @@ consts.MAX_PLAYING_SOURCES = 14
 consts.SQUAD_SPACING = 20
 consts.LAGGED_HEALTHBAR_DURATION = 0.25
 
+consts.STARTING_COMMANDER = "sir_horse"
+
 consts.MAX_SQUAD_COUNT = 10
 
 return consts

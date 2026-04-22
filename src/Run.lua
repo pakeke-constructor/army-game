@@ -8,8 +8,7 @@ local MapGraph = require("src.scenes.map_scene.MapGraph")
 ---@field difficulty integer
 ---@field squads g.Squad[]
 ---@field money number
----@field food number
----@field maxFood number
+---@field mana g.ManaCell[]
 ---@field blessings string[]
 ---@field day integer
 ---@field demonRage integer
@@ -25,13 +24,11 @@ function Run:init()
     self.level = 1
     self.xp = 0
     self.money = 0
-    self.food = 3
-    self.maxFood = 100
+    self.mana = {}
     self.blessings = {}
     self.day = 1
     self.demonRage = 0
     self.mapGraph = nil
-    self.mana = {}
 end
 
 
@@ -79,8 +76,7 @@ function Run:serialize()
         level = self.level,
         xp = self.xp,
         money = self.money,
-        food = self.food,
-        maxFood = self.maxFood,
+        mana = self.mana,
         blessings = self.blessings,
         day = self.day,
         demonRage = self.demonRage,
@@ -102,8 +98,7 @@ function Run.deserialize(data)
     run.level = data.level or run.level
     run.xp = data.xp or run.xp
     run.money = data.money or run.money
-    run.food = data.food or run.food
-    run.maxFood = data.maxFood
+    run.mana = data.mana or {}
     run.blessings = data.blessings or {}
     run.day = data.day or run.day
     run.demonRage = data.demonRage or run.demonRage
