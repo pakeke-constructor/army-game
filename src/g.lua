@@ -1565,7 +1565,7 @@ g.defineManaType("yellow", "yellow_mana", objects.Color("#f1f119"))
 function g.constructManaCell(mana1, mana2)
     local ls = {mana1,mana2}
     table.sort(ls)
-    return table.concat(ls, "+")
+    return table.concat(ls, "_")
 end
 
 
@@ -1579,8 +1579,7 @@ for _, mana1 in ipairs(manaTypeList) do
     end
 end
 
-VALID_MANA_CELLS["blue+green+red+yellow"] = true -- wildcard mana; accepts ANY type.
-
+VALID_MANA_CELLS["blue_green_red_yellow"] = true -- wildcard mana; accepts ANY type.
 
 g.postLoad(function()
     for _, manaType in ipairs(manaTypeList)do

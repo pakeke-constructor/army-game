@@ -3,7 +3,6 @@ local encounters = require("src.scenes.battle_scene.encounters")
 local Camera = require("lib.cam11")
 local ParticleService = require(".particles.ParticleService")
 local HUD = require("src.hud.hud")
-local drawSquadLineup = require("src.ui.squad_lineup")
 
 
 local CAMERA_SPEED = 400
@@ -237,11 +236,6 @@ function battle_scene:draw()
 
     if self.victoryPopup then
         drawCardSelect(self)
-    end
-
-    if self.editingSquadLineup then
-        lg.setColor(1,1,1)
-        drawSquadLineup(ui.getFullScreenRegion():padUnit(20,16))
     end
 
     ui.endUI()

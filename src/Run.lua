@@ -9,7 +9,6 @@ local MapGraph = require("src.scenes.map_scene.MapGraph")
 ---@field maxFood number
 ---@field mana g.ManaCell[]
 ---@field blessings string[]
----@field spells table<string, number>
 ---@field day integer
 ---@field demonRage integer
 ---@field mapGraph MapGraph
@@ -146,7 +145,6 @@ function Run.deserialize(data)
     run.food = data.food or run.food
     run.maxFood = data.maxFood
     run.blessings = data.blessings or {}
-    run.spells = data.spells or {}
     run.day = data.day or run.day
     run.demonRage = data.demonRage or run.demonRage
     run.mapGraph = data.mapGraph and MapGraph.deserialize(data.mapGraph)
