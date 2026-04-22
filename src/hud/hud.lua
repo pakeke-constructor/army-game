@@ -280,6 +280,7 @@ local function drawBottomBar(self, barHeight)
     local squadBar, _, blessingBox = region:splitHorizontal(2, 1, 1)
 
     ui.drawDarkPanel(squadBar:get())
+    iml.panel(squadBar:get()) -- dont a
     drawSquadBar(self, squadBar:padUnit(6))
 
     local mH=20

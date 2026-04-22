@@ -4,7 +4,7 @@ g.defineCommander("sir_horse", "Sir Horse", {
     description = loc("Basic commander"),
 
     startMana = {
-        [g.WILDCARD_MANA] = 3,
+        [g.WILDCARD_MANA] = 20,
         red = 2,
         green = 2
     },
@@ -13,6 +13,12 @@ g.defineCommander("sir_horse", "Sir Horse", {
         g.addSquadToArmy(g.newSquad("militia_squad"))
         g.addSquadToArmy(g.newSquad("militia_squad"))
         g.addSquadToArmy(g.newSquad("militia_squad"))
+        g.addSquadToArmy(g.newSquad("archer_squad"))
+        g.addSquadToArmy(g.newSquad("archer_squad"))
+        g.addSquadToArmy(g.newSquad("archer_squad"))
+        g.addSquadToArmy(g.newSquad("archer_squad"))
+        g.addSquadToArmy(g.newSquad("archer_squad"))
+        g.addSquadToArmy(g.newSquad("archer_squad"))
 
         g.addSquadToArmy(g.newSquad("archer_squad"))
         g.addSquadToArmy(g.newSquad("archer_squad"))
