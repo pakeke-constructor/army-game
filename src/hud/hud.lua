@@ -33,7 +33,7 @@ local TOP_BAR_FONT = g.getSmallFont(16)
 local function isSlotAvailable(slot)
     local army = g.getArmy()
     local squad = army[slot]
-    if (not army[slot].deployed) and (squad.canAfford) then
+    if (squad) and (not squad.deployed) and (squad.canAfford) then
         return true
     end
     return false
@@ -74,9 +74,9 @@ local function renderSquad(sq, x, y, size, selected)
         ui.drawSingleColorPanel(x - 2, y - 2, size + 4, size + 4)
     end
     if sq.deployed then
-        lg.setColor(1, 1, 1, 0.3)
+        lg.setColor(0.15, 0.15, 0.15, 1)
     elseif (not sq.canAfford) then
-        lg.setColor(0.3, 0.2, 0.2, 1)
+        lg.setColor(1, 1, 1, 0.35)
     else
         lg.setColor(1, 1, 1)
     end
@@ -353,8 +353,12 @@ function HUD:wheelmoved(dx, dy)
     local dir = dy > 0 and 1 or -1
     local total = #g.getArmy()
     local next = self.selectedSlot + dir
-    if next >= 1 and next <= total then
-        self.selectedSlot = next
+    for i=0, 8 do
+        local j = next + i*dir
+        if next >= 1 and next <= total and isSlotAvailable(j) then
+            self.selectedSlot = j
+            return
+        end
     end
 end
 
