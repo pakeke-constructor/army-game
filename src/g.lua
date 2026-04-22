@@ -487,22 +487,7 @@ function g.getArmy()
     return g.getRun().squads
 end
 
----@return g.Squad[]
-function g.getLineup()
-    local lineup = {}
-    for _, squad in ipairs(g.getRun().squads) do
-        if squad.inLineup then
-            lineup[#lineup + 1] = squad
-        end
-    end
-    return lineup
-end
 
----@param squad g.Squad
----@param active boolean
-function g.setSquadActive(squad, active)
-    squad.inLineup = active
-end
 
 ---@param id string
 ---@return g.SquadInfo

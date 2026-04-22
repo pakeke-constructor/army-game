@@ -9,7 +9,6 @@ local objects = require("src.modules.objects.objects")
 ---@field unitCount integer?
 ---@field formation "square"|"circle"|"horizontal"|"vertical"|"diamond"
 ---@field deployed boolean?
----@field inLineup boolean
 local Squad = objects.Class("g:Squad")
 
 --- Formation functions: (n, spacing) -> {{x,y}, ...}
@@ -82,7 +81,6 @@ function Squad:init(squadId, def)
     self.perks = def and {unpack(def.perks)} or {}
     self.formation = "square"
     self.deployed = false
-    self.inLineup = true
     self.icon = nil
 end
 
@@ -123,7 +121,6 @@ function Squad:serialize()
         perks = self.perks,
         unitCount = self.unitCount,
         formation = self.formation,
-        inLineup = self.inLineup,
     }
 end
 
@@ -136,7 +133,6 @@ function Squad.deserialize(data)
     sq.perks = data.perks or {}
     sq.unitCount = data.unitCount
     sq.formation = data.formation or "square"
-    sq.inLineup = data.inLineup ~= false
     return sq
 end
 

@@ -29,7 +29,7 @@ local LOC_HOVER_DAYS = loc("Days remaining until the next Incursion!", {}, {cont
 local TOP_BAR_FONT = g.getSmallFont(16)
 
 local function getSlotCount()
-    return #g.getLineup()
+    return #g.getArmy()
 end
 
 ---@param slot integer
@@ -37,7 +37,7 @@ end
 ---@return g.Squad entry
 ---@return integer subIndex
 local function getSlotInfo(slot)
-    local army = g.getLineup()
+    local army = g.getArmy()
     return "squad", army[slot], slot
 end
 
@@ -93,7 +93,7 @@ end
 ---@param region kirigami.Region
 ---@param currentSlot integer?
 local function drawSquadBar(self, region, currentSlot)
-    local army = g.getLineup()
+    local army = g.getArmy()
     if #army <= 0 then
         return
     end
