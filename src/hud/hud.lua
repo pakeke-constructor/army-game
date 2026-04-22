@@ -118,22 +118,18 @@ local function drawSquadBar(self, region)
 
     local currentSlot = getSlotIndex(self)
     local count = #army
-    local EDGE_PAD = 20
+    local EDGE_PAD = 14
 
-    local neededW = count * SQUAD_ICON_SIZE + (count - 1) * SQUAD_PADDING + 2 * EDGE_PAD
     local neededH = SQUAD_ICON_SIZE + 2 * EDGE_PAD
-    if region.w < neededW then
-        region = region:set(nil, nil, neededW, nil)
-    end
     if region.h < neededH then
         region = region:set(nil, nil, nil, neededH)
     end
 
     local inner = region:padUnit(EDGE_PAD)
 
-    local spacing = 0
+    local step = SQUAD_ICON_SIZE + SQUAD_PADDING
     if count > 1 then
-        spacing = (inner.w - count * SQUAD_ICON_SIZE) / (count - 1)
+        step = math.min(step, (inner.w - SQUAD_ICON_SIZE) / (count - 1))
     end
 
     local startX = inner.x
@@ -143,7 +139,7 @@ local function drawSquadBar(self, region)
     local baseY = inner.y + (inner.h - SQUAD_ICON_SIZE) / 2
 
     for i, sq in ipairs(army) do
-        local x = startX + (i - 1) * (SQUAD_ICON_SIZE + spacing)
+        local x = startX + (i - 1) * step
         local y = baseY
         local selected = (i == currentSlot)
         if selected then
