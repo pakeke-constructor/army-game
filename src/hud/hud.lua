@@ -200,7 +200,7 @@ local NO_MANA = loc("No Mana!", {}, {
 })
 
 
-local function drawManaBar(x,y, maxW,h)
+local function drawManaBar(x,y, w,h, maxW)
     local run = g.getRun()
     local manaCells = run.mana
     local _, sceneName = g.getCurrentScene()
@@ -237,6 +237,8 @@ local function drawManaBar(x,y, maxW,h)
             end
         end,
     })
+    local ww,hh = hbox:measure()
+    local xx = (w - ww)/2
     hbox:render(x, y)
 end
 
@@ -312,7 +314,7 @@ local function drawBottomBar(self, barHeight)
     drawSquadBar(self, squadBar:padUnit(6))
 
     local mH=20
-    drawManaBar(0, squadBar.y - mH, squadBar.w/2, mH)
+    drawManaBar(0, squadBar.y - mH, squadBar.w, mH,  squadBar.w/2)
 end
 
 ---@param self g.HUD
