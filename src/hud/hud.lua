@@ -73,8 +73,10 @@ local function renderSquad(sq, x, y, size, selected)
         lg.setColor(1, 1, 1, 0.3)
         ui.drawSingleColorPanel(x - 2, y - 2, size + 4, size + 4)
     end
-    if sq.deployed or (not sq.canAfford) then
+    if sq.deployed then
         lg.setColor(1, 1, 1, 0.3)
+    elseif (not sq.canAfford) then
+        lg.setColor(0.3, 0.2, 0.2, 1)
     else
         lg.setColor(1, 1, 1)
     end
@@ -217,24 +219,25 @@ local function drawManaBar(x,y, maxW,h)
         txt = "{c r=0.8 g=0.2 b=0.15}" .. NO_MANA
     end
 
-    lg.setColor(1,1,1)
-    richtext.printRich(txt, sf, x, y, 1000, "left")
-    local fw = richtext.getWidth(txt,sf)
-    x = x + fw + 4
-
     local WIDTH_PER_MANA = 20
-    local w = math.min(WIDTH_PER_MANA*#cpy, maxW)
-
-    local r = Kirigami(x,y, w,h)-- TODO: only use the width we actually use!!!
-    -- if the mana-bars take up less space, then we don't render the entire way.
-    local grid = r:grid(#cpy, 1)
-
-    lg.setColor(1,1,1)
-    ui.drawDarkPanel(r:get())
-    for i,mc in ipairs(manaCells) do
-        local rr = grid[i]
-        g.drawManaCell(mc, rr.x+rr.w/2, rr.y+rr.h/2)
-    end
+    local hbox = ui.HBox({padding = 2, spacing = 2}, function(bx, by, bw, bh)
+        lg.setColor(1,1,1)
+        ui.drawDarkPanel(bx, by, bw, bh)
+    end)
+    hbox:addText(txt, sf)
+    hbox:add({
+        getWidth = function() return math.min(WIDTH_PER_MANA * #cpy, maxW) end,
+        getHeight = function() return h end,
+        draw = function(dx, dy, dw, dh)
+            local grid = Kirigami(dx, dy, dw, dh):grid(#cpy, 1)
+            lg.setColor(1,1,1)
+            for i, mc in ipairs(cpy) do
+                local rr = grid[i]
+                g.drawManaCell(mc, rr.x + rr.w/2, rr.y + rr.h/2)
+            end
+        end,
+    })
+    hbox:render(x, y)
 end
 
 
