@@ -85,6 +85,29 @@ local function renderSquad(sq, x, y, size, selected)
     end
 end
 
+
+
+---@param sq g.Squad
+local function hoverSquad(sq)
+    local info = g.getSquadInfo(sq.squadId)
+    local mx, my = ui.getMouse()
+    hoverService.requestHover(mx, my, function(box, fonts)
+        box:addText("{c r=0.9 g=0.85 b=0.7}" .. info.name, fonts.title)
+        box:addSpacing(2)
+        box:addText("{c r=0.7 g=0.7 b=0.75}" .. info.count .. "x " .. info.entityId, fonts.body)
+        local perks = sq.perks
+        if perks and #perks > 0 then
+            for _, pId in ipairs(perks) do
+                local p = g.getPerkInfo(pId)
+                box:addSpacing(2)
+                box:addText("{c r=0.85 g=0.8 b=0.6}" .. p.name, fonts.body)
+                box:addText("{c r=0.6 g=0.6 b=0.65}" .. p.description, fonts.body)
+            end
+        end
+    end)
+end
+
+
 ---@param self g.HUD
 ---@param region kirigami.Region
 local function drawSquadBar(self, region)
@@ -132,22 +155,7 @@ local function drawSquadBar(self, region)
         end
         iml.panel(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, i)
         if iml.isHovered(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, i) then
-            local info = g.getSquadInfo(sq.squadId)
-            local mx, my = ui.getMouse()
-            hoverService.requestHover(mx, my, function(box, fonts)
-                box:addText("{c r=0.9 g=0.85 b=0.7}" .. info.name, fonts.title)
-                box:addSpacing(2)
-                box:addText("{c r=0.7 g=0.7 b=0.75}" .. info.count .. "x " .. info.entityId, fonts.body)
-                local perks = sq.perks
-                if perks and #perks > 0 then
-                    for _, pId in ipairs(perks) do
-                        local p = g.getPerkInfo(pId)
-                        box:addSpacing(2)
-                        box:addText("{c r=0.85 g=0.8 b=0.6}" .. p.name, fonts.body)
-                        box:addText("{c r=0.6 g=0.6 b=0.65}" .. p.description, fonts.body)
-                    end
-                end
-            end)
+            hoverSquad(sq)
         end
     end
 end
@@ -204,7 +212,6 @@ local function drawManaBar(x,y, maxW,h)
     -- if the mana-bars take up less space, then we don't render the entire way.
     local grid = r:grid(#cpy, 1)
 
-    -- TODO: refactor all the rendering part of this code.
     ui.drawDarkPanel(r:get())
     for i,mc in ipairs(manaCells) do
         local rr = grid[i]
