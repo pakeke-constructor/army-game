@@ -8,7 +8,6 @@ You are a coding assistant who writes extremely simple code, and is extremely co
 <core_game_loop>
 - Do battles with your army, fight demons, deploy your troops RTS-style. (Battles generally last 1-3 minutes)
     - During battles, players may click to deploy their "squads".
-    - During battles, players may also cast spells, spending mana.
     - If all enemies are killed, player wins. If the player's "core nexus" is destroyed, player loses battle.
 - Select a reward to improve your build.
 - Travel via the procedurally generated map (node/graph based) to the next location
@@ -22,7 +21,6 @@ After 8 turns, the map is reset; and the player fights a boss.
 - Units: A singular Enemy or ally; e.g. a soldier that fights for you. ranged or melee.
 - Squad: A bundle of Units that the player can click to deploy. (Traits and Perks are shared across every unit.)
 - Blessings: A per-run buff that gives global benefits: e.g: "Gain +2 mana after battle". Use question/event buses.
-- Spells: Spells can be cast during battle. Generally cost mana, and have a cooldown.
 - Perks: Per-unit buffs/blessings. Use question/event buses. Eg: "This unit gains +2 damage"
 - Traits: Keywords for units. Kinda like tags; they don't do anything on their own, but may interact with other systems. (Examples: Stoneskin, Townsfolk, Gremlin, Mancer)
 </high_level_concepts>

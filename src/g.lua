@@ -53,10 +53,72 @@ end
 
 
 
+---@class g.CommanderInfo
+---@field id string
+---@field name string
+---@field description string
+---@field image string
+---@field onStart (fun(run: g.Run))?
+
+local COMMANDERS = {}
+local COMMANDER_LIST = {}
+
+---@param id string
+---@param name string
+---@param info g.CommanderInfo|{id:nil}|{name:nil}
+function g.defineCommander(id, name, info)
+    assert(not COMMANDERS[id], "Duplicate commander: " .. id)
+    info.name = loc(name, {}, {
+        context = "The name of a commander"
+    })
+    info.id = id
+    COMMANDERS[id] = info
+    COMMANDER_LIST[#COMMANDER_LIST + 1] = id
+end
+
+---@return g.CommanderInfo
+function g.getCommanderInfo(id)
+    return assert(COMMANDERS[id], "Unknown commander: " .. tostring(id))
+end
+
+---@return string[]
+function g.getCommanderList()
+    return COMMANDER_LIST
+end
+
+
+
+
 local currentRun
 
-function g.newRun()
+---@class g.LaunchOptions
+---@field commander string
+---@field difficulty integer
+
+---@param lopt g.LaunchOptions
+function g.newRun(lopt)
     currentRun = Run()
+
+    lopt = lopt or {
+        commander = "basic",
+        difficulty = 0
+    }
+
+    currentRun.commander = lopt.commander
+    currentRun.difficulty = lopt.difficulty
+
+    local cmdInfo = g.getCommanderInfo(lopt.commander)
+    if cmdInfo.onStart then
+        cmdInfo.onStart(currentRun)
+    end
+
+    if consts.DEV_MODE then
+        -- populate test stuff.
+        currentRun.blessings = {
+            "iron_hide", "golden_coffers", "blood_tithe", "barrage",
+        }
+        currentRun.mana = {}
+    end
 
     return currentRun
 end

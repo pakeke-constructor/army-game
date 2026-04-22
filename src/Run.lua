@@ -4,6 +4,8 @@ local Squad = require("src.Squad")
 local MapGraph = require("src.scenes.map_scene.MapGraph")
 
 ---@class g.Run: objects.Class
+---@field commander string
+---@field difficulty integer
 ---@field squads g.Squad[]
 ---@field money number
 ---@field food number
@@ -16,6 +18,9 @@ local Run = objects.Class("g:Run")
 
 
 function Run:init()
+    self.commander = nil -- string
+    self.difficulty = 0
+
     self.squads = {}
     self.level = 1
     self.xp = 0
@@ -26,14 +31,7 @@ function Run:init()
     self.day = 1
     self.demonRage = 0
     self.mapGraph = nil
-
-
-    if consts.DEV_MODE then
-        -- populate test stuff.
-        self.blessings = {
-            "iron_hide", "golden_coffers", "blood_tithe", "barrage",
-        }
-    end
+    self.mana = {}
 end
 
 
