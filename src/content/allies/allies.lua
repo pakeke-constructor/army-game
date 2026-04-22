@@ -47,7 +47,7 @@ g.defineSquad("archer_squad", {
     count = 4,
     icon = "example_squad_icon",
     perks = {"sharpshooter"},
-    cost = {red = 3, blue = 1},
+    cost = {red = 2},
 })
 
 

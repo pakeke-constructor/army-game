@@ -32,7 +32,11 @@ local TOP_BAR_FONT = g.getSmallFont(16)
 ---@return boolean
 local function isSlotAvailable(slot)
     local army = g.getArmy()
-    return army[slot] and not army[slot].deployed
+    local squad = army[slot]
+    if (not army[slot].deployed) and (squad.canAfford) then
+        return true
+    end
+    return false
 end
 
 ---@param from integer
@@ -69,7 +73,7 @@ local function renderSquad(sq, x, y, size, selected)
         lg.setColor(1, 1, 1, 0.3)
         ui.drawSingleColorPanel(x - 2, y - 2, size + 4, size + 4)
     end
-    if sq.deployed then
+    if sq.deployed or (not sq.canAfford) then
         lg.setColor(1, 1, 1, 0.3)
     else
         lg.setColor(1, 1, 1)
@@ -185,7 +189,7 @@ local function drawManaBar(x,y, maxW,h)
     local run = g.getRun()
     local manaCells = run.mana
     local _, sceneName = g.getCurrentScene()
-    if sceneName == "battle" and run._battleMana then
+    if sceneName == "battle_scene" and run._battleMana then
         manaCells = run._battleMana
     end
     local cpy = helper.shallowCopy(manaCells) -- defensive copy before sorting

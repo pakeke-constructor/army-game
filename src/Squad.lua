@@ -9,6 +9,7 @@ local objects = require("src.modules.objects.objects")
 ---@field unitCount integer?
 ---@field formation "square"|"circle"|"horizontal"|"vertical"|"diamond"
 ---@field deployed boolean?
+---@field canAfford boolean?
 local Squad = objects.Class("g:Squad")
 
 --- Formation functions: (n, spacing) -> {{x,y}, ...}

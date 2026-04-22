@@ -82,6 +82,12 @@ end
 
 
 function battle_scene:update(dt)
+    local run = g.getRun()
+    for _, squad in ipairs(run.squads) do
+        local info = g.getSquadInfo(squad.squadId)
+        squad.canAfford = not info.cost or g.canAfford(run._battleMana, info.cost)
+    end
+
     self:updateCamera(dt)
     self.ecs:update(dt)
     if not self.paused then
@@ -222,7 +228,10 @@ function battle_scene:draw()
         local mx, my = love.mouse.getPosition()
         local wx, wy = self.camera:toWorld(mx, my)
         if entry and not entry.deployed then
-            entry:spawn(wx, wy)
+            local info = g.getSquadInfo(entry.squadId)
+            if not info.cost or g.trySpendMana(g.getRun()._battleMana, info.cost) then
+                entry:spawn(wx, wy)
+            end
         end
     end
     self.hud:drawUI({ battleScene = true })
