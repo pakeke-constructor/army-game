@@ -239,13 +239,18 @@ end
 ---@param kx number?
 ---@param ky number?
 function g.drawManaCell(manaCell, x, y, r, sx, sy, kx, ky)
-    manaCell = manaCell .. "_mana"
-    if not nameToQuad[manaCell] then
+    local quadName
+    if manaCell == g.WILDCARD_MANA then
+        quadName = "white_mana"
+    end
+
+    quadName = quadName or manaCell .. "_mana"
+    if not nameToQuad[quadName] then
         -- just render red for now, simple
         log.error("unknown manaCell type", manaCell)
-        manaCell = "red_mana"
+        quadName = "red_mana"
     end
-    return g.drawImage(manaCell, x, y, r, sx, sy, kx, ky)
+    return g.drawImage(quadName, x, y, r, sx, sy, kx, ky)
 end
 
 
@@ -1583,8 +1588,9 @@ g.defineManaType("red", "red_mana", objects.Color("#d53341"))
 g.defineManaType("yellow", "yellow_mana", objects.Color("#f1f119"))
 
 
----@param mana1 string
----@param mana2 string
+---@param mana1 g.ManaType
+---@param mana2 g.ManaType
+---@return g.ManaCell
 function g.constructManaCell(mana1, mana2)
     local ls = {mana1,mana2}
     table.sort(ls)
@@ -1602,7 +1608,9 @@ for _, mana1 in ipairs(manaTypeList) do
     end
 end
 
-VALID_MANA_CELLS["blue_green_red_yellow"] = true -- wildcard mana; accepts ANY type.
+g.WILDCARD_MANA = "blue_green_red_yellow"
+VALID_MANA_CELLS[g.WILDCARD_MANA] = true -- wildcard mana; accepts ANY type.
+
 
 g.postLoad(function()
     for _, manaType in ipairs(manaTypeList)do
