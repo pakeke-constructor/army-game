@@ -149,9 +149,40 @@ local function drawSquadBar(self, region)
 end
 
 
+
+
+---@param r kirigami.Region
+local function drawLeftBlessingBar(r)
+    local run = g.getRun()
+    lg.setColor(1,1,1)
+    ui.drawDarkPanel(r:get())
+    local blessings = run.blessings
+    if #blessings > 0 then
+        local padded = r:padUnit(6)
+        local cols, rows = helper.getBestFitDimensions(#blessings, padded.w, padded.h)
+        local cells = padded:grid(cols, math.max(rows, 8))
+        for i, bId in ipairs(blessings) do
+            local info = g.getBlessingInfo(bId)
+            local cx, cy = cells[i]:getCenter()
+            lg.setColor(1, 1, 1)
+            g.drawImage(info.image, cx, cy)
+            local gx, gy, gw, gh = cells[i]:get()
+            if iml.isHovered(gx, gy, gw, gh, "blessing" .. i) then
+                local mx, my = ui.getMouse()
+                hoverService.requestHover(mx, my, function(box, fonts)
+                    box:addText("{c r=0.9 g=0.85 b=0.7}" .. info.name, fonts.title)
+                    box:addSpacing(2)
+                    box:addText("{c r=0.6 g=0.6 b=0.65}" .. info.description, fonts.body)
+                end)
+            end
+        end
+    end
+end
+
+
 local function drawTopBar()
     local r = ui.getScreenRegion()
-    local topBar = r:splitVertical(0.1,0.9)
+    local topBar, mainBar = r:splitVertical(0.1,0.9)
 
     local demonRage, gold, daysTillIncursion, zoneString, pausePanel = topBar:splitHorizontal(2,2,4,4,1)
     --[[
@@ -196,7 +227,13 @@ local function drawTopBar()
 
     drawPanel(zoneString, LOC_ZONE)
     drawPanel(pausePanel, LOC_PAUSE)
+
+    local leftBlessingBar = mainBar:splitVertical(0.7,0.3):splitHorizontal(0.08, 0.92)
+    drawLeftBlessingBar(leftBlessingBar)
 end
+
+
+
 
 ---@param self g.HUD
 ---@param barHeight number
@@ -204,34 +241,11 @@ local function drawBottomBar(self, barHeight)
     local sw, sh = ui.getScaledUIDimensions()
     local run = g.getRun()
     local region = Kirigami(0, sh - barHeight, sw, barHeight)
-    local squadBar, blessingBox = region:splitHorizontal(2,1)
+    local squadBar, _, blessingBox = region:splitHorizontal(2, 1, 1)
 
     ui.drawDarkPanel(squadBar:get())
     drawSquadBar(self, squadBar:padUnit(6))
 
-    lg.setColor(1,1,1)
-    ui.drawDarkPanel(blessingBox:get())
-    local blessings = run.blessings
-    if #blessings > 0 then
-        local padded = blessingBox:padUnit(6)
-        local cols, rows = helper.getBestFitDimensions(#blessings, padded.w, padded.h)
-        local cells = padded:grid(cols, rows)
-        for i, bId in ipairs(blessings) do
-            local info = g.getBlessingInfo(bId)
-            local cx, cy = cells[i]:getCenter()
-            lg.setColor(1, 1, 1)
-            g.drawImage(info.image, cx, cy)
-            local gx, gy, gw, gh = cells[i]:get()
-            if iml.isHovered(gx, gy, gw, gh, "blessing" .. i) then
-                local mx, my = ui.getMouse()
-                hoverService.requestHover(mx, my, function(box, fonts)
-                    box:addText("{c r=0.9 g=0.85 b=0.7}" .. info.name, fonts.title)
-                    box:addSpacing(2)
-                    box:addText("{c r=0.6 g=0.6 b=0.65}" .. info.description, fonts.body)
-                end)
-            end
-        end
-    end
 end
 
 ---@param self g.HUD
