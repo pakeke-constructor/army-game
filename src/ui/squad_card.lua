@@ -197,7 +197,10 @@ local function drawSquadCard(squadId, region)
     if cost then
         local rw, rh = region.w, region.h
         lg.setColor(1, 1, 1)
-        g.drawManaCost(cost, x + rw / 2, y + rh, 24)
+        local www = g.getManaCostWidth(cost)
+        local H=30
+        ui.drawDarkPanel(x+rw/2 - www/2 - 6, y+rh-H/2, www + 12,H)
+        g.drawManaCost(cost, x + rw / 2, y + rh, rw/2)
     end
 
     if iml.wasJustClicked(x, y, w, h, 1, squadId) then

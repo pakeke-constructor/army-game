@@ -28,30 +28,18 @@ local LOC_HOVER_DAYS = loc("Days remaining until the next Incursion!", {}, {cont
 
 local TOP_BAR_FONT = g.getSmallFont(16)
 
-local function getSlotCount()
-    return #g.getArmy()
-end
-
----@param slot integer
----@return "squad" type
----@return g.Squad entry
----@return integer subIndex
-local function getSlotInfo(slot)
-    local army = g.getArmy()
-    return "squad", army[slot], slot
-end
-
 ---@param slot integer
 ---@return boolean
 local function isSlotAvailable(slot)
-    local _, entry = getSlotInfo(slot)
-    return not entry.deployed
+    local army = g.getArmy()
+    return army[slot] and not army[slot].deployed
 end
 
 ---@param from integer
 ---@return integer?
 local function getClosestAvailableSlot(from)
-    local total = getSlotCount()
+    local army = g.getArmy()
+    local total = #army
     if total == 0 then return nil end
     from = helper.clamp(from, 1, total)
     for offset = 0, total - 1 do
@@ -87,17 +75,21 @@ local function renderSquad(sq, x, y, size, selected)
         lg.setColor(1, 1, 1)
     end
     g.drawSquadIcon(sq.squadId, x, y, size, size)
+    local sqInfo = g.getSquadInfo(sq.squadId)
+    if sqInfo then
+        g.drawManaCost(sqInfo.cost, x+size/2,y, size + 6)
+    end
 end
 
 ---@param self g.HUD
 ---@param region kirigami.Region
----@param currentSlot integer?
-local function drawSquadBar(self, region, currentSlot)
+local function drawSquadBar(self, region)
     local army = g.getArmy()
     if #army <= 0 then
         return
     end
 
+    local currentSlot = getSlotIndex(self)
     local count = #army
     local EDGE_PAD = 20
 
@@ -156,6 +148,7 @@ local function drawSquadBar(self, region, currentSlot)
     end
 end
 
+
 local function drawTopBar()
     local r = ui.getScreenRegion()
     local topBar = r:splitVertical(0.1,0.9)
@@ -213,9 +206,8 @@ local function drawBottomBar(self, barHeight)
     local region = Kirigami(0, sh - barHeight, sw, barHeight)
     local squadBar, blessingBox = region:splitHorizontal(2,1)
 
-    local currentSlot = getSlotIndex(self)
     ui.drawDarkPanel(squadBar:get())
-    drawSquadBar(self, squadBar:padUnit(6), currentSlot)
+    drawSquadBar(self, squadBar:padUnit(6))
 
     lg.setColor(1,1,1)
     ui.drawDarkPanel(blessingBox:get())
@@ -251,7 +243,7 @@ end
 local function drawMapHUD(self)
     local sw, sh = ui.getScaledUIDimensions()
     local region = Kirigami(0, sh - SQUAD_ICON_SIZE - 40, sw/2, SQUAD_ICON_SIZE + 40)
-    drawSquadBar(self, region, getSlotIndex(self))
+    drawSquadBar(self, region)
 end
 
 ---@param opt g.hudArgs
@@ -267,26 +259,16 @@ function HUD:drawUI(opt)
     hoverService.draw()
 end
 
----@return "squad"|nil type
----@return g.Squad|nil entry
----@return integer|nil subIndex
+---@return g.Squad? squad
 function HUD:getSelection()
     local idx = getSlotIndex(self)
     if not idx then return nil end
-    return getSlotInfo(idx)
-end
-
----@return g.Squad? squad
----@return integer? armyIndex
-function HUD:getSelectedSquad()
-    local typ, entry, sub = self:getSelection()
-    if typ == "squad" then return entry, sub end
-    return nil
+    return g.getArmy()[idx]
 end
 
 function HUD:wheelmoved(dx, dy)
     local dir = dy > 0 and 1 or -1
-    local total = getSlotCount()
+    local total = #g.getArmy()
     local next = self.selectedSlot + dir
     if next >= 1 and next <= total then
         self.selectedSlot = next

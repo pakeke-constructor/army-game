@@ -231,6 +231,25 @@ function g.drawImage(imageName, x, y, r, sx, sy, kx, ky)
     return g.drawImageOffset(imageName, x, y, r, sx, sy, 0.5, 0.5, kx, ky)
 end
 
+---@param manaCell g.ManaCell
+---@param x number
+---@param y number
+---@param r number?
+---@param sx number?
+---@param sy number?
+---@param kx number?
+---@param ky number?
+function g.drawManaCell(manaCell, x, y, r, sx, sy, kx, ky)
+    if not nameToQuad[manaCell] then
+        -- just render red for now, simple
+        log.error("unknown manaCell type", manaCell)
+        manaCell = "red"
+    end
+    return g.drawImage(manaCell, x, y, r, sx, sy, kx, ky)
+end
+
+
+
 ---@param imageName string|love.Quad
 ---@param x number
 ---@param y number
@@ -1633,6 +1652,18 @@ end
 ---@param x number center x
 ---@param y number center y
 ---@param w number? max width to fit within
+function g.getManaCostWidth(bundle)
+    local count = 0
+    for _, manaType in ipairs(manaTypeList) do
+        local n = bundle[manaType]
+        if n and n > 0 then count = count + n end
+    end
+    if count == 0 then return 0 end
+    local quad = g.getImageQuad(manaInfos[manaTypeList[1]].image)
+    local _, _, qw, _ = quad:getViewport()
+    return (count - 1) * qw + qw
+end
+
 function g.drawManaCost(bundle, x, y, w)
     w = w or 9999
     local beads = {}

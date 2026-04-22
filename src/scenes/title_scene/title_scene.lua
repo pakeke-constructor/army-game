@@ -13,13 +13,10 @@ function title_scene:start()
     if self.started then
         return
     end
-    g.newRun()
-    g.addSquadToArmy(g.newSquad("militia_squad"))
-    g.addSquadToArmy(g.newSquad("militia_squad"))
-    g.addSquadToArmy(g.newSquad("militia_squad"))
-    g.addSquadToArmy(g.newSquad("archer_squad"))
-    g.addSquadToArmy(g.newSquad("archer_squad"))
-    g.addSquadToArmy(g.newSquad("archer_squad"))
+    g.newRun({
+        commander = "sir_horse",
+        difficulty = 0
+    })
     g.gotoScene("map_scene")
 end
 

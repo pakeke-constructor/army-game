@@ -196,10 +196,10 @@ function battle_scene:draw()
     self.particles:draw()
 
     if not self.victoryPopup then
-        local typ, entry = self.hud:getSelection()
+        local entry = self.hud:getSelection()
         local mx, my = love.mouse.getPosition()
         local wx, wy = self.camera:toWorld(mx, my)
-        if typ == "squad" and not entry.deployed then
+        if entry and not entry.deployed then
             local info = g.getSquadInfo(entry.squadId)
             local offsets = entry:getFormationOffsets()
             lg.setColor(0.2, 1, 0.3, 0.5)
@@ -218,10 +218,10 @@ function battle_scene:draw()
 
     local sw, sh = love.graphics.getDimensions()
     if not self.victoryPopup and iml.wasJustClicked(0, 0, sw, sh, 1, "deploy_click") then
-        local typ, entry = self.hud:getSelection()
+        local entry = self.hud:getSelection()
         local mx, my = love.mouse.getPosition()
         local wx, wy = self.camera:toWorld(mx, my)
-        if typ == "squad" and not entry.deployed then
+        if entry and not entry.deployed then
             entry:spawn(wx, wy)
         end
     end
