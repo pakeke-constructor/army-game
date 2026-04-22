@@ -189,6 +189,15 @@ end
 
 
 
+local AVAILABLE_MANA = loc("Available Mana: ", {}, {
+    context = "To the right of this text, it shows what mana is available. 'Mana' is an abstract concept, comes in different colors, like red,blue,green etc."
+})
+
+local NO_MANA = loc("No Mana!", {}, {
+    context = "When player runs out of mana. 'Mana' is an abstract concept, comes in different colors, like red,blue,green etc."
+})
+
+
 local function drawManaBar(x,y, maxW,h)
     local run = g.getRun()
     local manaCells = run.mana
@@ -200,6 +209,18 @@ local function drawManaBar(x,y, maxW,h)
     table.sort(cpy)
     ---@cast cpy g.ManaCell[]
 
+    local sf = g.getSmallFont(16)
+    local txt
+    if #manaCells > 0 then
+        txt = "{wavy amp=0.4}" .. AVAILABLE_MANA
+    else
+        txt = "{c r=0.8 g=0.2 b=0.15}" .. NO_MANA
+    end
+
+    lg.setColor(1,1,1)
+    richtext.printRich(txt, sf, x, y, 1000, "left")
+    local fw = richtext.getWidth(txt,sf)
+    x = x + fw + 4
 
     local WIDTH_PER_MANA = 20
     local w = math.min(WIDTH_PER_MANA*#cpy, maxW)
@@ -208,6 +229,7 @@ local function drawManaBar(x,y, maxW,h)
     -- if the mana-bars take up less space, then we don't render the entire way.
     local grid = r:grid(#cpy, 1)
 
+    lg.setColor(1,1,1)
     ui.drawDarkPanel(r:get())
     for i,mc in ipairs(manaCells) do
         local rr = grid[i]

@@ -109,4 +109,95 @@ function Box:render(x, y)
     return totalW, totalHeight
 end
 
-return Box
+
+
+
+---@class ui.HBox
+---@field private entries table[]
+---@field private padding number
+---@field private spacing number
+---@field private maxHeight number?
+---@field private drawBg fun(x:number,y:number,w:number,h:number)?
+local HBox = {}
+HBox.__index = HBox
+
+function HBox.new(args, drawBg)
+    return setmetatable({
+        entries = {},
+        padding = args.padding or 0,
+        spacing = args.spacing or 0,
+        maxHeight = args.maxHeight,
+        drawBg = drawBg,
+    }, HBox)
+end
+
+function HBox:addText(txt, font)
+    self.entries[#self.entries + 1] = { type = "text", txt = txt, font = font }
+end
+
+function HBox:add(child)
+    self.entries[#self.entries + 1] = { type = "custom", child = child }
+end
+
+function HBox:addSpacing(w)
+    self.entries[#self.entries + 1] = { type = "spacing", w = w }
+end
+
+function HBox:measure()
+    local pad = self.padding
+    local sp = self.spacing
+
+    local widths = {}
+    local maxH = 0
+    for i, e in ipairs(self.entries) do
+        local w, h
+        if e.type == "text" then
+            w = richtext.getWidth(e.txt, e.font)
+            h = e.font:getHeight()
+        elseif e.type == "custom" then
+            w = e.child.getWidth()
+            h = e.child.getHeight and e.child.getHeight() or 0
+        else -- spacing
+            w = e.w
+            h = 0
+        end
+        widths[i] = w
+        if h > maxH then maxH = h end
+    end
+
+    local n = #self.entries
+    local totalW = 0
+    for _, w in ipairs(widths) do totalW = totalW + w end
+    totalW = totalW + (n > 1 and sp * (n - 1) or 0) + pad * 2
+    local totalH = maxH + pad * 2
+    return totalW, totalH, widths, maxH
+end
+
+function HBox:render(x, y)
+    local pad = self.padding
+    local sp = self.spacing
+    local totalW, totalH, widths, maxH = self:measure()
+
+    if self.drawBg then
+        self.drawBg(x, y, totalW, totalH)
+    end
+
+    local n = #self.entries
+    local cx = x + pad
+    for i, e in ipairs(self.entries) do
+        local ey = y + pad
+        if e.type == "text" then
+            richtext.printRich(e.txt, e.font, cx, ey, widths[i], "left")
+        elseif e.type == "custom" then
+            e.child.draw(cx, ey, widths[i], maxH)
+        end
+        cx = cx + widths[i]
+        if i < n then
+            cx = cx + sp
+        end
+    end
+
+    return totalW, totalH
+end
+
+return { Box = Box, HBox = HBox }

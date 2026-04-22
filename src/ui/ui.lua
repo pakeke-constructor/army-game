@@ -1,5 +1,7 @@
 local n9slice = require("src.modules.n9slice.n9slice")
-local Box = require("src.ui.boxes")
+local boxes = require("src.ui.boxes")
+local Box = boxes.Box
+local HBox = boxes.HBox
 
 ---@class ui
 local ui = {}
@@ -511,6 +513,7 @@ end
 
 -- Super useful for rendering text inside boxes (see boxes.lua for API)
 ui.Box = Box.new
+ui.HBox = HBox.new
 
 
 ui.drawSquadCard = require(".squad_card")

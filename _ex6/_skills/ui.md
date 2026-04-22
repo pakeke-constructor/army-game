@@ -141,6 +141,26 @@ local totalW, totalH = box:render(x, y)  -- or box:measure() for size only
 Used heavily for cards (squad_card, blessing_card) and hover tooltips.
 
 
+## ui.HBox
+`ui.HBox(args, drawBg?)` — horizontal layout for text + custom elements.
+
+```lua
+local hbox = ui.HBox({padding = 4, spacing = 6}, function(x, y, w, h)
+    ui.drawPanel(x, y, w, h)
+end)
+hbox:addText("Label", font)
+hbox:addSpacing(8)
+hbox:add({
+    getWidth = function() return 20 end,
+    getHeight = function() return 20 end,  -- optional
+    draw = function(x, y, w, h) ... end,
+})
+local totalW, totalH = hbox:render(x, y)  -- or hbox:measure() for size only
+```
+
+Same as `ui.Box` but left-to-right. Height determined by tallest entry.
+
+
 ## Built-in Widgets
 
 ```lua
