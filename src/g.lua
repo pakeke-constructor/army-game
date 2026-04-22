@@ -88,14 +88,7 @@ function g.getRun()
 end
 
 
----@param globalStatId string
----@return number
-function g.get(globalStatId)
-    local run = g.getRun()
-    local info = g.getGlobalStatInfo(globalStatId)
-    assert(info, "Unknown global stat: " .. tostring(globalStatId))
-    return run.stats[info.name] or 0
-end
+
 
 
 function g.delRun()
@@ -504,26 +497,9 @@ function g.getLineup()
 end
 
 ---@param squad g.Squad
----@return boolean
-function g.canAffordSquad(squad)
-    local costs = {}
-    for _, s in ipairs(g.getRun().squads) do
-        if s.inLineup and s ~= squad then
-            costs[#costs + 1] = g.getSquadInfo(s.squadId).cost
-        end
-    end
-    return g.canAfford(costs, g.getSquadInfo(squad.squadId).cost)
-end
-
----@param squad g.Squad
 ---@param active boolean
----@return boolean ok
 function g.setSquadActive(squad, active)
-    if active and not g.canAffordSquad(squad) then
-        return false
-    end
     squad.inLineup = active
-    return true
 end
 
 ---@param id string
@@ -1300,13 +1276,8 @@ g.RARITIES = {
 
 
 ---@alias g.Stat {id:string, name:string, baseName:string, modQ:string, mulQ:string, color:objects.Color, icon:string, isImportant:fun(ent:ecs.Entity, stat:string):boolean}
----@alias g.GlobalStat {id:string, name:string, baseName:string, modQ:string, mulQ:string}
-
 local STAT_LIST = {}
 local STAT_DEFS = {}
-
-local GLOBAL_STAT_LIST = {}
-local GLOBAL_STAT_DEFS = {}
 
 ---@param id string
 ---@param baseName string
@@ -1331,24 +1302,7 @@ function g.defineStat(id, baseName, info)
     STAT_DEFS[id] = stat
 end
 
----@param id string
----@param baseName string
-function g.defineGlobalStat(id, baseName)
-    local Name = id:sub(1,1):upper() .. id:sub(2)
-    local modQ = "get" .. Name .. "Modifier"
-    local mulQ = "get" .. Name .. "Multiplier"
-    g.defineQuestion(modQ, reducers.ADD, 0)
-    g.defineQuestion(mulQ, reducers.MULTIPLY, 1)
-    local stat = {
-        id = id,
-        name = id,
-        baseName = baseName,
-        modQ = modQ,
-        mulQ = mulQ,
-    }
-    GLOBAL_STAT_LIST[#GLOBAL_STAT_LIST + 1] = stat
-    GLOBAL_STAT_DEFS[id] = stat
-end
+
 
 ---@param statId string
 ---@param ent_or_etype string|ecs.Entity
@@ -1364,22 +1318,13 @@ function g.getStatList()
     return STAT_LIST
 end
 
----@return g.GlobalStat[]
-function g.getGlobalStatList()
-    return GLOBAL_STAT_LIST
-end
-
 ---@param id string
 ---@return g.Stat
 function g.getStatInfo(id)
     return STAT_DEFS[id]
 end
 
----@param id string
----@return g.GlobalStat?
-function g.getGlobalStatInfo(id)
-    return GLOBAL_STAT_DEFS[id]
-end
+
 
 
 
@@ -1513,6 +1458,24 @@ end
 
 ---@alias g.ManaBundle {[g.ManaType]: integer}
 
+---@alias g.ManaCell {type: g.ManaType, type2: g.ManaType?, isWildcard:boolean?}
+
+
+
+
+---@param manaCells g.ManaCell
+---@param manaRequirement g.ManaBundle
+function g.canAfford(manaCells, manaRequirement)
+    
+end
+
+---@param manaCells g.ManaCell
+---@param manaRequirement g.ManaBundle
+function g.trySpendMana(manaCells, manaRequirement)
+
+end
+
+
 
 ---@type table<string, g.ManaInfo>
 local manaInfos = {}
@@ -1528,7 +1491,6 @@ function g.defineManaType(id, image, color)
         color = color,
     }
     table.insert(manaTypeList, id)
-    g.defineGlobalStat(id, id .. "Mana")
 end
 
 
@@ -1556,12 +1518,9 @@ end)
 
 
 ---@param id g.ManaType
----@return integer
 ---@return g.ManaInfo
 function g.getManaInfo(id)
-    local manaInfo = manaInfos[id]
-    local maxMana = g.get(id)
-    return maxMana, manaInfo
+    return manaInfos[id]
 end
 
 --- Draw mana cost as individual beads, centered at (x,y), fitting within w.
@@ -1594,65 +1553,6 @@ function g.drawManaCost(bundle, x, y, w)
     end
 end
 
-
-
-
----@param bundle g.ManaBundle
----@param counts {[g.ManaType]: number}
-local function checkBundle(bundle, counts)
-    for k,v in pairs(bundle) do
-        if k ~= "any" then
-            counts[k] = (counts[k] or 0) + v
-            if counts[k] > g.getManaInfo(k) then
-                return false -- cant afford
-            end
-        end
-    end
-    return true
-end
-
----@param manaBundles g.ManaBundle[]
----@param xtra g.ManaBundle
-function g.canAfford(manaBundles, xtra)
-    -- first, sums all total mana.
-    -- if total-mana > total-max-mana, then it's bad; not enough.
-    local aggre = 0
-    local stock = 0
-    for i, bundle in ipairs(manaBundles)do
-        for k,v in pairs(bundle)do
-            aggre = aggre + v
-        end
-    end
-    if xtra then
-        for k,v in pairs(xtra) do
-            aggre = aggre + v
-        end
-    end
-    for k,v in pairs(manaInfos) do
-        local maxMana = g.getManaInfo(k)
-        stock = stock + maxMana
-    end
-
-    if aggre > stock then
-        return false -- we dont have enough `any` mana.
-        -- Return false; cheap, no allocations
-    end
-
-    -- else, we allocate table, and do an extra pass
-    local counts = {}
-
-    -- loops over mana bundles, checks if can afford all non-any mana.
-    for i, bundle in ipairs(manaBundles)do
-        if not checkBundle(bundle, counts) then
-            return false --cant afford
-        end
-    end
-    if xtra and (not checkBundle(xtra, counts)) then
-        return false --cant afford
-    end
-
-    return true -- ALL OK. :)
-end
 
 
 return g

@@ -59,7 +59,6 @@ g.defineSpell("zap", {
     cooldown = 0,
     icon = "coin_icon",
     castSpell = function(x, y)
-        print("HI.")
         damageEnemiesInRadius(x, y, ZAP_RAD, 12)
     end,
     drawSpellHover = spellRenderer(ZAP_RAD, objects.Color.RED)

@@ -22,23 +22,20 @@ local function drawSquadEntry(squad, x,y, idSuffix)
     iml.panel(xx,yy,ww,hh, id)
 
     local isHovered = iml.isHovered(xx,yy,ww,hh, id)
-    local canAfford = squad.inLineup or g.canAffordSquad(squad)
-
-    local alpha = (canAfford or squad.inLineup) and 1 or 0.35
-    if isHovered and canAfford then
+    if isHovered then
         darkCol = darkCol:lerp(col, 0.25)
     end
 
     -- icon
     local iconPad = 4
     local iconSize = math.min(ww - iconPad * 2, hh * 0.6)
-    love.graphics.setColor(1, 1, 1, alpha)
+    love.graphics.setColor(1, 1, 1)
     g.drawSquadIcon(squad.squadId, x, y)
 
     -- mana cost beads (bottom center)
     local cost = info.cost
     if cost then
-        love.graphics.setColor(1, 1, 1, alpha)
+        love.graphics.setColor(1, 1, 1)
         g.drawManaCost(cost, xx + ww / 2, yy + hh + 4, SZ*2)
     end
 
@@ -49,50 +46,6 @@ local function drawSquadEntry(squad, x,y, idSuffix)
 end
 
 
-local function drawManaBar(region)
-    COST_FONT = COST_FONT or g.getSmallFont(16)
-    local x, y, w, h = region:get()
-    ui.drawDarkPanel(x, y, w, h)
-
-    local manaTypes = g.getManaTypes()
-    local visible = {}
-    for _, mt in ipairs(manaTypes) do
-        local maxMana, manaInfo = g.getManaInfo(mt)
-        if maxMana > 0 then
-            -- compute used
-            local used = 0
-            for _, sq in ipairs(g.getLineup()) do
-                local cost = g.getSquadInfo(sq.squadId).cost
-                if cost[mt] then used = used + cost[mt] end
-            end
-            visible[#visible + 1] = {used = used, max = maxMana, info = manaInfo, id = mt}
-        end
-    end
-
-    if #visible == 0 then return end
-
-    local cellW = math.floor(w / #visible)
-    local font = COST_FONT
-    local fh = font:getHeight()
-    for i, v in ipairs(visible) do
-        local cx = x + (i - 1) * cellW
-        local iconSize = h - 4
-        -- icon
-        love.graphics.setColor(1, 1, 1)
-        if v.info.image and g.isImage(v.info.image) then
-            g.drawImageContained(v.info.image, cx + 4, y + 2, iconSize, iconSize)
-        end
-        -- text: used/max
-        local textX = cx + iconSize + 8
-        local textCol = v.info.color or objects.Color(1, 1, 1)
-        local full = v.used >= v.max
-        local colTag = full and "{c r=1 g=0.3 b=0.3}" or ("{c r=" .. textCol.r .. " g=" .. textCol.g .. " b=" .. textCol.b .. "}")
-        local str = colTag .. v.used .. "/" .. v.max
-        love.graphics.setFont(font)
-        love.graphics.setColor(1, 1, 1)
-        richtext.printRich(str, font, textX, y + h / 2 - fh / 2, cellW - iconSize - 12, "left")
-    end
-end
 
 ---@param region kirigami.Region
 local function drawSquadLineUp(region)
@@ -104,7 +57,7 @@ local function drawSquadLineUp(region)
     lg.setColor(1,1,1)
     iml.panel(region:get())
 
-    local manaBar, lineup, bench = region:splitVertical(1, 3, 6)
+    local lineup, bench = region:splitVertical(3, 6)
 
     -- Top: current lineup
     local lineupSquads = g.getLineup()
@@ -121,9 +74,6 @@ local function drawSquadLineUp(region)
             end
         end
     end
-
-    -- Middle: mana budget
-    drawManaBar(manaBar:padUnit(4))
 
     -- Bottom: bench (all non-lineup squads)
     local allSquads = g.getArmy()

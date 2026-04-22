@@ -26,12 +26,12 @@
 ### OK:: what do we need for a minimum-playable game?
 
 
+Refactor into NEW mana system:
+- Player starts with (a,b,c) mana every battle.
+- Player can GAIN mana during battle
+- Each squad costs mana to create.
 
-
-- Squad-lineup UI  (MAKE UX GOOD!)
-
-
-- Spell reward/select UI
+- Hybrid-mana (eg, blue/red mana. Also, wildcard-mana; supports ALL types)
 
 - Blessing reward/select UI
 
@@ -50,6 +50,14 @@
 - Make it so weapons can be held/used
 - melee: swords + sword swinging
 - ranged: bows, + bow pointing in direction they aim
+
+
+- Sound effects
+
+- Music
+
+- Balancing / Feedback screen, players can give UNSTRUCTURED feedback/feelings sent directly to our server and stored.
+
 
 
 <agent_ideas>
