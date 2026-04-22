@@ -7,6 +7,7 @@ local MapGraph = require("src.scenes.map_scene.MapGraph")
 ---@field money number
 ---@field food number
 ---@field maxFood number
+---@field mana g.ManaCell[]
 ---@field blessings string[]
 ---@field spells table<string, number>
 ---@field day integer
@@ -25,6 +26,7 @@ function Run:init()
     self.blessings = {}
     self.spells = {}
     self.spellList = {}
+    self.mana = {}
     self.day = 1
     self.demonRage = 0
     self.mapGraph = nil
@@ -36,6 +38,9 @@ function Run:init()
             "iron_hide", "golden_coffers", "swift_feet", "blood_tithe", "barrage",
         }
         self.spells = {zap = 0, heal = 0}
+        self.mana = {
+
+        }
     end
 end
 

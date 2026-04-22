@@ -1454,11 +1454,11 @@ end
 ---@field image string
 ---@field color objects.Color
 
----@alias g.ManaType "red"|"yellow"|"blue"|"green"|"purple"|"black"|"white"|"any"
+---@alias g.ManaType "red"|"yellow"|"blue"|"green"
 
 ---@alias g.ManaBundle {[g.ManaType]: integer}
 
----@alias g.ManaCell {type: g.ManaType, type2: g.ManaType?, isWildcard:boolean?}
+---@alias g.ManaCell "blue"|"green"|"red"|"yellow"|"blue+green"|"blue+red"|"blue+yellow"|"green+red"|"green+yellow"|"red+yellow"|"blue+green+red+yellow"
 
 
 
@@ -1500,14 +1500,36 @@ function g.getManaTypes()
 end
 
 
-g.defineManaType("red", "red_mana", objects.Color("#ff4b4b"))
-g.defineManaType("yellow", "yellow_mana", objects.Color("#f5dd4b"))
-g.defineManaType("blue", "blue_mana", objects.Color("#4bb6ff"))
-g.defineManaType("green", "green_mana", objects.Color("#57d66b"))
-g.defineManaType("purple", "purple_mana", objects.Color("#b26bff"))
-g.defineManaType("black", "black_mana", objects.Color("FF6B6B6B"))
-g.defineManaType("white", "white_mana", objects.Color("#f4f4f4"))
-g.defineManaType("any", "any_mana", objects.Color("#c7c7c7"))
+local VALID_MANA_CELLS = {}
+
+g.defineManaType("blue", "blue_mana", objects.Color("#36c7de"))
+g.defineManaType("green", "green_mana", objects.Color("#7cc82a"))
+g.defineManaType("red", "red_mana", objects.Color("#d53341"))
+g.defineManaType("yellow", "yellow_mana", objects.Color("#f1f119"))
+
+
+---@param mana1 string
+---@param mana2 string
+function g.constructManaCell(mana1, mana2)
+    local ls = {mana1,mana2}
+    table.sort(ls)
+    return table.concat(ls, "+")
+end
+
+
+for _, mana1 in ipairs(manaTypeList) do
+    VALID_MANA_CELLS[mana1] = true
+    for _, mana2 in pairs(manaTypeList) do
+        if mana1 ~= mana2 then
+            local strKey = g.constructManaCell(mana1,mana2)
+            VALID_MANA_CELLS[strKey] = true
+        end
+    end
+end
+
+VALID_MANA_CELLS["blue+green+red+yellow"] = true -- wildcard mana; accepts ANY type.
+
+
 g.postLoad(function()
     for _, manaType in ipairs(manaTypeList)do
         local info = manaInfos[manaType]
@@ -1515,6 +1537,13 @@ g.postLoad(function()
         richtext.defineImage(manaType, atlas:getTexture(), quad)
     end
 end)
+
+
+---@param str string
+---@return boolean
+function g.isValidManaCell(str)
+    return VALID_MANA_CELLS[str]
+end
 
 
 ---@param id g.ManaType
