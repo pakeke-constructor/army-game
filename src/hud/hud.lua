@@ -180,6 +180,35 @@ local function drawLeftBlessingBar(r)
 end
 
 
+
+local function drawManaBar(x,y, maxW,h)
+    local run = g.getRun()
+    local manaCells = run.mana
+    local _, sceneName = g.getCurrentScene()
+    if sceneName == "battle" and run._battleMana then
+        manaCells = run._battleMana
+    end
+    local cpy = helper.shallowCopy(manaCells) -- defensive copy before sorting
+    table.sort(cpy)
+    ---@cast cpy g.ManaCell[]
+
+    -- create a grid here, then render mana cells in grid.
+
+    local r = Kirigami(x,y, maxW,h)-- TODO: only use the width we actually use!!!
+    -- if the mana-bars take up less space, then we don't render the entire way.
+    local grid = r:grid(#cpy, 1)
+
+    -- TODO: refactor all the rendering part of this code.
+    for i,mc in ipairs(manaCells) do
+        error("WTF? UNREACHED?")
+        local rr = grid[i]
+        g.drawManaCell(mc, rr.x+rr.w/2, rr.y+rr.h/2)
+    end
+end
+
+
+
+
 local function drawTopBar()
     local r = ui.getScreenRegion()
     local topBar, mainBar = r:splitVertical(0.1,0.9)
@@ -246,6 +275,8 @@ local function drawBottomBar(self, barHeight)
     ui.drawDarkPanel(squadBar:get())
     drawSquadBar(self, squadBar:padUnit(6))
 
+    local mH=20
+    drawManaBar(0, squadBar.y - mH, squadBar.w/2, mH)
 end
 
 ---@param self g.HUD

@@ -1649,9 +1649,6 @@ end
 
 --- Draw mana cost as individual beads, centered at (x,y), fitting within w.
 ---@param bundle g.ManaBundle
----@param x number center x
----@param y number center y
----@param w number? max width to fit within
 function g.getManaCostWidth(bundle)
     local count = 0
     for _, manaType in ipairs(manaTypeList) do

@@ -55,9 +55,16 @@ end
 
 function Run:resetForBattle()
     for _, squad in ipairs(self.squads) do
-        squad.deployed = false
+        squad.deployed = false -- reset squads
+    end
+
+    -- and reset mana
+    self._battleMana = {}
+    for _, mana in ipairs(self.mana) do
+        table.insert(self._battleMana, mana)
     end
 end
+
 
 function Run:winBattle()
     self.demonRage = self.demonRage + 1
