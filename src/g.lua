@@ -125,7 +125,6 @@ function g.newRun(lopt)
         currentRun.blessings = {
             "iron_hide", "golden_coffers", "blood_tithe", "barrage",
         }
-        currentRun.mana = {}
     end
 
     return currentRun
@@ -240,10 +239,11 @@ end
 ---@param kx number?
 ---@param ky number?
 function g.drawManaCell(manaCell, x, y, r, sx, sy, kx, ky)
+    manaCell = manaCell .. "_mana"
     if not nameToQuad[manaCell] then
         -- just render red for now, simple
         log.error("unknown manaCell type", manaCell)
-        manaCell = "red"
+        manaCell = "red_mana"
     end
     return g.drawImage(manaCell, x, y, r, sx, sy, kx, ky)
 end

@@ -122,7 +122,7 @@ local function drawSquadBar(self, region)
         if selected then
             y = y - 6
         end
-        renderSquad(sq, x, y, SQUAD_ICON_SIZE, selected)
+        renderSquad(sq, x, y-4, SQUAD_ICON_SIZE, selected)
         if not sq.deployed and iml.wasJustClicked(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, 1, i) then
             self.selectedSlot = i
         end
@@ -192,15 +192,17 @@ local function drawManaBar(x,y, maxW,h)
     table.sort(cpy)
     ---@cast cpy g.ManaCell[]
 
-    -- create a grid here, then render mana cells in grid.
 
-    local r = Kirigami(x,y, maxW,h)-- TODO: only use the width we actually use!!!
+    local WIDTH_PER_MANA = 20
+    local w = math.min(WIDTH_PER_MANA*#cpy, maxW)
+
+    local r = Kirigami(x,y, w,h)-- TODO: only use the width we actually use!!!
     -- if the mana-bars take up less space, then we don't render the entire way.
     local grid = r:grid(#cpy, 1)
 
     -- TODO: refactor all the rendering part of this code.
+    ui.drawDarkPanel(r:get())
     for i,mc in ipairs(manaCells) do
-        error("WTF? UNREACHED?")
         local rr = grid[i]
         g.drawManaCell(mc, rr.x+rr.w/2, rr.y+rr.h/2)
     end
@@ -235,6 +237,7 @@ local function drawTopBar()
 
     local function drawPanel(region, text, hoverText)
         local x, y, w, h = region:get()
+        lg.setColor(1, 1, 1)
         ui.drawDarkPanel(x, y, w, h)
         lg.setColor(1, 1, 1)
         richtext.printRich(text, font, x, y + h / 2 - fh / 2, w, "center")
@@ -257,7 +260,7 @@ local function drawTopBar()
     drawPanel(zoneString, LOC_ZONE)
     drawPanel(pausePanel, LOC_PAUSE)
 
-    local leftBlessingBar = mainBar:splitVertical(0.7,0.3):splitHorizontal(0.08, 0.92)
+    local leftBlessingBar = mainBar:splitVertical(0.7,0.3):splitHorizontal(0.06, 0.94)
     drawLeftBlessingBar(leftBlessingBar)
 end
 
@@ -281,7 +284,7 @@ end
 
 ---@param self g.HUD
 local function drawBattleHUD(self)
-    drawBottomBar(self, SQUAD_ICON_SIZE + 60)
+    drawBottomBar(self, SQUAD_ICON_SIZE + 30)
 end
 
 ---@param self g.HUD
