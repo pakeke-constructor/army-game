@@ -1463,16 +1463,68 @@ end
 
 
 
----@param manaCells g.ManaCell
----@param manaRequirement g.ManaBundle
-function g.canAfford(manaCells, manaRequirement)
-    
+-- Returns list of unspent cells after satisfying manaRequirement, or nil if can't afford.
+local function trySpendManaInternal(manaCells, manaRequirement)
+    -- Quick check: total cells >= total required
+    local totalNeed = 0
+    for _, v in pairs(manaRequirement) do totalNeed = totalNeed + v end
+    if #manaCells < totalNeed then return nil end
+
+    local need = {}
+    for k, v in pairs(manaRequirement) do need[k] = v end
+
+    -- Pass 1: spend exact (single-type) cells first
+    local kept = {}
+    for _, cell in ipairs(manaCells) do
+        if not cell:find("+") and need[cell] and need[cell] > 0 then
+            need[cell] = need[cell] - 1
+        else
+            table.insert(kept, cell)
+        end
+    end
+
+    -- Pass 2: spend hybrid/wildcard cells on any matching need
+    local kept2 = {}
+    for _, cell in ipairs(kept) do
+        local spent = false
+        for manaType, count in pairs(need) do
+            if count > 0 and cell:find(manaType, 1, true) then
+                need[manaType] = need[manaType] - 1
+                spent = true
+                break
+            end
+        end
+        if not spent then
+            table.insert(kept2, cell)
+        end
+    end
+
+    for _, count in pairs(need) do
+        if count > 0 then return nil end
+    end
+    return kept2
 end
 
----@param manaCells g.ManaCell
+---@param manaCells g.ManaCell[]
 ---@param manaRequirement g.ManaBundle
-function g.trySpendMana(manaCells, manaRequirement)
+---@return boolean
+function g.canAfford(manaCells, manaRequirement)
+    return trySpendManaInternal(manaCells, manaRequirement) ~= nil
+end
 
+---@param manaCells g.ManaCell[]
+---@param manaRequirement g.ManaBundle
+---@return boolean
+function g.trySpendMana(manaCells, manaRequirement)
+    local kept = trySpendManaInternal(manaCells, manaRequirement)
+    if not kept then return false end
+    for i = #manaCells, 1, -1 do
+        table.remove(manaCells, i)
+    end
+    for _, cell in ipairs(kept) do
+        table.insert(manaCells, cell)
+    end
+    return true
 end
 
 
