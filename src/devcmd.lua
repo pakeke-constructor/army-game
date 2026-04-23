@@ -57,9 +57,9 @@ end
 COMMANDS.gold = function(args)
     local amt = tonumber(args[1])
     if not amt then return addLog("usage: /gold <amount>") end
+    g.addGold(amt)
     local run = g.getRun()
-    run.gold = (run.gold or 0) + amt
-    addLog("gold -> " .. run.gold)
+    addLog("gold -> " .. run.money)
 end
 
 local function execCmd(line)

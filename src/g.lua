@@ -164,9 +164,24 @@ function g.getRun()
     return assert(currentRun, "run not loaded")
 end
 
+function g.addGold(amount)
+    local run = g.getRun()
+    run.money = run.money + amount
+end
 
+function g.trySpendGold(amount)
+    local run = g.getRun()
+    if run.money < amount then
+        return false
+    end
+    run.money = run.money - amount
+    return true
+end
 
-
+function g.addXP(amount)
+    local run = g.getRun()
+    run.xp = run.xp + amount
+end
 
 function g.delRun()
     currentRun = nil
