@@ -21,13 +21,12 @@
 - Remove trait system
 - Bench / Active-squads system. (Squad lineup)
 - Blessing reward/select UI
+- Battle-reward-screen / Generic-reward-screen (STS inspired)
+
 
 
 
 ### OK:: what do we need for a minimum-playable game?
-
-
-- Battle-reward-screen / Generic-reward-screen (STS inspired)
 
 
 - Fix unit pathing; (make it so they "lock on" to targets; instead of jittering back/forth)

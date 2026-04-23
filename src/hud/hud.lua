@@ -26,7 +26,6 @@ local LOC_HOVER_RAGE = loc("Demon Rage increases when you win a battle, making e
 local LOC_HOVER_GOLD = loc("Gold is used to buy items and upgrades at shops.", {}, {context="Tooltip when hovering gold in HUD"})
 local LOC_HOVER_DAYS = loc("Days remaining until the next Incursion!", {}, {context="Tooltip when hovering days-till-incursion in HUD. After X number of days, players will be forced to fight a 'boss'"})
 
-local TOP_BAR_FONT = g.getSmallFont(16)
 
 ---@param slot integer
 ---@return boolean
@@ -266,7 +265,7 @@ local function drawTopBar()
     ]]
 
     local run = g.getRun()
-    local font = TOP_BAR_FONT
+    local font = g.getSmallFont(16)
     local fh = font:getHeight()
 
     local function drawPanel(region, text, hoverText)

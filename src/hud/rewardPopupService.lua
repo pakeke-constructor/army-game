@@ -20,6 +20,11 @@ end
 function rewardPopupService.draw()
     if not active then return end
     active:draw()
+
+    if not active:hasAnyRewards() then
+        -- auto-clear when no rewards left
+        rewardPopupService.clear()
+    end
 end
 
 return rewardPopupService

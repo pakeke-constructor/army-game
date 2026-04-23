@@ -10,6 +10,8 @@ local RewardPanel = objects.Class("g:RewardPanel")
 ---@field randomSquad boolean?
 ---@field randomBlessing boolean?
 
+
+
 ---@param args g.RewardPanel.Rewards
 function RewardPanel:init(args)
     self.gold = args.gold
@@ -20,15 +22,28 @@ end
 
 
 
+---@return boolean
+function RewardPanel:hasAnyRewards()
+    return not not (self.gold or self.xp or self.randomBlessing or self.randomSquad)
+end
+
+
+
 
 local REWARDS_TXT = loc("Rewards", {}, {
     context = "As in, the rewards after battle"
 })
 
 
-local NEW_SQUAD = loc("Recruit new troops!")
 
-local NEW_BLESSING = loc("Get random Blessing!")
+local BROWN_COL = objects.Color("FF9B6F57")
+local colStr = ("{c r=%.2f g=%.2f b=%.2f}"):format(
+    objects.Color("FFBBA7A7"):getRGBA()
+)
+
+local NEW_SQUAD = colStr .. loc("Recruit new troops!")
+
+local NEW_BLESSING = colStr .. loc("Get random Blessing!")
 
 
 
@@ -37,13 +52,11 @@ function RewardPanel:draw()
 
     r = r:padRatio(0.2)
 
-    local brownCol = objects.Color("FF9B6F57")
-
     ---@type ui.Box
     local box = ui.Box({maxWidth = r.w, padding = 12, spacing = 8}, function(bx, by, bw, bh)
         love.graphics.setColor(1,1,1)
         ui.drawDarkPanel(bx, by, bw, bh)
-        lg.setColor(brownCol)
+        lg.setColor(BROWN_COL)
         ui.drawPanel(bx-4, by-4, bw+8, bh+8)
     end)
 
@@ -63,7 +76,7 @@ function RewardPanel:draw()
             lg.setColor(1,1,1)
             g.drawImage(IMG, x+w/2+padW, y+h/2, 0, 1,1)
             g.drawImage(IMG, x+w/2-padW, y+h/2, 0, -1,1)
-            lg.setColor(brownCol)
+            lg.setColor(BROWN_COL)
             richtext.printRichContained(REWARDS_TXT, LARGE_FONT, x,y,w,h)
         end,
     })
@@ -94,26 +107,31 @@ function RewardPanel:draw()
         })
     end
 
-    if self.gold then
+    if self.gold and self.gold > 0 then
         addBar("{coin_icon}{GOLD_COLOR} " .. tostring(self.gold), function()
             g.addGold(self.gold)
+            self.gold = nil
         end)
     end
 
-    if self.xp then
+    if self.xp and self.xp > 0 then
         addBar("{xp_icon}{XP_COLOR} " .. tostring(self.xp), function()
             g.addXP(self.xp)
+            self.xp = nil
         end)
     end
 
     if self.randomBlessing then
         addBar(NEW_BLESSING, function()
-            
+            choicePopupService.set("blessing")
+            self.randomBlessing = nil
         end)
     end
 
     if self.randomSquad then
         addBar(NEW_SQUAD, function()
+            choicePopupService.set("squad")
+            self.randomSquad = nil
         end)
     end
 
