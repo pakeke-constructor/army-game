@@ -2,9 +2,6 @@ local ECSWorld = require("src.ecs.ECSWorld")
 local encounters = require("src.scenes.battle_scene.encounters")
 local Camera = require("lib.cam11")
 local ParticleService = require(".particles.ParticleService")
-local HUD = require("src.hud.hud")
-local rewardPopupService = require("src.hud.rewardPopupService")
-local choicePopupService = require("src.hud.choicePopupService")
 
 
 local CAMERA_SPEED = 400

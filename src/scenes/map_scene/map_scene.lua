@@ -3,7 +3,6 @@ local Camera = require("lib.cam11")
 local MapGraph = require("src.scenes.map_scene.MapGraph")
 local PixelCanvas = require("src.modules.PixelCanvas")
 local decor_types = require("src.scenes.map_scene.decor_types")
-local HUD = require("src.hud.hud")
 
 local CAMERA_ZOOM = 0.5
 local NODE_RADIUS = 4

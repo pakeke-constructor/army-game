@@ -107,14 +107,13 @@ function RewardPanel:draw()
     end
 
     if self.randomBlessing then
-        addBar("{coin_icon} " .. tostring(self.gold), function()
+        addBar(NEW_BLESSING, function()
             
         end)
     end
 
     if self.randomSquad then
-        addBar("{coin_icon} " .. tostring(self.gold), function()
-            
+        addBar(NEW_SQUAD, function()
         end)
     end
 

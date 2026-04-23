@@ -81,6 +81,11 @@ _G.analytics = require("src.modules.analytics.analytics")
 _G.agentbridge = require("src.modules.agentbridge.agentbridge")
 _G.vignette = require("src.modules.vignette.vignette")
 
+
+_G.HUD = require("src.hud.hud")
+_G.rewardPopupService = require("src.hud.rewardPopupService")
+_G.choicePopupService = require("src.hud.choicePopupService")
+
 _G.g = require("src.g")
 _G.devcmd = require("src.devcmd")
 require("src.ev_q_defs")

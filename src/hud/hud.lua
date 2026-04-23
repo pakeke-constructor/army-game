@@ -1,7 +1,5 @@
 
 local hoverService = require("src.hud.hoverService")
-local rewardPopupService = require("src.hud.rewardPopupService")
-local choicePopupService = require("src.hud.choicePopupService")
 
 ---@class g.HUD: objects.Class
 local HUD = objects.Class("g:HUD")
