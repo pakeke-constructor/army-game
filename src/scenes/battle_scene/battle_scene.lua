@@ -3,6 +3,7 @@ local encounters = require("src.scenes.battle_scene.encounters")
 local Camera = require("lib.cam11")
 local ParticleService = require(".particles.ParticleService")
 local HUD = require("src.hud.hud")
+local RewardPanel = require("src.ui.RewardPanel")
 
 
 local CAMERA_SPEED = 400
@@ -16,7 +17,7 @@ local battle_scene = {}
 
 
 function battle_scene:init()
-    self.victoryPopup = false
+    self.victory = false
     self.victoryPopupTime = 0
 
     self.editingSquadLineup = false
@@ -45,7 +46,7 @@ function battle_scene:enter()
     self.particles = ParticleService()
     self.hud = HUD()
     self.noEnemyTimer = 0
-    self.victoryPopup = false
+    self.victory = false
     self.victoryPopupTime = 0
     self.squadChoices = nil
 
@@ -98,10 +99,10 @@ function battle_scene:update(dt)
         else
             self.noEnemyTimer = 0
         end
-        if self.noEnemyTimer >= WIN_DELAY and not self.victoryPopup then
-            self.victoryPopup = true
+        if self.noEnemyTimer >= WIN_DELAY and (not self.victory) then
+            self.victory = true
+            self.victoryReward = RewardPanel("squad")
             self.victoryPopupTime = 0
-            local run = g.getRun()
             run:winBattle()
             if not self.squadChoices then
                 self.squadChoices = buildVictoryChoices()
@@ -146,9 +147,6 @@ local function killAllEnemies(self)
             g.killEntity(ent)
         end
     end
-    self.noEnemyTimer = WIN_DELAY
-    self.victoryPopup = true
-    self.victoryPopupTime = 0
     local run = g.getRun()
     run:winBattle()
     if not self.squadChoices then
@@ -201,7 +199,7 @@ function battle_scene:draw()
     self.ecs:draw()
     self.particles:draw()
 
-    if not self.victoryPopup then
+    if not self.victory then
         local entry = self.hud:getSelection()
         local mx, my = love.mouse.getPosition()
         local wx, wy = self.camera:toWorld(mx, my)
@@ -223,7 +221,7 @@ function battle_scene:draw()
     ui.startUI()
 
     local sw, sh = love.graphics.getDimensions()
-    if not self.victoryPopup and iml.wasJustClicked(0, 0, sw, sh, 1, "deploy_click") then
+    if not self.victory and iml.wasJustClicked(0, 0, sw, sh, 1, "deploy_click") then
         local entry = self.hud:getSelection()
         local mx, my = love.mouse.getPosition()
         local wx, wy = self.camera:toWorld(mx, my)
@@ -236,8 +234,11 @@ function battle_scene:draw()
     end
     self.hud:drawUI({ battleScene = true })
 
-    if self.victoryPopup then
-        drawCardSelect(self)
+    if self.victory and self.victoryReward then
+        local done = self.victoryReward:draw()
+        if done then
+            g.gotoScene("map_scene")
+        end
     end
 
     ui.endUI()

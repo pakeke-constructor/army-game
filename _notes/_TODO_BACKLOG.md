@@ -20,17 +20,12 @@
 - add a little helper to render squad-icon + mana-cost
 - Remove trait system
 - Bench / Active-squads system. (Squad lineup)
+- Blessing reward/select UI
 
 
 
 ### OK:: what do we need for a minimum-playable game?
 
-
-
-ISSUE:
-im a bit unclear on how blessings/rewards/squad
-
-- Blessing reward/select UI
 
 -- TODO: completely refactor `self.victoryChoices`; extract into a "cardSelect" object?
 - Battle-reward-screen (STS inspired)

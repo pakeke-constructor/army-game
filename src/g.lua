@@ -1658,14 +1658,13 @@ end
 
 local VALID_MANA_CELLS = {}
 
+g.defineManaType("red", "red_mana", objects.Color("#d53341"))
 g.defineManaType("blue", "blue_mana", objects.Color("#36c7de"))
 g.defineManaType("green", "green_mana", objects.Color("#7cc82a"))
+g.defineManaType("yellow", "yellow_mana", objects.Color("#f1f119"))
+
 for _, mana1 in ipairs(manaTypeList) do
     VALID_MANA_CELLS[mana1] = true
-end
-            VALID_MANA_CELLS[strKey] = true
-        end
-    end
 end
 
 g.WILDCARD_MANA = "blue_green_red_yellow"

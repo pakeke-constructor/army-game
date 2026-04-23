@@ -53,8 +53,9 @@ end
 ---Draw a single squad card in a kirigami region. Returns true if clicked.
 ---@param squadId string
 ---@param region kirigami.Region
+---@param index number
 ---@return boolean
-local function drawSquadCard(squadId, region)
+local function drawSquadCard(squadId, region, index)
     ui.assertUIStarted()
 
     local info = g.getSquadInfo(squadId)
@@ -66,9 +67,10 @@ local function drawSquadCard(squadId, region)
     local bgCol1 = objects.Color(0.05, 0.05, 0.06, 0.7)
 
     local x, y, w, h = region:get()
-    iml.panel(x, y, w, h, squadId)
+    local uid = squadId .. "_" .. index
+    iml.panel(x, y, w, h, uid)
 
-    local isHovered = iml.isHovered(x,y,w,h, squadId)
+    local isHovered = iml.isHovered(x,y,w,h, uid)
     if isHovered then
         darkCol = darkCol:lerp(col, 0.25)
     end
@@ -203,7 +205,7 @@ local function drawSquadCard(squadId, region)
         g.drawManaCost(cost, x + rw / 2, y + rh, rw/2)
     end
 
-    if iml.wasJustClicked(x, y, w, h, 1, squadId) then
+    if iml.wasJustClicked(x, y, w, h, 1, uid) then
         g.playUISound("ui_click_basic", 1.4, 0.8)
         return true
     end

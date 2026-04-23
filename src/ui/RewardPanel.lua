@@ -3,7 +3,9 @@ local newPicker = require("src.modules.Picker")
 ---@class g.RewardPanel: objects.Class
 local RewardPanel = objects.Class("g:RewardPanel")
 
+
 local NUM_CHOICES = 3
+
 
 ---@param rType "squad"|"blessing"|"mana"
 ---@param rarityMapping g.RarityMapping?
@@ -11,6 +13,9 @@ function RewardPanel:init(rType, rarityMapping)
     self.rType = rType
     self.choices = {}
     self.rarityMapping = rarityMapping or consts.DEFAULT_RARITY_MAPPING
+    self.timeSincePicked = nil
+    self.timeSinceFirstDraw = nil
+    self.selectedI = nil
 
     local manaCells = g.getRun().mana
 
@@ -22,6 +27,7 @@ function RewardPanel:init(rType, rarityMapping)
         self:_pickFromPool(pool, function(id) return g.getBlessingInfo(id) end)
     end
 end
+
 
 ---@private
 function RewardPanel:_pickFromPool(pool, getInfo)
@@ -46,7 +52,16 @@ function RewardPanel:_pickFromPool(pool, getInfo)
 end
 
 
+local PICK_ANIMATION_TIME = 0.6
+
+
 function RewardPanel:draw()
+    local dt = love.timer.getAverageDelta()
+    if self.timeSincePicked then
+        self.timeSincePicked = self.timeSincePicked + dt
+    end
+    self.timeSinceFirstDraw = (self.timeSinceFirstDraw or 0) + dt
+
     local r = ui.getFullScreenRegion()
     local cardArea = r:padRatio(0.05, 0.1)
     local regions = cardArea:grid(#self.choices, 1)
@@ -57,18 +72,22 @@ function RewardPanel:draw()
     if self.rType == "squad" then
         for i = 1, #regions do
             local rew = self.choices[i]
-            if rew and ui.drawSquadCard(rew, regions[i]) then
-                return true
+            if rew and ui.drawSquadCard(rew, regions[i], i) then
+                self.selectedI = i
+                self.timeSincePicked = 0
             end
         end
     elseif self.rType == "blessing" then
         for i = 1, #regions do
             local rew = self.choices[i]
-            if rew and ui.drawBlessingCard(rew, regions[i]) then
-                return true
+            if rew and ui.drawBlessingCard(rew, regions[i], i) then
+                self.selectedI = i
+                self.timeSincePicked = 0
             end
         end
     end
+
+    return self.timeSincePicked and self.timeSincePicked > PICK_ANIMATION_TIME
 end
 
 

@@ -62,3 +62,16 @@ g.defineSquad("militia_squad", {
     perks = {"tough"},
     cost = {green = 2},
 })
+
+
+
+g.defineSquad("militia_band", {
+    name = loc("Militia beserkers"),
+    entityId = "militia",
+    rarity = g.RARITIES.RARE,
+    count = 6,
+    icon = "example_squad_icon",
+    perks = {"berserker"},
+    cost = {green = 2, red=1},
+})
+

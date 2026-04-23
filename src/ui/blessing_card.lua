@@ -5,8 +5,9 @@ local DESC_FONT = nil
 ---Draw a blessing card in a kirigami region. Returns true if clicked.
 ---@param blessingId string
 ---@param region kirigami.Region
+---@param index integer
 ---@return boolean
-local function drawBlessingCard(blessingId, region)
+local function drawBlessingCard(blessingId, region, index)
     ui.assertUIStarted()
 
     local info = g.getBlessingInfo(blessingId)
