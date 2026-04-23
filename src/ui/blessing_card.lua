@@ -35,7 +35,7 @@ local function drawBlessingCard(blessingId, region, index)
         love.graphics.setColor(1, 1, 1)
         helper.gradientRect("vertical", bgCol1, darkCol, bx, by, bw, bh)
         love.graphics.setColor(liteCol:getRGBA())
-        ui.drawPanel(bx, by, bw, bh)
+        ui.drawPanel(bx-3, by-3, bw+6, bh+6)
     end)
 
     -- Header: icon on left, name on right
