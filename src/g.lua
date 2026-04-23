@@ -17,6 +17,13 @@
 ---@field handlers table<string, function>
 
 
+---@class g.RarityMapping
+---@field COMMON number
+---@field UNCOMMON number
+---@field RARE number
+---@field LEGENDARY number
+
+
 ---@class g
 local g = {}
 

@@ -15,6 +15,15 @@ consts.MAX_PLAYING_SOURCES = 14
 consts.SQUAD_SPACING = 20
 consts.LAGGED_HEALTHBAR_DURATION = 0.25
 
+---@type g.RarityMapping
+consts.DEFAULT_RARITY_MAPPING = {
+    -- i just yolo'd these numbers, feel free to change them
+    COMMON = 1,
+    UNCOMMON = 0.5,
+    RARE = 0.3,
+    LEGENDARY = 0.1,
+}
+
 consts.STARTING_COMMANDER = "sir_horse"
 
 consts.MAX_SQUAD_COUNT = 10
