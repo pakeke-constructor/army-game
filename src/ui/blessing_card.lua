@@ -7,6 +7,8 @@ local DESC_FONT = nil
 ---@param region kirigami.Region
 ---@param index integer
 ---@return boolean
+---@return number
+---@return number
 local function drawBlessingCard(blessingId, region, index)
     ui.assertUIStarted()
 
@@ -15,9 +17,10 @@ local function drawBlessingCard(blessingId, region, index)
     local darkCol = rarity.darkColor
     local liteCol = rarity.color
     local bgCol1 = objects.Color(0.05, 0.05, 0.06, 0.7)
+    local uid = blessingId .. "_" .. index
 
     local x, y, w, h = region:get()
-    iml.panel(x, y, w, h, blessingId)
+    iml.panel(x, y, w, h, uid)
 
     TITLE_FONT = TITLE_FONT or g.getBigFont(16)
     DESC_FONT = DESC_FONT or g.getSmallFont(16)
@@ -51,13 +54,13 @@ local function drawBlessingCard(blessingId, region, index)
     -- Description
     box:addText("{c r=0.7 g=0.7 b=0.75}" .. info.description, DESC_FONT)
 
-    box:render(x, y)
+    local ww,hh = box:render(x, y)
 
-    if iml.wasJustClicked(x, y, w, h, 1, blessingId) then
+    if iml.wasJustClicked(x, y, w, h, 1, uid) then
         g.playUISound("ui_click_basic", 1.4, 0.8)
-        return true
+        return true, ww,hh
     end
-    return false
+    return false, ww,hh
 end
 
 return drawBlessingCard

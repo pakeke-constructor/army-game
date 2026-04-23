@@ -55,6 +55,8 @@ end
 ---@param region kirigami.Region
 ---@param index number
 ---@return boolean
+---@return number
+---@return number
 local function drawSquadCard(squadId, region, index)
     ui.assertUIStarted()
 
@@ -192,7 +194,7 @@ local function drawSquadCard(squadId, region, index)
         end
     end
 
-    box:render(x, y)
+    local ww,hh = box:render(x, y)
 
     -- Mana cost beads (bottom center)
     local cost = info.cost
@@ -207,9 +209,9 @@ local function drawSquadCard(squadId, region, index)
 
     if iml.wasJustClicked(x, y, w, h, 1, uid) then
         g.playUISound("ui_click_basic", 1.4, 0.8)
-        return true
+        return true, ww,hh
     end
-    return false
+    return false, ww,hh
 end
 
 return drawSquadCard

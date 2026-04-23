@@ -28,14 +28,28 @@
 
 
 -- TODO: completely refactor `self.victoryChoices`; extract into a "cardSelect" object?
-- Battle-reward-screen (STS inspired)
-- (Also, Generic-reward-screen (STS inspired))
+
+- Battle-reward-screen / Generic-reward-screen (STS inspired)
 
 
 - Fix unit pathing; (make it so they "lock on" to targets; instead of jittering back/forth)
 
 
+- fire-system
+- frozen-system
+- poison-system
+
+
 - "Terrain" for battle-scene 
+--- swamp
+--- lava-pit
+--- trees
+--- rocks
+--- grass
+--- BORDER: Trees + Rocks + Dark-Fog?
+
+
+- New HUD (from leo)
 
 
 - Shop UI (from leo)

@@ -101,7 +101,7 @@ function battle_scene:update(dt)
         end
         if self.noEnemyTimer >= WIN_DELAY and (not self.victory) then
             self.victory = true
-            self.victoryReward = RewardPanel("squad")
+            self.victoryReward = RewardPanel("blessing")
             self.victoryPopupTime = 0
             run:winBattle()
             if not self.squadChoices then
