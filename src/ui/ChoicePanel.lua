@@ -2,8 +2,8 @@ local newPicker = require("src.modules.Picker")
 
 
 
----@class g.RewardPanel: objects.Class
-local RewardPanel = objects.Class("g:RewardPanel")
+---@class g.ChoicePanel: objects.Class
+local ChoicePanel = objects.Class("g:ChoicePanel")
 
 
 local NUM_CHOICES = 3
@@ -11,7 +11,7 @@ local NUM_CHOICES = 3
 
 ---@param rType "squad"|"blessing"|"mana"
 ---@param rarityMapping g.RarityMapping?
-function RewardPanel:init(rType, rarityMapping)
+function ChoicePanel:init(rType, rarityMapping)
     self.rType = rType
     self.choices = {}
     self.rarityMapping = rarityMapping or consts.DEFAULT_RARITY_MAPPING
@@ -30,7 +30,7 @@ end
 
 
 ---@private
-function RewardPanel:_pickFromPool(pool, getInfo)
+function ChoicePanel:_pickFromPool(pool, getInfo)
     if #pool == 0 then return end
     local weights = {}
     for i, id in ipairs(pool) do
@@ -53,7 +53,7 @@ end
 
 
 
-function RewardPanel:draw()
+function ChoicePanel:draw()
     local r = ui.getFullScreenRegion()
     local cardArea = r:padRatio(0.05, 0.1)
     local regions = cardArea:grid(#self.choices, 1)
@@ -81,5 +81,5 @@ end
 
 
 
-return RewardPanel
+return ChoicePanel
 

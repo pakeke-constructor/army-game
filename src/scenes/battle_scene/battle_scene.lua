@@ -3,7 +3,7 @@ local encounters = require("src.scenes.battle_scene.encounters")
 local Camera = require("lib.cam11")
 local ParticleService = require(".particles.ParticleService")
 local HUD = require("src.hud.hud")
-local RewardPanel = require("src.ui.RewardPanel")
+local ChoicePanel = require("src.ui.ChoicePanel")
 
 
 local CAMERA_SPEED = 400
@@ -101,7 +101,7 @@ function battle_scene:update(dt)
         end
         if self.noEnemyTimer >= WIN_DELAY and (not self.victory) then
             self.victory = true
-            self.victoryReward = RewardPanel("blessing")
+            self.victoryReward = ChoicePanel("blessing")
             self.victoryPopupTime = 0
             run:winBattle()
             if not self.squadChoices then
