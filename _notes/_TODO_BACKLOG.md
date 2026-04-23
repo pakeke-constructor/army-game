@@ -26,25 +26,27 @@
 ### OK:: what do we need for a minimum-playable game?
 
 
-Refactor into NEW mana system:
-- Player starts with (a,b,c) mana every battle.
-- Player can GAIN mana during battle
-- Each squad costs mana to create.
 
-- Hybrid-mana (eg, blue/red mana. Also, wildcard-mana; supports ALL types)
+ISSUE:
+im a bit unclear on how blessings/rewards/squad
 
 - Blessing reward/select UI
-
 
 -- TODO: completely refactor `self.victoryChoices`; extract into a "cardSelect" object?
 - Battle-reward-screen (STS inspired)
 - (Also, Generic-reward-screen (STS inspired))
 
 
+- Fix unit pathing; (make it so they "lock on" to targets; instead of jittering back/forth)
+
+
+- "Terrain" for battle-scene 
+
+
+- Shop UI (from leo)
+
+
 - Special-nodes wired up
-
-
-- Add images to traits
 
 
 - Make it so weapons can be held/used
@@ -61,7 +63,6 @@ Refactor into NEW mana system:
 
 
 <agent_ideas>
-
 improvements to main-agent system-prompt.
 - Clearer defined workflow
 - explanation for how to use `condense/checkpoint`

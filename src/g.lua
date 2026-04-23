@@ -594,6 +594,34 @@ function g.getSquadList()
     return SQUAD_LIST
 end
 
+---returns all squad ids whose mana cost can be satisfied by the given mana cells (excluding wildcard)
+---@param manaCells g.ManaCell[]
+---@return string[]
+function g.getSquadsByMana(manaCells)
+    local available = {}
+    for _, cell in ipairs(manaCells) do
+        if cell ~= g.WILDCARD_MANA then
+            available[cell] = true
+        end
+    end
+    ---@type g.SquadInfo[]
+    local result = {}
+    for _, squadId in ipairs(SQUAD_LIST) do
+        local info = SQUAD_DEFS[squadId]
+        local ok = true
+        for manaType, _ in pairs(info.cost) do
+            if not available[manaType] then
+                ok = false
+                break
+            end
+        end
+        if ok then
+            result[#result + 1] = squadId
+        end
+    end
+    return result
+end
+
 ---@param squad g.Squad
 ---@param perkId string
 function g.addPerkToSquad(squad, perkId)
@@ -1486,51 +1514,70 @@ g.defineStat("projectileAccuracy", "baseProjectileAccuracy", {
 
 ---@alias g.ManaBundle {[g.ManaType]: integer}
 
----@alias g.ManaCell "blue"|"green"|"red"|"yellow"|"blue+green"|"blue+red"|"blue+yellow"|"green+red"|"green+yellow"|"red+yellow"|"blue+green+red+yellow"
+---@alias g.ManaCell "blue"|"green"|"red"|"yellow"|"blue_green_red_yellow"
 
 
 
 
 -- Returns list of unspent cells after satisfying manaRequirement, or nil if can't afford.
 local function trySpendManaInternal(manaCells, manaRequirement)
-    -- Quick check: total cells >= total required
-    local totalNeed = 0
-    for _, v in pairs(manaRequirement) do totalNeed = totalNeed + v end
+    local needBlue = manaRequirement.blue or 0
+    local needGreen = manaRequirement.green or 0
+    local needRed = manaRequirement.red or 0
+    local needYellow = manaRequirement.yellow or 0
+
+    local totalNeed = needBlue + needGreen + needRed + needYellow
     if #manaCells < totalNeed then return nil end
 
-    local need = {}
-    for k, v in pairs(manaRequirement) do need[k] = v end
-
-    -- Pass 1: spend exact (single-type) cells first
     local kept = {}
+    local keptN = 0
+
     for _, cell in ipairs(manaCells) do
-        if not cell:find("+") and need[cell] and need[cell] > 0 then
-            need[cell] = need[cell] - 1
+        if cell == "blue" and needBlue > 0 then
+            needBlue = needBlue - 1
+        elseif cell == "green" and needGreen > 0 then
+            needGreen = needGreen - 1
+        elseif cell == "red" and needRed > 0 then
+            needRed = needRed - 1
+        elseif cell == "yellow" and needYellow > 0 then
+            needYellow = needYellow - 1
         else
-            table.insert(kept, cell)
+            keptN = keptN + 1
+            kept[keptN] = cell
         end
     end
 
-    -- Pass 2: spend hybrid/wildcard cells on any matching need
-    local kept2 = {}
-    for _, cell in ipairs(kept) do
-        local spent = false
-        for manaType, count in pairs(need) do
-            if count > 0 and cell:find(manaType, 1, true) then
-                need[manaType] = need[manaType] - 1
-                spent = true
-                break
+    local write = 1
+    for i = 1, keptN do
+        local cell = kept[i]
+        if cell == g.WILDCARD_MANA then
+            if needBlue > 0 then
+                needBlue = needBlue - 1
+            elseif needGreen > 0 then
+                needGreen = needGreen - 1
+            elseif needRed > 0 then
+                needRed = needRed - 1
+            elseif needYellow > 0 then
+                needYellow = needYellow - 1
+            else
+                kept[write] = cell
+                write = write + 1
             end
-        end
-        if not spent then
-            table.insert(kept2, cell)
+        else
+            kept[write] = cell
+            write = write + 1
         end
     end
 
-    for _, count in pairs(need) do
-        if count > 0 then return nil end
+    if needBlue > 0 or needGreen > 0 or needRed > 0 or needYellow > 0 then
+        return nil
     end
-    return kept2
+
+    for i = #kept, write, -1 do
+        kept[i] = nil
+    end
+
+    return kept
 end
 
 ---@param manaCells g.ManaCell[]
@@ -1584,25 +1631,9 @@ local VALID_MANA_CELLS = {}
 
 g.defineManaType("blue", "blue_mana", objects.Color("#36c7de"))
 g.defineManaType("green", "green_mana", objects.Color("#7cc82a"))
-g.defineManaType("red", "red_mana", objects.Color("#d53341"))
-g.defineManaType("yellow", "yellow_mana", objects.Color("#f1f119"))
-
-
----@param mana1 g.ManaType
----@param mana2 g.ManaType
----@return g.ManaCell
-function g.constructManaCell(mana1, mana2)
-    local ls = {mana1,mana2}
-    table.sort(ls)
-    return table.concat(ls, "_")
-end
-
-
 for _, mana1 in ipairs(manaTypeList) do
     VALID_MANA_CELLS[mana1] = true
-    for _, mana2 in pairs(manaTypeList) do
-        if mana1 ~= mana2 then
-            local strKey = g.constructManaCell(mana1,mana2)
+end
             VALID_MANA_CELLS[strKey] = true
         end
     end
