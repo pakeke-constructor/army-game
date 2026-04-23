@@ -1,16 +1,16 @@
+local RewardPanel = require("src.ui.RewardPanel")
+
 ---@class g.rewardPopupService
 local rewardPopupService = {}
 
 local active = nil
 
-function rewardPopupService.push(data)
-    active = data
+function rewardPopupService.set(args)
+    active = RewardPanel(args)
 end
 
-function rewardPopupService.pop()
-    local data = active
+function rewardPopupService.clear()
     active = nil
-    return data
 end
 
 function rewardPopupService.getActive()
@@ -19,6 +19,7 @@ end
 
 function rewardPopupService.draw()
     if not active then return end
+    active:draw()
 end
 
 return rewardPopupService

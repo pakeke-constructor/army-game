@@ -3,8 +3,8 @@ local encounters = require("src.scenes.battle_scene.encounters")
 local Camera = require("lib.cam11")
 local ParticleService = require(".particles.ParticleService")
 local HUD = require("src.hud.hud")
-local ChoicePanel = require("src.ui.ChoicePanel")
-local RewardPanel = require("src.ui.RewardPanel")
+local rewardPopupService = require("src.hud.rewardPopupService")
+local choicePopupService = require("src.hud.choicePopupService")
 
 
 local CAMERA_SPEED = 400
@@ -102,7 +102,7 @@ function battle_scene:update(dt)
         end
         if self.noEnemyTimer >= WIN_DELAY and (not self.victory) then
             self.victory = true
-            self.victoryReward = ChoicePanel("blessing")
+            choicePopupService.set("blessing")
             self.victoryPopupTime = 0
             run:winBattle()
             if not self.squadChoices then
@@ -167,10 +167,10 @@ function battle_scene:keypressed(k)
             self.paused = not self.paused
         end
         if k == "r" then
-            if self.devRewardPanel then
-                self.devRewardPanel = nil
+            if rewardPopupService.getActive() then
+                rewardPopupService.clear()
             else
-                self.devRewardPanel = RewardPanel({
+                rewardPopupService.set({
                     gold = 123,
                     xp = 45,
                     randomBlessing = true,
@@ -229,15 +229,9 @@ function battle_scene:draw()
     end
     self.hud:drawUI({ battleScene = true })
 
-    if self.victory and self.victoryReward then
-        local done = self.victoryReward:draw()
-        if done then
-            g.gotoScene("map_scene")
-        end
-    end
-
-    if self.devRewardPanel then
-        self.devRewardPanel:draw()
+    local anyPopupOpen = choicePopupService.getActive() or rewardPopupService.getActive()
+    if self.victory and (not anyPopupOpen) then
+        g.gotoScene("map_scene")
     end
 
     ui.endUI()

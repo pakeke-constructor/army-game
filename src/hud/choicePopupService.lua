@@ -1,16 +1,16 @@
+local ChoicePanel = require("src.ui.ChoicePanel")
+
 ---@class g.choicePopupService
 local choicePopupService = {}
 
 local active = nil
 
-function choicePopupService.push(data)
-    active = data
+function choicePopupService.set(rType, rarityMapping)
+    active = ChoicePanel(rType, rarityMapping)
 end
 
-function choicePopupService.pop()
-    local data = active
+function choicePopupService.clear()
     active = nil
-    return data
 end
 
 function choicePopupService.getActive()
@@ -19,6 +19,11 @@ end
 
 function choicePopupService.draw()
     if not active then return end
+    local done = active:draw()
+    if done then
+        active = nil
+        return true
+    end
 end
 
 return choicePopupService
