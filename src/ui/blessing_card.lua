@@ -20,12 +20,18 @@ local function drawBlessingCard(blessingId, region, index)
     local uid = blessingId .. "_" .. index
 
     local x, y, w, h = region:get()
+    local isHovered = false
 
     TITLE_FONT = TITLE_FONT or g.getBigFont(16)
     DESC_FONT = DESC_FONT or g.getSmallFont(16)
 
+
     local box = ui.Box({maxWidth = w, padding = 12, spacing = 6}, function(bx, by, bw, bh)
-        iml.panel(bx,by, bw,bh, uid)
+        iml.panel(bx,by,bw,by, uid)
+        isHovered = iml.isHovered(bx,by, bw,bh, uid)
+        if isHovered then
+            darkCol = darkCol:lerp(liteCol, 0.25)
+        end
         love.graphics.setColor(1, 1, 1)
         helper.gradientRect("vertical", bgCol1, darkCol, bx, by, bw, bh)
         love.graphics.setColor(liteCol:getRGBA())
@@ -54,7 +60,7 @@ local function drawBlessingCard(blessingId, region, index)
     -- Description
     box:addText("{c r=0.7 g=0.7 b=0.75}" .. info.description, DESC_FONT)
 
-    local ww,hh = box:render(x, y)
+    local ww,hh = box:render(x, y + h/3)
 
     if iml.wasJustClicked(x, y, w, h, 1, uid) then
         g.playUISound("ui_click_basic", 1.4, 0.8)

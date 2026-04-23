@@ -27,8 +27,6 @@
 ### OK:: what do we need for a minimum-playable game?
 
 
--- TODO: completely refactor `self.victoryChoices`; extract into a "cardSelect" object?
-
 - Battle-reward-screen / Generic-reward-screen (STS inspired)
 
 
