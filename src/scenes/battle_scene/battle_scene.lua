@@ -4,6 +4,7 @@ local Camera = require("lib.cam11")
 local ParticleService = require(".particles.ParticleService")
 local HUD = require("src.hud.hud")
 local ChoicePanel = require("src.ui.ChoicePanel")
+local RewardPanel = require("src.ui.RewardPanel")
 
 
 local CAMERA_SPEED = 400
@@ -165,6 +166,18 @@ function battle_scene:keypressed(k)
         if k == "p" then
             self.paused = not self.paused
         end
+        if k == "r" then
+            if self.devRewardPanel then
+                self.devRewardPanel = nil
+            else
+                self.devRewardPanel = RewardPanel({
+                    gold = 123,
+                    xp = 45,
+                    randomBlessing = true,
+                    randomSquad = true,
+                })
+            end
+        end
     end
 end
 
@@ -221,6 +234,10 @@ function battle_scene:draw()
         if done then
             g.gotoScene("map_scene")
         end
+    end
+
+    if self.devRewardPanel then
+        self.devRewardPanel:draw()
     end
 
     ui.endUI()

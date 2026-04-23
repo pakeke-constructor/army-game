@@ -51,12 +51,13 @@
 
 
 - Shop UI (from leo)
+- Reroll system wired up in shop
 
 
 - Special-nodes wired up
 
 
-- Make it so weapons can be held/used
+- Weapons system: Make it so weapons can be held/used
 - melee: swords + sword swinging
 - ranged: bows, + bow pointing in direction they aim
 

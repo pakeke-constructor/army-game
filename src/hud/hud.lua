@@ -1,5 +1,7 @@
 
 local hoverService = require("src.hud.hoverService")
+local rewardPopupService = require("src.hud.rewardPopupService")
+local choicePopupService = require("src.hud.choicePopupService")
 
 ---@class g.HUD: objects.Class
 local HUD = objects.Class("g:HUD")
@@ -339,6 +341,8 @@ function HUD:drawUI(opt)
         drawMapHUD(self)
     end
 
+    rewardPopupService.draw()
+    choicePopupService.draw()
     hoverService.draw()
 end
 

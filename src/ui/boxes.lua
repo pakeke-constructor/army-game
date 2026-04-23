@@ -26,10 +26,13 @@ EXAMPLE:
 ---@field private padding number
 ---@field private spacing number
 ---@field private maxWidth number
----@field private drawBg fun(x:number,y:number,w:number,h:number)?
+---@field private drawBg (fun(x:number,y:number,w:number,h:number))?
 local Box = {}
 Box.__index = Box
 
+---@param args {padding:number?, spacing:number?, maxWidth:number}
+---@param drawBg (fun(x:number,y:number,w:number,h:number))?
+---@return ui.Box
 function Box.new(args, drawBg)
     return setmetatable({
         entries = {},
@@ -40,18 +43,25 @@ function Box.new(args, drawBg)
     }, Box)
 end
 
+---@param txt string
+---@param font love.Font
 function Box:addText(txt, font)
     self.entries[#self.entries + 1] = { type = "text", txt = txt, font = font }
 end
 
+---@param child {getHeight: (fun(w:number):number), draw: (fun(x:number,y:number,w:number,h:number))}
 function Box:add(child)
     self.entries[#self.entries + 1] = { type = "custom", child = child }
 end
 
+---@param h number
 function Box:addSpacing(h)
     self.entries[#self.entries + 1] = { type = "spacing", h = h }
 end
 
+---@return number totalW
+---@return number totalHeight
+---@return number[] heights
 function Box:measure()
     local pad = self.padding
     local sp = self.spacing
@@ -79,6 +89,10 @@ function Box:measure()
     return totalW, totalHeight, heights
 end
 
+---@param x number
+---@param y number
+---@return number totalW
+---@return number totalHeight
 function Box:render(x, y)
     local pad = self.padding
     local sp = self.spacing
@@ -117,10 +131,13 @@ end
 ---@field private padding number
 ---@field private spacing number
 ---@field private maxHeight number?
----@field private drawBg fun(x:number,y:number,w:number,h:number)?
+---@field private drawBg (fun(x:number,y:number,w:number,h:number))?
 local HBox = {}
 HBox.__index = HBox
 
+---@param args {padding:number?, spacing:number?, maxHeight:number?}
+---@param drawBg (fun(x:number,y:number,w:number,h:number))?
+---@return ui.HBox
 function HBox.new(args, drawBg)
     return setmetatable({
         entries = {},
@@ -131,18 +148,26 @@ function HBox.new(args, drawBg)
     }, HBox)
 end
 
+---@param txt string
+---@param font love.Font
 function HBox:addText(txt, font)
     self.entries[#self.entries + 1] = { type = "text", txt = txt, font = font }
 end
 
+---@param child {getWidth: (fun():number), getHeight: (fun():number)?, draw: (fun(x:number,y:number,w:number,h:number))}
 function HBox:add(child)
     self.entries[#self.entries + 1] = { type = "custom", child = child }
 end
 
+---@param w number
 function HBox:addSpacing(w)
     self.entries[#self.entries + 1] = { type = "spacing", w = w }
 end
 
+---@return number totalW
+---@return number totalH
+---@return number[] widths
+---@return number maxH
 function HBox:measure()
     local pad = self.padding
     local sp = self.spacing
@@ -173,6 +198,10 @@ function HBox:measure()
     return totalW, totalH, widths, maxH
 end
 
+---@param x number
+---@param y number
+---@return number totalW
+---@return number totalH
 function HBox:render(x, y)
     local pad = self.padding
     local sp = self.spacing
