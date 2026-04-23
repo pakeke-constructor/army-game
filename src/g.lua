@@ -6,6 +6,7 @@
 ---@field description string
 ---@field name string
 ---@field rarity g.Rarity
+---@field mana g.ManaType?
 ---@field handlers table<string, function>
 
 
@@ -693,6 +694,27 @@ end
 
 function g.getBlessingList()
     return BLESSING_LIST
+end
+
+---returns all blessing ids available for the given mana cells (excluding wildcard)
+---blessings with no mana field are always included
+---@param manaCells g.ManaCell[]
+---@return string[]
+function g.getBlessingsByMana(manaCells)
+    local available = {}
+    for _, cell in ipairs(manaCells) do
+        if cell ~= g.WILDCARD_MANA then
+            available[cell] = true
+        end
+    end
+    local result = {}
+    for _, blessingId in ipairs(BLESSING_LIST) do
+        local info = BLESSING_DEFS[blessingId]
+        if not info.mana or available[info.mana] then
+            result[#result + 1] = blessingId
+        end
+    end
+    return result
 end
 
 function g.addBlessing(id)
