@@ -168,24 +168,6 @@ function battle_scene:keypressed(k)
     end
 end
 
----@param self g.BattleScene
-local function drawCardSelect(self)
-    local r = ui.getFullScreenRegion()
-    local cardArea = r:padRatio(0.05, 0.1)
-    local c1, c2, c3 = cardArea:splitHorizontal(1, 1, 1)
-    local choices = self.squadChoices or {}
-    local regions = {c1:padRatio(0.1), c2:padRatio(0.1), c3:padRatio(0.1)}
-    for i = 1, #regions do
-        local id = choices[i]
-        if id then
-            if ui.drawSquadCard(id, regions[i]) then
-                g.addSquadToArmy(g.newSquad(id))
-                g.gotoScene("map_scene")
-            end
-        end
-    end
-end
-
 
 
 function battle_scene:draw()

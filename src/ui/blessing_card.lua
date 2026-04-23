@@ -20,16 +20,16 @@ local function drawBlessingCard(blessingId, region, index)
     local uid = blessingId .. "_" .. index
 
     local x, y, w, h = region:get()
-    iml.panel(x, y, w, h, uid)
 
     TITLE_FONT = TITLE_FONT or g.getBigFont(16)
     DESC_FONT = DESC_FONT or g.getSmallFont(16)
 
     local box = ui.Box({maxWidth = w, padding = 12, spacing = 6}, function(bx, by, bw, bh)
+        iml.panel(bx,by, bw,bh, uid)
         love.graphics.setColor(1, 1, 1)
-        helper.gradientRect("vertical", bgCol1, darkCol, x, y, w, h)
+        helper.gradientRect("vertical", bgCol1, darkCol, bx, by, bw, bh)
         love.graphics.setColor(liteCol:getRGBA())
-        ui.drawPanel(x, y, w, h)
+        ui.drawPanel(bx, by, bw, bh)
     end)
 
     -- Header: icon on left, name on right
