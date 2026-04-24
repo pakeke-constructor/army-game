@@ -50,7 +50,6 @@ end
 
 function ECSWorld:addEntity(e)
     self.entities:addBuffered(e)
-    e.frozenTime = 10
 end
 
 function ECSWorld:removeEntity(e)
