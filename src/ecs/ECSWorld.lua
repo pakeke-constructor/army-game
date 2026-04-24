@@ -167,7 +167,10 @@ local function getDrawY(e)
 end
 
 local function sortOrder(a, b)
-    return (getDrawY(a) + (a.drawOrder or 0)) < (getDrawY(b) + (b.drawOrder or 0))
+    local ya = getDrawY(a) + (a.drawOrder or 0)
+    local yb = getDrawY(b) + (b.drawOrder or 0)
+    if ya == yb then return a.id < b.id end
+    return ya < yb
 end
 
 function ECSWorld:draw(transform)
