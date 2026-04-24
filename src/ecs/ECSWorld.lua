@@ -1,5 +1,6 @@
 local objects = require("src.modules.objects.objects")
 local table_clear = require("table.clear")
+local PixelCanvas = require("src.modules.PixelCanvas")
 
 ---@class ecs.ECSWorld: objects.Class
 ---@field public data table
@@ -16,6 +17,8 @@ function ECSWorld:init(systemNames)
     self.entities = objects.BufferedSet()
 
     self.data = {}
+    self.backCanvas = PixelCanvas.new(love.graphics.getDimensions())
+    self.frontCanvas = PixelCanvas.new(love.graphics.getDimensions())
     self.border = nil -- {0, 0, w, h} or nil for no border
 
     self.componentIndex = {} -- [componentName] -> {ent, ent, ...}
@@ -47,6 +50,7 @@ end
 
 function ECSWorld:addEntity(e)
     self.entities:addBuffered(e)
+    e.burnTime = 10
 end
 
 function ECSWorld:removeEntity(e)
@@ -166,8 +170,15 @@ local function sortOrder(a, b)
     return (getDrawY(a) + (a.drawOrder or 0)) < (getDrawY(b) + (b.drawOrder or 0))
 end
 
-function ECSWorld:draw()
+function ECSWorld:draw(transform)
+    if transform then
+        self.backCanvas:start(transform)
+    end
     g.call("preDraw", self)
+    if transform then
+        self.backCanvas:finish()
+    end
+
     local list = {}
     for i = 1, self.entities.len do
         list[#list + 1] = self.entities[i]
@@ -177,7 +188,14 @@ function ECSWorld:draw()
         local e = list[i]
         g.drawEntity(e, e.x, getDrawY(e))
     end
+
+    if transform then
+        self.frontCanvas:start(transform)
+    end
     g.call("postDraw", self)
+    if transform then
+        self.frontCanvas:finish()
+    end
 end
 
 

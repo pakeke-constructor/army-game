@@ -108,80 +108,105 @@ end
 
 function initParticles()
 
-    local crosshair = defineParticle("crosshair", {
-        frames = {"crosshair"},
-        lifetime = 0.2,
-        emissionArea = {
-            distribution = "ellipse",
-            distance = {4, 4}
-        }
-    })
-    crosshair:setLinearAcceleration(0, 0, 0, 0)
-    crosshair:setSpeed(0, 0)
-    crosshair:setRotation(0, 0)
+    -- local crosshair = defineParticle("crosshair", {
+    --     frames = {"crosshair"},
+    --     lifetime = 0.2,
+    --     emissionArea = {
+    --         distribution = "ellipse",
+    --         distance = {4, 4}
+    --     }
+    -- })
+    -- crosshair:setLinearAcceleration(0, 0, 0, 0)
+    -- crosshair:setSpeed(0, 0)
+    -- crosshair:setRotation(0, 0)
 
 
-    do
-    local lifetime=0.2
-    local xp = defineParticle("xp1", {
-        frames = {"xp_particle_blue","xp_particle_blue2"},
-        lifetime=lifetime,
-        emissionArea = {
-            distribution = "ellipse",
-            distance = {0,0}
-        }
-    })
-    local xp2 = defineParticle("xp2", {
-        frames = {"xp_particle_white", "xp_particle_white2", "xp_particle_white3"},
-        lifetime=lifetime,
-        emissionArea = {
-            distribution = "ellipse",
-            distance = {0,0}
-        }
-    })
-    local xp3 = defineParticle("xp3", {
-        frames = {"xp_particle_pink","xp_particle_pink2"},
-        lifetime=lifetime,
-        emissionArea = {
-            distribution = "ellipse",
-            distance = {0,0}
-        }
-    })
+    -- do
+    -- local lifetime=0.2
+    -- local xp = defineParticle("xp1", {
+    --     frames = {"xp_particle_blue","xp_particle_blue2"},
+    --     lifetime=lifetime,
+    --     emissionArea = {
+    --         distribution = "ellipse",
+    --         distance = {0,0}
+    --     }
+    -- })
+    -- local xp2 = defineParticle("xp2", {
+    --     frames = {"xp_particle_white", "xp_particle_white2", "xp_particle_white3"},
+    --     lifetime=lifetime,
+    --     emissionArea = {
+    --         distribution = "ellipse",
+    --         distance = {0,0}
+    --     }
+    -- })
+    -- local xp3 = defineParticle("xp3", {
+    --     frames = {"xp_particle_pink","xp_particle_pink2"},
+    --     lifetime=lifetime,
+    --     emissionArea = {
+    --         distribution = "ellipse",
+    --         distance = {0,0}
+    --     }
+    -- })
 
-    for _,psys in ipairs({xp,xp2,xp3}) do
-        psys:setSpeed(40,40)
-    end
-    end
+    -- for _,psys in ipairs({xp,xp2,xp3}) do
+    --     psys:setSpeed(40,40)
+    -- end
+    -- end
 
-    local grass = defineParticle("grass", {
-        frames = makeFrames("grass_particle_", 3, 0),
+    -- local grass = defineParticle("grass", {
+    --     frames = makeFrames("grass_particle_", 3, 0),
+    --     lifetime = 0.4,
+    --     emissionArea = {
+    --         distribution = "ellipse",
+    --         distance = {4, 4}
+    --     }
+    -- })
+    -- grass:setSpeed(30,50)
+
+
+    -- local wood = defineParticle("wood", {
+    --     frames = makeFrames("wooden_particle_", 3),
+    --     lifetime = 0.3,
+    --     emissionArea = {
+    --         distribution = "ellipse",
+    --         distance = {4, 4}
+    --     }
+    -- })
+
+
+    -- local slime = defineParticle("slime", {
+    --     frames = makeFrames("slimed_particle_", 3),
+    --     lifetime = 0.3,
+    --     emissionArea = {
+    --         distribution = "ellipse",
+    --         distance = {4, 4}
+    --     }
+    -- })
+
+    local fire = defineParticle("fire_particle", {
+        frames = {"particle_3", "particle_2", "particle_1"},
         lifetime = 0.4,
         emissionArea = {
-            distribution = "ellipse",
-            distance = {4, 4}
+            distribution = "uniform",
+            distance = {2,2},
         }
     })
-    grass:setSpeed(30,50)
+    fire:setColors({1, 1, 0}, {1, 0.5, 0}, {0.8, 0.2, 0})
+    fire:setDirection(-math.pi/2)
+    fire:setSpread(0.1)
 
-
-    local wood = defineParticle("wood", {
-        frames = makeFrames("wooden_particle_", 3),
-        lifetime = 0.3,
+    local poison = defineParticle("poison_particle", {
+        frames = {"particle_4", "particle_3", "particle_2", "particle_1"},
+        lifetime = 0.4,
         emissionArea = {
-            distribution = "ellipse",
-            distance = {4, 4}
+            distribution = "uniform",
+            distance = {2,2},
         }
     })
+    poison:setColors({0.5, 1, 0.3}, {0.2, 0.8, 0.1}, {0.1, 0.5, 0.05})
+    fire:setDirection(-math.pi/2)
+    fire:setSpread(0.1)
 
-
-    local slime = defineParticle("slime", {
-        frames = makeFrames("slimed_particle_", 3),
-        lifetime = 0.3,
-        emissionArea = {
-            distribution = "ellipse",
-            distance = {4, 4}
-        }
-    })
     -- ... 
 
     -- ... 

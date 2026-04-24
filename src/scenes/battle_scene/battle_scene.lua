@@ -26,6 +26,10 @@ end
 function battle_scene:pollHandlers()
     self.ecs:addSystemHandlers()
     g.addBlessingHandlers()
+    g.addHandler({ postDraw = function()
+        lg.setColor(1,1,1)
+        self.particles:draw()
+    end})
 end
 
 
@@ -188,8 +192,7 @@ function battle_scene:draw()
     local border = self.ecs.border
     love.graphics.rectangle("line", border[1], border[2], border[3], border[4])
 
-    self.ecs:draw()
-    self.particles:draw()
+    self.ecs:draw(self.camera:getTransform())
 
     if not self.victory then
         local entry = self.hud:getSelection()
