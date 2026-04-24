@@ -919,6 +919,16 @@ end
 
 
 
+local function drawIceCube(ent, x, y, sx,sy)
+    local W,H,_ = 16,16,nil
+    local quad = g.getImageQuad(ent.image)
+    _,_,W,H = quad:getViewport()
+    W = W+10
+    H = H+10
+    lg.setColor(1,1,1,0.5)
+    g.drawImageContained("ice_cube", x-W/2, y-H/2, W,H)
+end
+
 ---@param ent ecs.Entity
 ---@param x number
 ---@param y number
@@ -950,14 +960,14 @@ function g.drawEntity(ent, x, y)
         return
     end
     if ent.image then
-        local r, gr, b = 1, 1, 1
-        if ent.frozenTime and ent.frozenTime > 0 then
-            r, gr, b = 0.4, 0.6, 1
-        end
-        lg.setColor(r,gr,b)
+        lg.setColor(1,1,1)
         g.drawImage(ent.image, x + (ent.ox or 0), y + (ent.oy or 0), ent.rot or 0, sx, sy)
+        if ent.frozenTime and ent.frozenTime > 0 then
+            drawIceCube(ent, x,y, sx,sy)
+        end
     end
     if ent.health then
+        lg.setColor(1,1,1)
         drawHealthBar(ent, x,y)
     end
 end
