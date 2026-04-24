@@ -19,6 +19,8 @@ end
 
 function rewardPopupService.draw()
     if not active then return end
+    lg.setColor(0,0,0,0.7)
+    lg.rectangle("fill", -1000,-1000, 9000,9000)
     active:draw()
 
     if not active:hasAnyRewards() then
