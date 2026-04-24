@@ -58,6 +58,7 @@ local physics = {
 
 
 ---@class ecs.Entity
+---@field public id integer
 ---@field public ai ecs.components.AI?
 ---@field public attack ecs.components.Attack?
 ---@field public projectile ecs.components.Projectile?

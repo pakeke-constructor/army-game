@@ -55,6 +55,7 @@ end
 local function pickTarget(ent, candidates)
     local best, bestScore = nil, -math.huge
     local ai = ent.ai
+    local curTarget = ent._aiTarget
     for i = 1, #candidates do
         local c = candidates[i]
         if isValidTarget(c) then
@@ -62,7 +63,13 @@ local function pickTarget(ent, candidates)
             local prio = getPrio(ent, c)
             -- tiebreak: closer is better (subtract tiny distance factor)
             local d2 = dist2(ent, c)
-            local score = prio - d2 * 0.00001 + love.math.random() * 0.5
+            -- deterministic per-pair noise for stable tie-breaking
+            local noise = (helper.hashInteger(ent.id * 1000 + c.id) % 1000) / 1000 * 0.5
+            local score = prio - d2 * 0.00001 + noise
+            -- bias toward keeping current target
+            if c == curTarget then
+                score = score + 1
+            end
             if score > bestScore then
                 best, bestScore = c, score
             end
