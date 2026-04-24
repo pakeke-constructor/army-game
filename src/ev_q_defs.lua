@@ -30,7 +30,7 @@ g.defineEvent("onAttack")
 
 -- Entity misc:
 g.defineEvent("drawEntity")
-
+g.defineEvent("statusEffectApplied")
 
 
 -- Squad / deployment

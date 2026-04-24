@@ -23,17 +23,20 @@
 - Blessing reward/select UI
 - Battle-reward-screen / Generic-reward-screen (STS inspired)
 - Fix unit pathing; (make it so they "lock on" to targets; instead of jittering back/forth)
+- fire-system
+- frozen-system
+- poison-system
+
 
 
 
 ### OK:: what do we need for a minimum-playable game?
 
 
+- New HUD (from leo)
 
-
-- fire-system
-- frozen-system
-- poison-system
+- Shop UI (from leo)
+- Reroll system wired up in shop
 
 
 - "Terrain" for battle-scene 
@@ -44,12 +47,6 @@
 --- grass
 --- BORDER: Trees + Rocks + Dark-Fog?
 
-
-- New HUD (from leo)
-
-
-- Shop UI (from leo)
-- Reroll system wired up in shop
 
 
 - Special-nodes wired up

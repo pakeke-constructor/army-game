@@ -852,6 +852,48 @@ function g.isAlive(ent)
     return not ent.___removed
 end
 
+---@param ent ecs.Entity
+---@param duration number
+---@param source ecs.Entity?
+---@return boolean applied
+function g.applyBurn(ent, duration, source)
+    local wasActive = ent.burnTime and ent.burnTime > 0
+    ent.burnTime = (ent.burnTime or 0) + duration
+    if not wasActive then
+        g.call("statusEffectApplied", ent, "burn", duration, source)
+        return true
+    end
+    return false
+end
+
+---@param ent ecs.Entity
+---@param duration number
+---@param source ecs.Entity?
+---@return boolean applied
+function g.applyPoison(ent, duration, source)
+    local wasActive = ent.poisonTime and ent.poisonTime > 0
+    ent.poisonTime = (ent.poisonTime or 0) + duration
+    if not wasActive then
+        g.call("statusEffectApplied", ent, "poison", duration, source)
+        return true
+    end
+    return false
+end
+
+---@param ent ecs.Entity
+---@param duration number
+---@param source ecs.Entity?
+---@return boolean applied
+function g.applyFrozen(ent, duration, source)
+    local wasActive = ent.frozenTime and ent.frozenTime > 0
+    ent.frozenTime = (ent.frozenTime or 0) + duration
+    if not wasActive then
+        g.call("statusEffectApplied", ent, "frozen", duration, source)
+        return true
+    end
+    return false
+end
+
 ---@param target ecs.Entity
 ---@param damage number
 ---@param attacker ecs.Entity?
