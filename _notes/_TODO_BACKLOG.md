@@ -34,9 +34,17 @@
 
 
 - New HUD (from leo)
+--- mana-spending-box
+--- Blessing-icons rendered properly
+--- Squad-icons rendered consistently
+
 
 - Shop UI (from leo)
-- Reroll system wired up in shop
+---- Reroll system wired up in shop
+---- Callback/events for reroll-system
+
+
+- Add glow_lootreward.png to the rewards-screen
 
 
 - "Terrain" for battle-scene 
@@ -48,6 +56,14 @@
 --- BORDER: Trees + Rocks + Dark-Fog?
 
 
+- Map-scene improvements:
+--- Proper ordered-rendering for map-scene
+--- Commander movement for map-scene
+--- Make the yellow-visual snap to thing to the closest mouse position
+
+
+- Event system: random events
+
 
 - Special-nodes wired up
 
@@ -55,6 +71,9 @@
 - Weapons system: Make it so weapons can be held/used
 - melee: swords + sword swinging
 - ranged: bows, + bow pointing in direction they aim
+
+
+- Juice for placing units (deploy them sequentially so its satisfying?)
 
 
 - Sound effects

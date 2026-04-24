@@ -169,7 +169,7 @@ local function drawLeftBlessingBar(r)
     if #blessings > 0 then
         local padded = r:padUnit(6)
         local cols, rows = helper.getBestFitDimensions(#blessings, padded.w, padded.h)
-        local cells = padded:grid(cols, math.max(rows, 8))
+        local cells = padded:grid(cols, rows)
         for i, bId in ipairs(blessings) do
             local info = g.getBlessingInfo(bId)
             local cx, cy = cells[i]:getCenter()
@@ -271,7 +271,8 @@ local function drawTopBar()
     local function drawPanel(region, text, hoverText)
         local x, y, w, h = region:get()
         lg.setColor(1, 1, 1)
-        ui.drawDarkPanel(x, y, w, h)
+        local DY = 30
+        ui.drawDarkPanel(x, y-DY, w, h+DY)
         lg.setColor(1, 1, 1)
         richtext.printRich(text, font, x, y + h / 2 - fh / 2, w, "center")
         if hoverText and iml.isHovered(x, y, w, h, text) then
@@ -319,16 +320,36 @@ end
 
 
 ---@param self g.HUD
-local function drawBottomBar(self)
+local function drawManaBox(self)
     local img = "hud_bottom_left_mana_box"
     local w,h = g.getImageSize(img)
     local r = Kirigami(0,0,w,h)
     local sr = ui.getFullScreenRegion()
-
     r = r:attachToBottomOf(sr):clampInside(sr)
-
     lg.setColor(1,1,1)
-    lg.rectangle("line",r:get())
+    g.drawImage(img, r:getCenter())
+    return w,h
+end
+
+
+---@param self g.HUD
+local function drawBottomBar(self, barHeight)
+    local w,h = drawManaBox(self)
+
+    local sw, sh = ui.getScaledUIDimensions()
+    local run = g.getRun()
+    local region = Kirigami(0, sh - barHeight, sw, barHeight)
+
+    local manaBox, rest = region:splitHorizontal(w,sw-w)
+    local squadBar,blessingBar = rest:splitHorizontal(2,1)
+
+    -- Squad box
+    ui.drawDarkPanel(squadBar:get())
+    drawSquadBar(self, squadBar:padUnit(6))
+
+    -- Blessing box
+    ui.drawDarkPanel(blessingBar:get())
+    drawLeftBlessingBar(blessingBar)
 end
 
 

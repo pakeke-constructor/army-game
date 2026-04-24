@@ -351,6 +351,25 @@ function g.drawSquadIcon(squadId, x, y, w, h)
     end
 end
 
+
+
+---@param blessingId string
+---@param x number
+---@param y number
+function g.drawBlessingIcon(blessingId, x, y)
+    local info = g.getSquadInfo(blessingId)
+    local rarityColor = (info.rarity or g.RARITIES.COMMON).color
+
+    -- draw border
+    g.drawImage("blessingborder_white")
+
+    -- draw blessing icon
+    -- Constrain both of them to the 
+end
+
+
+
+
 ---@param path string
 ---@param func fun(path: string)
 function g.walkDirectory(path, func)
@@ -1721,12 +1740,14 @@ local manaInfos = {}
 local manaTypeList = {}
 
 ---@param id g.ManaType
----@param image string
 ---@param color objects.Color
-function g.defineManaType(id, image, color)
+function g.defineManaType(id, color)
+    local mana_small = "mana_"..id.."_small"
+    local mana_large = "mana_"..id.."_large"
     manaInfos[id] = {
         id = id,
-        image = image,
+        image = mana_small,
+        image_large = mana_large,
         color = color,
     }
     table.insert(manaTypeList, id)
@@ -1741,10 +1762,10 @@ end
 
 local VALID_MANA_CELLS = {}
 
-g.defineManaType("red", "red_mana", objects.Color("#d53341"))
-g.defineManaType("blue", "blue_mana", objects.Color("#36c7de"))
-g.defineManaType("green", "green_mana", objects.Color("#7cc82a"))
-g.defineManaType("yellow", "yellow_mana", objects.Color("#f1f119"))
+g.defineManaType("red", objects.Color("#d53341"))
+g.defineManaType("blue", objects.Color("#36c7de"))
+g.defineManaType("green", objects.Color("#7cc82a"))
+g.defineManaType("yellow", objects.Color("#f1f119"))
 
 for _, mana1 in ipairs(manaTypeList) do
     VALID_MANA_CELLS[mana1] = true
