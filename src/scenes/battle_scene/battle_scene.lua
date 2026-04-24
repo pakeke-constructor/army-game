@@ -35,7 +35,7 @@ function battle_scene:enter()
 
     self.editingSquadLineup = true
 
-    self.ecs = ECSWorld({"stats", "ai", "attacking", "physics"})
+    self.ecs = ECSWorld({"stats", "status_effects", "ai", "attacking", "physics"})
     self.ecs:setBorder(600, 350)
     local border = self.ecs.border
     self.camera = Camera(0, 0, CAMERA_ZOOM)

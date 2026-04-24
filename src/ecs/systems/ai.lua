@@ -126,6 +126,12 @@ function aiSys.preUpdate(world, dt)
             ent._aiTarget = nil
         end
 
+        -- frozen: can't move
+        if ent.frozenTime and ent.frozenTime > 0 then
+            ent.vx, ent.vy = 0, 0
+            goto continue
+        end
+
         if not targ then
             ent.vx, ent.vy = 0, 0
             goto continue

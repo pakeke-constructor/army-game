@@ -84,6 +84,9 @@ local physics = {
 ---@field public _attackTarget ecs.Entity?
 ---@field public _knockVx number?
 ---@field public _knockVy number?
+---@field public burnTime number? -- if nil, no burn
+---@field public frozenTime number? -- if nil, not frozen
+---@field public poisonTime number? -- if nil, no poison
 ---@field public _timeSinceDamaged number?
 ---@field public onDeath fun(ecs.Entity)?
 ---@field public onSpawn fun(ecs.Entity)?

@@ -949,7 +949,15 @@ function g.drawEntity(ent, x, y)
         return
     end
     if ent.image then
-        love.graphics.setColor(1, 1, 1, ent.alpha or 1)
+        local r, gr, b = 1, 1, 1
+        if ent.frozenTime and ent.frozenTime > 0 then
+            r, gr, b = 0.4, 0.6, 1
+        elseif ent.burnTime and ent.burnTime > 0 then
+            r, gr, b = 1, 0.4, 0.2
+        elseif ent.poisonTime and ent.poisonTime > 0 then
+            r, gr, b = 0.4, 1, 0.3
+        end
+        love.graphics.setColor(r, gr, b, ent.alpha or 1)
         g.drawImage(ent.image, x + (ent.ox or 0), y + (ent.oy or 0), ent.rot or 0, sx, sy)
     end
     if ent.health then

@@ -126,6 +126,7 @@ end
 function atckSys.preUpdate(world, dt)
     for _, ent in world:iterate("attack") do
         if not isValid(ent) then goto continue end
+        if ent.frozenTime and ent.frozenTime > 0 then goto continue end
 
         local target = ent._aiTarget
         if not target or not isValid(target) then
