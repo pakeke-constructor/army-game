@@ -37,16 +37,18 @@ function statusFx.preUpdate(world, dt)
 end
 
 
-local PARTICLE_RATE = 0.1
+local FIRE_PARTICLE_RATE = 0.08
+local POISON_PARTICLE_RATE = 0.04
+
 function statusFx.postDraw(world)
     for _, ent in world:iterate("team") do
         if ent.burnTime and ent.burnTime > 0 then
-            if love.math.random() < PARTICLE_RATE then
+            if love.math.random() < FIRE_PARTICLE_RATE then
                 g.spawnParticle("fire_particle", ent.x, ent.y, 1)
             end
         end
         if ent.poisonTime and ent.poisonTime > 0 then
-            if love.math.random() < PARTICLE_RATE then
+            if love.math.random() < POISON_PARTICLE_RATE then
                 g.spawnParticle("poison_particle", ent.x, ent.y, 1)
             end
         end

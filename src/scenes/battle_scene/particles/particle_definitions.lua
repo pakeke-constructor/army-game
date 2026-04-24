@@ -184,7 +184,7 @@ function initParticles()
     -- })
 
     local fire = defineParticle("fire_particle", {
-        frames = {"particle_3", "particle_2", "particle_1"},
+        frames = {"particle_4", "particle_3", "particle_2", "particle_1"},
         lifetime = 0.4,
         emissionArea = {
             distribution = "uniform",
@@ -196,7 +196,7 @@ function initParticles()
     fire:setSpread(0.1)
 
     local poison = defineParticle("poison_particle", {
-        frames = {"particle_4", "particle_3", "particle_2", "particle_1"},
+        frames = {"side_particle_4", "side_particle_3", "side_particle_2", "side_particle_1"},
         lifetime = 0.4,
         emissionArea = {
             distribution = "uniform",
@@ -204,8 +204,8 @@ function initParticles()
         }
     })
     poison:setColors({0.5, 1, 0.3}, {0.2, 0.8, 0.1}, {0.1, 0.5, 0.05})
-    fire:setDirection(-math.pi/2)
-    fire:setSpread(0.1)
+    poison:setDirection(-math.pi/2)
+    poison:setSpread(0.1)
 
     -- ... 
 

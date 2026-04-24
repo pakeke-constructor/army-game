@@ -50,7 +50,7 @@ end
 
 function ECSWorld:addEntity(e)
     self.entities:addBuffered(e)
-    e.burnTime = 10
+    e.poisonTime = 10
 end
 
 function ECSWorld:removeEntity(e)
