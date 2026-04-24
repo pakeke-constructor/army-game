@@ -29,6 +29,6 @@ consts.STARTING_COMMANDER = "sir_horse"
 consts.MAX_SQUAD_COUNT = 10
 
 consts.BURN_DPS = 8
-consts.POISON_DPS = 3
+consts.POISON_DPS = 13
 
 return consts

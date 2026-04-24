@@ -15,14 +15,14 @@ function statusFx.preUpdate(world, dt)
         -- Burn: high DPS
         if ent.burnTime and ent.burnTime > 0 then
             ent.burnTime = ent.burnTime - dt
-            g.dealDamage(ent, consts.BURN_DPS * dt)
+            g.dealDamage(ent, consts.BURN_DPS * dt, nil, true)
             if ent.burnTime <= 0 then ent.burnTime = nil end
         end
 
         -- Poison: low DPS
         if ent.poisonTime and ent.poisonTime > 0 then
             ent.poisonTime = ent.poisonTime - dt
-            g.dealDamage(ent, consts.POISON_DPS * dt)
+            g.dealDamage(ent, consts.POISON_DPS * dt, nil, true)
             if ent.poisonTime <= 0 then ent.poisonTime = nil end
         end
 

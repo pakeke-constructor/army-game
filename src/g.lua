@@ -855,10 +855,11 @@ end
 ---@param target ecs.Entity
 ---@param damage number
 ---@param attacker ecs.Entity?
-function g.dealDamage(target, damage, attacker)
+---@param ignoreReduction boolean?
+function g.dealDamage(target, damage, attacker, ignoreReduction)
     if not g.isAlive(target) then return end
 
-    local reduction = g.ask("getDamageReduction", target)
+    local reduction = ignoreReduction and 0 or g.ask("getDamageReduction", target)
     local finalDmg = math.max(0, damage - reduction)
 
     target.health = target.health - finalDmg
@@ -952,12 +953,8 @@ function g.drawEntity(ent, x, y)
         local r, gr, b = 1, 1, 1
         if ent.frozenTime and ent.frozenTime > 0 then
             r, gr, b = 0.4, 0.6, 1
-        elseif ent.burnTime and ent.burnTime > 0 then
-            r, gr, b = 1, 0.4, 0.2
-        elseif ent.poisonTime and ent.poisonTime > 0 then
-            r, gr, b = 0.4, 1, 0.3
         end
-        love.graphics.setColor(r, gr, b, ent.alpha or 1)
+        lg.setColor(r,gr,b)
         g.drawImage(ent.image, x + (ent.ox or 0), y + (ent.oy or 0), ent.rot or 0, sx, sy)
     end
     if ent.health then
