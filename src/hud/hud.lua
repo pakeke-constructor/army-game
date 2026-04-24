@@ -316,6 +316,23 @@ local function drawBottomBar(self, barHeight)
     drawManaBar(0, squadBar.y - mH, squadBar.w, mH,  squadBar.w/2)
 end
 
+
+
+---@param self g.HUD
+local function drawBottomBar(self)
+    local img = "hud_bottom_left_mana_box"
+    local w,h = g.getImageSize(img)
+    local r = Kirigami(0,0,w,h)
+    local sr = ui.getFullScreenRegion()
+
+    r = r:attachToBottomOf(sr):clampInside(sr)
+
+    lg.setColor(1,1,1)
+    lg.rectangle("line",r:get())
+end
+
+
+
 ---@param self g.HUD
 local function drawBattleHUD(self)
     drawBottomBar(self, SQUAD_ICON_SIZE + 30)
