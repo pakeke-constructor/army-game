@@ -8,7 +8,8 @@ local MapGraph = require("src.scenes.map_scene.MapGraph")
 ---@field difficulty integer
 ---@field squads g.Squad[]
 ---@field money number
----@field mana g.ManaCell[]
+---@field mana g.ManaCounts
+---@field _battleMana g.ManaCounts
 ---@field blessings string[]
 ---@field day integer
 ---@field demonRage integer
@@ -60,8 +61,10 @@ function Run:resetForBattle()
 
     -- and reset mana
     self._battleMana = {}
-    for _, mana in ipairs(self.mana) do
-        table.insert(self._battleMana, mana)
+    for mana, count in pairs(self.mana) do
+        if count > 0 then
+            self._battleMana[mana] = count
+        end
     end
 end
 
@@ -72,7 +75,7 @@ function Run:winBattle()
 end
 
 
----@return table
+---@return {squads: table[], level: integer, xp: integer, money: number, mana: g.ManaCounts, _battleMana: g.ManaCounts, blessings: string[], day: integer, demonRage: integer, mapGraph: table?}
 function Run:serialize()
     local squads = {}
     for i = 1, #self.squads do
@@ -84,6 +87,7 @@ function Run:serialize()
         xp = self.xp,
         money = self.money,
         mana = self.mana,
+        _battleMana = self._battleMana,
         blessings = self.blessings,
         day = self.day,
         demonRage = self.demonRage,
@@ -91,7 +95,7 @@ function Run:serialize()
     }
 end
 
----@param data table?
+---@param data {squads: table[]?, level: integer?, xp: integer?, money: number?, mana: g.ManaCounts?, _battleMana: g.ManaCounts?, blessings: string[]?, day: integer?, demonRage: integer?, mapGraph: table?}?
 ---@return g.Run
 function Run.deserialize(data)
     local run = Run()
@@ -106,6 +110,7 @@ function Run.deserialize(data)
     run.xp = data.xp or run.xp
     run.money = data.money or run.money
     run.mana = data.mana or {}
+    run._battleMana = data._battleMana or {}
     run.blessings = data.blessings or {}
     run.day = data.day or run.day
     run.demonRage = data.demonRage or run.demonRage

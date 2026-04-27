@@ -637,12 +637,12 @@ function g.getSquadList()
 end
 
 ---returns all squad ids whose mana cost can be satisfied by the given mana cells (excluding wildcard)
----@param manaCells g.ManaCell[]
+---@param manaCells g.ManaCounts
 ---@return string[]
 function g.getSquadsByMana(manaCells)
     local available = {}
-    for _, cell in ipairs(manaCells) do
-        if cell ~= g.WILDCARD_MANA then
+    for cell, count in pairs(manaCells or {}) do
+        if cell ~= g.WILDCARD_MANA and (count or 0) > 0 then
             available[cell] = true
         end
     end
@@ -739,12 +739,12 @@ end
 
 ---returns all blessing ids available for the given mana cells (excluding wildcard)
 ---blessings with no mana field are always included
----@param manaCells g.ManaCell[]
+---@param manaCells g.ManaCounts
 ---@return string[]
 function g.getBlessingsByMana(manaCells)
     local available = {}
-    for _, cell in ipairs(manaCells) do
-        if cell ~= g.WILDCARD_MANA then
+    for cell, count in pairs(manaCells or {}) do
+        if cell ~= g.WILDCARD_MANA and (count or 0) > 0 then
             available[cell] = true
         end
     end
@@ -1647,88 +1647,109 @@ g.defineStat("projectileAccuracy", "baseProjectileAccuracy", {
 
 ---@alias g.ManaCell "blue"|"green"|"red"|"yellow"|"blue_green_red_yellow"
 
+---@alias g.ManaCounts {[g.ManaCell]: integer?}
 
 
 
--- Returns list of unspent cells after satisfying manaRequirement, or nil if can't afford.
-local function trySpendManaInternal(manaCells, manaRequirement)
+
+---@param manaCounts g.ManaCounts?
+---@return g.ManaCell[]
+local function manaMapToCells(manaCounts)
+    local cells = {}
+    for cell, count in pairs(manaCounts or {}) do
+        for _ = 1, count or 0 do
+            cells[#cells + 1] = cell
+        end
+    end
+    return cells
+end
+
+---@param manaCounts g.ManaCounts?
+---@return integer
+local function getTotalManaCount(manaCounts)
+    local n = 0
+    for _, count in pairs(manaCounts or {}) do
+        n = n + (count or 0)
+    end
+    return n
+end
+
+g.manaMapToCells = manaMapToCells
+g.getTotalManaCount = getTotalManaCount
+
+-- Returns map of unspent cells after satisfying manaRequirement, or nil if can't afford.
+---@param manaCounts g.ManaCounts?
+---@param manaRequirement g.ManaBundle
+---@return g.ManaCounts?
+local function trySpendManaInternal(manaCounts, manaRequirement)
     local needBlue = manaRequirement.blue or 0
     local needGreen = manaRequirement.green or 0
     local needRed = manaRequirement.red or 0
     local needYellow = manaRequirement.yellow or 0
 
     local totalNeed = needBlue + needGreen + needRed + needYellow
-    if #manaCells < totalNeed then return nil end
+    if getTotalManaCount(manaCounts) < totalNeed then return nil end
 
     local kept = {}
-    local keptN = 0
+    for k, v in pairs(manaCounts or {}) do
+        kept[k] = v
+    end
 
-    for _, cell in ipairs(manaCells) do
-        if cell == "blue" and needBlue > 0 then
-            needBlue = needBlue - 1
-        elseif cell == "green" and needGreen > 0 then
-            needGreen = needGreen - 1
-        elseif cell == "red" and needRed > 0 then
-            needRed = needRed - 1
-        elseif cell == "yellow" and needYellow > 0 then
-            needYellow = needYellow - 1
-        else
-            keptN = keptN + 1
-            kept[keptN] = cell
+    local used = math.min(kept.blue or 0, needBlue)
+    needBlue = needBlue - used
+    kept.blue = (kept.blue or 0) - used
+    if kept.blue <= 0 then kept.blue = nil end
+
+    used = math.min(kept.green or 0, needGreen)
+    needGreen = needGreen - used
+    kept.green = (kept.green or 0) - used
+    if kept.green <= 0 then kept.green = nil end
+
+    used = math.min(kept.red or 0, needRed)
+    needRed = needRed - used
+    kept.red = (kept.red or 0) - used
+    if kept.red <= 0 then kept.red = nil end
+
+    used = math.min(kept.yellow or 0, needYellow)
+    needYellow = needYellow - used
+    kept.yellow = (kept.yellow or 0) - used
+    if kept.yellow <= 0 then kept.yellow = nil end
+
+    local needLeft = needBlue + needGreen + needRed + needYellow
+    if needLeft > 0 then
+        local wildcard = kept[g.WILDCARD_MANA] or 0
+        if wildcard < needLeft then
+            return nil
         end
-    end
-
-    local write = 1
-    for i = 1, keptN do
-        local cell = kept[i]
-        if cell == g.WILDCARD_MANA then
-            if needBlue > 0 then
-                needBlue = needBlue - 1
-            elseif needGreen > 0 then
-                needGreen = needGreen - 1
-            elseif needRed > 0 then
-                needRed = needRed - 1
-            elseif needYellow > 0 then
-                needYellow = needYellow - 1
-            else
-                kept[write] = cell
-                write = write + 1
-            end
+        wildcard = wildcard - needLeft
+        if wildcard > 0 then
+            kept[g.WILDCARD_MANA] = wildcard
         else
-            kept[write] = cell
-            write = write + 1
+            kept[g.WILDCARD_MANA] = nil
         end
-    end
-
-    if needBlue > 0 or needGreen > 0 or needRed > 0 or needYellow > 0 then
-        return nil
-    end
-
-    for i = #kept, write, -1 do
-        kept[i] = nil
     end
 
     return kept
 end
 
----@param manaCells g.ManaCell[]
+---@param manaCells g.ManaCounts
 ---@param manaRequirement g.ManaBundle
 ---@return boolean
-function g.canAfford(manaCells, manaRequirement)
+function g.canAffordMana(manaCells, manaRequirement)
     return trySpendManaInternal(manaCells, manaRequirement) ~= nil
 end
 
----@param manaCells g.ManaCell[]
+---@param manaCells g.ManaCounts
 ---@param manaRequirement g.ManaBundle
 ---@return boolean
 function g.trySpendMana(manaCells, manaRequirement)
     local kept = trySpendManaInternal(manaCells, manaRequirement)
     if not kept then return false end
-    for i = #manaCells, 1, -1 do
-        table.remove(manaCells, i)
+    for k in pairs(manaCells) do
+        manaCells[k] = nil
     end
-    for _, cell in ipairs(kept) do
-        table.insert(manaCells, cell)
+    for k, v in pairs(kept) do
+        manaCells[k] = v
     end
     return true
 end
@@ -1754,9 +1775,22 @@ function g.defineManaType(id, color)
 end
 
 
+--- Gets a list of the possible mana types
 ---@return g.ManaType[]
-function g.getManaTypes()
+function g.getManaTypelist()
     return manaTypeList
+end
+
+
+--- gets a list of the mana-types that the player actually has
+---@return g.ManaCounts
+function g.getManaCounts()
+    local run = g.getRun()
+    local out = {}
+    for k, v in pairs(run and run.mana or {}) do
+        out[k] = v
+    end
+    return out
 end
 
 
@@ -1801,7 +1835,7 @@ end
 function g.addPermanentMana(manaCell)
     assert(g.isValidManaCell(manaCell), "Invalid mana cell: " .. tostring(manaCell))
     local run = g.getRun()
-    run.mana[#run.mana + 1] = manaCell
+    run.mana[manaCell] = (run.mana[manaCell] or 0) + 1
 end
 
 ---@param manaCell g.ManaCell
@@ -1809,13 +1843,14 @@ end
 function g.removePermanentMana(manaCell)
     assert(g.isValidManaCell(manaCell), "Invalid mana cell: " .. tostring(manaCell))
     local run = g.getRun()
-    for i = #run.mana, 1, -1 do
-        if run.mana[i] == manaCell then
-            table.remove(run.mana, i)
-            return true
-        end
+    if (run.mana[manaCell] or 0) <= 0 then
+        return false
     end
-    return false
+    run.mana[manaCell] = run.mana[manaCell] - 1
+    if run.mana[manaCell] <= 0 then
+        run.mana[manaCell] = nil
+    end
+    return true
 end
 
 --- Draw mana cost as individual beads, centered at (x,y), fitting within w.

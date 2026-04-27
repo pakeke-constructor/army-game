@@ -201,18 +201,17 @@ local NO_MANA = loc("No Mana!", {}, {
 
 local function drawManaBar(x,y, w,h, maxW)
     local run = g.getRun()
-    local manaCells = run.mana
+    local manaCounts = run.mana
     local _, sceneName = g.getCurrentScene()
     if sceneName == "battle_scene" and run._battleMana then
-        manaCells = run._battleMana
+        manaCounts = run._battleMana
     end
-    local cpy = helper.shallowCopy(manaCells) -- defensive copy before sorting
+    local cpy = g.manaMapToCells(manaCounts)
     table.sort(cpy)
-    ---@cast cpy g.ManaCell[]
 
     local sf = g.getSmallFont(16)
     local txt
-    if #manaCells > 0 then
+    if g.getTotalManaCount(manaCounts) > 0 then
         txt = "{wavy amp=0.4}" .. AVAILABLE_MANA
     else
         txt = "{c r=0.8 g=0.2 b=0.15}" .. NO_MANA
@@ -236,8 +235,6 @@ local function drawManaBar(x,y, w,h, maxW)
             end
         end,
     })
-    local ww,hh = hbox:measure()
-    local xx = (w - ww)/2
     hbox:render(x, y)
 end
 
@@ -328,6 +325,12 @@ local function drawManaBox(self)
     r = r:attachToBottomOf(sr):clampInside(sr)
     lg.setColor(1,1,1)
     g.drawImage(img, r:getCenter())
+
+    local mcounts = g.getManaCounts()
+    for mCell, count in pairs(mcounts) do
+        
+    end
+
     return w,h
 end
 

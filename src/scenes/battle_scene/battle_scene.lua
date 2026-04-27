@@ -88,7 +88,7 @@ function battle_scene:update(dt)
     local run = g.getRun()
     for _, squad in ipairs(run.squads) do
         local info = g.getSquadInfo(squad.squadId)
-        squad.canAfford = not info.cost or g.canAfford(run._battleMana, info.cost)
+        squad.canAfford = not info.cost or g.canAffordMana(run._battleMana, info.cost)
     end
 
     self:updateCamera(dt)
