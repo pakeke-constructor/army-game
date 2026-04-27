@@ -315,6 +315,15 @@ local function drawBottomBar(self, barHeight)
 end
 
 
+---@return g.ManaCounts
+local function getManaCounts()
+    local sc, scName = g.getCurrentScene()
+    if scName == "battle_scene" then
+        return g.getBattleManaCounts()
+    end
+    return g.getPermanentManaCounts()
+end
+
 
 ---@param self g.HUD
 local function drawManaBox(self)
@@ -326,9 +335,37 @@ local function drawManaBox(self)
     lg.setColor(1,1,1)
     g.drawImage(img, r:getCenter())
 
-    local mcounts = g.getManaCounts()
-    for mCell, count in pairs(mcounts) do
-        
+    local manaCounts = getManaCounts()
+    local ct=0
+    for _ in pairs(manaCounts) do
+        ct = ct + 1
+    end
+
+    local font = g.getSmallFont(16)
+    local rdiff = (math.pi*2) / ct
+    local cx,cy = r:getCenter()
+    local t = love.timer.getTime()
+    local function drawMana(mtype, i, manaImg)
+        local x = cx + (r.w/3) * math.sin(t + i*rdiff)
+        local y = cy + (r.h/3) * math.cos(t + i*rdiff)
+        local minfo = g.getManaInfo(mtype)
+        manaImg = manaImg or (minfo and minfo.imageLarge)
+        local count = manaCounts[mtype] or 0
+        lg.setColor(1,1,1)
+        g.drawImage(manaImg, x-10,y)
+        local color = (minfo and minfo.color) or objects.Color.WHITE
+        lg.setColor(color)
+        richtext.printRich(tostring(count), font, x+4,y-8, 100, "left")
+    end
+    if ct > 0 then
+        local i = 0
+        for _,mtype in ipairs(g.getManaTypelist())do
+            if manaCounts[mtype] and (manaCounts[mtype] > 0) then
+                drawMana(mtype, i)
+                i = i + 1
+            end
+        end
+        drawMana(g.WILDCARD_MANA, i, "mana_colorless_small")
     end
 
     return w,h

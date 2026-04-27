@@ -1639,6 +1639,7 @@ g.defineStat("projectileAccuracy", "baseProjectileAccuracy", {
 ---@class g.ManaInfo
 ---@field id string
 ---@field image string
+---@field imageLarge string
 ---@field color objects.Color
 
 ---@alias g.ManaType "red"|"yellow"|"blue"|"green"
@@ -1768,7 +1769,7 @@ function g.defineManaType(id, color)
     manaInfos[id] = {
         id = id,
         image = mana_small,
-        image_large = mana_large,
+        imageLarge = mana_large,
         color = color,
     }
     table.insert(manaTypeList, id)
@@ -1784,14 +1785,16 @@ end
 
 --- gets a list of the mana-types that the player actually has
 ---@return g.ManaCounts
-function g.getManaCounts()
-    local run = g.getRun()
-    local out = {}
-    for k, v in pairs(run and run.mana or {}) do
-        out[k] = v
-    end
-    return out
+function g.getPermanentManaCounts()
+    return g.getRun().mana
 end
+
+--- gets a list of the mana-types available in battle
+---@return g.ManaCounts
+function g.getBattleManaCounts()
+    return g.getRun()._battleMana or {}
+end
+
 
 
 local VALID_MANA_CELLS = {}

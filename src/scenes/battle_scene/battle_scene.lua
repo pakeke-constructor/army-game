@@ -222,7 +222,7 @@ function battle_scene:draw()
         local wx, wy = self.camera:toWorld(mx, my)
         if entry and not entry.deployed then
             local info = g.getSquadInfo(entry.squadId)
-            if not info.cost or g.trySpendMana(g.getRun()._battleMana, info.cost) then
+            if not info.cost or g.trySpendMana(g.getBattleManaCounts(), info.cost) then
                 entry:spawn(wx, wy)
             end
         end
