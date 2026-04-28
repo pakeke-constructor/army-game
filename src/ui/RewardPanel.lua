@@ -90,10 +90,15 @@ function RewardPanel:draw()
             end,
             draw = function(x, y, w, h)
                 lg.setColor(0,0,0)
-                if iml.isHovered(x,y,w,h) then
+                local isHovered = iml.isHovered(x,y,w,h)
+                if isHovered then
                     lg.setColor(0.07,0.07,0.25)
                 end
                 ui.drawSingleColorPanel(x, y, w, h)
+                if not isHovered then
+                    lg.setColor(1, 0.85, 0.3, 0.2)
+                    g.drawImage("glow_lootreward", x + w/2, y + h/2, 0, w/78, h/14)
+                end
                 lg.setColor(1,1,1)
                 richtext.printRich(txt, SMALL_FONT, x,y+pad, w, "center")
                 if iml.wasJustClicked(x,y,w,h) then

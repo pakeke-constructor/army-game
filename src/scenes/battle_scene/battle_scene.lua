@@ -103,7 +103,11 @@ function battle_scene:update(dt)
         end
         if self.noEnemyTimer >= WIN_DELAY and (not self.victory) then
             self.victory = true
-            choicePopupService.set("blessing")
+            -- choicePopupService.set("blessing")
+            rewardPopupService.set({
+                gold = 100,
+
+            })
             self.victoryPopupTime = 0
             run:winBattle()
             if not self.squadChoices then

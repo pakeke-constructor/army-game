@@ -26,17 +26,13 @@
 - fire-system
 - frozen-system
 - poison-system
+- New HUD (from leo)
+
 
 
 
 
 ### OK:: what do we need for a minimum-playable game?
-
-
-- New HUD (from leo)
---- ~~mana-spending-box~~
---- ~~Blessing-icons rendered properly~~
---- Squad-icons rendered consistently
 
 
 - Shop UI (from leo)
