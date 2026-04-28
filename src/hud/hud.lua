@@ -65,9 +65,9 @@ end
 ---@param sq g.Squad
 ---@param x number
 ---@param y number
----@param size number
 ---@param selected boolean
-local function renderSquad(sq, x, y, size, selected)
+local function renderSquad(sq, x, y, selected)
+    local size = SQUAD_ICON_SIZE
     if selected then
         lg.setColor(1, 1, 1, 0.3)
         ui.drawSingleColorPanel(x - 2, y - 2, size + 4, size + 4)
@@ -79,11 +79,7 @@ local function renderSquad(sq, x, y, size, selected)
     else
         lg.setColor(1, 1, 1)
     end
-    g.drawSquadIcon(sq.squadId, x, y, size, size)
-    local sqInfo = g.getSquadInfo(sq.squadId)
-    if sqInfo then
-        g.drawManaCost(sqInfo.cost, x+size/2,y, size + 6)
-    end
+    g.drawSquadIcon(sq.squadId, x, y, size, size, true)
 end
 
 
@@ -156,7 +152,7 @@ local function drawSquadBar(self, region)
         if selected then
             y = y - 6
         end
-        renderSquad(sq, x, y-4, SQUAD_ICON_SIZE, selected)
+        renderSquad(sq, x, y-4, selected)
         if iml.wasJustClicked(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, 1, i) then
             self.selectedSlot = armyIdx
         end

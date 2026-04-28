@@ -326,7 +326,8 @@ end
 ---@param y number
 ---@param w number?
 ---@param h number?
-function g.drawSquadIcon(squadId, x, y, w, h)
+---@param drawManaCost boolean?
+function g.drawSquadIcon(squadId, x, y, w, h, drawManaCost)
     local info = g.getSquadInfo(squadId)
     local rarityColor = (info.rarity or g.RARITIES.COMMON).color
     if w and h then
@@ -349,6 +350,9 @@ function g.drawSquadIcon(squadId, x, y, w, h)
         g.drawImage("squadicon_border", x, y)
         c:pop()
     end
+
+    local size = 32 -- hacky hardcode
+    g.drawManaCost(info.cost, x+size/2,y, size + 6)
 end
 
 
