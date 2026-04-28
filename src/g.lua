@@ -1699,22 +1699,18 @@ local function trySpendManaInternal(manaCounts, manaRequirement)
     local used = math.min(kept.blue or 0, needBlue)
     needBlue = needBlue - used
     kept.blue = (kept.blue or 0) - used
-    if kept.blue <= 0 then kept.blue = nil end
 
     used = math.min(kept.green or 0, needGreen)
     needGreen = needGreen - used
     kept.green = (kept.green or 0) - used
-    if kept.green <= 0 then kept.green = nil end
 
     used = math.min(kept.red or 0, needRed)
     needRed = needRed - used
     kept.red = (kept.red or 0) - used
-    if kept.red <= 0 then kept.red = nil end
 
     used = math.min(kept.yellow or 0, needYellow)
     needYellow = needYellow - used
     kept.yellow = (kept.yellow or 0) - used
-    if kept.yellow <= 0 then kept.yellow = nil end
 
     local needLeft = needBlue + needGreen + needRed + needYellow
     if needLeft > 0 then
@@ -1724,7 +1720,7 @@ local function trySpendManaInternal(manaCounts, manaRequirement)
         end
         wildcard = wildcard - needLeft
         if wildcard > 0 then
-            kept[g.WILDCARD_MANA] = wildcard
+            kept[g.WILDCARD_MANA] = math.max(0, wildcard)
         else
             kept[g.WILDCARD_MANA] = nil
         end

@@ -118,7 +118,15 @@ local function drawSquadBar(self, region)
     end
 
     local currentSlot = getSlotIndex(self)
-    local count = #army
+
+    local trueArmy = {}
+    for i, sq in ipairs(army) do
+        if not sq.deployed then
+            table.insert(trueArmy, {sq = sq, idx = i})
+        end
+    end
+
+    local count = #trueArmy
     local EDGE_PAD = 14
 
     local neededH = SQUAD_ICON_SIZE + 2 * EDGE_PAD
@@ -139,16 +147,18 @@ local function drawSquadBar(self, region)
     end
     local baseY = inner.y + (inner.h - SQUAD_ICON_SIZE) / 2
 
-    for i, sq in ipairs(army) do
+    for i, entry in ipairs(trueArmy) do
+        local sq = entry.sq
+        local armyIdx = entry.idx
         local x = startX + (i - 1) * step
         local y = baseY
-        local selected = (i == currentSlot)
+        local selected = (armyIdx == currentSlot)
         if selected then
             y = y - 6
         end
         renderSquad(sq, x, y-4, SQUAD_ICON_SIZE, selected)
-        if not sq.deployed and iml.wasJustClicked(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, 1, i) then
-            self.selectedSlot = i
+        if iml.wasJustClicked(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, 1, i) then
+            self.selectedSlot = armyIdx
         end
         iml.panel(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, i)
         if iml.isHovered(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, i) then
@@ -156,6 +166,7 @@ local function drawSquadBar(self, region)
         end
     end
 end
+
 
 
 
@@ -335,32 +346,43 @@ local function drawManaBox(self)
     lg.setColor(1,1,1)
     g.drawImage(img, r:getCenter())
 
+    local availableManaCounts = g.getPermanentManaCounts()
     local manaCounts = getManaCounts()
     local ct=0
-    for _ in pairs(manaCounts) do
+    for _ in pairs(availableManaCounts) do
         ct = ct + 1
     end
 
     local font = g.getSmallFont(16)
     local rdiff = (math.pi*2) / ct
     local cx,cy = r:getCenter()
-    local t = love.timer.getTime()
+    local t = 0--love.timer.getTime()
     local function drawMana(mtype, i, manaImg)
         local x = cx + (r.w/3) * math.sin(t + i*rdiff)
         local y = cy + (r.h/3) * math.cos(t + i*rdiff)
+        if ct <= 1 then
+            -- just center it:
+            x,y = cx,cy
+        end
         local minfo = g.getManaInfo(mtype)
         manaImg = manaImg or (minfo and minfo.imageLarge)
         local count = manaCounts[mtype] or 0
         lg.setColor(1,1,1)
+        if count <= 0 then
+            lg.setColor(0.3,0.3,0.3)
+        end
         g.drawImage(manaImg, x-10,y)
         local color = (minfo and minfo.color) or objects.Color.WHITE
         lg.setColor(color)
+        if count <= 0 then
+            lg.setColor(0.3,0.3,0.3)
+        end
         richtext.printRich(tostring(count), font, x+4,y-8, 100, "left")
     end
     if ct > 0 then
         local i = 0
         for _,mtype in ipairs(g.getManaTypelist())do
-            if manaCounts[mtype] and (manaCounts[mtype] > 0) then
+            if availableManaCounts[mtype] then
                 drawMana(mtype, i)
                 i = i + 1
             end

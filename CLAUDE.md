@@ -31,6 +31,7 @@ src/g.lua: All core functions stored here, exposed via `g.*` namespace
 src/scenes/*: All scenes defined here, in folders.
 src/scenes/map_scene/*: Map-scene stuff. Has a graph of nodes for players to navigate
 src/scenes/battle_scene/*: Battle-scene stuff. Contains an ECS. Nodes on the map may trigger battles.
+src/hud/*: HUD related stuff, used by multiple scenes
 src/ecs/*: Entity-component-system stuff.
 src/ecs/systems/*: ECS Systems. (projectile, ent movement, pathing, etc)
 src/ecs/components.lua: All component type-definitions
