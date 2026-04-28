@@ -35,6 +35,7 @@ Example output (verbosity=0):
 from __future__ import annotations
 from dataclasses import dataclass, field
 import json, os
+import ex6
 
 
 @dataclass
@@ -233,7 +234,7 @@ for mod in _DATA.modules:
         _TYPES[t.name] = t
 
 
-def love2d_docs(query: str, verbosity: int = 0):
+def love2d_docs(ctx: ex6.Context, query: str, verbosity: int = 0):
     """
     Look up Love2D API docs. Returns signatures, descriptions, and method lists.
     You MUST use this
@@ -282,19 +283,19 @@ def love2d_docs(query: str, verbosity: int = 0):
 # Quick smoke test when run directly
 if __name__ == "__main__":
     print("=== love.graphics v0 ===")
-    print(love2d_docs("love.graphics")[:600])
+    print(love2d_docs(None, "love.graphics")[:600])
     print()
     print("=== love.graphics.newCanvas v0 ===")
-    print(love2d_docs("love.graphics.newCanvas"))
+    print(love2d_docs(None, "love.graphics.newCanvas"))
     print()
     print("=== love.graphics.newCanvas v1 ===")
-    print(love2d_docs("love.graphics.newCanvas", 1))
+    print(love2d_docs(None, "love.graphics.newCanvas", 1))
     print()
     print("=== Canvas v0 ===")
-    print(love2d_docs("Canvas"))
+    print(love2d_docs(None, "Canvas"))
     print()
     print("=== Canvas:getFilter v0 ===")
-    print(love2d_docs("Canvas:getFilter"))
+    print(love2d_docs(None, "Canvas:getFilter"))
     print()
     print("=== Canvas:getFilter v1 ===")
-    print(love2d_docs("Canvas:getFilter", 1))
+    print(love2d_docs(None, "Canvas:getFilter", 1))
