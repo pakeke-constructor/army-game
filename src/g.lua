@@ -357,14 +357,19 @@ end
 ---@param x number
 ---@param y number
 function g.drawBlessingIcon(blessingId, x, y)
-    local info = g.getSquadInfo(blessingId)
-    local rarityColor = (info.rarity or g.RARITIES.COMMON).color
+    local binfo = g.getBlessingInfo(blessingId)
+    local rarityColor = (binfo.rarity or g.RARITIES.COMMON).color
+    x = math.floor(x)
+    y = math.floor(y)
 
     -- draw border
-    g.drawImage("blessingborder_white")
+    lg.setColor(rarityColor)
+    g.drawImage("blessingborder_white",x,y)
 
     -- draw blessing icon
     -- Constrain both of them to the 
+    lg.setColor(1,1,1)
+    g.drawImage(binfo.image, x,y)
 end
 
 

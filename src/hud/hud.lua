@@ -182,10 +182,9 @@ local function drawLeftBlessingBar(r)
         local cols, rows = helper.getBestFitDimensions(#blessings, padded.w, padded.h)
         local cells = padded:grid(cols, rows)
         for i, bId in ipairs(blessings) do
-            local info = g.getBlessingInfo(bId)
             local cx, cy = cells[i]:getCenter()
-            lg.setColor(1, 1, 1)
-            g.drawImage(info.image, cx, cy)
+            g.drawBlessingIcon(bId,cx,cy)
+            local info = g.getBlessingInfo(bId)
             local gx, gy, gw, gh = cells[i]:get()
             if iml.isHovered(gx, gy, gw, gh, "blessing" .. i) then
                 local mx, my = ui.getMouse()

@@ -34,7 +34,7 @@
 
 
 - New HUD (from leo)
---- mana-spending-box
+--- ~~mana-spending-box~~
 --- Blessing-icons rendered properly
 --- Squad-icons rendered consistently
 
