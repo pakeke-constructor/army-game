@@ -94,6 +94,8 @@ if consts.TEST then
     require("src.ecs.ecs_tests")
 end
 
+local subpixel = require("src.modules.subpixel")
+
 
 
 local sceneManager = require("src.scenes.sceneManager")
@@ -171,6 +173,7 @@ function love.draw()
     if settings.isFullscreen() ~= love.window.getFullscreen() then
         love.window.setFullscreen(settings.isFullscreen(), "desktop")
     end
+    lg.setShader(subpixel.shader)
     local sc = sceneManager.getCurrentScene()
     if sc and sc.draw then
         iml.beginFrame()

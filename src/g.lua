@@ -358,13 +358,17 @@ end
 ---@param y number
 function g.drawBlessingIcon(blessingId, x, y)
     local binfo = g.getBlessingInfo(blessingId)
-    local rarityColor = (binfo.rarity or g.RARITIES.COMMON).color
+    local rarityColor = (binfo.rarity or g.RARITIES.COMMON)
     x = math.floor(x)
     y = math.floor(y)
 
-    -- draw border
-    lg.setColor(rarityColor)
-    g.drawImage("blessingborder_white",x,y)
+    local img = "blessingborder_white_middle"
+    local w,h = g.getImageSize(img)
+    helper.gradientRectStencil("vertical", objects.Color.WHITE, rarityColor.color, x-w/2,y-h/2,w,h, function()
+        g.drawImage(img, x,y)
+    end)
+    lg.setColor(1,1,1)
+    g.drawImage("blessingborder_white_outline", x,y)
 
     -- draw blessing icon
     -- Constrain both of them to the 
