@@ -187,7 +187,7 @@ local function drawBlessing(blesR, blessingId, cost)
         local binfo = g.getBlessingInfo(blessingId)
         local mx,my = ui.getMouse()
         hoverService.requestHover(mx,my, function (box, fonts)
-            box:addText(binfo.name,fonts.title)
+            box:addText("{c r=0.7 g=0.5 b=0.4}"..binfo.name,fonts.title)
             box:addText(binfo.description,fonts.body)
         end)
     end
