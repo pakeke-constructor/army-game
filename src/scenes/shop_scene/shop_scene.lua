@@ -1,3 +1,8 @@
+
+local hoverService = require("src.hud.hoverService")
+
+
+
 local shop_scene = {}
 
 function shop_scene:init()
@@ -56,7 +61,9 @@ end
 
 
 local function dbg(r)
-    lg.rectangle("line",r:get())
+    if consts.DEV_MODE then
+        lg.rectangle("line",r:get())
+    end
 end
 
 
@@ -157,6 +164,37 @@ local function drawRerollButton(self, r)
 end
 
 
+
+
+---@param blesR kirigami.Region
+---@param blessingId string
+---@param cost number
+local function drawBlessing(blesR, blessingId, cost)
+    blesR = blesR:padRatio(0.3)
+    local top, bot = blesR:splitVertical(3,1)
+
+    -- draw blessing 
+    g.drawBlessingIcon(blessingId, top:getCenter())
+
+    -- draw cost
+    drawCost(cost, bot)
+
+    dbg(top)
+    dbg(bot)
+    dbg(blesR)
+
+    if iml.isHovered(blesR:get()) then
+        local binfo = g.getBlessingInfo(blessingId)
+        local mx,my = ui.getMouse()
+        hoverService.requestHover(mx,my, function (box, fonts)
+            box:addText(binfo.name,fonts.title)
+            box:addText(binfo.description,fonts.body)
+        end)
+    end
+end
+
+
+
 local function drawShopUI(self)
     local w,h = ui.getScaledUIDimensions()
     local shopBg = "shop_background"
@@ -178,6 +216,10 @@ local function drawShopUI(self)
     local leftR,rightR = shopRegion:splitHorizontal(2,1)
 
     local blessReg,xpReg = rightR:splitVertical(3,3)
+    for _, blesR in ipairs(blessReg:grid(3,2)) do
+        drawBlessing(blesR, "golden_coffers", 50)
+    end
+
     dbg(xpReg:padRatio(0.1))
     dbg(blessReg:padRatio(0.1))
 
