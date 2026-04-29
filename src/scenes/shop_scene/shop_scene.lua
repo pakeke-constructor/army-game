@@ -37,16 +37,32 @@ end
 
 
 
----@param gold number
----@param x number
----@param y number
+---@param money number
+---@param r kirigami.Region 
 ---@param discount boolean?
-local function drawCost(gold, x, y, discount)
-    local txt = "{coin_icon}" .. gold
+local function drawCost(money, r, discount)
     local font = g.getSmallFont(16)
-    richtext.printRichCentered(txt, font, x,y+10, 1000, "center")
+    local txt
+    if g.getRun().money < money then
+        -- cant afford! red color
+        txt = "{coin_icon}{c r=0.6 g=0.1 b=0.05} " .. money
+    elseif discount then
+        txt = "{coin_icon}{c r=0.15 b=0.1 g=0.6} " .. money
+    else
+        txt = "{coin_icon}{GOLD_COLOR} " .. money
+    end
+    richtext.printRichContainedNoWrap(txt, font, r:get())
 end
 
+
+local function dbg(r)
+    lg.rectangle("line",r:get())
+end
+
+
+local RAR_MAP = {
+    [g.RARITIES.COMMON] = "foo"
+}
 
 ---@param r kirigami.Region
 ---@param squadId string
@@ -56,17 +72,23 @@ local function drawSquadCard(r, squadId, cost)
     -- BACKGROUND: color-border
     ui.drawPanel(r:get())
 
+    local topmid, name, bot2 = r:padUnit(8,8):splitVertical(3,1,1)
+
     -- squad-icon, manaCost
-    local x,y = r:getCenter()
-    g.drawSquadIcon(squadId, r:getCenter())
+    local x,y,w,h = topmid:getCenter()
+    g.drawSquadIcon(squadId, x,y, true)
 
     -- unit name
     local sinfo = g.getSquadInfo(squadId)
     local font = g.getSmallFont(16)
-    richtext.printRichCentered(sinfo.name, font, x,y+10, 1000, "center")
+    local txt = sinfo.name
+    richtext.printRichContained(txt, font, name:get())
+    dbg(name)
 
     -- cost (Gold)
-    drawCost(cost, x,y+30, false)
+    drawCost(cost, bot2, false)
+    dbg(topmid)
+    dbg(bot2)
 
     -- TOP-RIGHT: level
 end
@@ -76,10 +98,6 @@ local function getRerollCost(self)
     return 20
 end
 
-
-local function dbg(r)
-    lg.rectangle("line",r:get())
-end
 
 ---@param r kirigami.Region
 local function drawRerollButton(self, r)
@@ -94,8 +112,8 @@ local function drawRerollButton(self, r)
     dbg(chain)
     dbg(body)
     richtext.printRichContained(
-        "{shop_reroll_icon} {coin_icon} " .. getRerollCost(self),
-        font, body:padRatio(0.5):get()
+        "{shop_reroll_icon} {coin_icon} {GOLD_COLOR}" .. getRerollCost(self),
+        font, body:padRatio(0.5):moveUnit(0,1):get()
     )
 end
 
@@ -125,7 +143,13 @@ local function drawShopUI(self)
     dbg(blessReg:padRatio(0.1))
 
     local rerollR, unitR = leftR:padRatio(0,-0.2,0,0):splitVertical(1,7)
+
     dbg(unitR:padRatio(0.1))
+    local units = unitR:padRatio(0.15):grid(3,2)
+    for _, ur in ipairs(units) do
+        drawSquadCard(ur:padUnit(6,6), "militia_squad", 50)
+    end
+
     drawRerollButton(self, rerollR:padRatio(0.1))
 end
 

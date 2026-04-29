@@ -101,7 +101,7 @@ local function drawSquadCard(squadId, region, index)
         draw = function(ex, ey, ew, eh)
             -- icon
             love.graphics.setColor(1, 1, 1)
-            g.drawSquadIcon(squadId, ex, ey, iconSize, iconSize)
+            g.drawSquadIcon(squadId, ex+ew/2, ey+eh/2, true)
             -- name to right of icon
             local textX = ex + iconSize + iconGap
             local textW = ew - iconSize - iconGap

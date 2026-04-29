@@ -339,32 +339,20 @@ end
 ---@param w number?
 ---@param h number?
 ---@param drawManaCost boolean?
-function g.drawSquadIcon(squadId, x, y, w, h, drawManaCost)
+function g.drawSquadIcon(squadId, x, y, drawManaCost)
     local info = g.getSquadInfo(squadId)
     local rarityColor = (info.rarity or g.RARITIES.COMMON).color
-    if w and h then
-        local bq = g.getImageQuad("squadicon_border")
-        local _,_,bw,bh = bq:getViewport()
-        local scale = math.min(w / bw, h / bh)
-        local iq = g.getImageQuad(info.icon)
-        local _,_,iw,ih = iq:getViewport()
-        local c = gsman.mulColor(1, 1, 1)
-        atlas:draw(iq, x + w/2, y + h/2, 0, scale, scale, iw/2, ih/2)
-        c:pop()
-        c = gsman.mulColor(rarityColor:getRGBA())
-        atlas:draw(bq, x + w/2, y + h/2, 0, scale, scale, bw/2, bh/2)
-        c:pop()
-    else
-        local c = gsman.mulColor(1, 1, 1)
-        g.drawImage(info.icon, x, y)
-        c:pop()
-        c = gsman.mulColor(rarityColor:getRGBA())
-        g.drawImage("squadicon_border", x, y)
-        c:pop()
-    end
+    local c = gsman.mulColor(1, 1, 1)
+    g.drawImage(info.icon, x, y)
+    c:pop()
+    c = gsman.mulColor(rarityColor:getRGBA())
+    g.drawImage("squadicon_border", x, y)
+    c:pop()
 
     local size = 32 -- hacky hardcode
-    g.drawManaCost(info.cost, x+size/2,y, size + 6)
+    if drawManaCost then
+        g.drawManaCost(info.cost, x,y-size/2, size + 6)
+    end
 end
 
 
