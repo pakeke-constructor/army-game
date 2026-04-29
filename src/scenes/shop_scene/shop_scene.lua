@@ -61,8 +61,16 @@ end
 
 
 local RAR_MAP = {
-    [g.RARITIES.COMMON] = "foo"
+    [g.RARITIES.COMMON] = "squadbackground_common",
+    [g.RARITIES.UNCOMMON] = "squadbackground_uncommon",
+    [g.RARITIES.RARE] = "squadbackground_rare",
+    [g.RARITIES.LEGENDARY] = "squadbackground_superrare",
+
+    [g.RARITIES.UNIQUE] = "squadbackground_superrare", -- should never happen
 }
+
+
+
 
 ---@param r kirigami.Region
 ---@param squadId string
@@ -70,7 +78,35 @@ local RAR_MAP = {
 local function drawSquadCard(r, squadId, cost)
     -- BACKGROUND: gradient-fade
     -- BACKGROUND: color-border
-    ui.drawPanel(r:get())
+    local sinfo = g.getSquadInfo(squadId)
+    local font = g.getSmallFont(16)
+    local rar = sinfo.rarity
+    local bg = RAR_MAP[rar]
+    local canAfford = g.getRun().money >= cost
+
+    -- draw background:
+    if canAfford then
+        lg.setColor(1,1,1)
+    else
+        lg.setColor(0.7,0.7,0.7, 0.4)
+    end
+    g.drawImageContained(bg, r:get())
+    do
+    local x,y,w,h = r:get()
+    helper.gradientRectStencil("vertical", rar.color,rar.lightColor, x,y,w,h, function ()
+        ui.drawPanelThin(r:get())
+    end)
+    end
+
+    -- draw level-widget
+    do
+    local _,rr = r:padRatio(0.1):splitHorizontal(3,1)
+    local rrr = rr:splitVertical(1,3)
+    local pop = gsman.mulColor(1,1,1,0.4)
+    richtext.printRichContained("Lv 1", font, rrr:get())
+    pop:pop()
+    -- dbg(rrr)
+    end
 
     local topmid, name, bot2 = r:padUnit(8,8):splitVertical(3,1,1)
 
@@ -79,16 +115,19 @@ local function drawSquadCard(r, squadId, cost)
     g.drawSquadIcon(squadId, x,y, true)
 
     -- unit name
-    local sinfo = g.getSquadInfo(squadId)
-    local font = g.getSmallFont(16)
     local txt = sinfo.name
+    local squadCol = g.getManaBundleColor(sinfo.cost)
+    local pop = gsman.mulColor(squadCol)
     richtext.printRichContained(txt, font, name:get())
-    dbg(name)
+    pop:pop()
 
     -- cost (Gold)
+    lg.setColor(1,1,1)
     drawCost(cost, bot2, false)
-    dbg(topmid)
-    dbg(bot2)
+
+    -- dbg(topmid)
+    -- dbg(name)
+    -- dbg(bot2)
 
     -- TOP-RIGHT: level
 end
@@ -147,7 +186,7 @@ local function drawShopUI(self)
     dbg(unitR:padRatio(0.1))
     local units = unitR:padRatio(0.15):grid(3,2)
     for _, ur in ipairs(units) do
-        drawSquadCard(ur:padUnit(6,6), "militia_squad", 50)
+        drawSquadCard(ur:padUnit(6,10), "militia_squad", 90 + helper.hashInteger(_) % 20)
     end
 
     drawRerollButton(self, rerollR:padRatio(0.1))

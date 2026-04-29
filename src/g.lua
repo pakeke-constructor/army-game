@@ -146,6 +146,7 @@ function g.newTestRun()
         currentRun.blessings = {
             "iron_hide", "golden_coffers", "blood_tithe", "barrage",
         }
+        currentRun.money = 100
     end
 
 end
@@ -333,19 +334,32 @@ function g.drawImageContained(imageName, x, y, w, h, rot)
     atlas:draw(quad, centerX + scaledW/2, centerY + scaledH/2, rot or 0, scale, scale, qw/2, qh/2)
 end
 
+
+
+---@param bundle g.ManaBundle
+function g.getManaBundleColor(bundle)
+    for _,mc in ipairs(g.getManaTypelist()) do
+        if bundle[mc] then
+            local minfo = g.getManaInfo(mc)
+            return minfo.color
+        end
+    end
+    return objects.Color.WHITE
+end
+
+
 ---@param squadId string
 ---@param x number
 ---@param y number
----@param w number?
----@param h number?
 ---@param drawManaCost boolean?
 function g.drawSquadIcon(squadId, x, y, drawManaCost)
     local info = g.getSquadInfo(squadId)
-    local rarityColor = (info.rarity or g.RARITIES.COMMON).color
+    --local rarityColor = (info.rarity or g.RARITIES.COMMON).color
+    local col = g.getManaBundleColor(info.cost)
     local c = gsman.mulColor(1, 1, 1)
     g.drawImage(info.icon, x, y)
     c:pop()
-    c = gsman.mulColor(rarityColor:getRGBA())
+    c = gsman.mulColor(col)
     g.drawImage("squadicon_border", x, y)
     c:pop()
 
@@ -1808,10 +1822,10 @@ end
 
 local VALID_MANA_CELLS = {}
 
-g.defineManaType("red", objects.Color("#d53341"))
-g.defineManaType("blue", objects.Color("#36c7de"))
-g.defineManaType("green", objects.Color("#7cc82a"))
-g.defineManaType("yellow", objects.Color("#f1f119"))
+g.defineManaType("red", objects.Color("FFB42430"))
+g.defineManaType("blue", objects.Color("FF1C7CB7"))
+g.defineManaType("green", objects.Color("FF52B225"))
+g.defineManaType("yellow", objects.Color("FFD0D31F"))
 
 for _, mana1 in ipairs(manaTypeList) do
     VALID_MANA_CELLS[mana1] = true

@@ -212,6 +212,23 @@ end
 
 
 
+local simpleUIPanelThin = nil
+---@param x number
+---@param y number
+---@param w number
+---@param h number
+function ui.drawPanelThin(x, y, w, h)
+    simpleUIPanelThin = simpleUIPanelThin or n9slice.new {
+        image = g.getAtlas(),
+        padding = 9,
+        quad = g.getImageQuad("simple_ui_panel_thin")
+    }
+    return simpleUIPanelThin:draw(x, y, w, h)
+end
+
+
+
+
 local darkUIPanel = nil
 ---@param x number
 ---@param y number
