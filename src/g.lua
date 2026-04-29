@@ -128,6 +128,19 @@ function g.newRun(lopt)
         cmdInfo.onStart(currentRun)
     end
 
+    return currentRun
+end
+
+
+
+function g.newTestRun()
+    assert(consts.DEV_MODE)
+
+    g.newRun({
+        commander = "sir_horse",
+        difficulty = 0
+    })
+
     if consts.DEV_MODE then
         -- populate test stuff.
         currentRun.blessings = {
@@ -135,7 +148,6 @@ function g.newRun(lopt)
         }
     end
 
-    return currentRun
 end
 
 

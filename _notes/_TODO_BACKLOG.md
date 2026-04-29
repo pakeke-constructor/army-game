@@ -27,7 +27,7 @@
 - frozen-system
 - poison-system
 - New HUD (from leo)
-
+- Add glow_lootreward.png to the rewards-screen
 
 
 
@@ -40,7 +40,15 @@
 ---- Callback/events for reroll-system
 
 
-- Add glow_lootreward.png to the rewards-screen
+- Set up leo w/ claude-code
+
+
+- Put ev_q_defs in the system-prompt, so leo_normal/smart knows about it.
+
+
+- Add smoke to fire-particles. smoke becomes bigger, gray/dark gray.
+
+
 
 
 - "Terrain" for battle-scene 

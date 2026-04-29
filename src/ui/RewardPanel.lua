@@ -92,7 +92,7 @@ function RewardPanel:draw()
                 lg.setColor(0,0,0)
                 local isHovered = iml.isHovered(x,y,w,h)
                 if isHovered then
-                    lg.setColor(0.07,0.07,0.25)
+                    lg.setColor(0.05,0.05,0.15)
                 end
                 ui.drawSingleColorPanel(x, y, w, h)
                 if not isHovered then

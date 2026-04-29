@@ -171,6 +171,12 @@ function map_scene:update(dt)
 end
 
 
+function map_scene:keypressed(k)
+    if consts.DEV_MODE and k == "o" then
+        g.gotoScene("shop_scene")
+    end
+end
+
 function map_scene:mousepressed(mx, my, button)
     if button == 1 then
         self.dragging = true
