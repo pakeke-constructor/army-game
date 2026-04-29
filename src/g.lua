@@ -182,11 +182,15 @@ function g.addGold(amount)
     run.money = run.money + amount
 end
 
+function g.canAffordGold(amount)
+    return g.getRun().money >= amount
+end
+
 function g.trySpendGold(amount)
-    local run = g.getRun()
-    if run.money < amount then
+    if not g.canAffordGold(amount) then
         return false
     end
+    local run = g.getRun()
     run.money = run.money - amount
     return true
 end

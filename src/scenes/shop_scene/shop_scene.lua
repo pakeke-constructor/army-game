@@ -62,7 +62,7 @@ end
 
 local function dbg(r)
     if consts.DEV_MODE then
-        lg.rectangle("line",r:get())
+        -- lg.rectangle("line",r:get())
     end
 end
 
@@ -170,8 +170,8 @@ end
 ---@param blessingId string
 ---@param cost number
 local function drawBlessing(blesR, blessingId, cost)
-    blesR = blesR:padRatio(0.3)
-    local top, bot = blesR:splitVertical(3,1)
+    blesR = blesR:padRatio(0.2)
+    local top, bot = blesR:splitVertical(2,1)
 
     -- draw blessing 
     g.drawBlessingIcon(blessingId, top:getCenter())
@@ -211,13 +211,39 @@ local function drawShopUI(self)
     end
     -- local r1 = 
     --g.drawImageContained(shopBg, shopRegion:get())
-    lg.rectangle("line",shopRegion:get())
 
     local leftR,rightR = shopRegion:splitHorizontal(2,1)
 
     local blessReg,xpReg = rightR:splitVertical(3,3)
-    for _, blesR in ipairs(blessReg:grid(3,2)) do
+    for _, blesR in ipairs(blessReg:padRatio(0.15):grid(3,2)) do
         drawBlessing(blesR, "golden_coffers", 50)
+    end
+
+    -- xp purchasing.
+    do
+    local leftXp, rightXp = xpReg:padRatio(0.1):splitHorizontal(1,1)
+    local function drawXpBuy(reg, img, xpAmount, cost)
+        local _,main,bot,_ = reg:splitVertical(2,6,2,1)
+        local x,y = main:getCenter()
+        local canAfford = g.canAffordGold(cost)
+        if canAfford then
+            lg.setColor(1,1,1)
+        else
+            lg.setColor(0.6,0.6,0.6,0.7)
+        end
+        g.drawImage(img, x,y)
+        if iml.wasJustClicked(main:get()) then
+            if g.trySpendGold(cost) then
+                print("Hi!")
+                g.addXP(xpAmount)
+            end
+        end
+        lg.setColor(1,1,1)
+        drawCost(cost, bot)
+    end
+
+    drawXpBuy(rightXp:padRatio(0.3), "shop_xp_large", 4, 60)
+    drawXpBuy(leftXp:padRatio(0.3), "shop_xp_small", 1, 20)
     end
 
     dbg(xpReg:padRatio(0.1))
@@ -225,6 +251,7 @@ local function drawShopUI(self)
 
     local rerollR, unitR = leftR:padRatio(0,-0.2,0,0):splitVertical(1,7)
 
+    -- draw squad purchase
     dbg(unitR:padRatio(0.1))
     local units = unitR:padRatio(0.15):grid(3,2)
     for _, ur in ipairs(units) do

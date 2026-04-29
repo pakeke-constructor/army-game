@@ -296,9 +296,6 @@ local function drawTopBar()
 
     drawPanel(zoneString, LOC_ZONE)
     drawPanel(pausePanel, LOC_PAUSE)
-
-    local leftBlessingBar = mainBar:splitVertical(0.7,0.3):splitHorizontal(0.06, 0.94)
-    drawLeftBlessingBar(leftBlessingBar)
 end
 
 
