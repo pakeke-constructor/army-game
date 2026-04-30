@@ -183,7 +183,7 @@ nodes.FountainNode = FountainNode
 -- EmptyNode
 -------------------------------
 ---@class MapNode.EmptyNode: MapNode
-local EmptyNode = nodes.newClass("Empty")
+local EmptyNode = nodes.newClass("empty")
 
 function EmptyNode:enter()
     -- this node does nothing.
@@ -197,6 +197,44 @@ function EmptyNode:draw(wx, wy)
 end
 
 nodes.EmptyNode = EmptyNode
+
+
+
+
+
+
+-------------------------------
+--- shop node
+-------------------------------
+---@class MapNode.ShopNode: MapNode
+---@field squadShop (false|string)[]
+---@field blessingShop (false|string)[]
+local ShopNode = nodes.newClass("shop")
+
+function ShopNode:init(x,y)
+    Node.init(self,x,y)
+    self.squadShop = {} -- List<squadId OR false>. False indicates been purchased
+    self.blessingShop = {} -- List<blessingId OR false>. False indicates been purchased
+    --[[
+    relative difficulty of node, relative to current level:
+    0 = normal enemy
+    1 = harder enemy
+    2 = elite-level enemy
+    ]]
+end
+
+function ShopNode:enter()
+    g.gotoScene("shop_scene")
+    local sc = g.getCurrentScene()
+    ---@cast sc g.ShopScene
+    sc:setShop(self)
+end
+
+function ShopNode:draw()
+    g.drawImage("node_town", self.x,self.y)
+end
+
+
 
 
 

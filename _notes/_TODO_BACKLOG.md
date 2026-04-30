@@ -66,7 +66,7 @@
 --- Make the yellow-visual snap to thing to the closest mouse position
 
 
-- Event system: random events
+- Event system: random map events on empty nodes
 
 
 - Special-nodes wired up

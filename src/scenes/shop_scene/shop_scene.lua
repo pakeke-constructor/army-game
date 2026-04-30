@@ -3,6 +3,7 @@ local hoverService = require("src.hud.hoverService")
 
 
 
+---@class g.ShopScene
 local shop_scene = {}
 
 function shop_scene:init()
@@ -19,27 +20,52 @@ function shop_scene:pollHandlers()
     g.addBlessingHandlers()
 end
 
+---@param dt number
 function shop_scene:update(dt)
 end
 
+---@param mx number
+---@param my number
+---@param button number
+---@param istouch boolean
+---@param presses number
 function shop_scene:mousepressed(mx, my, button, istouch, presses)
 end
 
+---@param mx number
+---@param my number
+---@param button number
+---@param istouch boolean
 function shop_scene:mousereleased(mx, my, button, istouch)
 end
 
+---@param mx number
+---@param my number
+---@param dx number
+---@param dy number
+---@param istouch boolean
 function shop_scene:mousemoved(mx, my, dx, dy, istouch)
 end
 
+---@param key string
+---@param scancode string
+---@param isrep boolean
 function shop_scene:keypressed(key, scancode, isrep)
 end
 
 
+---@param dx number
+---@param dy number
 function shop_scene:wheelmoved(dx, dy)
     self.hud:wheelmoved(dx, dy)
 end
 
 
+
+---@param shopNode MapNode.ShopNode
+function shop_scene:setShop(shopNode)
+    -- set stuff properly here
+end
 
 
 ---@param money number
@@ -140,11 +166,14 @@ local function drawSquadCard(r, squadId, cost)
 end
 
 
+---@param self g.ShopScene
+---@return number
 local function getRerollCost(self)
     return 20
 end
 
 
+---@param self g.ShopScene
 ---@param r kirigami.Region
 local function drawRerollButton(self, r)
     local IMG = "shop_reroll_button"
@@ -195,6 +224,7 @@ end
 
 
 
+---@param self g.ShopScene
 local function drawShopUI(self)
     local w,h = ui.getScaledUIDimensions()
     local shopBg = "shop_background"
