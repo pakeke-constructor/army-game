@@ -184,7 +184,7 @@ local function drawSquadCard(r, squadId, cost)
     local wasJustClicked = iml.wasJustClicked(r:get())
 
     -- draw background:
-    local hoverAlpha = (canAfford and isHovered) and 0.8 or 0.5
+    local hoverAlpha = (canAfford and isHovered) and 0.6 or 0.3
     local affordColorMul = canAfford and 1 or 0.5
     lg.setColor(affordColorMul,affordColorMul,affordColorMul, hoverAlpha)
     g.drawImageContained(bg, r:get())
@@ -211,7 +211,8 @@ local function drawSquadCard(r, squadId, cost)
 
     -- squad-icon, manaCost
     local x,y,w,h = topmid:getCenter()
-    g.drawSquadIcon(squadId, x,y, true)
+    local oy = isHovered and -2 or 0
+    g.drawSquadIcon(squadId, x, y + oy, true)
 
     -- unit name
     local txt = "{o}" .. sinfo.name
@@ -224,11 +225,9 @@ local function drawSquadCard(r, squadId, cost)
     lg.setColor(1,1,1)
     drawCost(cost, bot2, false)
 
-    -- dbg(topmid)
-    -- dbg(name)
-    -- dbg(bot2)
-
-    -- TOP-RIGHT: level
+    if wasJustClicked then
+        -- try to buy the squad.
+    end
 end
 
 
@@ -275,8 +274,20 @@ end
 local function drawBlessing(blesR, blessingId, cost)
     blesR = blesR:padRatio(0.2)
     local top, bot = blesR:splitVertical(2,1)
+    local binfo = g.getBlessingInfo(blessingId)
+    local isHovered = iml.isHovered(blesR:get())
+
+    if isHovered then
+        local bg = RAR_MAP[binfo.rarity]
+        lg.setColor(1,1,1,0.7)
+        g.drawImageContained(bg, blesR:get())
+        lg.setColor(1,1,1,1)
+    end
 
     -- draw blessing 
+    if isHovered then
+        top = top:moveUnit(0,-2)
+    end
     g.drawBlessingIcon(blessingId, top:getCenter())
 
     -- draw cost
@@ -286,8 +297,7 @@ local function drawBlessing(blesR, blessingId, cost)
     dbg(bot)
     dbg(blesR)
 
-    if iml.isHovered(blesR:get()) then
-        local binfo = g.getBlessingInfo(blessingId)
+    if isHovered then
         local mx,my = ui.getMouse()
         hoverService.requestHover(mx,my, function (box, fonts)
             box:addText("{c r=0.7 g=0.5 b=0.4}"..binfo.name,fonts.title)
