@@ -184,7 +184,7 @@ local function drawSquadCard(r, squadId, cost)
     local wasJustClicked = iml.wasJustClicked(r:get())
 
     -- draw background:
-    local hoverAlpha = (canAfford and isHovered) and 0.6 or 0.3
+    local hoverAlpha = (canAfford and isHovered) and 0.8 or 0.3
     local affordColorMul = canAfford and 1 or 0.5
     lg.setColor(affordColorMul,affordColorMul,affordColorMul, hoverAlpha)
     g.drawImageContained(bg, r:get())
@@ -356,17 +356,17 @@ local function drawShopUI(self)
         local _,main,bot,_ = reg:splitVertical(2,6,2,1)
         local x,y = main:getCenter()
         local canAfford = g.canAffordGold(cost)
+        local isHovered = iml.isHovered(main:get())
+        local wasJustClicked = iml.wasJustClicked(main:get())
+
         if canAfford then
             lg.setColor(1,1,1)
         else
             lg.setColor(0.6,0.6,0.6,0.7)
         end
         g.drawImage(img, x,y)
-        if iml.wasJustClicked(main:get()) then
-            if g.trySpendGold(cost) then
-                print("Hi!")
-                g.addXP(xpAmount)
-            end
+        if wasJustClicked and g.trySpendGold(cost) then
+            g.addXP(xpAmount)
         end
         lg.setColor(1,1,1)
         drawCost(cost, bot)
