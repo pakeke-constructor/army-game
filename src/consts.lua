@@ -15,8 +15,11 @@ consts.MAX_PLAYING_SOURCES = 14
 consts.SQUAD_SPACING = 20
 consts.LAGGED_HEALTHBAR_DURATION = 0.25
 
----@type g.RarityMapping
-consts.DEFAULT_RARITY_MAPPING = {
+consts.SHOP_BLESSING_COUNT = 6
+consts.SHOP_SQUAD_COUNT = 6
+
+---@type g.RarityWeights
+consts.DEFAULT_RARITY_WEIGHTS = {
     -- i just yolo'd these numbers, feel free to change them
     COMMON = 1,
     UNCOMMON = 0.5,

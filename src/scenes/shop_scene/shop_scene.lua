@@ -61,10 +61,38 @@ function shop_scene:wheelmoved(dx, dy)
 end
 
 
+local newPicker = require("src.modules.Picker")
+
+
+---@param shopNode MapNode.ShopNode
+function shop_scene.prefillShopNode(shopNode)
+    -- fill shopNode
+end
+
+
+---@param shopNode MapNode.ShopNode
+function shop_scene.rerollShopNodeInplace(shopNode)
+    local pool = g.getSquadsByMana(g.getPermanentManaCounts())
+    local rw = consts.DEFAULT_RARITY_WEIGHTS
+    local weights = {}
+    for i, squadId in ipairs(pool) do
+        local sinfo = g.getSquadInfo(squadId)
+        weights[i] = rw[sinfo.rarity.id]
+    end
+    local squadPicker = newPicker(pool, weights)
+
+    for i,entry in ipairs(shopNode.squadShop) do
+        if entry ~= false then -- false denotes a purchase.
+            shopNode.squadShop[i] = squadPicker:pickAndRemove()
+        end
+    end
+end
+
+
 
 ---@param shopNode MapNode.ShopNode
 function shop_scene:setShop(shopNode)
-    -- set stuff properly here
+    self.shopNode = shopNode
 end
 
 
@@ -190,6 +218,13 @@ local function drawRerollButton(self, r)
         "{shop_reroll_icon} {coin_icon} {GOLD_COLOR}" .. getRerollCost(self),
         font, body:padRatio(0.5):moveUnit(0,1):get()
     )
+
+    if iml.wasJustClicked(r2:get()) then
+        local cost = getRerollCost(self)
+        if g.trySpendGold(cost) then
+            shop_scene.rerollShopNodeInplace(self.shopNode)
+        end
+    end
 end
 
 
@@ -307,7 +342,10 @@ end
 if true and consts.DEV_MODE then
     g.postLoad(function()
         g.newTestRun()
+        local fakeShop = {squadShop = {}, blessingShop = {}}
+        shop_scene.rerollShopNodeInplace(fakeShop)
         g.gotoScene("shop_scene")
+        g.getCurrentScene():setShop(fakeShop)
     end)
 end
 

@@ -215,12 +215,7 @@ function ShopNode:init(x,y)
     Node.init(self,x,y)
     self.squadShop = {} -- List<squadId OR false>. False indicates been purchased
     self.blessingShop = {} -- List<blessingId OR false>. False indicates been purchased
-    --[[
-    relative difficulty of node, relative to current level:
-    0 = normal enemy
-    1 = harder enemy
-    2 = elite-level enemy
-    ]]
+    shop_scene.rerollShopNodeInplace(self)
 end
 
 function ShopNode:enter()

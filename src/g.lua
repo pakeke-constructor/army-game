@@ -17,7 +17,7 @@
 ---@field handlers table<string, function>
 
 
----@class g.RarityMapping
+---@class g.RarityWeights
 ---@field COMMON number
 ---@field UNCOMMON number
 ---@field RARE number
@@ -146,7 +146,7 @@ function g.newTestRun()
         currentRun.blessings = {
             "iron_hide", "golden_coffers", "blood_tithe", "barrage",
         }
-        currentRun.money = 100
+        currentRun.money = 1000
     end
 
 end
