@@ -63,15 +63,49 @@ end
 
 local newPicker = require("src.modules.Picker")
 
+local BLESSING_COST = {
+    COMMON = 40,
+    UNCOMMON = 60,
+    RARE = 90,
+    LEGENDARY = 130,
+}
+
+local NUM_SQUAD_SLOTS = 6
+local NUM_BLESSING_SLOTS = 6
 
 ---@param shopNode MapNode.ShopNode
 function shop_scene.prefillShopNode(shopNode)
-    -- fill shopNode
+    if shopNode.isSetup then return end
+    shopNode.isSetup = true
+    for i = 1, NUM_SQUAD_SLOTS do
+        shopNode.squadShop[i] = shopNode.squadShop[i] or true
+    end
+    for i = 1, NUM_BLESSING_SLOTS do
+        shopNode.blessingShop[i] = shopNode.blessingShop[i] or true
+    end
+    shop_scene.rerollShopNodeInplace(shopNode)
+
+    -- fill blessings once
+    local bPool = g.getBlessingsByMana(g.getPermanentManaCounts())
+    local rw = consts.DEFAULT_RARITY_WEIGHTS
+    local bWeights = {}
+    for i, blessingId in ipairs(bPool) do
+        local binfo = g.getBlessingInfo(blessingId)
+        bWeights[i] = rw[binfo.rarity.id]
+    end
+    local blessingPicker = newPicker(bPool, bWeights)
+    for i, entry in ipairs(shopNode.blessingShop) do
+        if entry ~= false then
+            shopNode.blessingShop[i] = blessingPicker:pickAndRemove()
+        end
+    end
 end
 
 
 ---@param shopNode MapNode.ShopNode
 function shop_scene.rerollShopNodeInplace(shopNode)
+    shop_scene.prefillShopNode(shopNode)
+    -- reroll squads
     local pool = g.getSquadsByMana(g.getPermanentManaCounts())
     local rw = consts.DEFAULT_RARITY_WEIGHTS
     local weights = {}
@@ -82,8 +116,9 @@ function shop_scene.rerollShopNodeInplace(shopNode)
     local squadPicker = newPicker(pool, weights)
 
     for i,entry in ipairs(shopNode.squadShop) do
-        if entry ~= false then -- false denotes a purchase.
-            shopNode.squadShop[i] = squadPicker:pickAndRemove()
+        if entry ~= false then
+            local newEntry = squadPicker:pickAndRemove()
+            shopNode.squadShop[i] = newEntry
         end
     end
 end
@@ -116,7 +151,7 @@ end
 
 local function dbg(r)
     if consts.DEV_MODE then
-        -- lg.rectangle("line",r:get())
+        lg.rectangle("line",r:get())
     end
 end
 
@@ -233,6 +268,7 @@ end
 ---@param blesR kirigami.Region
 ---@param blessingId string
 ---@param cost number
+---@return boolean bought
 local function drawBlessing(blesR, blessingId, cost)
     blesR = blesR:padRatio(0.2)
     local top, bot = blesR:splitVertical(2,1)
@@ -255,6 +291,14 @@ local function drawBlessing(blesR, blessingId, cost)
             box:addText(binfo.description,fonts.body)
         end)
     end
+
+    if iml.wasJustClicked(blesR:get()) then
+        if g.trySpendGold(cost) then
+            g.addBlessing(blessingId)
+            return true
+        end
+    end
+    return false
 end
 
 
@@ -280,8 +324,16 @@ local function drawShopUI(self)
     local leftR,rightR = shopRegion:splitHorizontal(2,1)
 
     local blessReg,xpReg = rightR:splitVertical(3,3)
-    for _, blesR in ipairs(blessReg:padRatio(0.15):grid(3,2)) do
-        drawBlessing(blesR, "golden_coffers", 50)
+    local blessCells = blessReg:padRatio(0.15):grid(3,2)
+    for i, blesR in ipairs(blessCells) do
+        local entry = self.shopNode.blessingShop[i]
+        if entry and entry ~= false then
+            local binfo = g.getBlessingInfo(entry)
+            local cost = BLESSING_COST[binfo.rarity.id] or 50
+            if drawBlessing(blesR, entry, cost) then
+                self.shopNode.blessingShop[i] = false
+            end
+        end
     end
 
     -- xp purchasing.
@@ -343,7 +395,7 @@ if true and consts.DEV_MODE then
     g.postLoad(function()
         g.newTestRun()
         local fakeShop = {squadShop = {}, blessingShop = {}}
-        shop_scene.rerollShopNodeInplace(fakeShop)
+        shop_scene.prefillShopNode(fakeShop)
         g.gotoScene("shop_scene")
         g.getCurrentScene():setShop(fakeShop)
     end)

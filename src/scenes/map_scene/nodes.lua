@@ -209,16 +209,18 @@ nodes.EmptyNode = EmptyNode
 ---@class MapNode.ShopNode: MapNode
 ---@field squadShop (false|string)[]
 ---@field blessingShop (false|string)[]
+---@field isSetup boolean?
 local ShopNode = nodes.newClass("shop")
 
 function ShopNode:init(x,y)
     Node.init(self,x,y)
     self.squadShop = {} -- List<squadId OR false>. False indicates been purchased
     self.blessingShop = {} -- List<blessingId OR false>. False indicates been purchased
-    shop_scene.rerollShopNodeInplace(self)
+    shop_scene.prefillShopNode(self)
 end
 
 function ShopNode:enter()
+    shop_scene.prefillShopNode(self)
     g.gotoScene("shop_scene")
     local sc = g.getCurrentScene()
     ---@cast sc g.ShopScene
