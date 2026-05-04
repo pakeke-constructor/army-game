@@ -364,7 +364,8 @@ local function drawShopUI(self)
         else
             lg.setColor(0.6,0.6,0.6,0.7)
         end
-        g.drawImage(img, x,y)
+        local oy = isHovered and -2 or 0
+        g.drawImage(img, x,y+oy)
         if wasJustClicked and g.trySpendGold(cost) then
             g.addXP(xpAmount)
         end
