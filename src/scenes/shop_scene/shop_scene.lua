@@ -180,13 +180,16 @@ local function drawSquadCard(r, squadId, cost)
     local bg = RAR_MAP[rar]
     local canAfford = g.getRun().money >= cost
 
+    local isHovered = iml.isHovered(r:get())
+    local wasJustClicked = iml.wasJustClicked(r:get())
+
     -- draw background:
-    if canAfford then
-        lg.setColor(1,1,1)
-    else
-        lg.setColor(0.7,0.7,0.7, 0.4)
-    end
+    local hoverAlpha = (canAfford and isHovered) and 0.8 or 0.5
+    local affordColorMul = canAfford and 1 or 0.5
+    lg.setColor(affordColorMul,affordColorMul,affordColorMul, hoverAlpha)
     g.drawImageContained(bg, r:get())
+    lg.setColor(affordColorMul,affordColorMul,affordColorMul, 1)
+
     do
     local x,y,w,h = r:get()
     helper.gradientRectStencil("vertical", rar.color,rar.lightColor, x,y,w,h, function ()
@@ -211,10 +214,10 @@ local function drawSquadCard(r, squadId, cost)
     g.drawSquadIcon(squadId, x,y, true)
 
     -- unit name
-    local txt = sinfo.name
+    local txt = "{o}" .. sinfo.name
     local squadCol = g.getManaBundleColor(sinfo.cost)
     local pop = gsman.mulColor(squadCol)
-    richtext.printRichContained(txt, font, name:get())
+    richtext.printRichContainedNoWrap(txt, font, name:get())
     pop:pop()
 
     -- cost (Gold)
@@ -371,8 +374,11 @@ local function drawShopUI(self)
     -- draw squad purchase
     dbg(unitR:padRatio(0.1))
     local units = unitR:padRatio(0.15):grid(3,2)
-    for _, ur in ipairs(units) do
-        drawSquadCard(ur:padUnit(6,10), "militia_squad", 90 + helper.hashInteger(_) % 20)
+    for i, ur in ipairs(units) do
+        local squadId = self.shopNode.squadShop[i]
+        if squadId and squadId ~= false then
+            drawSquadCard(ur:padUnit(6,10), squadId, 90 + helper.hashInteger(i) % 20)
+        end
     end
 
     drawRerollButton(self, rerollR:padRatio(0.1))
