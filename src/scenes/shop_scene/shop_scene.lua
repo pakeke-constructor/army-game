@@ -408,7 +408,7 @@ end
 
 
 
-if true and consts.DEV_MODE then
+if false and consts.DEV_MODE then
     g.postLoad(function()
         g.newTestRun()
         local fakeShop = {squadShop = {}, blessingShop = {}}

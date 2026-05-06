@@ -731,6 +731,7 @@ function g.spawnSquad(squad, x, y, ...)
     local entities = {}
     for i = 1, #offsets do
         local ent = g.spawnEntity(info.entityId, x + offsets[i].x, y + offsets[i].y, ...)
+        g.applyBurn(ent, 10)
         ent.scope = squadScope
         ent.squad = squad
         entities[i] = ent

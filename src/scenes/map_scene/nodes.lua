@@ -212,7 +212,10 @@ nodes.EmptyNode = EmptyNode
 ---@field isSetup boolean?
 local ShopNode = nodes.newClass("shop")
 
+local shop_scene
+
 function ShopNode:init(x,y)
+    shop_scene = shop_scene or require("src.scenes.shop_scene.shop_scene")
     Node.init(self,x,y)
     self.squadShop = {} -- List<squadId OR false>. False indicates been purchased
     self.blessingShop = {} -- List<blessingId OR false>. False indicates been purchased
@@ -220,6 +223,7 @@ function ShopNode:init(x,y)
 end
 
 function ShopNode:enter()
+    shop_scene = shop_scene or require("src.scenes.shop_scene.shop_scene")
     shop_scene.prefillShopNode(self)
     g.gotoScene("shop_scene")
     local sc = g.getCurrentScene()
