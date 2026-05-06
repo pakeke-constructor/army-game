@@ -231,8 +231,9 @@ function ShopNode:enter()
     sc:setShop(self)
 end
 
-function ShopNode:draw()
-    g.drawImage("node_town", self.x,self.y)
+function ShopNode:draw(wx,wy)
+    lg.setColor(1,1,1)
+    g.drawImage("node_town", wx,wy)
 end
 
 
