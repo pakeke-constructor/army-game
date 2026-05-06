@@ -152,7 +152,8 @@ end
 
 function FeastNode:draw(wx, wy)
     lg.setColor(1,1,1)
-    g.drawImage("node_banquet", wx, wy)
+    local sx = self.id%2==0 and 1 or -1
+    g.drawImage("node_banquet", wx, wy, 0, sx,1)
     tryDrawDemons(self, wx,wy)
 end
 
@@ -233,7 +234,8 @@ end
 
 function ShopNode:draw(wx,wy)
     lg.setColor(1,1,1)
-    g.drawImage("node_town", wx,wy)
+    local sx = self.id%2==0 and 1 or -1
+    g.drawImage("node_town", wx,wy-8, 0, sx, 1)
 end
 
 
