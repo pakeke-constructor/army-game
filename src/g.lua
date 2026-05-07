@@ -356,7 +356,8 @@ end
 ---@param x number
 ---@param y number
 ---@param drawManaCost boolean?
-function g.drawSquadIcon(squadId, x, y, drawManaCost)
+---@param drawLevel integer?
+function g.drawSquadIcon(squadId, x, y, drawManaCost, drawLevel)
     local info = g.getSquadInfo(squadId)
     --local rarityColor = (info.rarity or g.RARITIES.COMMON).color
     local col = g.getManaBundleColor(info.cost)
@@ -370,6 +371,13 @@ function g.drawSquadIcon(squadId, x, y, drawManaCost)
     local size = 32 -- hacky hardcode
     if drawManaCost then
         g.drawManaCost(info.cost, x,y-size/2, size + 6)
+    end
+    if drawLevel then
+        -- draw level:
+        local lvReg = Kirigami(x, y+2, size/2-4, size/2-4)
+        local font = g.getSmallFont(16)
+        lg.setColor(0.6,0.6,0.6,0.6)
+        richtext.printRichContainedNoWrap("Lv "..tostring(drawLevel), font, lvReg:get())
     end
 end
 

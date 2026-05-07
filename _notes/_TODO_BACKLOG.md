@@ -28,14 +28,14 @@
 - poison-system
 - New HUD (from leo)
 - Add glow_lootreward.png to the rewards-screen
-
+- Squad upgrade system
 
 
 
 ### OK:: what do we need for a minimum-playable game?
 
 
-- Squad upgrade system
+- Squad upgrade UI
 
 
 - Shop UI (from leo)

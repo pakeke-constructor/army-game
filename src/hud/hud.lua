@@ -79,7 +79,7 @@ local function renderSquad(sq, x, y, selected)
     else
         lg.setColor(1, 1, 1)
     end
-    g.drawSquadIcon(sq.squadId, x+size/2, y+size/2, true)
+    g.drawSquadIcon(sq.squadId, x+size/2, y+size/2, true, sq.level)
 end
 
 
