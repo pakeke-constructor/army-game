@@ -35,8 +35,12 @@
 ### OK:: what do we need for a minimum-playable game?
 
 
+- Squad upgrade system
+
+
 - Shop UI (from leo)
 ---- Reroll system wired up in shop
+---- Squads actually purchased
 ---- Callback/events for reroll-system
 
 

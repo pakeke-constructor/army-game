@@ -599,6 +599,8 @@ local SQUAD_LIST = {}
 ---@field id string
 ---@field entityId string
 ---@field rarity g.Rarity
+---@field statUpgradeScaling table<string, number> { [statName] -> number }
+---@field unitCountUpgradeScaling integer?
 ---@field name string
 ---@field count number
 ---@field icon string
@@ -617,6 +619,13 @@ function g.defineSquad(id, info)
     info.count = info.count or 1
     info.name = assert(info.name)
     info.rarity = assert(info.rarity)
+    info.unitCountUpgradeScaling = info.unitCountUpgradeScaling or 0
+    info.statUpgradeScaling = info.statUpgradeScaling or {}
+    assert(type(info.unitCountUpgradeScaling) == "number")
+    for stat,scaling in pairs(info.statUpgradeScaling)do
+        assert(g.getStatInfo(stat), "?")
+        assert(scaling < 1, "Per-level stat scaling shouldn't be more than 100%. Must be number between (0,1)")
+    end
     assert(info.icon)
     SQUAD_DEFS[id] = info
     SQUAD_LIST[#SQUAD_LIST + 1] = id
