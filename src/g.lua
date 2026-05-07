@@ -1056,7 +1056,8 @@ local function drawHealthBar(ent, x,y)
 end
 
 function g.drawEntity(ent, x, y)
-    local sx, sy = (ent.sx or 1) * (ent.faceDir or 1), ent.sy or 1
+    local entScale = g.ask("getEntityScale", ent)
+    local sx, sy = (ent.sx or 1) * (ent.faceDir or 1) * entScale, (ent.sy or 1) * entScale
     if ent.draw then
         ent:draw(x, y)
         return

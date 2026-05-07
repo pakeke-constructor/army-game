@@ -48,6 +48,8 @@ g.defineSquad("archer_squad", {
     icon = "example_squad_icon",
     perks = {"sharpshooter"},
     cost = {red = 1},
+
+    statUpgradeScaling = {maxHealth = 0.5},
 })
 
 

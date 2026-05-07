@@ -91,7 +91,7 @@ local function hoverSquad(sq)
     hoverService.requestHover(mx, my, function(box, fonts)
         box:addText("{c r=0.9 g=0.85 b=0.7}" .. info.name, fonts.title)
         box:addSpacing(2)
-        box:addText("{c r=0.7 g=0.7 b=0.75}" .. info.count .. "x " .. info.entityId, fonts.body)
+        box:addText("{c r=0.7 g=0.7 b=0.75}" .. info.unitCount .. "x " .. info.entityId, fonts.body)
         local perks = sq.perks
         if perks and #perks > 0 then
             for _, pId in ipairs(perks) do

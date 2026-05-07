@@ -50,6 +50,8 @@ g.defineEvent("chestOpened")
 local ADD = reducers.ADD
 local MUL = reducers.MULTIPLY
 
+g.defineQuestion("getEntityScale", MUL, 1)
+
 g.defineQuestion("getDamageReduction", ADD, 0)
 
 -- Questions: economy/rewards

@@ -50,10 +50,10 @@ local function recomputeStat(ent, stat)
     ---@cast squad g.Squad
     local statMul = 1
     if squad then
-        local lv = squad.level or 1
+        local lv = (squad.level or 1)
         local info = g.getSquadInfo(squad.squadId)
-        if info.statUpgradeScaling and info.statUpgradeScaling[stat] then
-            statMul = 1 + (info.statUpgradeScaling[stat] * (lv-1))
+        if info.statUpgradeScaling and info.statUpgradeScaling[stat.name] then
+            statMul = 1 + (info.statUpgradeScaling[stat.name] * (lv-1))
         end
     end
     local val = base + g.ask(stat.modQ, ent)
