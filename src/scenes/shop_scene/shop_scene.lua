@@ -166,12 +166,27 @@ local RAR_MAP = {
 }
 
 
+local function getOrbitPosOnRegionEdge(r, t)
+    local x, y, w, h = r:get()
+    local perimeter = 2 * (w + h)
+    local d = (t % 1) * perimeter
+
+    if d < w then
+        return x + d, y
+    elseif d < w + h then
+        return x + w, y + (d - w)
+    elseif d < (2 * w + h) then
+        return x + w - (d - w - h), y + h
+    else
+        return x, y + h - (d - 2 * w - h)
+    end
+end
 
 
 ---@param r kirigami.Region
 ---@param squadId string
 ---@param cost number
-local function drawSquadCard(r, squadId, cost)
+local function drawSquadBox(r, squadId, cost)
     -- BACKGROUND: gradient-fade
     -- BACKGROUND: color-border
     local sinfo = g.getSquadInfo(squadId)
@@ -183,7 +198,34 @@ local function drawSquadCard(r, squadId, cost)
     local isHovered = iml.isHovered(r:get())
     local wasJustClicked = iml.wasJustClicked(r:get())
 
+    -- find existing squad
+    ---@type g.Squad?
+    local squad
+    for _, sq in ipairs(g.getArmy()) do
+        if sq.squadId == squadId then
+            -- found!
+            squad = sq
+        end
+    end
+
+    if canAfford and squad then
+        -- then player can afford it!
+        local function drawSnakeThing(offset)
+            local N = 9
+            local col = objects.Color(rar.color)
+            for i=N,1,-1 do
+                col=col:darken(0.1)
+                lg.setColor(col)
+                local x,y = getOrbitPosOnRegionEdge(r, offset + i/80 + love.timer.getTime()/5)
+                lg.rectangle("fill", x-3,y-3, 6,6)
+            end
+        end
+        drawSnakeThing(0)
+        drawSnakeThing(0.5)
+    end
+
     -- draw background:
+    ui.drawDarkPanel(r:get())
     local hoverAlpha = (canAfford and isHovered) and 0.8 or 0.3
     local affordColorMul = canAfford and 1 or 0.5
     lg.setColor(affordColorMul,affordColorMul,affordColorMul, hoverAlpha)
@@ -198,11 +240,11 @@ local function drawSquadCard(r, squadId, cost)
     end
 
     -- draw level-widget
-    do
+    if squad then
     local _,rr = r:padRatio(0.1):splitHorizontal(3,1)
     local rrr = rr:splitVertical(1,3)
     local pop = gsman.mulColor(1,1,1,0.4)
-    richtext.printRichContained("Lv 1", font, rrr:get())
+    richtext.printRichContained("Lv "..squad.level, font, rrr:get())
     pop:pop()
     -- dbg(rrr)
     end
@@ -388,7 +430,7 @@ local function drawShopUI(self)
     for i, ur in ipairs(units) do
         local squadId = self.shopNode.squadShop[i]
         if squadId and squadId ~= false then
-            drawSquadCard(ur:padUnit(6,10), squadId, 90 + helper.hashInteger(i) % 20)
+            drawSquadBox(ur:padUnit(6,10), squadId, 90 + helper.hashInteger(i) % 20)
         end
     end
 
