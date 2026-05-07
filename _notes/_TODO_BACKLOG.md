@@ -29,6 +29,8 @@
 - New HUD (from leo)
 - Add glow_lootreward.png to the rewards-screen
 - Squad upgrade system
+- Shop UI (from leo)
+- Add smoke to fire-particles. smoke becomes bigger, gray/dark gray.
 
 
 
@@ -36,22 +38,17 @@
 
 
 - Squad upgrade UI
+- When hovering squad-card, you can see the squad-upgrade
+- When hovering squad-box, you can see what the upgrade does
 
+- In shop, when hovering a squad, display squad-card on right
 
-- Shop UI (from leo)
----- Reroll system wired up in shop
----- Squads actually purchased
----- Callback/events for reroll-system
 
 
 - Set up leo w/ claude-code
 
 
 - Put ev_q_defs in the system-prompt, so leo_normal/smart knows about it.
-
-
-- Add smoke to fire-particles. smoke becomes bigger, gray/dark gray.
-
 
 
 

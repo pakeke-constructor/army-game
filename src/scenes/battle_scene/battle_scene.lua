@@ -106,6 +106,7 @@ function battle_scene:update(dt)
             -- choicePopupService.set("blessing")
             rewardPopupService.set({
                 gold = 100,
+                randomSquad = true
 
             })
             self.victoryPopupTime = 0

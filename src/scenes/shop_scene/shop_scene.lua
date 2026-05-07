@@ -275,10 +275,10 @@ local function drawSquadBox(r, squadId, cost)
             else
                 g.addSquadToArmy(g.newSquad(squadId))
             end
-            return true
+            return true, isHovered
         end
     end
-    return false
+    return false, isHovered
 end
 
 
@@ -310,6 +310,7 @@ local function drawRerollButton(self, r)
     if iml.wasJustClicked(r2:get()) then
         local cost = getRerollCost(self)
         if g.trySpendGold(cost) then
+            g.call("rerollShop")
             shop_scene.rerollShopNodeInplace(self.shopNode)
         end
     end
@@ -388,17 +389,6 @@ local function drawShopUI(self)
     local leftR,rightR = shopRegion:splitHorizontal(2,1)
 
     local blessReg,xpReg = rightR:splitVertical(3,3)
-    local blessCells = blessReg:padRatio(0.15):grid(3,2)
-    for i, blesR in ipairs(blessCells) do
-        local entry = self.shopNode.blessingShop[i]
-        if entry and entry ~= false then
-            local binfo = g.getBlessingInfo(entry)
-            local cost = BLESSING_COST[binfo.rarity.id] or 50
-            if drawBlessing(blesR, entry, cost) then
-                self.shopNode.blessingShop[i] = false
-            end
-        end
-    end
 
     -- xp purchasing.
     do
@@ -434,13 +424,32 @@ local function drawShopUI(self)
     local rerollR, unitR = leftR:padRatio(0,-0.2,0,0):splitVertical(1,7)
 
     -- draw squad purchase
+    local hoveredSquadId = nil
     dbg(unitR:padRatio(0.1))
     local units = unitR:padRatio(0.15):grid(3,2)
     for i, ur in ipairs(units) do
         local squadId = self.shopNode.squadShop[i]
         if squadId and squadId ~= false then
-            if drawSquadBox(ur:padUnit(6,10), squadId, 90 + helper.hashInteger(i) % 20) then
+            local clicked, hovered = drawSquadBox(ur:padUnit(6,10), squadId, 90 + helper.hashInteger(i) % 20)
+            if clicked then
                 self.shopNode.squadShop[i] = false
+            end
+            if hovered then
+                hoveredSquadId = squadId
+            end
+        end
+    end
+
+    if not hoveredSquadId then
+        local blessCells = blessReg:padRatio(0.15):grid(3,2)
+        for i, blesR in ipairs(blessCells) do
+            local entry = self.shopNode.blessingShop[i]
+            if entry and entry ~= false then
+                local binfo = g.getBlessingInfo(entry)
+                local cost = BLESSING_COST[binfo.rarity.id] or 50
+                if drawBlessing(blesR, entry, cost) then
+                    self.shopNode.blessingShop[i] = false
+                end
             end
         end
     end
@@ -451,6 +460,16 @@ local function drawShopUI(self)
     local exitR = Kirigami(0, scrH * (7/8), scrW/10,scrH/10)
     if ui.DefaultButton("Exit", exitR) then
         g.gotoLastScene()
+    end
+
+
+    if hoveredSquadId then
+        local screenReg = ui.getScreenRegion():padRatio(0.1, 0.3, 0.1, 0.1)
+        local _,_,creg = screenReg:splitHorizontal(1,1,1)
+        local rrr = creg:padRatio(0.1)
+        lg.setColor(1,1,1)
+        ui.drawDarkPanel(rrr:get())
+        ui.drawSquadCard(hoveredSquadId, rrr, 1)
     end
 end
 

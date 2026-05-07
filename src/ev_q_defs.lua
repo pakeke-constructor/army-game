@@ -38,11 +38,10 @@ g.defineEvent("squadDeployed")
 
 
 -- Economy / run
-g.defineEvent("moneyGained")
-g.defineEvent("rewardChosen")
-g.defineEvent("shopEntered")
-g.defineEvent("chestOpened")
-
+-- g.defineEvent("moneyGained")
+-- g.defineEvent("rewardChosen")
+-- g.defineEvent("chestOpened")
+g.defineEvent("rerollShop")
 
 
 
