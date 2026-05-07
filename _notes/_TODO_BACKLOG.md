@@ -50,8 +50,6 @@
 --- BORDER: Trees + Rocks + Dark-Fog?
 
 
-- Proper ordered-rendering for map-scene
-
 
 
 - Squad upgrade UI
@@ -66,6 +64,7 @@
 - Special-nodes wired up
 
 
+- Proper ordered-rendering for map-scene
 
 
 - Weapons system: Make it so weapons can be held/used

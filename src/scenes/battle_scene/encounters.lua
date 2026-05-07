@@ -7,7 +7,7 @@ local encounters = {}
 local enemyPool = {}
 
 ---@param difficulty integer
----@param spawn fun(es:g.EnemySpawner)
+---@param spawn fun(es:g.EnemySpawner, ecs:ecs.ECSWorld)
 function encounters.defineEnemyEncounter(difficulty, spawn)
     enemyPool[difficulty] = enemyPool[difficulty] or objects.Array()
     enemyPool[difficulty]:add(spawn)
@@ -36,14 +36,6 @@ function EnemySpawner:init(ecs, rng)
     self._y = 150
     self._dx = -1
     self._dy = 0
-end
-
-
----@param wx integer
----@param wy integer
-function EnemySpawner:setWorldSize(wx,wy)
-    self._wx = wx
-    self._wy = wy
 end
 
 
@@ -128,8 +120,7 @@ function encounters.startRandomEncounter(difficulty, ecs)
     local rng = love.math.newRandomGenerator(os.time())
     local spawn = arr[rng:random(1, #arr)]
     local es = EnemySpawner(ecs, rng)
-    spawn(es)
-    ecs:setBorder(es._wx, es._wy)
+    spawn(es, ecs)
     es:finalize()
 end
 
