@@ -505,6 +505,7 @@ vec4 effect(vec4 color, Image tex, vec2 tc, vec2 sc) {
     return pixel;
 }
 ]])
+helper.alphaTestShader = alphaTestShader
 
 ---Draws a gradient rect, but clipped to whatever `drawFunc` draws as a stencil.
 ---@param dir "vertical"|"horizontal"
@@ -516,14 +517,16 @@ vec4 effect(vec4 color, Image tex, vec2 tc, vec2 sc) {
 ---@param h number
 ---@param drawFunc fun()
 function helper.gradientRectStencil(dir, col1, col2, x,y,w,h, drawFunc)
-    love.graphics.setStencilMode("draw", 1)
+    love.graphics.setColorMask(false)
+    love.graphics.setStencilState("replace", "always", 1)
     local sh = lg.getShader()
     love.graphics.setShader(alphaTestShader)
     drawFunc()
     love.graphics.setShader(sh)
-    love.graphics.setStencilMode("test", 1)
+    love.graphics.setStencilState("keep", "greater", 0)
+    love.graphics.setColorMask(true)
     helper.gradientRect(dir, col1, col2, x, y, w, h)
-    love.graphics.setStencilMode()
+    love.graphics.setStencilState()
 end
 
 end

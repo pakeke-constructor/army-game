@@ -280,8 +280,11 @@ local function drawXpBar(reg)
     local stencilReg = xpBar:shrinkTo(xpW, xpBar.h)
     lg.setColorMask(false)
     lg.setStencilState("replace", "always", 1)
+    local prevShader = lg.getShader()
+    lg.setShader(helper.alphaTestShader)
     ui.drawSingleColorPanel(stencilReg:get())
-    lg.setStencilState("increment", "greater", 0)
+    lg.setShader(prevShader)
+    lg.setStencilState("keep", "greater", 0)
     lg.setColorMask(true)
     local ox = math.sin(love.timer.getTime() * 0.3) * 8
     local oy = math.cos(love.timer.getTime() * 0.21) * 4
@@ -291,7 +294,9 @@ local function drawXpBar(reg)
     end
 
     -- draw xp text
-    richtext.printRichContainedNoWrap(("%d / %d"):format(xp,xpReq), smallFont, rightTop:get())
+    local txt1 = helper.wrapRichtextColor(objects.Color("FF80BD51"),("%d"):format(xp))
+    local txt2 = helper.wrapRichtextColor(objects.Color("FF1F6525"), ("/%d"):format(xpReq))
+    richtext.printRichContainedNoWrap(txt1..txt2, smallFont, rightTop:get())
 end
 
 
