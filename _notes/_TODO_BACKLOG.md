@@ -32,17 +32,18 @@
 - Shop UI (from leo)
 - Add smoke to fire-particles. smoke becomes bigger, gray/dark gray.
 - In shop, when hovering a squad, display squad-card on right
+- Set up leo w/ claude-code
 
 
 ### OK:: what do we need for a minimum-playable game?
 
 
 
+- Map-scene improvements:
+--- Commander movement for map-scene
+--- Make the yellow-visual snap to thing to the closest mouse position
 
-- Set up leo w/ claude-code
-
-
-- Put ev_q_defs in the system-prompt, so leo_normal/smart knows about it.
+- Proper ordered-rendering for map-scene
 
 
 
@@ -55,10 +56,7 @@
 --- BORDER: Trees + Rocks + Dark-Fog?
 
 
-- Map-scene improvements:
---- Proper ordered-rendering for map-scene
---- Commander movement for map-scene
---- Make the yellow-visual snap to thing to the closest mouse position
+- Write CLAUDE.md for Leo. Put ev_q_defs in the system-prompt, so leo_normal/smart knows about it.
 
 
 - Event system: random map events on empty nodes
@@ -97,11 +95,7 @@ improvements to main-agent system-prompt.
 - Clearer defined workflow
 - explanation for how to use `condense/checkpoint`
 
-
-
 Set up omni-agent properly (maybe make an agent-creator helper in base-ex6?)
-
-
 
 - Have an agent that audits changes (git diffs) and checks for issues.
 That agent should utilize _ex6/coding_style.

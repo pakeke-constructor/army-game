@@ -97,7 +97,7 @@ function RewardPanel:draw()
                 ui.drawSingleColorPanel(x, y, w, h)
                 if not isHovered then
                     lg.setColor(1, 0.85, 0.3, 0.2)
-                    g.drawImage("glow_lootreward", x + w/2, y + h/2, 0, w/78, h/14)
+                    -- g.drawImage("glow_lootreward", x + w/2, y + h/2, 0, w/78, h/14)
                 end
                 lg.setColor(1,1,1)
                 richtext.printRich(txt, SMALL_FONT, x,y+pad, w, "center")
