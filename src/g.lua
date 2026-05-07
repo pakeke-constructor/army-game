@@ -1079,7 +1079,13 @@ function g.drawEntity(ent, x, y)
     end
     if ent.image then
         lg.setColor(1,1,1)
-        g.drawImage(ent.image, x + (ent.ox or 0), y + (ent.oy or 0), ent.rot or 0, sx, sy)
+        local yoff = ent.yoffset or 0
+        if yoff ~= 0 then
+            local _,h = g.getImageSize(ent.image)
+            g.drawImageOffset(ent.image, x + (ent.ox or 0), y + (ent.oy or 0), ent.rot or 0, sx, sy, 0.5, 0.5 + yoff / h, ent.kx, ent.ky)
+        else
+            g.drawImage(ent.image, x + (ent.ox or 0), y + (ent.oy or 0), ent.rot or 0, sx, sy, ent.kx, ent.ky)
+        end
         if ent.frozenTime and ent.frozenTime > 0 then
             drawIceCube(ent, x,y, sx,sy)
         end
