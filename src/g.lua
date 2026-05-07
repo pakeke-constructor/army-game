@@ -599,10 +599,10 @@ local SQUAD_LIST = {}
 ---@field id string
 ---@field entityId string
 ---@field rarity g.Rarity
+---@field unitCount integer
 ---@field statUpgradeScaling table<string, number> { [statName] -> number }
 ---@field unitCountUpgradeScaling integer?
 ---@field name string
----@field count number
 ---@field icon string
 ---@field perks string[]
 ---@field cost g.ManaBundle
@@ -616,7 +616,7 @@ function g.defineSquad(id, info)
     assert(not SQUAD_DEFS[id], "Duplicate squad: " .. id)
     info.id = id
     info.perks = info.perks or {}
-    info.count = info.count or 1
+    info.unitCount = info.unitCount or 1
     info.name = assert(info.name)
     info.rarity = assert(info.rarity)
     info.unitCountUpgradeScaling = info.unitCountUpgradeScaling or 0

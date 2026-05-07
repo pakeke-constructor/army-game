@@ -6,7 +6,6 @@ local objects = require("src.modules.objects.objects")
 ---@field level integer
 ---@field icon string
 ---@field perks string[]
----@field unitCount integer?
 ---@field formation "square"|"circle"|"horizontal"|"vertical"|"diamond"
 ---@field deployed boolean?
 ---@field canAfford boolean?
@@ -93,7 +92,7 @@ end
 
 function Squad:getUnitCount()
     g = g or require("src.g")
-    return self.unitCount or g.getSquadInfo(self.squadId).count
+    return g.getSquadInfo(self.squadId).unitCount
 end
 
 ---@param x number
@@ -120,7 +119,6 @@ function Squad:serialize()
         squadId = self.squadId,
         level = self.level,
         perks = self.perks,
-        unitCount = self.unitCount,
         formation = self.formation,
     }
 end
@@ -132,7 +130,6 @@ function Squad.deserialize(data)
     local sq = Squad(data.squadId)
     sq.level = data.level or 1
     sq.perks = data.perks or {}
-    sq.unitCount = data.unitCount
     sq.formation = data.formation or "square"
     return sq
 end

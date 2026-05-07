@@ -120,7 +120,7 @@ local function drawSquadCard(squadId, region, index)
         getHeight = function() return unitHeight + 4 end,
         draw = function(ex, ey, ew, eh)
             if unitHeight == 0 then return end
-            local count = info.count or 1
+            local count = info.unitCount or 1
             local totalW = count * unitWidth + (count - 1) * unitGap
             local startX = ex + (ew - totalW) / 2
             local r,gg,b,a = darkCol:getRGBA()
