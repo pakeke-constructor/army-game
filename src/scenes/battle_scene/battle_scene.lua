@@ -6,6 +6,7 @@ local ParticleService = require(".particles.ParticleService")
 
 local CAMERA_SPEED = 400
 local CAMERA_ZOOM = 2
+local INTRO_ZOOM_DURATION = 1.4
 local WIN_DELAY = 2.5
 local VICTORY_FADE_IN = 0.25
 
@@ -47,6 +48,7 @@ function battle_scene:enter()
     self.victory = false
     self.victoryPopupTime = 0
     self.squadChoices = nil
+    self.timeSinceEnteredScene = 0
 
     local run = g.getRun()
     encounters.startRandomEncounter(run.day, self.ecs)
@@ -84,6 +86,8 @@ end
 
 
 function battle_scene:update(dt)
+    self.timeSinceEnteredScene = self.timeSinceEnteredScene + dt
+
     local run = g.getRun()
     for _, squad in ipairs(run.squads) do
         local info = g.getSquadInfo(squad.squadId)
@@ -123,6 +127,17 @@ end
 function battle_scene:updateCamera(dt)
     local cam = self.camera
     cam:setViewport(0, 0, love.graphics.getDimensions())
+
+    if self.timeSinceEnteredScene < INTRO_ZOOM_DURATION then
+        local border = self.ecs.border
+        local sw, sh = love.graphics.getDimensions()
+        local fitZoom = math.min(sw / border[3], sh / border[4])
+        local t = self.timeSinceEnteredScene / INTRO_ZOOM_DURATION
+        t = t * t * (3 - 2 * t)
+        cam:setZoom(fitZoom + (CAMERA_ZOOM - fitZoom) * t)
+    else
+        cam:setZoom(CAMERA_ZOOM)
+    end
 
     local spd = CAMERA_SPEED / math.sqrt(cam:getZoom())
     local mx, my = 0, 0

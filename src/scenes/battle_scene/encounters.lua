@@ -32,8 +32,8 @@ function EnemySpawner:init(ecs, rng)
     self._rng = rng
     self._entries = {}
     -- spawn origin and facing direction
-    self._x = 400
-    self._y = 150
+    self._x = nil
+    self._y = nil
     self._dx = -1
     self._dy = 0
 end
@@ -77,7 +77,8 @@ end
 
 --- Spawns all queued enemies in formation.
 --- Melee in front rows, ranged in back rows.
-function EnemySpawner:finalize()
+---@param ecs ecs.ECSWorld
+function EnemySpawner:finalize(ecs)
     -- separate melee and ranged
     local melee, ranged = {}, {}
     for _, id in ipairs(self._entries) do
@@ -95,6 +96,11 @@ function EnemySpawner:finalize()
     for _, id in ipairs(ranged) do ordered[#ordered + 1] = id end
 
     -- lay out in rows centered on spawn position
+    if not (self._x and self._y) then
+        local x,y,w,h = ecs.border[1],ecs.border[2],ecs.border[3],ecs.border[4]
+        self._x = x + w * (2/3)
+        self._y = y + h * (2/5)
+    end
     local ox, oy = self._x, self._y
     for i, id in ipairs(ordered) do
         local idx = i - 1
@@ -121,7 +127,7 @@ function encounters.startRandomEncounter(difficulty, ecs)
     local spawn = arr[rng:random(1, #arr)]
     local es = EnemySpawner(ecs, rng)
     spawn(es, ecs)
-    es:finalize()
+    es:finalize(ecs)
 end
 
 return encounters

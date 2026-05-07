@@ -42,6 +42,12 @@
 ### OK:: what do we need for a minimum-playable game?
 
 
+- Enter-animation for battle-scene.  Camera zoom-in when entering.  Show "battle start" text.
+
+
+- Make demons/enemies walk around a bit randomly at the start of combat
+
+
 
 - "Terrain" for battle-scene 
 --- trees
