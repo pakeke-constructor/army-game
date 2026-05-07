@@ -209,7 +209,8 @@ local function drawSquadBox(r, squadId, cost)
     end
 
     if canAfford and squad then
-        -- then player can afford it!
+        -- if player can upgrade their squad:
+        -- Then draw a fancy background animation behind the card.
         local function drawSnakeThing(offset)
             local N = 9
             local col = objects.Color(rar.color)
@@ -268,8 +269,16 @@ local function drawSquadBox(r, squadId, cost)
     drawCost(cost, bot2, false)
 
     if wasJustClicked then
-        -- try to buy the squad.
+        if g.trySpendGold(cost) then
+            if squad then
+                squad.level = squad.level + 1
+            else
+                g.addSquadToArmy(g.newSquad(squadId))
+            end
+            return true
+        end
     end
+    return false
 end
 
 
@@ -430,7 +439,9 @@ local function drawShopUI(self)
     for i, ur in ipairs(units) do
         local squadId = self.shopNode.squadShop[i]
         if squadId and squadId ~= false then
-            drawSquadBox(ur:padUnit(6,10), squadId, 90 + helper.hashInteger(i) % 20)
+            if drawSquadBox(ur:padUnit(6,10), squadId, 90 + helper.hashInteger(i) % 20) then
+                self.shopNode.squadShop[i] = false
+            end
         end
     end
 
