@@ -9,6 +9,8 @@ g.defineCommander("sir_horse", "Sir Horse", {
         green = 2
     },
 
+    image = "basiccommander",
+
     onStart = function(run)
         g.addSquadToArmy(g.newSquad("militia_squad"))
         g.addSquadToArmy(g.newSquad("militia_squad"))

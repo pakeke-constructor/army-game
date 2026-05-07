@@ -14,6 +14,7 @@ local COMMANDER_SPEED = 80 -- world pixels per second
 local PATH_SEARCH_DEPTH = 3
 
 
+---@class g.MapScene
 local map_scene = {}
 
 function map_scene:init()
@@ -46,10 +47,12 @@ local function renderNode(graph, node, r, g, b, a, radius)
 end
 
 ---@param graph MapGraph
-local function getHoveredNode(graph, wx, wy)
-    local hoverDist = graph.distanceBetweenNodes * HOVER_DIST_FRAC
-    local best, bestDist = nil, hoverDist * hoverDist
-    graph:forEachNode(function(node)
+---@param pnode MapNode
+local function getHoveredNode(graph, pnode, wx, wy)
+    local best, bestDist = nil, math.huge
+    local neighbors = graph:getNeighbors(pnode.x, pnode.y)
+    for i = 1, #neighbors do
+        local node = neighbors[i]
         local nx, ny = graph:getDrawPos(node)
         local dx, dy = nx - wx, ny - wy
         local d2 = dx * dx + dy * dy
@@ -57,7 +60,7 @@ local function getHoveredNode(graph, wx, wy)
             best = node
             bestDist = d2
         end
-    end)
+    end
     return best
 end
 
@@ -68,6 +71,7 @@ function map_scene:enter()
     self.pixelCanvas = PixelCanvas.new(love.graphics.getDimensions())
     self.hud = HUD()
     self.dragging = false
+    self.commanderFacing = -1
 
     local run = g.getRun()
     if not run.mapGraph then
@@ -194,13 +198,15 @@ function map_scene:mousereleased(mx, my, button)
             local pnode = graph and graph:getPlayerNode()
             if pnode then
                 local wx, wy = self.camera:toWorld(mx, my)
-                local hovered = getHoveredNode(graph, wx, wy)
+                local hovered = getHoveredNode(graph, pnode, wx, wy)
                 if hovered and hovered ~= pnode then
                     local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, PATH_SEARCH_DEPTH)
                     if path and #path >= 2 then
                         local ax, ay = graph:getDrawPos(path[1])
                         local bx, by = graph:getDrawPos(path[2])
                         local dist = math.sqrt((bx - ax)^2 + (by - ay)^2)
+                        if bx < ax then self.commanderFacing = 1 end
+                        if bx > ax then self.commanderFacing = -1 end
                         self.traveling = {
                             toNode = path[2],
                             ax = ax, ay = ay, bx = bx, by = by,
@@ -224,6 +230,11 @@ function map_scene:mousemoved(mx, my, dmx, dmy)
     end
 end
 
+
+
+---@param scene g.MapScene
+---@param graph MapGraph
+---@param pnode any
 local function drawCommander(scene, graph, pnode)
     local cx, cy
     if scene.traveling then
@@ -233,8 +244,12 @@ local function drawCommander(scene, graph, pnode)
     else
         cx, cy = graph:getDrawPos(pnode)
     end
-    love.graphics.setColor(1, 0.8, 0.2, 1)
-    love.graphics.circle("fill", cx, cy, PLAYER_RADIUS)
+    local run = g.getRun()
+    local cinfo = g.getCommanderInfo(run.commander)
+    lg.setColor(1,1,1)
+    g.drawImage(cinfo.image, cx,cy-8, 0, scene.commanderFacing, 1)
+    -- love.graphics.setColor(1, 0.8, 0.2, 1)
+    -- love.graphics.circle("fill", cx, cy, PLAYER_RADIUS)
 end
 
 local function hash(x,y)
@@ -287,8 +302,8 @@ function map_scene:draw()
         if pnode then
             local mx, my = love.mouse.getPosition()
             local wx, wy = self.camera:toWorld(mx, my)
-            local hovered = getHoveredNode(graph, wx, wy)
-            if hovered and hovered ~= pnode then
+            local hovered = getHoveredNode(graph, pnode, wx, wy)
+            if (not self.traveling) and hovered and hovered ~= pnode then
                 local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, PATH_SEARCH_DEPTH)
                 if path and #path >= 2 then
                     -- first edge bold yellow, rest pale yellow
