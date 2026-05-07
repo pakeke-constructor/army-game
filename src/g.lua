@@ -173,19 +173,25 @@ function g.hasRun()
     return currentRun ~= nil
 end
 
+---@return g.Run
 function g.getRun()
     return assert(currentRun, "run not loaded")
 end
 
+---@param amount number
 function g.addGold(amount)
     local run = g.getRun()
     run.money = run.money + amount
 end
 
+---@param amount number
+---@return boolean
 function g.canAffordGold(amount)
     return g.getRun().money >= amount
 end
 
+---@param amount number
+---@return boolean
 function g.trySpendGold(amount)
     if not g.canAffordGold(amount) then
         return false
@@ -195,6 +201,7 @@ function g.trySpendGold(amount)
     return true
 end
 
+---@param amount number
 function g.addXP(amount)
     local run = g.getRun()
     run.xp = run.xp + amount
@@ -1621,6 +1628,7 @@ g.COLORS = {
 
     GOLD = objects.Color("FFD8B01F"),
     XP = objects.Color("FF2BC66E"),
+    DARK_UI = objects.Color("FF0c0c19"),
 }
 
 for k,v in pairs(g.COLORS) do

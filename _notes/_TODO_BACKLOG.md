@@ -31,17 +31,11 @@
 - Squad upgrade system
 - Shop UI (from leo)
 - Add smoke to fire-particles. smoke becomes bigger, gray/dark gray.
-
+- In shop, when hovering a squad, display squad-card on right
 
 
 ### OK:: what do we need for a minimum-playable game?
 
-
-- Squad upgrade UI
-- When hovering squad-card, you can see the squad-upgrade
-- When hovering squad-box, you can see what the upgrade does
-
-- In shop, when hovering a squad, display squad-card on right
 
 
 
@@ -70,7 +64,16 @@
 - Event system: random map events on empty nodes
 
 
+
+
+- Squad upgrade UI
+- When hovering squad-card, you can see the squad-upgrade
+- When hovering squad-box, you can see what the upgrade does
+
+
+
 - Special-nodes wired up
+
 
 
 - Weapons system: Make it so weapons can be held/used

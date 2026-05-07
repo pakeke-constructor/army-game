@@ -16,10 +16,8 @@ local hudArgs
 local SQUAD_ICON_SIZE = 32
 local SQUAD_PADDING = 4
 
-local LOC_DEMON_RAGE = interp("{demon_pitchfork}{c r=0.6 g=0.1 b=0} Rage: %{n}", {context="HUD top bar, shows current demon rage level"})
-local LOC_GOLD = interp("{coin_icon} Coins: %{n}", {context="HUD top bar, shows player's coin currency"})
 local LOC_DAYS = interp("%{n} days until {c r=1 g=0.3 b=0.3}attack", {context="HUD top bar, countdown to next demon incursion. 'attack' is richtext-colored red"})
-local LOC_ZONE = loc("{c r=0.2 g=0.5 b=0.3}Zone 1 - Forest", {}, {context="HUD top bar, current zone name. Hardcoded stub"})
+local LOC_ZONE = loc("Zone 1 - Forest", {}, {context="HUD top bar, current zone name. Hardcoded stub"})
 local LOC_PAUSE = loc("II", {}, {context="HUD top bar, pause button icon text"})
 
 local LOC_HOVER_RAGE = loc("Demon Rage increases when you win a battle, making enemies stronger.", {}, {context="Tooltip when hovering demon rage in HUD"})
@@ -246,12 +244,53 @@ end
 
 
 
+local function dbg(r)
+    if consts.DEV_MODE then
+        lg.rectangle("line",r:get())
+    end
+end
+
+
+---@param reg kirigami.Region
+local function drawXpBar(reg)
+    ui.drawDarkPanel(reg:get())
+    local left, right = reg:splitHorizontal(1, 4)
+
+    local run = g.getRun()
+    local smallFont = g.getSmallFont(16)
+    local level = run.level
+    local leftTop, leftBot = left:padRatio(0.2):splitVertical(1,1)
+    lg.setColor(1,1,1)
+    g.drawImage("xp_icon", leftTop:getCenter())
+    lg.setColor(objects.Color("FF33873E"))
+    richtext.printRichContainedNoWrap("{o}Lv "..tostring(level).."{/o}", smallFont, leftBot:get())
+
+    -- draw xp bar
+    local _, rightTop, rightBot = right:splitVertical(1,2,2)
+    local xp, xpReq = run.xp, run:getXpRequirement()
+    -- local xpBar = rightBot:padUnit(8, 10, 8, 6)
+    local xpBar = rightBot:padUnit(6, 2, 6, 6)
+    lg.setColor(g.COLORS.DARK_UI)
+    lg.setColor(objects.Color("FF2E2C3C"))
+    ui.drawSingleColorPanel(xpBar:get())
+    lg.setColor(objects.Color("FF145914"))
+
+    do
+    -- set a stencil here, draw image `army_healthbar_background`, offset randomly, (math.sin)
+    local xpW = (xp/xpReq) * xpBar.w
+    ui.drawSingleColorPanel(xpBar:shrinkTo(xpW, xpBar.h):get())
+    end
+
+    -- draw xp text
+    richtext.printRichContainedNoWrap(("%d / %d"):format(xp,xpReq), smallFont, rightTop:get())
+end
+
 
 local function drawTopBar()
     local r = ui.getScreenRegion()
     local topBar, mainBar = r:splitVertical(0.1,0.9)
 
-    local demonRage, gold, daysTillIncursion, zoneString, pausePanel = topBar:splitHorizontal(2,2,4,4,1)
+    local xp, demonRage, gold, daysTillIncursion, zoneString, pausePanel = topBar:splitHorizontal(4, 2,2,4,4,1)
     --[[
     each of these ^^^ are panels.
 
@@ -286,15 +325,17 @@ local function drawTopBar()
         end
     end
 
-    drawPanel(demonRage, LOC_DEMON_RAGE({n = run.demonRage}), LOC_HOVER_RAGE)
-    drawPanel(gold, LOC_GOLD({n = run.money}), LOC_HOVER_GOLD)
+    drawXpBar(xp)
+
+    drawPanel(demonRage, "{demon_pitchfork}{c r=0.6 g=0.1 b=0} " .. tostring(run.demonRage), LOC_HOVER_RAGE)
+    drawPanel(gold, "{coin_icon} {GOLD_COLOR}" .. tostring(run.money), LOC_HOVER_GOLD)
 
     local _, _, _, dh = daysTillIncursion:get()
     local extraH = dh * 0.05
     local dtiRegion = daysTillIncursion:padUnit(0, -extraH, 0, 0)
     drawPanel(dtiRegion, LOC_DAYS({n = run:getDaysUntilIncursion()}), LOC_HOVER_DAYS)
 
-    drawPanel(zoneString, LOC_ZONE)
+    drawPanel(zoneString, "{c r=0.2 g=0.5 b=0.3}{wavy freq=0.5}" .. LOC_ZONE)
     drawPanel(pausePanel, LOC_PAUSE)
 end
 
