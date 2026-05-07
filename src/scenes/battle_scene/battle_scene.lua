@@ -40,11 +40,7 @@ function battle_scene:enter()
     self.editingSquadLineup = true
 
     self.ecs = ECSWorld({"stats", "status_effects", "ai", "attacking", "physics"})
-    self.ecs:setBorder(600, 350)
-    local border = self.ecs.border
     self.camera = Camera(0, 0, CAMERA_ZOOM)
-    self.camera:setViewport(0, 0, love.graphics.getDimensions())
-    self.camera:setPos(border[3] * 0.45, border[4] * 0.5)
     self.particles = ParticleService()
     self.hud = HUD()
     self.noEnemyTimer = 0
@@ -54,6 +50,9 @@ function battle_scene:enter()
 
     local run = g.getRun()
     encounters.startRandomEncounter(run.day, self.ecs)
+    local border = self.ecs.border
+    self.camera:setViewport(0, 0, love.graphics.getDimensions())
+    self.camera:setPos(border[3] * 0.45, border[4] * 0.5)
 end
 
 local function countEnemies(ecs)

@@ -38,6 +38,15 @@ function EnemySpawner:init(ecs, rng)
     self._dy = 0
 end
 
+
+---@param wx integer
+---@param wy integer
+function EnemySpawner:setWorldSize(wx,wy)
+    self._wx = wx
+    self._wy = wy
+end
+
+
 ---@param id string entity type id
 ---@param count? number default 1
 function EnemySpawner:add(id, count)
@@ -120,6 +129,7 @@ function encounters.startRandomEncounter(difficulty, ecs)
     local spawn = arr[rng:random(1, #arr)]
     local es = EnemySpawner(ecs, rng)
     spawn(es)
+    ecs:setBorder(es._wx, es._wy)
     es:finalize()
 end
 

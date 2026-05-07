@@ -136,9 +136,6 @@ local function drawSquadBar(self, region)
     end
 
     local startX = inner.x
-    if count == 1 then
-        startX = inner.x + (inner.w - SQUAD_ICON_SIZE) / 2
-    end
     local baseY = inner.y + (inner.h - SQUAD_ICON_SIZE) / 2
 
     for i, entry in ipairs(trueArmy) do

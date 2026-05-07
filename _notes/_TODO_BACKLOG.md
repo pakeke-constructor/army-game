@@ -33,34 +33,24 @@
 - Add smoke to fire-particles. smoke becomes bigger, gray/dark gray.
 - In shop, when hovering a squad, display squad-card on right
 - Set up leo w/ claude-code
+- Map-scene improvements:
+--- Commander movement for map-scene
+--- Make the yellow-visual snap to thing to the closest mouse position
+
 
 
 ### OK:: what do we need for a minimum-playable game?
 
 
 
-- Map-scene improvements:
---- Commander movement for map-scene
---- Make the yellow-visual snap to thing to the closest mouse position
-
-- Proper ordered-rendering for map-scene
-
-
-
 - "Terrain" for battle-scene 
---- swamp
---- lava-pit
 --- trees
 --- rocks
 --- grass
 --- BORDER: Trees + Rocks + Dark-Fog?
 
 
-- Write CLAUDE.md for Leo. Put ev_q_defs in the system-prompt, so leo_normal/smart knows about it.
-
-
-- Event system: random map events on empty nodes
-
+- Proper ordered-rendering for map-scene
 
 
 
@@ -69,8 +59,12 @@
 - When hovering squad-box, you can see what the upgrade does
 
 
+- Event system: random map events on empty nodes
+
+- Shrine nodes UI
 
 - Special-nodes wired up
+
 
 
 
@@ -79,7 +73,20 @@
 - ranged: bows, + bow pointing in direction they aim
 
 
+
+
+- Write CLAUDE.md for Leo. Put ev_q_defs in the system-prompt, so leo_normal/smart knows about it.
+
+
+
 - Juice for placing units (deploy them sequentially so its satisfying?)
+- Juice for spending mana: Should pop up above the units as you spend them
+- Juice for spending money in shop
+
+
+- Extra fancy terrain for battles:
+--- swamp
+--- lava-pit
 
 
 - Sound effects
