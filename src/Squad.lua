@@ -92,7 +92,9 @@ end
 
 function Squad:getUnitCount()
     g = g or require("src.g")
-    return g.getSquadInfo(self.squadId).unitCount
+    local info = g.getSquadInfo(self.squadId)
+    local xtra = ((self.level-1) * info.unitCountUpgradeScaling)
+    return info.unitCount + xtra
 end
 
 ---@param x number

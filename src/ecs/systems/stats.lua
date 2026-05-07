@@ -46,8 +46,18 @@ USAGE (adding a buff/perk/blessing):
 local function recomputeStat(ent, stat)
     local base = ent[stat.baseName]
     if not base then return end
+    local squad = ent.squad
+    ---@cast squad g.Squad
+    local statMul = 1
+    if squad then
+        local lv = squad.level or 1
+        local info = g.getSquadInfo(squad.squadId)
+        if info.statUpgradeScaling and info.statUpgradeScaling[stat] then
+            statMul = 1 + (info.statUpgradeScaling[stat] * (lv-1))
+        end
+    end
     local val = base + g.ask(stat.modQ, ent)
-    val = val * g.ask(stat.mulQ, ent)
+    val = val * g.ask(stat.mulQ, ent) * statMul
     ent[stat.name] = val
 end
 
