@@ -36,19 +36,22 @@
 - Map-scene improvements:
 --- Commander movement for map-scene
 --- Make the yellow-visual snap to thing to the closest mouse position
+- Enter-animation for battle-scene.  Camera zoom-in when entering.  Show "battle start" text.
 
 
 
 ### OK:: what do we need for a minimum-playable game?
 
 
-- Enter-animation for battle-scene.  Camera zoom-in when entering.  Show "battle start" text.
-
 
 
 - Dark-fog rendering system.
 --- dark-fog for map
 --- dark-fog for battle-scene
+
+
+
+- Fog for battle-scene border
 
 
 

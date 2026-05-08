@@ -2,6 +2,7 @@ local ECSWorld = require("src.ecs.ECSWorld")
 local encounters = require("src.scenes.battle_scene.encounters")
 local Camera = require("lib.cam11")
 local ParticleService = require(".particles.ParticleService")
+local fogService = require("src.fogService")
 
 
 local CAMERA_SPEED = 400
@@ -226,6 +227,19 @@ function battle_scene:draw()
     love.graphics.rectangle("line", border[1], border[2], border[3], border[4])
 
     self.ecs:draw(self.camera:getTransform())
+
+    local sw, sh = love.graphics.getDimensions()
+    local x1, y1 = self.camera:toWorld(0, 0)
+    local x2, y2 = self.camera:toWorld(sw, sh)
+    local fogRegion = {
+        x = math.min(x1, x2),
+        y = math.min(y1, y2),
+        w = math.abs(x2 - x1),
+        h = math.abs(y2 - y1),
+    }
+    fogService.renderFog(fogRegion, function(x, y)
+        return x < border[1] or x > border[1] + border[3] or y < border[2] or y > border[2] + border[4]
+    end)
 
     if not self.victory then
         local entry = self.hud:getSelection()
