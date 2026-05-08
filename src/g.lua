@@ -1617,6 +1617,7 @@ function g.buffEntity(ent, stat, increase)
     assert(STAT_DEFS[stat], "unknown stat: " .. tostring(stat))
     ent.buffs = ent.buffs or {}
     ent.buffs[stat] = (ent.buffs[stat] or 0) + increase
+    g.call("entityBuffed", ent, stat, increase)
 end
 
 ---@param id string
