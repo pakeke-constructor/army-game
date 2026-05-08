@@ -3,6 +3,7 @@ local Camera = require("lib.cam11")
 local MapGraph = require("src.scenes.map_scene.MapGraph")
 local PixelCanvas = require("src.modules.PixelCanvas")
 local decor_types = require("src.scenes.map_scene.decor_types")
+local fogService = require("src.fogService")
 
 local CAMERA_ZOOM = 0.5
 local NODE_RADIUS = 4
@@ -12,6 +13,7 @@ local HOVER_DIST_FRAC = 0.4 -- fraction of distanceBetweenNodes
 local COMMANDER_SPEED = 80 -- world pixels per second
 
 local PATH_SEARCH_DEPTH = 3
+local FOG_CLEAR_RADIUS = 120
 
 
 ---@class g.MapScene
@@ -115,6 +117,25 @@ function map_scene:enter()
     table.sort(self.decorList, byY)
     table.sort(self.nodeList, byY)
 
+    -- precompute fog-free cells (nested tables for fast lookup, no string alloc)
+    self.fogClearCells = {}
+    local step = 24 -- matches FOG_STEP in fogService
+    local clearCells = math.ceil(FOG_CLEAR_RADIUS / step)
+    for _, entry in ipairs(self.nodeList) do
+        local cx = math.floor(entry.x / step)
+        local cy = math.floor(entry.y / step)
+        for dx = -clearCells, clearCells do
+            local row = self.fogClearCells[cx + dx]
+            if not row then
+                row = {}
+                self.fogClearCells[cx + dx] = row
+            end
+            for dy = -clearCells, clearCells do
+                row[cy + dy] = true
+            end
+        end
+    end
+
     local pnode = run.mapGraph:getPlayerNode()
     if pnode then
         self.camX, self.camY = run.mapGraph:getDrawPos(pnode)
@@ -169,7 +190,7 @@ function map_scene:update(dt)
 
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
     self.pixelCanvas:resize(love.graphics.getDimensions())
-    self.camera:setZoom(CAMERA_ZOOM * ui.getUIScaling())
+    --self.camera:setZoom(CAMERA_ZOOM * ui.getUIScaling())
     self.camera:setPos(self.camX, self.camY)
     self.ecs:update(dt)
 end
@@ -227,6 +248,15 @@ function map_scene:mousemoved(mx, my, dmx, dmy)
         local zoom = self.camera:getZoom()
         self.camX = self.camX - dmx / zoom
         self.camY = self.camY - dmy / zoom
+    end
+end
+
+function map_scene:wheelmoved(dx, dy)
+    if dy ~= 0 then
+        local zoom = self.camera:getZoom()
+        zoom = zoom * (1 + dy * 0.1)
+        zoom = math.max(0.1, math.min(2, zoom))
+        self.camera:setZoom(zoom)
     end
 end
 
@@ -321,6 +351,24 @@ function map_scene:draw()
             drawCommander(self, graph, pnode)
         end
     end
+
+    -- fog
+    local sw, sh = love.graphics.getDimensions()
+    local x1, y1 = self.camera:toWorld(0, 0)
+    local x2, y2 = self.camera:toWorld(sw, sh)
+    local fogRegion = {
+        x = math.min(x1, x2),
+        y = math.min(y1, y2),
+        w = math.abs(x2 - x1),
+        h = math.abs(y2 - y1),
+    }
+    local step = 24
+    local clearCells = self.fogClearCells
+    fogService.renderFog(fogRegion, function(x, y)
+        local cx = math.floor(x / step)
+        local row = clearCells[cx]
+        return not (row and row[math.floor(y / step)])
+    end)
 
     lg.setColor(1, 1, 1, 1)
     iml.popTransform()

@@ -3,9 +3,9 @@
 local fogService = {}
 
 
-local FOG_COLOR = objects.Color("FF361919")
+local FOG_COLOR = objects.Color("FF6C0909")
 
-local FOG_STEP = 24
+local FOG_STEP = 22
 local FOGS={
 "fog_of_war_cloud1",
 "fog_of_war_cloud2",
@@ -129,7 +129,9 @@ function fogService.renderFog(r, hasFog)
                     local lv = math.max(1, math.min(FOG_LAYER_MAX, v))
                     if lv == layer then
                         local i = hashCell(x, y, 4)
-                        g.drawImage(FOGS[i % #FOGS + 1], x, y, math.sin(t + (i % 100) / 100))
+                        local ox = (i % 9) - 4
+                        local oy = (hashCell(x, y, 5) % 9) - 4
+                        g.drawImage(FOGS[i % #FOGS + 1], x + ox, y + oy, math.sin(t + (i % 100) / 100))
                     end
                 end
             end
