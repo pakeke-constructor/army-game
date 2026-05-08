@@ -81,6 +81,7 @@ local physics = {
 ---@field public image string?
 ---@field public squad g.Squad?
 ---@field public scope g.Scope?
+---@field public buffs {[string]: number}?
 ---@field public _attackTimer number?
 ---@field public _attackTarget ecs.Entity?
 ---@field public _knockVx number?

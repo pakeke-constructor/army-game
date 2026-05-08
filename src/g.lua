@@ -1610,6 +1610,15 @@ function g.getStatList()
     return STAT_LIST
 end
 
+---@param ent ecs.Entity
+---@param stat string
+---@param increase number
+function g.buffEntity(ent, stat, increase)
+    assert(STAT_DEFS[stat], "unknown stat: " .. tostring(stat))
+    ent.buffs = ent.buffs or {}
+    ent.buffs[stat] = (ent.buffs[stat] or 0) + increase
+end
+
 ---@param id string
 ---@return g.Stat
 function g.getStatInfo(id)

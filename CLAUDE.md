@@ -53,6 +53,7 @@ A bunch of common pitfalls/traps to look out for:
 - Don't add buffs to squads directly. Use g.addBuff instead.
 - table-valued fields on the def are shared across all entities of that type. Mutating them (e.g. `table.insert(ent.tags, ...)`) affects every entity. 
 - Before adding/removing handlers to ent.scopes, look for a g.* function first.
+- Entity stats (attackDamage, maxHealth, etc) are recomputed every frame in stats.lua; so if you want to add a buff, you must use `g.buffEntity`
 </gotchas>
 
 <event_question_bus>
