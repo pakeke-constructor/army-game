@@ -3,9 +3,24 @@
 local fogService = {}
 
 
-local FOG_COLOR = objects.Color("FF6C0909")
+-- local FOG_COLOR = objects.Color("FF2F0404") -- dark red
+-- local FOG_COLOR = objects.Color("FF342D2D") -- dark gray
 
-local FOG_STEP = 22
+local FOG_COLOR = objects.Color("FF450606") -- dark-ish red
+
+local FOG_COLOR = objects.Color("FF1A311F") -- dark-green
+
+
+local FOG_COLOR = objects.Color("ff273718") -- forest green
+-- TODO: in future, change color of fog depending on the zone
+
+
+
+local FOG_STEP = 18
+
+local OPACITY = 1
+
+
 local FOGS={
 "fog_of_war_cloud1",
 "fog_of_war_cloud2",
@@ -16,7 +31,6 @@ local FOG_LAYER_MAX = 6
 local FOG_DARKEN_PER_LAYER = 0.16
 local FOG_EXPAND_CELLS = 5
 local FOG_VARIATION_MOD = 4
-local FOG_PIN_NIL_MOD = 131
 
 local ADJ = {
     {-1, -1}, {0, -1}, {1, -1},
@@ -91,8 +105,7 @@ function fogService.renderFog(r, hasFog)
         for gy = 0, h - 1 do
             local wx = x1 + gx * FOG_STEP
             local wy = y1 + gy * FOG_STEP
-            local p = hashCell(wx, wy, 1)
-            if hasFog(wx, wy) and (p % FOG_PIN_NIL_MOD ~= 0) then
+            if hasFog(wx, wy) then
                 a:set(gx, gy, 0)
             else
                 a:set(gx, gy, nil)
@@ -110,7 +123,8 @@ function fogService.renderFog(r, hasFog)
 
     for layer = FOG_LAYER_MAX, 1, -1 do
         local col = objects.Color(FOG_COLOR)
-        lg.setColor(col:darken((FOG_LAYER_MAX - layer) * FOG_DARKEN_PER_LAYER))
+        local coll = col:darken((FOG_LAYER_MAX - layer) * FOG_DARKEN_PER_LAYER)
+        lg.setColor(coll[1], coll[2], coll[3], OPACITY)
         for gx = 0, w - 1 do
             for gy = 0, h - 1 do
                 local v = a:get(gx, gy)
@@ -127,10 +141,10 @@ function fogService.renderFog(r, hasFog)
                     end
 
                     local lv = math.max(1, math.min(FOG_LAYER_MAX, v))
-                    if lv == layer then
+                    if lv <= layer then
                         local i = hashCell(x, y, 4)
-                        local ox = (i % 9) - 4
-                        local oy = (hashCell(x, y, 5) % 9) - 4
+                        local ox = (i % 19) - 10
+                        local oy = (hashCell(x, y, 5) % 19) - 10
                         g.drawImage(FOGS[i % #FOGS + 1], x + ox, y + oy, math.sin(t + (i % 100) / 100))
                     end
                 end
