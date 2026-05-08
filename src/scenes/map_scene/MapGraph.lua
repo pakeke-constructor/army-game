@@ -416,6 +416,18 @@ end
 
 
 
+---@return integer
+function MapGraph:countNodes()
+    local count = 0
+    for _ in pairs(self.nodes) do
+        count = count + 1
+    end
+    return count
+end
+
+
+
+
 local SPECIAL_NODES = {"feast", "fountain", "shop"}
 -- TODO: add `town` in here too.
 

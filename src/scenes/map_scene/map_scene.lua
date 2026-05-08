@@ -77,7 +77,7 @@ function map_scene:enter()
 
     local run = g.getRun()
     if not run.mapGraph then
-        run.mapGraph = MapGraph.generate({
+        repeat run.mapGraph = MapGraph.generate({
             width = 50,
             height = 30,
             nodePruneChance = 0.35,
@@ -89,13 +89,15 @@ function map_scene:enter()
             scaleY = 0.6,
             decorTypes = {
                 "mountain_large",
+                "mountain_small_1",
+                "mountain_small_2",
                 "tree_large_1",
                 "tree_small_1",
                 "grass_1",
                 "grass_2",
                 "grass_3"
             },
-        })
+        }) until run.mapGraph:countNodes() > 20
     end
 
     -- Build sorted decor list for drawing
