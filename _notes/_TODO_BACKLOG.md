@@ -45,7 +45,10 @@
 - Enter-animation for battle-scene.  Camera zoom-in when entering.  Show "battle start" text.
 
 
-- Make demons/enemies walk around a bit randomly at the start of combat
+
+- Dark-fog rendering system.
+--- dark-fog for map
+--- dark-fog for battle-scene
 
 
 
@@ -55,6 +58,9 @@
 --- grass
 --- BORDER: Trees + Rocks + Dark-Fog?
 
+
+
+- Make demons/enemies walk around a bit randomly at the start of combat
 
 
 

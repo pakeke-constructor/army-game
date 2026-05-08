@@ -6,7 +6,10 @@ local ParticleService = require(".particles.ParticleService")
 
 local CAMERA_SPEED = 400
 local CAMERA_ZOOM = 2
-local INTRO_ZOOM_DURATION = 1.4
+
+local INTRO_ZOOM_TEXT_FADE_TIME = 0.4
+local INTRO_ZOOM_DURATION = 1.6
+
 local WIN_DELAY = 2.5
 local VICTORY_FADE_IN = 0.25
 
@@ -39,6 +42,8 @@ function battle_scene:enter()
     run:resetForBattle()
 
     self.editingSquadLineup = true
+
+    self.randomI = love.math.random(1,1000) -- random integer, doesnt really matter
 
     self.ecs = ECSWorld({"stats", "status_effects", "ai", "attacking", "physics"})
     self.camera = Camera(0, 0, CAMERA_ZOOM)
@@ -202,6 +207,15 @@ function battle_scene:keypressed(k)
 end
 
 
+local _BATTLE_START_CTX = "An exciting little title-prompt that shows up before a battle. Meant to indicate a battle is starting and it's exciting"
+local BATTLE_START = {
+    loc("Start Battle!",{}, {context=_BATTLE_START_CTX}),
+    loc("En Garde!",{}, {context=_BATTLE_START_CTX}),
+    loc("Fight!",{}, {context=_BATTLE_START_CTX}),
+    loc("Battle Begins!",{}, {context=_BATTLE_START_CTX}),
+}
+
+
 
 function battle_scene:draw()
     self.camera:attach()
@@ -253,6 +267,16 @@ function battle_scene:draw()
         g.gotoScene("map_scene")
     end
 
+    if self.timeSinceEnteredScene < INTRO_ZOOM_DURATION then
+        local rr = ui.getScreenRegion()
+        local font = g.getBigFont(16)
+        local shrink = 1-math.min(1, self.timeSinceEnteredScene / 0.25)
+        rr = rr:padRatio(shrink)
+        local fade = 1-((self.timeSinceEnteredScene - (INTRO_ZOOM_DURATION - INTRO_ZOOM_TEXT_FADE_TIME)) / INTRO_ZOOM_TEXT_FADE_TIME)
+        lg.setColor(1,1,1, fade)
+        local txt = BATTLE_START[self.randomI % #BATTLE_START + 1]
+        richtext.printRichContainedNoWrap("{o}{c r=0.7 g=0.1 b=0.2}"..txt, font, rr:padRatio(0.75):get())
+    end
     ui.endUI()
 end
 
