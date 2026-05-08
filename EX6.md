@@ -26,6 +26,7 @@ After 8 turns, the map is reset; and the player fights a boss.
 </high_level_concepts>
 
 <architecture>
+_ex6/** folder is your coding harness. includes plugins (python files) and includes your own agent definition.
 src/g.lua: All core functions stored here, exposed via `g.*` namespace
 src/scenes/*: All scenes defined here, in folders.
 src/scenes/map_scene/*: Map-scene stuff. Has a graph of nodes for players to navigate
@@ -108,23 +109,3 @@ loc MUST be called at load-time, before the draw/update loop begins.
 - No complex one-liners, no deep nesting, no clever abstractions.
 - If a feature needs >300 new lines, stop and ask how to simplify.
 </IMPORTANT-INSTRUCTIONS>
-
-<FINAL-IMPORTANT-DETAILS>
-You are working alongside an artist/designer to design content for army-game. The artist you are working alongside is NOT very technical.
-
-Your tasks will involve one (or more) of the following things:
-- Defining squads
-- Defining enemies
-- Defining perks
-- Defining blessings
-- (Defining anything else in `content/` folder.)
-
-General guidelines:
-- Avoid working on features that require changes to internal systems, instead, try to work within the existing systems; the main functions you will need live in `g.lua`.
-- If you are reaching into internals, like `ent._target`, then it's probably a sign that the systems are not ready yet. So you should tell the user that "there isn't really a proper way to do this yet".
-- You should tell the user what they are doing, and why you are doing it, keeping in mind that they are not fully technical.
-- You MUST check that image-files exist before using them. Every image inside of `content/*`, `assets/sprites/*` is loaded by filename as a string, eg file.png -> "file".
-- You MUST look at examples inside `content/` before starting. This will give you a better understanding.
-- You may help the user with git issues, but NEVER EVER push directly to master.
-</FINAL-IMPORTANT-DETAILS>
-
