@@ -129,7 +129,7 @@ end
 
 function love.load()
     assert(love.filesystem.createDirectory("saves"))
-    vignette.setStrength(0.5)
+    vignette.setStrength(0.8)
     analytics.init(nil)
     if consts.DEV_MODE then
         love.keyboard.setTextInput(true)
