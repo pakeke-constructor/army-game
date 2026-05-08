@@ -5,7 +5,7 @@ local PixelCanvas = require("src.modules.PixelCanvas")
 local decor_types = require("src.scenes.map_scene.decor_types")
 local fogService = require("src.fogService")
 
-local CAMERA_ZOOM = 0.5
+local CAMERA_ZOOM = 1--0.5
 local NODE_RADIUS = 4
 local PLAYER_RADIUS = 5
 local PAN_SPEED = 200
@@ -14,7 +14,7 @@ local COMMANDER_SPEED = 80 -- world pixels per second
 
 local PATH_SEARCH_DEPTH = 3
 local FOG_CLEAR_RADIUS = 120
-local FOG_REVEAL_DEPTH = 5
+local FOG_REVEAL_DEPTH = 4
 
 
 ---@class g.MapScene
@@ -223,7 +223,9 @@ function map_scene:update(dt)
 
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
     self.pixelCanvas:resize(love.graphics.getDimensions())
-    --self.camera:setZoom(CAMERA_ZOOM * ui.getUIScaling())
+    if not consts.DEV_MODE then
+        self.camera:setZoom(CAMERA_ZOOM * ui.getUIScaling())
+    end
     self.camera:setPos(self.camX, self.camY)
     self.ecs:update(dt)
 end

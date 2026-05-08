@@ -37,6 +37,10 @@
 --- Commander movement for map-scene
 --- Make the yellow-visual snap to thing to the closest mouse position
 - Enter-animation for battle-scene.  Camera zoom-in when entering.  Show "battle start" text.
+- Dark-fog rendering system.
+- dark-fog for map
+- dark-fog for battle-scene
+
 
 
 
@@ -44,22 +48,7 @@
 
 
 
-
-- Dark-fog rendering system.
---- dark-fog for map
---- dark-fog for battle-scene
-
-
-
-- Fog for battle-scene border
-
-
-
-- "Terrain" for battle-scene 
---- trees
---- rocks
---- grass
---- BORDER: Trees + Rocks + Dark-Fog?
+- Write CLAUDE.md for Leo. Put ev_q_defs in the system-prompt, so leo_normal/smart knows about it.
 
 
 
@@ -89,7 +78,12 @@
 
 
 
-- Write CLAUDE.md for Leo. Put ev_q_defs in the system-prompt, so leo_normal/smart knows about it.
+- "Terrain" for battle-scene 
+--- trees
+--- rocks
+--- grass
+--- BORDER: Trees + Rocks + Dark-Fog?
+
 
 
 
