@@ -12,9 +12,10 @@ local FOGS={
 "fog_of_war_cloud3",
 }
 
-local FOG_LAYER_MAX = 4
+local FOG_LAYER_MAX = 6
 local FOG_DARKEN_PER_LAYER = 0.16
 local FOG_EXPAND_CELLS = 5
+local FOG_VARIATION_MOD = 4
 
 local ADJ = {
     {-1, -1}, {0, -1}, {1, -1},
@@ -65,7 +66,7 @@ local function step(src, dst, allowBigger)
     end)
 end
 
----@param r kirigami.Region
+---@param r kirigami.Region -- world-space
 ---@param hasFog fun(x:number,y:number):boolean
 function fogService.renderFog(r, hasFog)
     local t = love.timer.getTime()
@@ -106,10 +107,19 @@ function fogService.renderFog(r, hasFog)
             for gy = 0, h - 1 do
                 local v = a:get(gx, gy)
                 if v ~= nil then
+                    local x = x1 + gx * FOG_STEP
+                    local y = y1 + gy * FOG_STEP
+                    local j = helper.hashInteger(math.floor(x * 17.31 + y * 91.73))
+                    if j % FOG_VARIATION_MOD == 0 then
+                        v = v + 1
+                    end
+                    local k = helper.hashInteger(math.floor(x * 13.91 + y * 31.37))
+                    if k % FOG_VARIATION_MOD == 0 then
+                        v = v + 1
+                    end
+
                     local lv = math.max(1, math.min(FOG_LAYER_MAX, v))
                     if lv == layer then
-                        local x = x1 + gx * FOG_STEP
-                        local y = y1 + gy * FOG_STEP
                         local i = helper.hashInteger(math.floor(x * 33.4 + y * 77.65))
                         g.drawImage(FOGS[i % #FOGS + 1], x, y, math.sin(t + (i % 100) / 100))
                     end
