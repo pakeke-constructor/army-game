@@ -375,7 +375,14 @@ function helper.hashInteger(int)
     for i = 1, 3 do
         int = (int * 214013 + 2531011) % 4294967296
     end
-    return int
+    return math.floor(int / 65536)
+end
+
+function helper.hashIntegerPair(x, y)
+    -- mix x and y non-linearly to avoid spatial correlation
+    local h = helper.hashInteger(x * 374761 + 7919)
+    h = helper.hashInteger(h + y * 668453 + 9533)
+    return h
 end
 
 

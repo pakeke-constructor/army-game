@@ -16,6 +16,7 @@ local FOG_LAYER_MAX = 6
 local FOG_DARKEN_PER_LAYER = 0.16
 local FOG_EXPAND_CELLS = 5
 local FOG_VARIATION_MOD = 4
+local FOG_PIN_NIL_MOD = 131
 
 local ADJ = {
     {-1, -1}, {0, -1}, {1, -1},
@@ -66,6 +67,12 @@ local function step(src, dst, allowBigger)
     end)
 end
 
+local function hashCell(wx, wy, salt)
+    local gx = math.floor(wx / FOG_STEP)
+    local gy = math.floor(wy / FOG_STEP)
+    return helper.hashIntegerPair(gx + salt * 7877, gy + salt * 6991)
+end
+
 ---@param r kirigami.Region -- world-space
 ---@param hasFog fun(x:number,y:number):boolean
 function fogService.renderFog(r, hasFog)
@@ -84,7 +91,8 @@ function fogService.renderFog(r, hasFog)
         for gy = 0, h - 1 do
             local wx = x1 + gx * FOG_STEP
             local wy = y1 + gy * FOG_STEP
-            if hasFog(wx, wy) then
+            local p = hashCell(wx, wy, 1)
+            if hasFog(wx, wy) and (p % FOG_PIN_NIL_MOD ~= 0) then
                 a:set(gx, gy, 0)
             else
                 a:set(gx, gy, nil)
@@ -109,18 +117,18 @@ function fogService.renderFog(r, hasFog)
                 if v ~= nil then
                     local x = x1 + gx * FOG_STEP
                     local y = y1 + gy * FOG_STEP
-                    local j = helper.hashInteger(math.floor(x * 17.31 + y * 91.73))
+                    local j = hashCell(x, y, 2)
                     if j % FOG_VARIATION_MOD == 0 then
                         v = v + 1
                     end
-                    local k = helper.hashInteger(math.floor(x * 13.91 + y * 31.37))
+                    local k = hashCell(x, y, 3)
                     if k % FOG_VARIATION_MOD == 0 then
                         v = v + 1
                     end
 
                     local lv = math.max(1, math.min(FOG_LAYER_MAX, v))
                     if lv == layer then
-                        local i = helper.hashInteger(math.floor(x * 33.4 + y * 77.65))
+                        local i = hashCell(x, y, 4)
                         g.drawImage(FOGS[i % #FOGS + 1], x, y, math.sin(t + (i % 100) / 100))
                     end
                 end
