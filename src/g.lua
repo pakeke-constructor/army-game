@@ -969,6 +969,21 @@ function g.applyFrozen(ent, duration, source)
     return false
 end
 
+---@param ent ecs.Entity
+---@param healAmount number
+---@param healerEnt ecs.Entity?
+function g.healEntity(ent, healAmount, healerEnt)
+    if not g.isAlive(ent) then return end
+
+    local oldHealth = ent.health
+    ent.health = math.min(ent.maxHealth, ent.health + healAmount)
+    local finalHeal = ent.health - oldHealth
+
+    if finalHeal > 0 then
+        g.call("entityHealed", ent, finalHeal, healerEnt)
+    end
+end
+
 ---@param target ecs.Entity
 ---@param damage number
 ---@param attacker ecs.Entity?
