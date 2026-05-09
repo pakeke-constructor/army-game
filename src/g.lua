@@ -169,6 +169,24 @@ function g.iteratePartition(partitionId, x, y, fn, range)
     end
 end
 
+---@param x number
+---@param y number
+---@param damage number
+---@param radius number?
+function g.explosion(x, y, damage, radius)
+    radius = radius or 60
+    local radiusSq = radius * radius
+    -- todo: make particles here
+    g.iteratePartition("unit", x, y, function(ent)
+        local dx = ent.x - x
+        local dy = ent.y - y
+        if dx * dx + dy * dy <= radiusSq then
+            g.knockback(ent, x, y, 200)
+            g.dealDamage(ent, damage)
+        end
+    end, radius)
+end
+
 
 function g.hasRun()
     return currentRun ~= nil
@@ -680,6 +698,7 @@ function g.getArmy()
 end
 
 
+g.spawnEntity("horse", 1,1)
 
 ---@param id string
 ---@return g.SquadInfo
