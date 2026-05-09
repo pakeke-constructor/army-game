@@ -32,11 +32,12 @@ end
 ---@param region kirigami.Region
 ---@return boolean
 function ui.DefaultButton(richTxt, region)
-    local c = g.COLORS
+    local col1 = objects.Color.GRAY
+    local col2 = objects.Color.DARK_GRAY
     return ui.CustomButton(function (xx,yy,ww,hh)
         local font = g.getSmallFont(16)
         richtext.printRichContained(richTxt, font, xx,yy,ww,hh)
-    end, c.BUTTON_FADE_1, c.BUTTON_FADE_2, region)
+    end, col1,col2, region)
 end
 
 
@@ -209,6 +210,23 @@ function ui.drawPanel(x, y, w, h)
     }
     return simpleUIPanel:draw(x, y, w, h)
 end
+
+
+
+local simpleUIPanelThin = nil
+---@param x number
+---@param y number
+---@param w number
+---@param h number
+function ui.drawPanelThin(x, y, w, h)
+    simpleUIPanelThin = simpleUIPanelThin or n9slice.new {
+        image = g.getAtlas(),
+        padding = 9,
+        quad = g.getImageQuad("simple_ui_panel_thin")
+    }
+    return simpleUIPanelThin:draw(x, y, w, h)
+end
+
 
 
 

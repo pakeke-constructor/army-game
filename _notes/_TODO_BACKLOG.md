@@ -28,48 +28,58 @@
 - poison-system
 - New HUD (from leo)
 - Add glow_lootreward.png to the rewards-screen
-
+- Squad upgrade system
+- Shop UI (from leo)
+- Add smoke to fire-particles. smoke becomes bigger, gray/dark gray.
+- In shop, when hovering a squad, display squad-card on right
+- Set up leo w/ claude-code
+- Map-scene improvements:
+--- Commander movement for map-scene
+--- Make the yellow-visual snap to thing to the closest mouse position
+- Enter-animation for battle-scene.  Camera zoom-in when entering.  Show "battle start" text.
 
 
 
 ### OK:: what do we need for a minimum-playable game?
 
 
-- Shop UI (from leo)
----- Reroll system wired up in shop
----- Callback/events for reroll-system
 
 
-- Set up leo w/ claude-code
+- Dark-fog rendering system.
+--- dark-fog for map
+--- dark-fog for battle-scene
 
 
-- Put ev_q_defs in the system-prompt, so leo_normal/smart knows about it.
 
-
-- Add smoke to fire-particles. smoke becomes bigger, gray/dark gray.
-
+- Fog for battle-scene border
 
 
 
 - "Terrain" for battle-scene 
---- swamp
---- lava-pit
 --- trees
 --- rocks
 --- grass
 --- BORDER: Trees + Rocks + Dark-Fog?
 
 
-- Map-scene improvements:
---- Proper ordered-rendering for map-scene
---- Commander movement for map-scene
---- Make the yellow-visual snap to thing to the closest mouse position
+
+- Make demons/enemies walk around a bit randomly at the start of combat
 
 
-- Event system: random events
 
+- Squad upgrade UI
+- When hovering squad-card, you can see the squad-upgrade
+- When hovering squad-box, you can see what the upgrade does
+
+
+- Event system: random map events on empty nodes
+
+- Shrine nodes UI
 
 - Special-nodes wired up
+
+
+- Proper ordered-rendering for map-scene
 
 
 - Weapons system: Make it so weapons can be held/used
@@ -77,7 +87,20 @@
 - ranged: bows, + bow pointing in direction they aim
 
 
+
+
+- Write CLAUDE.md for Leo. Put ev_q_defs in the system-prompt, so leo_normal/smart knows about it.
+
+
+
 - Juice for placing units (deploy them sequentially so its satisfying?)
+- Juice for spending mana: Should pop up above the units as you spend them
+- Juice for spending money in shop
+
+
+- Extra fancy terrain for battles:
+--- swamp
+--- lava-pit
 
 
 - Sound effects
@@ -93,11 +116,7 @@ improvements to main-agent system-prompt.
 - Clearer defined workflow
 - explanation for how to use `condense/checkpoint`
 
-
-
 Set up omni-agent properly (maybe make an agent-creator helper in base-ex6?)
-
-
 
 - Have an agent that audits changes (git diffs) and checks for issues.
 That agent should utilize _ex6/coding_style.

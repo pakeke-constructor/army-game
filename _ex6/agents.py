@@ -60,8 +60,6 @@ The ONLY acceptable text output is: a direct answer, a clarifying question, or a
 # SMART_MODEL = "openai/gpt-5.2-codex"
 # SMART_MODEL = "openai/gpt-5.1-codex-mini"
 # SMART_MODEL = M.SONNET_46.id
-SMART_MODEL = M.OPUS_46.id
-ANALYTICAL_MODEL = M.GPT52_CODEX.id
 
 
 
@@ -81,7 +79,7 @@ CODE_MODE_SYS_PROMPT = make_code_mode_system_prompt([
 
 
 
-coder = Context("c_opus", yolo=False, model=M.OPUS_46.id, reasoning="medium", messages=[
+coder = Context("c_opus", yolo=False, model=M.OPUS_47.id, reasoning="medium", messages=[
     MAIN_SYSTEM_PROMPT,
     CODE_MODE_SYS_PROMPT,
     ENV_PROMPT,

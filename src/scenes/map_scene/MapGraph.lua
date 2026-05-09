@@ -416,7 +416,7 @@ end
 
 
 
-local SPECIAL_NODES = {"feast", "fountain"}
+local SPECIAL_NODES = {"feast", "fountain", "shop"}
 -- TODO: add `town` in here too.
 
 local function isNextToNodeOfSameType(self, x, y, nodeType)
@@ -445,7 +445,7 @@ function MapGraph:_generateNodes(rng)
                 self:setNode(node.x, node.y, pick)
             end
         else
-            self:setNode(node.x, node.y, "Empty")
+            self:setNode(node.x, node.y, "empty")
         end
         ::continue::
     end
@@ -466,11 +466,11 @@ function MapGraph:_generateNodes(rng)
 
     -- pass-3: Fill in super empty nodes
     for _, node in pairs(self.nodes) do
-        if node.nodeType == "Empty" then
+        if node.nodeType == "empty" then
             local nbs = self:getNeighbors(node.x, node.y)
             local emptyCount = 0
             for _, nb in ipairs(nbs) do
-                if nb.nodeType == "Empty" then emptyCount = emptyCount + 1 end
+                if nb.nodeType == "empty" then emptyCount = emptyCount + 1 end
             end
             if #nbs > 0 and emptyCount / #nbs > 0.51 then
                 -- if node has too many empty neighbors, make it a battle-node.

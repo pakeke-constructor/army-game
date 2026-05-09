@@ -20,6 +20,7 @@ COMMANDS.help = function()
     addLog("/upgrade <perk_id> [idx] - add perk to squad")
     addLog("/spawn <ent_id> [count] - spawn at cursor")
     addLog("/gold <amount> - add gold")
+    addLog("/tp - teleport to cursor (map)")
     addLog("/help - show this")
 end
 
@@ -60,6 +61,39 @@ COMMANDS.gold = function(args)
     g.addGold(amt)
     local run = g.getRun()
     addLog("gold -> " .. run.money)
+end
+
+COMMANDS.tp = function()
+    local scene, name = g.getCurrentScene()
+    if name ~= "map_scene" then return addLog("/tp only works in map scene") end
+    local run = g.getRun()
+    local graph = run.mapGraph
+    if not graph then return addLog("no map graph") end
+
+    local mx, my = love.mouse.getPosition()
+    local wx, wy = scene.camera:toWorld(mx, my)
+
+    local best, bestD2
+    graph:forEachNode(function(node)
+        local nx, ny = graph:getDrawPos(node)
+        local dx, dy = nx - wx, ny - wy
+        local d2 = dx * dx + dy * dy
+        if not bestD2 or d2 < bestD2 then
+            best = node
+            bestD2 = d2
+        end
+    end)
+
+    if not best then return addLog("no node at cursor") end
+
+    graph:setPlayerPosition(best.x, best.y)
+    scene.traveling = nil
+    scene.camX, scene.camY = graph:getDrawPos(best)
+    if not best.visited then
+        best.visited = true
+        best:enter()
+    end
+    addLog("teleported")
 end
 
 local function execCmd(line)

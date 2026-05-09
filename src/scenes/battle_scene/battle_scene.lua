@@ -2,10 +2,15 @@ local ECSWorld = require("src.ecs.ECSWorld")
 local encounters = require("src.scenes.battle_scene.encounters")
 local Camera = require("lib.cam11")
 local ParticleService = require(".particles.ParticleService")
+local fogService = require("src.fogService")
 
 
 local CAMERA_SPEED = 400
 local CAMERA_ZOOM = 2
+
+local INTRO_ZOOM_TEXT_FADE_TIME = 0.4
+local INTRO_ZOOM_DURATION = 1.6
+
 local WIN_DELAY = 2.5
 local VICTORY_FADE_IN = 0.25
 
@@ -39,21 +44,23 @@ function battle_scene:enter()
 
     self.editingSquadLineup = true
 
+    self.randomI = love.math.random(1,1000) -- random integer, doesnt really matter
+
     self.ecs = ECSWorld({"stats", "status_effects", "ai", "attacking", "physics"})
-    self.ecs:setBorder(600, 350)
-    local border = self.ecs.border
     self.camera = Camera(0, 0, CAMERA_ZOOM)
-    self.camera:setViewport(0, 0, love.graphics.getDimensions())
-    self.camera:setPos(border[3] * 0.45, border[4] * 0.5)
     self.particles = ParticleService()
     self.hud = HUD()
     self.noEnemyTimer = 0
     self.victory = false
     self.victoryPopupTime = 0
     self.squadChoices = nil
+    self.timeSinceEnteredScene = 0
 
     local run = g.getRun()
     encounters.startRandomEncounter(run.day, self.ecs)
+    local border = self.ecs.border
+    self.camera:setViewport(0, 0, love.graphics.getDimensions())
+    self.camera:setPos(border[3] * 0.45, border[4] * 0.5)
 end
 
 local function countEnemies(ecs)
@@ -85,6 +92,8 @@ end
 
 
 function battle_scene:update(dt)
+    self.timeSinceEnteredScene = self.timeSinceEnteredScene + dt
+
     local run = g.getRun()
     for _, squad in ipairs(run.squads) do
         local info = g.getSquadInfo(squad.squadId)
@@ -106,6 +115,7 @@ function battle_scene:update(dt)
             -- choicePopupService.set("blessing")
             rewardPopupService.set({
                 gold = 100,
+                randomSquad = true
 
             })
             self.victoryPopupTime = 0
@@ -123,6 +133,17 @@ end
 function battle_scene:updateCamera(dt)
     local cam = self.camera
     cam:setViewport(0, 0, love.graphics.getDimensions())
+
+    if self.timeSinceEnteredScene < INTRO_ZOOM_DURATION then
+        local border = self.ecs.border
+        local sw, sh = love.graphics.getDimensions()
+        local fitZoom = math.min(sw / border[3], sh / border[4])
+        local t = self.timeSinceEnteredScene / INTRO_ZOOM_DURATION
+        t = t * t * (3 - 2 * t)
+        cam:setZoom(fitZoom + (CAMERA_ZOOM - fitZoom) * t)
+    else
+        cam:setZoom(CAMERA_ZOOM)
+    end
 
     local spd = CAMERA_SPEED / math.sqrt(cam:getZoom())
     local mx, my = 0, 0
@@ -187,6 +208,15 @@ function battle_scene:keypressed(k)
 end
 
 
+local _BATTLE_START_CTX = "An exciting little title-prompt that shows up before a battle. Meant to indicate a battle is starting and it's exciting"
+local BATTLE_START = {
+    loc("Start Battle!",{}, {context=_BATTLE_START_CTX}),
+    loc("En Garde!",{}, {context=_BATTLE_START_CTX}),
+    loc("Fight!",{}, {context=_BATTLE_START_CTX}),
+    loc("Battle Begins!",{}, {context=_BATTLE_START_CTX}),
+}
+
+
 
 function battle_scene:draw()
     self.camera:attach()
@@ -197,6 +227,19 @@ function battle_scene:draw()
     love.graphics.rectangle("line", border[1], border[2], border[3], border[4])
 
     self.ecs:draw(self.camera:getTransform())
+
+    local sw, sh = love.graphics.getDimensions()
+    local x1, y1 = self.camera:toWorld(0, 0)
+    local x2, y2 = self.camera:toWorld(sw, sh)
+    local fogRegion = {
+        x = math.min(x1, x2),
+        y = math.min(y1, y2),
+        w = math.abs(x2 - x1),
+        h = math.abs(y2 - y1),
+    }
+    fogService.renderFog(fogRegion, function(x, y)
+        return x < border[1] or x > border[1] + border[3] or y < border[2] or y > border[2] + border[4]
+    end)
 
     if not self.victory then
         local entry = self.hud:getSelection()
@@ -238,6 +281,16 @@ function battle_scene:draw()
         g.gotoScene("map_scene")
     end
 
+    if self.timeSinceEnteredScene < INTRO_ZOOM_DURATION then
+        local rr = ui.getScreenRegion()
+        local font = g.getBigFont(16)
+        local shrink = 1-math.min(1, self.timeSinceEnteredScene / 0.25)
+        rr = rr:padRatio(shrink)
+        local fade = 1-((self.timeSinceEnteredScene - (INTRO_ZOOM_DURATION - INTRO_ZOOM_TEXT_FADE_TIME)) / INTRO_ZOOM_TEXT_FADE_TIME)
+        lg.setColor(1,1,1, fade)
+        local txt = BATTLE_START[self.randomI % #BATTLE_START + 1]
+        richtext.printRichContainedNoWrap("{o}{c r=0.7 g=0.1 b=0.2}"..txt, font, rr:padRatio(0.75):get())
+    end
     ui.endUI()
 end
 

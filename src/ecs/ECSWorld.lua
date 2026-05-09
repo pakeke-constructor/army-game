@@ -106,6 +106,13 @@ function ECSWorld:addSystemHandlers()
     for i = 1, #self.systems do
         g.addHandler(self.systems[i])
     end
+    g.addHandler({
+        getEntityScale = function(ent)
+            if ent.maxHealth and ent.baseMaxHealth then
+                return (ent.maxHealth / ent.baseMaxHealth) ^ 0.35
+            end
+        end
+    })
 end
 
 function ECSWorld:update(dt)

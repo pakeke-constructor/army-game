@@ -46,6 +46,7 @@ src/consts.lua: Constants.
 <gotchas>
 A bunch of common pitfalls/traps to look out for:
 
+- This project uses love2d version 12, which is new and has breaking changes.
 - Don't set ent.x/ent.y directly on entities with a .physics component; use g.setPos(ent, x, y) which syncs the Box2D body.
 - For `localize(txt)` calls, you MUST NOT localize text at runtime. It must be done at load-time. The idiomatic way is to have constants at the top, like `LOC_TXT = loc("...")`
 - Pretty much ALL text in the game uses `richtext`, which has `{effect}` formatting tags, and `%{variable:.2f}` for interpolation.

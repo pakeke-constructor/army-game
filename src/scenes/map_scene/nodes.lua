@@ -152,7 +152,8 @@ end
 
 function FeastNode:draw(wx, wy)
     lg.setColor(1,1,1)
-    g.drawImage("node_banquet", wx, wy)
+    local sx = self.id%2==0 and 1 or -1
+    g.drawImage("node_banquet", wx, wy, 0, sx,1)
     tryDrawDemons(self, wx,wy)
 end
 
@@ -183,7 +184,7 @@ nodes.FountainNode = FountainNode
 -- EmptyNode
 -------------------------------
 ---@class MapNode.EmptyNode: MapNode
-local EmptyNode = nodes.newClass("Empty")
+local EmptyNode = nodes.newClass("empty")
 
 function EmptyNode:enter()
     -- this node does nothing.
@@ -197,6 +198,47 @@ function EmptyNode:draw(wx, wy)
 end
 
 nodes.EmptyNode = EmptyNode
+
+
+
+
+
+
+-------------------------------
+--- shop node
+-------------------------------
+---@class MapNode.ShopNode: MapNode
+---@field squadShop (false|string)[]
+---@field blessingShop (false|string)[]
+---@field isSetup boolean?
+local ShopNode = nodes.newClass("shop")
+
+local shop_scene
+
+function ShopNode:init(x,y)
+    shop_scene = shop_scene or require("src.scenes.shop_scene.shop_scene")
+    Node.init(self,x,y)
+    self.squadShop = {} -- List<squadId OR false>. False indicates been purchased
+    self.blessingShop = {} -- List<blessingId OR false>. False indicates been purchased
+    shop_scene.prefillShopNode(self)
+end
+
+function ShopNode:enter()
+    shop_scene = shop_scene or require("src.scenes.shop_scene.shop_scene")
+    shop_scene.prefillShopNode(self)
+    g.gotoScene("shop_scene")
+    local sc = g.getCurrentScene()
+    ---@cast sc g.ShopScene
+    sc:setShop(self)
+end
+
+function ShopNode:draw(wx,wy)
+    lg.setColor(1,1,1)
+    local sx = self.id%2==0 and 1 or -1
+    g.drawImage("node_town", wx,wy-8, 0, sx, 1)
+end
+
+
 
 
 

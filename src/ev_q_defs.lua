@@ -38,17 +38,18 @@ g.defineEvent("squadDeployed")
 
 
 -- Economy / run
-g.defineEvent("moneyGained")
-g.defineEvent("rewardChosen")
-g.defineEvent("shopEntered")
-g.defineEvent("chestOpened")
-
+-- g.defineEvent("moneyGained")
+-- g.defineEvent("rewardChosen")
+-- g.defineEvent("chestOpened")
+g.defineEvent("rerollShop")
 
 
 
 -- Questions: stat modifiers
 local ADD = reducers.ADD
 local MUL = reducers.MULTIPLY
+
+g.defineQuestion("getEntityScale", MUL, 1)
 
 g.defineQuestion("getDamageReduction", ADD, 0)
 

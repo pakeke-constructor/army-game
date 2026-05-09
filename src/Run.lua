@@ -23,7 +23,7 @@ function Run:init()
 
     self.squads = {}
     self.level = 1
-    self.xp = 0
+    self.xp = 20
     self.money = 0
     self.mana = {}
     self.blessings = {}

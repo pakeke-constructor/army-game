@@ -184,14 +184,14 @@ function initParticles()
     -- })
 
     local fire = defineParticle("fire_particle", {
-        frames = {"particle_4", "particle_3", "particle_2", "particle_1"},
-        lifetime = 0.4,
+        frames = {"particle_4", "particle_3", "particle_2", "particle_1", "particle_2", "particle_1"},
+        lifetime = 0.5,
         emissionArea = {
             distribution = "uniform",
             distance = {2,2},
         }
     })
-    fire:setColors({1, 1, 0}, {1, 0.5, 0}, {0.8, 0.2, 0})
+    fire:setColors({1, 1, 0}, {1, 0.5, 0}, {0.8, 0.2, 0}, {0.4,0.4,0.4}, {0.6,0.6,0.6})
     fire:setDirection(-math.pi/2)
     fire:setSpread(0.1)
 

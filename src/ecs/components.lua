@@ -67,6 +67,7 @@ local physics = {
 ---@field public x number
 ---@field public y number
 ---@field public z number?
+---@field public yoffset number?
 ---@field public vx number?
 ---@field public vy number?
 ---@field public vz number?

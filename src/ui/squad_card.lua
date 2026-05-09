@@ -101,7 +101,7 @@ local function drawSquadCard(squadId, region, index)
         draw = function(ex, ey, ew, eh)
             -- icon
             love.graphics.setColor(1, 1, 1)
-            g.drawSquadIcon(squadId, ex+ew/2, ey+eh/2, true)
+            g.drawSquadIcon(squadId, ex+16, ey+16, true)
             -- name to right of icon
             local textX = ex + iconSize + iconGap
             local textW = ew - iconSize - iconGap
@@ -120,7 +120,7 @@ local function drawSquadCard(squadId, region, index)
         getHeight = function() return unitHeight + 4 end,
         draw = function(ex, ey, ew, eh)
             if unitHeight == 0 then return end
-            local count = info.count or 1
+            local count = info.unitCount or 1
             local totalW = count * unitWidth + (count - 1) * unitGap
             local startX = ex + (ew - totalW) / 2
             local r,gg,b,a = darkCol:getRGBA()

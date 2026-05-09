@@ -17,7 +17,7 @@
 ---@field handlers table<string, function>
 
 
----@class g.RarityMapping
+---@class g.RarityWeights
 ---@field COMMON number
 ---@field UNCOMMON number
 ---@field RARE number
@@ -81,6 +81,7 @@ function g.defineCommander(id, name, info)
         context = "The name of a commander"
     })
     info.id = id
+    assert(info.image,"commanders need images")
     COMMANDERS[id] = info
     COMMANDER_LIST[#COMMANDER_LIST + 1] = id
 end
@@ -146,6 +147,7 @@ function g.newTestRun()
         currentRun.blessings = {
             "iron_hide", "golden_coffers", "blood_tithe", "barrage",
         }
+        currentRun.money = 1000
     end
 
 end
@@ -172,24 +174,35 @@ function g.hasRun()
     return currentRun ~= nil
 end
 
+---@return g.Run
 function g.getRun()
     return assert(currentRun, "run not loaded")
 end
 
+---@param amount number
 function g.addGold(amount)
     local run = g.getRun()
     run.money = run.money + amount
 end
 
+---@param amount number
+---@return boolean
+function g.canAffordGold(amount)
+    return g.getRun().money >= amount
+end
+
+---@param amount number
+---@return boolean
 function g.trySpendGold(amount)
-    local run = g.getRun()
-    if run.money < amount then
+    if not g.canAffordGold(amount) then
         return false
     end
+    local run = g.getRun()
     run.money = run.money - amount
     return true
 end
 
+---@param amount number
 function g.addXP(amount)
     local run = g.getRun()
     run.xp = run.xp + amount
@@ -333,25 +346,46 @@ function g.drawImageContained(imageName, x, y, w, h, rot)
     atlas:draw(quad, centerX + scaledW/2, centerY + scaledH/2, rot or 0, scale, scale, qw/2, qh/2)
 end
 
+
+
+---@param bundle g.ManaBundle
+function g.getManaBundleColor(bundle)
+    for _,mc in ipairs(g.getManaTypelist()) do
+        if bundle[mc] then
+            local minfo = g.getManaInfo(mc)
+            return minfo.color
+        end
+    end
+    return objects.Color.WHITE
+end
+
+
 ---@param squadId string
 ---@param x number
 ---@param y number
----@param w number?
----@param h number?
 ---@param drawManaCost boolean?
-function g.drawSquadIcon(squadId, x, y, drawManaCost)
+---@param drawLevel integer?
+function g.drawSquadIcon(squadId, x, y, drawManaCost, drawLevel)
     local info = g.getSquadInfo(squadId)
-    local rarityColor = (info.rarity or g.RARITIES.COMMON).color
+    --local rarityColor = (info.rarity or g.RARITIES.COMMON).color
+    local col = g.getManaBundleColor(info.cost)
     local c = gsman.mulColor(1, 1, 1)
     g.drawImage(info.icon, x, y)
     c:pop()
-    c = gsman.mulColor(rarityColor:getRGBA())
+    c = gsman.mulColor(col)
     g.drawImage("squadicon_border", x, y)
     c:pop()
 
     local size = 32 -- hacky hardcode
     if drawManaCost then
         g.drawManaCost(info.cost, x,y-size/2, size + 6)
+    end
+    if drawLevel then
+        -- draw level:
+        local lvReg = Kirigami(x, y+2, size/2-4, size/2-4)
+        local font = g.getSmallFont(16)
+        lg.setColor(0.6,0.6,0.6,0.6)
+        richtext.printRichContainedNoWrap("Lv "..tostring(drawLevel), font, lvReg:get())
     end
 end
 
@@ -581,8 +615,10 @@ local SQUAD_LIST = {}
 ---@field id string
 ---@field entityId string
 ---@field rarity g.Rarity
+---@field unitCount integer
+---@field statUpgradeScaling table<string, number> { [statName] -> number }
+---@field unitCountUpgradeScaling integer?
 ---@field name string
----@field count number
 ---@field icon string
 ---@field perks string[]
 ---@field cost g.ManaBundle
@@ -596,9 +632,16 @@ function g.defineSquad(id, info)
     assert(not SQUAD_DEFS[id], "Duplicate squad: " .. id)
     info.id = id
     info.perks = info.perks or {}
-    info.count = info.count or 1
+    info.unitCount = info.unitCount or 1
     info.name = assert(info.name)
     info.rarity = assert(info.rarity)
+    info.unitCountUpgradeScaling = info.unitCountUpgradeScaling or 0
+    info.statUpgradeScaling = info.statUpgradeScaling or {}
+    assert(type(info.unitCountUpgradeScaling) == "number")
+    for stat,scaling in pairs(info.statUpgradeScaling)do
+        assert(g.getStatInfo(stat), "?")
+        assert(scaling < 1, "Per-level stat scaling shouldn't be more than 100%. Must be number between (0,1)")
+    end
     assert(info.icon)
     SQUAD_DEFS[id] = info
     SQUAD_LIST[#SQUAD_LIST + 1] = id
@@ -1028,14 +1071,21 @@ local function drawHealthBar(ent, x,y)
 end
 
 function g.drawEntity(ent, x, y)
-    local sx, sy = (ent.sx or 1) * (ent.faceDir or 1), ent.sy or 1
+    local entScale = g.ask("getEntityScale", ent)
+    local sx, sy = (ent.sx or 1) * (ent.faceDir or 1) * entScale, (ent.sy or 1) * entScale
     if ent.draw then
         ent:draw(x, y)
         return
     end
     if ent.image then
         lg.setColor(1,1,1)
-        g.drawImage(ent.image, x + (ent.ox or 0), y + (ent.oy or 0), ent.rot or 0, sx, sy)
+        local yoff = ent.yoffset or 0
+        if yoff ~= 0 then
+            local _,h = g.getImageSize(ent.image)
+            g.drawImageOffset(ent.image, x + (ent.ox or 0), y + (ent.oy or 0), ent.rot or 0, sx, sy, 0.5, 0.5 + yoff / h, ent.kx, ent.ky)
+        else
+            g.drawImage(ent.image, x + (ent.ox or 0), y + (ent.oy or 0), ent.rot or 0, sx, sy, ent.kx, ent.ky)
+        end
         if ent.frozenTime and ent.frozenTime > 0 then
             drawIceCube(ent, x,y, sx,sy)
         end
@@ -1579,11 +1629,12 @@ g.COLORS = {
     HEALTH = objects.Color("FF397634"),
     ATTACK = objects.Color("FFA2741E"),
     MAP_EDGE = objects.Color(0.16, 0.28, 0.18),
-    MAP_EDGE_HIGHLIGHT = objects.Color(1, 1, 0.2, 1),
+    MAP_EDGE_HIGHLIGHT = objects.Color("FF396938"),
     GROUND_COLOR = objects.Color(0.08, 0.06, 0.06, 1),
 
     GOLD = objects.Color("FFD8B01F"),
     XP = objects.Color("FF2BC66E"),
+    DARK_UI = objects.Color("FF0c0c19"),
 }
 
 for k,v in pairs(g.COLORS) do
@@ -1808,10 +1859,10 @@ end
 
 local VALID_MANA_CELLS = {}
 
-g.defineManaType("red", objects.Color("#d53341"))
-g.defineManaType("blue", objects.Color("#36c7de"))
-g.defineManaType("green", objects.Color("#7cc82a"))
-g.defineManaType("yellow", objects.Color("#f1f119"))
+g.defineManaType("red", objects.Color("FFB42430"))
+g.defineManaType("blue", objects.Color("FF1C7CB7"))
+g.defineManaType("green", objects.Color("FF52B225"))
+g.defineManaType("yellow", objects.Color("FFD0D31F"))
 
 for _, mana1 in ipairs(manaTypeList) do
     VALID_MANA_CELLS[mana1] = true

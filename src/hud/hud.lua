@@ -16,10 +16,8 @@ local hudArgs
 local SQUAD_ICON_SIZE = 32
 local SQUAD_PADDING = 4
 
-local LOC_DEMON_RAGE = interp("{demon_pitchfork}{c r=0.6 g=0.1 b=0} Rage: %{n}", {context="HUD top bar, shows current demon rage level"})
-local LOC_GOLD = interp("{coin_icon} Coins: %{n}", {context="HUD top bar, shows player's coin currency"})
 local LOC_DAYS = interp("%{n} days until {c r=1 g=0.3 b=0.3}attack", {context="HUD top bar, countdown to next demon incursion. 'attack' is richtext-colored red"})
-local LOC_ZONE = loc("{c r=0.2 g=0.5 b=0.3}Zone 1 - Forest", {}, {context="HUD top bar, current zone name. Hardcoded stub"})
+local LOC_ZONE = loc("Zone 1 - Forest", {}, {context="HUD top bar, current zone name. Hardcoded stub"})
 local LOC_PAUSE = loc("II", {}, {context="HUD top bar, pause button icon text"})
 
 local LOC_HOVER_RAGE = loc("Demon Rage increases when you win a battle, making enemies stronger.", {}, {context="Tooltip when hovering demon rage in HUD"})
@@ -79,7 +77,7 @@ local function renderSquad(sq, x, y, selected)
     else
         lg.setColor(1, 1, 1)
     end
-    g.drawSquadIcon(sq.squadId, x+size/2, y+size/2, true)
+    g.drawSquadIcon(sq.squadId, x+size/2, y+size/2, true, sq.level)
 end
 
 
@@ -91,7 +89,7 @@ local function hoverSquad(sq)
     hoverService.requestHover(mx, my, function(box, fonts)
         box:addText("{c r=0.9 g=0.85 b=0.7}" .. info.name, fonts.title)
         box:addSpacing(2)
-        box:addText("{c r=0.7 g=0.7 b=0.75}" .. info.count .. "x " .. info.entityId, fonts.body)
+        box:addText("{c r=0.7 g=0.7 b=0.75}" .. info.unitCount .. "x " .. info.entityId, fonts.body)
         local perks = sq.perks
         if perks and #perks > 0 then
             for _, pId in ipairs(perks) do
@@ -138,9 +136,6 @@ local function drawSquadBar(self, region)
     end
 
     local startX = inner.x
-    if count == 1 then
-        startX = inner.x + (inner.w - SQUAD_ICON_SIZE) / 2
-    end
     local baseY = inner.y + (inner.h - SQUAD_ICON_SIZE) / 2
 
     for i, entry in ipairs(trueArmy) do
@@ -246,12 +241,69 @@ end
 
 
 
+local function dbg(r)
+    if consts.DEV_MODE then
+        lg.rectangle("line",r:get())
+    end
+end
+
+
+---@param reg kirigami.Region
+local function drawXpBar(reg)
+    ui.drawDarkPanel(reg:get())
+    local left, right = reg:splitHorizontal(1, 4)
+
+    local run = g.getRun()
+    local smallFont = g.getSmallFont(16)
+    local level = run.level
+    local leftTop, leftBot = left:padRatio(0.2):splitVertical(1,1)
+    lg.setColor(1,1,1)
+    g.drawImage("xp_icon", leftTop:getCenter())
+    lg.setColor(objects.Color("FF33873E"))
+    richtext.printRichContainedNoWrap("{o}Lv "..tostring(level).."{/o}", smallFont, leftBot:get())
+
+    -- draw xp bar
+    local _, rightTop, rightBot = right:splitVertical(1,2,2)
+    local xp, xpReq = run.xp, run:getXpRequirement()
+    -- local xpBar = rightBot:padUnit(8, 10, 8, 6)
+    local xpBar = rightBot:padUnit(6, 2, 6, 6)
+    lg.setColor(g.COLORS.DARK_UI)
+    lg.setColor(objects.Color("FF2E2C3C"))
+    ui.drawSingleColorPanel(xpBar:get())
+    lg.setColor(objects.Color("FF145914"))
+
+    do
+    local xpW = (xp/xpReq) * xpBar.w
+    local stencilReg = xpBar:shrinkTo(xpW, xpBar.h)
+    lg.setColorMask(false)
+    lg.setStencilState("replace", "always", 1)
+    local prevShader = lg.getShader()
+    lg.setShader(helper.alphaTestShader)
+    ui.drawSingleColorPanel(stencilReg:get())
+    lg.setShader(prevShader)
+    lg.setStencilState("keep", "greater", 0)
+    lg.setColorMask(true)
+    local ox = math.sin(love.timer.getTime() * 0.3) * 8
+    local oy = math.cos(love.timer.getTime() * 0.21) * 4
+    lg.setColor(1, 1, 1)
+    g.drawImageOffset("army_healthbar_background", xpBar.x + ox, xpBar.y + xpBar.h/2 + oy, 0, nil, nil, 0.5, 0.5)
+    lg.setStencilState()
+    end
+
+    -- draw xp text
+    local txt1 = helper.wrapRichtextColor(objects.Color("FF80BD51"),("%d"):format(xp))
+    local txt2 = helper.wrapRichtextColor(objects.Color("FF1F6525"), ("/%d"):format(xpReq))
+    richtext.printRichContainedNoWrap(txt1..txt2, smallFont, rightTop:get())
+end
+
+
+
 
 local function drawTopBar()
     local r = ui.getScreenRegion()
     local topBar, mainBar = r:splitVertical(0.1,0.9)
 
-    local demonRage, gold, daysTillIncursion, zoneString, pausePanel = topBar:splitHorizontal(2,2,4,4,1)
+    local xp, demonRage, gold, daysTillIncursion, zoneString, pausePanel = topBar:splitHorizontal(4, 2,2,4,4,1)
     --[[
     each of these ^^^ are panels.
 
@@ -286,19 +338,18 @@ local function drawTopBar()
         end
     end
 
-    drawPanel(demonRage, LOC_DEMON_RAGE({n = run.demonRage}), LOC_HOVER_RAGE)
-    drawPanel(gold, LOC_GOLD({n = run.money}), LOC_HOVER_GOLD)
+    drawXpBar(xp)
+
+    drawPanel(demonRage, "{demon_pitchfork}{c r=0.6 g=0.1 b=0} " .. tostring(run.demonRage), LOC_HOVER_RAGE)
+    drawPanel(gold, "{coin_icon} {GOLD_COLOR}" .. tostring(run.money), LOC_HOVER_GOLD)
 
     local _, _, _, dh = daysTillIncursion:get()
     local extraH = dh * 0.05
     local dtiRegion = daysTillIncursion:padUnit(0, -extraH, 0, 0)
     drawPanel(dtiRegion, LOC_DAYS({n = run:getDaysUntilIncursion()}), LOC_HOVER_DAYS)
 
-    drawPanel(zoneString, LOC_ZONE)
+    drawPanel(zoneString, "{c r=0.2 g=0.5 b=0.3}{wavy freq=0.5}" .. LOC_ZONE)
     drawPanel(pausePanel, LOC_PAUSE)
-
-    local leftBlessingBar = mainBar:splitVertical(0.7,0.3):splitHorizontal(0.06, 0.94)
-    drawLeftBlessingBar(leftBlessingBar)
 end
 
 

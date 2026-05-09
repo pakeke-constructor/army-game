@@ -3,6 +3,7 @@ local Camera = require("lib.cam11")
 local MapGraph = require("src.scenes.map_scene.MapGraph")
 local PixelCanvas = require("src.modules.PixelCanvas")
 local decor_types = require("src.scenes.map_scene.decor_types")
+local fogService = require("src.fogService")
 
 local CAMERA_ZOOM = 0.5
 local NODE_RADIUS = 4
@@ -12,8 +13,10 @@ local HOVER_DIST_FRAC = 0.4 -- fraction of distanceBetweenNodes
 local COMMANDER_SPEED = 80 -- world pixels per second
 
 local PATH_SEARCH_DEPTH = 3
+local FOG_CLEAR_RADIUS = 120
 
 
+---@class g.MapScene
 local map_scene = {}
 
 function map_scene:init()
@@ -46,10 +49,12 @@ local function renderNode(graph, node, r, g, b, a, radius)
 end
 
 ---@param graph MapGraph
-local function getHoveredNode(graph, wx, wy)
-    local hoverDist = graph.distanceBetweenNodes * HOVER_DIST_FRAC
-    local best, bestDist = nil, hoverDist * hoverDist
-    graph:forEachNode(function(node)
+---@param pnode MapNode
+local function getHoveredNode(graph, pnode, wx, wy)
+    local best, bestDist = nil, math.huge
+    local neighbors = graph:getNeighbors(pnode.x, pnode.y)
+    for i = 1, #neighbors do
+        local node = neighbors[i]
         local nx, ny = graph:getDrawPos(node)
         local dx, dy = nx - wx, ny - wy
         local d2 = dx * dx + dy * dy
@@ -57,7 +62,7 @@ local function getHoveredNode(graph, wx, wy)
             best = node
             bestDist = d2
         end
-    end)
+    end
     return best
 end
 
@@ -68,6 +73,7 @@ function map_scene:enter()
     self.pixelCanvas = PixelCanvas.new(love.graphics.getDimensions())
     self.hud = HUD()
     self.dragging = false
+    self.commanderFacing = -1
 
     local run = g.getRun()
     if not run.mapGraph then
@@ -110,6 +116,25 @@ function map_scene:enter()
     end
     table.sort(self.decorList, byY)
     table.sort(self.nodeList, byY)
+
+    -- precompute fog-free cells (nested tables for fast lookup, no string alloc)
+    self.fogClearCells = {}
+    local step = 24 -- matches FOG_STEP in fogService
+    local clearCells = math.ceil(FOG_CLEAR_RADIUS / step)
+    for _, entry in ipairs(self.nodeList) do
+        local cx = math.floor(entry.x / step)
+        local cy = math.floor(entry.y / step)
+        for dx = -clearCells, clearCells do
+            local row = self.fogClearCells[cx + dx]
+            if not row then
+                row = {}
+                self.fogClearCells[cx + dx] = row
+            end
+            for dy = -clearCells, clearCells do
+                row[cy + dy] = true
+            end
+        end
+    end
 
     local pnode = run.mapGraph:getPlayerNode()
     if pnode then
@@ -165,7 +190,7 @@ function map_scene:update(dt)
 
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
     self.pixelCanvas:resize(love.graphics.getDimensions())
-    self.camera:setZoom(CAMERA_ZOOM * ui.getUIScaling())
+    --self.camera:setZoom(CAMERA_ZOOM * ui.getUIScaling())
     self.camera:setPos(self.camX, self.camY)
     self.ecs:update(dt)
 end
@@ -194,13 +219,15 @@ function map_scene:mousereleased(mx, my, button)
             local pnode = graph and graph:getPlayerNode()
             if pnode then
                 local wx, wy = self.camera:toWorld(mx, my)
-                local hovered = getHoveredNode(graph, wx, wy)
+                local hovered = getHoveredNode(graph, pnode, wx, wy)
                 if hovered and hovered ~= pnode then
                     local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, PATH_SEARCH_DEPTH)
                     if path and #path >= 2 then
                         local ax, ay = graph:getDrawPos(path[1])
                         local bx, by = graph:getDrawPos(path[2])
                         local dist = math.sqrt((bx - ax)^2 + (by - ay)^2)
+                        if bx < ax then self.commanderFacing = 1 end
+                        if bx > ax then self.commanderFacing = -1 end
                         self.traveling = {
                             toNode = path[2],
                             ax = ax, ay = ay, bx = bx, by = by,
@@ -224,6 +251,20 @@ function map_scene:mousemoved(mx, my, dmx, dmy)
     end
 end
 
+function map_scene:wheelmoved(dx, dy)
+    if dy ~= 0 then
+        local zoom = self.camera:getZoom()
+        zoom = zoom * (1 + dy * 0.1)
+        zoom = math.max(0.1, math.min(2, zoom))
+        self.camera:setZoom(zoom)
+    end
+end
+
+
+
+---@param scene g.MapScene
+---@param graph MapGraph
+---@param pnode any
 local function drawCommander(scene, graph, pnode)
     local cx, cy
     if scene.traveling then
@@ -233,8 +274,12 @@ local function drawCommander(scene, graph, pnode)
     else
         cx, cy = graph:getDrawPos(pnode)
     end
-    love.graphics.setColor(1, 0.8, 0.2, 1)
-    love.graphics.circle("fill", cx, cy, PLAYER_RADIUS)
+    local run = g.getRun()
+    local cinfo = g.getCommanderInfo(run.commander)
+    lg.setColor(1,1,1)
+    g.drawImage(cinfo.image, cx,cy-8, 0, scene.commanderFacing, 1)
+    -- love.graphics.setColor(1, 0.8, 0.2, 1)
+    -- love.graphics.circle("fill", cx, cy, PLAYER_RADIUS)
 end
 
 local function hash(x,y)
@@ -287,8 +332,8 @@ function map_scene:draw()
         if pnode then
             local mx, my = love.mouse.getPosition()
             local wx, wy = self.camera:toWorld(mx, my)
-            local hovered = getHoveredNode(graph, wx, wy)
-            if hovered and hovered ~= pnode then
+            local hovered = getHoveredNode(graph, pnode, wx, wy)
+            if (not self.traveling) and hovered and hovered ~= pnode then
                 local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, PATH_SEARCH_DEPTH)
                 if path and #path >= 2 then
                     -- first edge bold yellow, rest pale yellow
@@ -306,6 +351,24 @@ function map_scene:draw()
             drawCommander(self, graph, pnode)
         end
     end
+
+    -- fog
+    local sw, sh = love.graphics.getDimensions()
+    local x1, y1 = self.camera:toWorld(0, 0)
+    local x2, y2 = self.camera:toWorld(sw, sh)
+    local fogRegion = {
+        x = math.min(x1, x2),
+        y = math.min(y1, y2),
+        w = math.abs(x2 - x1),
+        h = math.abs(y2 - y1),
+    }
+    local step = 24
+    local clearCells = self.fogClearCells
+    fogService.renderFog(fogRegion, function(x, y)
+        local cx = math.floor(x / step)
+        local row = clearCells[cx]
+        return not (row and row[math.floor(y / step)])
+    end)
 
     lg.setColor(1, 1, 1, 1)
     iml.popTransform()

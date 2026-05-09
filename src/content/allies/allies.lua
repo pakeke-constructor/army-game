@@ -44,10 +44,12 @@ g.defineSquad("archer_squad", {
     name = loc("Archer squad"),
     rarity = g.RARITIES.RARE,
     entityId = "archer",
-    count = 4,
+    unitCount = 4,
     icon = "example_squad_icon",
     perks = {"sharpshooter"},
     cost = {red = 1},
+
+    statUpgradeScaling = {maxHealth = 0.5},
 })
 
 
@@ -57,7 +59,8 @@ g.defineSquad("militia_squad", {
     name = loc("Militia squad"),
     entityId = "militia",
     rarity = g.RARITIES.UNCOMMON,
-    count = 4,
+    unitCount = 4,
+    unitCountUpgradeScaling = 2,
     icon = "example_squad_icon",
     perks = {"tough"},
     cost = {green = 1},
@@ -98,7 +101,7 @@ g.defineSquad("militia_band", {
     name = loc("Militia beserkers"),
     entityId = "militia",
     rarity = g.RARITIES.RARE,
-    count = 6,
+    unitCount = 6,
     icon = "example_squad_icon",
     perks = {"berserker"},
     cost = {green = 1, red=1},

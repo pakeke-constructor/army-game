@@ -10,11 +10,11 @@ local NUM_CHOICES = 3
 
 
 ---@param rType "squad"|"blessing"|"mana"
----@param rarityMapping g.RarityMapping?
-function ChoicePanel:init(rType, rarityMapping)
+---@param rarityWeights g.RarityWeights?
+function ChoicePanel:init(rType, rarityWeights)
     self.rType = rType
     self.choices = {}
-    self.rarityMapping = rarityMapping or consts.DEFAULT_RARITY_MAPPING
+    self.rarityWeights = rarityWeights or consts.DEFAULT_RARITY_WEIGHTS
     self.selectedI = nil
 
     local manaCells = g.getRun().mana
@@ -35,7 +35,7 @@ function ChoicePanel:_pickFromPool(pool, getInfo)
     local weights = {}
     for i, id in ipairs(pool) do
         local info = getInfo(id)
-        weights[i] = self.rarityMapping[info.rarity.id] or 0
+        weights[i] = self.rarityWeights[info.rarity.id] or 0
     end
     local picker = newPicker(pool, weights)
     local seen = {}

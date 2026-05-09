@@ -25,8 +25,7 @@ https://www.keithschwarz.com/darts-dice-coins/
 ---multiple times.
 ---
 ---If the item list is dynamic or it only needs be picked once then consider
----`generation.pickWeighted` or `generation.pickWeightedPlanar`.
----@class generation.Picker
+---@class picker.Picker
 ---@field entryList any[]
 ---@field alias table<integer, integer>
 ---@field prob table<integer, number>
@@ -130,6 +129,30 @@ function Picker:pick(rng)
 
     local i = pickIndex(self, rand1, rand2)
     return self.entryList[i]
+end
+
+
+---Picks an entry and excludes it from future pickAndRemove calls.
+---Not guaranteed unique, but tries up to maxTries times.
+---@param rng {random:fun(self:any):number}?
+---@param maxTries integer?
+---@return any
+function Picker:pickAndRemove(rng, maxTries)
+    maxTries = maxTries or 5
+    if not self._excluded then
+        self._excluded = {}
+    end
+    for _ = 1, maxTries do
+        local pick = self:pick(rng)
+        if not self._excluded[pick] then
+            self._excluded[pick] = true
+            return pick
+        end
+    end
+    -- fallback: return last pick even if duplicate
+    local pick = self:pick(rng)
+    self._excluded[pick] = true
+    return pick
 end
 
 
