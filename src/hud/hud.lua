@@ -167,7 +167,11 @@ local function drawLeftBlessingBar(r)
     local run = g.getRun()
     lg.setColor(1,1,1)
     ui.drawDarkPanel(r:get())
-    local blessings = run.blessings
+    local blessings = {}
+    for bId, _ in pairs(run.blessings) do
+        blessings[#blessings + 1] = bId
+    end
+    table.sort(blessings)
     if #blessings > 0 then
         local padded = r:padUnit(6)
         local cols, rows = helper.getBestFitDimensions(#blessings, padded.w, padded.h)

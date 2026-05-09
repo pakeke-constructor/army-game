@@ -3,6 +3,8 @@
 ---@class g.BlessingInfo
 ---@field id string
 ---@field image string
+---@field startingData any?
+---@field resetDataOnBattleStart boolean?
 ---@field description string
 ---@field name string
 ---@field rarity g.Rarity
@@ -145,7 +147,7 @@ function g.newTestRun()
     if consts.DEV_MODE then
         -- populate test stuff.
         currentRun.blessings = {
-            "iron_hide", "golden_coffers", "blood_tithe", "barrage",
+            iron_hide = true, golden_coffers = true, blood_tithe = true, barrage = true,
         }
         currentRun.money = 1000
     end
@@ -834,27 +836,39 @@ function g.getBlessingsByMana(manaCells)
 end
 
 function g.addBlessing(id)
-    assert(BLESSING_DEFS[id], "Unknown blessing: " .. tostring(id))
+    local info = assert(BLESSING_DEFS[id], "Unknown blessing: " .. tostring(id))
     local run = g.getRun()
-    run.blessings[#run.blessings + 1] = id
+    local d = info.startingData
+    if d == nil then d = true end
+    run.blessings[id] = d
 end
 
 function g.removeBlessing(id)
     local run = g.getRun()
-    for i = #run.blessings, 1, -1 do
-        if run.blessings[i] == id then
-            table.remove(run.blessings, i)
-            return true
-        end
+    if run.blessings[id] ~= nil then
+        run.blessings[id] = nil
+        return true
     end
     return false
+end
+
+function g.getBlessingData(id)
+    local run = g.getRun()
+    return run.blessings[id]
+end
+
+function g.setBlessingData(id, val)
+    local run = g.getRun()
+    assert(run.blessings[id] ~= nil, "Blessing not present: " .. tostring(id))
+    if val == nil then val = false end
+    run.blessings[id] = val
 end
 
 function g.addBlessingHandlers()
     if not g.hasRun() then return end
     local run = g.getRun()
-    for i = 1, #run.blessings do
-        local info = BLESSING_DEFS[run.blessings[i]]
+    for id, _ in pairs(run.blessings) do
+        local info = BLESSING_DEFS[id]
         if info and info.handlers then
             g.addHandler(info.handlers)
         end
