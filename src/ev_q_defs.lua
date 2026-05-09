@@ -61,3 +61,6 @@ g.defineQuestion("getRewardChoiceCount", ADD, 3)
 g.defineQuestion("getProjectileCountModifier", ADD, 0)
 g.defineQuestion("getProjectileSpeedMultiplier", MUL, 1)
 
+-- Questions: timed effects (higher = faster; Acceleration returns 2 to halve all intervals)
+g.defineQuestion("getTickIntervalMultiplier", MUL, 1)
+

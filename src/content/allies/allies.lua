@@ -277,6 +277,35 @@ g.defineSquad("friendly_giant", {
 })
 
 
+g.defineEntity("doom_device", {
+    image = "militia", -- placeholder
+    physics = { shape = "circle", radius = 12, ox = 0, oy = 0, mass = 8 },
+    partitions = {"unit", "ally"},
+    team = "ally",
+    ai = { target = "enemy" },
+    attack = {
+        attackType = "ranged",
+        projectileType = "arrow",
+        projectileSpeed = 500,
+    },
+    baseAttackDamage = 12,
+    baseAttackSpeed = 2.0,
+    baseAttackRange = 99999,
+    baseMoveSpeed = 10,
+    baseMaxHealth = 40,
+})
+
+g.defineSquad("doom_device", {
+    name = loc("Doom Device"),
+    entityId = "doom_device",
+    rarity = g.RARITIES.LEGENDARY,
+    count = 1,
+    icon = "example_squad_icon",
+    perks = {},
+    cost = {yellow = 4},
+})
+
+
 g.defineEntity("swarm_bug", {
     image = "militia", -- placeholder
     physics = { shape = "circle", radius = 3, ox = 0, oy = 0, mass = 0.3 },
