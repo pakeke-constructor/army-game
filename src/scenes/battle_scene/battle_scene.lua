@@ -263,10 +263,30 @@ local function drawSandboxUI(self)
     end
 
     if self.sandbox_squadPicker then
-        -- For each squad-type: draw a big grid of squad-icons;
-        -- if region is clicked, add that squad to the player's army.
-        -- (Doesnt need to look good; this is just a dev-tool. Make it easy to use)
-
+        local panel = r:padRatio(0.1)
+        ui.drawDarkPanel(panel:get())
+        local top, body = panel:padUnit(8):splitHorizontal(1, 10)
+        if ui.Button("Close", c.GRAY, c.DARK_GRAY, top) then
+            self.sandbox_squadPicker = false
+        end
+        local ids = g.getSquadList()
+        local cols = 8
+        local rows = math.ceil(#ids / cols)
+        local cells = body:grid(cols, rows)
+        for i, id in ipairs(ids) do
+            local cell = cells[i]
+            local cx, cy, cw, ch = cell:get()
+            local idd = "sb_pick_"..id
+            if iml.isHovered( cx, cy, cw, ch , idd) then
+                lg.setColor(0.4,0.4,0.4)
+                lg.rectangle("fill", cell:get())
+            end
+            lg.setColor(1,1,1)
+            g.drawSquadIcon(id, cx + cw/2, cy + ch/2, true)
+            if iml.wasJustClicked(cx, cy, cw, ch, 1, idd) then
+                g.addSquadToArmy(g.newSquad(id))
+            end
+        end
     elseif self.sandbox_squadLevelUpper then
         -- For each squad-type in g.Army(), draw squad-icon.
         --  if region is clicked, upgrade the squad.
