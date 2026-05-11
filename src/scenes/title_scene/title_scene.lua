@@ -9,23 +9,31 @@ end
 function title_scene:update(dt)
 end
 
-function title_scene:start()
-    if self.started then
-        return
-    end
+
+---@param sandbox boolean?
+function title_scene:start(sandbox)
+    if self.started then return end
+    self.started = true
     g.newRun({
         commander = "sir_horse",
         difficulty = 0
     })
-    g.gotoScene("map_scene")
+    if sandbox then
+        local battle = require("src.scenes.battle_scene.battle_scene")
+        battle.sandbox = true
+        g.gotoScene("battle_scene")
+    else
+        g.gotoScene("map_scene")
+    end
 end
 
 function title_scene:mousepressed()
 end
 
 function title_scene:keypressed(k)
-    if k == "s" then
-        
+    if consts.DEV_MODE and k == "s" then
+        self:start(true)
+        return
     end
     self:start()
 end
