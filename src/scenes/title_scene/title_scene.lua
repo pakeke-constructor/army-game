@@ -23,7 +23,10 @@ end
 function title_scene:mousepressed()
 end
 
-function title_scene:keypressed()
+function title_scene:keypressed(k)
+    if k == "s" then
+        
+    end
     self:start()
 end
 
@@ -51,6 +54,12 @@ function title_scene:draw()
     if math.floor(t * 2) % 2 == 0 then
         local msg = "PRESS ANY KEY"
         lg.print(msg, (w - smallFont:getWidth(msg)) / 2, h * 0.55)
+    end
+
+    if consts.DEV_MODE then
+        local msg = "(DEV_MODE: Press S to enter sandbox)"
+        lg.setColor(objects.Color("FFFFEE00"))
+        lg.print(msg, (w - smallFont:getWidth(msg)) / 2, h * 0.7)
     end
 end
 

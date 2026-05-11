@@ -54,13 +54,16 @@
 - Make sandbox for Leo
 
 
+- Squad-card: when hovering stats on squad-card, tells about the stats
+
+
 - Rework stats a bit in UI: Don't display DMG/ASPD separately, instead, have a DPS stat.
 When DPS is hovered, it shows DPS/DMG as a combined thing.
 
 
 - Squad upgrade UI
 - When hovering squad-card, you can see the squad-upgrade
-- When hovering squad-box, you can see what the upgrade does
+- When hovering squad-box, squad-card shows the upgrade.
 
 
 

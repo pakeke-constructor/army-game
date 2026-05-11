@@ -21,7 +21,19 @@ COMMANDS.help = function()
     addLog("/spawn <ent_id> [count] - spawn at cursor")
     addLog("/gold <amount> - add gold")
     addLog("/tp - teleport to cursor (map)")
+    addLog("/sb - reset & enter sandbox battle")
     addLog("/help - show this")
+end
+
+COMMANDS.sb = function()
+    g.newRun({
+        commander = consts.STARTING_COMMANDER,
+        difficulty = 0
+    })
+    local battle = require("src.scenes.battle_scene.battle_scene")
+    battle.sandbox = true
+    g.gotoScene("battle_scene")
+    addLog("sandbox mode")
 end
 
 COMMANDS.get = function(args)

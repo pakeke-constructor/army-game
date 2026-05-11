@@ -954,7 +954,6 @@ function g.spawnEntity(id, x, y, ...)
     if ent.startingArmor then
         g.addArmor(ent, ent.startingArmor)
     end
-    g.addArmor(ent, 5)
     return ent
 end
 

@@ -22,6 +22,7 @@ local battle_scene = {}
 function battle_scene:init()
     self.victory = false
     self.victoryPopupTime = 0
+    self.sandbox = false -- dev-mode sandbox
 
     self.editingSquadLineup = false
 end
@@ -57,7 +58,11 @@ function battle_scene:enter()
     self.timeSinceEnteredScene = 0
 
     local run = g.getRun()
-    encounters.startRandomEncounter(run.day, self.ecs)
+    if self.sandbox then
+        self.ecs:setBorder(500, 300)
+    else
+        encounters.startRandomEncounter(run.day, self.ecs)
+    end
     local border = self.ecs.border
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
     self.camera:setPos(border[3] * 0.45, border[4] * 0.5)
@@ -114,7 +119,7 @@ function battle_scene:update(dt)
         else
             self.noEnemyTimer = 0
         end
-        if self.noEnemyTimer >= WIN_DELAY and (not self.victory) then
+        if self.noEnemyTimer >= WIN_DELAY and (not self.victory) and (not self.sandbox) then
             self.victory = true
             -- choicePopupService.set("blessing")
             rewardPopupService.set({
@@ -212,7 +217,7 @@ function battle_scene:keypressed(k)
 end
 
 
-local _BATTLE_START_CTX = "An exciting little title-prompt that shows up before a battle. Meant to indicate a battle is starting and it's exciting"
+local _BATTLE_START_CTX = "An exciting bit of title-text that shows up before a battle. Meant to indicate a battle is starting and it's exciting"
 local BATTLE_START = {
     loc("Start Battle!",{}, {context=_BATTLE_START_CTX}),
     loc("En Garde!",{}, {context=_BATTLE_START_CTX}),
@@ -220,6 +225,17 @@ local BATTLE_START = {
     loc("Battle Begins!",{}, {context=_BATTLE_START_CTX}),
 }
 
+
+local dbg = function(r)
+    if consts.DEV_MODE then lg.rectangle("line", r:get()) end
+end
+
+---@param self g.BattleScene
+local function drawSandboxUI(self)
+    local r = ui.getFullScreenRegion()
+    local main, right = r:splitVertical(5,1)
+    dbg(right)
+end
 
 
 function battle_scene:draw()
