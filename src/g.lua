@@ -678,25 +678,42 @@ end
 ---@param squad g.Squad
 function g.addSquadToArmy(squad)
     local run = g.getRun()
-    run.squads[#run.squads + 1] = squad
+    assert(not run.squads[squad.squadId], "Squad already in army: " .. squad.squadId)
+    run.squads[squad.squadId] = squad
+    run._sortedSquads = nil
 end
 
 ---@param squad g.Squad
 ---@return boolean
 function g.removeSquadFromArmy(squad)
     local run = g.getRun()
-    for i = #run.squads, 1, -1 do
-        if run.squads[i] == squad then
-            table.remove(run.squads, i)
-            return true
-        end
+    if run.squads[squad.squadId] then
+        run.squads[squad.squadId] = nil
+        run._sortedSquads = nil
+        return true
     end
     return false
 end
 
+---@param squadId string
+---@return g.Squad?
+function g.getSquadFromArmy(squadId)
+    return g.getRun().squads[squadId]
+end
+
 ---@return g.Squad[]
-function g.getArmy()
-    return g.getRun().squads
+function g.getSortedArmyList()
+    local run = g.getRun()
+    if run._sortedSquads then
+        return run._sortedSquads
+    end
+    local list = {}
+    for _, sq in pairs(run.squads) do
+        list[#list + 1] = sq
+    end
+    table.sort(list, function(a, b) return a.squadId < b.squadId end)
+    run._sortedSquads = list
+    return list
 end
 
 

@@ -104,7 +104,7 @@ function battle_scene:update(dt)
     self.timeSinceEnteredScene = self.timeSinceEnteredScene + dt
 
     local run = g.getRun()
-    for _, squad in ipairs(run.squads) do
+    for _, squad in pairs(run.squads) do
         local info = g.getSquadInfo(squad.squadId)
         squad.canAfford = not info.cost or g.canAffordMana(run._battleMana, info.cost)
     end
@@ -284,7 +284,9 @@ local function drawSandboxUI(self)
             lg.setColor(1,1,1)
             g.drawSquadIcon(id, cx + cw/2, cy + ch/2, true)
             if iml.wasJustClicked(cx, cy, cw, ch, 1, idd) then
-                g.addSquadToArmy(g.newSquad(id))
+                if not g.getSquadFromArmy(id) then
+                    g.addSquadToArmy(g.newSquad(id))
+                end
             end
         end
     elseif self.sandbox_squadLevelUpper then

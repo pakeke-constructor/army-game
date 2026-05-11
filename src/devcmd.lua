@@ -39,6 +39,7 @@ end
 COMMANDS.get = function(args)
     local squadId = args[1]
     if not squadId then return addLog("usage: /get <squad_id>") end
+    if g.getSquadFromArmy(squadId) then return addLog("already have squad: " .. squadId) end
     local squad = g.newSquad(squadId)
     g.addSquadToArmy(squad)
     addLog("added squad: " .. squadId)
@@ -47,7 +48,7 @@ end
 COMMANDS.upgrade = function(args)
     local perkId = args[1]
     if not perkId then return addLog("usage: /upgrade <perk_id> [idx]") end
-    local army = g.getArmy()
+    local army = g.getSortedArmyList()
     if #army == 0 then return addLog("no squads in army") end
     local idx = tonumber(args[2]) or 1
     local squad = army[idx]

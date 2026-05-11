@@ -28,7 +28,7 @@ local LOC_HOVER_DAYS = loc("Days remaining until the next Incursion!", {}, {cont
 ---@param slot integer
 ---@return boolean
 local function isSlotAvailable(slot)
-    local army = g.getArmy()
+    local army = g.getSortedArmyList()
     local squad = army[slot]
     if (squad) and (not squad.deployed) and (squad.canAfford) then
         return true
@@ -39,7 +39,7 @@ end
 ---@param from integer
 ---@return integer?
 local function getClosestAvailableSlot(from)
-    local army = g.getArmy()
+    local army = g.getSortedArmyList()
     local total = #army
     if total == 0 then return nil end
     from = helper.clamp(from, 1, total)
@@ -106,7 +106,7 @@ end
 ---@param self g.HUD
 ---@param region kirigami.Region
 local function drawSquadBar(self, region)
-    local army = g.getArmy()
+    local army = g.getSortedArmyList()
     if #army <= 0 then
         return
     end
@@ -497,12 +497,12 @@ end
 function HUD:getSelection()
     local idx = getSlotIndex(self)
     if not idx then return nil end
-    return g.getArmy()[idx]
+    return g.getSortedArmyList()[idx]
 end
 
 function HUD:wheelmoved(dx, dy)
     local dir = dy > 0 and 1 or -1
-    local total = #g.getArmy()
+    local total = #g.getSortedArmyList()
     local next = self.selectedSlot + dir
     for i=0, 8 do
         local j = next + i*dir
