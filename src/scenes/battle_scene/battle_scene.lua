@@ -22,7 +22,10 @@ local battle_scene = {}
 function battle_scene:init()
     self.victory = false
     self.victoryPopupTime = 0
+
     self.sandbox = false -- dev-mode sandbox
+    self.sandbox_squadPicker = false
+    self.sandbox_squadLevelUpper = false
 
     self.editingSquadLineup = false
 end
@@ -256,9 +259,12 @@ local function drawSandboxUI(self)
             g.spawnEntity("archerdemon", cx + 40 + ox, cy + oy)
         end
     end
-    if ui.Button("Clear", c.WHITE,c.BLACK, regs[5]) then
+    if ui.Button("Clear/Reset", c.WHITE,c.BLACK, regs[5]) then
         for _, ent in self.ecs:iterate("team") do
             self.ecs:removeEntity(ent)
+        end
+        for _, squad in ipairs(g.getSortedArmyList()) do
+            squad.deployed = false
         end
     end
 
@@ -274,6 +280,7 @@ local function drawSandboxUI(self)
         local rows = math.ceil(#ids / cols)
         local cells = body:grid(cols, rows)
         for i, id in ipairs(ids) do
+            local has = g.getSquadFromArmy(id)
             local cell = cells[i]
             local cx, cy, cw, ch = cell:get()
             local idd = "sb_pick_"..id
@@ -288,10 +295,36 @@ local function drawSandboxUI(self)
                     g.addSquadToArmy(g.newSquad(id))
                 end
             end
+            if has then
+                lg.setColor(0,0,0,0.7)
+                lg.rectangle("fill", cell:get())
+            end
         end
     elseif self.sandbox_squadLevelUpper then
-        -- For each squad-type in g.Army(), draw squad-icon.
-        --  if region is clicked, upgrade the squad.
+        local panel = r:padRatio(0.1)
+        ui.drawDarkPanel(panel:get())
+        local top, body = panel:padUnit(8):splitHorizontal(1, 10)
+        if ui.Button("Close", c.GRAY, c.DARK_GRAY, top) then
+            self.sandbox_squadLevelUpper = false
+        end
+        local army = g.getSortedArmyList()
+        local cols = 8
+        local rows = math.max(1, math.ceil(#army / cols))
+        local cells = body:grid(cols, rows)
+        for i, sq in ipairs(army) do
+            local cell = cells[i]
+            local cx, cy, cw, ch = cell:get()
+            local idd = "sb_lvl_"..i
+            if iml.isHovered(cx, cy, cw, ch, idd) then
+                lg.setColor(0.4,0.4,0.4)
+                lg.rectangle("fill", cell:get())
+            end
+            lg.setColor(1,1,1)
+            g.drawSquadIcon(sq.squadId, cx + cw/2, cy + ch/2, true, sq.level)
+            if iml.wasJustClicked(cx, cy, cw, ch, 1, idd) then
+                sq.level = sq.level + 1
+            end
+        end
     end
 end
 
