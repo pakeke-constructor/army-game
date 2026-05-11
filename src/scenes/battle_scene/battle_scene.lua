@@ -233,8 +233,21 @@ end
 ---@param self g.BattleScene
 local function drawSandboxUI(self)
     local r = ui.getFullScreenRegion()
-    local main, right = r:splitVertical(5,1)
-    dbg(right)
+    local main, right = r:splitHorizontal(5,1)
+    local regs = right:grid(1,8)
+    local c = objects.Color
+    if ui.Button("Add Squad(s)", c.BLUE,c.BLACK, regs[2]) then
+        self.sandbox_squadPicker = true
+    end
+    if ui.Button("Level Up squad(s)", c.BLUE,c.BLACK, regs[2]) then
+        self.sandbox_squadLevelUpper = true
+    end
+    if ui.Button("Spawn enemies", c.RED,c.BLACK, regs[3]) then
+        -- spawn some default enemies
+    end
+    if ui.Button("Clear", c.WHITE,c.BLACK, regs[4]) then
+        -- delete EVERY unit on screen
+    end
 end
 
 
@@ -310,6 +323,10 @@ function battle_scene:draw()
         lg.setColor(1,1,1, fade)
         local txt = BATTLE_START[self.randomI % #BATTLE_START + 1]
         richtext.printRichContainedNoWrap("{o}{c r=0.7 g=0.1 b=0.2}"..txt, font, rr:padRatio(0.75):get())
+    end
+
+    if self.sandbox then
+        drawSandboxUI(self)
     end
     ui.endUI()
 end
