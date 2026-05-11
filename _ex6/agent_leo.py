@@ -72,23 +72,25 @@ CODE_MODE_SYS_PROMPT = make_code_mode_system_prompt([
 ])
 
 
+ADD_LEO_AGENTS = False
 
-coder = Context("leo_smart", yolo=False, model=M.GPT53_CODEX.id, reasoning="medium", messages=[
-    MAIN_SYSTEM_PROMPT,
-    CODE_MODE_SYS_PROMPT,
-    ENV_PROMPT,
-    # CODING_STYLE_PROMPT,
-    CLAUDE_MD,
-])
+if ADD_LEO_AGENTS:
+    coder = Context("leo_smart", yolo=False, model=M.GPT53_CODEX.id, reasoning="medium", messages=[
+        MAIN_SYSTEM_PROMPT,
+        CODE_MODE_SYS_PROMPT,
+        ENV_PROMPT,
+        # CODING_STYLE_PROMPT,
+        CLAUDE_MD,
+    ])
 
 
-coder = Context("leo_normal", yolo=False, model=M.GEMMA_4.id, reasoning="medium", messages=[
-    MAIN_SYSTEM_PROMPT,
-    CODE_MODE_SYS_PROMPT,
-    ENV_PROMPT,
-    # CODING_STYLE_PROMPT,
-    CLAUDE_MD,
-])
-cache_manually(coder)
+    coder = Context("leo_normal", yolo=False, model=M.GEMMA_4.id, reasoning="medium", messages=[
+        MAIN_SYSTEM_PROMPT,
+        CODE_MODE_SYS_PROMPT,
+        ENV_PROMPT,
+        # CODING_STYLE_PROMPT,
+        CLAUDE_MD,
+    ])
+    cache_manually(coder)
 
 
