@@ -62,6 +62,10 @@
 - Make demons/enemies walk around a bit randomly at the start of combat
 
 
+- Rework stats a bit in UI: Don't display DMG/ASPD separately, instead, have a DPS stat.
+When DPS is hovered, it shows DPS/DMG as a combined thing.
+
+
 - Squad upgrade UI
 - When hovering squad-card, you can see the squad-upgrade
 - When hovering squad-box, you can see what the upgrade does

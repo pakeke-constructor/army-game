@@ -91,6 +91,10 @@ local function buildVictoryChoices()
 end
 
 
+function battle_scene:perSecondUpdate()
+    g.call("perSecondUpdate", self.ecs)
+end
+
 function battle_scene:update(dt)
     self.timeSinceEnteredScene = self.timeSinceEnteredScene + dt
 

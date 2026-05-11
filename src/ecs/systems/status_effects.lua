@@ -10,29 +10,28 @@ local statusFx = {}
 
 
 ---@param world ecs.ECSWorld
----@param dt number
-function statusFx.preUpdate(world, dt)
+function statusFx.perSecondUpdate(world)
     for _, ent in world:iterate("team") do
         ---@cast ent ecs.Entity
         if not ent.health then goto continue end
 
         -- Burn: high DPS
         if ent.burnTime and ent.burnTime > 0 then
-            ent.burnTime = ent.burnTime - dt
-            g.dealDamage(ent, consts.BURN_DPS * dt, nil, true)
+            ent.burnTime = ent.burnTime - 1
+            g.dealDamage(ent, consts.BURN_DPS, nil, true)
             if ent.burnTime <= 0 then ent.burnTime = nil end
         end
 
         -- Poison: low DPS
         if ent.poisonAmount and ent.poisonAmount > 0 then
-            ent.poisonAmount = ent.poisonAmount - dt
-            g.dealDamage(ent, ent.poisonAmount * dt, nil, true)
+            ent.poisonAmount = ent.poisonAmount - 1
+            g.dealDamage(ent, ent.poisonAmount, nil, true)
             if ent.poisonAmount <= 0 then ent.poisonAmount = nil end
         end
 
         -- Frozen: just tick down (movement/attack blocked in ai + attacking systems)
         if ent.frozenTime and ent.frozenTime > 0 then
-            ent.frozenTime = ent.frozenTime - dt
+            ent.frozenTime = ent.frozenTime - 1
             if ent.frozenTime <= 0 then ent.frozenTime = nil end
         end
 

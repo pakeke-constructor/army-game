@@ -5,6 +5,7 @@ local reducers = require("src.modules.reducers")
 g.defineEvent("initECS")
 g.defineEvent("preUpdate")
 g.defineEvent("postUpdate")
+g.defineEvent("perSecondUpdate")
 g.defineEvent("preDraw")
 g.defineEvent("postDraw")
 
