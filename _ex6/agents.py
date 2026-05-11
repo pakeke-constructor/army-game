@@ -81,7 +81,7 @@ CODE_MODE_SYS_PROMPT = make_code_mode_system_prompt([
 EX6_MD = ex6.Message(role="system", content=open("EX6.md","r").read(), overview="EX6.md")
 
 
-coder = Context("c_opus", yolo=False, model=M.OPUS_47.id, reasoning="medium", messages=[
+coder = Context("c_opus", yolo=False, model=M.OPUS_LATEST.id, reasoning="medium", messages=[
     MAIN_SYSTEM_PROMPT,
     CODE_MODE_SYS_PROMPT,
     ENV_PROMPT,
@@ -92,7 +92,7 @@ cache_manually(coder)
 
 
 
-coder = Context("c_codex", yolo=False, model=M.GPT53_CODEX.id, reasoning="medium", messages=[
+coder = Context("c_codex", yolo=False, model=M.CODEX_LATEST.id, reasoning="medium", messages=[
     MAIN_SYSTEM_PROMPT,
     CODE_MODE_SYS_PROMPT,
     ENV_PROMPT,

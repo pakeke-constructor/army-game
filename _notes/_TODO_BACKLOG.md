@@ -40,6 +40,9 @@
 - Dark-fog rendering system.
 - dark-fog for map
 - dark-fog for battle-scene
+- Write CLAUDE.md for Leo
+
+
 
 
 
@@ -47,13 +50,16 @@
 ### OK:: what do we need for a minimum-playable game?
 
 
+- Add burn-system
 
-- Write CLAUDE.md for Leo. Put ev_q_defs in the system-prompt, so leo_normal/smart knows about it.
 
+- Add armor system
+
+
+- Status-effect system
 
 
 - Make demons/enemies walk around a bit randomly at the start of combat
-
 
 
 - Squad upgrade UI

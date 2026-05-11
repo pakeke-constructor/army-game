@@ -52,7 +52,7 @@ A bunch of common pitfalls/traps to look out for:
 - Don't add buffs to squads directly. Use g.addBuff instead.
 - table-valued fields on the def are shared across all entities of that type. Mutating them (e.g. `table.insert(ent.tags, ...)`) affects every entity. 
 - Before adding/removing handlers to ent.scopes, look for a g.* function first.
-- Entity stats (attackDamage, maxHealth, etc) are recomputed every frame in stats.lua; so if you want to add a buff, you must use `g.buffEntity`
+- Entity stats (attackDamage, maxHealth, etc) are recomputed every frame in stats.lua; so if you want to add a buff, you must use `g.buffEntity`. Alternatively, hook into the question-bus for the stat. (E.g. getMaxHealthModifier/Multiplier)
 </gotchas>
 
 <event_question_bus>
@@ -126,5 +126,7 @@ General guidelines:
 - You MUST check that image-files exist before using them. Every image inside of `content/*`, `assets/sprites/*` is loaded by filename as a string, eg file.png -> "file".
 - You MUST look at examples inside `content/` before starting. This will give you a better understanding.
 - You may help the user with git issues, but NEVER EVER push directly to master.
+- Do NOT use globals. If you need to store data for blessings, use `g.setBlessingData` and `g.getBlessingData`. If you need to store information on the entity you may define a field on the entity, prefixed with _; but only use this as a last-resort, and you MUST define the component as part of the `@class ecs.Entity` definition.
+- IMPORTANT: Whenever you tag onto an event/question, e.g. in blessings-handler, you MUST reason about how frequently the event will be called. If it's called frequently, e.g. postUpdate, getEntityScale, then it's a hot-path, you MUST avoid allocating tables in the path, you MUST avoid iterating over every entity, you MUST avoid recursive calls. 
 </FINAL-IMPORTANT-DETAILS>
 

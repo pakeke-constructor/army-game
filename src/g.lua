@@ -700,7 +700,6 @@ function g.getArmy()
 end
 
 
-g.spawnEntity("horse", 1,1)
 
 ---@param id string
 ---@return g.SquadInfo
@@ -1020,11 +1019,11 @@ end
 ---@param target ecs.Entity
 ---@param damage number
 ---@param attacker ecs.Entity?
----@param ignoreReduction boolean?
-function g.dealDamage(target, damage, attacker, ignoreReduction)
+---@param ignoreQuestionBuses boolean?
+function g.dealDamage(target, damage, attacker, ignoreQuestionBuses)
     if not g.isAlive(target) then return end
 
-    local reduction = ignoreReduction and 0 or g.ask("getDamageReduction", target)
+    local reduction = ignoreQuestionBuses and 0 or g.ask("getDamageReduction", target)
     local finalDmg = math.max(0, damage - reduction)
 
     target.health = target.health - finalDmg
