@@ -23,6 +23,11 @@ local aiSys = {}
 local REFRESH_FRACTION = 0.05 -- re-target 5% of ents per frame
 local STALE_DEFAULT = -1000   -- never-targeted ents sort first
 
+local PATROL_RADIUS = 40
+local PATROL_PAUSE_MIN = 1.5
+local PATROL_PAUSE_MAX = 3.5
+local PATROL_ARRIVE_DIST = 4
+
 -- reused across frames
 local _sortBuf = {}
 
@@ -76,6 +81,38 @@ local function pickTarget(ent, candidates)
         end
     end
     return best
+end
+
+local function updatePatrol(ent, dt)
+    if not ent._patrolInited then
+        ent._patrolInited = true
+        local t = (helper.hashInteger(ent.id) % 1000) / 1000
+        ent._patrolPauseTime = t * PATROL_PAUSE_MAX
+    end
+    if ent._patrolPauseTime and ent._patrolPauseTime > 0 then
+        ent._patrolPauseTime = ent._patrolPauseTime - dt
+        ent.vx, ent.vy = 0, 0
+        return
+    end
+    local tx, ty = ent._patrolTargetX, ent._patrolTargetY
+    if not tx then
+        local a = love.math.random() * math.pi * 2
+        local r = love.math.random() * PATROL_RADIUS
+        ent._patrolTargetX = ent.patrolX + math.cos(a) * r
+        ent._patrolTargetY = ent.patrolY + math.sin(a) * r
+        tx, ty = ent._patrolTargetX, ent._patrolTargetY
+    end
+    local dx, dy = tx - ent.x, ty - ent.y
+    local dist = (dx * dx + dy * dy) ^ 0.5
+    if dist < PATROL_ARRIVE_DIST then
+        ent._patrolTargetX, ent._patrolTargetY = nil, nil
+        ent._patrolPauseTime = PATROL_PAUSE_MIN + love.math.random() * (PATROL_PAUSE_MAX - PATROL_PAUSE_MIN)
+        ent.vx, ent.vy = 0, 0
+        return
+    end
+    local speed = (ent.moveSpeed or 60) * 0.6
+    ent.vx = dx / dist * speed
+    ent.vy = dy / dist * speed
 end
 
 local function staleSorter(a, b)
@@ -133,7 +170,11 @@ function aiSys.preUpdate(world, dt)
         end
 
         if not targ then
-            ent.vx, ent.vy = 0, 0
+            if ent.team == "enemy" and ent.patrolX then
+                updatePatrol(ent, dt)
+            else
+                ent.vx, ent.vy = 0, 0
+            end
             goto continue
         end
 

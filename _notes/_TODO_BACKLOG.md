@@ -42,16 +42,11 @@
 - dark-fog for battle-scene
 - Write CLAUDE.md for Leo
 - Status-effect system
-
-
-
+- Add armor system
 
 
 
 ### OK:: what do we need for a minimum-playable game?
-
-
-- Add armor system
 
 
 - Make demons/enemies walk around a bit randomly at the start of combat
@@ -64,6 +59,10 @@ When DPS is hovered, it shows DPS/DMG as a combined thing.
 - Squad upgrade UI
 - When hovering squad-card, you can see the squad-upgrade
 - When hovering squad-box, you can see what the upgrade does
+
+
+- Make sandbox for Leo
+
 
 
 - Event system: random map events on empty nodes

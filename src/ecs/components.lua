@@ -80,6 +80,8 @@ local physics = {
 ---@field public attackSpeed number?
 ---@field public attackRange number?
 ---@field public moveSpeed number?
+---@field public patrolX number?
+---@field public patrolY number?
 ---@field public image string?
 ---@field public squad g.Squad?
 ---@field public scope g.Scope?

@@ -108,7 +108,8 @@ function EnemySpawner:finalize(ecs)
         local row = math.floor(idx / ROW_SIZE)
         local x = ox + (col - (ROW_SIZE - 1) / 2) * SPACING
         local y = oy + row * SPACING
-        g.spawnEntity(id, x, y)
+        local ent = g.spawnEntity(id, x, y)
+        ent.patrolX, ent.patrolY = x, y
     end
 
     self._entries = {}
