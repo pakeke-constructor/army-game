@@ -21,12 +21,25 @@ COMMANDS.help = function()
     addLog("/spawn <ent_id> [count] - spawn at cursor")
     addLog("/gold <amount> - add gold")
     addLog("/tp - teleport to cursor (map)")
+    addLog("/sb - reset & enter sandbox battle")
     addLog("/help - show this")
+end
+
+COMMANDS.sb = function()
+    g.newRun({
+        commander = consts.STARTING_COMMANDER,
+        difficulty = 0
+    })
+    local battle = require("src.scenes.battle_scene.battle_scene")
+    battle.sandbox = true
+    g.gotoScene("battle_scene")
+    addLog("sandbox mode")
 end
 
 COMMANDS.get = function(args)
     local squadId = args[1]
     if not squadId then return addLog("usage: /get <squad_id>") end
+    if g.getSquadFromArmy(squadId) then return addLog("already have squad: " .. squadId) end
     local squad = g.newSquad(squadId)
     g.addSquadToArmy(squad)
     addLog("added squad: " .. squadId)
@@ -35,7 +48,7 @@ end
 COMMANDS.upgrade = function(args)
     local perkId = args[1]
     if not perkId then return addLog("usage: /upgrade <perk_id> [idx]") end
-    local army = g.getArmy()
+    local army = g.getSortedArmyList()
     if #army == 0 then return addLog("no squads in army") end
     local idx = tonumber(args[2]) or 1
     local squad = army[idx]

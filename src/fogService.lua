@@ -141,7 +141,7 @@ function fogService.renderFog(r, hasFog)
                     end
 
                     local lv = math.max(1, math.min(FOG_LAYER_MAX, v))
-                    if lv <= layer then
+                    if lv == layer then
                         local i = hashCell(x, y, 4)
                         local ox = (i % 19) - 10
                         local oy = (hashCell(x, y, 5) % 19) - 10

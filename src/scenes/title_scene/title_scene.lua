@@ -9,21 +9,32 @@ end
 function title_scene:update(dt)
 end
 
-function title_scene:start()
-    if self.started then
-        return
-    end
+
+---@param sandbox boolean?
+function title_scene:start(sandbox)
+    if self.started then return end
+    self.started = true
     g.newRun({
         commander = "sir_horse",
         difficulty = 0
     })
-    g.gotoScene("map_scene")
+    if sandbox then
+        local battle = require("src.scenes.battle_scene.battle_scene")
+        battle.sandbox = true
+        g.gotoScene("battle_scene")
+    else
+        g.gotoScene("map_scene")
+    end
 end
 
 function title_scene:mousepressed()
 end
 
-function title_scene:keypressed()
+function title_scene:keypressed(k)
+    if consts.DEV_MODE and k == "s" then
+        self:start(true)
+        return
+    end
     self:start()
 end
 
@@ -51,6 +62,12 @@ function title_scene:draw()
     if math.floor(t * 2) % 2 == 0 then
         local msg = "PRESS ANY KEY"
         lg.print(msg, (w - smallFont:getWidth(msg)) / 2, h * 0.55)
+    end
+
+    if consts.DEV_MODE then
+        local msg = "(DEV_MODE: Press S to enter sandbox)"
+        lg.setColor(objects.Color("FFFFEE00"))
+        lg.print(msg, (w - smallFont:getWidth(msg)) / 2, h * 0.7)
     end
 end
 

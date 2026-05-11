@@ -37,39 +37,36 @@
 --- Commander movement for map-scene
 --- Make the yellow-visual snap to thing to the closest mouse position
 - Enter-animation for battle-scene.  Camera zoom-in when entering.  Show "battle start" text.
+- Dark-fog rendering system.
+- dark-fog for map
+- dark-fog for battle-scene
+- Write CLAUDE.md for Leo
+- Status-effect system
+- Add armor system
+- Make demons/enemies walk around a bit randomly at the start of combat
+
 
 
 
 ### OK:: what do we need for a minimum-playable game?
 
 
+- Make sandbox for Leo
 
 
-- Dark-fog rendering system.
---- dark-fog for map
---- dark-fog for battle-scene
+- Squad-card: when hovering stats on squad-card, tells about the stats
 
 
-
-- Fog for battle-scene border
-
-
-
-- "Terrain" for battle-scene 
---- trees
---- rocks
---- grass
---- BORDER: Trees + Rocks + Dark-Fog?
-
-
-
-- Make demons/enemies walk around a bit randomly at the start of combat
-
+- Rework stats a bit in UI: Don't display DMG/ASPD separately, instead, have a DPS stat.
+When DPS is hovered, it shows DPS/DMG as a combined thing.
 
 
 - Squad upgrade UI
 - When hovering squad-card, you can see the squad-upgrade
-- When hovering squad-box, you can see what the upgrade does
+- When hovering squad-box, squad-card shows the upgrade.
+
+
+
 
 
 - Event system: random map events on empty nodes
@@ -89,13 +86,21 @@
 
 
 
-- Write CLAUDE.md for Leo. Put ev_q_defs in the system-prompt, so leo_normal/smart knows about it.
+- "Terrain" for battle-scene 
+--- trees
+--- rocks
+--- grass
+--- BORDER: Trees + Rocks + Dark-Fog?
+
 
 
 
 - Juice for placing units (deploy them sequentially so its satisfying?)
 - Juice for spending mana: Should pop up above the units as you spend them
 - Juice for spending money in shop
+
+- Juice for breaking armor
+
 
 
 - Extra fancy terrain for battles:

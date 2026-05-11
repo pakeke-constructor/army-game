@@ -200,13 +200,7 @@ local function drawSquadBox(r, squadId, cost)
 
     -- find existing squad
     ---@type g.Squad?
-    local squad
-    for _, sq in ipairs(g.getArmy()) do
-        if sq.squadId == squadId then
-            -- found!
-            squad = sq
-        end
-    end
+    local squad = g.getSquadFromArmy(squadId)
 
     if canAfford and squad then
         -- if player can upgrade their squad:

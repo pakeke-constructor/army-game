@@ -100,6 +100,8 @@ local subpixel = require("src.modules.subpixel")
 
 local sceneManager = require("src.scenes.sceneManager")
 
+local perSecondUpdateTimer = 0
+
 
 local function assertValid()
     for _, id in ipairs(g.getSquadList()) do
@@ -129,7 +131,7 @@ end
 
 function love.load()
     assert(love.filesystem.createDirectory("saves"))
-    vignette.setStrength(0.5)
+    vignette.setStrength(0.8)
     analytics.init(nil)
     if consts.DEV_MODE then
         love.keyboard.setTextInput(true)
@@ -160,6 +162,14 @@ function love.update(dt)
     local sc = sceneManager.getCurrentScene()
     if sc and sc.update then
         sc:update(dt)
+    end
+
+    perSecondUpdateTimer = perSecondUpdateTimer + dt
+    while perSecondUpdateTimer >= 1 do
+        perSecondUpdateTimer = perSecondUpdateTimer - 1
+        if sc and sc.perSecondUpdate then
+            sc:perSecondUpdate()
+        end
     end
 end
 

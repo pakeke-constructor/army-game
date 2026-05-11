@@ -56,7 +56,8 @@ local function recomputeStat(ent, stat)
             statMul = 1 + (info.statUpgradeScaling[stat.name] * (lv-1))
         end
     end
-    local val = base + g.ask(stat.modQ, ent)
+    local buff = (ent.buffs and ent.buffs[stat.name]) or 0
+    local val = base + g.ask(stat.modQ, ent) + buff
     val = val * g.ask(stat.mulQ, ent) * statMul
     ent[stat.name] = val
 end

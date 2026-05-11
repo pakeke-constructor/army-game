@@ -23,6 +23,10 @@ function battle_scene:init()
     self.victory = false
     self.victoryPopupTime = 0
 
+    self.sandbox = false -- dev-mode sandbox
+    self.sandbox_squadPicker = false
+    self.sandbox_squadLevelUpper = false
+
     self.editingSquadLineup = false
 end
 
@@ -57,7 +61,11 @@ function battle_scene:enter()
     self.timeSinceEnteredScene = 0
 
     local run = g.getRun()
-    encounters.startRandomEncounter(run.day, self.ecs)
+    if self.sandbox then
+        self.ecs:setBorder(500, 300)
+    else
+        encounters.startRandomEncounter(run.day, self.ecs)
+    end
     local border = self.ecs.border
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
     self.camera:setPos(border[3] * 0.45, border[4] * 0.5)
@@ -91,11 +99,15 @@ local function buildVictoryChoices()
 end
 
 
+function battle_scene:perSecondUpdate()
+    g.call("perSecondUpdate", self.ecs)
+end
+
 function battle_scene:update(dt)
     self.timeSinceEnteredScene = self.timeSinceEnteredScene + dt
 
     local run = g.getRun()
-    for _, squad in ipairs(run.squads) do
+    for _, squad in pairs(run.squads) do
         local info = g.getSquadInfo(squad.squadId)
         squad.canAfford = not info.cost or g.canAffordMana(run._battleMana, info.cost)
     end
@@ -110,7 +122,7 @@ function battle_scene:update(dt)
         else
             self.noEnemyTimer = 0
         end
-        if self.noEnemyTimer >= WIN_DELAY and (not self.victory) then
+        if self.noEnemyTimer >= WIN_DELAY and (not self.victory) and (not self.sandbox) then
             self.victory = true
             -- choicePopupService.set("blessing")
             rewardPopupService.set({
@@ -208,7 +220,7 @@ function battle_scene:keypressed(k)
 end
 
 
-local _BATTLE_START_CTX = "An exciting little title-prompt that shows up before a battle. Meant to indicate a battle is starting and it's exciting"
+local _BATTLE_START_CTX = "An exciting bit of title-text that shows up before a battle. Meant to indicate a battle is starting and it's exciting"
 local BATTLE_START = {
     loc("Start Battle!",{}, {context=_BATTLE_START_CTX}),
     loc("En Garde!",{}, {context=_BATTLE_START_CTX}),
@@ -216,6 +228,114 @@ local BATTLE_START = {
     loc("Battle Begins!",{}, {context=_BATTLE_START_CTX}),
 }
 
+
+local dbg = function(r)
+    if consts.DEV_MODE then lg.rectangle("line", r:get()) end
+end
+
+---@param self g.BattleScene
+local function drawSandboxUI(self)
+    local r = ui.getFullScreenRegion()
+    local main, right = r:splitHorizontal(5,1)
+    local regs = right:grid(1,8)
+    local c = objects.Color
+    local ii = 1
+    local function button(txt, col)
+        ii = ii + 1
+        return ui.Button(txt, col, c.BLACK, regs[ii])
+    end
+
+    if button("Add Squad(s)", c.BLUE) then
+        self.sandbox_squadPicker = true
+    end
+    if button("Level Up squad(s)", c.BLUE) then
+        self.sandbox_squadLevelUpper = true
+    end
+    if button("Spawn enemies", c.RED) then
+        local b = self.ecs.border
+        local cx, cy = b[1] + b[3] * 0.75 + math.random(-20,20), b[2] + b[4] * 0.5 + math.random(-20,20)
+        for i = 1, 8 do
+            local ox = love.math.random(-40, 40)
+            local oy = love.math.random(-60, 60)
+            g.spawnEntity("demon", cx + ox, cy + oy)
+        end
+        for i = 1, 4 do
+            local ox = love.math.random(-30, 30)
+            local oy = love.math.random(-60, 60)
+            g.spawnEntity("archerdemon", cx + 40 + ox, cy + oy)
+        end
+    end
+    if button("Clear/Reset", c.WHITE) then
+        for _, ent in self.ecs:iterate("team") do
+            self.ecs:removeEntity(ent)
+        end
+        for _, squad in ipairs(g.getSortedArmyList()) do
+            squad.deployed = false
+        end
+    end
+    if button("RESTART!!", c.GREEN) then
+        love.event.quit("restart")
+    end
+
+    if self.sandbox_squadPicker then
+        local panel = r:padRatio(0.1)
+        ui.drawDarkPanel(panel:get())
+        local top, body = panel:padUnit(8):splitHorizontal(1, 10)
+        if ui.Button("Close", c.GRAY, c.DARK_GRAY, top) then
+            self.sandbox_squadPicker = false
+        end
+        local ids = g.getSquadList()
+        local cols = 8
+        local rows = math.ceil(#ids / cols)
+        local cells = body:grid(cols, rows)
+        for i, id in ipairs(ids) do
+            local has = g.getSquadFromArmy(id)
+            local cell = cells[i]
+            local cx, cy, cw, ch = cell:get()
+            local idd = "sb_pick_"..id
+            if iml.isHovered( cx, cy, cw, ch , idd) then
+                lg.setColor(0.4,0.4,0.4)
+                lg.rectangle("fill", cell:get())
+            end
+            lg.setColor(1,1,1)
+            g.drawSquadIcon(id, cx + cw/2, cy + ch/2, true)
+            if iml.wasJustClicked(cx, cy, cw, ch, 1, idd) then
+                if not g.getSquadFromArmy(id) then
+                    g.addSquadToArmy(g.newSquad(id))
+                end
+            end
+            if has then
+                lg.setColor(0,0,0,0.7)
+                lg.rectangle("fill", cell:get())
+            end
+        end
+    elseif self.sandbox_squadLevelUpper then
+        local panel = r:padRatio(0.1)
+        ui.drawDarkPanel(panel:get())
+        local top, body = panel:padUnit(8):splitHorizontal(1, 10)
+        if ui.Button("Close", c.GRAY, c.DARK_GRAY, top) then
+            self.sandbox_squadLevelUpper = false
+        end
+        local army = g.getSortedArmyList()
+        local cols = 8
+        local rows = math.max(1, math.ceil(#army / cols))
+        local cells = body:grid(cols, rows)
+        for i, sq in ipairs(army) do
+            local cell = cells[i]
+            local cx, cy, cw, ch = cell:get()
+            local idd = "sb_lvl_"..i
+            if iml.isHovered(cx, cy, cw, ch, idd) then
+                lg.setColor(0.4,0.4,0.4)
+                lg.rectangle("fill", cell:get())
+            end
+            lg.setColor(1,1,1)
+            g.drawSquadIcon(sq.squadId, cx + cw/2, cy + ch/2, true, sq.level)
+            if iml.wasJustClicked(cx, cy, cw, ch, 1, idd) then
+                sq.level = sq.level + 1
+            end
+        end
+    end
+end
 
 
 function battle_scene:draw()
@@ -290,6 +410,10 @@ function battle_scene:draw()
         lg.setColor(1,1,1, fade)
         local txt = BATTLE_START[self.randomI % #BATTLE_START + 1]
         richtext.printRichContainedNoWrap("{o}{c r=0.7 g=0.1 b=0.2}"..txt, font, rr:padRatio(0.75):get())
+    end
+
+    if self.sandbox then
+        drawSandboxUI(self)
     end
     ui.endUI()
 end

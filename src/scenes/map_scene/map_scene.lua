@@ -5,7 +5,7 @@ local PixelCanvas = require("src.modules.PixelCanvas")
 local decor_types = require("src.scenes.map_scene.decor_types")
 local fogService = require("src.fogService")
 
-local CAMERA_ZOOM = 0.5
+local CAMERA_ZOOM = 1--0.5
 local NODE_RADIUS = 4
 local PLAYER_RADIUS = 5
 local PAN_SPEED = 200
@@ -14,6 +14,7 @@ local COMMANDER_SPEED = 80 -- world pixels per second
 
 local PATH_SEARCH_DEPTH = 3
 local FOG_CLEAR_RADIUS = 120
+local FOG_REVEAL_DEPTH = 4
 
 
 ---@class g.MapScene
@@ -77,7 +78,9 @@ function map_scene:enter()
 
     local run = g.getRun()
     if not run.mapGraph then
-        run.mapGraph = MapGraph.generate({
+        -- Run the proc gen algorithm until we have a valid setup.
+        -- (nodeCount > 20 is valid)
+        repeat run.mapGraph = MapGraph.generate({
             width = 50,
             height = 30,
             nodePruneChance = 0.35,
@@ -89,13 +92,15 @@ function map_scene:enter()
             scaleY = 0.6,
             decorTypes = {
                 "mountain_large",
+                "mountain_small_1",
+                "mountain_small_2",
                 "tree_large_1",
                 "tree_small_1",
                 "grass_1",
                 "grass_2",
                 "grass_3"
             },
-        })
+        }) until run.mapGraph:countNodes() > 20
     end
 
     -- Build sorted decor list for drawing
@@ -117,31 +122,59 @@ function map_scene:enter()
     table.sort(self.decorList, byY)
     table.sort(self.nodeList, byY)
 
-    -- precompute fog-free cells (nested tables for fast lookup, no string alloc)
-    self.fogClearCells = {}
-    local step = 24 -- matches FOG_STEP in fogService
-    local clearCells = math.ceil(FOG_CLEAR_RADIUS / step)
-    for _, entry in ipairs(self.nodeList) do
-        local cx = math.floor(entry.x / step)
-        local cy = math.floor(entry.y / step)
-        for dx = -clearCells, clearCells do
-            local row = self.fogClearCells[cx + dx]
-            if not row then
-                row = {}
-                self.fogClearCells[cx + dx] = row
-            end
-            for dy = -clearCells, clearCells do
-                row[cy + dy] = true
-            end
-        end
-    end
-
     local pnode = run.mapGraph:getPlayerNode()
     if pnode then
         self.camX, self.camY = run.mapGraph:getDrawPos(pnode)
     else
         self.camX, self.camY = 0, 0
     end
+end
+
+function map_scene:_buildFogClearCells()
+    local run = g.getRun()
+    local graph = run.mapGraph
+    local step = 24
+    local clearCells = math.ceil(FOG_CLEAR_RADIUS / step)
+    local cells = {}
+
+    local nearPlayer = {}
+    local pnode = graph:getPlayerNode()
+    if pnode then
+        local queue = {pnode}
+        nearPlayer[pnode] = 0
+        local head = 1
+        while head <= #queue do
+            local node = queue[head]
+            local depth = nearPlayer[node]
+            head = head + 1
+            if depth < FOG_REVEAL_DEPTH then
+                for _, nb in ipairs(graph:getNeighbors(node.x, node.y)) do
+                    if not nearPlayer[nb] then
+                        nearPlayer[nb] = depth + 1
+                        queue[#queue + 1] = nb
+                    end
+                end
+            end
+        end
+    end
+
+    for _, entry in ipairs(self.nodeList) do
+        if entry.node.visited or nearPlayer[entry.node] ~= nil then
+            local cx = math.floor(entry.x / step)
+            local cy = math.floor(entry.y / step)
+            for dx = -clearCells, clearCells do
+                local row = cells[cx + dx]
+                if not row then
+                    row = {}
+                    cells[cx + dx] = row
+                end
+                for dy = -clearCells, clearCells do
+                    row[cy + dy] = true
+                end
+            end
+        end
+    end
+    return cells
 end
 
 function map_scene:leave()
@@ -190,7 +223,9 @@ function map_scene:update(dt)
 
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
     self.pixelCanvas:resize(love.graphics.getDimensions())
-    --self.camera:setZoom(CAMERA_ZOOM * ui.getUIScaling())
+    if not consts.DEV_MODE then
+        self.camera:setZoom(CAMERA_ZOOM * ui.getUIScaling())
+    end
     self.camera:setPos(self.camX, self.camY)
     self.ecs:update(dt)
 end
@@ -363,7 +398,7 @@ function map_scene:draw()
         h = math.abs(y2 - y1),
     }
     local step = 24
-    local clearCells = self.fogClearCells
+    local clearCells = self:_buildFogClearCells()
     fogService.renderFog(fogRegion, function(x, y)
         local cx = math.floor(x / step)
         local row = clearCells[cx]

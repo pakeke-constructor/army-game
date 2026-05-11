@@ -136,6 +136,13 @@ function ECSWorld:update(dt)
         end
         if e.health then
             e._timeSinceDamaged = (e._timeSinceDamaged or 0xfffffffff) + dt
+            e._timeSinceLostArmor = (e._timeSinceLostArmor or 0xfffffffff) + dt
+            if e._damageLagAmount and e._damageLagAmount > 0 then
+                e._damageLagAmount = e._damageLagAmount * math.exp(-18 * dt)
+                if e._damageLagAmount < 0.01 then
+                    e._damageLagAmount = nil
+                end
+            end
         end
         if e.vz then
             if e.gravity then e.vz = e.vz - e.gravity * dt end
@@ -210,6 +217,11 @@ end
 
 local EMPTY = {}
 
+
+---@param component string
+---@return fun(table: ecs.Entity[], i?: integer):integer
+---@return ecs.Entity[]
+---@return integer
 function ECSWorld:iterate(component)
     local list = self.componentIndex[component]
     if not list then
@@ -218,6 +230,13 @@ function ECSWorld:iterate(component)
     return ipairs(list)
 end
 
+
+
+---@param partitionId string
+---@param x number
+---@param y number
+---@param fn fun(ent: ecs.Entity)
+---@param range number
 function ECSWorld:iteratePartition(partitionId, x, y, fn, range)
     local part = self.partitions[partitionId]
     if part then

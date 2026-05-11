@@ -74,21 +74,28 @@ local physics = {
 ---@field public gravity number?
 ---@field public health number?
 ---@field public maxHealth number?
+---@field public armor number?
+---@field public startingArmor number?
 ---@field public attackDamage number?
 ---@field public attackSpeed number?
 ---@field public attackRange number?
 ---@field public moveSpeed number?
+---@field public patrolX number?
+---@field public patrolY number?
 ---@field public image string?
 ---@field public squad g.Squad?
 ---@field public scope g.Scope?
+---@field public buffs {[string]: number}?
 ---@field public _attackTimer number?
 ---@field public _attackTarget ecs.Entity?
 ---@field public _knockVx number?
 ---@field public _knockVy number?
 ---@field public burnTime number? -- if nil, no burn
 ---@field public frozenTime number? -- if nil, not frozen
----@field public poisonTime number? -- if nil, no poison
+---@field public poisonAmount number? -- if nil, no poison
 ---@field public _timeSinceDamaged number?
+---@field public _timeSinceLostArmor number?
+---@field public _damageLagAmount number?
 ---@field public onDeath fun(ecs.Entity)?
 ---@field public onSpawn fun(ecs.Entity)?
 ---@field public onUpdate fun(ecs.Entity, number)?

@@ -42,8 +42,9 @@ M.define("grass_3", { image = "grass_3", chance = 0.2, nodeRadius = 4, decorRadi
 
 
 -- Define built-in decor types
-M.define("mountain_large", { image = "mountain_large_1", chance = 0.5, nodeRadius = 35, decorRadius = 20 })
-M.define("mountain_large_2", { image = "mountain_small_1", chance = 0.3, nodeRadius = 21, decorRadius = 10 })
+M.define("mountain_large", { image = "mountain_large_1", chance = 0.2, nodeRadius = 35, decorRadius = 20 })
+M.define("mountain_small_1", { image = "mountain_small_1", chance = 0.3, nodeRadius = 15, decorRadius = 10 })
+M.define("mountain_small_2", { image = "mountain_small_2", chance = 0.1, nodeRadius = 15, decorRadius = 6 })
 
 M.define("tree_large_1", { image = "tree_large_1", chance = 0.2, nodeRadius = 20, decorRadius = 8 })
 M.define("tree_small_1", { image = "tree_small_1", chance = 0.3, nodeRadius = 12, decorRadius = 6 })

@@ -3,6 +3,8 @@
 ---@class g.BlessingInfo
 ---@field id string
 ---@field image string
+---@field startingData any?
+---@field resetDataOnBattleStart boolean?
 ---@field description string
 ---@field name string
 ---@field rarity g.Rarity
@@ -145,7 +147,7 @@ function g.newTestRun()
     if consts.DEV_MODE then
         -- populate test stuff.
         currentRun.blessings = {
-            "iron_hide", "golden_coffers", "blood_tithe", "barrage",
+            iron_hide = true, golden_coffers = true, blood_tithe = true, barrage = true,
         }
         currentRun.money = 1000
     end
@@ -167,6 +169,24 @@ function g.iteratePartition(partitionId, x, y, fn, range)
     if ecs then
         ecs:iteratePartition(partitionId, x, y, fn, range)
     end
+end
+
+---@param x number
+---@param y number
+---@param damage number
+---@param radius number?
+function g.explosion(x, y, damage, radius)
+    radius = radius or 60
+    local radiusSq = radius * radius
+    -- todo: make particles here
+    g.iteratePartition("unit", x, y, function(ent)
+        local dx = ent.x - x
+        local dy = ent.y - y
+        if dx * dx + dy * dy <= radiusSq then
+            g.knockback(ent, x, y, 200)
+            g.dealDamage(ent, damage)
+        end
+    end, radius)
 end
 
 
@@ -658,25 +678,42 @@ end
 ---@param squad g.Squad
 function g.addSquadToArmy(squad)
     local run = g.getRun()
-    run.squads[#run.squads + 1] = squad
+    assert(not run.squads[squad.squadId], "Squad already in army: " .. squad.squadId)
+    run.squads[squad.squadId] = squad
+    run._sortedSquads = nil
 end
 
 ---@param squad g.Squad
 ---@return boolean
 function g.removeSquadFromArmy(squad)
     local run = g.getRun()
-    for i = #run.squads, 1, -1 do
-        if run.squads[i] == squad then
-            table.remove(run.squads, i)
-            return true
-        end
+    if run.squads[squad.squadId] then
+        run.squads[squad.squadId] = nil
+        run._sortedSquads = nil
+        return true
     end
     return false
 end
 
+---@param squadId string
+---@return g.Squad?
+function g.getSquadFromArmy(squadId)
+    return g.getRun().squads[squadId]
+end
+
 ---@return g.Squad[]
-function g.getArmy()
-    return g.getRun().squads
+function g.getSortedArmyList()
+    local run = g.getRun()
+    if run._sortedSquads then
+        return run._sortedSquads
+    end
+    local list = {}
+    for _, sq in pairs(run.squads) do
+        list[#list + 1] = sq
+    end
+    table.sort(list, function(a, b) return a.squadId < b.squadId end)
+    run._sortedSquads = list
+    return list
 end
 
 
@@ -815,27 +852,39 @@ function g.getBlessingsByMana(manaCells)
 end
 
 function g.addBlessing(id)
-    assert(BLESSING_DEFS[id], "Unknown blessing: " .. tostring(id))
+    local info = assert(BLESSING_DEFS[id], "Unknown blessing: " .. tostring(id))
     local run = g.getRun()
-    run.blessings[#run.blessings + 1] = id
+    local d = info.startingData
+    if d == nil then d = true end
+    run.blessings[id] = d
 end
 
 function g.removeBlessing(id)
     local run = g.getRun()
-    for i = #run.blessings, 1, -1 do
-        if run.blessings[i] == id then
-            table.remove(run.blessings, i)
-            return true
-        end
+    if run.blessings[id] ~= nil then
+        run.blessings[id] = nil
+        return true
     end
     return false
+end
+
+function g.getBlessingData(id)
+    local run = g.getRun()
+    return run.blessings[id]
+end
+
+function g.setBlessingData(id, val)
+    local run = g.getRun()
+    assert(run.blessings[id] ~= nil, "Blessing not present: " .. tostring(id))
+    if val == nil then val = false end
+    run.blessings[id] = val
 end
 
 function g.addBlessingHandlers()
     if not g.hasRun() then return end
     local run = g.getRun()
-    for i = 1, #run.blessings do
-        local info = BLESSING_DEFS[run.blessings[i]]
+    for id, _ in pairs(run.blessings) do
+        local info = BLESSING_DEFS[id]
         if info and info.handlers then
             g.addHandler(info.handlers)
         end
@@ -919,6 +968,9 @@ function g.spawnEntity(id, x, y, ...)
     end
     ecs:addEntity(ent)
     g.call("entitySpawned", ent)
+    if ent.startingArmor then
+        g.addArmor(ent, ent.startingArmor)
+    end
     return ent
 end
 
@@ -942,14 +994,14 @@ function g.applyBurn(ent, duration, source)
 end
 
 ---@param ent ecs.Entity
----@param duration number
+---@param amount number
 ---@param source ecs.Entity?
 ---@return boolean applied
-function g.applyPoison(ent, duration, source)
-    local wasActive = ent.poisonTime and ent.poisonTime > 0
-    ent.poisonTime = (ent.poisonTime or 0) + duration
-    if not wasActive then
-        g.call("statusEffectApplied", ent, "poison", duration, source)
+function g.applyPoison(ent, amount, source)
+    ent.poisonAmount = (ent.poisonAmount or 0) + amount
+    -- poison if always applied, since it stacks
+    if amount > 0 then
+        g.call("statusEffectApplied", ent, "poison", 0xffffff, source)
         return true
     end
     return false
@@ -969,15 +1021,37 @@ function g.applyFrozen(ent, duration, source)
     return false
 end
 
+---@param ent ecs.Entity
+---@param healAmount number
+---@param healerEnt ecs.Entity?
+function g.healEntity(ent, healAmount, healerEnt)
+    if not g.isAlive(ent) then return end
+
+    local oldHealth = ent.health
+    ent.health = math.min(ent.maxHealth, ent.health + healAmount)
+    local finalHeal = ent.health - oldHealth
+
+    if finalHeal > 0 then
+        g.call("entityHealed", ent, finalHeal, healerEnt)
+    end
+end
+
 ---@param target ecs.Entity
 ---@param damage number
 ---@param attacker ecs.Entity?
----@param ignoreReduction boolean?
-function g.dealDamage(target, damage, attacker, ignoreReduction)
+---@param ignoreQuestionBuses boolean?
+function g.dealDamage(target, damage, attacker, ignoreQuestionBuses)
     if not g.isAlive(target) then return end
 
-    local reduction = ignoreReduction and 0 or g.ask("getDamageReduction", target)
+    if not ignoreQuestionBuses and target.armor then
+        g.removeArmor(target, 1)
+        return
+    end
+
+    local reduction = ignoreQuestionBuses and 0 or g.ask("getDamageReduction", target)
     local finalDmg = math.max(0, damage - reduction)
+
+    target._damageLagAmount = (target._damageLagAmount or 0) + finalDmg
 
     target.health = target.health - finalDmg
     target._timeSinceDamaged = 0
@@ -987,6 +1061,27 @@ function g.dealDamage(target, damage, attacker, ignoreReduction)
     if target.health <= 0 then
         g.killEntity(target, attacker)
     end
+end
+
+---@param ent ecs.Entity
+---@param amount number
+function g.addArmor(ent, amount)
+    if amount <= 0 then return end
+    ent.armor = (ent.armor or 0) + amount
+    g.call("armorIncreased", ent, amount)
+end
+
+---@param ent ecs.Entity
+---@param count number
+function g.removeArmor(ent, count)
+    if count <= 0 then return end
+    local cur = ent.armor or 0
+    local removed = math.min(cur, count)
+    if removed <= 0 then return end
+    local newArmor = cur - removed
+    ent.armor = newArmor > 0 and newArmor or nil
+    ent._timeSinceLostArmor = 0
+    g.call("armorDecreased", ent, removed)
 end
 
 ---@param ent ecs.Entity
@@ -1059,15 +1154,51 @@ local function drawHealthBar(ent, x,y)
     lg.setColor(0, 0, 0)
     lg.rectangle("fill", x - w/2 - out, y + oy - out, w + out*2, h + out*2)
 
-    local t = helper.clamp((ent._timeSinceDamaged or 0xfffffffff) / consts.LAGGED_HEALTHBAR_DURATION, 0, 1)
-    t = helper.clamp(helper.EASINGS.easeInCubic(t), 0, 1)
-    local lagFrac = helper.lerp(1, frac, t)
+    local lagFrac = helper.clamp((ent.health + (ent._damageLagAmount or 0)) / ent.maxHealth, 0, 1)
     -- white lagged
     lg.setColor(1, 1, 1)
     lg.rectangle("fill", x - w/2, y + oy, w * lagFrac, h)
     -- red health
     lg.setColor(1, 0, 0)
     lg.rectangle("fill", x - w/2, y + oy, w * frac, h)
+
+    -- status effect tip segments (drawn right-to-left from tip)
+    local pxPerHp = w / ent.maxHealth
+    local right = x - w/2 + w * frac
+    local remaining = ent.health
+    local function drawTip(hp, color)
+        hp = math.min(hp, remaining)
+        if hp <= 0 then return end
+        lg.setColor(color)
+        lg.rectangle("fill", right - hp * pxPerHp, y + oy, hp * pxPerHp, h)
+        right = right - hp * pxPerHp
+        remaining = remaining - hp
+    end
+    drawTip(5 * (ent.poisonAmount or 0), g.COLORS.POISON)
+    drawTip((ent.burnTime or 0) * consts.BURN_DPS, g.COLORS.BURN)
+
+    if ent.armor then
+        local FLASH_DUR = 0.15
+        local armorFlash = math.max(0, FLASH_DUR - (ent._timeSinceLostArmor or 0xfff))/FLASH_DUR
+        local armorH = 6
+        local armorY = y + h + oy
+        local ratio = math.min(1,(ent.armor)/6)
+        lg.setColor(0,0,0)
+        lg.rectangle("fill", x-w/2, armorY, w*ratio, armorH)
+        local pad=2
+        lg.setColor(0.5,0.5,0.5)
+        lg.rectangle("fill", x-w/2 + pad, armorY + pad, ratio*(w-pad*2), armorH-pad*2)
+        if armorFlash then
+            lg.setColor(1,1,1, armorFlash)
+            lg.rectangle("fill", x-w/2, armorY, w*ratio, armorH)
+        end
+        lg.setColor(1,1,1)
+        g.drawImage("armor_healthbar_icon", x-w/2 - 2, armorY + 2)
+        if armorFlash > 0 then
+            lg.setColor(1,1,1, armorFlash)
+            g.drawImage("armor_healthbar_icon_white", x-w/2 - 2, armorY + 2)
+        end
+    end
 end
 
 function g.drawEntity(ent, x, y)
@@ -1610,6 +1741,16 @@ function g.getStatList()
     return STAT_LIST
 end
 
+---@param ent ecs.Entity
+---@param stat string
+---@param increase number
+function g.buffEntity(ent, stat, increase)
+    assert(STAT_DEFS[stat], "unknown stat: " .. tostring(stat))
+    ent.buffs = ent.buffs or {}
+    ent.buffs[stat] = (ent.buffs[stat] or 0) + increase
+    g.call("entityBuffed", ent, stat, increase)
+end
+
 ---@param id string
 ---@return g.Stat
 function g.getStatInfo(id)
@@ -1626,6 +1767,8 @@ g.COLORS = {
     todo: figure out what do put here:
     
     ]]
+    BURN = objects.Color("FFE17313"),
+    POISON = objects.Color("FF4CC44C"),
     HEALTH = objects.Color("FF397634"),
     ATTACK = objects.Color("FFA2741E"),
     MAP_EDGE = objects.Color(0.16, 0.28, 0.18),
