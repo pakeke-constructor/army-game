@@ -974,14 +974,14 @@ function g.applyBurn(ent, duration, source)
 end
 
 ---@param ent ecs.Entity
----@param duration number
+---@param amount number
 ---@param source ecs.Entity?
 ---@return boolean applied
-function g.applyPoison(ent, duration, source)
-    local wasActive = ent.poisonTime and ent.poisonTime > 0
-    ent.poisonTime = (ent.poisonTime or 0) + duration
-    if not wasActive then
-        g.call("statusEffectApplied", ent, "poison", duration, source)
+function g.applyPoison(ent, amount, source)
+    ent.poisonAmount = (ent.poisonAmount or 0) + amount
+    -- poison if always applied, since it stacks
+    if amount > 0 then
+        g.call("statusEffectApplied", ent, "poison", 0xffffff, source)
         return true
     end
     return false

@@ -8,8 +8,12 @@ Burn and poison deal damage over time. Frozen is handled by ai/attacking systems
 
 local statusFx = {}
 
+
+---@param world ecs.ECSWorld
+---@param dt number
 function statusFx.preUpdate(world, dt)
     for _, ent in world:iterate("team") do
+        ---@cast ent ecs.Entity
         if not ent.health then goto continue end
 
         -- Burn: high DPS
@@ -20,10 +24,10 @@ function statusFx.preUpdate(world, dt)
         end
 
         -- Poison: low DPS
-        if ent.poisonTime and ent.poisonTime > 0 then
-            ent.poisonTime = ent.poisonTime - dt
-            g.dealDamage(ent, consts.POISON_DPS * dt, nil, true)
-            if ent.poisonTime <= 0 then ent.poisonTime = nil end
+        if ent.poisonAmount and ent.poisonAmount > 0 then
+            ent.poisonAmount = ent.poisonAmount - dt
+            g.dealDamage(ent, ent.poisonAmount * dt, nil, true)
+            if ent.poisonAmount <= 0 then ent.poisonAmount = nil end
         end
 
         -- Frozen: just tick down (movement/attack blocked in ai + attacking systems)

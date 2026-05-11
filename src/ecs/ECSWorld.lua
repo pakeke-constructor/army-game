@@ -216,6 +216,11 @@ end
 
 local EMPTY = {}
 
+
+---@param component string
+---@return fun(table: ecs.Entity[], i?: integer):integer
+---@return ecs.Entity[]
+---@return integer
 function ECSWorld:iterate(component)
     local list = self.componentIndex[component]
     if not list then
@@ -224,6 +229,13 @@ function ECSWorld:iterate(component)
     return ipairs(list)
 end
 
+
+
+---@param partitionId string
+---@param x number
+---@param y number
+---@param fn fun(ent: ecs.Entity)
+---@param range number
 function ECSWorld:iteratePartition(partitionId, x, y, fn, range)
     local part = self.partitions[partitionId]
     if part then
