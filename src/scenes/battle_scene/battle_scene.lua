@@ -239,14 +239,37 @@ local function drawSandboxUI(self)
     if ui.Button("Add Squad(s)", c.BLUE,c.BLACK, regs[2]) then
         self.sandbox_squadPicker = true
     end
-    if ui.Button("Level Up squad(s)", c.BLUE,c.BLACK, regs[2]) then
+    if ui.Button("Level Up squad(s)", c.BLUE,c.BLACK, regs[3]) then
         self.sandbox_squadLevelUpper = true
     end
-    if ui.Button("Spawn enemies", c.RED,c.BLACK, regs[3]) then
-        -- spawn some default enemies
+    if ui.Button("Spawn enemies", c.RED,c.BLACK, regs[4]) then
+        local b = self.ecs.border
+        local cx, cy = b[1] + b[3] * 0.75 + math.random(-20,20), b[2] + b[4] * 0.5 + math.random(-20,20)
+        for i = 1, 8 do
+            local ox = love.math.random(-40, 40)
+            local oy = love.math.random(-60, 60)
+            g.spawnEntity("demon", cx + ox, cy + oy)
+        end
+        for i = 1, 4 do
+            local ox = love.math.random(-30, 30)
+            local oy = love.math.random(-60, 60)
+            g.spawnEntity("archerdemon", cx + 40 + ox, cy + oy)
+        end
     end
-    if ui.Button("Clear", c.WHITE,c.BLACK, regs[4]) then
-        -- delete EVERY unit on screen
+    if ui.Button("Clear", c.WHITE,c.BLACK, regs[5]) then
+        for _, ent in self.ecs:iterate("team") do
+            self.ecs:removeEntity(ent)
+        end
+    end
+
+    if self.sandbox_squadPicker then
+        -- For each squad-type: draw a big grid of squad-icons;
+        -- if region is clicked, add that squad to the player's army.
+        -- (Doesnt need to look good; this is just a dev-tool. Make it easy to use)
+
+    elseif self.sandbox_squadLevelUpper then
+        -- For each squad-type in g.Army(), draw squad-icon.
+        --  if region is clicked, upgrade the squad.
     end
 end
 
