@@ -43,13 +43,15 @@
 - Write CLAUDE.md for Leo
 - Status-effect system
 - Add armor system
+- Make demons/enemies walk around a bit randomly at the start of combat
+
 
 
 
 ### OK:: what do we need for a minimum-playable game?
 
 
-- Make demons/enemies walk around a bit randomly at the start of combat
+- Make sandbox for Leo
 
 
 - Rework stats a bit in UI: Don't display DMG/ASPD separately, instead, have a DPS stat.
@@ -61,7 +63,6 @@ When DPS is hovered, it shows DPS/DMG as a combined thing.
 - When hovering squad-box, you can see what the upgrade does
 
 
-- Make sandbox for Leo
 
 
 
@@ -94,6 +95,9 @@ When DPS is hovered, it shows DPS/DMG as a combined thing.
 - Juice for placing units (deploy them sequentially so its satisfying?)
 - Juice for spending mana: Should pop up above the units as you spend them
 - Juice for spending money in shop
+
+- Juice for breaking armor
+
 
 
 - Extra fancy terrain for battles:

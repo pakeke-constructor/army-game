@@ -1161,19 +1161,15 @@ local function drawHealthBar(ent, x,y)
     drawTip((ent.burnTime or 0) * consts.BURN_DPS, g.COLORS.BURN)
 
     if ent.armor then
-        local armorH = 5
-        local armorY = y + h + oy + 2
+        local armorH = 6
+        local armorY = y + h + oy
+        local ratio = math.min(1,(ent.armor)/6)
         lg.setColor(0,0,0)
-        lg.rectangle("fill", x-w/2, armorY, w, armorH)
+        lg.rectangle("fill", x-w/2, armorY, w*ratio, armorH)
         lg.setColor(0.5,0.5,0.5)
-        local N = helper.clamp(ent.armor, 6, 50)
-        local pad = 2
-        local cellW = w / N
-        for i=1, N do
-            if i <= ent.armor then
-                lg.rectangle("fill", x-w/2 + (i-1)*cellW + pad, armorY + pad, cellW - pad, armorH - pad*2)
-            end
-        end
+        local pad=2
+        lg.rectangle("fill", x-w/2 + pad, armorY + pad, ratio*(w-pad*2), armorH-pad*2)
+        --local N = helper.clamp(ent.armor, 6, 50)
         lg.setColor(1,1,1)
         g.drawImage("armor_healthbar_icon", x-w/2 - 2, armorY + 2)
     end
