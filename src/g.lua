@@ -954,6 +954,7 @@ function g.spawnEntity(id, x, y, ...)
     if ent.startingArmor then
         g.addArmor(ent, ent.startingArmor)
     end
+    g.addArmor(ent, 5)
     return ent
 end
 
@@ -1160,9 +1161,16 @@ local function drawHealthBar(ent, x,y)
     drawTip((ent.burnTime or 0) * consts.BURN_DPS, g.COLORS.BURN)
 
     if ent.armor then
-        local armorY = y + h + oy
-        lg.setColor(0.5,0.5,0.5)
+        local armorY = y + h + oy + 2
+        lg.setColor(0,0,0)
         lg.rectangle("fill", x-w/2, armorY, w, h)
+        lg.setColor(0.5,0.5,0.5)
+        local N = helper.clamp(ent.armor, 6, 50)
+        for i=1, N do
+            -- draw a filled gray rectangle padded inside.
+        end
+        lg.setColor(1,1,1)
+        g.drawImage("armor_healthbar_icon", x-w/2 - 2, armorY + 2)
     end
 end
 
