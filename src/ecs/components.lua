@@ -94,6 +94,7 @@ local physics = {
 ---@field public frozenTime number? -- if nil, not frozen
 ---@field public poisonAmount number? -- if nil, no poison
 ---@field public _timeSinceDamaged number?
+---@field public _timeSinceLostArmor number?
 ---@field public _damageLagAmount number?
 ---@field public onDeath fun(ecs.Entity)?
 ---@field public onSpawn fun(ecs.Entity)?

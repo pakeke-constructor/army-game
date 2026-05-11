@@ -136,6 +136,7 @@ function ECSWorld:update(dt)
         end
         if e.health then
             e._timeSinceDamaged = (e._timeSinceDamaged or 0xfffffffff) + dt
+            e._timeSinceLostArmor = (e._timeSinceLostArmor or 0xfffffffff) + dt
             if e._damageLagAmount and e._damageLagAmount > 0 then
                 e._damageLagAmount = e._damageLagAmount * math.exp(-18 * dt)
                 if e._damageLagAmount < 0.01 then

@@ -1064,6 +1064,7 @@ function g.removeArmor(ent, count)
     if removed <= 0 then return end
     local newArmor = cur - removed
     ent.armor = newArmor > 0 and newArmor or nil
+    ent._timeSinceLostArmor = 0
     g.call("armorDecreased", ent, removed)
 end
 
@@ -1161,17 +1162,26 @@ local function drawHealthBar(ent, x,y)
     drawTip((ent.burnTime or 0) * consts.BURN_DPS, g.COLORS.BURN)
 
     if ent.armor then
+        local FLASH_DUR = 0.15
+        local armorFlash = math.max(0, FLASH_DUR - (ent._timeSinceLostArmor or 0xfff))/FLASH_DUR
         local armorH = 6
         local armorY = y + h + oy
         local ratio = math.min(1,(ent.armor)/6)
         lg.setColor(0,0,0)
         lg.rectangle("fill", x-w/2, armorY, w*ratio, armorH)
-        lg.setColor(0.5,0.5,0.5)
         local pad=2
+        lg.setColor(0.5,0.5,0.5)
         lg.rectangle("fill", x-w/2 + pad, armorY + pad, ratio*(w-pad*2), armorH-pad*2)
-        --local N = helper.clamp(ent.armor, 6, 50)
+        if armorFlash then
+            lg.setColor(1,1,1, armorFlash)
+            lg.rectangle("fill", x-w/2, armorY, w*ratio, armorH)
+        end
         lg.setColor(1,1,1)
         g.drawImage("armor_healthbar_icon", x-w/2 - 2, armorY + 2)
+        if armorFlash > 0 then
+            lg.setColor(1,1,1, armorFlash)
+            g.drawImage("armor_healthbar_icon_white", x-w/2 - 2, armorY + 2)
+        end
     end
 end
 
