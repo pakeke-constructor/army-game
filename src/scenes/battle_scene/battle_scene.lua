@@ -239,13 +239,19 @@ local function drawSandboxUI(self)
     local main, right = r:splitHorizontal(5,1)
     local regs = right:grid(1,8)
     local c = objects.Color
-    if ui.Button("Add Squad(s)", c.BLUE,c.BLACK, regs[2]) then
+    local ii = 1
+    local function button(txt, col)
+        ii = ii + 1
+        return ui.Button(txt, col, c.BLACK, regs[ii])
+    end
+
+    if button("Add Squad(s)", c.BLUE) then
         self.sandbox_squadPicker = true
     end
-    if ui.Button("Level Up squad(s)", c.BLUE,c.BLACK, regs[3]) then
+    if button("Level Up squad(s)", c.BLUE) then
         self.sandbox_squadLevelUpper = true
     end
-    if ui.Button("Spawn enemies", c.RED,c.BLACK, regs[4]) then
+    if button("Spawn enemies", c.RED) then
         local b = self.ecs.border
         local cx, cy = b[1] + b[3] * 0.75 + math.random(-20,20), b[2] + b[4] * 0.5 + math.random(-20,20)
         for i = 1, 8 do
@@ -259,13 +265,16 @@ local function drawSandboxUI(self)
             g.spawnEntity("archerdemon", cx + 40 + ox, cy + oy)
         end
     end
-    if ui.Button("Clear/Reset", c.WHITE,c.BLACK, regs[5]) then
+    if button("Clear/Reset", c.WHITE) then
         for _, ent in self.ecs:iterate("team") do
             self.ecs:removeEntity(ent)
         end
         for _, squad in ipairs(g.getSortedArmyList()) do
             squad.deployed = false
         end
+    end
+    if button("RESTART!!", c.GREEN) then
+        love.event.quit("restart")
     end
 
     if self.sandbox_squadPicker then
