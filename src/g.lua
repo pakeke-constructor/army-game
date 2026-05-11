@@ -1026,6 +1026,8 @@ function g.dealDamage(target, damage, attacker, ignoreQuestionBuses)
     local reduction = ignoreQuestionBuses and 0 or g.ask("getDamageReduction", target)
     local finalDmg = math.max(0, damage - reduction)
 
+    target._damageLagAmount = (target._damageLagAmount or 0) + finalDmg
+
     target.health = target.health - finalDmg
     target._timeSinceDamaged = 0
 
@@ -1106,9 +1108,7 @@ local function drawHealthBar(ent, x,y)
     lg.setColor(0, 0, 0)
     lg.rectangle("fill", x - w/2 - out, y + oy - out, w + out*2, h + out*2)
 
-    local t = helper.clamp((ent._timeSinceDamaged or 0xfffffffff) / consts.LAGGED_HEALTHBAR_DURATION, 0, 1)
-    t = helper.clamp(helper.EASINGS.easeInCubic(t), 0, 1)
-    local lagFrac = helper.lerp(1, frac, t)
+    local lagFrac = helper.clamp((ent.health + (ent._damageLagAmount or 0)) / ent.maxHealth, 0, 1)
     -- white lagged
     lg.setColor(1, 1, 1)
     lg.rectangle("fill", x - w/2, y + oy, w * lagFrac, h)
