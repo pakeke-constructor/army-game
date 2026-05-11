@@ -1025,6 +1025,11 @@ end
 function g.dealDamage(target, damage, attacker, ignoreQuestionBuses)
     if not g.isAlive(target) then return end
 
+    if not ignoreQuestionBuses and (target.armor or 0) > 0 then
+        g.removeArmor(target, 1)
+        return
+    end
+
     local reduction = ignoreQuestionBuses and 0 or g.ask("getDamageReduction", target)
     local finalDmg = math.max(0, damage - reduction)
 
@@ -1038,6 +1043,25 @@ function g.dealDamage(target, damage, attacker, ignoreQuestionBuses)
     if target.health <= 0 then
         g.killEntity(target, attacker)
     end
+end
+
+---@param ent ecs.Entity
+---@param amount number
+function g.addArmor(ent, amount)
+    if amount <= 0 then return end
+    ent.armor = (ent.armor or 0) + amount
+    g.call("armorIncreased", ent, amount)
+end
+
+---@param ent ecs.Entity
+---@param count number
+function g.removeArmor(ent, count)
+    if count <= 0 then return end
+    local cur = ent.armor or 0
+    local removed = math.min(cur, count)
+    if removed <= 0 then return end
+    ent.armor = cur - removed
+    g.call("armorDecreased", ent, removed)
 end
 
 ---@param ent ecs.Entity

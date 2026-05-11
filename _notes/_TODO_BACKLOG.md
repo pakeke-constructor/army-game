@@ -41,6 +41,7 @@
 - dark-fog for map
 - dark-fog for battle-scene
 - Write CLAUDE.md for Leo
+- Status-effect system
 
 
 
@@ -51,8 +52,6 @@
 
 
 - Add armor system
-
-- Status-effect system
 
 
 - Make demons/enemies walk around a bit randomly at the start of combat

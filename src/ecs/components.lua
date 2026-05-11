@@ -74,6 +74,8 @@ local physics = {
 ---@field public gravity number?
 ---@field public health number?
 ---@field public maxHealth number?
+---@field public armor number?
+---@field public startingArmor number?
 ---@field public attackDamage number?
 ---@field public attackSpeed number?
 ---@field public attackRange number?

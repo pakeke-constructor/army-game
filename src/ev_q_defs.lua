@@ -24,6 +24,8 @@ g.defineEvent("entityDeath")
 -- Entity combat
 g.defineEvent("entityHurt")
 g.defineEvent("entityHealed")
+g.defineEvent("armorIncreased")
+g.defineEvent("armorDecreased")
 g.defineEvent("entityBuffed")
 g.defineEvent("entityKillsEnemy")
 g.defineEvent("entityShootsProjectile")
