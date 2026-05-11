@@ -951,8 +951,9 @@ function g.spawnEntity(id, x, y, ...)
     end
     ecs:addEntity(ent)
     g.call("entitySpawned", ent)
-    g.applyBurn(ent, 10)
-    g.applyPoison(ent, 5)
+    if ent.startingArmor then
+        g.addArmor(ent, ent.startingArmor)
+    end
     return ent
 end
 
@@ -1025,7 +1026,7 @@ end
 function g.dealDamage(target, damage, attacker, ignoreQuestionBuses)
     if not g.isAlive(target) then return end
 
-    if not ignoreQuestionBuses and (target.armor or 0) > 0 then
+    if not ignoreQuestionBuses and target.armor then
         g.removeArmor(target, 1)
         return
     end
@@ -1060,7 +1061,8 @@ function g.removeArmor(ent, count)
     local cur = ent.armor or 0
     local removed = math.min(cur, count)
     if removed <= 0 then return end
-    ent.armor = cur - removed
+    local newArmor = cur - removed
+    ent.armor = newArmor > 0 and newArmor or nil
     g.call("armorDecreased", ent, removed)
 end
 
@@ -1156,6 +1158,12 @@ local function drawHealthBar(ent, x,y)
     end
     drawTip(5 * (ent.poisonAmount or 0), g.COLORS.POISON)
     drawTip((ent.burnTime or 0) * consts.BURN_DPS, g.COLORS.BURN)
+
+    if ent.armor then
+        local armorY = y + h + oy
+        lg.setColor(0.5,0.5,0.5)
+        lg.rectangle("fill", x-w/2, armorY, w, h)
+    end
 end
 
 function g.drawEntity(ent, x, y)
