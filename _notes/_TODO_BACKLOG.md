@@ -50,10 +50,6 @@
 ### OK:: what do we need for a minimum-playable game?
 
 
-- Add burn-system
-- Add nice visual for burn-system
-
-
 - Add armor system
 
 - Status-effect system

@@ -22,9 +22,8 @@ function statusFx.perSecondUpdate(world)
             if ent.burnTime <= 0 then ent.burnTime = nil end
         end
 
-        -- Poison: low DPS
+        -- Poison: constant DPS
         if ent.poisonAmount and ent.poisonAmount > 0 then
-            ent.poisonAmount = ent.poisonAmount - 1
             g.dealDamage(ent, ent.poisonAmount, nil, true)
             if ent.poisonAmount <= 0 then ent.poisonAmount = nil end
         end

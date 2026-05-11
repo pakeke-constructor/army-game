@@ -951,6 +951,8 @@ function g.spawnEntity(id, x, y, ...)
     end
     ecs:addEntity(ent)
     g.call("entitySpawned", ent)
+    g.applyBurn(ent, 10)
+    g.applyPoison(ent, 5)
     return ent
 end
 
@@ -1115,6 +1117,21 @@ local function drawHealthBar(ent, x,y)
     -- red health
     lg.setColor(1, 0, 0)
     lg.rectangle("fill", x - w/2, y + oy, w * frac, h)
+
+    -- status effect tip segments (drawn right-to-left from tip)
+    local pxPerHp = w / ent.maxHealth
+    local right = x - w/2 + w * frac
+    local remaining = ent.health
+    local function drawTip(hp, color)
+        hp = math.min(hp, remaining)
+        if hp <= 0 then return end
+        lg.setColor(color)
+        lg.rectangle("fill", right - hp * pxPerHp, y + oy, hp * pxPerHp, h)
+        right = right - hp * pxPerHp
+        remaining = remaining - hp
+    end
+    drawTip(5 * (ent.poisonAmount or 0), g.COLORS.POISON)
+    drawTip((ent.burnTime or 0) * consts.BURN_DPS, g.COLORS.BURN)
 end
 
 function g.drawEntity(ent, x, y)
@@ -1683,6 +1700,8 @@ g.COLORS = {
     todo: figure out what do put here:
     
     ]]
+    BURN = objects.Color("FFE17313"),
+    POISON = objects.Color("FF4CC44C"),
     HEALTH = objects.Color("FF397634"),
     ATTACK = objects.Color("FFA2741E"),
     MAP_EDGE = objects.Color(0.16, 0.28, 0.18),
