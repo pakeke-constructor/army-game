@@ -166,23 +166,6 @@ local RAR_MAP = {
 }
 
 
-local function getOrbitPosOnRegionEdge(r, t)
-    local x, y, w, h = r:get()
-    local perimeter = 2 * (w + h)
-    local d = (t % 1) * perimeter
-
-    if d < w then
-        return x + d, y
-    elseif d < w + h then
-        return x + w, y + (d - w)
-    elseif d < (2 * w + h) then
-        return x + w - (d - w - h), y + h
-    else
-        return x, y + h - (d - 2 * w - h)
-    end
-end
-
-
 ---@param r kirigami.Region
 ---@param squadId string
 ---@param cost number
@@ -205,18 +188,8 @@ local function drawSquadBox(r, squadId, cost)
     if canAfford and squad then
         -- if player can upgrade their squad:
         -- Then draw a fancy background animation behind the card.
-        local function drawSnakeThing(offset)
-            local N = 9
-            local col = objects.Color(rar.color)
-            for i=N,1,-1 do
-                col=col:darken(0.1)
-                lg.setColor(col)
-                local x,y = getOrbitPosOnRegionEdge(r, offset + i/80 + love.timer.getTime()/5)
-                lg.rectangle("fill", x-3,y-3, 6,6)
-            end
-        end
-        drawSnakeThing(0)
-        drawSnakeThing(0.5)
+        helper.drawEdgeTrailAnimation(r, rar.color, 0)
+        helper.drawEdgeTrailAnimation(r, rar.color, 0.5)
     end
 
     -- draw background:

@@ -1787,6 +1787,8 @@ g.COLORS = {
     todo: figure out what do put here:
     
     ]]
+    UPGRADE = objects.Color("FFF7D172"),
+
     BURN = objects.Color("FFE17313"),
     POISON = objects.Color("FF4CC44C"),
     HEALTH = objects.Color("FF397634"),

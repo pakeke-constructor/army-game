@@ -61,6 +61,10 @@ local UPGRADE = loc("UPGRADE!", {}, {
     context = "Title, denoting that there is a squad upgrade."
 })
 
+local UPGRADE_UNITS = interp("+%{n} Units", {
+    context = "An upgrade where the units in a squad increases. e.g. More soldiers; `+5 units`."
+})
+
 
 ---Draw a single squad card in a kirigami region. Returns true if clicked.
 ---@param squadId string
@@ -261,22 +265,34 @@ local function drawSquadCard(squadId, region, index)
     if existingSquad then
         -- its an upgrade
         local r1, _ = region:splitVertical(1,8)
-        local font = g.getBigFont(16)
-        richtext.printRichContainedNoWrap("{wavy amp=0.3}{o}{c r=0.9 g=0.9 b=0.4}" .. UPGRADE, font, r1:moveRatio(0,-0.7):padRatio(0.3):get())
+        local titleFont = g.getBigFont(16)
+        richtext.printRichContainedNoWrap("{wavy amp=0.3}{o}{c r=0.9 g=0.9 b=0.4}" .. UPGRADE, titleFont, r1:moveRatio(0,-0.7):padRatio(0.3):get())
 
         local buf = {}
-        for statId, mult in pairs(info.statUpgradeScaling) do
+        local lv = existingSquad.level
+        for statId, _ in pairs(info.statUpgradeScaling) do
             local statInfo = g.getStatInfo(statId)
-            local lv = existingSquad.level
-            local statMul = 1 + (info.statUpgradeScaling[statId] * (lv-1))
-            local increase = def[statInfo.baseName] * statMul
-            -- add increase to the buf
+            local base = def[statInfo.baseName] or 0
+            local increase = base * info.statUpgradeScaling[statId]
+            buf[#buf+1] = string.format("{%s} +%d", statInfo.icon, math.floor(increase + 0.5))
         end
-        if info.unitCountUpgradeScaling then
-            -- add unit-count upgrade txt
+        if info.unitCountUpgradeScaling and info.unitCountUpgradeScaling > 0 then
+            buf[#buf+1] = UPGRADE_UNITS({n = info.unitCountUpgradeScaling})
         end
-        local str = table.concat(buf, " ")
-        -- draw box, with buf txt inside
+        if #buf > 0 then
+            local str = table.concat(buf, "  ")
+            local boxReg = Kirigami(x, y + h - 34, w, 58):padUnit(30, 0, 30, 0)
+            local title, txtReg = boxReg:splitVertical(2,3)
+
+            love.graphics.setColor(1,1,1)
+            helper.drawEdgeTrailAnimation(boxReg, col, 0)
+            helper.drawEdgeTrailAnimation(boxReg, col, 0.5)
+            lg.setColor(1,1,1)
+            ui.drawDarkPanel(boxReg:get())
+            local font = g.getSmallFont(16)
+            richtext.printRichContainedNoWrap("{wavy amp=0.5}"..UPGRADE, font, title:padUnit(2,2):get())
+            richtext.printRichContainedNoWrap(str, font, txtReg:padUnit(4,4):get())
+        end
     end
 
     return ret, ww,hh
