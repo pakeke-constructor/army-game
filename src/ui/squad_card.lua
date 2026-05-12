@@ -284,7 +284,7 @@ local function drawSquadCard(squadId, region, index)
         end
         if #buf > 0 then
             local str = table.concat(buf, "  ")
-            local boxReg = Kirigami(x, y + h - 24, w, 40):padUnit(30, 0, 30, 0)
+            local boxReg = Kirigami(x, y + h - 20, w, 40):padUnit(30, 0, 30, 0)
             local title, txtReg = boxReg:splitVertical(2,3)
 
             love.graphics.setColor(1,1,1)
