@@ -226,23 +226,6 @@ local function drawSquadCard(squadId, region, index)
                 local textX = cx + ch
                 richtext.printRich(tostring(value), STAT_FONT, textX, cy + ch / 2 - STAT_FONT:getHeight() / 2, cw - ch, "left")
                 end
-
-                if existingSquad and info.statUpgradeScaling then
-                    local increase = 0
-                    if isDPS then
-                        -- calculate custom DPS, based on attackSpeed + attackDamage scaling
-                    
-                    elseif info.statUpgradeScaling[statId] then
-                        local lv = existingSquad.level
-                        local statMul = 1 + (info.statUpgradeScaling[statId] * (lv-1))
-                        increase = value * statMul
-                    end
-                    if increase > 0 then
-                        local _,upgrLoc = Kirigami(cx,cy,cw,ch):splitHorizontal(1,1)
-                        upgrLoc = upgrLoc:moveUnit(4, math.sin(love.timer.getTime())*2)
-                        richtext.printRichContainedNoWrap("{o}+" .. tostring(increase), STAT_FONT, upgrLoc:get())
-                    end
-                end
             end
         end,
     })
@@ -280,6 +263,20 @@ local function drawSquadCard(squadId, region, index)
         local r1, _ = region:splitVertical(1,8)
         local font = g.getBigFont(16)
         richtext.printRichContainedNoWrap("{wavy amp=0.3}{o}{c r=0.9 g=0.9 b=0.4}" .. UPGRADE, font, r1:moveRatio(0,-0.7):padRatio(0.3):get())
+
+        local buf = {}
+        for statId, mult in pairs(info.statUpgradeScaling) do
+            local statInfo = g.getStatInfo(statId)
+            local lv = existingSquad.level
+            local statMul = 1 + (info.statUpgradeScaling[statId] * (lv-1))
+            local increase = def[statInfo.baseName] * statMul
+            -- add increase to the buf
+        end
+        if info.unitCountUpgradeScaling then
+            -- add unit-count upgrade txt
+        end
+        local str = table.concat(buf, " ")
+        -- draw box, with buf txt inside
     end
 
     return ret, ww,hh
