@@ -1801,6 +1801,9 @@ g.COLORS = {
     ]]
     UPGRADE = objects.Color("FFF7D172"),
 
+    DAMAGE = objects.Color("ffd53341"),
+    HEAL = objects.Color("ffc852a4"),
+
     BURN = objects.Color("FFE17313"),
     POISON = objects.Color("FF4CC44C"),
     HEALTH = objects.Color("FF397634"),

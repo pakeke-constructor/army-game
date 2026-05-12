@@ -846,8 +846,9 @@ end
 ---@param r kirigami.Region
 ---@param color objects.Color
 ---@param offset number
-function helper.drawEdgeTrailAnimation(r, color, offset)
-    local N = 9
+---@param N integer?
+function helper.drawEdgeTrailAnimation(r, color, offset, N)
+    N = N or 9
     local col = objects.Color(color)
     for i=N,1,-1 do
         col = col:darken(0.1)

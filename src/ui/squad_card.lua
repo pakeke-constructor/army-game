@@ -54,7 +54,7 @@ end
 
 
 local HPS_NAME = loc("Healing per second", {}, {context = "The healing done per second for this unit"})
-local HPS_DESC = interp("Healing power: {c r=0.85 g=0.25 b=0.25}%{attackDamage}{/c}\nAttack Speed: {c r=0.9 g=0.55 b=0.2}%{attackSpeed}{/c}\n{c r=0.85 g=0.25 b=0.25}%{attackDamage}{/c} x {c r=0.9 g=0.55 b=0.2}%{attackSpeed}{/c} = {c r=1 g=1 b=1}%{dps}{/c}", {
+local HPS_DESC = interp("Healing power: {c r=0.78 g=0.32 b=0.64}%{attackDamage}{/c}\nAttack Speed: {c r=0.9 g=0.55 b=0.2}%{attackSpeed}{/c}\n{c r=0.78 g=0.32 b=0.64}%{attackDamage}{/c} x {c r=0.9 g=0.55 b=0.2}%{attackSpeed}{/c} = {c r=1 g=1 b=1}%{dps}{/c}", {
     context = "Shows healing-per-second calculation, e.g. for a unit that heals others."
 })
 
@@ -107,6 +107,10 @@ local function drawSquadCard(squadId, region, index)
     TITLE_FONT = TITLE_FONT or g.getBigFont(16)
 
     local box = ui.Box({maxWidth = w, padding = 12, spacing = 8}, function(bx, by, bw, bh)
+        if existingSquad then
+            helper.drawEdgeTrailAnimation(region, col, 0.25, 20)
+            helper.drawEdgeTrailAnimation(region, col, 0.75, 20)
+        end
         love.graphics.setColor(0,0,0)
         ui.drawPanel(x-3,y-3, w+6,h+6)
         love.graphics.setColor(1,1,1)
@@ -183,7 +187,7 @@ local function drawSquadCard(squadId, region, index)
                     -- its special! computed
                     value = def.baseAttackSpeed * (def.baseHealPower or def.baseAttackDamage)
                     icon = isHealer and "healpower" or "damage"
-                    color = objects.Color.RED
+                    color = isHealer and g.COLORS.HEAL or g.COLORS.DAMAGE
                     name = isHealer and HPS_NAME or DPS_NAME
                     desc = (isHealer and HPS_DESC or DPS_DESC)({
                         attackSpeed = def.baseAttackSpeed,
