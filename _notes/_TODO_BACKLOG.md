@@ -44,6 +44,7 @@
 - Status-effect system
 - Add armor system
 - Make demons/enemies walk around a bit randomly at the start of combat
+- Make sandbox for Leo
 
 
 
@@ -51,14 +52,13 @@
 ### OK:: what do we need for a minimum-playable game?
 
 
-- Make sandbox for Leo
+
+- Rework stats a bit in UI: Don't display DMG/ASPD separately, instead, have a DPS stat.
+When DPS is hovered, it shows DPS/DMG as a combined thing.
 
 
 - Squad-card: when hovering stats on squad-card, tells about the stats
 
-
-- Rework stats a bit in UI: Don't display DMG/ASPD separately, instead, have a DPS stat.
-When DPS is hovered, it shows DPS/DMG as a combined thing.
 
 
 - Squad upgrade UI

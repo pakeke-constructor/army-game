@@ -1,8 +1,7 @@
 
 local STAT_LIST = {
     {id = "maxHealth", label = "HP"},
-    {id = "attackDamage", label = "DMG"},
-    {id = "attackSpeed", label = "AS"},
+    {id = "DPS", label = "DPS"}, -- special: calculated via (DMG x AS)
     {id = "armor", label = "ARM"},
     {id = "moveSpeed", label = "SPD"},
     {id = "attackRange", label = "RNG"},
@@ -150,33 +149,52 @@ local function drawSquadCard(squadId, region, index)
                 local cw = cellW - 2
                 local ch = statCellH - 2
 
+                local value, icon, color
                 local statId = STAT_LIST[i].id
-                local stat = g.getStatInfo(statId)
-                local value = def and def[stat.baseName] or 0
+                local isDPS = statId == "DPS"
+                if isDPS then
+                    -- its special! computed
+                    value = def.baseAttackSpeed * def.baseAttackDamage
+                    icon = "damage"
+                    color = objects.Color.RED
+                else
+                    local stat = g.getStatInfo(statId)
+                    value = def and def[stat.baseName] or 0
+                    icon = stat.icon
+                    color = stat.color
+                end
 
                 -- background
-                local important = g.isStatImportant(statId, info.entityId)
-                local alpha = 0.3
+                local important = isDPS or g.isStatImportant(statId, info.entityId)
+                local alpha = 0.4
                 if important then
                     alpha = 1
                 end
 
+                local px, py = iml.getTransformedPointer()
+                local isStatHovered = px >= cx and py >= cy and px <= cx+cw and py <= cy+ch
+                if isStatHovered then
+                    alpha = alpha * 0.75
+                end
                 do
                 local r,g,b,a = darkCol:getRGBA()
                 love.graphics.setColor(r,g,b,a*alpha)
                 ui.drawSingleColorPanel(cx, cy, cw, ch)
                 end
+                if isStatHovered then
+                    
+                end
 
                 -- icon
-                if stat.icon and g.isImage(stat.icon) then
+                if icon and g.isImage(icon) then
                     love.graphics.setColor(1, 1, 1, alpha)
-                    g.drawImageContained(stat.icon, cx + 2, cy + 2, ch - 4, ch - 4)
+                    g.drawImageContained(icon, cx + 2, cy + 2, ch - 4, ch - 4)
                 end
 
                 -- text
                 do
                 love.graphics.setFont(STAT_FONT)
-                local r,g,b,a = stat.color:getRGBA()
+                local r,g,b,a = color:getRGBA()
                 love.graphics.setColor(r,g,b,a*alpha)
                 local textX = cx + ch
                 richtext.printRich(tostring(value), STAT_FONT, textX, cy + ch / 2 - STAT_FONT:getHeight() / 2, cw - ch, "left")
@@ -194,6 +212,12 @@ local function drawSquadCard(squadId, region, index)
         end
     end
 
+    local ret = false
+    if iml.wasJustClicked(x, y, w, h, 1, uid) then
+        g.playUISound("ui_click_basic", 1.4, 0.8)
+        ret = true
+    end
+
     local ww,hh = box:render(x, y)
 
     -- Mana cost beads (bottom center)
@@ -207,11 +231,7 @@ local function drawSquadCard(squadId, region, index)
         g.drawManaCost(cost, x + rw / 2, y + rh, rw/2)
     end
 
-    if iml.wasJustClicked(x, y, w, h, 1, uid) then
-        g.playUISound("ui_click_basic", 1.4, 0.8)
-        return true, ww,hh
-    end
-    return false, ww,hh
+    return ret, ww,hh
 end
 
 return drawSquadCard
