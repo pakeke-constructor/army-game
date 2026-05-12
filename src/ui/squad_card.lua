@@ -53,7 +53,7 @@ end
 
 
 local DPS_NAME = loc("Damage per second", {}, {context = "The damage done per second for this unit"})
-local DPS_DESC = interp("Attack Damage: %{attackDamage}\nAttack Speed: %{attackSpeed}\n%{attackDamage} x %{attackSpeed} = %{dps}", {
+local DPS_DESC = interp("Attack Damage: {c r=0.85 g=0.25 b=0.25}%{attackDamage}{/c}\nAttack Speed: {c r=0.9 g=0.55 b=0.2}%{attackSpeed}{/c}\n{c r=0.85 g=0.25 b=0.25}%{attackDamage}{/c} x {c r=0.9 g=0.55 b=0.2}%{attackSpeed}{/c} = {c r=1 g=1 b=1}%{dps}{/c}", {
     context = "Shows damage-per-second calculation."
 })
 
@@ -200,7 +200,8 @@ local function drawSquadCard(squadId, region, index)
                 if isStatHovered then
                     -- print information about the stat
                     hoverService.requestHover(function (boxx, fonts)
-                        boxx:addText(name, fonts.title)
+                        local rr,gg,bb = color.r, color.g, color.b
+                        boxx:addText(string.format("{c r=%.3f g=%.3f b=%.3f}%s", rr, gg, bb, name), fonts.title)
                         boxx:addText(desc, fonts.body)
                     end)
                 end
