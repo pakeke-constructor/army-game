@@ -51,6 +51,12 @@ local function addPerk(box, perk)
     })
 end
 
+
+local DPS_NAME = loc("Damage per second", {}, {context = "The damage done per second for this unit"})
+local DPS_DESC = interp("Attack Damage: %{attackDamage}\nAttack Speed: %{attackSpeed}\n%{attackDamage} x %{attackSpeed} = %{dps}", {
+    context = "Shows damage-per-second calculation."
+})
+
 ---Draw a single squad card in a kirigami region. Returns true if clicked.
 ---@param squadId string
 ---@param region kirigami.Region
@@ -159,11 +165,19 @@ local function drawSquadCard(squadId, region, index)
                     value = def.baseAttackSpeed * def.baseAttackDamage
                     icon = "damage"
                     color = objects.Color.RED
+                    name = DPS_NAME
+                    desc = DPS_DESC({
+                        attackSpeed = def.baseAttackSpeed,
+                        attackDamage = def.baseAttackDamage,
+                        dps = value
+                    })
                 else
                     local stat = g.getStatInfo(statId)
                     value = def and def[stat.baseName] or 0
                     icon = stat.icon
                     color = stat.color
+                    name = stat.displayName
+                    desc = stat.description
                 end
 
                 -- background
@@ -186,8 +200,8 @@ local function drawSquadCard(squadId, region, index)
                 if isStatHovered then
                     -- print information about the stat
                     hoverService.requestHover(function (boxx, fonts)
-                        boxx:addText("hi", fonts.title)
-                        boxx:addText("hi2 hi 2", fonts.body)
+                        boxx:addText(name, fonts.title)
+                        boxx:addText(desc, fonts.body)
                     end)
                 end
 

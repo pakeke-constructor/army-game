@@ -1698,13 +1698,13 @@ g.RARITIES = {
 }
 
 
----@alias g.Stat {id:string, name:string, baseName:string, modQ:string, mulQ:string, color:objects.Color, icon:string, isImportant:fun(ent:ecs.Entity, stat:string):boolean}
+---@alias g.Stat {id:string, name:string, displayName:string, description:string, baseName:string, modQ:string, mulQ:string, color:objects.Color, icon:string, isImportant:fun(ent:ecs.Entity, stat:string):boolean}
 local STAT_LIST = {}
 local STAT_DEFS = {}
 
 ---@param id string
 ---@param baseName string
----@param info {color:objects.Color, icon:string, isImportant:fun(ent:ecs.Entity):boolean}
+---@param info {displayName:string, description:string, color:objects.Color, icon:string, isImportant:fun(ent:ecs.Entity):boolean}
 function g.defineStat(id, baseName, info)
     local Name = id:sub(1,1):upper() .. id:sub(2)
     local modQ = "get" .. Name .. "Modifier"
@@ -1714,6 +1714,12 @@ function g.defineStat(id, baseName, info)
     local stat = {
         id = id,
         name = id,
+        displayName = loc(info.displayName, {}, {
+            context = "The display name of a unit stat (e.g. Health, Attack Damage)"
+        }),
+        description = loc(info.description, {}, {
+            context = "The description of a unit stat, explaining what it does"
+        }),
         baseName = baseName,
         modQ = modQ,
         mulQ = mulQ,
@@ -1806,36 +1812,50 @@ local function _importantIfNonZero(ent, stat)
 end
 
 g.defineStat("maxHealth", "baseMaxHealth", {
+    displayName = "Health",
+    description = "Health of unit",
     color = objects.Color(0.3, 0.9, 0.3),
     icon = "health",
     isImportant = _alwaysImportant,
 })
 g.defineStat("attackDamage", "baseAttackDamage", {
+    displayName = "Attack Damage",
+    description = "Damage per attack",
     color = objects.Color(0.95, 0.3, 0.3),
     icon = "damage",
     isImportant = _alwaysImportant,
 })
 g.defineStat("attackSpeed", "baseAttackSpeed", {
+    displayName = "Attack Speed",
+    description = "Attacks per second",
     color = objects.Color(0.95, 0.85, 0.3),
     icon = "atkspeed",
     isImportant = _importantIfRanged,
 })
 g.defineStat("moveSpeed", "baseMoveSpeed", {
+    displayName = "Move Speed",
+    description = "Movement speed",
     color = objects.Color(0.4, 0.7, 0.95),
     icon = "movespeed",
     isImportant = _importantIfMelee,
 })
 g.defineStat("attackRange", "baseAttackRange", {
+    displayName = "Attack Range",
+    description = "Range of attacks",
     color = objects.Color(0.8, 0.5, 0.2),
     icon = "range",
     isImportant = _importantIfRanged,
 })
 g.defineStat("armor", "baseArmor", {
+    displayName = "Armor",
+    description = "Reduces damage taken",
     color = objects.Color(0.6, 0.6, 0.7),
     icon = "armor",
     isImportant = _importantIfNonZero,
 })
 g.defineStat("projectileAccuracy", "baseProjectileAccuracy", {
+    displayName = "Accuracy",
+    description = "Projectile accuracy",
     color = objects.Color(0.9, 0.9, 0.9),
     icon = "hourglass_icon",
     isImportant = _importantIfRanged,
