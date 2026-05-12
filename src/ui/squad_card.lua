@@ -65,6 +65,8 @@ local UPGRADE_UNITS = interp("+%{n} Units", {
     context = "An upgrade where the units in a squad increases. e.g. More soldiers; `+5 units`."
 })
 
+local UPGRADE_COL = "{UPGRADE_COLOR}"
+
 
 ---Draw a single squad card in a kirigami region. Returns true if clicked.
 ---@param squadId string
@@ -266,7 +268,7 @@ local function drawSquadCard(squadId, region, index)
         -- its an upgrade
         local r1, _ = region:splitVertical(1,8)
         local titleFont = g.getBigFont(16)
-        richtext.printRichContainedNoWrap("{wavy amp=0.3}{o}{c r=0.9 g=0.9 b=0.4}" .. UPGRADE, titleFont, r1:moveRatio(0,-0.7):padRatio(0.3):get())
+        richtext.printRichContainedNoWrap("{wavy amp=0.3}{o}" ..UPGRADE_COL.. UPGRADE, titleFont, r1:moveRatio(0,-0.7):padRatio(0.3):get())
 
         local buf = {}
         local lv = existingSquad.level
@@ -274,14 +276,15 @@ local function drawSquadCard(squadId, region, index)
             local statInfo = g.getStatInfo(statId)
             local base = def[statInfo.baseName] or 0
             local increase = base * info.statUpgradeScaling[statId]
-            buf[#buf+1] = string.format("{%s} +%d", statInfo.icon, math.floor(increase + 0.5))
+            local incrtxt = helper.wrapRichtextColor(statInfo.color, " +%d")
+            buf[#buf+1] = string.format("{%s}" .. incrtxt, statInfo.icon, math.floor(increase + 0.5))
         end
         if info.unitCountUpgradeScaling and info.unitCountUpgradeScaling > 0 then
             buf[#buf+1] = UPGRADE_UNITS({n = info.unitCountUpgradeScaling})
         end
         if #buf > 0 then
             local str = table.concat(buf, "  ")
-            local boxReg = Kirigami(x, y + h - 34, w, 58):padUnit(30, 0, 30, 0)
+            local boxReg = Kirigami(x, y + h - 34, w, 48):padUnit(30, 0, 30, 0)
             local title, txtReg = boxReg:splitVertical(2,3)
 
             love.graphics.setColor(1,1,1)
@@ -290,7 +293,7 @@ local function drawSquadCard(squadId, region, index)
             lg.setColor(1,1,1)
             ui.drawDarkPanel(boxReg:get())
             local font = g.getSmallFont(16)
-            richtext.printRichContainedNoWrap("{wavy amp=0.5}"..UPGRADE, font, title:padUnit(2,2):get())
+            richtext.printRichContainedNoWrap("{wavy amp=0.5}"..UPGRADE_COL..UPGRADE, font, title:padUnit(2,2):get())
             richtext.printRichContainedNoWrap(str, font, txtReg:padUnit(4,4):get())
         end
     end
