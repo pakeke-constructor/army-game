@@ -54,12 +54,12 @@ end
 
 
 local HPS_NAME = loc("Healing per second", {}, {context = "The healing done per second for this unit"})
-local HPS_DESC = interp("Healing power: {c r=0.78 g=0.32 b=0.64}%{attackDamage}{/c}\nAttack Speed: {c r=0.9 g=0.55 b=0.2}%{attackSpeed}{/c}\n{c r=0.78 g=0.32 b=0.64}%{attackDamage}{/c} x {c r=0.9 g=0.55 b=0.2}%{attackSpeed}{/c} = {c r=1 g=1 b=1}%{dps}{/c}", {
+local HPS_DESC = interp("{healpower} Healing power: {c r=0.78 g=0.32 b=0.64}%{attackDamage}{/c}\n{atkspeed} Attack Speed: {c r=0.9 g=0.55 b=0.2}%{attackSpeed}{/c}\n{c r=0.78 g=0.32 b=0.64}%{attackDamage}{/c}{healpower} x {c r=0.9 g=0.55 b=0.2}%{attackSpeed}{/c}{atkspeed} = {c r=1 g=1 b=1}%{dps}{/c}", {
     context = "Shows healing-per-second calculation, e.g. for a unit that heals others."
 })
 
 local DPS_NAME = loc("Damage per second", {}, {context = "The damage done per second for this unit"})
-local DPS_DESC = interp("{damage} Attack Damage: {c r=0.85 g=0.25 b=0.25}%{attackDamage}{/c}\nAttack Speed: {c r=0.9 g=0.55 b=0.2}%{attackSpeed}{/c}\n{c r=0.85 g=0.25 b=0.25}%{attackDamage}{/c}{damage} x {c r=0.9 g=0.55 b=0.2}%{attackSpeed}{/c}{atkspeed} = {c r=1 g=1 b=1}%{dps}{/c}", {
+local DPS_DESC = interp("{damage} Attack Damage: {c r=0.85 g=0.25 b=0.25}%{attackDamage}{/c}\n{atkspeed} Attack Speed: {c r=0.9 g=0.55 b=0.2}%{attackSpeed}{/c}\n{c r=0.85 g=0.25 b=0.25}%{attackDamage}{/c}{damage} x {c r=0.9 g=0.55 b=0.2}%{attackSpeed}{/c}{atkspeed} = {c r=1 g=1 b=1}%{dps}{/c}", {
     context = "Shows damage-per-second calculation."
 })
 
