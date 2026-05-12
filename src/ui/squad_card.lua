@@ -52,8 +52,14 @@ local function addPerk(box, perk)
 end
 
 
+
+local HPS_NAME = loc("Healing per second", {}, {context = "The healing done per second for this unit"})
+local HPS_DESC = interp("Healing power: {c r=0.85 g=0.25 b=0.25}%{attackDamage}{/c}\nAttack Speed: {c r=0.9 g=0.55 b=0.2}%{attackSpeed}{/c}\n{c r=0.85 g=0.25 b=0.25}%{attackDamage}{/c} x {c r=0.9 g=0.55 b=0.2}%{attackSpeed}{/c} = {c r=1 g=1 b=1}%{dps}{/c}", {
+    context = "Shows healing-per-second calculation, e.g. for a unit that heals others."
+})
+
 local DPS_NAME = loc("Damage per second", {}, {context = "The damage done per second for this unit"})
-local DPS_DESC = interp("Attack Damage: {c r=0.85 g=0.25 b=0.25}%{attackDamage}{/c}\nAttack Speed: {c r=0.9 g=0.55 b=0.2}%{attackSpeed}{/c}\n{c r=0.85 g=0.25 b=0.25}%{attackDamage}{/c} x {c r=0.9 g=0.55 b=0.2}%{attackSpeed}{/c} = {c r=1 g=1 b=1}%{dps}{/c}", {
+local DPS_DESC = interp("{damage} Attack Damage: {c r=0.85 g=0.25 b=0.25}%{attackDamage}{/c}\nAttack Speed: {c r=0.9 g=0.55 b=0.2}%{attackSpeed}{/c}\n{c r=0.85 g=0.25 b=0.25}%{attackDamage}{/c}{damage} x {c r=0.9 g=0.55 b=0.2}%{attackSpeed}{/c}{atkspeed} = {c r=1 g=1 b=1}%{dps}{/c}", {
     context = "Shows damage-per-second calculation."
 })
 
@@ -81,6 +87,7 @@ local function drawSquadCard(squadId, region, index)
     local info = g.getSquadInfo(squadId)
     local existingSquad = g.getSquadFromArmy(squadId)
     local def = g.getEntityDef(info.entityId)
+    local isHealer = def.baseHealPower
     local rarity = info.rarity or g.RARITIES.COMMON
     local darkCol = rarity.darkColor
     local liteCol = rarity.lightColor
@@ -174,13 +181,13 @@ local function drawSquadCard(squadId, region, index)
                 local isDPS = statId == "DPS"
                 if isDPS then
                     -- its special! computed
-                    value = def.baseAttackSpeed * def.baseAttackDamage
-                    icon = "damage"
+                    value = def.baseAttackSpeed * (def.baseHealPower or def.baseAttackDamage)
+                    icon = isHealer and "healpower" or "damage"
                     color = objects.Color.RED
-                    name = DPS_NAME
-                    desc = DPS_DESC({
+                    name = isHealer and HPS_NAME or DPS_NAME
+                    desc = (isHealer and HPS_DESC or DPS_DESC)({
                         attackSpeed = def.baseAttackSpeed,
-                        attackDamage = def.baseAttackDamage,
+                        attackDamage = def.baseHealPower or def.baseAttackDamage,
                         dps = value
                     })
                 else

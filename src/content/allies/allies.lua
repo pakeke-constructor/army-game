@@ -33,6 +33,35 @@ g.defineSquad("archer_squad", {
 
 
 
+g.defineSquad("healer_archer_squad", {
+    name = loc("Healer archer squad"),
+    rarity = g.RARITIES.RARE,
+    entityDef = {
+        image = "longbowman",
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        partitions = {"unit", "ally"},
+        team = "ally",
+        ai = {
+            target = "ally",
+        },
+        attack = {
+            attackType = "ranged",
+            projectileType = "arrow",
+            projectileSpeed = 250,
+        },
+        isHealer = true,
+        baseHealPower = 10,
+        baseAttackSpeed = 0.8,
+        baseAttackRange = 200,
+        baseMoveSpeed = 50,
+        baseMaxHealth = 30,
+    },
+    unitCount = 4,
+    icon = "example_squad_icon",
+    cost = {red = 1},
+})
+
+
 
 g.defineSquad("militia_squad", {
     name = loc("Militia squad"),

@@ -73,9 +73,11 @@ local physics = {
 ---@field public vz number?
 ---@field public gravity number?
 ---@field public health number?
+---@field public isHealer boolean? if this is true, the entity is a healer, and will heal with it's attacks.
 ---@field public baseMaxHealth number?
 ---@field public baseArmor number?
 ---@field public baseAttackDamage number?
+---@field public baseHealPower number?
 ---@field public baseAttackSpeed number?
 ---@field public baseAttackRange number?
 ---@field public baseMoveSpeed number?
@@ -84,6 +86,7 @@ local physics = {
 ---@field public armor number?
 ---@field public startingArmor number?
 ---@field public attackDamage number?
+---@field public healPower number?
 ---@field public attackSpeed number?
 ---@field public attackRange number?
 ---@field public moveSpeed number?

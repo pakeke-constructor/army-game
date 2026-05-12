@@ -955,6 +955,9 @@ function g.defineEntity(id, def)
     for k, v in pairs(Entity) do
         def[k] = v
     end
+    if def.baseHealPower and def.baseHealPower > 0 then
+        assert(not def.baseAttackDamage or def.baseAttackDamage <= 0, "Entities cannot be healers AND attackers at same time")
+    end
     local mt = {__index = def}
     ENTITY_DEFS[id] = mt
     ENTITY_LIST[#ENTITY_LIST + 1] = id
@@ -1849,6 +1852,13 @@ g.defineStat("attackDamage", "baseAttackDamage", {
     color = objects.Color(0.95, 0.3, 0.3),
     icon = "damage",
     isImportant = _alwaysImportant,
+})
+g.defineStat("healPower", "baseHealPower", {
+    displayName = "Heal Power",
+    description = "Healing per attack",
+    color = objects.Color(0.3, 0.95, 0.6),
+    icon = "healpower",
+    isImportant = _importantIfNonZero,
 })
 g.defineStat("attackSpeed", "baseAttackSpeed", {
     displayName = "Attack Speed",
