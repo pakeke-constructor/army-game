@@ -57,6 +57,11 @@ local DPS_DESC = interp("Attack Damage: {c r=0.85 g=0.25 b=0.25}%{attackDamage}{
     context = "Shows damage-per-second calculation."
 })
 
+local UPGRADE = loc("UPGRADE!", {}, {
+    context = "Title, denoting that there is a squad upgrade."
+})
+
+
 ---Draw a single squad card in a kirigami region. Returns true if clicked.
 ---@param squadId string
 ---@param region kirigami.Region
@@ -68,6 +73,7 @@ local function drawSquadCard(squadId, region, index)
     ui.assertUIStarted()
 
     local info = g.getSquadInfo(squadId)
+    local existingSquad = g.getSquadFromArmy(squadId)
     local def = g.getEntityDef(info.entityId)
     local rarity = info.rarity or g.RARITIES.COMMON
     local darkCol = rarity.darkColor
@@ -220,6 +226,23 @@ local function drawSquadCard(squadId, region, index)
                 local textX = cx + ch
                 richtext.printRich(tostring(value), STAT_FONT, textX, cy + ch / 2 - STAT_FONT:getHeight() / 2, cw - ch, "left")
                 end
+
+                if existingSquad and info.statUpgradeScaling then
+                    local increase = 0
+                    if isDPS then
+                        -- calculate custom DPS, based on attackSpeed + attackDamage scaling
+                    
+                    elseif info.statUpgradeScaling[statId] then
+                        local lv = existingSquad.level
+                        local statMul = 1 + (info.statUpgradeScaling[statId] * (lv-1))
+                        increase = value * statMul
+                    end
+                    if increase > 0 then
+                        local _,upgrLoc = Kirigami(cx,cy,cw,ch):splitHorizontal(1,1)
+                        upgrLoc = upgrLoc:moveUnit(4, math.sin(love.timer.getTime())*2)
+                        richtext.printRichContainedNoWrap("{o}+" .. tostring(increase), STAT_FONT, upgrLoc:get())
+                    end
+                end
             end
         end,
     })
@@ -250,6 +273,13 @@ local function drawSquadCard(squadId, region, index)
         local H=30
         ui.drawDarkPanel(x+rw/2 - www/2 - 6, y+rh-H/2, www + 12,H)
         g.drawManaCost(cost, x + rw / 2, y + rh, rw/2)
+    end
+
+    if existingSquad then
+        -- its an upgrade
+        local r1, _ = region:splitVertical(1,8)
+        local font = g.getBigFont(16)
+        richtext.printRichContainedNoWrap("{wavy amp=0.3}{o}{c r=0.9 g=0.9 b=0.4}" .. UPGRADE, font, r1:moveRatio(0,-0.7):padRatio(0.3):get())
     end
 
     return ret, ww,hh

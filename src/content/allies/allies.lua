@@ -61,6 +61,9 @@ g.defineSquad("militia_squad", {
     rarity = g.RARITIES.UNCOMMON,
     unitCount = 4,
     unitCountUpgradeScaling = 2,
+    statUpgradeScaling = {
+        maxHealth = 0.5
+    },
     icon = "example_squad_icon",
     perks = {"tough"},
     cost = {green = 1},

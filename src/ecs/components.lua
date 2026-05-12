@@ -96,11 +96,20 @@ local physics = {
 ---@field public _timeSinceDamaged number?
 ---@field public _timeSinceLostArmor number?
 ---@field public _damageLagAmount number?
----@field public onDeath fun(ecs.Entity)?
----@field public onSpawn fun(ecs.Entity)?
 ---@field public onUpdate fun(ecs.Entity, number)?
 ---@field public onDraw fun(ecs.Entity)?
 ---@field public onAttack fun(ecs.Entity)?
+---@field public entitySpawned fun(ecs.Entity)?
+---@field public entityDeath fun(ecs.Entity, ecs.Entity?)?
+---@field public entityHurt fun(ecs.Entity, number, ecs.Entity?)?
+---@field public entityHealed fun(ecs.Entity, number, ecs.Entity?)?
+---@field public armorIncreased fun(ecs.Entity, number)?
+---@field public armorDecreased fun(ecs.Entity, number)?
+---@field public entityBuffed fun(ecs.Entity, table, number?)?
+---@field public entityKillsEnemy fun(ecs.Entity, ecs.Entity)?
+---@field public entityShootsProjectile fun(ecs.Entity, ecs.Entity)?
+---@field public drawEntity fun(ecs.Entity)?
+---@field public statusEffectApplied fun(ecs.Entity, string, number, ecs.Entity?)?
 ---@field public physics ecs.components.Physics?
 ---@field public partitions string[]?
 local ecs_Entity = {}

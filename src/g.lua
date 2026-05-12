@@ -1252,6 +1252,9 @@ function g.drawUnit(entityId, x, y, maxW, maxH)
     end
 end
 
+
+---@param id string
+---@return table
 function g.getEntityDef(id)
     local mt = ENTITY_DEFS[id]
     return mt and mt.__index
