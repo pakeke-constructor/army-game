@@ -915,13 +915,18 @@ function g.getPerkList()
 end
 
 --- Add a buff to an entity. Promotes shared scopes so buff only affects this entity.
-function g.addBuff(ent, handler, duration)
+--- If `tag` is given, the buff is "tagged": re-adding with same tag overwrites the previous one (no stacking).
+---@param ent table
+---@param handler table
+---@param duration number?
+---@param tag any?
+function g.addBuff(ent, handler, duration, tag)
     if not ent.scope then
         ent.scope = g.newScope()
     elseif ent.scope.shared then
         ent.scope = g.newScope(ent.scope)
     end
-    ent.scope:addHandler(handler, duration)
+    ent.scope:addHandler(handler, duration, tag)
 end
 
 
@@ -1472,6 +1477,7 @@ function Scope:init(parent)
     self.shared = false
     self.handlers = {}
     self.expiry = {} -- [handler] -> expire time
+    self.tags = {} -- [tag] -> handler
     self.cache = {} -- [eventOrQuestionName] -> {func, func, ...}
     self.lastPrune = 0
 end
@@ -1513,9 +1519,14 @@ function Scope:_pruneIfNeeded()
     if dirty then self:_rebuild() end
 end
 
-function Scope:addHandler(handler, duration)
+function Scope:addHandler(handler, duration, tag)
     for key in pairs(handler) do
         assert(definedEvents[key] or questions[key], "Unknown event/question: " .. tostring(key))
+    end
+    if tag then
+        local old = self.tags[tag]
+        if old then self:removeHandler(old) end
+        self.tags[tag] = handler
     end
     if duration then
         self.expiry[handler] = love.timer.getTime() + duration
