@@ -914,13 +914,13 @@ function g.getPerkList()
     return PERK_LIST
 end
 
---- Add a buff to an entity. Promotes shared scopes so buff only affects this entity.
---- If `tag` is given, the buff is "tagged": re-adding with same tag overwrites the previous one (no stacking).
+--- Add a custom effect (handler) to an entity. Promotes shared scopes so it only affects this entity.
+--- If `tag` is given, the effect is "tagged": re-adding with same tag overwrites the previous one (no stacking).
 ---@param ent table
 ---@param handler table
 ---@param duration number?
 ---@param tag any?
-function g.addBuff(ent, handler, duration, tag)
+function g.addCustomEffect(ent, handler, duration, tag)
     if not ent.scope then
         ent.scope = g.newScope()
     elseif ent.scope.shared then

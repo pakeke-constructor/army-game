@@ -45,7 +45,9 @@
 - Add armor system
 - Make demons/enemies walk around a bit randomly at the start of combat
 - Make sandbox for Leo
-
+- Squad upgrade UI
+- When hovering squad-card, you can see the squad-upgrade
+- When hovering squad-box, squad-card shows the upgrade.
 
 
 
@@ -53,13 +55,6 @@
 
 
 
-- Squad upgrade UI
-- When hovering squad-card, you can see the squad-upgrade
-- When hovering squad-box, squad-card shows the upgrade.
-
-
-- refactor: There currently exist 2 funcs, `g.addBuff  g.buffEntity`. Simplify this,
-have one of them be `g.addCustomEffect` or something.
 
 
 - Make it so there is no `g.defineSquad + g.defineEntity`; `g.defineSquad` CONTAINS the entity-def.
