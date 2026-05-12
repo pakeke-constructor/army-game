@@ -73,6 +73,13 @@ local physics = {
 ---@field public vz number?
 ---@field public gravity number?
 ---@field public health number?
+---@field public baseMaxHealth number?
+---@field public baseArmor number?
+---@field public baseAttackDamage number?
+---@field public baseAttackSpeed number?
+---@field public baseAttackRange number?
+---@field public baseMoveSpeed number?
+---@field public baseProjectileAccuracy number?
 ---@field public maxHealth number?
 ---@field public armor number?
 ---@field public startingArmor number?
@@ -80,6 +87,7 @@ local physics = {
 ---@field public attackSpeed number?
 ---@field public attackRange number?
 ---@field public moveSpeed number?
+---@field public projectileAccuracy number?
 ---@field public patrolX number?
 ---@field public patrolY number?
 ---@field public image string?
