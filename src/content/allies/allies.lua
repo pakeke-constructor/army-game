@@ -1,49 +1,28 @@
 
 
 
-g.defineEntity("militia", {
-    image = "militia",
-    physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-    partitions = {"unit", "ally"},
-    team = "ally",
-    ai = {
-        target = "enemy",
-    },
-    attack = {
-        attackType = "melee",
-    },
-    baseAttackDamage = 10,
-    baseAttackSpeed = 1,
-    baseAttackRange = 18,
-    baseMoveSpeed = 60,
-    baseMaxHealth = 120,
-})
-
-
-g.defineEntity("archer", {
-    image = "longbowman", -- placeholder
-    physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-    partitions = {"unit", "ally"},
-    team = "ally",
-    ai = {
-        target = "enemy",
-    },
-    attack = {
-        attackType = "ranged",
-        projectileType = "arrow",
-        projectileSpeed = 250,
-    },
-    baseAttackDamage = 8,
-    baseAttackSpeed = 0.8,
-    baseAttackRange = 200,
-    baseMoveSpeed = 50,
-    baseMaxHealth = 30,
-})
-
 g.defineSquad("archer_squad", {
     name = loc("Archer squad"),
     rarity = g.RARITIES.RARE,
-    entityId = "archer",
+    entityDef = {
+        image = "longbowman", -- placeholder
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        partitions = {"unit", "ally"},
+        team = "ally",
+        ai = {
+            target = "enemy",
+        },
+        attack = {
+            attackType = "ranged",
+            projectileType = "arrow",
+            projectileSpeed = 250,
+        },
+        baseAttackDamage = 8,
+        baseAttackSpeed = 0.8,
+        baseAttackRange = 200,
+        baseMoveSpeed = 50,
+        baseMaxHealth = 30,
+    },
     unitCount = 4,
     icon = "example_squad_icon",
     perks = {"sharpshooter"},
@@ -57,8 +36,24 @@ g.defineSquad("archer_squad", {
 
 g.defineSquad("militia_squad", {
     name = loc("Militia squad"),
-    entityId = "militia",
     rarity = g.RARITIES.UNCOMMON,
+    entityDef = {
+        image = "militia",
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        partitions = {"unit", "ally"},
+        team = "ally",
+        ai = {
+            target = "enemy",
+        },
+        attack = {
+            attackType = "melee",
+        },
+        baseAttackDamage = 10,
+        baseAttackSpeed = 1,
+        baseAttackRange = 18,
+        baseMoveSpeed = 60,
+        baseMaxHealth = 120,
+    },
     unitCount = 4,
     unitCountUpgradeScaling = 2,
     statUpgradeScaling = {
@@ -73,8 +68,24 @@ g.defineSquad("militia_squad", {
 
 g.defineSquad("militia_band", {
     name = loc("Militia beserkers"),
-    entityId = "militia",
     rarity = g.RARITIES.RARE,
+    entityDef = {
+        image = "militia",
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        partitions = {"unit", "ally"},
+        team = "ally",
+        ai = {
+            target = "enemy",
+        },
+        attack = {
+            attackType = "melee",
+        },
+        baseAttackDamage = 10,
+        baseAttackSpeed = 1,
+        baseAttackRange = 18,
+        baseMoveSpeed = 60,
+        baseMaxHealth = 120,
+    },
     unitCount = 6,
     icon = "example_squad_icon",
     perks = {"berserker"},

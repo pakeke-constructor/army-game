@@ -631,9 +631,16 @@ local PERK_LIST = {}
 local SQUAD_DEFS = {}
 local SQUAD_LIST = {}
 
+-- entity type defs
+local ENTITY_DEFS = {}
+local ENTITY_LIST = {}
+local currentEntityId = 0
+
+
 ---@class g.SquadInfo
 ---@field id string
 ---@field entityId string
+---@field entityDef table
 ---@field rarity g.Rarity
 ---@field unitCount integer
 ---@field statUpgradeScaling table<string, number> { [statName] -> number }
@@ -644,6 +651,7 @@ local SQUAD_LIST = {}
 ---@field cost g.ManaBundle
 ---@field onDeploy (fun(squad: g.SquadInfo, entities: table[], x: number, y:number))?
 ---@field drawSquadHover fun(x:number, y:number)?
+
 
 
 ---@param id string
@@ -657,6 +665,11 @@ function g.defineSquad(id, info)
     info.rarity = assert(info.rarity)
     info.unitCountUpgradeScaling = info.unitCountUpgradeScaling or 0
     info.statUpgradeScaling = info.statUpgradeScaling or {}
+    info.entityId = info.entityId or (id .. "_unit")
+    assert(info.entityDef, "Missing entityDef for squad: " .. id)
+    if not ENTITY_DEFS[info.entityId] then
+        g.defineEntity(info.entityId, info.entityDef)
+    end
     assert(type(info.unitCountUpgradeScaling) == "number")
     for stat,scaling in pairs(info.statUpgradeScaling)do
         assert(g.getStatInfo(stat), "?")
@@ -930,10 +943,6 @@ function g.addCustomEffect(ent, handler, duration, tag)
 end
 
 
--- Entity system
-local ENTITY_DEFS = {}
-local ENTITY_LIST = {}
-local currentEntityId = 0
 
 function g.defineEntity(id, def)
     assert(not ENTITY_DEFS[id], "Duplicate entity type: " .. id)
