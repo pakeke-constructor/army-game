@@ -280,11 +280,11 @@ local function drawSquadCard(squadId, region, index)
             buf[#buf+1] = string.format("{%s}" .. incrtxt, statInfo.icon, math.floor(increase + 0.5))
         end
         if info.unitCountUpgradeScaling and info.unitCountUpgradeScaling > 0 then
-            buf[#buf+1] = UPGRADE_UNITS({n = info.unitCountUpgradeScaling})
+            buf[#buf+1] = helper.wrapRichtextColor(g.COLORS.UPGRADE, UPGRADE_UNITS({n = info.unitCountUpgradeScaling}))
         end
         if #buf > 0 then
             local str = table.concat(buf, "  ")
-            local boxReg = Kirigami(x, y + h - 34, w, 48):padUnit(30, 0, 30, 0)
+            local boxReg = Kirigami(x, y + h - 24, w, 40):padUnit(30, 0, 30, 0)
             local title, txtReg = boxReg:splitVertical(2,3)
 
             love.graphics.setColor(1,1,1)
