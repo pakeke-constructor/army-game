@@ -44,14 +44,13 @@ local pending = nil
 
 --- Requests a hover panel this frame. Last request wins.
 --- builder receives a ui.Box and the title/body fonts to populate freely.
----@param mouseX number
----@param mouseY number
 ---@param builder fun(box: ui.Box, fonts: {title: love.Font, body: love.Font})
 ---@param col1? objects.Color gradient-1
 ---@param col2? objects.Color gradient-2
-function hoverService.requestHover(mouseX, mouseY, builder, col1, col2)
+function hoverService.requestHover(builder, col1, col2)
+    local mx, my = ui.getMouse()
     pending = {
-        mx = mouseX, my = mouseY,
+        mx = mx, my = my,
         builder = builder,
         col1 = col1 or DEFAULT_COL1,
         col2 = col2 or DEFAULT_COL2,

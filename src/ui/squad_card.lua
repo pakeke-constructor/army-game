@@ -1,4 +1,6 @@
 
+local hoverService = require("src.hud.hoverService")
+
 local STAT_LIST = {
     {id = "maxHealth", label = "HP"},
     {id = "DPS", label = "DPS"}, -- special: calculated via (DMG x AS)
@@ -149,7 +151,7 @@ local function drawSquadCard(squadId, region, index)
                 local cw = cellW - 2
                 local ch = statCellH - 2
 
-                local value, icon, color
+                local value, icon, color, name, desc
                 local statId = STAT_LIST[i].id
                 local isDPS = statId == "DPS"
                 if isDPS then
@@ -182,7 +184,11 @@ local function drawSquadCard(squadId, region, index)
                 ui.drawSingleColorPanel(cx, cy, cw, ch)
                 end
                 if isStatHovered then
-                    
+                    -- print information about the stat
+                    hoverService.requestHover(function (boxx, fonts)
+                        boxx:addText("hi", fonts.title)
+                        boxx:addText("hi2 hi 2", fonts.body)
+                    end)
                 end
 
                 -- icon
