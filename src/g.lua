@@ -697,6 +697,14 @@ function g.addSquadToArmy(squad)
 end
 
 ---@param squad g.Squad
+function g.addOrUpgradeSquad(squad)
+    local run = g.getRun()
+    assert(not run.squads[squad.squadId], "Squad already in army: " .. squad.squadId)
+    run.squads[squad.squadId] = squad
+    run._sortedSquads = nil
+end
+
+---@param squad g.Squad
 ---@return boolean
 function g.removeSquadFromArmy(squad)
     local run = g.getRun()

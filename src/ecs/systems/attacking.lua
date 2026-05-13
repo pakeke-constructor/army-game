@@ -36,6 +36,13 @@ local function isValid(ent)
     return not not (ent.health and g.isAlive(ent))
 end
 
+local function getTargetTeam(ent)
+    if ent.ai and ent.ai.target == "enemy" then
+        return ent.team == "ally" and "enemy" or "ally"
+    end
+    return ent.team
+end
+
 
 
 local PROJ_HIT_RADIUS = 10
@@ -76,14 +83,29 @@ local function spawnProjectile(attacker, target)
         ent.gravity = gravity
         ent.projectile = {
             damage = attacker.attackDamage or 0,
+            healing = attacker.healPower or 0,
             ownerEnt = attacker,
             team = attacker.team,
+            targetTeam = getTargetTeam(attacker),
             pierceCount = 1,
             knockback = atk.projectileKnockback or 80,
         }
     end
 
     g.call("entityShootsProjectile", attacker, target)
+end
+
+
+
+---@param target ecs.Entity
+---@param attacker ecs.Entity
+---@param dmgOverride number?
+local function dealDmg(target, attacker, dmgOverride)
+    if attacker.healPower then
+        g.healEntity(target, dmgOverride or attacker.healPower or 0, attacker)
+    else
+        g.dealDamage(target, dmgOverride or attacker.attackDamage or 0, attacker)
+    end
 end
 
 ---@param attacker ecs.Entity
@@ -98,8 +120,7 @@ local function doAttack(attacker, target)
         spawnProjectile(attacker, target)
     else
         -- melee: direct damage
-        local dmg = attacker.attackDamage or 0
-        g.dealDamage(target, dmg, attacker)
+        dealDmg(target, attacker)
     end
 end
 
@@ -109,10 +130,10 @@ end
 ---@param range number
 ---@return ecs.Entity?
 local function findNearbyTarget(ent, world, range)
-    local opTeam = ent.team == "ally" and "enemy" or "ally"
+    local targetTeam = getTargetTeam(ent)
     local best, bestD2 = nil, range * range
     for _, other in world:iterate("team") do
-        if other.team == opTeam and isValid(other) then
+        if other.team == targetTeam and isValid(other) then
             local d2 = dist2(ent, other)
             if d2 <= bestD2 then
                 best, bestD2 = other, d2
@@ -176,9 +197,9 @@ local function updateProjectile(world, ent, dt)
 
     -- check collision with units (only if z is low enough)
     if ent.z < PROJ_Z_MAX then
-        local opTeam = proj.team == "ally" and "enemy" or "ally"
+        local targetTeam = proj.targetTeam or (proj.team == "ally" and "enemy" or "ally")
         local hitEnt = nil
-        g.iteratePartition(opTeam, ent.x, ent.y, function(other)
+        g.iteratePartition(targetTeam, ent.x, ent.y, function(other)
             if hitEnt then return end
             if not isValid(other) then return end
             local dx, dy = other.x - ent.x, other.y - ent.y
@@ -188,7 +209,7 @@ local function updateProjectile(world, ent, dt)
             end
         end, PROJ_HIT_RADIUS)
         if hitEnt then
-            g.dealDamage(hitEnt, proj.damage, proj.ownerEnt)
+            dealDmg(hitEnt, proj.ownerEnt, proj.damage or proj.healing)
             g.knockback(hitEnt, proj.ownerEnt.x, proj.ownerEnt.y, proj.knockback or 50)
             g.call("projectileHit", ent, hitEnt)
             proj.pierceCount = proj.pierceCount - 1

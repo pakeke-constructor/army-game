@@ -55,6 +55,12 @@ local function zero(ent, c)
     return 0
 end
 
+local function missingHealthPriority(ent, c)
+    local maxHealth = c.maxHealth or c.health or 0
+    local missing = maxHealth - (c.health or 0)
+    return math.max(0, missing)
+end
+
 
 -- Find the best target for `ent` from `candidates`
 local function pickTarget(ent, candidates)
@@ -64,7 +70,14 @@ local function pickTarget(ent, candidates)
     for i = 1, #candidates do
         local c = candidates[i]
         if isValidTarget(c) then
-            local getPrio = ai.getPriority or zero
+            local getPrio = ai.getPriority
+            if not getPrio then
+                if (ent.healPower or 0) > 0 then
+                    getPrio = missingHealthPriority
+                else
+                    getPrio = zero
+                end
+            end
             local prio = getPrio(ent, c)
             -- tiebreak: closer is better (subtract tiny distance factor)
             local d2 = dist2(ent, c)
