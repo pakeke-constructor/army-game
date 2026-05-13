@@ -1051,6 +1051,16 @@ function g.applyFrozen(ent, duration, source)
 end
 
 ---@param ent ecs.Entity
+---@param tauntingEnt ecs.Entity
+---@param duration number?
+function g.tauntEntity(ent, tauntingEnt, duration)
+    ent.taunt = {
+        ent = tauntingEnt,
+        duration = duration or 3,
+    }
+end
+
+---@param ent ecs.Entity
 ---@param healAmount number
 ---@param healerEnt ecs.Entity?
 function g.healEntity(ent, healAmount, healerEnt)

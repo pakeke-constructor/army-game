@@ -34,6 +34,18 @@ function statusFx.perSecondUpdate(world)
             if ent.frozenTime <= 0 then ent.frozenTime = nil end
         end
 
+        if ent.taunt then
+            local tauntEnt = ent.taunt.ent
+            if not tauntEnt or not g.isAlive(tauntEnt) then
+                ent.taunt = nil
+            else
+                ent.taunt.duration = ent.taunt.duration - 1
+                if ent.taunt.duration <= 0 then
+                    ent.taunt = nil
+                end
+            end
+        end
+
         ::continue::
     end
 end

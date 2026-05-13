@@ -35,6 +35,13 @@ local projectile = {
     -- damage, ownerEnt, team, pierceCount are set on spawn
 }
 
+---@class ecs.components.Taunt
+---@field public ent ecs.Entity
+---@field public duration number
+local taunt = {
+    -- ent + duration are set when applied
+}
+
 
 ---@class ecs.components.Physics
 ---@field public shape "circle"|"rect"
@@ -62,6 +69,7 @@ local physics = {
 ---@field public ai ecs.components.AI?
 ---@field public attack ecs.components.Attack?
 ---@field public projectile ecs.components.Projectile?
+---@field public taunt ecs.components.Taunt?
 ---@field public team "ally"|"enemy"
 ---@field public color objects.Color?
 ---@field public x number

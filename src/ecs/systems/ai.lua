@@ -176,6 +176,14 @@ function aiSys.preUpdate(world, dt)
             ent._aiTarget = nil
         end
 
+        if ent.taunt then
+            local tauntEnt = ent.taunt.ent
+            if tauntEnt and isValidTarget(tauntEnt) then
+                targ = tauntEnt
+                ent._aiTarget = tauntEnt
+            end
+        end
+
         -- frozen: can't move
         if ent.frozenTime and ent.frozenTime > 0 then
             ent.vx, ent.vy = 0, 0
