@@ -104,6 +104,7 @@ local physics = {
 ---@field public burnTime number? -- if nil, no burn
 ---@field public frozenTime number? -- if nil, not frozen
 ---@field public poisonAmount number? -- if nil, no poison
+---@field public isPest number? returns true if this entity is a "pest"
 ---@field public _timeSinceDamaged number?
 ---@field public _timeSinceLostArmor number?
 ---@field public _damageLagAmount number?

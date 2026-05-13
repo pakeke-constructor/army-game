@@ -51,6 +51,8 @@
 - refactor: There currently exist 2 funcs, `g.addBuff  g.buffEntity`. Simplify this, have one of them be `g.addCustomEffect` or something.
 - Make it so there is no `g.defineSquad + g.defineEntity` combination when defining squads; `g.defineSquad` CONTAINS the entity-def.
 - Add new stat: `attackHeal`. Used by units that heal others
+- Squads can have `onDeploy` effects, that affect the squads (Visuals for onDeploy effects (e.g. red circle?))
+
 
 
 
@@ -64,9 +66,6 @@
 
 
 
-
-- Squads can have `onDeploy` effects, that affect the squads
---- Visuals for onDeploy effects (e.g. red circle?)
 
 
 
