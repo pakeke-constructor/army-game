@@ -876,14 +876,19 @@ function g.getBlessingsByMana(manaCells)
     return result
 end
 
+---@param id string
 function g.addBlessing(id)
     local info = assert(BLESSING_DEFS[id], "Unknown blessing: " .. tostring(id))
     local run = g.getRun()
     local d = info.startingData
     if d == nil then d = true end
-    run.blessings[id] = d
+    if not run.blessings[id] then
+        run.blessings[id] = d
+        g.call("blessingAdded", id)
+    end
 end
 
+---@param id string
 function g.removeBlessing(id)
     local run = g.getRun()
     if run.blessings[id] ~= nil then
@@ -893,11 +898,14 @@ function g.removeBlessing(id)
     return false
 end
 
+---@param id string
 function g.getBlessingData(id)
     local run = g.getRun()
     return run.blessings[id]
 end
 
+---@param id string
+---@param val any
 function g.setBlessingData(id, val)
     local run = g.getRun()
     assert(run.blessings[id] ~= nil, "Blessing not present: " .. tostring(id))
@@ -2030,6 +2038,7 @@ function g.trySpendMana(manaCells, manaRequirement)
     for k, v in pairs(kept) do
         manaCells[k] = v
     end
+    g.call("manaSpent", manaRequirement)
     return true
 end
 

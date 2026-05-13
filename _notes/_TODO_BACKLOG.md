@@ -52,16 +52,13 @@
 - Make it so there is no `g.defineSquad + g.defineEntity` combination when defining squads; `g.defineSquad` CONTAINS the entity-def.
 - Add new stat: `attackHeal`. Used by units that heal others
 - Squads can have `onDeploy` effects, that affect the squads (Visuals for onDeploy effects (e.g. red circle?))
-
-
-
+- Make it so entities are rendered from their base
 
 
 
 ### OK:: what do we need for a minimum-playable game?
 
 
-- Make it so entities are rendered from their base
 
 
 - Weapons system: Make it so weapons can be held/used
