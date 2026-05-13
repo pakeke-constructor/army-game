@@ -65,7 +65,7 @@
 
 
 
-- Perks can have `onDeploy` effects, that affect the squads
+- Squads can have `onDeploy` effects, that affect the squads
 --- Visuals for onDeploy effects (e.g. red circle?)
 
 

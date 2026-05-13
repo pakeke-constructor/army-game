@@ -15,6 +15,7 @@ local WIN_DELAY = 2.5
 local VICTORY_FADE_IN = 0.25
 
 ---@class g.BattleScene
+---@field hud g.HUD
 local battle_scene = {}
 
 
@@ -338,6 +339,24 @@ local function drawSandboxUI(self)
 end
 
 
+
+---@param squad g.Squad
+---@param wx number world x coord
+---@param wy number world y coord
+local function drawSquadHover(squad, wx,wy)
+    local info = g.getSquadInfo(squad.squadId)
+    local offsets = squad:getFormationOffsets()
+    lg.setColor(0.2, 1, 0.3, 0.5)
+    for i = 1, #offsets do
+        local ox, oy = offsets[i].x, offsets[i].y
+        g.drawUnit(info.entityId, wx + ox, wy + oy)
+    end
+    if info.drawSquadHover then
+        info.drawSquadHover(wx, wy)
+    end
+end
+
+
 function battle_scene:draw()
     self.camera:attach()
     love.graphics.clear(0.15, 0.15, 0.15)
@@ -362,17 +381,11 @@ function battle_scene:draw()
     end)
 
     if not self.victory then
-        local entry = self.hud:getSelection()
+        local squad = self.hud:getSelection()
         local mx, my = love.mouse.getPosition()
         local wx, wy = self.camera:toWorld(mx, my)
-        if entry and not entry.deployed then
-            local info = g.getSquadInfo(entry.squadId)
-            local offsets = entry:getFormationOffsets()
-            lg.setColor(0.2, 1, 0.3, 0.5)
-            for i = 1, #offsets do
-                local ox, oy = offsets[i].x, offsets[i].y
-                g.drawUnit(info.entityId, wx + ox, wy + oy)
-            end
+        if squad and not squad.deployed then
+            drawSquadHover(squad, wx, wy)
             lg.setColor(1, 1, 1, 1)
         end
     end
