@@ -1253,13 +1253,7 @@ function g.drawEntity(ent, x, y)
     end
     if ent.image then
         lg.setColor(1,1,1)
-        local yoff = ent.yoffset or 0
-        if yoff ~= 0 then
-            local _,h = g.getImageSize(ent.image)
-            g.drawImageOffset(ent.image, x + (ent.ox or 0), y + (ent.oy or 0), ent.rot or 0, sx, sy, 0.5, 0.5 + yoff / h, ent.kx, ent.ky)
-        else
-            g.drawImage(ent.image, x + (ent.ox or 0), y + (ent.oy or 0), ent.rot or 0, sx, sy, ent.kx, ent.ky)
-        end
+        g.drawImageOffset(ent.image, x + (ent.ox or 0), y + (ent.oy or 0), ent.rot or 0, sx, sy, 0.5, 0.95, ent.kx, ent.ky)
         if ent.frozenTime and ent.frozenTime > 0 then
             drawIceCube(ent, x,y, sx,sy)
         end
@@ -2009,10 +2003,13 @@ end
 
 ---@param manaType g.ManaType
 ---@param count integer
-function g.addMana(manaType, count)
+---@param sourceEnt ecs.Entity? The source of the mana
+function g.addMana(manaType, count, sourceEnt)
     local battleMana = g.getRun()._battleMana
     battleMana[manaType] = (battleMana[manaType] or 0) + (count or 1)
+    g.call("manaAdded", manaType, count, sourceEnt)
 end
+
 
 ---@param manaCells g.ManaCounts
 ---@param manaRequirement g.ManaBundle

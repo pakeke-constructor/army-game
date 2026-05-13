@@ -61,6 +61,8 @@
 ### OK:: what do we need for a minimum-playable game?
 
 
+- Make it so entities are rendered from their base
+
 
 - Weapons system: Make it so weapons can be held/used
 - melee: swords + sword swinging

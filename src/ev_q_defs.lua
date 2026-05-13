@@ -16,6 +16,8 @@ g.defineEvent("battleLost")
 g.defineEvent("battleStarted")
 g.defineEvent("projectileHit")
 g.defineEvent("nexusDamaged")
+g.defineEvent("manaAdded")
+
 
 -- Entity lifecycle
 g.defineEvent("entitySpawned")
