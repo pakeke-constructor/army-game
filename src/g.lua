@@ -688,20 +688,24 @@ function g.newSquad(squadId)
     return Squad(squadId, def)
 end
 
----@param squad g.Squad
-function g.addSquadToArmy(squad)
+---@param squadId string
+function g.addSquadToArmy(squadId)
     local run = g.getRun()
-    assert(not run.squads[squad.squadId], "Squad already in army: " .. squad.squadId)
-    run.squads[squad.squadId] = squad
+    assert(not run.squads[squadId], "Squad already in army: " .. squadId)
+    run.squads[squadId] = g.newSquad(squadId)
     run._sortedSquads = nil
 end
 
----@param squad g.Squad
-function g.addOrUpgradeSquad(squad)
+---@param squadId string
+function g.addOrUpgradeSquad(squadId)
     local run = g.getRun()
-    assert(not run.squads[squad.squadId], "Squad already in army: " .. squad.squadId)
-    run.squads[squad.squadId] = squad
-    run._sortedSquads = nil
+    local squad = run.squads[squadId]
+    if squad then
+        squad.level = squad.level + 1
+    else
+        run.squads[squadId] = g.newSquad(squadId)
+        run._sortedSquads = nil
+    end
 end
 
 ---@param squad g.Squad

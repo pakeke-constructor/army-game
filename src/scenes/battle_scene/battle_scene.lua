@@ -301,7 +301,7 @@ local function drawSandboxUI(self)
             g.drawSquadIcon(id, cx + cw/2, cy + ch/2, true)
             if iml.wasJustClicked(cx, cy, cw, ch, 1, idd) then
                 if not g.getSquadFromArmy(id) then
-                    g.addSquadToArmy(g.newSquad(id))
+                    g.addSquadToArmy(id)
                 end
             end
             if has then

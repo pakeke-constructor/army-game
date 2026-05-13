@@ -240,7 +240,7 @@ local function drawSquadBox(r, squadId, cost)
             if squad then
                 squad.level = squad.level + 1
             else
-                g.addSquadToArmy(g.newSquad(squadId))
+                g.addSquadToArmy(squadId)
             end
             return true, isHovered
         end

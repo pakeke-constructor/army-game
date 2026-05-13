@@ -12,8 +12,8 @@ g.defineCommander("sir_horse", "Sir Horse", {
     image = "basiccommander",
 
     onStart = function(run)
-        g.addSquadToArmy(g.newSquad("militia_squad"))
-        g.addSquadToArmy(g.newSquad("archer_squad"))
+        g.addSquadToArmy("militia_squad")
+        g.addSquadToArmy("archer_squad")
     end
 })
 
