@@ -1944,17 +1944,6 @@ g.defineStat("projectileAccuracy", "baseProjectileAccuracy", {
 
 
 
----@param manaCounts g.ManaCounts?
----@return g.ManaCell[]
-local function manaMapToCells(manaCounts)
-    local cells = {}
-    for cell, count in pairs(manaCounts or {}) do
-        for _ = 1, count or 0 do
-            cells[#cells + 1] = cell
-        end
-    end
-    return cells
-end
 
 ---@param manaCounts g.ManaCounts?
 ---@return integer
@@ -1965,9 +1954,6 @@ local function getTotalManaCount(manaCounts)
     end
     return n
 end
-
-g.manaMapToCells = manaMapToCells
-g.getTotalManaCount = getTotalManaCount
 
 -- Returns map of unspent cells after satisfying manaRequirement, or nil if can't afford.
 ---@param manaCounts g.ManaCounts?

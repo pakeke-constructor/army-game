@@ -202,46 +202,6 @@ local NO_MANA = loc("No Mana!", {}, {
 })
 
 
-local function drawManaBar(x,y, w,h, maxW)
-    local run = g.getRun()
-    local manaCounts = run.mana
-    local _, sceneName = g.getCurrentScene()
-    if sceneName == "battle_scene" and run._battleMana then
-        manaCounts = run._battleMana
-    end
-    local cpy = g.manaMapToCells(manaCounts)
-    table.sort(cpy)
-
-    local sf = g.getSmallFont(16)
-    local txt
-    if g.getTotalManaCount(manaCounts) > 0 then
-        txt = "{wavy amp=0.4}" .. AVAILABLE_MANA
-    else
-        txt = "{c r=0.8 g=0.2 b=0.15}" .. NO_MANA
-    end
-
-    local WIDTH_PER_MANA = 20
-    local hbox = ui.HBox({padding = 2, spacing = 2}, function(bx, by, bw, bh)
-        lg.setColor(1,1,1)
-        ui.drawDarkPanel(bx, by, bw, bh)
-    end)
-    hbox:addText(txt, sf)
-    hbox:add({
-        getWidth = function() return math.min(WIDTH_PER_MANA * #cpy, maxW) end,
-        getHeight = function() return h end,
-        draw = function(dx, dy, dw, dh)
-            local grid = Kirigami(dx, dy, dw, dh):grid(#cpy, 1)
-            lg.setColor(1,1,1)
-            for i, mc in ipairs(cpy) do
-                local rr = grid[i]
-                g.drawManaCell(mc, rr.x + rr.w/2, rr.y + rr.h/2)
-            end
-        end,
-    })
-    hbox:render(x, y)
-end
-
-
 
 local function dbg(r)
     if consts.DEV_MODE then
