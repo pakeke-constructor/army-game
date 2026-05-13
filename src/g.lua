@@ -2006,6 +2006,14 @@ local function trySpendManaInternal(manaCounts, manaRequirement)
     return kept
 end
 
+
+---@param manaType g.ManaType
+---@param count integer
+function g.addMana(manaType, count)
+    local battleMana = g.getRun()._battleMana
+    battleMana[manaType] = (battleMana[manaType] or 0) + (count or 1)
+end
+
 ---@param manaCells g.ManaCounts
 ---@param manaRequirement g.ManaBundle
 ---@return boolean
