@@ -15,7 +15,6 @@ function ChoicePanel:init(rType, rarityWeights)
     self.rType = rType
     self.choices = {}
     self.rarityWeights = rarityWeights or consts.DEFAULT_RARITY_WEIGHTS
-    self.selectedI = nil
 
     local manaCells = g.getRun().mana
 
@@ -61,20 +60,27 @@ function ChoicePanel:draw()
         regions[i] = rr:padRatio(0.15)
     end
 
-    ---@param i integer
-    local function drawCard(i)
-        local rew = self.choices[i]
-        local f = self.rType == "squad" and ui.drawSquadCard or ui.drawBlessingCard
-        local clicked, ww,hh = f(rew, regions[i], i)
-        
-        if clicked then
-            self.selectedI = i
-            return true
+    if self.rType == "squad" then
+        for i = 1, #regions do
+            local squadId = self.choices[i]
+            local clicked = ui.drawSquadCard(squadId, regions[i], i)
+            if clicked then
+                g.addOrUpgradeSquad(squadId)
+                return true
+            end
         end
+        return
     end
 
-    for i = 1, #regions do
-        if drawCard(i) then return true end
+    if self.rType == "blessing" then
+        for i = 1, #regions do
+            local blessId = self.choices[i]
+            local clicked = ui.drawBlessingCard(blessId, regions[i], i)
+            if clicked then
+                g.addOrUpgradeSquad(blessId)
+                return true
+            end
+        end
     end
 end
 
