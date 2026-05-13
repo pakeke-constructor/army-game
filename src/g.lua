@@ -1050,17 +1050,17 @@ function g.applyFrozen(ent, duration, source)
     return false
 end
 
----@param ent ecs.Entity
----@param tauntingTowards ecs.Entity
+---@param victimEnt ecs.Entity Entity that gets taunted.
+---@param tauntingEnt ecs.Entity Entity the victim should target/move toward.
 ---@param duration number?
-function g.applyTaunt(ent, tauntingTowards, duration)
-    local wasActive = ent.taunt and ent.taunt.duration and ent.taunt.duration > 0
-    ent.taunt = {
-        ent = tauntingTowards,
+function g.applyTaunt(victimEnt, tauntingEnt, duration)
+    local wasActive = victimEnt.taunt and victimEnt.taunt.duration and victimEnt.taunt.duration > 0
+    victimEnt.taunt = {
+        ent = tauntingEnt,
         duration = duration or 3,
     }
     if not wasActive then
-        g.call("statusEffectApplied", ent, "taunt", duration or 3, tauntingTowards)
+        g.call("statusEffectApplied", victimEnt, "taunt", duration or 3, tauntingEnt)
     end
 end
 
