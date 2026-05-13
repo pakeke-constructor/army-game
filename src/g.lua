@@ -631,9 +631,16 @@ local PERK_LIST = {}
 local SQUAD_DEFS = {}
 local SQUAD_LIST = {}
 
+-- entity type defs
+local ENTITY_DEFS = {}
+local ENTITY_LIST = {}
+local currentEntityId = 0
+
+
 ---@class g.SquadInfo
 ---@field id string
 ---@field entityId string
+---@field entityDef table
 ---@field rarity g.Rarity
 ---@field unitCount integer
 ---@field statUpgradeScaling table<string, number> { [statName] -> number }
@@ -642,8 +649,9 @@ local SQUAD_LIST = {}
 ---@field icon string
 ---@field perks string[]
 ---@field cost g.ManaBundle
----@field onDeploy (fun(squad: g.SquadInfo, entities: table[], x: number, y:number))?
+---@field onDeploySquad (fun(squad: g.SquadInfo, entities: ecs.Entity[], x: number, y:number))?
 ---@field drawSquadHover fun(x:number, y:number)?
+
 
 
 ---@param id string
@@ -657,6 +665,11 @@ function g.defineSquad(id, info)
     info.rarity = assert(info.rarity)
     info.unitCountUpgradeScaling = info.unitCountUpgradeScaling or 0
     info.statUpgradeScaling = info.statUpgradeScaling or {}
+    info.entityId = info.entityId or (id .. "_unit")
+    assert(info.entityDef, "Missing entityDef for squad: " .. id)
+    if not ENTITY_DEFS[info.entityId] then
+        g.defineEntity(info.entityId, info.entityDef)
+    end
     assert(type(info.unitCountUpgradeScaling) == "number")
     for stat,scaling in pairs(info.statUpgradeScaling)do
         assert(g.getStatInfo(stat), "?")
@@ -675,12 +688,24 @@ function g.newSquad(squadId)
     return Squad(squadId, def)
 end
 
----@param squad g.Squad
-function g.addSquadToArmy(squad)
+---@param squadId string
+function g.addSquadToArmy(squadId)
     local run = g.getRun()
-    assert(not run.squads[squad.squadId], "Squad already in army: " .. squad.squadId)
-    run.squads[squad.squadId] = squad
+    assert(not run.squads[squadId], "Squad already in army: " .. squadId)
+    run.squads[squadId] = g.newSquad(squadId)
     run._sortedSquads = nil
+end
+
+---@param squadId string
+function g.addOrUpgradeSquad(squadId)
+    local run = g.getRun()
+    local squad = run.squads[squadId]
+    if squad then
+        squad.level = squad.level + 1
+    else
+        run.squads[squadId] = g.newSquad(squadId)
+        run._sortedSquads = nil
+    end
 end
 
 ---@param squad g.Squad
@@ -797,8 +822,8 @@ function g.spawnSquad(squad, x, y, ...)
         ent.squad = squad
         entities[i] = ent
     end
-    if info.onDeploy then
-        info.onDeploy(info, entities)
+    if info.onDeploySquad then
+        info.onDeploySquad(info, entities)
     end
     return entities
 end
@@ -851,14 +876,19 @@ function g.getBlessingsByMana(manaCells)
     return result
 end
 
+---@param id string
 function g.addBlessing(id)
     local info = assert(BLESSING_DEFS[id], "Unknown blessing: " .. tostring(id))
     local run = g.getRun()
     local d = info.startingData
     if d == nil then d = true end
-    run.blessings[id] = d
+    if not run.blessings[id] then
+        run.blessings[id] = d
+        g.call("blessingAdded", id)
+    end
 end
 
+---@param id string
 function g.removeBlessing(id)
     local run = g.getRun()
     if run.blessings[id] ~= nil then
@@ -868,11 +898,14 @@ function g.removeBlessing(id)
     return false
 end
 
+---@param id string
 function g.getBlessingData(id)
     local run = g.getRun()
     return run.blessings[id]
 end
 
+---@param id string
+---@param val any
 function g.setBlessingData(id, val)
     local run = g.getRun()
     assert(run.blessings[id] ~= nil, "Blessing not present: " .. tostring(id))
@@ -914,21 +947,22 @@ function g.getPerkList()
     return PERK_LIST
 end
 
---- Add a buff to an entity. Promotes shared scopes so buff only affects this entity.
-function g.addBuff(ent, handler, duration)
+--- Add a custom effect (handler) to an entity. Promotes shared scopes so it only affects this entity.
+--- If `tag` is given, the effect is "tagged": re-adding with same tag overwrites the previous one (no stacking).
+---@param ent table
+---@param handler table
+---@param duration number?
+---@param tag any?
+function g.addCustomEffect(ent, handler, duration, tag)
     if not ent.scope then
         ent.scope = g.newScope()
     elseif ent.scope.shared then
         ent.scope = g.newScope(ent.scope)
     end
-    ent.scope:addHandler(handler, duration)
+    ent.scope:addHandler(handler, duration, tag)
 end
 
 
--- Entity system
-local ENTITY_DEFS = {}
-local ENTITY_LIST = {}
-local currentEntityId = 0
 
 function g.defineEntity(id, def)
     assert(not ENTITY_DEFS[id], "Duplicate entity type: " .. id)
@@ -940,6 +974,9 @@ function g.defineEntity(id, def)
     def.image = def.image or id
     for k, v in pairs(Entity) do
         def[k] = v
+    end
+    if def.baseHealPower and def.baseHealPower > 0 then
+        assert(not def.baseAttackDamage or def.baseAttackDamage <= 0, "Entities cannot be healers AND attackers at same time")
     end
     local mt = {__index = def}
     ENTITY_DEFS[id] = mt
@@ -1019,6 +1056,20 @@ function g.applyFrozen(ent, duration, source)
         return true
     end
     return false
+end
+
+---@param victimEnt ecs.Entity Entity that gets taunted.
+---@param tauntingEnt ecs.Entity Entity the victim should target/move toward.
+---@param duration number?
+function g.applyTaunt(victimEnt, tauntingEnt, duration)
+    local wasActive = victimEnt.taunt and victimEnt.taunt.duration and victimEnt.taunt.duration > 0
+    victimEnt.taunt = {
+        ent = tauntingEnt,
+        duration = duration or 3,
+    }
+    if not wasActive then
+        g.call("statusEffectApplied", victimEnt, "taunt", duration or 3, tauntingEnt)
+    end
 end
 
 ---@param ent ecs.Entity
@@ -1210,13 +1261,7 @@ function g.drawEntity(ent, x, y)
     end
     if ent.image then
         lg.setColor(1,1,1)
-        local yoff = ent.yoffset or 0
-        if yoff ~= 0 then
-            local _,h = g.getImageSize(ent.image)
-            g.drawImageOffset(ent.image, x + (ent.ox or 0), y + (ent.oy or 0), ent.rot or 0, sx, sy, 0.5, 0.5 + yoff / h, ent.kx, ent.ky)
-        else
-            g.drawImage(ent.image, x + (ent.ox or 0), y + (ent.oy or 0), ent.rot or 0, sx, sy, ent.kx, ent.ky)
-        end
+        g.drawImageOffset(ent.image, x + (ent.ox or 0), y + (ent.oy or 0), ent.rot or 0, sx, sy, 0.5, 0.95, ent.kx, ent.ky)
         if ent.frozenTime and ent.frozenTime > 0 then
             drawIceCube(ent, x,y, sx,sy)
         end
@@ -1252,6 +1297,9 @@ function g.drawUnit(entityId, x, y, maxW, maxH)
     end
 end
 
+
+---@param id string
+---@return table
 function g.getEntityDef(id)
     local mt = ENTITY_DEFS[id]
     return mt and mt.__index
@@ -1469,6 +1517,7 @@ function Scope:init(parent)
     self.shared = false
     self.handlers = {}
     self.expiry = {} -- [handler] -> expire time
+    self.tags = {} -- [tag] -> handler
     self.cache = {} -- [eventOrQuestionName] -> {func, func, ...}
     self.lastPrune = 0
 end
@@ -1510,9 +1559,14 @@ function Scope:_pruneIfNeeded()
     if dirty then self:_rebuild() end
 end
 
-function Scope:addHandler(handler, duration)
+function Scope:addHandler(handler, duration, tag)
     for key in pairs(handler) do
         assert(definedEvents[key] or questions[key], "Unknown event/question: " .. tostring(key))
+    end
+    if tag then
+        local old = self.tags[tag]
+        if old then self:removeHandler(old) end
+        self.tags[tag] = handler
     end
     if duration then
         self.expiry[handler] = love.timer.getTime() + duration
@@ -1698,13 +1752,13 @@ g.RARITIES = {
 }
 
 
----@alias g.Stat {id:string, name:string, baseName:string, modQ:string, mulQ:string, color:objects.Color, icon:string, isImportant:fun(ent:ecs.Entity, stat:string):boolean}
+---@alias g.Stat {id:string, name:string, displayName:string, description:string, baseName:string, modQ:string, mulQ:string, color:objects.Color, icon:string, isImportant:fun(ent:ecs.Entity, stat:string):boolean}
 local STAT_LIST = {}
 local STAT_DEFS = {}
 
 ---@param id string
 ---@param baseName string
----@param info {color:objects.Color, icon:string, isImportant:fun(ent:ecs.Entity):boolean}
+---@param info {displayName:string, description:string, color:objects.Color, icon:string, isImportant:fun(ent:ecs.Entity):boolean}
 function g.defineStat(id, baseName, info)
     local Name = id:sub(1,1):upper() .. id:sub(2)
     local modQ = "get" .. Name .. "Modifier"
@@ -1714,6 +1768,12 @@ function g.defineStat(id, baseName, info)
     local stat = {
         id = id,
         name = id,
+        displayName = loc(info.displayName, {}, {
+            context = "The display name of a unit stat (e.g. Health, Attack Damage)"
+        }),
+        description = loc(info.description, {}, {
+            context = "The description of a unit stat, explaining what it does"
+        }),
         baseName = baseName,
         modQ = modQ,
         mulQ = mulQ,
@@ -1767,6 +1827,11 @@ g.COLORS = {
     todo: figure out what do put here:
     
     ]]
+    UPGRADE = objects.Color("FFF7D172"),
+
+    DAMAGE = objects.Color("ffd53341"),
+    HEAL = objects.Color("ffc852a4"),
+
     BURN = objects.Color("FFE17313"),
     POISON = objects.Color("FF4CC44C"),
     HEALTH = objects.Color("FF397634"),
@@ -1806,36 +1871,57 @@ local function _importantIfNonZero(ent, stat)
 end
 
 g.defineStat("maxHealth", "baseMaxHealth", {
+    displayName = "Health",
+    description = "Health of unit",
     color = objects.Color(0.3, 0.9, 0.3),
     icon = "health",
     isImportant = _alwaysImportant,
 })
 g.defineStat("attackDamage", "baseAttackDamage", {
+    displayName = "Attack Damage",
+    description = "Damage per attack",
     color = objects.Color(0.95, 0.3, 0.3),
     icon = "damage",
     isImportant = _alwaysImportant,
 })
+g.defineStat("healPower", "baseHealPower", {
+    displayName = "Heal Power",
+    description = "Healing per attack",
+    color = objects.Color(0.3, 0.95, 0.6),
+    icon = "healpower",
+    isImportant = _importantIfNonZero,
+})
 g.defineStat("attackSpeed", "baseAttackSpeed", {
+    displayName = "Attack Speed",
+    description = "Attacks per second",
     color = objects.Color(0.95, 0.85, 0.3),
     icon = "atkspeed",
     isImportant = _importantIfRanged,
 })
 g.defineStat("moveSpeed", "baseMoveSpeed", {
+    displayName = "Move Speed",
+    description = "Movement speed",
     color = objects.Color(0.4, 0.7, 0.95),
     icon = "movespeed",
     isImportant = _importantIfMelee,
 })
 g.defineStat("attackRange", "baseAttackRange", {
+    displayName = "Attack Range",
+    description = "Range of attacks",
     color = objects.Color(0.8, 0.5, 0.2),
     icon = "range",
     isImportant = _importantIfRanged,
 })
 g.defineStat("armor", "baseArmor", {
+    displayName = "Armor",
+    description = "Reduces damage taken",
     color = objects.Color(0.6, 0.6, 0.7),
     icon = "armor",
     isImportant = _importantIfNonZero,
 })
 g.defineStat("projectileAccuracy", "baseProjectileAccuracy", {
+    displayName = "Accuracy",
+    description = "Projectile accuracy",
     color = objects.Color(0.9, 0.9, 0.9),
     icon = "hourglass_icon",
     isImportant = _importantIfRanged,
@@ -1860,17 +1946,6 @@ g.defineStat("projectileAccuracy", "baseProjectileAccuracy", {
 
 
 
----@param manaCounts g.ManaCounts?
----@return g.ManaCell[]
-local function manaMapToCells(manaCounts)
-    local cells = {}
-    for cell, count in pairs(manaCounts or {}) do
-        for _ = 1, count or 0 do
-            cells[#cells + 1] = cell
-        end
-    end
-    return cells
-end
 
 ---@param manaCounts g.ManaCounts?
 ---@return integer
@@ -1881,9 +1956,6 @@ local function getTotalManaCount(manaCounts)
     end
     return n
 end
-
-g.manaMapToCells = manaMapToCells
-g.getTotalManaCount = getTotalManaCount
 
 -- Returns map of unspent cells after satisfying manaRequirement, or nil if can't afford.
 ---@param manaCounts g.ManaCounts?
@@ -1936,6 +2008,17 @@ local function trySpendManaInternal(manaCounts, manaRequirement)
     return kept
 end
 
+
+---@param manaType g.ManaType
+---@param count integer
+---@param sourceEnt ecs.Entity? The source of the mana
+function g.addMana(manaType, count, sourceEnt)
+    local battleMana = g.getRun()._battleMana
+    battleMana[manaType] = (battleMana[manaType] or 0) + (count or 1)
+    g.call("manaAdded", manaType, count, sourceEnt)
+end
+
+
 ---@param manaCells g.ManaCounts
 ---@param manaRequirement g.ManaBundle
 ---@return boolean
@@ -1955,6 +2038,7 @@ function g.trySpendMana(manaCells, manaRequirement)
     for k, v in pairs(kept) do
         manaCells[k] = v
     end
+    g.call("manaSpent", manaRequirement)
     return true
 end
 

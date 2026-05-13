@@ -40,8 +40,7 @@ COMMANDS.get = function(args)
     local squadId = args[1]
     if not squadId then return addLog("usage: /get <squad_id>") end
     if g.getSquadFromArmy(squadId) then return addLog("already have squad: " .. squadId) end
-    local squad = g.newSquad(squadId)
-    g.addSquadToArmy(squad)
+    g.addSquadToArmy(squadId)
     addLog("added squad: " .. squadId)
 end
 

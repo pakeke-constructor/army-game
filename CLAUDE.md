@@ -49,7 +49,7 @@ A bunch of common pitfalls/traps to look out for:
 - Don't set ent.x/ent.y directly on entities with a .physics component; use g.setPos(ent, x, y) which syncs the Box2D body.
 - For `localize(txt)` calls, you MUST NOT localize text at runtime. It must be done at load-time. The idiomatic way is to have constants at the top, like `LOC_TXT = loc("...")`
 - Pretty much ALL text in the game uses `richtext`, which has `{effect}` formatting tags, and `%{variable:.2f}` for interpolation.
-- Don't add buffs to squads directly. Use g.addBuff instead.
+- Don't add buffs to entities directly. Use g.buffEntity (stat buffs) or g.addCustomEffect (handler-based effects).
 - table-valued fields on the def are shared across all entities of that type. Mutating them (e.g. `table.insert(ent.tags, ...)`) affects every entity. 
 - Before adding/removing handlers to ent.scopes, look for a g.* function first.
 - Entity stats (attackDamage, maxHealth, etc) are recomputed every frame in stats.lua; so if you want to add a buff, you must use `g.buffEntity`. Alternatively, hook into the question-bus for the stat. (E.g. getMaxHealthModifier/Multiplier)
@@ -76,7 +76,7 @@ Scopes: essentially a collection of handlers, (with parent inheritance.)
 - Entities can own a scope, which allows you to add effects/behaviour to entities.
 - Scopes contain handlers, which is just a table of functions: `handler: {my_event = func, my_question = func2}`
 - Handlers can auto-expire via optional duration arg, via `:addHandler(handler, duration)`. (how temporary buffs work.)
-- Squad spawn creates a shared scope for all units. g.addBuff(ent, handler, duration) layers a per-entity scope on top (with the shared scope as parent), so buffs stay per-entity.
+- Squad spawn creates a shared scope for all units. g.addCustomEffect(ent, handler, duration) layers a per-entity scope on top (with the shared scope as parent), so effects stay per-entity.
 - If the scope has a parent (ent.scope = Scope(parent)) then the parent's handlers are called too. This is useful when we have a scope shared between entities, but we want to add a buff for just ONE entity; we create a new scope, and have it inherit from the old one.
 
 EXAMPLE:
@@ -123,6 +123,7 @@ General guidelines:
 - Avoid working on features that require changes to internal systems, instead, try to work within the existing systems; the main functions you will need live in `g.lua`.
 - If you are reaching into internals, like `ent._target`, then it's probably a sign that the systems are not ready yet. So you should tell the user that "there isn't really a proper way to do this yet".
 - You should tell the user what they are doing, and why you are doing it, keeping in mind that they are not fully technical.
+- If you want to do "when this squad is deployed" effects, the MUST have a corresponding visual to go alongside it, via `drawHoverSquad`. (This could show the circle it affects, or something.)
 - You MUST check that image-files exist before using them. Every image inside of `content/*`, `assets/sprites/*` is loaded by filename as a string, eg file.png -> "file".
 - You MUST look at examples inside `content/` before starting. This will give you a better understanding.
 - You may help the user with git issues, but NEVER EVER push directly to master.

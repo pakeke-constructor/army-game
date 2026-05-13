@@ -35,6 +35,13 @@ local projectile = {
     -- damage, ownerEnt, team, pierceCount are set on spawn
 }
 
+---@class ecs.components.Taunt
+---@field public ent ecs.Entity
+---@field public duration number
+local taunt = {
+    -- ent + duration are set when applied
+}
+
 
 ---@class ecs.components.Physics
 ---@field public shape "circle"|"rect"
@@ -62,24 +69,35 @@ local physics = {
 ---@field public ai ecs.components.AI?
 ---@field public attack ecs.components.Attack?
 ---@field public projectile ecs.components.Projectile?
+---@field public taunt ecs.components.Taunt?
 ---@field public team "ally"|"enemy"
 ---@field public color objects.Color?
 ---@field public x number
 ---@field public y number
 ---@field public z number?
----@field public yoffset number?
 ---@field public vx number?
 ---@field public vy number?
 ---@field public vz number?
 ---@field public gravity number?
 ---@field public health number?
+---@field public isHealer boolean? if this is true, the entity is a healer, and will heal with it's attacks.
+---@field public baseMaxHealth number?
+---@field public baseArmor number?
+---@field public baseAttackDamage number?
+---@field public baseHealPower number?
+---@field public baseAttackSpeed number?
+---@field public baseAttackRange number?
+---@field public baseMoveSpeed number?
+---@field public baseProjectileAccuracy number?
 ---@field public maxHealth number?
 ---@field public armor number?
 ---@field public startingArmor number?
 ---@field public attackDamage number?
+---@field public healPower number?
 ---@field public attackSpeed number?
 ---@field public attackRange number?
 ---@field public moveSpeed number?
+---@field public projectileAccuracy number?
 ---@field public patrolX number?
 ---@field public patrolY number?
 ---@field public image string?
@@ -93,14 +111,24 @@ local physics = {
 ---@field public burnTime number? -- if nil, no burn
 ---@field public frozenTime number? -- if nil, not frozen
 ---@field public poisonAmount number? -- if nil, no poison
+---@field public isPest number? returns true if this entity is a "pest"
 ---@field public _timeSinceDamaged number?
 ---@field public _timeSinceLostArmor number?
 ---@field public _damageLagAmount number?
----@field public onDeath fun(ecs.Entity)?
----@field public onSpawn fun(ecs.Entity)?
 ---@field public onUpdate fun(ecs.Entity, number)?
 ---@field public onDraw fun(ecs.Entity)?
 ---@field public onAttack fun(ecs.Entity)?
+---@field public entitySpawned fun(ecs.Entity)?
+---@field public entityDeath fun(ecs.Entity, ecs.Entity?)?
+---@field public entityHurt fun(ecs.Entity, number, ecs.Entity?)?
+---@field public entityHealed fun(ecs.Entity, number, ecs.Entity?)?
+---@field public armorIncreased fun(ecs.Entity, number)?
+---@field public armorDecreased fun(ecs.Entity, number)?
+---@field public entityBuffed fun(ecs.Entity, table, number?)?
+---@field public entityKillsEnemy fun(ecs.Entity, ecs.Entity)?
+---@field public entityShootsProjectile fun(ecs.Entity, ecs.Entity)?
+---@field public drawEntity fun(ecs.Entity)?
+---@field public statusEffectApplied fun(ecs.Entity, string, number, ecs.Entity?)?
 ---@field public physics ecs.components.Physics?
 ---@field public partitions string[]?
 local ecs_Entity = {}

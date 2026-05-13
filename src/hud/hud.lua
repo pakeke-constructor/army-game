@@ -85,8 +85,7 @@ end
 ---@param sq g.Squad
 local function hoverSquad(sq)
     local info = g.getSquadInfo(sq.squadId)
-    local mx, my = ui.getMouse()
-    hoverService.requestHover(mx, my, function(box, fonts)
+    hoverService.requestHover(function(box, fonts)
         box:addText("{c r=0.9 g=0.85 b=0.7}" .. info.name, fonts.title)
         box:addSpacing(2)
         box:addText("{c r=0.7 g=0.7 b=0.75}" .. info.unitCount .. "x " .. info.entityId, fonts.body)
@@ -182,8 +181,7 @@ local function drawLeftBlessingBar(r)
             local info = g.getBlessingInfo(bId)
             local gx, gy, gw, gh = cells[i]:get()
             if iml.isHovered(gx, gy, gw, gh, "blessing" .. i) then
-                local mx, my = ui.getMouse()
-                hoverService.requestHover(mx, my, function(box, fonts)
+                hoverService.requestHover(function(box, fonts)
                     box:addText("{c r=0.9 g=0.85 b=0.7}" .. info.name, fonts.title)
                     box:addSpacing(2)
                     box:addText("{c r=0.6 g=0.6 b=0.65}" .. info.description, fonts.body)
@@ -202,46 +200,6 @@ local AVAILABLE_MANA = loc("Available Mana: ", {}, {
 local NO_MANA = loc("No Mana!", {}, {
     context = "When player runs out of mana. 'Mana' is an abstract concept, comes in different colors, like red,blue,green etc."
 })
-
-
-local function drawManaBar(x,y, w,h, maxW)
-    local run = g.getRun()
-    local manaCounts = run.mana
-    local _, sceneName = g.getCurrentScene()
-    if sceneName == "battle_scene" and run._battleMana then
-        manaCounts = run._battleMana
-    end
-    local cpy = g.manaMapToCells(manaCounts)
-    table.sort(cpy)
-
-    local sf = g.getSmallFont(16)
-    local txt
-    if g.getTotalManaCount(manaCounts) > 0 then
-        txt = "{wavy amp=0.4}" .. AVAILABLE_MANA
-    else
-        txt = "{c r=0.8 g=0.2 b=0.15}" .. NO_MANA
-    end
-
-    local WIDTH_PER_MANA = 20
-    local hbox = ui.HBox({padding = 2, spacing = 2}, function(bx, by, bw, bh)
-        lg.setColor(1,1,1)
-        ui.drawDarkPanel(bx, by, bw, bh)
-    end)
-    hbox:addText(txt, sf)
-    hbox:add({
-        getWidth = function() return math.min(WIDTH_PER_MANA * #cpy, maxW) end,
-        getHeight = function() return h end,
-        draw = function(dx, dy, dw, dh)
-            local grid = Kirigami(dx, dy, dw, dh):grid(#cpy, 1)
-            lg.setColor(1,1,1)
-            for i, mc in ipairs(cpy) do
-                local rr = grid[i]
-                g.drawManaCell(mc, rr.x + rr.w/2, rr.y + rr.h/2)
-            end
-        end,
-    })
-    hbox:render(x, y)
-end
 
 
 
@@ -335,8 +293,7 @@ local function drawTopBar()
         lg.setColor(1, 1, 1)
         richtext.printRich(text, font, x, y + h / 2 - fh / 2, w, "center")
         if hoverText and iml.isHovered(x, y, w, h, text) then
-            local mx, my = ui.getMouse()
-            hoverService.requestHover(mx, my, function(box, fonts)
+            hoverService.requestHover(function(box, fonts)
                 box:addText("{c r=0.7 g=0.7 b=0.75}" .. hoverText, fonts.body)
             end)
         end

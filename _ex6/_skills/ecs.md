@@ -63,4 +63,4 @@ Gotcha: never set `ent.x`/`ent.y` directly on physics entities — the physics s
 - `g.getVel(ent)` — returns effective velocity including knockback.
 
 
-Scopes: `ent.scope` holds per-entity handlers/buffs. Use `g.addBuff(ent, handler, duration)` to add buffs — it auto-promotes shared scopes so the buff only affects that entity.
+Scopes: `ent.scope` holds per-entity handlers/effects. Use `g.addCustomEffect(ent, handler, duration)` to add effects — it auto-promotes shared scopes so it only affects that entity.

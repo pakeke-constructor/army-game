@@ -181,8 +181,7 @@ Buttons handle hover/click sounds, gradient fill, iml registration. Must be insi
 
 ```lua
 if iml.isHovered(x, y, w, h, myKey) then
-    local mx, my = ui.getMouse()
-    hoverService.requestHover(mx, my, function(box, fonts)
+    hoverService.requestHover(function(box, fonts)
         box:addText("{c r=0.9 g=0.85 b=0.7}Title", fonts.title)
         box:addText("{c r=0.7 g=0.7 b=0.75}Description.", fonts.body)
     end)

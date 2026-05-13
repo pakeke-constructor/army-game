@@ -44,28 +44,33 @@
 - Status-effect system
 - Add armor system
 - Make demons/enemies walk around a bit randomly at the start of combat
-
+- Make sandbox for Leo
+- Squad upgrade UI
+- When hovering squad-card, you can see the squad-upgrade
+- When hovering squad-box, squad-card shows the upgrade.
+- refactor: There currently exist 2 funcs, `g.addBuff  g.buffEntity`. Simplify this, have one of them be `g.addCustomEffect` or something.
+- Make it so there is no `g.defineSquad + g.defineEntity` combination when defining squads; `g.defineSquad` CONTAINS the entity-def.
+- Add new stat: `attackHeal`. Used by units that heal others
+- Squads can have `onDeploy` effects, that affect the squads (Visuals for onDeploy effects (e.g. red circle?))
+- Make it so entities are rendered from their base
 
 
 
 ### OK:: what do we need for a minimum-playable game?
 
 
-- Make sandbox for Leo
 
 
-- Squad-card: when hovering stats on squad-card, tells about the stats
+- Weapons system: Make it so weapons can be held/used
+- melee: swords + sword swinging
+- ranged: bows, + bow pointing in direction they aim
 
 
-- Rework stats a bit in UI: Don't display DMG/ASPD separately, instead, have a DPS stat.
-When DPS is hovered, it shows DPS/DMG as a combined thing.
+- Juice for placing units (deploy them sequentially so its satisfying?)
+- Juice for spending mana: Should pop up above the units as you spend them
+- Juice for spending money in shop
 
-
-- Squad upgrade UI
-- When hovering squad-card, you can see the squad-upgrade
-- When hovering squad-box, squad-card shows the upgrade.
-
-
+- Juice for breaking armor
 
 
 
@@ -77,35 +82,6 @@ When DPS is hovered, it shows DPS/DMG as a combined thing.
 
 
 - Proper ordered-rendering for map-scene
-
-
-- Weapons system: Make it so weapons can be held/used
-- melee: swords + sword swinging
-- ranged: bows, + bow pointing in direction they aim
-
-
-
-
-- "Terrain" for battle-scene 
---- trees
---- rocks
---- grass
---- BORDER: Trees + Rocks + Dark-Fog?
-
-
-
-
-- Juice for placing units (deploy them sequentially so its satisfying?)
-- Juice for spending mana: Should pop up above the units as you spend them
-- Juice for spending money in shop
-
-- Juice for breaking armor
-
-
-
-- Extra fancy terrain for battles:
---- swamp
---- lava-pit
 
 
 - Sound effects
@@ -129,4 +105,19 @@ That agent should utilize _ex6/coding_style.
 - add push-ifs-up methodology (inside `_ex6/coding_style`)  https://gieseanw.wordpress.com/2024/06/24/dont-push-ifs-up-put-them-as-close-to-the-source-of-data-as-possible/
 
 </agent_ideas>
+
+
+<scope_creep>
+
+
+- "Terrain" for battle-scene 
+--- trees
+--- rocks
+--- grass
+--- BORDER: Trees + Rocks + Dark-Fog?
+
+
+- Extra fancy terrain for battles:
+--- swamp
+--- lava-pit
 

@@ -16,6 +16,9 @@ g.defineEvent("battleLost")
 g.defineEvent("battleStarted")
 g.defineEvent("projectileHit")
 g.defineEvent("nexusDamaged")
+g.defineEvent("manaAdded")
+g.defineEvent("manaSpent")
+
 
 -- Entity lifecycle
 g.defineEvent("entitySpawned")
@@ -45,6 +48,7 @@ g.defineEvent("squadDeployed")
 -- g.defineEvent("rewardChosen")
 -- g.defineEvent("chestOpened")
 g.defineEvent("rerollShop")
+g.defineEvent("blessingAdded")
 
 
 
