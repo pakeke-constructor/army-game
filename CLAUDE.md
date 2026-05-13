@@ -123,6 +123,7 @@ General guidelines:
 - Avoid working on features that require changes to internal systems, instead, try to work within the existing systems; the main functions you will need live in `g.lua`.
 - If you are reaching into internals, like `ent._target`, then it's probably a sign that the systems are not ready yet. So you should tell the user that "there isn't really a proper way to do this yet".
 - You should tell the user what they are doing, and why you are doing it, keeping in mind that they are not fully technical.
+- If a squad has `onDeploySquad` function, it MUST have a corresponding visual to go alongside it, via `drawHoverSquad`. (This could show the circle it affects, or something)
 - You MUST check that image-files exist before using them. Every image inside of `content/*`, `assets/sprites/*` is loaded by filename as a string, eg file.png -> "file".
 - You MUST look at examples inside `content/` before starting. This will give you a better understanding.
 - You may help the user with git issues, but NEVER EVER push directly to master.

@@ -649,7 +649,7 @@ local currentEntityId = 0
 ---@field icon string
 ---@field perks string[]
 ---@field cost g.ManaBundle
----@field onDeploy (fun(squad: g.SquadInfo, entities: table[], x: number, y:number))?
+---@field onDeploySquad (fun(squad: g.SquadInfo, entities: ecs.Entity[], x: number, y:number))?
 ---@field drawSquadHover fun(x:number, y:number)?
 
 
@@ -822,8 +822,8 @@ function g.spawnSquad(squad, x, y, ...)
         ent.squad = squad
         entities[i] = ent
     end
-    if info.onDeploy then
-        info.onDeploy(info, entities)
+    if info.onDeploySquad then
+        info.onDeploySquad(info, entities)
     end
     return entities
 end
