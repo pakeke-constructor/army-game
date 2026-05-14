@@ -16,7 +16,8 @@
 ---@field id string
 ---@field description string
 ---@field image string
----@field handlers table<string, function>
+---@field handlers table<string, fun(ent: ecs.Entity, ...): any> Scoped to the entity. Only fires when the event/question is dispatched AT this entity (eg g.call("onHit", ent)). Cheap; default choice.
+---@field rawHandlers table<string, fun(ent: ecs.Entity, ...): any>? Scene-level. Fires for EVERY dispatch of that event globally, regardless of target. Use when the perk needs to listen to things happening elsewhere (eg "when any ally is hurt"). More expensive; use only when `handlers` can't express it.
 
 
 ---@class g.RarityWeights
@@ -155,20 +156,9 @@ function g.newTestRun()
 end
 
 
----@return ecs.ECSWorld?
-function g.getBattleECS()
-    -- gets the ECS for battle
-    local scene, name = g.getCurrentScene()
-    if name == "battle_scene" then
-        return scene.ecs
-    end
-end
-
 function g.iteratePartition(partitionId, x, y, fn, range)
-    local ecs = g.getBattleECS()
-    if ecs then
-        ecs:iteratePartition(partitionId, x, y, fn, range)
-    end
+    local ecs = g.getECS()
+    ecs:iteratePartition(partitionId, x, y, fn, range)
 end
 
 ---@param x number
@@ -925,7 +915,40 @@ function g.setBlessingData(id, val)
     run.blessings[id] = val
 end
 
-function g.addBlessingHandlers()
+
+---@param ent ecs.Entity
+local function getWrappedEntityPerkHandler(ent)
+    if ent.__cachedPerkHandler then
+        return ent.__cachedPerkHandler
+    end
+    if ent.__cachedPerkHandler == false then
+        -- false indicates no rawHandlers on perks.
+        return nil
+    end
+
+    local squad = assert(ent.squad)
+    local __cachedPerkHandler = nil
+    for _, perk in ipairs(squad.perks) do
+        local pinfo = g.getPerkInfo(perk)
+        if pinfo.rawHandlers then
+            __cachedPerkHandler = __cachedPerkHandler or {}
+            for k,func in pairs(pinfo.rawHandlers) do
+                __cachedPerkHandler[k] = function(...)
+                    func(ent, ...)
+                end
+            end
+        end
+    end
+    if not __cachedPerkHandler then
+        ent.__cachedPerkHandler = false -- dont run this again.
+    else
+        ent.__cachedPerkHandler = __cachedPerkHandler
+    end
+    return ent.__cachedPerkHandler
+end
+
+
+function g.addBlessingAndEntityHandlers()
     if not g.hasRun() then return end
     local run = g.getRun()
     for id, _ in pairs(run.blessings) do
@@ -934,10 +957,25 @@ function g.addBlessingHandlers()
             g.addHandler(info.handlers)
         end
     end
+    local ecs = g.getECS()
+    for _, ent in ecs:iterate("squad") do
+        ---@cast ent ecs.Entity
+        -- HACK: only entities with squads can add raw handlers.
+        local cachedHandler = getWrappedEntityPerkHandler(ent)
+        if cachedHandler then
+            g.addHandler(cachedHandler)
+        end
+    end
 end
+
 
 -- Perk system
 
+--- Define a perk. Two handler tables:
+--- `handlers`: per-entity. Fires only when dispatched AT this entity, e.g. g.call(event, ent). Cheap; default.
+--- `rawHandlers`: scene-level. Fires on EVERY global dispatch. Entity passed as 1st arg:
+---   rawHandlers.onAllyHurt = function(selfEnt, ally, dmg) ... end
+--- Use rawHandlers when listening to things not happening to the entity itself.
 ---@param id string
 ---@param name string
 ---@param info g.PerkInfo|{id:nil,name:nil}
@@ -1004,8 +1042,8 @@ end
 function g.spawnEntity(id, x, y, ...)
     local mt = ENTITY_DEFS[id]
     assert(mt, "Unknown entity type: " .. tostring(id))
-    local ecs = g.getBattleECS()
-    assert(ecs, "g.spawnEntity called outside of battle")
+    local ecs = g.getECS()
+    assert(ecs, "g.spawnEntity called when ECS isnt active")
     currentEntityId = currentEntityId + 1
     local ent = setmetatable({
         id = currentEntityId,
@@ -1500,12 +1538,13 @@ local reducers = require("src.modules.reducers")
 
 local definedEvents = {}
 local questions = {}
+
 -- global handler caches: name -> {func1, func2, ...}
 -- Rebuilt atomically each frame by g.pollHandlers.
 local table_clear = require("table.clear")
 local handlerCache = {} -- [eventOrQuestionName] -> {func, func, ...}
 
-function g.defineEvent(ev)
+function g.defineEvent(ev, isGlobalEvent)
     assert(not definedEvents[ev], "Event already defined: " .. ev)
     definedEvents[ev] = true
     handlerCache[ev] = {}

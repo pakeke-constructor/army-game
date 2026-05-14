@@ -35,7 +35,7 @@ end
 
 function battle_scene:pollHandlers()
     self.ecs:addSystemHandlers()
-    g.addBlessingHandlers()
+    g.addBlessingAndEntityHandlers()
     g.addHandler({ postDraw = function()
         lg.setColor(1,1,1)
         self.particles:draw()

@@ -26,6 +26,7 @@ After 8 turns, the map is reset; and the player fights a boss.
 </high_level_concepts>
 
 <architecture>
+main.lua: Entrypoint.
 src/g.lua: All core functions stored here, exposed via `g.*` namespace
 src/scenes/*: All scenes defined here, in folders.
 src/scenes/map_scene/*: Map-scene stuff. Has a graph of nodes for players to navigate
@@ -88,6 +89,16 @@ There are 3 places where events/questions can be dispatched to:
 - On the entity/table itself: If arg1 is an entity (table), g.call/g.ask auto-dispatch to that entity's handlers too. So g.call("onHit", ent) calls ent.onHit.
 - Entity scope: If arg1.scope is a Scope object, calls arg1.scope:call or arg1.scope:ask. Used by perks/buffs.
 </event_question_bus>
+
+<perks>
+Defined via `g.definePerk(id, name, info)`. Info has two handler tables:
+
+- `handlers`: per-entity. Fires only when an event is dispatched AT this entity
+  (eg `g.call("onHit", ent)`). Cheap; default.
+- `rawHandlers`: scene-level. Fires on EVERY global dispatch. Entity passed as 1st arg:
+    `rawHandlers.onAllyHurt = function(self, ally, dmg) ... end`
+  Use only when listening to things not happening to the entity itself (eg "any ally hurt").
+</perks>
 
 <localization>
 Do NOT add text to entities, blessings, or UI without wrapping it in a `loc()` call.

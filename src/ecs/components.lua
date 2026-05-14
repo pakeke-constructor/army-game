@@ -112,6 +112,7 @@ local physics = {
 ---@field public squad g.Squad?
 ---@field public scope g.Scope?
 ---@field public buffs {[string]: number}?
+---@field public __cachedPerkHandler table<string, function>|false?
 ---@field public _attackTimer number?
 ---@field public _attackTarget ecs.Entity?
 ---@field public _knockVx number?
