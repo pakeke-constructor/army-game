@@ -86,6 +86,7 @@ local physics = {
 ---@field public baseAttackDamage number?
 ---@field public baseHealPower number?
 ---@field public baseAttackSpeed number?
+---@field public baseLifesteal number?
 ---@field public baseAttackRange number?
 ---@field public baseMoveSpeed number?
 ---@field public baseProjectileAccuracy number?
@@ -95,6 +96,7 @@ local physics = {
 ---@field public attackDamage number?
 ---@field public healPower number?
 ---@field public attackSpeed number?
+---@field public lifesteal number?
 ---@field public attackRange number?
 ---@field public moveSpeed number?
 ---@field public projectileAccuracy number?

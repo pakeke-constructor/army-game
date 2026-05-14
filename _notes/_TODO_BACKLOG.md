@@ -53,12 +53,12 @@
 - Add new stat: `attackHeal`. Used by units that heal others
 - Squads can have `onDeploy` effects, that affect the squads (Visuals for onDeploy effects (e.g. red circle?))
 - Make it so entities are rendered from their base
+- For systems in ECSWorld, remove passing ecs as first arg weirdly
 
 
 
 ### OK:: what do we need for a minimum-playable game?
 
-- For systems in ECSWorld, remove passing ecs as first arg weirdly
 
 
 - ~~blazing bombardiers: needs onHit system~~

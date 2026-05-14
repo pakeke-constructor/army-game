@@ -1107,6 +1107,9 @@ function g.dealDamage(target, damage, attacker, ignoreQuestionBuses)
     if not g.isAlive(target) then return end
 
     if not ignoreQuestionBuses and target.armor then
+        if attacker then
+            g.call("onHit", target, damage, attacker)
+        end
         g.removeArmor(target, 1)
         return
     end
@@ -1123,6 +1126,10 @@ function g.dealDamage(target, damage, attacker, ignoreQuestionBuses)
         g.call("onHit", target, damage, attacker)
     end
     g.call("entityHurt", target, damage)
+
+    if attacker and attacker.lifesteal then
+        g.healEntity(attacker, damage * attacker.lifesteal, attacker)
+    end
 
     if target.health <= 0 then
         g.killEntity(target, attacker)
@@ -1912,6 +1919,13 @@ g.defineStat("attackSpeed", "baseAttackSpeed", {
     color = objects.Color(0.95, 0.85, 0.3),
     icon = "atkspeed",
     isImportant = _importantIfRanged,
+})
+g.defineStat("lifesteal", "baseLifesteal", {
+    displayName = "Lifesteal",
+    description = "Health gained per attack damage dealt",
+    color = objects.Color(0.7, 0.2, 0.4),
+    icon = "damage",
+    isImportant = _importantIfNonZero,
 })
 g.defineStat("moveSpeed", "baseMoveSpeed", {
     displayName = "Move Speed",
