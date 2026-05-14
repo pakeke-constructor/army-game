@@ -90,12 +90,6 @@ function Squad:getIcon()
     return self.icon
 end
 
-function Squad:getUnitCount()
-    g = g or require("src.g")
-    local info = g.getSquadInfo(self.squadId)
-    local xtra = ((self.level-1) * info.unitCountUpgradeScaling)
-    return info.unitCount + xtra
-end
 
 ---@param x number
 ---@param y number
@@ -111,7 +105,7 @@ end
 ---@return table[] offsets {{x,y}, ...}
 function Squad:getFormationOffsets()
     local fn = Squad.FORMATIONS[self.formation] or Squad.FORMATIONS.square
-    return fn(self:getUnitCount(), consts.SQUAD_SPACING)
+    return fn(g.getSquadUnitCount(self.squadId), consts.SQUAD_SPACING)
 end
 
 

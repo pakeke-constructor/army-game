@@ -1308,6 +1308,21 @@ function g.drawEntity(ent, x, y)
     end
 end
 
+
+
+---@param squadId string
+function g.getSquadUnitCount(squadId)
+    local squad = g.getSquadFromArmy(squadId)
+    local info = g.getSquadInfo(squadId)
+    if squad then
+        local xtra = ((squad.level-1) * info.unitCountUpgradeScaling)
+        local xtra2 = g.ask("getSquadUnitCountModifier", squadId)
+        return info.unitCount + xtra + xtra2
+    end
+    return info.unitCount
+end
+
+
 ---@param entityId string
 ---@return number w, number h
 function g.getUnitDrawSize(entityId)
@@ -1323,7 +1338,7 @@ end
 ---@param y number
 ---@param maxW number?
 ---@param maxH number?
-function g.drawUnit(entityId, x, y, maxW, maxH)
+function g.drawUnitPreview(entityId, x, y, maxW, maxH)
     local def = g.getEntityDef(entityId)
     if not def or not def.image then return end
     if maxW and maxH then

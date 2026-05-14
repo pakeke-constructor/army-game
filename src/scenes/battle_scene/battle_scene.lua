@@ -351,7 +351,7 @@ local function drawSquadHover(squad, wx,wy)
     lg.setColor(0.2, 1, 0.3, 0.5)
     for i = 1, #offsets do
         local ox, oy = offsets[i].x, offsets[i].y
-        g.drawUnit(info.entityId, wx + ox, wy + oy)
+        g.drawUnitPreview(info.entityId, wx + ox, wy + oy)
     end
     if info.drawSquadHover then
         info.drawSquadHover(wx, wy)

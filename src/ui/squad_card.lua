@@ -150,7 +150,7 @@ local function drawSquadCard(squadId, region, index)
         getHeight = function() return unitHeight + 4 end,
         draw = function(ex, ey, ew, eh)
             if unitHeight == 0 then return end
-            local count = info.unitCount or 1
+            local count = g.getSquadUnitCount(squadId)
             local totalW = count * unitWidth + (count - 1) * unitGap
             local startX = ex + (ew - totalW) / 2
             local r,gg,b,a = darkCol:getRGBA()
@@ -159,7 +159,7 @@ local function drawSquadCard(squadId, region, index)
             love.graphics.setColor(1, 1, 1, 0.85)
             for i = 1, count do
                 local ux = startX + (i - 1) * (unitWidth + unitGap)
-                g.drawUnit(info.entityId, ux, ey + 2, unitWidth, unitHeight)
+                g.drawUnitPreview(info.entityId, ux, ey + 2, unitWidth, unitHeight)
             end
         end
     })
