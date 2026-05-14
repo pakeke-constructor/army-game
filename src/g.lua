@@ -1083,6 +1083,20 @@ function g.applyTaunt(victimEnt, tauntingEnt, duration)
     end
 end
 
+---@param victimEnt ecs.Entity Entity that gets feared.
+---@param fearEnt ecs.Entity? Entity the victim should run away from.
+---@param duration number?
+function g.applyFear(victimEnt, fearEnt, duration)
+    local wasActive = victimEnt.fear and victimEnt.fear.duration and victimEnt.fear.duration > 0
+    victimEnt.fear = {
+        ent = fearEnt,
+        duration = duration or 3,
+    }
+    if not wasActive then
+        g.call("statusEffectApplied", victimEnt, "fear", duration or 3, fearEnt)
+    end
+end
+
 ---@param ent ecs.Entity
 ---@param healAmount number
 ---@param healerEnt ecs.Entity?
@@ -1164,7 +1178,7 @@ function g.killEntity(ent, killer)
     ent.health = 0
     g.call("entityDeath", ent, killer)
     if killer then
-        g.call("entityKillsEnemy", killer, ent)
+        g.call("onKill", killer, ent)
     end
     ent:getWorld():removeEntity(ent)
 end

@@ -191,6 +191,27 @@ function aiSys.preUpdate(dt)
             goto continue
         end
 
+        -- feared: runs away from opponent
+        if ent.fear and ent.fear.duration and ent.fear.duration > 0 then
+            local fearEnt = ent.fear.ent
+            if fearEnt and not isValidTarget(fearEnt) then
+                fearEnt = nil
+            end
+            local runFrom = fearEnt or targ
+            if runFrom then
+                local dx, dy = ent.x - runFrom.x, ent.y - runFrom.y
+                local dist = (dx * dx + dy * dy) ^ 0.5
+                if dist > 1 then
+                    local speed = (ent.moveSpeed or 60) * 0.7
+                    ent.vx = (dx / dist) * speed
+                    ent.vy = (dy / dist) * speed
+                else
+                    ent.vx, ent.vy = 0, 0
+                end
+                goto continue
+            end
+        end
+
         if not targ then
             if ent.team == "enemy" and ent.patrolX then
                 updatePatrol(ent, dt)

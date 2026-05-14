@@ -46,6 +46,18 @@ function statusFx.perSecondUpdate()
             end
         end
 
+        if ent.fear then
+            local fearEnt = ent.fear.ent
+            if fearEnt and not g.isAlive(fearEnt) then
+                ent.fear = nil
+            else
+                ent.fear.duration = ent.fear.duration - 1
+                if ent.fear.duration <= 0 then
+                    ent.fear = nil
+                end
+            end
+        end
+
         ::continue::
     end
 end

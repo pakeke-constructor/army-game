@@ -67,8 +67,8 @@
 - ~~charred-souls, needs perSecondUpdate to pass the second-count~~
 - ~~barbs: need lifesteal~~
 - ~~druids: need healEntity~~
+- ~~blade/rock throwers:  need a way to customize the projectiles a bit more; speed, height, etc~~
 
-- blade/rock throwers:  need a way to customize the projectiles a bit more; speed, height, etc
 - fear-system:  Opposite of taunt system
 - Prospectors:  needs onKill system
 - Quartz cannoneers:  (deals x2 dmg to far away: TODO: this will work with onHit, right?)

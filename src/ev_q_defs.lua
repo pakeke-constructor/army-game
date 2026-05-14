@@ -30,11 +30,12 @@ g.defineEvent("entityHealed")
 g.defineEvent("armorIncreased")
 g.defineEvent("armorDecreased")
 g.defineEvent("entityBuffed")
-g.defineEvent("entityKillsEnemy")
 g.defineEvent("entityShootsProjectile")
-g.defineEvent("onAttack") -- called when an entity attacks
-g.defineEvent("onHitDamage") -- called when an entity actually hits their target to deal damage (projectile OR melee)
-g.defineEvent("onHitHeal") -- called when an entity actually hits their target to heal (projectile OR melee)
+
+g.defineEvent("onAttack") -- Attacker passed as first arg. called when an entity attacks (healer OR attacker)
+g.defineEvent("onHitDamage") -- Attacker passed as first arg. called when an entity actually hits their target to deal damage (projectile OR melee)
+g.defineEvent("onHitHeal") -- Healer passed as first arg. called when an entity actually hits their target to heal (projectile OR melee)
+g.defineEvent("onKill") -- killer passed as first arg. called when an entity kills another.
 
 
 -- Entity misc:

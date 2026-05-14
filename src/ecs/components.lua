@@ -42,6 +42,12 @@ local taunt = {
     -- ent + duration are set when applied
 }
 
+---@class ecs.components.Fear
+---@field public ent ecs.Entity?
+---@field public duration number
+local fear = {
+    -- ent + duration are set when applied
+}
 
 ---@class ecs.components.Physics
 ---@field public shape "circle"|"rect"
@@ -70,6 +76,7 @@ local physics = {
 ---@field public attack ecs.components.Attack?
 ---@field public projectile ecs.components.Projectile?
 ---@field public taunt ecs.components.Taunt?
+---@field public fear ecs.components.Fear?
 ---@field public team "ally"|"enemy"
 ---@field public color objects.Color?
 ---@field public x number
