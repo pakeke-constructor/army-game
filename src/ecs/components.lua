@@ -78,7 +78,6 @@ local physics = {
 ---@field public vx number?
 ---@field public vy number?
 ---@field public vz number?
----@field public gravity number?
 ---@field public health number?
 ---@field public isHealer boolean? if this is true, the entity is a healer, and will heal with it's attacks.
 ---@field public baseMaxHealth number?

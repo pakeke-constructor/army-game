@@ -16,7 +16,7 @@ Projectiles fly with vx/vy velocity and a z arc (gravity).
 Hit opposing units via spatial partitioning, or hit ground when z<=0.
 
 Entities need: attack, attackDamage, attackSpeed, attackRange, team, x, y
-Projectile entities need: projectile component (damage, ownerEnt, team), vx, vy, vz, z, gravity
+Projectile entities need: projectile component (damage, ownerEnt, team), vx, vy, vz, z
 ]]
 
 local atckSys = {}
@@ -62,15 +62,17 @@ local function spawnProjectile(attacker, target)
     local dist = (dx * dx + dy * dy) ^ 0.5
     if dist < 1 then dist = 1 end
 
-    -- compute arc height: higher arc for longer distances
+    -- arc so projectile lands at z=0 after flightTime under constant gravity
+    -- z(t) = vz*t - 0.5*GRAVITY*t^2, z(T)=0 => vz = 0.5*GRAVITY*T
     local flightTime = dist / projSpeed
-    local arcHeight = math.min(dist * 0.15, 40)
-    -- vz such that projectile goes up then comes back to z=0 over flightTime
-    -- z(t) = vz*t - 0.5*gravity*t^2, z(flightTime)=0 => vz = 0.5*gravity*flightTime
-    -- peak = vz^2/(2*gravity) = arcHeight => gravity = vz^2/(2*arcHeight)
-    -- combining: vz = 2*arcHeight/flightTime, gravity = 2*arcHeight/(flightTime^2)
-    local vz = 2 * arcHeight / flightTime
-    local gravity = 2 * arcHeight / (flightTime * flightTime)
+    local vz = 0.5 * consts.GRAVITY * flightTime
+
+    -- shoot from body of sprite (70% up), not the feet
+    local zStart = 1
+    if attacker.image then
+        local _, h = g.getImageSize(attacker.image)
+        zStart = h * 0.7
+    end
 
     for i = 1, count do
         local spread = count > 1 and ((i - 1) / (count - 1) - 0.5) or 0
@@ -78,9 +80,8 @@ local function spawnProjectile(attacker, target)
         local ent = g.spawnEntity(projType, attacker.x, attacker.y)
         ent.vx = math.cos(angle) * projSpeed
         ent.vy = math.sin(angle) * projSpeed
-        ent.z = 1
+        ent.z = zStart
         ent.vz = vz
-        ent.gravity = gravity
         ent.projectile = {
             damage = attacker.attackDamage or 0,
             healing = attacker.healPower or 0,

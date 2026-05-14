@@ -146,7 +146,7 @@ function ECSWorld:update(dt)
             end
         end
         if e.vz then
-            if e.gravity then e.vz = e.vz - e.gravity * dt end
+            e.vz = e.vz - consts.GRAVITY * dt
             e.z = math.max(0, (e.z or 0) + e.vz * dt)
         end
         if e.update then

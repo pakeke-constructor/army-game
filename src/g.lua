@@ -1019,7 +1019,6 @@ function g.spawnEntity(id, x, y, ...)
     if ent.startingArmor then
         g.addArmor(ent, ent.startingArmor)
     end
-    g.applyPoison(ent, 10)
     return ent
 end
 
@@ -1224,7 +1223,7 @@ local function drawHealthBar(ent, x,y)
     local frac = ent.health / ent.maxHealth
     -- black outline
     local out=2
-    local oy=10
+    local oy=2
     lg.setColor(0, 0, 0)
     lg.rectangle("fill", x - w/2 - out, y + oy - out, w + out*2, h + out*2)
 

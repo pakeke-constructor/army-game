@@ -15,7 +15,7 @@ g.defineSquad("archer_squad", {
         attack = {
             attackType = "ranged",
             projectileType = "arrow",
-            projectileSpeed = 250,
+            projectileSpeed = 350,
         },
         baseAttackDamage = 8,
         baseAttackSpeed = 0.8,
