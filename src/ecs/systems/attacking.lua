@@ -144,7 +144,8 @@ local function findNearbyTarget(ent, world, range)
 end
 
 -- ATTACK SYSTEM
-function atckSys.preUpdate(world, dt)
+function atckSys.preUpdate(dt)
+    local world = g.getECS()
     for _, ent in world:iterate("attack") do
         if not isValid(ent) then goto continue end
         if ent.frozenTime and ent.frozenTime > 0 then goto continue end
@@ -221,7 +222,8 @@ local function updateProjectile(world, ent, dt)
     end
 end
 
-function atckSys.postUpdate(world, dt)
+function atckSys.postUpdate(dt)
+    local world = g.getECS()
     for _, ent in world:iterate("projectile") do
         updateProjectile(world, ent, dt)
     end

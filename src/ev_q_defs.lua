@@ -25,14 +25,16 @@ g.defineEvent("entitySpawned")
 g.defineEvent("entityDeath")
 
 -- Entity combat
-g.defineEvent("entityHurt")
+g.defineEvent("entityHurt") -- called whenever any entity is hurt
 g.defineEvent("entityHealed")
 g.defineEvent("armorIncreased")
 g.defineEvent("armorDecreased")
 g.defineEvent("entityBuffed")
 g.defineEvent("entityKillsEnemy")
 g.defineEvent("entityShootsProjectile")
-g.defineEvent("onAttack")
+g.defineEvent("onAttack") -- called when an entity attacks
+g.defineEvent("onHit") -- called when an entity actually hits their target (projectile OR melee)
+
 
 -- Entity misc:
 g.defineEvent("drawEntity")

@@ -9,8 +9,8 @@ Burn and poison deal damage over time. Frozen is handled by ai/attacking systems
 local statusFx = {}
 
 
----@param world ecs.ECSWorld
-function statusFx.perSecondUpdate(world)
+function statusFx.perSecondUpdate()
+    local world = g.getECS()
     for _, ent in world:iterate("team") do
         ---@cast ent ecs.Entity
         if not ent.health then goto continue end
@@ -54,7 +54,8 @@ end
 local FIRE_PARTICLE_RATE = 0.08
 local POISON_PARTICLE_RATE = 0.04
 
-function statusFx.postDraw(world)
+function statusFx.postDraw()
+    local world = g.getECS()
     for _, ent in world:iterate("team") do
         if ent.burnTime and ent.burnTime > 0 then
             if love.math.random() < FIRE_PARTICLE_RATE then

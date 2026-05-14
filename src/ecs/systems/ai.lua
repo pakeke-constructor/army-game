@@ -132,7 +132,8 @@ local function staleSorter(a, b)
     return (a._lastTargetRefreshTime or STALE_DEFAULT) < (b._lastTargetRefreshTime or STALE_DEFAULT)
 end
 
-function aiSys.preUpdate(world, dt)
+function aiSys.preUpdate(dt)
+    local world = g.getECS()
     -- build side lists
     local allies, enemies = {}, {}
     for _, ent in world:iterate("team") do

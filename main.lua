@@ -101,6 +101,7 @@ local subpixel = require("src.modules.subpixel")
 local sceneManager = require("src.scenes.sceneManager")
 
 local perSecondUpdateTimer = 0
+local secondCount = 0
 
 
 local function assertValid()
@@ -167,6 +168,7 @@ function love.update(dt)
     perSecondUpdateTimer = perSecondUpdateTimer + dt
     while perSecondUpdateTimer >= 1 do
         perSecondUpdateTimer = perSecondUpdateTimer - 1
+        secondCount = secondCount + 1
         if sc and sc.perSecondUpdate then
             sc:perSecondUpdate()
         end

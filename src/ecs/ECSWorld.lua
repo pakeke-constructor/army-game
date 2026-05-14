@@ -116,9 +116,10 @@ function ECSWorld:addSystemHandlers()
 end
 
 function ECSWorld:update(dt)
+    g.setCurrentECS(self)
     self.entities:flush()
     self:_rebuildIndex()
-    g.call("preUpdate", self, dt)
+    g.call("preUpdate", dt)
     for i = 1, self.entities.len do
         local e = self.entities[i]
         if not e.physics then
@@ -171,7 +172,7 @@ function ECSWorld:update(dt)
             end
         end
     end
-    g.call("postUpdate", self, dt)
+    g.call("postUpdate", dt)
     self.entities:flush()
 end
 
@@ -187,10 +188,11 @@ local function sortOrder(a, b)
 end
 
 function ECSWorld:draw(transform)
+    g.setCurrentECS(self)
     if transform then
         self.backCanvas:start(transform)
     end
-    g.call("preDraw", self)
+    g.call("preDraw")
     if transform then
         self.backCanvas:finish()
     end
@@ -208,7 +210,7 @@ function ECSWorld:draw(transform)
     if transform then
         self.frontCanvas:start(transform)
     end
-    g.call("postDraw", self)
+    g.call("postDraw")
     if transform then
         self.frontCanvas:finish()
     end

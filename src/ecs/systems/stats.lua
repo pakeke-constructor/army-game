@@ -82,7 +82,8 @@ function stats.entitySpawned(ent)
     end
 end
 
-function stats.preUpdate(world, dt)
+function stats.preUpdate(dt)
+    local world = g.getECS()
     for _, ent in world:iterate("team") do
         if ent.maxHealth and not ent.health then
             ent.health = ent.maxHealth

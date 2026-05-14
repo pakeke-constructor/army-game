@@ -199,6 +199,17 @@ function g.getRun()
     return assert(currentRun, "run not loaded")
 end
 
+local currentECS
+---@return ecs.ECSWorld
+function g.getECS()
+    return assert(currentECS, "ecs not active")
+end
+
+---@param ecs ecs.ECSWorld
+function g.setCurrentECS(ecs)
+    currentECS = ecs
+end
+
 ---@param amount number
 function g.addGold(amount)
     local run = g.getRun()
@@ -1008,6 +1019,7 @@ function g.spawnEntity(id, x, y, ...)
     if ent.startingArmor then
         g.addArmor(ent, ent.startingArmor)
     end
+    g.applyPoison(ent, 10)
     return ent
 end
 
@@ -1107,7 +1119,10 @@ function g.dealDamage(target, damage, attacker, ignoreQuestionBuses)
     target.health = target.health - finalDmg
     target._timeSinceDamaged = 0
 
-    g.call("entityHurt", target, finalDmg, attacker)
+    if attacker then
+        g.call("onHit", target, damage, attacker)
+    end
+    g.call("entityHurt", target, damage)
 
     if target.health <= 0 then
         g.killEntity(target, attacker)

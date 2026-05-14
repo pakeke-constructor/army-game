@@ -58,6 +58,37 @@
 
 ### OK:: what do we need for a minimum-playable game?
 
+- For systems in ECSWorld, remove passing ecs as first arg weirdly
+
+
+- ~~blazing bombardiers: needs onHit system~~
+- ~~demonic golith: onhit sys~~
+- ~~hellHounds: onSpawn~~
+- ~~charred-souls, needs perSecondUpdate to pass the second-count~~
+
+- barbs: need lifesteal
+- druids: need onHeal
+- blade/rock throwers:  need a way to customize the projectiles a bit more; speed, height, etc
+- fear-system:  Opposite of taunt system
+- Prospectors:  needs onKill system
+- Quartz cannoneers:  (deals x2 dmg to far away: TODO: this will work with onHit, right?)
+- Dynamic unit-counts: All squads with at least 6 units gain +2 units.
+- Crystal golems:  Need a robust way for projectiles to duplicate themselves
+- Pierce: Attack can pass through up to 5 enemies.
+- Cleave: Attacks deal AOE.
+
+- RnD: If this survives to the end of the battle, Upgrade a random squad permanently. Needs upgrade UI
+- Soul Harvest: For every 10 allies that die nearby, this squad gains 1 DMG permanently.
+
+- (STATE) Ritual: On-spawn, gains 1 DMG per 2 allies that have died this combat.
+- (STATE) “Deterrent”: On-deploy, your next squad gains the Volatile Perk for the battle, exploding in a large area On-death.
+
+- EXPLOSIONS: needs a `team` field, so it doesnt deal dmg to everything
+
+
+
+
+- CLAUDE.MD: Should know "roughly" how much each stat is worth.
 
 
 
@@ -71,6 +102,9 @@
 - Juice for spending money in shop
 
 - Juice for breaking armor
+
+
+- Explain demon-fury when hovering it.  "+20% demon damage, +10% demon health!"
 
 
 

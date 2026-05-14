@@ -100,8 +100,10 @@ local function buildVictoryChoices()
 end
 
 
-function battle_scene:perSecondUpdate()
-    g.call("perSecondUpdate", self.ecs)
+---@param secondCount integer
+function battle_scene:perSecondUpdate(secondCount)
+    g.setCurrentECS(self.ecs)
+    g.call("perSecondUpdate", secondCount)
 end
 
 function battle_scene:update(dt)
