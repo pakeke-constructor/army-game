@@ -1096,6 +1096,7 @@ function g.healEntity(ent, healAmount, healerEnt)
 
     if finalHeal > 0 then
         g.call("entityHealed", ent, finalHeal, healerEnt)
+        g.call("onHitHeal", healerEnt, finalHeal, ent)
     end
 end
 
@@ -1108,7 +1109,7 @@ function g.dealDamage(target, damage, attacker, ignoreQuestionBuses)
 
     if not ignoreQuestionBuses and target.armor then
         if attacker then
-            g.call("onHit", target, damage, attacker)
+            g.call("onHitDamage", attacker, damage, target)
         end
         g.removeArmor(target, 1)
         return
@@ -1123,7 +1124,7 @@ function g.dealDamage(target, damage, attacker, ignoreQuestionBuses)
     target._timeSinceDamaged = 0
 
     if attacker then
-        g.call("onHit", target, damage, attacker)
+        g.call("onHitDamage", attacker, damage, target)
     end
     g.call("entityHurt", target, damage)
 

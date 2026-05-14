@@ -85,7 +85,7 @@ EXAMPLE:
 
 There are 3 places where events/questions can be dispatched to:
 - Scene-level: g.addHandler handlers. Used by blessings, ECS systems.
-- On the entity/table itself: If arg1 is an entity (table), g.call/g.ask auto-dispatch to that entity's handlers too. So g.call("onHit", ent) hits ent.onHit.
+- On the entity/table itself: If arg1 is an entity (table), g.call/g.ask auto-dispatch to that entity's handlers too. So g.call("onHit", ent) calls ent.onHit.
 - Entity scope: If arg1.scope is a Scope object, calls arg1.scope:call or arg1.scope:ask. Used by perks/buffs.
 </event_question_bus>
 

@@ -33,7 +33,8 @@ g.defineEvent("entityBuffed")
 g.defineEvent("entityKillsEnemy")
 g.defineEvent("entityShootsProjectile")
 g.defineEvent("onAttack") -- called when an entity attacks
-g.defineEvent("onHit") -- called when an entity actually hits their target (projectile OR melee)
+g.defineEvent("onHitDamage") -- called when an entity actually hits their target to deal damage (projectile OR melee)
+g.defineEvent("onHitHeal") -- called when an entity actually hits their target to heal (projectile OR melee)
 
 
 -- Entity misc:

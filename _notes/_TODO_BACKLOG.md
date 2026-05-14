@@ -65,9 +65,9 @@
 - ~~demonic golith: onhit sys~~
 - ~~hellHounds: onSpawn~~
 - ~~charred-souls, needs perSecondUpdate to pass the second-count~~
+- ~~barbs: need lifesteal~~
 
-- barbs: need lifesteal
-- druids: need onHeal
+- druids: need healEntity
 - blade/rock throwers:  need a way to customize the projectiles a bit more; speed, height, etc
 - fear-system:  Opposite of taunt system
 - Prospectors:  needs onKill system
