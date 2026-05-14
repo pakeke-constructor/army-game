@@ -22,6 +22,7 @@ function ECSWorld:init(systemNames)
     self.border = nil -- {0, 0, w, h} or nil for no border
 
     self.componentIndex = {} -- [componentName] -> {ent, ent, ...}
+    self.trackedComponents = objects.Set()
     self.partitions = {
         -- [partitionId] -> objects.Partition
         unit = objects.Partition(PARTITION_CHUNKSIZE),
@@ -57,38 +58,37 @@ function ECSWorld:removeEntity(e)
     self.entities:removeBuffered(e)
 end
 
-function ECSWorld:_rebuildIndex()
+local function entHas(e, k)
+    if rawget(e, k) ~= nil then return true end
+    local mt = getmetatable(e)
+    local base = mt and rawget(mt, "__index")
+    return type(base) == "table" and base[k] ~= nil
+end
+
+function ECSWorld:_rebuildComponentIndex()
     local idx = self.componentIndex
-    -- clear existing lists but keep the tables
     for _, list in pairs(idx) do
         table_clear(list)
     end
+    local tracked = self.trackedComponents
+    for ti = 1, tracked.len do
+        local k = tracked[ti]
+        local list = idx[k]
+        for i = 1, self.entities.len do
+            local e = self.entities[i]
+            if entHas(e, k) then
+                list[#list + 1] = e
+            end
+        end
+    end
+end
+
+function ECSWorld:_rebuildPartitions()
     for _, part in pairs(self.partitions) do
         part:clear()
     end
     for i = 1, self.entities.len do
         local e = self.entities[i]
-        -- own keys
-        for k in pairs(e) do
-            if type(k) == "string" then
-                local list = idx[k]
-                if not list then list = {}; idx[k] = list end
-                list[#list + 1] = e
-            end
-        end
-        -- inherited keys via __index
-        local mt = getmetatable(e)
-        local base = mt and rawget(mt, "__index")
-        if type(base) == "table" then
-            for k in pairs(base) do
-                if type(k) == "string" and rawget(e, k) == nil then
-                    local list = idx[k]
-                    if not list then list = {}; idx[k] = list end
-                    list[#list + 1] = e
-                end
-            end
-        end
-        -- spatial partitions
         local p = e.partitions
         if p then
             for j = 1, #p do
@@ -118,7 +118,8 @@ end
 function ECSWorld:update(dt)
     g.setCurrentECS(self)
     self.entities:flush()
-    self:_rebuildIndex()
+    self:_rebuildPartitions()
+    self:_rebuildComponentIndex()
     g.call("preUpdate", dt)
     for i = 1, self.entities.len do
         local e = self.entities[i]
@@ -217,9 +218,6 @@ function ECSWorld:draw(transform)
 end
 
 
-local EMPTY = {}
-
-
 ---@param component string
 ---@return fun(table: ecs.Entity[], i?: integer):integer
 ---@return ecs.Entity[]
@@ -227,7 +225,15 @@ local EMPTY = {}
 function ECSWorld:iterate(component)
     local list = self.componentIndex[component]
     if not list then
-        return ipairs(EMPTY)
+        list = {}
+        self.componentIndex[component] = list
+        self.trackedComponents:add(component)
+        for i = 1, self.entities.len do
+            local e = self.entities[i]
+            if entHas(e, component) then
+                list[#list + 1] = e
+            end
+        end
     end
     return ipairs(list)
 end
