@@ -71,8 +71,8 @@
 - ~~fear-system:  Opposite of taunt system~~
 - ~~Prospectors:  needs onKill system~~
 - ~~Quartz cannoneers:  (deals x2 dmg to far away: TODO: this will work with onHit, right?)~~
+- ~~Dynamic unit-counts: All squakds with at least 6 units gain +2 units.~~
 
-- ~~Dynamic unit-counts: All squads with at least 6 units gain +2 units.~~
 - Crystal golems:  Need a robust way for projectiles to duplicate themselves~~
 - Pierce: Attack can pass through up to 5 enemies.
 - Cleave: Attacks deal AOE.

@@ -175,14 +175,15 @@ end
 ---@param y number
 ---@param damage number
 ---@param radius number?
-function g.explosion(x, y, damage, radius)
+---@param fromEntity ecs.Entity?
+function g.explosion(x, y, damage, radius, fromEntity)
     radius = radius or 60
     local radiusSq = radius * radius
     -- todo: make particles here
     g.iteratePartition("unit", x, y, function(ent)
         local dx = ent.x - x
         local dy = ent.y - y
-        if dx * dx + dy * dy <= radiusSq then
+        if dx * dx + dy * dy <= radiusSq and (not fromEntity or ent.team ~= fromEntity.team) then
             g.knockback(ent, x, y, 200)
             g.dealDamage(ent, damage)
         end
