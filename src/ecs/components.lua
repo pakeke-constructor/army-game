@@ -115,6 +115,7 @@ local physics = {
 ---@field public buffs {[string]: number}?
 ---@field public __cachedPerkHandler table<string, function>|false?
 ---@field public _projectileCloned boolean?
+---@field public _projectileHits table<integer, boolean>?
 ---@field public _attackTimer number?
 ---@field public _attackTarget ecs.Entity?
 ---@field public _knockVx number?

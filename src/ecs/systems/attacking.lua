@@ -88,7 +88,7 @@ local function spawnProjectile(attacker, target)
             ownerEnt = attacker,
             team = attacker.team,
             targetTeam = getTargetTeam(attacker),
-            pierceCount = 1,
+            pierceCount = 4,
             knockback = atk.projectileKnockback or 80,
         }
     end
@@ -201,8 +201,10 @@ local function updateProjectile(world, ent, dt)
     if ent.z < PROJ_Z_MAX then
         local targetTeam = proj.targetTeam or (proj.team == "ally" and "enemy" or "ally")
         local hitEnt = nil
+        local projHits = ent._projectileHits
         g.iteratePartition(targetTeam, ent.x, ent.y, function(other)
             if hitEnt then return end
+            if projHits and projHits[other.id] then return end
             if not isValid(other) then return end
             local dx, dy = other.x - ent.x, other.y - ent.y
             local d2 = dx * dx + dy * dy
@@ -211,6 +213,8 @@ local function updateProjectile(world, ent, dt)
             end
         end, PROJ_HIT_RADIUS)
         if hitEnt then
+            ent._projectileHits = ent._projectileHits or {}
+            ent._projectileHits[hitEnt.id] = true
             dealDmg(hitEnt, proj.ownerEnt, proj.damage or proj.healing)
             g.knockback(hitEnt, proj.ownerEnt.x, proj.ownerEnt.y, proj.knockback or 50)
             g.call("projectileHit", ent, hitEnt)

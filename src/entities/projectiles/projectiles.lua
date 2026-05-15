@@ -1,5 +1,6 @@
 
 
+---@param id string
 local function defineProjectile(id, etype)
     etype.drawOrder = etype.drawOrder or 10
     etype.projectile = true-- component marker for ECS iterate
