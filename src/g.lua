@@ -1327,14 +1327,14 @@ local function drawHealthBar(ent, x,y)
 end
 
 function g.drawEntity(ent, x, y)
-    local entScale = g.ask("getEntityScale", ent)
+    local entScale = g.ask("getEntityScale", ent) * (ent.scale or 1)
     local sx, sy = (ent.sx or 1) * (ent.faceDir or 1) * entScale, (ent.sy or 1) * entScale
     if ent.draw then
         ent:draw(x, y)
         return
     end
     if ent.image then
-        lg.setColor(1,1,1)
+        lg.setColor(ent.color or objects.Color.WHITE)
         g.drawImageOffset(ent.image, x + (ent.ox or 0), y + (ent.oy or 0), ent.rot or 0, sx, sy, 0.5, 0.95, ent.kx, ent.ky)
         if ent.frozenTime and ent.frozenTime > 0 then
             drawIceCube(ent, x,y, sx,sy)

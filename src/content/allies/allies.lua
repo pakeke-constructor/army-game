@@ -25,7 +25,7 @@ g.defineSquad("archer_squad", {
     },
     unitCount = 4,
     icon = "example_squad_icon",
-    perks = {"sharpshooter"},
+    perks = {},--{"sharpshooter"},
     cost = {red = 1},
 
     statUpgradeScaling = {maxHealth = 0.5},
@@ -123,6 +123,8 @@ g.defineSquad("militia_band", {
 
 
 
+local PURPLE_COLOR = objects.Color("#".."FFC339ED")
+
 
 g.defineSquad("crystal_golems", {
     name = loc("Crystal golems"),
@@ -156,12 +158,17 @@ g.defineSquad("crystal_golems", {
                 if dx * dx + dy * dy > radiusSq then return end
 
                 local clone = g.spawnEntity(projEnt.type, projEnt.x, projEnt.y)
-                clone.vx = (projEnt.vx or 0) * (1 + (love.math.random() - 0.5) * 0.04)
-                clone.vy = (projEnt.vy or 0) * (1 + (love.math.random() - 0.5) * 0.04)
+                local DRIFT = 0.80
+                clone.vx = (projEnt.vx or 0) * (1 + (love.math.random() - 0.5) * DRIFT)
+                clone.vy = (projEnt.vy or 0) * (1 + (love.math.random() - 0.5) * DRIFT)
                 clone.vz = projEnt.vz
                 clone.z = projEnt.z
-                clone.projectile = helper.deepCopy(projEnt.projectile)
-                clone.color = objects.Color.PURPLE
+                clone.projectile = helper.shallowCopy(projEnt.projectile)
+
+                clone.color = PURPLE_COLOR
+                clone.scale = 2
+                projEnt.color = PURPLE_COLOR
+                projEnt.scale = 2
 
                 projEnt._projectileCloned = true
                 clone._projectileCloned = true

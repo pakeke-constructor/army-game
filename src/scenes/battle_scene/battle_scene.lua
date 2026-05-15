@@ -65,6 +65,7 @@ function battle_scene:enter()
     if self.sandbox then
         self.ecs:setBorder(500, 300)
     else
+        g.setCurrentECS(self.ecs)
         encounters.startRandomEncounter(run.day, self.ecs)
     end
     local border = self.ecs.border
