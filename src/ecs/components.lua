@@ -92,6 +92,7 @@ local physics = {
 ---@field public scale number?
 ---@field public health number?
 ---@field public isHealer boolean? if this is true, the entity is a healer, and will heal with it's attacks.
+---@field public isBuilding boolean? if this is true, entity is a building, and MUST be assigned a static physics body
 ---@field public baseMaxHealth number?
 ---@field public baseArmor number?
 ---@field public baseAttackDamage number?

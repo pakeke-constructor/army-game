@@ -641,6 +641,7 @@ local currentEntityId = 0
 
 ---@class g.SquadInfo
 ---@field id string
+---@field squadOrder integer?
 ---@field entityId string
 ---@field entityDef ecs.Components
 ---@field rarity g.Rarity
@@ -728,6 +729,53 @@ function g.getSquadFromArmy(squadId)
     return g.getRun().squads[squadId]
 end
 
+
+
+
+--- checks if an entity is a ranged attacker
+---@param entId string
+---@return boolean
+function g.isRangedUnit(entId)
+    local etype = g.getEntityDef(entId)
+    if etype.attack and etype.attack.attackType == "ranged" then
+        return true
+    end
+end
+
+--- checks if an entity is a building type
+---@param entId string
+---@return boolean
+function g.isBuildingType(entId)
+    local etype = g.getEntityDef(entId)
+    if etype.isBuilding then
+        return true
+    end
+    return false
+end
+
+
+
+---@param a g.Squad
+---@param b g.Squad
+local function squadSortFn(a, b)
+    local infoA = g.getSquadInfo(a.squadId)
+    local infoB = g.getSquadInfo(b.squadId)
+    -- first, prioritze hardcoded order.
+    local orderA = (infoA.squadOrder or 0)
+    local orderB = (infoB.squadOrder or 0)
+
+    -- then, prioritze (building > melee > ranged)
+    if info A ranged then orderA += 10 end
+    if info A building then orderA -= 10 end
+    -- and do same for infoB.
+
+    if orderA ~= orderB then
+        return orderA < orderB
+    end
+    return a.squadId < b.squadId
+end
+
+
 ---@return g.Squad[]
 function g.getSortedArmyList()
     local run = g.getRun()
@@ -738,7 +786,7 @@ function g.getSortedArmyList()
     for _, sq in pairs(run.squads) do
         list[#list + 1] = sq
     end
-    table.sort(list, function(a, b) return a.squadId < b.squadId end)
+    table.sort(list, squadSortFn)
     run._sortedSquads = list
     return list
 end
@@ -1021,6 +1069,9 @@ function g.defineEntity(id, def)
     assert(def.x == nil and def.y == nil and def.type == nil and def._world == nil, "x/y/type/_world are reserved")
     for k in pairs(Entity) do
         assert(def[k] == nil, "Entity def '" .. id .. "' cannot override base method: " .. k)
+    end
+    if def.isBuilding and def.physics then
+        assert(def.physics.isStatic, "Buildings must have static physics")
     end
     def.type = id
     def.image = def.image or id
@@ -1390,7 +1441,7 @@ end
 
 
 ---@param id string
----@return table
+---@return ecs.Components
 function g.getEntityDef(id)
     local mt = ENTITY_DEFS[id]
     return mt and mt.__index
@@ -1850,7 +1901,7 @@ local STAT_DEFS = {}
 
 ---@param id string
 ---@param baseName string
----@param info {displayName:string, description:string, color:objects.Color, icon:string, isImportant:fun(ent:ecs.Entity):boolean}
+---@param info {displayName:string, description:string, color:objects.Color, icon:string, isImportant:fun(ent:ecs.Components):boolean}
 function g.defineStat(id, baseName, info)
     local Name = id:sub(1,1):upper() .. id:sub(2)
     local modQ = "get" .. Name .. "Modifier"
@@ -1880,7 +1931,7 @@ end
 
 
 ---@param statId string
----@param ent_or_etype string|ecs.Entity
+---@param ent_or_etype string|ecs.Components
 function g.isStatImportant(statId, ent_or_etype)
     local stinfo = g.getStatInfo(statId)
     if type(ent_or_etype) == "string" then
