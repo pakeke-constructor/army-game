@@ -69,20 +69,12 @@
 - ~~Crystal golems:  Need a robust way for projectiles to duplicate themselves~~
 - Pierce: Attack can pass through up to 5 enemies.
 - EXPLOSIONS: needs a `team` field, so it doesnt deal dmg to everything
+- Cleave: Attacks deal AOE.
+- Soul Harvest: For every 10 allies that die nearby, this squad gains 1 DMG permanently.
 
 
 
 ### OK:: what do we need for a minimum-playable game?
-
-
-
-- Cleave: Attacks deal AOE.
-
-- RnD: If this survives to the end of the battle, Upgrade a random squad permanently. Needs upgrade UI
-- Soul Harvest: For every 10 allies that die nearby, this squad gains 1 DMG permanently.
-
-- (STATE) Ritual: On-spawn, gains 1 DMG per 2 allies that have died this combat.
-- (STATE) “Deterrent”: On-deploy, your next squad gains the Volatile Perk for the battle, exploding in a large area On-death.
 
 
 
@@ -130,6 +122,13 @@ this makes it a lot easier for the user
 - Music
 
 - Balancing / Feedback screen, players can give UNSTRUCTURED feedback/feelings sent directly to our server and stored.
+
+
+
+- RnD: If this survives to the end of the battle, Upgrade a random squad permanently. Needs upgrade UI
+- (STATE) Ritual: On-spawn, gains 1 DMG per 2 allies that have died this combat.
+- (STATE) “Deterrent”: On-deploy, your next squad gains the Volatile Perk for the battle, exploding in a large area On-death.
+
 
 
 

@@ -6,6 +6,7 @@ local objects = require("src.modules.objects.objects")
 ---@field level integer
 ---@field icon string
 ---@field perks string[]
+---@field storage table<string, any> per-squad permanent data. Eg: "Whenever a unit in this squad kills a unit, gain +1 damage PERMANENTLY."
 ---@field formation "square"|"circle"|"horizontal"|"vertical"|"diamond"
 ---@field deployed boolean?
 ---@field canAfford boolean?

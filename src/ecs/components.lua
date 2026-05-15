@@ -26,7 +26,7 @@ local attack = {
     projectileType = "basic_arrow",
     projectileSpeed = 300, -- pixels/sec for projectiles
 
-    aoeRadius = 50 or nil,
+    aoeRadius = 50 or nil, -- defaults to 0  (no AOE)
     aoeDamageMultiplier = 0.8 or nil,
 }
 
