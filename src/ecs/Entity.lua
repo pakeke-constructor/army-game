@@ -1,5 +1,8 @@
 
----@class ecs.Entity
+---@class ecs.Entity: ecs.Components
+---@field public id integer
+---@field public x number
+---@field public y number
 ---@field public _world ecs.ECSWorld
 local Entity = {}
 

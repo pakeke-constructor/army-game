@@ -71,6 +71,7 @@ g.defineQuestion("getRewardChoiceCount", ADD, 3)
 -- Questions: projectiles
 g.defineQuestion("getProjectileCountModifier", ADD, 0)
 g.defineQuestion("getProjectileSpeedMultiplier", MUL, 1)
-
+g.defineQuestion("getAoeRadius", ADD, 0)
+g.defineQuestion("getAoeDamageMultiplier", MUL, 1)
 
 g.defineQuestion("getSquadUnitCountModifier", ADD, 0)

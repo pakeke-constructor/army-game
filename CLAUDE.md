@@ -53,7 +53,6 @@ A bunch of common pitfalls/traps to look out for:
 - Don't add buffs to entities directly. Use g.buffEntity (stat buffs) or g.addCustomEffect (handler-based effects).
 - table-valued fields on the def are shared across all entities of that type. Mutating them (e.g. `table.insert(ent.tags, ...)`) affects every entity. 
 - Before adding/removing handlers to ent.scopes, look for a g.* function first.
-- Entity stats (attackDamage, maxHealth, etc) are recomputed every frame in stats.lua; so if you want to add a buff, you must use `g.buffEntity`. Alternatively, hook into the question-bus for the stat. (E.g. getMaxHealthModifier/Multiplier)
 </gotchas>
 
 <event_question_bus>
@@ -98,6 +97,14 @@ Defined via `g.definePerk(id, name, info)`. Info has two handler tables:
 - `rawHandlers`: scene-level. Fires on EVERY global dispatch. Entity passed as 1st arg:
     `rawHandlers.onAllyHurt = function(self, ally, dmg) ... end`
   Use only when listening to things not happening to the entity itself (eg "any ally hurt").
+</perks>
+
+<stats>
+Entity stats, eg ent.attackDamage, ent.maxHealth, ent.attackSpeed, etc are handled in `stats.lua`.
+When modifying stats:
+- BAD: `ent.attackDamage = ent.attackDamage + 5`. This WON'T WORK, because stats are recalculated every frame.
+- GOOD: `g.buffEntity(ent, "attackDamage", 5) -- permanent buff until ent dies
+- GOOD 2: Alternatively, hook into the question-bus for the stat. (E.g. getMaxHealthModifier/Multiplier)
 </perks>
 
 <localization>

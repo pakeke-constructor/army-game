@@ -67,6 +67,8 @@
 - ~~Quartz cannoneers:  (deals x2 dmg to far away: TODO: this will work with onHit, right?)~~
 - ~~Dynamic unit-counts: All squakds with at least 6 units gain +2 units.~~
 - ~~Crystal golems:  Need a robust way for projectiles to duplicate themselves~~
+- Pierce: Attack can pass through up to 5 enemies.
+- EXPLOSIONS: needs a `team` field, so it doesnt deal dmg to everything
 
 
 
@@ -74,7 +76,6 @@
 
 
 
-- Pierce: Attack can pass through up to 5 enemies.
 - Cleave: Attacks deal AOE.
 
 - RnD: If this survives to the end of the battle, Upgrade a random squad permanently. Needs upgrade UI
@@ -82,8 +83,6 @@
 
 - (STATE) Ritual: On-spawn, gains 1 DMG per 2 allies that have died this combat.
 - (STATE) “Deterrent”: On-deploy, your next squad gains the Volatile Perk for the battle, exploding in a large area On-death.
-
-- EXPLOSIONS: needs a `team` field, so it doesnt deal dmg to everything
 
 
 

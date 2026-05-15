@@ -3,7 +3,7 @@
 
 ---@class ecs.components.AI
 ---@field public target "enemy"|"ally"
----@field public getPriority fun(selfEnt: ecs.Entity, targEnt:ecs.Entity): number
+---@field public getPriority (fun(selfEnt: ecs.Entity, targEnt:ecs.Entity): number)?
 local ai = {
     target = "enemy",
     getPriority = function(selfEnt, targEnt)
@@ -18,11 +18,16 @@ local ai = {
 ---@field public attackType "melee"|"ranged"
 ---@field public projectileType string?
 ---@field public projectileSpeed number?
+---@field public aoeRadius number?
+---@field public aoeDamageMultiplier number?
 local attack = {
     attackType = "melee",
     -- ranged attacks spawn a projectile entity type (e.g. "arrow")
     projectileType = "basic_arrow",
     projectileSpeed = 300, -- pixels/sec for projectiles
+
+    aoeRadius = 50 or nil,
+    aoeDamageMultiplier = 0.8 or nil,
 }
 
 
@@ -70,8 +75,7 @@ local physics = {
 }
 
 
----@class ecs.Entity
----@field public id integer
+---@class ecs.Components
 ---@field public ai ecs.components.AI?
 ---@field public attack ecs.components.Attack?
 ---@field public projectile ecs.components.Projectile?
@@ -79,8 +83,8 @@ local physics = {
 ---@field public fear ecs.components.Fear?
 ---@field public team "ally"|"enemy"
 ---@field public color objects.Color?
----@field public x number
----@field public y number
+---@field public x number?
+---@field public y number?
 ---@field public z number?
 ---@field public vx number?
 ---@field public vy number?

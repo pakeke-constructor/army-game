@@ -88,7 +88,7 @@ local function spawnProjectile(attacker, target)
             ownerEnt = attacker,
             team = attacker.team,
             targetTeam = getTargetTeam(attacker),
-            pierceCount = 4,
+            pierceCount = 1,
             knockback = atk.projectileKnockback or 80,
         }
     end
@@ -109,6 +109,39 @@ local function dealDmg(target, attacker, dmgOverride)
     end
 end
 
+
+---@param attacker ecs.Entity
+---@return number, number
+local function getAoeInfo(attacker)
+    local atk = attacker.attack or {}
+    local radius = (atk.aoeRadius or 0) + g.ask("getAoeRadius", attacker)
+    local dmgMul = (atk.aoeDamageMultiplier or 1) * g.ask("getAoeDamageMultiplier", attacker)
+    return radius, dmgMul
+end
+
+
+---@param attacker ecs.Entity
+---@param centerEnt ecs.Entity
+---@param baseAmount number
+local function doAoe(attacker, centerEnt, baseAmount)
+    local radius, dmgMul = getAoeInfo(attacker)
+    if radius <= 0 then return end
+    local amount = baseAmount * dmgMul
+    if amount == 0 then return end
+
+    local targetTeam = getTargetTeam(attacker)
+    local radius2 = radius * radius
+    g.iteratePartition(targetTeam, centerEnt.x, centerEnt.y, function(other)
+        if other.id == centerEnt.id then return end
+        if not isValid(other) then return end
+        local dx = other.x - centerEnt.x
+        local dy = other.y - centerEnt.y
+        if dx * dx + dy * dy <= radius2 then
+            dealDmg(other, attacker, amount)
+        end
+    end, radius)
+end
+
 ---@param attacker ecs.Entity
 ---@param target ecs.Entity
 local function doAttack(attacker, target)
@@ -121,7 +154,9 @@ local function doAttack(attacker, target)
         spawnProjectile(attacker, target)
     else
         -- melee: direct damage
-        dealDmg(target, attacker)
+        local amount = attacker.healPower or attacker.attackDamage or 0
+        dealDmg(target, attacker, amount)
+        doAoe(attacker, target, amount)
     end
 end
 
@@ -215,7 +250,9 @@ local function updateProjectile(world, ent, dt)
         if hitEnt then
             ent._projectileHits = ent._projectileHits or {}
             ent._projectileHits[hitEnt.id] = true
-            dealDmg(hitEnt, proj.ownerEnt, proj.damage or proj.healing)
+            local amount = proj.damage or proj.healing or 0
+            dealDmg(hitEnt, proj.ownerEnt, amount)
+            doAoe(proj.ownerEnt, hitEnt, amount)
             g.knockback(hitEnt, proj.ownerEnt.x, proj.ownerEnt.y, proj.knockback or 50)
             g.call("projectileHit", ent, hitEnt)
             proj.pierceCount = proj.pierceCount - 1

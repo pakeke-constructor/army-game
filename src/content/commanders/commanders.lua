@@ -13,8 +13,8 @@ g.defineCommander("sir_horse", "Sir Horse", {
 
     onStart = function(run)
         g.addSquadToArmy("militia_squad")
-        g.addSquadToArmy("archer_squad")
-        g.addSquadToArmy("crystal_golems")
+        --g.addSquadToArmy("archer_squad")
+        g.addSquadToArmy("archer_squad2")
     end
 })
 

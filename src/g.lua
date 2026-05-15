@@ -642,7 +642,7 @@ local currentEntityId = 0
 ---@class g.SquadInfo
 ---@field id string
 ---@field entityId string
----@field entityDef table
+---@field entityDef ecs.Components
 ---@field rarity g.Rarity
 ---@field unitCount integer
 ---@field statUpgradeScaling table<string, number> { [statName] -> number }
@@ -1014,6 +1014,8 @@ end
 
 
 
+---@param id string
+---@param def ecs.Components
 function g.defineEntity(id, def)
     assert(not ENTITY_DEFS[id], "Duplicate entity type: " .. id)
     assert(def.x == nil and def.y == nil and def.type == nil and def._world == nil, "x/y/type/_world are reserved")
