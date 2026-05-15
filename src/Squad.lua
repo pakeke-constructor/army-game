@@ -104,6 +104,7 @@ end
 
 ---@return table[] offsets {{x,y}, ...}
 function Squad:getFormationOffsets()
+    g = g or require("src.g")
     local fn = Squad.FORMATIONS[self.formation] or Squad.FORMATIONS.square
     return fn(g.getSquadUnitCount(self.squadId), consts.SQUAD_SPACING)
 end

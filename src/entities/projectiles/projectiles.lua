@@ -3,7 +3,7 @@
 local function defineProjectile(id, etype)
     etype.drawOrder = etype.drawOrder or 10
     etype.projectile = true-- component marker for ECS iterate
-    local partitions = helper.shallowCopy(etype.partitions)
+    local partitions = helper.shallowCopy(etype.partitions or {})
     table.insert(partitions, "projectile")
     etype.partitions = partitions
     g.defineEntity(id, etype)

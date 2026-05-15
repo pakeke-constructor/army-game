@@ -121,3 +121,55 @@ g.defineSquad("militia_band", {
     cost = {green = 1, red=1},
 })
 
+
+
+
+g.defineSquad("crystal_golems", {
+    name = loc("Crystal golems"),
+    rarity = g.RARITIES.RARE,
+    entityDef = {
+        image = "militia", -- TODO: change to crystal golems
+        physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 2 },
+        partitions = {"unit", "ally"},
+        team = "ally",
+        ai = {
+            target = "enemy",
+        },
+        attack = {
+            attackType = "melee",
+        },
+        baseAttackDamage = 14,
+        baseAttackSpeed = 0.8,
+        baseAttackRange = 20,
+        baseMoveSpeed = 45,
+        baseMaxHealth = 180,
+        onUpdate = function(self)
+            local radius = (self.physics and self.physics.radius or 8) + 4
+            local radiusSq = radius * radius
+            g.iteratePartition("projectile", self.x, self.y, function(projEnt)
+                if projEnt == self then return end
+                if projEnt._projectileCloned then return end
+                if not projEnt.projectile then return end
+                if projEnt.projectile.team ~= "ally" then return end
+                local dx = projEnt.x - self.x
+                local dy = projEnt.y - self.y
+                if dx * dx + dy * dy > radiusSq then return end
+
+                local clone = g.spawnEntity(projEnt.type, projEnt.x, projEnt.y)
+                clone.vx = (projEnt.vx or 0) * (1 + (love.math.random() - 0.5) * 0.04)
+                clone.vy = (projEnt.vy or 0) * (1 + (love.math.random() - 0.5) * 0.04)
+                clone.vz = projEnt.vz
+                clone.z = projEnt.z
+                clone.projectile = helper.deepCopy(projEnt.projectile)
+                clone.color = objects.Color.PURPLE
+
+                projEnt._projectileCloned = true
+                clone._projectileCloned = true
+            end, radius)
+        end,
+    },
+    unitCount = 2,
+    icon = "example_squad_icon",
+    cost = {blue = 1},
+})
+

@@ -1237,7 +1237,6 @@ function g.setPos(ent, x, y)
 end
 
 
-
 ---@param ent ecs.Entity
 ---@param x number
 ---@param y number

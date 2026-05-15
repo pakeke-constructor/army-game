@@ -14,6 +14,7 @@ g.defineCommander("sir_horse", "Sir Horse", {
     onStart = function(run)
         g.addSquadToArmy("militia_squad")
         g.addSquadToArmy("archer_squad")
+        g.addSquadToArmy("crystal_golems")
     end
 })
 

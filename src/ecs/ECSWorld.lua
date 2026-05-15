@@ -150,8 +150,8 @@ function ECSWorld:update(dt)
             e.vz = e.vz - consts.GRAVITY * dt
             e.z = math.max(0, (e.z or 0) + e.vz * dt)
         end
-        if e.update then
-            e:update(dt)
+        if e.onUpdate then
+            e:onUpdate(dt)
         end
         if e.lifetime then
             e.lifetime = e.lifetime - dt

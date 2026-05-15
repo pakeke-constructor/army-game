@@ -99,7 +99,7 @@ end)
 test("update calls entity update", function()
     local w = ECSWorld()
     local called = false
-    local e = makeEntity({x = 0}, {update = function(self, dt) called = dt end})
+    local e = makeEntity({x = 0}, {onUpdate = function(self, dt) called = dt end})
     w:addEntity(e)
     w:update(0.16)
     assert(called == 0.16, "update should be called with dt")
