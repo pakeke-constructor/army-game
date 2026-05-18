@@ -12,6 +12,10 @@ g.defineEntity("demon", {
             return 0
         end,
     },
+    weapon = {
+        type = "spear",
+        image = "demon_pitchfork"
+    },
     attack = {
         attackType = "melee",
     },
@@ -32,6 +36,10 @@ g.defineEntity("archerdemon", {
         getPriority = function(selfEnt, targEnt)
             return 0
         end,
+    },
+    weapon = {
+        type = "bow",
+        image = "archerdemon_bow"
     },
     attack = {
         attackType = "ranged",

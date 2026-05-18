@@ -1413,7 +1413,42 @@ local function drawWeapon(ent, x,y)
         -- drawImageOffset(imageName, x, y, r, sx, sy, ox, oy, kx, ky)
 
     elseif wep.type == "spear" then
-        
+        local face = ent.faceDir or 1
+        local dx = face * (wep.xOffset or 10)
+        local swingTime = (wep.swingTime) or 0.2
+        local ratio = helper.clamp(1 - (atkTime / swingTime), 0, 1)
+
+        local target = ent._aiTarget
+        local targetRot = 0.25 * face
+        if target and target.x and target.y and ent.x and ent.y then
+            targetRot = math.atan2((target.y - 12) - ent.y, target.x - ent.x)
+        end
+
+        local FORWARD_OFFSET = -math.pi / 2
+        local attackRot = targetRot - FORWARD_OFFSET
+
+        local rot = 0
+        local stab = 0
+        local T1 = 0.2
+        local T2 = 1 - T1
+
+        if ratio < T1 then
+            local t = ratio / T1
+            rot = helper.lerp(0, attackRot, t)
+        elseif ratio < T2 then
+            local t = (ratio - T1) / (T2 - T1)
+            rot = attackRot
+            stab = 1 - math.abs(t * 2 - 1)
+        else
+            local t = (ratio - T2) / (1 - T2)
+            rot = helper.lerp(attackRot, 0, t)
+        end
+
+        local stabDist = stab * (wep.stabDist or 14)
+        local forwardRot = rot + FORWARD_OFFSET
+        local stabx, staby = helper.fromPolar(forwardRot, stabDist)
+        local dyy = staby - math.floor(h/5)
+        g.drawImageOffset(wep.image, x + dx + stabx, y + dyy, rot, 1, 1, 0.5, 0.95)
     elseif wep.type == "bow" then
         local dx = (ent.faceDir or 1) * (wep.xOffset or 8)
         local drawTime = (wep.swingTime) or 0.2
@@ -1428,8 +1463,8 @@ local function drawWeapon(ent, x,y)
         local bob = math.sin(g.getWorldTime() * 7 + (ent.id or 0)) * ((wep.weaponBobbing or 0.1) * 2)
         local offx, offy = helper.fromPolar(rot, 5)
         local pullx, pully = helper.fromPolar(rot + math.pi, recoil)
-        local dyy = bob + offy + pully
-        g.drawImageOffset(wep.image, x + dx + offx + pullx, y + dyy, rot, 1, 1, 0.5, 0.95)
+        local dyy = bob + offy + pully - math.floor(h/2)
+        g.drawImageOffset(wep.image, x + dx + offx + pullx, y + dyy, rot, 1, 1, 0.5, 0.5)
     elseif wep.type == "object" then
     elseif wep.type == "staff" then
     end
