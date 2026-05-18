@@ -1399,14 +1399,14 @@ local function drawWeapon(ent, x,y)
 
     local w,h = g.getImageSize(ent.image)
 
-    local dx = (ent.faceDir or 1) * (wep.xOffset or 12) * -1
     local atkTime = ent._attackTimer or 10
 
     if wep.type == "sword" then
+        local dx = (ent.faceDir or 1) * (wep.xOffset or 12)
         local swingTime = (wep.swingTime) or 0.2
         local ratio = helper.clamp(1 - (atkTime / swingTime), 0, 1)
         local face = ent.faceDir or 1
-        local rot = helper.EASINGS.sineInOut(ratio) * 1.2 * -face
+        local rot = helper.EASINGS.sineInOut(ratio) * 1.2 * face
         local dxx, dyy = helper.fromPolar(rot, 7 * ratio ^ 0.5)
         dyy = dyy - math.floor(h/5)
         g.drawImageOffset(wep.image, x + dx + dxx, y + dyy, rot, 1,1, 0.5, 0.95)
@@ -1415,6 +1415,21 @@ local function drawWeapon(ent, x,y)
     elseif wep.type == "spear" then
         
     elseif wep.type == "bow" then
+        local dx = (ent.faceDir or 1) * (wep.xOffset or 8)
+        local drawTime = (wep.swingTime) or 0.2
+        local ratio = helper.clamp(1 - (atkTime / drawTime), 0, 1)
+        local face = ent.faceDir or 1
+        local target = ent._aiTarget
+        local rot = 0.25 * face
+        if target and target.x and target.y and ent.x and ent.y then
+            rot = math.atan2((target.y - 12) - ent.y, target.x - ent.x)
+        end
+        local recoil = (wep.bowRecoil or 0.1) * 24 * ratio
+        local bob = math.sin(g.getWorldTime() * 7 + (ent.id or 0)) * ((wep.weaponBobbing or 0.1) * 2)
+        local offx, offy = helper.fromPolar(rot, 5)
+        local pullx, pully = helper.fromPolar(rot + math.pi, recoil)
+        local dyy = bob + offy + pully
+        g.drawImageOffset(wep.image, x + dx + offx + pullx, y + dyy, rot, 1, 1, 0.5, 0.95)
     elseif wep.type == "object" then
     elseif wep.type == "staff" then
     end

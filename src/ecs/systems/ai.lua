@@ -247,7 +247,7 @@ function aiSys.preUpdate(dt)
         end
 
         -- face toward target (covers both moving and attacking)
-        local newFace = dx > 5 and -1 or dx < -5 and 1 or nil
+        local newFace = dx > 5 and 1 or dx < -5 and -1 or nil
         if newFace and newFace ~= ent.faceDir and now - (ent._faceDirTime or 0) > 1.5 then
             ent.faceDir = newFace
             ent._faceDirTime = now

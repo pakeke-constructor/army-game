@@ -45,7 +45,7 @@ end
 
 
 
-local PROJ_HIT_RADIUS = 10
+local PROJ_HIT_RADIUS = 24
 local PROJ_Z_MAX = 50 -- above this z, projectile doesn't hit anything
 
 ---@param attacker ecs.Entity
@@ -254,7 +254,7 @@ local function updateProjectile(world, ent, dt)
             local amount = proj.damage or proj.healing or 0
             dealDmg(hitEnt, proj.ownerEnt, amount)
             doAoe(proj.ownerEnt, hitEnt, amount)
-            g.knockback(hitEnt, proj.ownerEnt.x, proj.ownerEnt.y, proj.knockback or 50)
+            g.knockback(hitEnt, proj.ownerEnt.x, proj.ownerEnt.y, proj.knockback or consts.DEFAULT_RANGED_KNOCKBACK)
             g.call("projectileHit", ent, hitEnt)
             proj.pierceCount = proj.pierceCount - 1
             if proj.pierceCount <= 0 then
