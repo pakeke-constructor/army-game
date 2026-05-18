@@ -89,7 +89,7 @@ local function spawnProjectile(attacker, target)
             team = attacker.team,
             targetTeam = getTargetTeam(attacker),
             pierceCount = 1,
-            knockback = atk.projectileKnockback or 80,
+            knockback = atk.projectileKnockback or consts.DEFAULT_RANGED_KNOCKBACK,
         }
     end
 
@@ -156,6 +156,7 @@ local function doAttack(attacker, target)
         -- melee: direct damage
         local amount = attacker.healPower or attacker.attackDamage or 0
         dealDmg(target, attacker, amount)
+        g.knockback(target, attacker.x, attacker.y, atk.meleeKnockback or consts.DEFAULT_MELEE_KNOCKBACK)
         doAoe(attacker, target, amount)
     end
 end

@@ -1399,18 +1399,19 @@ local function drawWeapon(ent, x,y)
 
     local w,h = g.getImageSize(ent.image)
 
-    local dx = (ent.faceDir or 1) * (wep.xOffset or 10) * -1
+    local dx = (ent.faceDir or 1) * (wep.xOffset or 12) * -1
     local atkTime = ent._attackTimer or 10
-
 
     if wep.type == "sword" then
         local swingTime = (wep.swingTime) or 0.2
-        local ratio = (1-math.max(1, swingTime / atkTime))
-        local rot = -ratio / 4
-        local dxx,dyy = helper.fromPolar(rot, 10)
-        g.drawImageOffset(wep.image, x+dx, y, rot, 1,1, 0.5, 0.95)
+        local ratio = helper.clamp(1 - (atkTime / swingTime), 0, 1)
+        local face = ent.faceDir or 1
+        local rot = helper.EASINGS.sineInOut(ratio) * 1.2 * -face
+        local dxx, dyy = helper.fromPolar(rot, 7 * ratio ^ 0.5)
+        dyy = dyy - math.floor(h/5)
+        g.drawImageOffset(wep.image, x + dx + dxx, y + dyy, rot, 1,1, 0.5, 0.95)
         -- drawImageOffset(imageName, x, y, r, sx, sy, ox, oy, kx, ky)
-        
+
     elseif wep.type == "spear" then
         
     elseif wep.type == "bow" then
