@@ -204,7 +204,7 @@ function atckSys.preUpdate(dt)
 
         -- tick cooldown
         local speed = ent.attackSpeed or 1
-        local timer = ent._attackTimer or (math.random() * (1 / speed))
+        local timer = ent._attackTimer or (love.math.random() * (1 / speed))
         timer = timer - dt
         if timer <= 0 then
             doAttack(ent, target)

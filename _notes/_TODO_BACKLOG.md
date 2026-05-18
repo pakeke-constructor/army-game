@@ -71,6 +71,8 @@
 - EXPLOSIONS: needs a `team` field, so it doesnt deal dmg to everything
 - Cleave: Attacks deal AOE.
 - Soul Harvest: For every 10 allies that die nearby, this squad gains 1 DMG permanently.
+- Add a HUD priority system, which sorts squads before playing (eg suicide-bombers first, melee next, ranged next, and buffers/onDeploy squads last)
+
 
 
 
@@ -78,9 +80,6 @@
 
 
 
-- Add a HUD priority system, which sorts squads before playing
-(eg suicide-bombers first, melee next, ranged next, and buffers/onDeploy squads last)
-this makes it a lot easier for the user
 
 
 

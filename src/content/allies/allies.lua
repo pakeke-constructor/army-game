@@ -18,6 +18,10 @@ g.defineSquad("archer_squad", {
             projectileSpeed = 350,
             aoeRadius = 1
         },
+        weapon = {
+            image = "longbow",
+            type = "bow",
+        },
         baseAttackDamage = 8,
         baseAttackSpeed = 0.8,
         baseAttackRange = 200,
@@ -79,6 +83,10 @@ g.defineSquad("militia_squad", {
         attack = {
             attackType = "melee",
         },
+        weapon = {
+            image = "militia_sword",
+            type = "sword",
+        },
         baseAttackDamage = 10,
         baseAttackSpeed = 1,
         baseAttackRange = 18,
@@ -110,6 +118,10 @@ g.defineSquad("militia_band", {
         },
         attack = {
             attackType = "melee",
+        },
+        weapon = {
+            image = "militia_sword",
+            type = "sword",
         },
         baseAttackDamage = 10,
         baseAttackSpeed = 1,

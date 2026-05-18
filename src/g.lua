@@ -641,7 +641,7 @@ local currentEntityId = 0
 
 ---@class g.SquadInfo
 ---@field id string
----@field squadOrder integer?
+---@field squadOrder integer? Use this to help determine the "order" of squads. By default, buildings = -10, melee = 0, ranged = 10. Which means that the placement ordering in HUD will be (buildings, melee, ranged).  You MUST edit this if the unit benefits from being placed first/last, e.g. "when deployed, buff all allies." <-- this should be set order = 50 or something, to deploy LAST.
 ---@field entityId string
 ---@field entityDef ecs.Components
 ---@field rarity g.Rarity
@@ -654,7 +654,6 @@ local currentEntityId = 0
 ---@field cost g.ManaBundle
 ---@field onDeploySquad (fun(squad: g.SquadInfo, entities: ecs.Entity[], x: number, y:number))?
 ---@field drawSquadHover fun(x:number, y:number)?
-
 
 
 ---@param id string
@@ -760,14 +759,25 @@ end
 local function squadSortFn(a, b)
     local infoA = g.getSquadInfo(a.squadId)
     local infoB = g.getSquadInfo(b.squadId)
-    -- first, prioritze hardcoded order.
+
+    -- first, prioritize hardcoded order.
     local orderA = (infoA.squadOrder or 0)
     local orderB = (infoB.squadOrder or 0)
 
-    -- then, prioritze (building > melee > ranged)
-    if info A ranged then orderA += 10 end
-    if info A building then orderA -= 10 end
-    -- and do same for infoB.
+    -- then, prioritize (building > melee > ranged)
+    if g.isRangedUnit(infoA.entityId) then
+        orderA = orderA + 10
+    end
+    if g.isBuildingType(infoA.entityId) then
+        orderA = orderA - 10
+    end
+
+    if g.isRangedUnit(infoB.entityId) then
+        orderB = orderB + 10
+    end
+    if g.isBuildingType(infoB.entityId) then
+        orderB = orderB - 10
+    end
 
     if orderA ~= orderB then
         return orderA < orderB
@@ -1379,6 +1389,37 @@ local function drawHealthBar(ent, x,y)
     end
 end
 
+
+---@param ent ecs.Entity
+---@param x number
+---@param y number
+local function drawWeapon(ent, x,y)
+    local wep = ent.weapon
+    ---@cast wep ecs.components.Weapon
+
+    local w,h = g.getImageSize(ent.image)
+
+    local dx = (ent.faceDir or 1) * (wep.xOffset or 10) * -1
+    local atkTime = ent._attackTimer or 10
+
+
+    if wep.type == "sword" then
+        local swingTime = (wep.swingTime) or 0.2
+        local ratio = (1-math.max(1, swingTime / atkTime))
+        local rot = -ratio / 4
+        local dxx,dyy = helper.fromPolar(rot, 10)
+        g.drawImageOffset(wep.image, x+dx, y, rot, 1,1, 0.5, 0.95)
+        -- drawImageOffset(imageName, x, y, r, sx, sy, ox, oy, kx, ky)
+        
+    elseif wep.type == "spear" then
+        
+    elseif wep.type == "bow" then
+    elseif wep.type == "object" then
+    elseif wep.type == "staff" then
+    end
+    -- g.drawImageOffset(wep.image, )
+end
+
 function g.drawEntity(ent, x, y)
     local entScale = g.ask("getEntityScale", ent) * (ent.scale or 1)
     local sx, sy = (ent.sx or 1) * (ent.faceDir or 1) * entScale, (ent.sy or 1) * entScale
@@ -1389,6 +1430,11 @@ function g.drawEntity(ent, x, y)
     if ent.image then
         lg.setColor(ent.color or objects.Color.WHITE)
         g.drawImageOffset(ent.image, x + (ent.ox or 0), y + (ent.oy or 0), ent.rot or 0, sx, sy, 0.5, 0.95, ent.kx, ent.ky)
+
+        if ent.weapon then
+            drawWeapon(ent,x,y)
+        end
+
         if ent.frozenTime and ent.frozenTime > 0 then
             drawIceCube(ent, x,y, sx,sy)
         end

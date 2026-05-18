@@ -75,10 +75,32 @@ local physics = {
 }
 
 
+---@class ecs.components.Weapon
+---@field public image string
+---@field public type "sword"|"spear"|"bow"|"staff"|"object"
+---@field public swordSwingTime number?
+---@field public bowRecoil number?
+---@field public weaponBobbing number?
+---@field public xOffset number?
+local weapon = {
+    image = "militia_sword",
+    type = "sword",
+    swingTime = 0.2,
+    bowRecoil = 0.1, -- 10% recoil
+    weaponBobbing = 0.1, -- 10% bobbing
+    xOffset = 10,
+}
+
+
+
+
+
 ---@class ecs.Components
 ---@field public ai ecs.components.AI?
 ---@field public attack ecs.components.Attack?
 ---@field public projectile ecs.components.Projectile?
+---@field public weapon ecs.components.Weapon?
+---@field public faceDir integer?
 ---@field public taunt ecs.components.Taunt?
 ---@field public fear ecs.components.Fear?
 ---@field public team "ally"|"enemy"
