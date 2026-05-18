@@ -80,7 +80,8 @@ local function destroyBody(ent, d)
     d.physicsFixtures[ent] = nil
 end
 
-function physicsSys.preUpdate(world, dt)
+function physicsSys.preUpdate(dt)
+    local world = g.getECS()
     local d = getData(world)
     local bodies = d.physicsBodies
 

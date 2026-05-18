@@ -6,6 +6,7 @@ local objects = require("src.modules.objects.objects")
 ---@field level integer
 ---@field icon string
 ---@field perks string[]
+---@field storage table<string, any> per-squad permanent data. Eg: "Whenever a unit in this squad kills a unit, gain +1 damage PERMANENTLY."
 ---@field formation "square"|"circle"|"horizontal"|"vertical"|"diamond"
 ---@field deployed boolean?
 ---@field canAfford boolean?
@@ -90,12 +91,6 @@ function Squad:getIcon()
     return self.icon
 end
 
-function Squad:getUnitCount()
-    g = g or require("src.g")
-    local info = g.getSquadInfo(self.squadId)
-    local xtra = ((self.level-1) * info.unitCountUpgradeScaling)
-    return info.unitCount + xtra
-end
 
 ---@param x number
 ---@param y number
@@ -110,8 +105,9 @@ end
 
 ---@return table[] offsets {{x,y}, ...}
 function Squad:getFormationOffsets()
+    g = g or require("src.g")
     local fn = Squad.FORMATIONS[self.formation] or Squad.FORMATIONS.square
-    return fn(self:getUnitCount(), consts.SQUAD_SPACING)
+    return fn(g.getSquadUnitCount(self.squadId), consts.SQUAD_SPACING)
 end
 
 

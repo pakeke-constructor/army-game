@@ -16,7 +16,7 @@ Projectiles fly with vx/vy velocity and a z arc (gravity).
 Hit opposing units via spatial partitioning, or hit ground when z<=0.
 
 Entities need: attack, attackDamage, attackSpeed, attackRange, team, x, y
-Projectile entities need: projectile component (damage, ownerEnt, team), vx, vy, vz, z, gravity
+Projectile entities need: projectile component (damage, ownerEnt, team), vx, vy, vz, z
 ]]
 
 local atckSys = {}
@@ -45,7 +45,7 @@ end
 
 
 
-local PROJ_HIT_RADIUS = 10
+local PROJ_HIT_RADIUS = 24
 local PROJ_Z_MAX = 50 -- above this z, projectile doesn't hit anything
 
 ---@param attacker ecs.Entity
@@ -62,15 +62,17 @@ local function spawnProjectile(attacker, target)
     local dist = (dx * dx + dy * dy) ^ 0.5
     if dist < 1 then dist = 1 end
 
-    -- compute arc height: higher arc for longer distances
+    -- arc so projectile lands at z=0 after flightTime under constant gravity
+    -- z(t) = vz*t - 0.5*GRAVITY*t^2, z(T)=0 => vz = 0.5*GRAVITY*T
     local flightTime = dist / projSpeed
-    local arcHeight = math.min(dist * 0.15, 40)
-    -- vz such that projectile goes up then comes back to z=0 over flightTime
-    -- z(t) = vz*t - 0.5*gravity*t^2, z(flightTime)=0 => vz = 0.5*gravity*flightTime
-    -- peak = vz^2/(2*gravity) = arcHeight => gravity = vz^2/(2*arcHeight)
-    -- combining: vz = 2*arcHeight/flightTime, gravity = 2*arcHeight/(flightTime^2)
-    local vz = 2 * arcHeight / flightTime
-    local gravity = 2 * arcHeight / (flightTime * flightTime)
+    local vz = 0.5 * consts.GRAVITY * flightTime
+
+    -- shoot from body of sprite (70% up), not the feet
+    local zStart = 1
+    if attacker.image then
+        local _, h = g.getImageSize(attacker.image)
+        zStart = h * 0.7
+    end
 
     for i = 1, count do
         local spread = count > 1 and ((i - 1) / (count - 1) - 0.5) or 0
@@ -78,9 +80,8 @@ local function spawnProjectile(attacker, target)
         local ent = g.spawnEntity(projType, attacker.x, attacker.y)
         ent.vx = math.cos(angle) * projSpeed
         ent.vy = math.sin(angle) * projSpeed
-        ent.z = 1
+        ent.z = zStart
         ent.vz = vz
-        ent.gravity = gravity
         ent.projectile = {
             damage = attacker.attackDamage or 0,
             healing = attacker.healPower or 0,
@@ -88,7 +89,7 @@ local function spawnProjectile(attacker, target)
             team = attacker.team,
             targetTeam = getTargetTeam(attacker),
             pierceCount = 1,
-            knockback = atk.projectileKnockback or 80,
+            knockback = atk.projectileKnockback or consts.DEFAULT_RANGED_KNOCKBACK,
         }
     end
 
@@ -108,6 +109,39 @@ local function dealDmg(target, attacker, dmgOverride)
     end
 end
 
+
+---@param attacker ecs.Entity
+---@return number, number
+local function getAoeInfo(attacker)
+    local atk = attacker.attack or {}
+    local radius = (atk.aoeRadius or 0) + g.ask("getAoeRadius", attacker)
+    local dmgMul = (atk.aoeDamageMultiplier or 1) * g.ask("getAoeDamageMultiplier", attacker)
+    return radius, dmgMul
+end
+
+
+---@param attacker ecs.Entity
+---@param centerEnt ecs.Entity
+---@param baseAmount number
+local function doAoe(attacker, centerEnt, baseAmount)
+    local radius, dmgMul = getAoeInfo(attacker)
+    if radius <= 0 then return end
+    local amount = baseAmount * dmgMul
+    if amount == 0 then return end
+
+    local targetTeam = getTargetTeam(attacker)
+    local radius2 = radius * radius
+    g.iteratePartition(targetTeam, centerEnt.x, centerEnt.y, function(other)
+        if other.id == centerEnt.id then return end
+        if not isValid(other) then return end
+        local dx = other.x - centerEnt.x
+        local dy = other.y - centerEnt.y
+        if dx * dx + dy * dy <= radius2 then
+            dealDmg(other, attacker, amount)
+        end
+    end, radius)
+end
+
 ---@param attacker ecs.Entity
 ---@param target ecs.Entity
 local function doAttack(attacker, target)
@@ -120,7 +154,10 @@ local function doAttack(attacker, target)
         spawnProjectile(attacker, target)
     else
         -- melee: direct damage
-        dealDmg(target, attacker)
+        local amount = attacker.healPower or attacker.attackDamage or 0
+        dealDmg(target, attacker, amount)
+        g.knockback(target, attacker.x, attacker.y, atk.meleeKnockback or consts.DEFAULT_MELEE_KNOCKBACK)
+        doAoe(attacker, target, amount)
     end
 end
 
@@ -144,7 +181,8 @@ local function findNearbyTarget(ent, world, range)
 end
 
 -- ATTACK SYSTEM
-function atckSys.preUpdate(world, dt)
+function atckSys.preUpdate(dt)
+    local world = g.getECS()
     for _, ent in world:iterate("attack") do
         if not isValid(ent) then goto continue end
         if ent.frozenTime and ent.frozenTime > 0 then goto continue end
@@ -167,7 +205,7 @@ function atckSys.preUpdate(world, dt)
 
         -- tick cooldown
         local speed = ent.attackSpeed or 1
-        local timer = ent._attackTimer or (math.random() * (1 / speed))
+        local timer = ent._attackTimer or (love.math.random() * (1 / speed))
         timer = timer - dt
         if timer <= 0 then
             doAttack(ent, target)
@@ -199,8 +237,10 @@ local function updateProjectile(world, ent, dt)
     if ent.z < PROJ_Z_MAX then
         local targetTeam = proj.targetTeam or (proj.team == "ally" and "enemy" or "ally")
         local hitEnt = nil
+        local projHits = ent._projectileHits
         g.iteratePartition(targetTeam, ent.x, ent.y, function(other)
             if hitEnt then return end
+            if projHits and projHits[other.id] then return end
             if not isValid(other) then return end
             local dx, dy = other.x - ent.x, other.y - ent.y
             local d2 = dx * dx + dy * dy
@@ -209,8 +249,12 @@ local function updateProjectile(world, ent, dt)
             end
         end, PROJ_HIT_RADIUS)
         if hitEnt then
-            dealDmg(hitEnt, proj.ownerEnt, proj.damage or proj.healing)
-            g.knockback(hitEnt, proj.ownerEnt.x, proj.ownerEnt.y, proj.knockback or 50)
+            ent._projectileHits = ent._projectileHits or {}
+            ent._projectileHits[hitEnt.id] = true
+            local amount = proj.damage or proj.healing or 0
+            dealDmg(hitEnt, proj.ownerEnt, amount)
+            doAoe(proj.ownerEnt, hitEnt, amount)
+            g.knockback(hitEnt, proj.ownerEnt.x, proj.ownerEnt.y, proj.knockback or consts.DEFAULT_RANGED_KNOCKBACK)
             g.call("projectileHit", ent, hitEnt)
             proj.pierceCount = proj.pierceCount - 1
             if proj.pierceCount <= 0 then
@@ -221,7 +265,8 @@ local function updateProjectile(world, ent, dt)
     end
 end
 
-function atckSys.postUpdate(world, dt)
+function atckSys.postUpdate(dt)
+    local world = g.getECS()
     for _, ent in world:iterate("projectile") do
         updateProjectile(world, ent, dt)
     end

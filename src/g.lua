@@ -16,7 +16,8 @@
 ---@field id string
 ---@field description string
 ---@field image string
----@field handlers table<string, function>
+---@field handlers table<string, fun(ent: ecs.Entity, ...): any> Scoped to the entity. Only fires when the event/question is dispatched AT this entity (eg g.call("onHit", ent)). Cheap; default choice.
+---@field rawHandlers table<string, fun(ent: ecs.Entity, ...): any>? Scene-level. Fires for EVERY dispatch of that event globally, regardless of target. Use when the perk needs to listen to things happening elsewhere (eg "when any ally is hurt"). More expensive; use only when `handlers` can't express it.
 
 
 ---@class g.RarityWeights
@@ -155,34 +156,24 @@ function g.newTestRun()
 end
 
 
----@return ecs.ECSWorld?
-function g.getBattleECS()
-    -- gets the ECS for battle
-    local scene, name = g.getCurrentScene()
-    if name == "battle_scene" then
-        return scene.ecs
-    end
-end
-
 function g.iteratePartition(partitionId, x, y, fn, range)
-    local ecs = g.getBattleECS()
-    if ecs then
-        ecs:iteratePartition(partitionId, x, y, fn, range)
-    end
+    local ecs = g.getECS()
+    ecs:iteratePartition(partitionId, x, y, fn, range)
 end
 
 ---@param x number
 ---@param y number
 ---@param damage number
 ---@param radius number?
-function g.explosion(x, y, damage, radius)
+---@param fromEntity ecs.Entity?
+function g.explosion(x, y, damage, radius, fromEntity)
     radius = radius or 60
     local radiusSq = radius * radius
     -- todo: make particles here
     g.iteratePartition("unit", x, y, function(ent)
         local dx = ent.x - x
         local dy = ent.y - y
-        if dx * dx + dy * dy <= radiusSq then
+        if dx * dx + dy * dy <= radiusSq and (not fromEntity or ent.team ~= fromEntity.team) then
             g.knockback(ent, x, y, 200)
             g.dealDamage(ent, damage)
         end
@@ -197,6 +188,17 @@ end
 ---@return g.Run
 function g.getRun()
     return assert(currentRun, "run not loaded")
+end
+
+local currentECS
+---@return ecs.ECSWorld
+function g.getECS()
+    return assert(currentECS, "ecs not active")
+end
+
+---@param ecs ecs.ECSWorld
+function g.setCurrentECS(ecs)
+    currentECS = ecs
 end
 
 ---@param amount number
@@ -639,8 +641,9 @@ local currentEntityId = 0
 
 ---@class g.SquadInfo
 ---@field id string
+---@field squadOrder integer? Use this to help determine the "order" of squads. By default, buildings = -10, melee = 0, ranged = 10. Which means that the placement ordering in HUD will be (buildings, melee, ranged).  You MUST edit this if the unit benefits from being placed first/last, e.g. "when deployed, buff all allies." <-- this should be set order = 50 or something, to deploy LAST.
 ---@field entityId string
----@field entityDef table
+---@field entityDef ecs.Components
 ---@field rarity g.Rarity
 ---@field unitCount integer
 ---@field statUpgradeScaling table<string, number> { [statName] -> number }
@@ -651,7 +654,6 @@ local currentEntityId = 0
 ---@field cost g.ManaBundle
 ---@field onDeploySquad (fun(squad: g.SquadInfo, entities: ecs.Entity[], x: number, y:number))?
 ---@field drawSquadHover fun(x:number, y:number)?
-
 
 
 ---@param id string
@@ -726,6 +728,64 @@ function g.getSquadFromArmy(squadId)
     return g.getRun().squads[squadId]
 end
 
+
+
+
+--- checks if an entity is a ranged attacker
+---@param entId string
+---@return boolean
+function g.isRangedUnit(entId)
+    local etype = g.getEntityDef(entId)
+    if etype.attack and etype.attack.attackType == "ranged" then
+        return true
+    end
+end
+
+--- checks if an entity is a building type
+---@param entId string
+---@return boolean
+function g.isBuildingType(entId)
+    local etype = g.getEntityDef(entId)
+    if etype.isBuilding then
+        return true
+    end
+    return false
+end
+
+
+
+---@param a g.Squad
+---@param b g.Squad
+local function squadSortFn(a, b)
+    local infoA = g.getSquadInfo(a.squadId)
+    local infoB = g.getSquadInfo(b.squadId)
+
+    -- first, prioritize hardcoded order.
+    local orderA = (infoA.squadOrder or 0)
+    local orderB = (infoB.squadOrder or 0)
+
+    -- then, prioritize (building > melee > ranged)
+    if g.isRangedUnit(infoA.entityId) then
+        orderA = orderA + 10
+    end
+    if g.isBuildingType(infoA.entityId) then
+        orderA = orderA - 10
+    end
+
+    if g.isRangedUnit(infoB.entityId) then
+        orderB = orderB + 10
+    end
+    if g.isBuildingType(infoB.entityId) then
+        orderB = orderB - 10
+    end
+
+    if orderA ~= orderB then
+        return orderA < orderB
+    end
+    return a.squadId < b.squadId
+end
+
+
 ---@return g.Squad[]
 function g.getSortedArmyList()
     local run = g.getRun()
@@ -736,7 +796,7 @@ function g.getSortedArmyList()
     for _, sq in pairs(run.squads) do
         list[#list + 1] = sq
     end
-    table.sort(list, function(a, b) return a.squadId < b.squadId end)
+    table.sort(list, squadSortFn)
     run._sortedSquads = list
     return list
 end
@@ -913,7 +973,40 @@ function g.setBlessingData(id, val)
     run.blessings[id] = val
 end
 
-function g.addBlessingHandlers()
+
+---@param ent ecs.Entity
+local function getWrappedEntityPerkHandler(ent)
+    if ent.__cachedPerkHandler then
+        return ent.__cachedPerkHandler
+    end
+    if ent.__cachedPerkHandler == false then
+        -- false indicates no rawHandlers on perks.
+        return nil
+    end
+
+    local squad = assert(ent.squad)
+    local __cachedPerkHandler = nil
+    for _, perk in ipairs(squad.perks) do
+        local pinfo = g.getPerkInfo(perk)
+        if pinfo.rawHandlers then
+            __cachedPerkHandler = __cachedPerkHandler or {}
+            for k,func in pairs(pinfo.rawHandlers) do
+                __cachedPerkHandler[k] = function(...)
+                    func(ent, ...)
+                end
+            end
+        end
+    end
+    if not __cachedPerkHandler then
+        ent.__cachedPerkHandler = false -- dont run this again.
+    else
+        ent.__cachedPerkHandler = __cachedPerkHandler
+    end
+    return ent.__cachedPerkHandler
+end
+
+
+function g.addBlessingAndEntityHandlers()
     if not g.hasRun() then return end
     local run = g.getRun()
     for id, _ in pairs(run.blessings) do
@@ -922,10 +1015,25 @@ function g.addBlessingHandlers()
             g.addHandler(info.handlers)
         end
     end
+    local ecs = g.getECS()
+    for _, ent in ecs:iterate("squad") do
+        ---@cast ent ecs.Entity
+        -- HACK: only entities with squads can add raw handlers.
+        local cachedHandler = getWrappedEntityPerkHandler(ent)
+        if cachedHandler then
+            g.addHandler(cachedHandler)
+        end
+    end
 end
+
 
 -- Perk system
 
+--- Define a perk. Two handler tables:
+--- `handlers`: per-entity. Fires only when dispatched AT this entity, e.g. g.call(event, ent). Cheap; default.
+--- `rawHandlers`: scene-level. Fires on EVERY global dispatch. Entity passed as 1st arg:
+---   rawHandlers.onAllyHurt = function(selfEnt, ally, dmg) ... end
+--- Use rawHandlers when listening to things not happening to the entity itself.
 ---@param id string
 ---@param name string
 ---@param info g.PerkInfo|{id:nil,name:nil}
@@ -964,11 +1072,16 @@ end
 
 
 
+---@param id string
+---@param def ecs.Components
 function g.defineEntity(id, def)
     assert(not ENTITY_DEFS[id], "Duplicate entity type: " .. id)
     assert(def.x == nil and def.y == nil and def.type == nil and def._world == nil, "x/y/type/_world are reserved")
     for k in pairs(Entity) do
         assert(def[k] == nil, "Entity def '" .. id .. "' cannot override base method: " .. k)
+    end
+    if def.isBuilding and def.physics then
+        assert(def.physics.isStatic, "Buildings must have static physics")
     end
     def.type = id
     def.image = def.image or id
@@ -992,8 +1105,8 @@ end
 function g.spawnEntity(id, x, y, ...)
     local mt = ENTITY_DEFS[id]
     assert(mt, "Unknown entity type: " .. tostring(id))
-    local ecs = g.getBattleECS()
-    assert(ecs, "g.spawnEntity called outside of battle")
+    local ecs = g.getECS()
+    assert(ecs, "g.spawnEntity called when ECS isnt active")
     currentEntityId = currentEntityId + 1
     local ent = setmetatable({
         id = currentEntityId,
@@ -1072,6 +1185,20 @@ function g.applyTaunt(victimEnt, tauntingEnt, duration)
     end
 end
 
+---@param victimEnt ecs.Entity Entity that gets feared.
+---@param fearEnt ecs.Entity? Entity the victim should run away from.
+---@param duration number?
+function g.applyFear(victimEnt, fearEnt, duration)
+    local wasActive = victimEnt.fear and victimEnt.fear.duration and victimEnt.fear.duration > 0
+    victimEnt.fear = {
+        ent = fearEnt,
+        duration = duration or 3,
+    }
+    if not wasActive then
+        g.call("statusEffectApplied", victimEnt, "fear", duration or 3, fearEnt)
+    end
+end
+
 ---@param ent ecs.Entity
 ---@param healAmount number
 ---@param healerEnt ecs.Entity?
@@ -1084,6 +1211,7 @@ function g.healEntity(ent, healAmount, healerEnt)
 
     if finalHeal > 0 then
         g.call("entityHealed", ent, finalHeal, healerEnt)
+        g.call("onHitHeal", healerEnt, finalHeal, ent)
     end
 end
 
@@ -1095,6 +1223,9 @@ function g.dealDamage(target, damage, attacker, ignoreQuestionBuses)
     if not g.isAlive(target) then return end
 
     if not ignoreQuestionBuses and target.armor then
+        if attacker then
+            g.call("onHitDamage", attacker, damage, target)
+        end
         g.removeArmor(target, 1)
         return
     end
@@ -1107,7 +1238,14 @@ function g.dealDamage(target, damage, attacker, ignoreQuestionBuses)
     target.health = target.health - finalDmg
     target._timeSinceDamaged = 0
 
-    g.call("entityHurt", target, finalDmg, attacker)
+    if attacker then
+        g.call("onHitDamage", attacker, damage, target)
+    end
+    g.call("entityHurt", target, damage)
+
+    if attacker and attacker.lifesteal then
+        g.healEntity(attacker, damage * attacker.lifesteal, attacker)
+    end
 
     if target.health <= 0 then
         g.killEntity(target, attacker)
@@ -1142,7 +1280,7 @@ function g.killEntity(ent, killer)
     ent.health = 0
     g.call("entityDeath", ent, killer)
     if killer then
-        g.call("entityKillsEnemy", killer, ent)
+        g.call("onKill", killer, ent)
     end
     ent:getWorld():removeEntity(ent)
 end
@@ -1160,7 +1298,6 @@ function g.setPos(ent, x, y)
         end
     end
 end
-
 
 
 ---@param ent ecs.Entity
@@ -1201,7 +1338,7 @@ local function drawHealthBar(ent, x,y)
     local frac = ent.health / ent.maxHealth
     -- black outline
     local out=2
-    local oy=10
+    local oy=2
     lg.setColor(0, 0, 0)
     lg.rectangle("fill", x - w/2 - out, y + oy - out, w + out*2, h + out*2)
 
@@ -1252,16 +1389,103 @@ local function drawHealthBar(ent, x,y)
     end
 end
 
+
+---@param ent ecs.Entity
+---@param x number
+---@param y number
+local function drawWeapon(ent, x,y)
+    local wep = ent.weapon
+    ---@cast wep ecs.components.Weapon
+
+    local w,h = g.getImageSize(ent.image)
+
+    local atkTime = ent._attackTimer or 10
+
+    if wep.type == "sword" then
+        local dx = (ent.faceDir or 1) * (wep.xOffset or 12)
+        local swingTime = (wep.swingTime) or 0.2
+        local ratio = helper.clamp(1 - (atkTime / swingTime), 0, 1)
+        local face = ent.faceDir or 1
+        local rot = helper.EASINGS.sineInOut(ratio) * 1.2 * face
+        local dxx, dyy = helper.fromPolar(rot, 7 * ratio ^ 0.5)
+        dyy = dyy - math.floor(h/5)
+        g.drawImageOffset(wep.image, x + dx + dxx, y + dyy, rot, 1,1, 0.5, 0.95)
+        -- drawImageOffset(imageName, x, y, r, sx, sy, ox, oy, kx, ky)
+
+    elseif wep.type == "spear" then
+        local face = ent.faceDir or 1
+        local dx = face * (wep.xOffset or 10)
+        local swingTime = (wep.swingTime) or 0.2
+        local ratio = helper.clamp(1 - (atkTime / swingTime), 0, 1)
+
+        local target = ent._aiTarget
+        local targetRot = 0.25 * face
+        if target and target.x and target.y and ent.x and ent.y then
+            targetRot = math.atan2((target.y - 12) - ent.y, target.x - ent.x)
+        end
+
+        local FORWARD_OFFSET = -math.pi / 2
+        local attackRot = targetRot - FORWARD_OFFSET
+
+        local rot = 0
+        local stab = 0
+        local T1 = 0.2
+        local T2 = 1 - T1
+
+        if ratio < T1 then
+            local t = ratio / T1
+            rot = helper.lerp(0, attackRot, t)
+        elseif ratio < T2 then
+            local t = (ratio - T1) / (T2 - T1)
+            rot = attackRot
+            stab = 1 - math.abs(t * 2 - 1)
+        else
+            local t = (ratio - T2) / (1 - T2)
+            rot = helper.lerp(attackRot, 0, t)
+        end
+
+        local stabDist = stab * (wep.stabDist or 14)
+        local forwardRot = rot + FORWARD_OFFSET
+        local stabx, staby = helper.fromPolar(forwardRot, stabDist)
+        local dyy = staby - math.floor(h/5)
+        g.drawImageOffset(wep.image, x + dx + stabx, y + dyy, rot, 1, 1, 0.5, 0.95)
+    elseif wep.type == "bow" then
+        local dx = (ent.faceDir or 1) * (wep.xOffset or 8)
+        local drawTime = (wep.swingTime) or 0.2
+        local ratio = helper.clamp(1 - (atkTime / drawTime), 0, 1)
+        local face = ent.faceDir or 1
+        local target = ent._aiTarget
+        local rot = 0.25 * face
+        if target and target.x and target.y and ent.x and ent.y then
+            rot = math.atan2((target.y - 12) - ent.y, target.x - ent.x)
+        end
+        local recoil = (wep.bowRecoil or 0.1) * 24 * ratio
+        local bob = math.sin(g.getWorldTime() * 7 + (ent.id or 0)) * ((wep.weaponBobbing or 0.1) * 2)
+        local offx, offy = helper.fromPolar(rot, 5)
+        local pullx, pully = helper.fromPolar(rot + math.pi, recoil)
+        local dyy = bob + offy + pully - math.floor(h/2)
+        g.drawImageOffset(wep.image, x + dx + offx + pullx, y + dyy, rot, 1, 1, 0.5, 0.5)
+    elseif wep.type == "object" then
+    elseif wep.type == "staff" then
+    end
+    -- g.drawImageOffset(wep.image, )
+end
+
 function g.drawEntity(ent, x, y)
-    local entScale = g.ask("getEntityScale", ent)
+    local entScale = g.ask("getEntityScale", ent) * (ent.scale or 1)
     local sx, sy = (ent.sx or 1) * (ent.faceDir or 1) * entScale, (ent.sy or 1) * entScale
     if ent.draw then
         ent:draw(x, y)
         return
     end
     if ent.image then
-        lg.setColor(1,1,1)
+        lg.setColor(ent.color or objects.Color.WHITE)
         g.drawImageOffset(ent.image, x + (ent.ox or 0), y + (ent.oy or 0), ent.rot or 0, sx, sy, 0.5, 0.95, ent.kx, ent.ky)
+
+        if ent.weapon then
+            drawWeapon(ent,x,y)
+        end
+
         if ent.frozenTime and ent.frozenTime > 0 then
             drawIceCube(ent, x,y, sx,sy)
         end
@@ -1271,6 +1495,21 @@ function g.drawEntity(ent, x, y)
         drawHealthBar(ent, x,y)
     end
 end
+
+
+
+---@param squadId string
+function g.getSquadUnitCount(squadId)
+    local squad = g.getSquadFromArmy(squadId)
+    local info = g.getSquadInfo(squadId)
+    if squad then
+        local xtra = ((squad.level-1) * info.unitCountUpgradeScaling)
+        local xtra2 = g.ask("getSquadUnitCountModifier", squadId)
+        return info.unitCount + xtra + xtra2
+    end
+    return info.unitCount
+end
+
 
 ---@param entityId string
 ---@return number w, number h
@@ -1287,7 +1526,7 @@ end
 ---@param y number
 ---@param maxW number?
 ---@param maxH number?
-function g.drawUnit(entityId, x, y, maxW, maxH)
+function g.drawUnitPreview(entityId, x, y, maxW, maxH)
     local def = g.getEntityDef(entityId)
     if not def or not def.image then return end
     if maxW and maxH then
@@ -1299,7 +1538,7 @@ end
 
 
 ---@param id string
----@return table
+---@return ecs.Components
 function g.getEntityDef(id)
     local mt = ENTITY_DEFS[id]
     return mt and mt.__index
@@ -1448,12 +1687,13 @@ local reducers = require("src.modules.reducers")
 
 local definedEvents = {}
 local questions = {}
+
 -- global handler caches: name -> {func1, func2, ...}
 -- Rebuilt atomically each frame by g.pollHandlers.
 local table_clear = require("table.clear")
 local handlerCache = {} -- [eventOrQuestionName] -> {func, func, ...}
 
-function g.defineEvent(ev)
+function g.defineEvent(ev, isGlobalEvent)
     assert(not definedEvents[ev], "Event already defined: " .. ev)
     definedEvents[ev] = true
     handlerCache[ev] = {}
@@ -1758,7 +1998,7 @@ local STAT_DEFS = {}
 
 ---@param id string
 ---@param baseName string
----@param info {displayName:string, description:string, color:objects.Color, icon:string, isImportant:fun(ent:ecs.Entity):boolean}
+---@param info {displayName:string, description:string, color:objects.Color, icon:string, isImportant:fun(ent:ecs.Components):boolean}
 function g.defineStat(id, baseName, info)
     local Name = id:sub(1,1):upper() .. id:sub(2)
     local modQ = "get" .. Name .. "Modifier"
@@ -1788,7 +2028,7 @@ end
 
 
 ---@param statId string
----@param ent_or_etype string|ecs.Entity
+---@param ent_or_etype string|ecs.Components
 function g.isStatImportant(statId, ent_or_etype)
     local stinfo = g.getStatInfo(statId)
     if type(ent_or_etype) == "string" then
@@ -1897,6 +2137,13 @@ g.defineStat("attackSpeed", "baseAttackSpeed", {
     color = objects.Color(0.95, 0.85, 0.3),
     icon = "atkspeed",
     isImportant = _importantIfRanged,
+})
+g.defineStat("lifesteal", "baseLifesteal", {
+    displayName = "Lifesteal",
+    description = "Health gained per attack damage dealt",
+    color = objects.Color(0.7, 0.2, 0.4),
+    icon = "damage",
+    isImportant = _importantIfNonZero,
 })
 g.defineStat("moveSpeed", "baseMoveSpeed", {
     displayName = "Move Speed",

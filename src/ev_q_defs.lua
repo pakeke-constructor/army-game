@@ -25,14 +25,18 @@ g.defineEvent("entitySpawned")
 g.defineEvent("entityDeath")
 
 -- Entity combat
-g.defineEvent("entityHurt")
+g.defineEvent("entityHurt") -- called whenever any entity is hurt
 g.defineEvent("entityHealed")
 g.defineEvent("armorIncreased")
 g.defineEvent("armorDecreased")
 g.defineEvent("entityBuffed")
-g.defineEvent("entityKillsEnemy")
 g.defineEvent("entityShootsProjectile")
-g.defineEvent("onAttack")
+
+g.defineEvent("onAttack") -- Attacker passed as first arg. called when an entity attacks (healer OR attacker)
+g.defineEvent("onHitDamage") -- Attacker passed as first arg. called when an entity actually hits their target to deal damage (projectile OR melee)
+g.defineEvent("onHitHeal") -- Healer passed as first arg. called when an entity actually hits their target to heal (projectile OR melee)
+g.defineEvent("onKill") -- killer passed as first arg. called when an entity kills another.
+
 
 -- Entity misc:
 g.defineEvent("drawEntity")
@@ -68,6 +72,7 @@ g.defineQuestion("getRewardChoiceCount", ADD, 3)
 g.defineQuestion("getProjectileCountModifier", ADD, 0)
 g.defineQuestion("getProjectileSpeedMultiplier", MUL, 1)
 
--- Questions: timed effects (higher = faster; Acceleration returns 2 to halve all intervals)
-g.defineQuestion("getTickIntervalMultiplier", MUL, 1)
+g.defineQuestion("getAoeRadius", ADD, 0) -- This works on entities without any base AOE. So if you want a perk/blessing to give AOE, use this.
+g.defineQuestion("getAoeDamageMultiplier", MUL, 1)
 
+g.defineQuestion("getSquadUnitCountModifier", ADD, 0)

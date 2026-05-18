@@ -35,7 +35,7 @@ end
 
 function battle_scene:pollHandlers()
     self.ecs:addSystemHandlers()
-    g.addBlessingHandlers()
+    g.addBlessingAndEntityHandlers()
     g.addHandler({ postDraw = function()
         lg.setColor(1,1,1)
         self.particles:draw()
@@ -65,6 +65,7 @@ function battle_scene:enter()
     if self.sandbox then
         self.ecs:setBorder(500, 300)
     else
+        g.setCurrentECS(self.ecs)
         encounters.startRandomEncounter(run.day, self.ecs)
     end
     local border = self.ecs.border
@@ -100,8 +101,10 @@ local function buildVictoryChoices()
 end
 
 
-function battle_scene:perSecondUpdate()
-    g.call("perSecondUpdate", self.ecs)
+---@param secondCount integer
+function battle_scene:perSecondUpdate(secondCount)
+    g.setCurrentECS(self.ecs)
+    g.call("perSecondUpdate", secondCount)
 end
 
 function battle_scene:update(dt)
@@ -349,7 +352,7 @@ local function drawSquadHover(squad, wx,wy)
     lg.setColor(0.2, 1, 0.3, 0.5)
     for i = 1, #offsets do
         local ox, oy = offsets[i].x, offsets[i].y
-        g.drawUnit(info.entityId, wx + ox, wy + oy)
+        g.drawUnitPreview(info.entityId, wx + ox, wy + oy)
     end
     if info.drawSquadHover then
         info.drawSquadHover(wx, wy)

@@ -17,7 +17,7 @@ function shop_scene:leave()
 end
 
 function shop_scene:pollHandlers()
-    g.addBlessingHandlers()
+    g.addBlessingAndEntityHandlers()
 end
 
 ---@param dt number

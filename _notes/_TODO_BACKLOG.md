@@ -53,11 +53,40 @@
 - Add new stat: `attackHeal`. Used by units that heal others
 - Squads can have `onDeploy` effects, that affect the squads (Visuals for onDeploy effects (e.g. red circle?))
 - Make it so entities are rendered from their base
+- For systems in ECSWorld, remove passing ecs as first arg weirdly
+
+- ~~blazing bombardiers: needs onHit system~~
+- ~~demonic golith: onhit sys~~
+- ~~hellHounds: onSpawn~~
+- ~~charred-souls, needs perSecondUpdate to pass the second-count~~
+- ~~barbs: need lifesteal~~
+- ~~druids: need healEntity~~
+- ~~blade/rock throwers:  need a way to customize the projectiles a bit more; speed, height, etc~~
+- ~~fear-system:  Opposite of taunt system~~
+- ~~Prospectors:  needs onKill system~~
+- ~~Quartz cannoneers:  (deals x2 dmg to far away: TODO: this will work with onHit, right?)~~
+- ~~Dynamic unit-counts: All squakds with at least 6 units gain +2 units.~~
+- ~~Crystal golems:  Need a robust way for projectiles to duplicate themselves~~
+- Pierce: Attack can pass through up to 5 enemies.
+- EXPLOSIONS: needs a `team` field, so it doesnt deal dmg to everything
+- Cleave: Attacks deal AOE.
+- Soul Harvest: For every 10 allies that die nearby, this squad gains 1 DMG permanently.
+- Add a HUD priority system, which sorts squads before playing (eg suicide-bombers first, melee next, ranged next, and buffers/onDeploy squads last)
+
 
 
 
 ### OK:: what do we need for a minimum-playable game?
 
+
+
+
+
+
+- CLAUDE.MD: Should know "roughly" how much each stat is worth.
+
+
+- CLAUDE.MD: Tell agent to avoid setting stats directly (use actual example)
 
 
 
@@ -71,6 +100,9 @@
 - Juice for spending money in shop
 
 - Juice for breaking armor
+
+
+- Explain demon-fury when hovering it.  "+20% demon damage, +10% demon health!"
 
 
 
@@ -89,6 +121,13 @@
 - Music
 
 - Balancing / Feedback screen, players can give UNSTRUCTURED feedback/feelings sent directly to our server and stored.
+
+
+
+- RnD: If this survives to the end of the battle, Upgrade a random squad permanently. Needs upgrade UI
+- (STATE) Ritual: On-spawn, gains 1 DMG per 2 allies that have died this combat.
+- (STATE) “Deterrent”: On-deploy, your next squad gains the Volatile Perk for the battle, exploding in a large area On-death.
+
 
 
 

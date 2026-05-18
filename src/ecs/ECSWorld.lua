@@ -22,6 +22,7 @@ function ECSWorld:init(systemNames)
     self.border = nil -- {0, 0, w, h} or nil for no border
 
     self.componentIndex = {} -- [componentName] -> {ent, ent, ...}
+    self.trackedComponents = objects.Set()
     self.partitions = {
         -- [partitionId] -> objects.Partition
         unit = objects.Partition(PARTITION_CHUNKSIZE),
@@ -57,38 +58,37 @@ function ECSWorld:removeEntity(e)
     self.entities:removeBuffered(e)
 end
 
-function ECSWorld:_rebuildIndex()
+local function entHas(e, k)
+    if rawget(e, k) ~= nil then return true end
+    local mt = getmetatable(e)
+    local base = mt and rawget(mt, "__index")
+    return type(base) == "table" and base[k] ~= nil
+end
+
+function ECSWorld:_rebuildComponentIndex()
     local idx = self.componentIndex
-    -- clear existing lists but keep the tables
     for _, list in pairs(idx) do
         table_clear(list)
     end
+    local tracked = self.trackedComponents
+    for ti = 1, tracked.len do
+        local k = tracked[ti]
+        local list = idx[k]
+        for i = 1, self.entities.len do
+            local e = self.entities[i]
+            if entHas(e, k) then
+                list[#list + 1] = e
+            end
+        end
+    end
+end
+
+function ECSWorld:_rebuildPartitions()
     for _, part in pairs(self.partitions) do
         part:clear()
     end
     for i = 1, self.entities.len do
         local e = self.entities[i]
-        -- own keys
-        for k in pairs(e) do
-            if type(k) == "string" then
-                local list = idx[k]
-                if not list then list = {}; idx[k] = list end
-                list[#list + 1] = e
-            end
-        end
-        -- inherited keys via __index
-        local mt = getmetatable(e)
-        local base = mt and rawget(mt, "__index")
-        if type(base) == "table" then
-            for k in pairs(base) do
-                if type(k) == "string" and rawget(e, k) == nil then
-                    local list = idx[k]
-                    if not list then list = {}; idx[k] = list end
-                    list[#list + 1] = e
-                end
-            end
-        end
-        -- spatial partitions
         local p = e.partitions
         if p then
             for j = 1, #p do
@@ -116,9 +116,11 @@ function ECSWorld:addSystemHandlers()
 end
 
 function ECSWorld:update(dt)
+    g.setCurrentECS(self)
     self.entities:flush()
-    self:_rebuildIndex()
-    g.call("preUpdate", self, dt)
+    self:_rebuildPartitions()
+    self:_rebuildComponentIndex()
+    g.call("preUpdate", dt)
     for i = 1, self.entities.len do
         local e = self.entities[i]
         if not e.physics then
@@ -145,11 +147,11 @@ function ECSWorld:update(dt)
             end
         end
         if e.vz then
-            if e.gravity then e.vz = e.vz - e.gravity * dt end
+            e.vz = e.vz - consts.GRAVITY * dt
             e.z = math.max(0, (e.z or 0) + e.vz * dt)
         end
-        if e.update then
-            e:update(dt)
+        if e.onUpdate then
+            e:onUpdate(dt)
         end
         if e.lifetime then
             e.lifetime = e.lifetime - dt
@@ -171,7 +173,7 @@ function ECSWorld:update(dt)
             end
         end
     end
-    g.call("postUpdate", self, dt)
+    g.call("postUpdate", dt)
     self.entities:flush()
 end
 
@@ -187,10 +189,11 @@ local function sortOrder(a, b)
 end
 
 function ECSWorld:draw(transform)
+    g.setCurrentECS(self)
     if transform then
         self.backCanvas:start(transform)
     end
-    g.call("preDraw", self)
+    g.call("preDraw")
     if transform then
         self.backCanvas:finish()
     end
@@ -208,14 +211,11 @@ function ECSWorld:draw(transform)
     if transform then
         self.frontCanvas:start(transform)
     end
-    g.call("postDraw", self)
+    g.call("postDraw")
     if transform then
         self.frontCanvas:finish()
     end
 end
-
-
-local EMPTY = {}
 
 
 ---@param component string
@@ -225,7 +225,15 @@ local EMPTY = {}
 function ECSWorld:iterate(component)
     local list = self.componentIndex[component]
     if not list then
-        return ipairs(EMPTY)
+        list = {}
+        self.componentIndex[component] = list
+        self.trackedComponents:add(component)
+        for i = 1, self.entities.len do
+            local e = self.entities[i]
+            if entHas(e, component) then
+                list[#list + 1] = e
+            end
+        end
     end
     return ipairs(list)
 end

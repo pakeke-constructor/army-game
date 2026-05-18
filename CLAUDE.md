@@ -26,6 +26,7 @@ After 8 turns, the map is reset; and the player fights a boss.
 </high_level_concepts>
 
 <architecture>
+main.lua: Entrypoint.
 src/g.lua: All core functions stored here, exposed via `g.*` namespace
 src/scenes/*: All scenes defined here, in folders.
 src/scenes/map_scene/*: Map-scene stuff. Has a graph of nodes for players to navigate
@@ -52,7 +53,6 @@ A bunch of common pitfalls/traps to look out for:
 - Don't add buffs to entities directly. Use g.buffEntity (stat buffs) or g.addCustomEffect (handler-based effects).
 - table-valued fields on the def are shared across all entities of that type. Mutating them (e.g. `table.insert(ent.tags, ...)`) affects every entity. 
 - Before adding/removing handlers to ent.scopes, look for a g.* function first.
-- Entity stats (attackDamage, maxHealth, etc) are recomputed every frame in stats.lua; so if you want to add a buff, you must use `g.buffEntity`. Alternatively, hook into the question-bus for the stat. (E.g. getMaxHealthModifier/Multiplier)
 </gotchas>
 
 <event_question_bus>
@@ -85,9 +85,27 @@ EXAMPLE:
 
 There are 3 places where events/questions can be dispatched to:
 - Scene-level: g.addHandler handlers. Used by blessings, ECS systems.
-- On the entity/table itself: If arg1 is an entity (table), g.call/g.ask auto-dispatch to that entity's handlers too. So g.call("onHit", ent) hits ent.onHit.
+- On the entity/table itself: If arg1 is an entity (table), g.call/g.ask auto-dispatch to that entity's handlers too. So g.call("onHit", ent) calls ent.onHit.
 - Entity scope: If arg1.scope is a Scope object, calls arg1.scope:call or arg1.scope:ask. Used by perks/buffs.
 </event_question_bus>
+
+<perks>
+Defined via `g.definePerk(id, name, info)`. Info has two handler tables:
+
+- `handlers`: per-entity. Fires only when an event is dispatched AT this entity
+  (eg `g.call("onHit", ent)`). Cheap; default.
+- `rawHandlers`: scene-level. Fires on EVERY global dispatch. Entity passed as 1st arg:
+    `rawHandlers.onAllyHurt = function(self, ally, dmg) ... end`
+  Use only when listening to things not happening to the entity itself (eg "any ally hurt").
+</perks>
+
+<stats>
+Entity stats, eg ent.attackDamage, ent.maxHealth, ent.attackSpeed, etc are handled in `stats.lua`.
+When modifying stats:
+- BAD: `ent.attackDamage = ent.attackDamage + 5`. This WON'T WORK, because stats are recalculated every frame.
+- GOOD: `g.buffEntity(ent, "attackDamage", 5) -- permanent buff until ent dies
+- GOOD 2: Alternatively, hook into the question-bus for the stat. (E.g. getMaxHealthModifier/Multiplier)
+</perks>
 
 <localization>
 Do NOT add text to entities, blessings, or UI without wrapping it in a `loc()` call.
