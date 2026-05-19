@@ -1346,8 +1346,15 @@ local function drawHealthBar(ent, x,y)
     -- white lagged
     lg.setColor(1, 1, 1)
     lg.rectangle("fill", x - w/2, y + oy, w * lagFrac, h)
-    -- red health
-    lg.setColor(1, 0, 0)
+
+    -- green healthbar for allies, red for enemies
+    if ent.team == "enemy" then
+        lg.setColor(1, 0.1, 0.1)
+    elseif ent.team == "ally" then
+        lg.setColor(0.1, 1, 0.1)
+    else -- neutral unit
+        lg.setColor(0.1, 0.4, 1)
+    end
     lg.rectangle("fill", x - w/2, y + oy, w * frac, h)
 
     -- status effect tip segments (drawn right-to-left from tip)

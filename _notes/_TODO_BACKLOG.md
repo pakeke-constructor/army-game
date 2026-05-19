@@ -75,7 +75,7 @@
 - Weapons system: Make it so weapons can be held/used
 - melee: swords + sword swinging
 - ranged: bows, + bow pointing in direction they aim
-
+- CLAUDE.MD: Tell agent to avoid setting stats directly (use actual example)
 
 
 
@@ -88,7 +88,6 @@
 - CLAUDE.MD: Should know "roughly" how much each stat is worth.
 
 
-- CLAUDE.MD: Tell agent to avoid setting stats directly (use actual example)
 
 
 - Juice for placing units (deploy them sequentially so its satisfying?)
