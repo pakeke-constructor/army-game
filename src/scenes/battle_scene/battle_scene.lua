@@ -350,13 +350,19 @@ local function drawSquadHover(squad, wx,wy)
     local info = g.getSquadInfo(squad.squadId)
     local offsets = squad:getFormationOffsets()
     lg.setColor(0.2, 1, 0.3, 0.5)
+    local yof = nil
     for i = 1, #offsets do
         local ox, oy = offsets[i].x, offsets[i].y
         g.drawUnitPreview(info.entityId, wx + ox, wy + oy)
+        yof = math.min(yof or oy, oy)
     end
     if info.drawSquadHover then
         info.drawSquadHover(wx, wy)
     end
+    local smallFont = g.getSmallFont(16)
+    lg.setColor(info.rarity.color)
+    local yof2 = -24
+    richtext.printRichCentered("{wavy}{o}"..info.name, smallFont, wx, wy+yof+yof2, 1000, "left")
 end
 
 

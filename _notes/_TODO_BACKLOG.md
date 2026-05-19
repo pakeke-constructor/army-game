@@ -85,16 +85,21 @@
 
 
 
-- CLAUDE.MD: Should know "roughly" how much each stat is worth.
-
-
 
 
 - Juice for placing units (deploy them sequentially so its satisfying?)
+-- ~~show name above unit when hovering it~~
+-- units deploy sequentially, (stretched towards sky?)
+
 - Juice for spending mana: Should pop up above the units as you spend them
 - Juice for spending money in shop
 
 - Juice for breaking armor
+
+
+
+- CLAUDE.MD: Should know "roughly" how much each stat is worth.
+
 
 
 - Explain demon-fury when hovering it.  "+20% demon damage, +10% demon health!"
