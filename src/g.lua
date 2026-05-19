@@ -149,7 +149,7 @@ function g.newTestRun()
     if consts.DEV_MODE then
         -- populate test stuff.
         currentRun.blessings = {
-            iron_hide = true, golden_coffers = true, blood_tithe = true, barrage = true,
+            golden_coffers = true, blood_tithe = true, barrage = true,
         }
         currentRun.money = 1000
     end
@@ -1271,8 +1271,7 @@ function g.dealDamage(target, damage, attacker, ignoreQuestionBuses)
         return
     end
 
-    local reduction = ignoreQuestionBuses and 0 or g.ask("getDamageReduction", target)
-    local finalDmg = math.max(0, damage - reduction)
+    local finalDmg = math.max(0, damage)
 
     target._damageLagAmount = (target._damageLagAmount or 0) + finalDmg
 

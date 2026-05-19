@@ -72,15 +72,6 @@ g.definePerk("body_slam", "Body Slam", {
     },
 })
 
-g.definePerk("tough", "Tough", {
-    description = loc("This unit takes 2 less damage from attacks."),
-    image = "coin_icon",
-    handlers = {
-        getDamageReduction = function(ent)
-            return 2
-        end,
-    },
-})
 
 g.definePerk("sharpshooter", "Sharpshooter", {
     description = loc("This unit fires 1 extra projectile."),

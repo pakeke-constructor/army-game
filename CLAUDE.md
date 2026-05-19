@@ -64,7 +64,7 @@ Pre-declared via g.defineEvent(name) / g.defineQuestion(name, reducer, default).
   "Something happened. React if you care."
 
 **Questions** = gathering information. Returns a reduced value from all listeners.
-  local dmg = g.ask("getDamageReduction", unit)
+  local dmg = g.ask("getAttackDamageModifier", unitEnt)
   "I need to know something. Everyone contribute."
   Reducers: ADD, MULTIPLY, OR, AND, MIN, MAX, PRIORITY, etc.
 

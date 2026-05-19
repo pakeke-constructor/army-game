@@ -1,17 +1,4 @@
 
-g.defineBlessing("iron_hide", "Iron Hide", {
-    description = loc("Allies take 3 less damage from attacks."),
-    image = "coin_icon",
-    rarity = g.RARITIES.UNCOMMON,
-    handlers = {
-        getDamageReduction = function(ent)
-            if ent.team == "ally" then
-                return 3
-            end
-        end,
-    },
-})
-
 g.defineBlessing("golden_coffers", "Golden Coffers", {
     description = loc("Gain 50% more money from all sources."),
     image = "coin_icon",

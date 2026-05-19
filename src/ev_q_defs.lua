@@ -62,8 +62,6 @@ local MUL = reducers.MULTIPLY
 
 g.defineQuestion("getEntityScale", MUL, 1)
 
-g.defineQuestion("getDamageReduction", ADD, 0)
-
 -- Questions: economy/rewards
 g.defineQuestion("getMoneyMultiplier", MUL, 1)
 g.defineQuestion("getRewardChoiceCount", ADD, 3)

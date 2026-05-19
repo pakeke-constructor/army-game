@@ -107,7 +107,7 @@ g.defineSquad("militia_squad", {
         maxHealth = 0.5
     },
     icon = "example_squad_icon",
-    perks = {"tough"},
+    perks = {},
     cost = {green = 1},
 })
 

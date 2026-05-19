@@ -51,7 +51,7 @@ System hooks: `initECS`, `preUpdate`, `postUpdate`, `preDraw`, `postDraw`, `enti
 
 Existing systems:
 - ai — target selection, refreshed in batches.
-- attacking — cooldowns, melee hits, projectile spawning. Contains `dealDamage` (applies damage reduction via `getDamageReduction` question, fires `entityHurt`/`entityDeath`).
+- attacking — cooldowns, melee hits, projectile spawning. Contains `dealDamage` (blocks if ent has armor, fires `entityHurt`/`entityDeath`).
 - physics — creates/destroys Box2D bodies, syncs positions each frame.
 - stats — recomputes derived stats from base values via questions.
 

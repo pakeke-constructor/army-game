@@ -76,7 +76,7 @@
 - melee: swords + sword swinging
 - ranged: bows, + bow pointing in direction they aim
 - CLAUDE.MD: Tell agent to avoid setting stats directly (use actual example)
-
+- remove iron-hide, remove tough perk
 
 
 
