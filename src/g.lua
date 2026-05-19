@@ -18,6 +18,7 @@
 ---@field image string
 ---@field handlers table<string, fun(ent: ecs.Entity, ...): any> Scoped to the entity. Only fires when the event/question is dispatched AT this entity (eg g.call("onHit", ent)). Cheap; default choice.
 ---@field rawHandlers table<string, fun(ent: ecs.Entity, ...): any>? Scene-level. Fires for EVERY dispatch of that event globally, regardless of target. Use when the perk needs to listen to things happening elsewhere (eg "when any ally is hurt"). More expensive; use only when `handlers` can't express it.
+---@field armyHandlers table<string, fun(squad: g.Squad, ...): any>? Army-level. Registered once per army squad holding this perk, regardless of whether it has deployed. First arg is the owning squad. Use for effects computed from run state that must be known before the squad spawns (eg modifying this squad's own unit count).
 
 
 ---@class g.RarityWeights
@@ -196,6 +197,12 @@ function g.getECS()
     return assert(currentECS, "ecs not active")
 end
 
+--- Non-asserting accessor: returns the active ECS, or nil when no battle is running.
+---@return ecs.ECSWorld?
+function g.tryGetECS()
+    return currentECS
+end
+
 ---@param ecs ecs.ECSWorld
 function g.setCurrentECS(ecs)
     currentECS = ecs
@@ -205,6 +212,7 @@ end
 function g.addGold(amount)
     local run = g.getRun()
     run.money = run.money + amount
+    g.call("goldGained", amount)
 end
 
 ---@param amount number
@@ -698,6 +706,19 @@ function g.addSquadToArmy(squadId)
     run._sortedSquads = nil
 end
 
+--- Adds a temporary squad to the bench for the current fight only.
+--- Battle squads are cleared at the start and end of every battle.
+---@param squadId string
+---@param level integer?
+function g.addBattleSquad(squadId, level)
+    local run = g.getRun()
+    run._battleSquads = run._battleSquads or {}
+    local squad = g.newSquad(squadId)
+    squad.level = level or 1
+    run._battleSquads[#run._battleSquads + 1] = squad
+    run._sortedSquads = nil
+end
+
 ---@param squadId string
 function g.addOrUpgradeSquad(squadId)
     local run = g.getRun()
@@ -796,6 +817,11 @@ function g.getSortedArmyList()
     for _, sq in pairs(run.squads) do
         list[#list + 1] = sq
     end
+    if run._battleSquads then
+        for _, sq in ipairs(run._battleSquads) do
+            list[#list + 1] = sq
+        end
+    end
     table.sort(list, squadSortFn)
     run._sortedSquads = list
     return list
@@ -872,7 +898,9 @@ function g.spawnSquad(squad, x, y, ...)
     squadScope.shared = true
     for j = 1, #squad.perks do
         local perkInfo = g.getPerkInfo(squad.perks[j])
-        squadScope:addHandler(perkInfo.handlers)
+        if perkInfo.handlers then
+            squadScope:addHandler(perkInfo.handlers)
+        end
     end
     local offsets = squad:getFormationOffsets()
     local entities = {}
@@ -1013,6 +1041,19 @@ function g.addBlessingAndEntityHandlers()
         local info = BLESSING_DEFS[id]
         if info and info.handlers then
             g.addHandler(info.handlers)
+        end
+    end
+    -- army-level perk handlers: registered from squads in the army (not from
+    -- battlefield entities), so they answer questions even before the squad
+    -- deploys. Each handler is wrapped with its owning squad as the first arg.
+    for _, squad in pairs(run.squads) do
+        for _, perkId in ipairs(squad.perks) do
+            local pinfo = g.getPerkInfo(perkId)
+            if pinfo.armyHandlers then
+                for k, func in pairs(pinfo.armyHandlers) do
+                    g.addHandler({ [k] = function(...) return func(squad, ...) end })
+                end
+            end
         end
     end
     local ecs = g.getECS()
@@ -2293,6 +2334,14 @@ function g.trySpendMana(manaCells, manaRequirement)
         manaCells[k] = v
     end
     g.call("manaSpent", manaRequirement)
+    local ecs = g.tryGetECS()
+    if ecs then
+        for _, ent in ecs:iterate("team") do
+            if ent.scope then
+                ent.scope:call("manaSpent", ent, manaRequirement)
+            end
+        end
+    end
     return true
 end
 

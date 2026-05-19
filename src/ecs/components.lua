@@ -170,7 +170,7 @@ local shadow = {
 ---@field public armorIncreased fun(ecs.Entity, number)?
 ---@field public armorDecreased fun(ecs.Entity, number)?
 ---@field public entityBuffed fun(ecs.Entity, table, number?)?
----@field public entityKillsEnemy fun(ecs.Entity, ecs.Entity)?
+---@field public onKill fun(ecs.Entity, ecs.Entity)?
 ---@field public entityShootsProjectile fun(ecs.Entity, ecs.Entity)?
 ---@field public drawEntity fun(ecs.Entity)?
 ---@field public statusEffectApplied fun(ecs.Entity, string, number, ecs.Entity?)?
