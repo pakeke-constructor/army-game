@@ -3,6 +3,7 @@
 
 g.defineEntity("demon", {
     image = "demon",
+    shadow = {},
     physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
     partitions = {"unit", "enemy"},
     team = "enemy",
@@ -28,6 +29,7 @@ g.defineEntity("demon", {
 
 g.defineEntity("archerdemon", {
     image = "archerdemon",
+    shadow = {},
     physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
     partitions = {"unit", "enemy"},
     team = "enemy",
