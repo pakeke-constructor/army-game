@@ -86,6 +86,17 @@
 
 
 
+- Instead of referencing "ATK" and "ASPD" in descriptions; should populate with icon+colored text - so it's a bit more formalized. (E.g. `Gain 1 (ASPD)`, replaces with richtext.)
+
+- In squad-card, Make stats panels better. Most important stats at top. Don't even show other panels.
+
+
+- IMPORTANT: FIX REMAINING PERKS / BLESSINGS / ETC.
+
+
+- Change ranged-icon; it shouldnt be a sword, should be bow
+
+
 
 - Ground texture. rip from catx.
 
