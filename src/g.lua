@@ -2141,6 +2141,37 @@ local PALETTE = {
     {124, 34, 34},
     {225, 185, 123}
 }
+for i, c in ipairs(PALETTE) do
+    PALETTE[i] = objects.Color.fromByteRGBA(c[1], c[2], c[3])
+end
+
+---Snap a color to the nearest palette entry.
+---Uses 4th-power channel distance to deeply penalize large per-channel differences.
+---Preserves the input alpha.
+---@param r number|objects.Color red [0..1], or a Color/table
+---@param gg number? green [0..1]
+---@param b number? blue [0..1]
+---@param a number? alpha [0..1] (default 1)
+---@return objects.Color
+function g.snapToPalette(r, gg, b, a)
+    if type(r) == "table" then
+        r, gg, b, a = r[1], r[2], r[3], r[4]
+    end
+    a = a or 1
+    local best, bestDist = nil, math.huge
+    for _, c in ipairs(PALETTE) do
+        local dr, dg, db = r - c.r, gg - c.g, b - c.b
+        local dist = dr*dr*dr*dr + dg*dg*dg*dg + db*db*db*db
+        if dist < bestDist then
+            bestDist = dist
+            best = c
+        end
+    end
+    assert(best, "?")
+    return best:clone():setRGBA(nil, nil, nil, a)
+end
+
+
 
 g.COLORS = {
     --[[
