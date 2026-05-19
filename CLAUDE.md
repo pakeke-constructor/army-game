@@ -52,7 +52,7 @@ A bunch of common pitfalls/traps to look out for:
 - Pretty much ALL text in the game uses `richtext`, which has `{effect}` formatting tags, and `%{variable:.2f}` for interpolation.
 - Don't add buffs to entities directly. Use g.buffEntity (stat buffs) or g.addCustomEffect (handler-based effects).
 - table-valued fields on the def are shared across all entities of that type. Mutating them (e.g. `table.insert(ent.tags, ...)`) affects every entity. 
-- Before adding/removing handlers to ent.scopes, look for a g.* function first.
+- Before adding/removing handlers to ent.scopes, look for a g.* function first. If you are unsure in general, **you should just read g.lua;** there's a lot of stuff there.
 </gotchas>
 
 <event_question_bus>

@@ -91,15 +91,20 @@ local weapon = {
     xOffset = 10,
 }
 
-
-
-
+---@class ecs.components.Shadow
+---@field public radius number?
+---@field public opacity number?
+local shadow = {
+    radius = 3,
+    opacity = 0.6,
+}
 
 ---@class ecs.Components
 ---@field public ai ecs.components.AI?
 ---@field public attack ecs.components.Attack?
 ---@field public projectile ecs.components.Projectile?
 ---@field public weapon ecs.components.Weapon?
+---@field public shadow ecs.components.Shadow?
 ---@field public faceDir integer?
 ---@field public taunt ecs.components.Taunt?
 ---@field public fear ecs.components.Fear?

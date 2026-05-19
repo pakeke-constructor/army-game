@@ -6,6 +6,7 @@ g.defineSquad("archer_squad", {
     rarity = g.RARITIES.RARE,
     entityDef = {
         image = "longbowman", -- placeholder
+        shadow = {},
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         partitions = {"unit", "ally"},
         team = "ally",
@@ -18,6 +19,7 @@ g.defineSquad("archer_squad", {
             projectileSpeed = 350,
             aoeRadius = 1
         },
+        shadow = {},
         weapon = {
             image = "longbow",
             type = "bow",
@@ -44,6 +46,7 @@ g.defineSquad("healer_archer_squad", {
     rarity = g.RARITIES.RARE,
     entityDef = {
         image = "longbowman",
+        shadow = {},
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         partitions = {"unit", "ally"},
         team = "ally",
@@ -74,6 +77,7 @@ g.defineSquad("militia_squad", {
     rarity = g.RARITIES.UNCOMMON,
     entityDef = {
         image = "militia",
+        shadow = {},
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         partitions = {"unit", "ally"},
         team = "ally",
@@ -110,6 +114,7 @@ g.defineSquad("militia_band", {
     rarity = g.RARITIES.RARE,
     entityDef = {
         image = "militia",
+        shadow = {},
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         partitions = {"unit", "ally"},
         team = "ally",
@@ -145,6 +150,7 @@ g.defineSquad("crystal_golems", {
     rarity = g.RARITIES.RARE,
     entityDef = {
         image = "militia", -- TODO: change to crystal golems
+        shadow = {},
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 2 },
         partitions = {"unit", "ally"},
         team = "ally",
