@@ -365,13 +365,14 @@ g.definePerk("defy", "Defy", {
 ]]
 
 g.definePerk("life_force", "Life Force", {
-    description = loc("Converts any max HP gained into ATK."),
+    description = loc("Gain ATK equal to max HP. Take 4 x as much damage."),
     image = "coin_icon",
     handlers = {
-        entityBuffed = function(ent, stat, increase)
-            if stat ~= "maxHealth" or increase <= 0 then return end
-            g.buffEntity(ent, "maxHealth", -increase)
-            g.buffEntity(ent, "attackDamage", increase)
+        getAttackDamageModifier = function(ent)
+            return ent.maxHealth
+        end,
+        getDamageTakenMultiplier = function(ent)
+            return 4
         end,
     },
 })

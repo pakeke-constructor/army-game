@@ -77,7 +77,9 @@
 - ranged: bows, + bow pointing in direction they aim
 - CLAUDE.MD: Tell agent to avoid setting stats directly (use actual example)
 - remove iron-hide, remove tough perk
-
+- Juice for placing units (deploy them sequentially so its satisfying?)
+-- show name above unit when hovering it
+-- units deploy sequentially, (stretched towards sky?)
 
 
 ### OK:: what do we need for a minimum-playable game?
@@ -85,11 +87,9 @@
 
 
 
+- Ground texture. rip from catx.
 
 
-- Juice for placing units (deploy them sequentially so its satisfying?)
--- ~~show name above unit when hovering it~~
--- units deploy sequentially, (stretched towards sky?)
 
 - Juice for spending mana: Should pop up above the units as you spend them
 - Juice for spending money in shop

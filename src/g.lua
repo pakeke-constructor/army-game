@@ -1276,6 +1276,9 @@ function g.dealDamage(target, damage, attacker, ignoreQuestionBuses)
     end
 
     local finalDmg = math.max(0, damage)
+    if not ignoreQuestionBuses then
+        finalDmg = finalDmg * g.ask("getDamageTakenMultiplier", target, attacker)
+    end
 
     target._damageLagAmount = (target._damageLagAmount or 0) + finalDmg
 

@@ -72,5 +72,6 @@ g.defineQuestion("getProjectileSpeedMultiplier", MUL, 1)
 
 g.defineQuestion("getAoeRadius", ADD, 0) -- This works on entities without any base AOE. So if you want a perk/blessing to give AOE, use this.
 g.defineQuestion("getAoeDamageMultiplier", MUL, 1)
+g.defineQuestion("getDamageTakenMultiplier", MUL, 1)
 
 g.defineQuestion("getSquadUnitCountModifier", ADD, 0)
