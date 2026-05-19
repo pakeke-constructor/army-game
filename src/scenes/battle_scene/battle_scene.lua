@@ -348,21 +348,40 @@ end
 ---@param wy number world y coord
 local function drawSquadHover(squad, wx,wy)
     local info = g.getSquadInfo(squad.squadId)
+    local einfo = g.getEntityDef(info.entityId)
     local offsets = squad:getFormationOffsets()
     lg.setColor(0.2, 1, 0.3, 0.5)
-    local yof = nil
+
+    local w,h = 10,10
+    if einfo.image then
+        w,h = g.getImageSize(einfo.image)
+    end
+
+    local minX, minY, maxX, maxY = math.huge,math.huge,0,0
     for i = 1, #offsets do
         local ox, oy = offsets[i].x, offsets[i].y
         g.drawUnitPreview(info.entityId, wx + ox, wy + oy)
-        yof = math.min(yof or oy, oy)
+        minX = math.min(minX, ox)
+        minY = math.min(minY, oy)
+        maxX = math.max(maxX, ox)
+        maxY = math.max(maxY, oy)
     end
     if info.drawSquadHover then
         info.drawSquadHover(wx, wy)
     end
+
+    do
+    local ww, hh = maxX-minX, maxY-minY
+    lg.setLineWidth(2)
+    lg.setColor(0.05,0.2,0.07, 0.25)
+    lg.rectangle("fill", wx+minX-w/2, wy+minY-h/2, ww+w, hh+h)
+    lg.setColor(0.1,0.7,0.3, 0.6)
+    lg.rectangle("line", wx+minX-w/2, wy+minY-h/2, ww+w, hh+h)
+    end
     local smallFont = g.getSmallFont(16)
     lg.setColor(info.rarity.color)
     local yof2 = -24
-    richtext.printRichCentered("{wavy}{o}"..info.name, smallFont, wx, wy+yof+yof2, 1000, "left")
+    richtext.printRichCentered("{wavy}{o}"..info.name, smallFont, wx, wy+minY+yof2, 1000, "left")
 end
 
 

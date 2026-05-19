@@ -649,7 +649,7 @@ local currentEntityId = 0
 
 ---@class g.SquadInfo
 ---@field id string
----@field squadOrder integer? Use this to help determine the "order" of squads. By default, buildings = -10, melee = 0, ranged = 10. Which means that the placement ordering in HUD will be (buildings, melee, ranged).  You MUST edit this if the unit benefits from being placed first/last, e.g. "when deployed, buff all allies." <-- this should be set order = 50 or something, to deploy LAST.
+---@field squadOrder integer? Use this to help determine the "order" of squads. By default, buildings = -10, melee = 0, ranged = 10. Which means that the placement ordering in HUD will be (buildings, melee, ranged).  You MUST edit this if the unit benefits from being placed first/last, e.g. "when deployed, buff all allies." <-- this should be set order = 50 or something, so it's deployed LAST. By contrast, a unit that has a perk: "Whenever an ally is spawned, earn $1", <-- this should have squadOrder = -30 or something; to ensure it's FIRST.
 ---@field entityId string
 ---@field entityDef ecs.Components
 ---@field rarity g.Rarity
