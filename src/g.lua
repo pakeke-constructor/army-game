@@ -2160,8 +2160,10 @@ function g.snapToPalette(r, gg, b, a)
     a = a or 1
     local best, bestDist = nil, math.huge
     for _, c in ipairs(PALETTE) do
+        local rbar = (r + c.r) * 0.5
         local dr, dg, db = r - c.r, gg - c.g, b - c.b
-        local dist = dr*dr*dr*dr + dg*dg*dg*dg + db*db*db*db
+        -- redmean: cheap perceptual RGB distance
+        local dist = (2 + rbar)*dr*dr + 4*dg*dg + (3 - rbar)*db*db
         if dist < bestDist then
             bestDist = dist
             best = c
