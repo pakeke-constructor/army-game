@@ -86,6 +86,47 @@
 
 
 
+
+<agent_ideas>
+- Remove aggressive RestrictedPython sandboxing for agents; let them free.
+
+- Encourage agents to use variables:
+
+```py
+replace = r'''
+code
+'''
+edit_file(edit, replace)
+# YES!
+```
+
+```py
+edit_file('''
+edit
+''',
+'''
+replace
+''')
+## NO, a lot worse, because agent can't reuse the variable, and it can't "back down" once it's made the edit.
+```
+
+
+Pass ToolResults to LLM subagent tool
+
+
+improvements to main-agent system-prompt.
+- Clearer defined workflow
+- explanation for how to use `condense/checkpoint`
+- IMPORTANT: *Approval box for condense!!! So the user can say: hey, dont condense that*
+
+Set up omni-agent properly (maybe make an agent-creator helper in base-ex6?)
+
+- Have an agent that audits changes (git diffs) and checks for issues. That agent should utilize _ex6/coding_style.
+
+</agent_ideas>
+
+
+
 - Instead of referencing "ATK" and "ASPD" in descriptions; should populate with icon+colored text - so it's a bit more formalized. (E.g. `Gain 1 (ASPD)`, replaces with richtext.)
 
 - In squad-card, Make stats panels better. Most important stats at top. Don't even show other panels.
@@ -140,21 +181,6 @@
 - (STATE) “Deterrent”: On-deploy, your next squad gains the Volatile Perk for the battle, exploding in a large area On-death.
 
 
-
-
-<agent_ideas>
-improvements to main-agent system-prompt.
-- Clearer defined workflow
-- explanation for how to use `condense/checkpoint`
-
-Set up omni-agent properly (maybe make an agent-creator helper in base-ex6?)
-
-- Have an agent that audits changes (git diffs) and checks for issues.
-That agent should utilize _ex6/coding_style.
-
-- add push-ifs-up methodology (inside `_ex6/coding_style`)  https://gieseanw.wordpress.com/2024/06/24/dont-push-ifs-up-put-them-as-close-to-the-source-of-data-as-possible/
-
-</agent_ideas>
 
 
 <scope_creep>
