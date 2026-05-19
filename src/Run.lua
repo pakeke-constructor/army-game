@@ -8,6 +8,7 @@ local MapGraph = require("src.scenes.map_scene.MapGraph")
 ---@field difficulty integer
 ---@field squads {[string]: g.Squad}
 ---@field _sortedSquads g.Squad[]?
+---@field _battleSquads g.Squad[] temporary squads on the bench for the current fight only
 ---@field money number
 ---@field mana g.ManaCounts
 ---@field _battleMana g.ManaCounts
@@ -24,6 +25,7 @@ function Run:init()
 
     self.squads = {}
     self._sortedSquads = nil
+    self._battleSquads = {}
     self.level = 1
     self.xp = 20
     self.money = 0
@@ -61,6 +63,10 @@ function Run:resetForBattle()
         squad.deployed = false -- reset squads
     end
 
+    -- clear temporary fight-only bench squads
+    self._battleSquads = {}
+    self._sortedSquads = nil
+
     -- and reset mana
     self._battleMana = {}
     for mana, count in pairs(self.mana) do
@@ -82,6 +88,8 @@ end
 
 
 function Run:winBattle()
+    self._battleSquads = {}
+    self._sortedSquads = nil
     self.demonRage = self.demonRage + 1
     g.call("battleWon")
 end

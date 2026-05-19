@@ -114,7 +114,7 @@ g.defineBlessing("injection", "Injection", {
     mana = "green",
     handlers = {
         preUpdate = function(dt)
-            if not g.getBattleECS() then return end
+            if not g.tryGetECS() then return end
             _injTimer = _injTimer - dt
             if _injTimer <= 0 then
                 _injTimer = TICK_INTERVAL / g.ask("getTickIntervalMultiplier")
@@ -132,7 +132,7 @@ g.defineBlessing("firestarter", "Firestarter", {
     mana = "red",
     handlers = {
         preUpdate = function(dt)
-            if not g.getBattleECS() then return end
+            if not g.tryGetECS() then return end
             _fireTimer = _fireTimer - dt
             if _fireTimer <= 0 then
                 _fireTimer = TICK_INTERVAL / g.ask("getTickIntervalMultiplier")
@@ -150,7 +150,7 @@ g.defineBlessing("chill", "Chill", {
     mana = "blue",
     handlers = {
         preUpdate = function(dt)
-            if not g.getBattleECS() then return end
+            if not g.tryGetECS() then return end
             _chillTimer = _chillTimer - dt
             if _chillTimer <= 0 then
                 _chillTimer = TICK_INTERVAL / g.ask("getTickIntervalMultiplier")
@@ -167,7 +167,7 @@ g.defineBlessing("misfortune", "Misfortune", {
     rarity = g.RARITIES.COMMON,
     handlers = {
         preUpdate = function(dt)
-            if not g.getBattleECS() then return end
+            if not g.tryGetECS() then return end
             _misfortTimer = _misfortTimer - dt
             if _misfortTimer <= 0 then
                 _misfortTimer = TICK_INTERVAL / g.ask("getTickIntervalMultiplier")

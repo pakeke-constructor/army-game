@@ -159,6 +159,21 @@ g.definePerk("infestation", "Infestation", {
     },
 })
 
+g.definePerk("swarmsurge", "Swarmsurge", {
+    description = loc("Whenever any Green unit dies, this unit summons a Pest."),
+    image = "coin_icon",
+    rawHandlers = {
+        entityDeath = function(self, ent, killer)
+            if not g.isAlive(self) then return end
+            local squadId = ent.type and ent.type:match("^(.-)_unit$")
+            if not squadId then return end
+            local ok, info = pcall(g.getSquadInfo, squadId)
+            if not ok or not (info and info.cost and info.cost.green) then return end
+            g.spawnEntity("pest", self.x, self.y)
+        end,
+    },
+})
+
 g.definePerk("his_gratitude", "His Gratitude", {
     description = loc("On death, deal massive damage to a random enemy."),
     image = "coin_icon",
@@ -205,8 +220,133 @@ g.definePerk("strike_gold", "Strike Gold", {
     description = loc("On-kill, gain 1 Coin."),
     image = "coin_icon",
     handlers = {
-        entityKillsEnemy = function(ent, target)
+        onKill = function(ent, target)
             g.addGold(1)
+        end,
+    },
+})
+
+g.definePerk("extraction", "Extraction", {
+    description = loc("When an enemy dies, gain 2 Coins."),
+    image = "coin_icon",
+    rawHandlers = {
+        entityDeath = function(self, dead, killer)
+            if dead and dead.team == "enemy" then
+                g.addGold(2)
+            end
+        end,
+    },
+})
+
+g.definePerk("consumption", "Consumption", {
+    description = loc("On-kill, spawn a copy of this unit."),
+    image = "coin_icon",
+    handlers = {
+        onKill = function(ent, target)
+            if not g.isAlive(ent) then return end
+            if ent.type then
+                g.spawnEntity(ent.type, ent.x, ent.y)
+            end
+        end,
+    },
+})
+
+g.definePerk("mass_production", "Mass-Production", {
+    description = loc("Has extra units equal to the total levels of all squads in your army."),
+    image = "coin_icon",
+    armyHandlers = {
+        getSquadUnitCountModifier = function(ownerSquad, squadId)
+            if squadId ~= ownerSquad.squadId then return 0 end
+            local total = 0
+            for _, sq in pairs(g.getRun().squads) do
+                total = total + (sq.level or 1)
+            end
+            return total
+        end,
+    },
+})
+
+g.definePerk("invigorate", "Invigorate", {
+    description = loc("Every 2 seconds, 5 nearby allies gain +50% ASPD for 4s."),
+    image = "coin_icon",
+    rawHandlers = {
+        perSecondUpdate = function(self, secondCount)
+            if secondCount % 2 ~= 0 then return end
+            if not g.isAlive(self) then return end
+            local buffed = 0
+            g.iteratePartition("ally", self.x, self.y, function(other)
+                if buffed >= 5 then return end
+                if other == self then return end
+                if not g.isAlive(other) then return end
+                g.addCustomEffect(other, {
+                    getAttackSpeedMultiplier = function(e) return 1.5 end,
+                }, 4)
+                buffed = buffed + 1
+            end, 200)
+        end,
+    },
+})
+
+g.definePerk("protective_coating", "Protective Coating", {
+    description = loc("On-hurt, gives a random nearby ally 1 ARMR. Only triggers on HP damage."),
+    image = "coin_icon",
+    handlers = {
+        entityHurt = function(ent, damage)
+            local nearby = {}
+            g.iteratePartition("ally", ent.x, ent.y, function(other)
+                if other == ent then return end
+                if not g.isAlive(other) then return end
+                nearby[#nearby + 1] = other
+            end, 120)
+            if #nearby > 0 then
+                g.addArmor(nearby[math.random(#nearby)], 1)
+            end
+        end,
+    },
+})
+
+g.definePerk("ritual_sacrifice", "Ritual Sacrifice", {
+    description = loc("On-spawn, kills a nearby ally to gain +2 ATK for the fight."),
+    image = "coin_icon",
+    handlers = {
+        entitySpawned = function(ent)
+            local victim = nil
+            g.iteratePartition("ally", ent.x, ent.y, function(other)
+                if victim then return end
+                if other == ent then return end
+                if not g.isAlive(other) then return end
+                victim = other
+            end, 120)
+            if victim then
+                g.killEntity(victim, ent)
+                g.addCustomEffect(ent, {
+                    getAttackDamageModifier = function(e) return 2 end,
+                }, 9999)
+            end
+        end,
+    },
+})
+
+g.definePerk("conflagrate", "Conflagrate", {
+    description = loc("On-attack, a nearby ally takes 1 damage and gains +1 ATK for the fight."),
+    image = "coin_icon",
+    handlers = {
+        onAttack = function(ent, target)
+            local found = nil
+            g.iteratePartition("ally", ent.x, ent.y, function(other)
+                if found then return end
+                if other == ent then return end
+                if not g.isAlive(other) then return end
+                found = other
+            end, 120)
+            if found then
+                g.dealDamage(found, 1)
+                if g.isAlive(found) then
+                    g.addCustomEffect(found, {
+                        getAttackDamageModifier = function(e) return 1 end,
+                    }, 9999)
+                end
+            end
         end,
     },
 })
@@ -226,11 +366,278 @@ g.definePerk("pinpoint", "Pinpoint", {
     },
 })
 
+--[[ DEFY (backburner - eternal_soldier_squad)
+g.definePerk("defy", "Defy", {
+    description = loc("For the first 15s of battle, on-death, summon a copy with +1 ATK."),
+    image = "coin_icon",
+})
+]]
+
+g.definePerk("life_force", "Life Force", {
+    description = loc("Converts any max HP gained into ATK."),
+    image = "coin_icon",
+    handlers = {
+        entityBuffed = function(ent, stat, increase)
+            if stat ~= "maxHealth" or increase <= 0 then return end
+            g.buffEntity(ent, "maxHealth", -increase)
+            g.buffEntity(ent, "attackDamage", increase)
+        end,
+    },
+})
+
+g.definePerk("explosive", "Explosive", {
+    description = loc("On-hit, causes an explosion dealing full damage to nearby enemies."),
+    image = "coin_icon",
+    rawHandlers = {
+        projectileHit = function(self, projEnt, hitEnt)
+            if not hitEnt then return end
+            if not g.isAlive(self) then return end
+            if not projEnt.projectile or projEnt.projectile.ownerEnt ~= self then return end
+            g.explosion(hitEnt.x, hitEnt.y, self.attackDamage or 0, 70, self)
+        end,
+    },
+})
+
+g.definePerk("helmheart", "Helmheart", {
+    description = loc("Whenever a Blue unit spawns, gains 1 armor."),
+    image = "coin_icon",
+    rawHandlers = {
+        entitySpawned = function(self, ent)
+            if not g.isAlive(self) then return end
+            local squadId = ent.type and ent.type:match("^(.-)_unit$")
+            if not squadId then return end
+            local ok, info = pcall(g.getSquadInfo, squadId)
+            if not ok or not (info and info.cost and info.cost.blue) then return end
+            g.addArmor(self, 1)
+        end,
+    },
+})
+
+g.definePerk("sadistic", "Sadistic", {
+    description = loc("When a nearby ally takes damage, gains 1 ATK for the battle."),
+    image = "coin_icon",
+    rawHandlers = {
+        entityHurt = function(self, ent, damage, attacker)
+            if ent == self then return end
+            if ent.team ~= "ally" then return end
+            if not g.isAlive(self) then return end
+            local dx, dy = self.x - ent.x, self.y - ent.y
+            if dx*dx + dy*dy > 150*150 then return end
+            g.buffEntity(self, "attackDamage", 1)
+        end,
+    },
+})
+
+g.definePerk("sputter", "Sputter", {
+    description = loc("Gains +0.5 ASPD whenever mana is spent."),
+    image = "coin_icon",
+    handlers = {
+        manaSpent = function(ent, manaRequirement)
+            g.buffEntity(ent, "attackSpeed", 0.5)
+        end,
+    },
+})
+
+g.definePerk("shrapnelmancy", "Shrapnelmancy", {
+    description = loc("When any ally loses armor, this unit deals 1 damage to a random nearby enemy."),
+    image = "coin_icon",
+    rawHandlers = {
+        armorDecreased = function(self, ent, removed)
+            if ent.team ~= "ally" then return end
+            if not g.isAlive(self) then return end
+            local enemies = {}
+            g.iteratePartition("enemy", self.x, self.y, function(other)
+                if not g.isAlive(other) then return end
+                enemies[#enemies + 1] = other
+            end, 150)
+            if #enemies > 0 then
+                g.dealDamage(enemies[math.random(#enemies)], 1)
+            end
+        end,
+    },
+})
+
+local function hasMagnificence(ent)
+    if not ent.squad then return false end
+    for _, p in ipairs(ent.squad.perks or {}) do
+        if p == "magnificence" then return true end
+    end
+    return false
+end
+
+g.definePerk("magnificence", "Magnificence", {
+    description = loc("When this unit heals or gains max HP, spread the effect to 3 random nearby allies without this perk."),
+    image = "coin_icon",
+    handlers = {
+        entityHealed = function(ent, amount, healer)
+            local nearby = {}
+            g.iteratePartition("ally", ent.x, ent.y, function(other)
+                if other == ent then return end
+                if not g.isAlive(other) then return end
+                if hasMagnificence(other) then return end
+                nearby[#nearby + 1] = other
+            end, 120)
+            for i = 1, math.min(3, #nearby) do
+                local idx = math.random(i, #nearby)
+                nearby[i], nearby[idx] = nearby[idx], nearby[i]
+                g.healEntity(nearby[i], amount)
+            end
+        end,
+        entityBuffed = function(ent, stat, increase)
+            if stat ~= "maxHealth" or increase <= 0 then return end
+            local nearby = {}
+            g.iteratePartition("ally", ent.x, ent.y, function(other)
+                if other == ent then return end
+                if not g.isAlive(other) then return end
+                if hasMagnificence(other) then return end
+                nearby[#nearby + 1] = other
+            end, 120)
+            for i = 1, math.min(3, #nearby) do
+                local idx = math.random(i, #nearby)
+                nearby[i], nearby[idx] = nearby[idx], nearby[i]
+                g.buffEntity(nearby[i], "maxHealth", increase)
+            end
+        end,
+    },
+})
+
+g.definePerk("reverberate", "Reverberate", {
+    description = loc("When this unit is Buffed, deals 1 damage to all nearby enemies."),
+    image = "coin_icon",
+    handlers = {
+        entityBuffed = function(ent, stat, increase)
+            if increase <= 0 then return end
+            g.iteratePartition("enemy", ent.x, ent.y, function(other)
+                if not g.isAlive(other) then return end
+                g.dealDamage(other, 1)
+            end, 120)
+        end,
+    },
+})
+
+g.definePerk("laser_focus", "Laser Focus", {
+    description = loc("On-attack, this unit gains 0.1 ASPD. Stacks up to 30 times."),
+    image = "coin_icon",
+    handlers = {
+        onAttack = function(ent, target)
+            ent._laserFocusStacks = ent._laserFocusStacks or 0
+            if ent._laserFocusStacks >= 30 then return end
+            ent._laserFocusStacks = ent._laserFocusStacks + 1
+            g.buffEntity(ent, "attackSpeed", 0.1)
+        end,
+    },
+})
+
+g.definePerk("golden_bulk", "Golden Bulk", {
+    description = loc("When you gain Coins during battle, this unit gains an equal amount of armor."),
+    image = "coin_icon",
+    rawHandlers = {
+        goldGained = function(self, amount)
+            if not g.isAlive(self) then return end
+            g.addArmor(self, amount)
+        end,
+    },
+})
+
+g.definePerk("omen", "Omen", {
+    description = loc("On-heal, triggers the healed ally's On-death effects without killing it."),
+    image = "coin_icon",
+    handlers = {
+        onAttack = function(ent, target)
+            if not ent.healPower then return end
+            if not target or not g.isAlive(target) then return end
+            if target.entityDeath then
+                target.entityDeath(target, ent)
+            end
+            if target.scope then
+                target.scope:call("entityDeath", target, ent)
+            end
+        end,
+    },
+})
+
+g.definePerk("circle_of_life", "Circle of Life", {
+    description = loc("On-death, all allies gain 10% of this unit's max HP."),
+    image = "coin_icon",
+    handlers = {
+        entityDeath = function(ent, killer)
+            local amount = (ent.maxHealth or 0) * 0.1
+            if amount <= 0 then return end
+            for _, other in ent:getWorld():iterate("team") do
+                if other.team == "ally" and g.isAlive(other) then
+                    g.healEntity(other, amount)
+                end
+            end
+        end,
+    },
+})
+
+g.definePerk("her_wrath", "Her Wrath", {
+    description = loc("Whenever an ally heals, this building damages a random enemy equal to 100% of the heal value."),
+    image = "coin_icon",
+    rawHandlers = {
+        entityHealed = function(self, ent, amount, healer)
+            if not g.isAlive(self) then return end
+            if not ent or ent.team ~= "ally" then return end
+            if not amount or amount <= 0 then return end
+            local enemies = {}
+            for _, other in self:getWorld():iterate("team") do
+                if other.team == "enemy" and g.isAlive(other) then
+                    enemies[#enemies + 1] = other
+                end
+            end
+            if #enemies > 0 then
+                g.dealDamage(enemies[math.random(#enemies)], amount)
+            end
+        end,
+    },
+})
+
+g.definePerk("forge_life", "Forge Life", {
+    description = loc("This unit has additional HEAL equal to its ARMR."),
+    image = "coin_icon",
+    handlers = {
+        getHealPowerModifier = function(ent)
+            return math.floor(ent.armor or 0)
+        end,
+    },
+})
+
+-- The actual duplication logic lives in the squad's onDeploySquad hook, which is
+-- guaranteed to run with the deployed squad fully set up. This perk is the label.
+g.definePerk("duplication", "Duplication", {
+    description = loc("On-deploy, add a copy of the deployed squad to your bench for the fight."),
+    image = "coin_icon",
+    handlers = {},
+})
+
+g.definePerk("rebirth", "Rebirth", {
+    description = loc("When you spend Blue mana, trigger the On-spawn effects of all allied units in a large radius around this building."),
+    image = "coin_icon",
+    handlers = {
+        manaSpent = function(ent, manaRequirement)
+            if not (manaRequirement and (manaRequirement.blue or 0) > 0) then return end
+            if not g.isAlive(ent) then return end
+            g.iteratePartition("ally", ent.x, ent.y, function(other)
+                if not g.isAlive(other) then return end
+                -- Re-fire the entity's own On-spawn effects: its entityDef hook
+                -- and its perk handlers, without re-triggering scene-level listeners.
+                if other.entitySpawned then
+                    other.entitySpawned(other)
+                end
+                if other.scope then
+                    other.scope:call("entitySpawned", other)
+                end
+            end, 250)
+        end,
+    },
+})
+
 g.definePerk("vampiric", "Vampiric", {
     description = loc("This unit heals for 3 HP on kill."),
     image = "coin_icon",
     handlers = {
-        entityKillsEnemy = function(ent, target)
+        onKill = function(ent, target)
             if ent.hp and ent.maxHp then
                 ent.hp = math.min(ent.hp + 3, ent.maxHp)
             end

@@ -170,7 +170,7 @@ function love.update(dt)
         perSecondUpdateTimer = perSecondUpdateTimer - 1
         secondCount = secondCount + 1
         if sc and sc.perSecondUpdate then
-            sc:perSecondUpdate()
+            sc:perSecondUpdate(secondCount)
         end
     end
 end
