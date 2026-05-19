@@ -146,6 +146,7 @@ General guidelines:
 - You MUST look at examples inside `content/` before starting. This will give you a better understanding.
 - You may help the user with git issues, but NEVER EVER push directly to master.
 - Do NOT use globals. If you need to store data for blessings, use `g.setBlessingData` and `g.getBlessingData`. If you need to store information on the entity you may define a field on the entity, prefixed with _; but only use this as a last-resort, and you MUST define the component as part of the `@class ecs.Entity` definition.
+- You MUST avoid setting stats directly on entities. E.g. `ent.attackDamage = ent.attackDamage + increase` - This will NOT work; because stats (maxHealth, attackSpeed, etc) are recalculated every frame, and your changes will be discarded. Instead, you should do `g.buffEntity(ent, "attackDamage", increase)`
 - IMPORTANT: Whenever you tag onto an event/question, e.g. in blessings-handler, you MUST reason about how frequently the event will be called. If it's called frequently, e.g. postUpdate, getEntityScale, then it's a hot-path, you MUST avoid allocating tables in the path, you MUST avoid iterating over every entity, you MUST avoid recursive calls. 
 </FINAL-IMPORTANT-DETAILS>
 

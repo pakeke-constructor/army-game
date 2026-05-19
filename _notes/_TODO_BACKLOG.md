@@ -72,6 +72,10 @@
 - Cleave: Attacks deal AOE.
 - Soul Harvest: For every 10 allies that die nearby, this squad gains 1 DMG permanently.
 - Add a HUD priority system, which sorts squads before playing (eg suicide-bombers first, melee next, ranged next, and buffers/onDeploy squads last)
+- Weapons system: Make it so weapons can be held/used
+- melee: swords + sword swinging
+- ranged: bows, + bow pointing in direction they aim
+
 
 
 
@@ -81,18 +85,10 @@
 
 
 
-
-
 - CLAUDE.MD: Should know "roughly" how much each stat is worth.
 
 
 - CLAUDE.MD: Tell agent to avoid setting stats directly (use actual example)
-
-
-
-- Weapons system: Make it so weapons can be held/used
-- melee: swords + sword swinging
-- ranged: bows, + bow pointing in direction they aim
 
 
 - Juice for placing units (deploy them sequentially so its satisfying?)
