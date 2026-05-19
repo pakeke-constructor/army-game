@@ -176,6 +176,8 @@ local shadow = {
 ---@field public statusEffectApplied fun(ecs.Entity, string, number, ecs.Entity?)?
 ---@field public physics ecs.components.Physics?
 ---@field public partitions string[]?
+---@field public ___removed boolean?
+---@field public ___dead boolean?
 local ecs_Entity = {}
 
 

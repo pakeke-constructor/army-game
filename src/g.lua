@@ -1317,7 +1317,8 @@ end
 ---@param ent ecs.Entity
 ---@param killer ecs.Entity?
 function g.killEntity(ent, killer)
-    if not g.isAlive(ent) then return end
+    if ent.___dead or not g.isAlive(ent) then return end
+    ent.___dead = true
     ent.health = 0
     g.call("entityDeath", ent, killer)
     if killer then
