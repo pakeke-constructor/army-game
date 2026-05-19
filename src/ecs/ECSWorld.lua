@@ -146,6 +146,9 @@ function ECSWorld:update(dt)
                 end
             end
         end
+        if e._timeSinceDeployed then
+            e._timeSinceDeployed = e._timeSinceDeployed + dt
+        end
         if e.vz then
             e.vz = e.vz - consts.GRAVITY * dt
             e.z = math.max(0, (e.z or 0) + e.vz * dt)

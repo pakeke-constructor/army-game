@@ -159,6 +159,7 @@ local shadow = {
 ---@field public isPest number? returns true if this entity is a "pest"
 ---@field public _timeSinceDamaged number?
 ---@field public _timeSinceLostArmor number?
+---@field public _timeSinceDeployed number?
 ---@field public _damageLagAmount number?
 ---@field public onUpdate fun(ecs.Entity, number)?
 ---@field public onDraw fun(ecs.Entity)?

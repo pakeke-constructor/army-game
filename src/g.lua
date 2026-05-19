@@ -888,6 +888,9 @@ function g.removePerkFromSquad(squad, perkId)
     return false
 end
 
+
+local DEPLOY_ANIMATION_STEP = 0.04
+
 ---@param squad g.Squad
 ---@param x number
 ---@param y number
@@ -908,6 +911,7 @@ function g.spawnSquad(squad, x, y, ...)
         local ent = g.spawnEntity(info.entityId, x + offsets[i].x, y + offsets[i].y, ...)
         ent.scope = squadScope
         ent.squad = squad
+        ent._timeSinceDeployed = -((i - 1) * DEPLOY_ANIMATION_STEP)
         entities[i] = ent
     end
     if info.onDeploySquad then
@@ -1519,9 +1523,21 @@ local function drawWeapon(ent, x,y)
     -- g.drawImageOffset(wep.image, )
 end
 
+
+local DEPLOY_STRETCH_SY = 2.8
+local DEPLOY_ANIMATION_DURATION = 0.15
+
 function g.drawEntity(ent, x, y)
     local entScale = g.ask("getEntityScale", ent) * (ent.scale or 1)
     local sx, sy = (ent.sx or 1) * (ent.faceDir or 1) * entScale, (ent.sy or 1) * entScale
+    if ent._timeSinceDeployed then
+        if ent._timeSinceDeployed < 0 then
+            return
+        end
+        local p = math.min(1, ent._timeSinceDeployed / DEPLOY_ANIMATION_DURATION)
+        sx = sx * (0.3 + 0.7 * p)
+        sy = sy * (DEPLOY_STRETCH_SY - (DEPLOY_STRETCH_SY - 1) * p)
+    end
     if ent.draw then
         ent:draw(x, y)
         return
