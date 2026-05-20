@@ -4,7 +4,7 @@ local hoverService = require("src.hud.hoverService")
 local STAT_LIST = {
     {id = "maxHealth", label = "HP"},
     {id = "DPS", label = "DPS"}, -- special: calculated via (DMG x AS)
-    {id = "armor", label = "ARM"},
+    {id = "startingArmor", label = "ARM"},
     {id = "moveSpeed", label = "SPD"},
     {id = "attackRange", label = "RNG"},
 }

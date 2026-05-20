@@ -1461,7 +1461,7 @@ local function drawWeapon(ent, x,y)
         local swingTime = (wep.swingTime) or 0.2
         local ratio = helper.clamp(1 - (atkTime / swingTime), 0, 1)
         local face = ent.faceDir or 1
-        local rot = helper.EASINGS.sineInOut(ratio) * 1.2 * face
+        local rot = helper.EASINGS.easeOutBack(ratio) * 1.2 * face
         local dxx, dyy = helper.fromPolar(rot, 7 * ratio ^ 0.5)
         dyy = dyy - math.floor(h/5)
         g.drawImageOffset(wep.image, x + dx + dxx, y + dyy, rot, 1,1, 0.5, 0.95)
@@ -2292,7 +2292,7 @@ g.defineStat("attackRange", "baseAttackRange", {
     icon = "range",
     isImportant = _importantIfRanged,
 })
-g.defineStat("armor", "baseArmor", {
+g.defineStat("startingArmor", "baseStartingArmor", {
     displayName = "Armor",
     description = "Reduces damage taken",
     color = objects.Color(0.6, 0.6, 0.7),
