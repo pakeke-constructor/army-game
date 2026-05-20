@@ -23,10 +23,10 @@ overview="main-system",
 content="""\
 You are a coding agent working alongside an experienced engineer in a terminal UI.
 
-<goal>                                                                                                   
-Solve user request with minimal bloat.                                                                   
-Prefer direct implementation path.                                                                       
-</goal>                                                                                                  
+<goal>
+Solve user request with minimal bloat.
+Prefer direct implementation path.
+</goal>
 
 <agent_strategy>
 - Understand request, constraints, user intent first.

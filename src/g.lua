@@ -2431,14 +2431,6 @@ function g.trySpendMana(manaCells, manaRequirement)
         manaCells[k] = v
     end
     g.call("manaSpent", manaRequirement)
-    local ecs = g.tryGetECS()
-    if ecs then
-        for _, ent in ecs:iterate("team") do
-            if ent.scope then
-                ent.scope:call("manaSpent", ent, manaRequirement)
-            end
-        end
-    end
     return true
 end
 

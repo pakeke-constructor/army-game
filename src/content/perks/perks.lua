@@ -391,7 +391,7 @@ g.definePerk("explosive", "Explosive", {
 })
 
 g.definePerk("helmheart", "Helmheart", {
-    description = loc("Whenever a Blue unit spawns, gains 1 armor."),
+    description = loc("Whenever a Blue unit spawns, gains 1 ARMR."),
     image = "coin_icon",
     rawHandlers = {
         entitySpawned = function(self, ent)
@@ -420,15 +420,6 @@ g.definePerk("sadistic", "Sadistic", {
     },
 })
 
-g.definePerk("sputter", "Sputter", {
-    description = loc("Gains +0.5 ASPD whenever mana is spent."),
-    image = "coin_icon",
-    handlers = {
-        manaSpent = function(ent, manaRequirement)
-            g.buffEntity(ent, "attackSpeed", 0.5)
-        end,
-    },
-})
 
 g.definePerk("shrapnelmancy", "Shrapnelmancy", {
     description = loc("When any ally loses armor, this unit deals 1 damage to a random nearby enemy."),
@@ -557,6 +548,7 @@ g.definePerk("circle_of_life", "Circle of Life", {
             if amount <= 0 then return end
             for _, other in ent:getWorld():iterate("team") do
                 if other.team == "ally" and g.isAlive(other) then
+                    g.buffEntity(other, "maxHealth", amount)
                     g.healEntity(other, amount)
                 end
             end
@@ -630,9 +622,7 @@ g.definePerk("vampiric", "Vampiric", {
     image = "coin_icon",
     handlers = {
         onKill = function(ent, target)
-            if ent.hp and ent.maxHp then
-                ent.hp = math.min(ent.hp + 3, ent.maxHp)
-            end
+            g.healEntity(ent, 3, ent)
         end,
     },
 })
