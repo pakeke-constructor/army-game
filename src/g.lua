@@ -2059,19 +2059,20 @@ g.RARITIES = {
 }
 
 
----@alias g.Stat {id:string, name:string, displayName:string, description:string, baseName:string, modQ:string, mulQ:string, color:objects.Color, icon:string, isImportant:fun(ent:ecs.Entity, stat:string):boolean}
+---@alias g.Stat {id:string, name:string, displayName:string, description:string, shortName:string, richText:string, baseName:string, modQ:string, mulQ:string, color:objects.Color, icon:string, isImportant:fun(ent:ecs.Entity, stat:string):boolean}
 local STAT_LIST = {}
 local STAT_DEFS = {}
 
 ---@param id string
 ---@param baseName string
----@param info {displayName:string, description:string, color:objects.Color, icon:string, isImportant:fun(ent:ecs.Components):boolean}
+---@param info {displayName:string, description:string, shortName:string, color:objects.Color, icon:string, isImportant:fun(ent:ecs.Components):boolean}
 function g.defineStat(id, baseName, info)
     local Name = id:sub(1,1):upper() .. id:sub(2)
     local modQ = "get" .. Name .. "Modifier"
     local mulQ = "get" .. Name .. "Multiplier"
     g.defineQuestion(modQ, reducers.ADD, 0)
     g.defineQuestion(mulQ, reducers.MULTIPLY, 1)
+    local r, gg, b = info.color:getRGBA()
     local stat = {
         id = id,
         name = id,
@@ -2081,6 +2082,8 @@ function g.defineStat(id, baseName, info)
         description = loc(info.description, {}, {
             context = "The description of a unit stat, explaining what it does"
         }),
+        shortName = info.shortName,
+        richText = string.format("{%s}{c r=%.3f g=%.3f b=%.3f}%s{/c}", info.icon, r, gg, b, info.shortName),
         baseName = baseName,
         modQ = modQ,
         mulQ = mulQ,
@@ -2246,6 +2249,7 @@ end
 g.defineStat("maxHealth", "baseMaxHealth", {
     displayName = "Health",
     description = "Health of unit",
+    shortName = "HP",
     color = objects.Color(0.3, 0.9, 0.3),
     icon = "health",
     isImportant = _alwaysImportant,
@@ -2253,6 +2257,7 @@ g.defineStat("maxHealth", "baseMaxHealth", {
 g.defineStat("attackDamage", "baseAttackDamage", {
     displayName = "Attack Damage",
     description = "Damage per attack",
+    shortName = "ATK",
     color = objects.Color(0.95, 0.3, 0.3),
     icon = "damage",
     isImportant = _alwaysImportant,
@@ -2260,6 +2265,7 @@ g.defineStat("attackDamage", "baseAttackDamage", {
 g.defineStat("healPower", "baseHealPower", {
     displayName = "Heal Power",
     description = "Healing per attack",
+    shortName = "HEAL",
     color = objects.Color(0.3, 0.95, 0.6),
     icon = "healpower",
     isImportant = _importantIfNonZero,
@@ -2267,6 +2273,7 @@ g.defineStat("healPower", "baseHealPower", {
 g.defineStat("attackSpeed", "baseAttackSpeed", {
     displayName = "Attack Speed",
     description = "Attacks per second",
+    shortName = "ASPD",
     color = objects.Color(0.95, 0.85, 0.3),
     icon = "atkspeed",
     isImportant = _importantIfRanged,
@@ -2274,6 +2281,7 @@ g.defineStat("attackSpeed", "baseAttackSpeed", {
 g.defineStat("lifesteal", "baseLifesteal", {
     displayName = "Lifesteal",
     description = "Health gained per attack damage dealt",
+    shortName = "LIFESTEAL",
     color = objects.Color(0.7, 0.2, 0.4),
     icon = "damage",
     isImportant = _importantIfNonZero,
@@ -2281,6 +2289,7 @@ g.defineStat("lifesteal", "baseLifesteal", {
 g.defineStat("moveSpeed", "baseMoveSpeed", {
     displayName = "Move Speed",
     description = "Movement speed",
+    shortName = "SPD",
     color = objects.Color(0.4, 0.7, 0.95),
     icon = "movespeed",
     isImportant = _importantIfMelee,
@@ -2288,6 +2297,7 @@ g.defineStat("moveSpeed", "baseMoveSpeed", {
 g.defineStat("attackRange", "baseAttackRange", {
     displayName = "Attack Range",
     description = "Range of attacks",
+    shortName = "RNG",
     color = objects.Color(0.8, 0.5, 0.2),
     icon = "range",
     isImportant = _importantIfRanged,
@@ -2295,6 +2305,7 @@ g.defineStat("attackRange", "baseAttackRange", {
 g.defineStat("startingArmor", "baseStartingArmor", {
     displayName = "Armor",
     description = "Reduces damage taken",
+    shortName = "ARMR",
     color = objects.Color(0.6, 0.6, 0.7),
     icon = "armor",
     isImportant = _importantIfNonZero,
@@ -2302,6 +2313,7 @@ g.defineStat("startingArmor", "baseStartingArmor", {
 g.defineStat("projectileAccuracy", "baseProjectileAccuracy", {
     displayName = "Accuracy",
     description = "Projectile accuracy",
+    shortName = "ACC",
     color = objects.Color(0.9, 0.9, 0.9),
     icon = "hourglass_icon",
     isImportant = _importantIfRanged,

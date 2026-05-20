@@ -87,23 +87,6 @@
 
 
 
-<agent_ideas>
-
-
-- EX6: improvements to main-agent system-prompt.
-- Clearer defined workflow
-- explanation for how to use `condense/checkpoint`
-- IMPORTANT: *Approval box for condense!!! So the user can say: hey, dont condense that*
-
-
-- Git tool that prints git-diffs
-
-- Have an agent that audits changes (git diffs) and checks for issues. That agent should utilize _ex6/coding_style.
-- Set up omni-agent properly (maybe make an agent-creator helper in base-ex6?)
-
-</agent_ideas>
-
-
 
 - Instead of referencing "ATK" and "ASPD" in descriptions; should populate with icon+colored text - so it's a bit more formalized. (E.g. `Gain 1 (ASPD)`, replaces with richtext.)
 
