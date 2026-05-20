@@ -80,7 +80,7 @@
 - Juice for placing units (deploy them sequentially so its satisfying?)
 -- show name above unit when hovering it
 -- units deploy sequentially, (stretched towards sky?)
-
+- EX6: Remove aggressive RestrictedPython sandboxing for agents; let them free.
 
 ### OK:: what do we need for a minimum-playable game?
 
@@ -88,40 +88,18 @@
 
 
 <agent_ideas>
-- Remove aggressive RestrictedPython sandboxing for agents; let them free.
-
-- Encourage agents to use variables:
-
-```py
-replace = r'''
-code
-'''
-edit_file(edit, replace)
-# YES!
-```
-
-```py
-edit_file('''
-edit
-''',
-'''
-replace
-''')
-## NO, a lot worse, because agent can't reuse the variable, and it can't "back down" once it's made the edit.
-```
 
 
-Pass ToolResults to LLM subagent tool
-
-
-improvements to main-agent system-prompt.
+- EX6: improvements to main-agent system-prompt.
 - Clearer defined workflow
 - explanation for how to use `condense/checkpoint`
 - IMPORTANT: *Approval box for condense!!! So the user can say: hey, dont condense that*
 
-Set up omni-agent properly (maybe make an agent-creator helper in base-ex6?)
+
+- Git tool that prints git-diffs
 
 - Have an agent that audits changes (git diffs) and checks for issues. That agent should utilize _ex6/coding_style.
+- Set up omni-agent properly (maybe make an agent-creator helper in base-ex6?)
 
 </agent_ideas>
 
