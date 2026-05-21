@@ -424,7 +424,7 @@ function battle_scene:draw()
     ui.startUI()
 
     local sw, sh = love.graphics.getDimensions()
-    if not self.victory and iml.wasJustClicked(0, 0, sw, sh, 1, "deploy_click") then
+    if not self.victory and iml.wasJustPressed(0, 0, sw, sh, 1, "deploy_click") then
         local entry = self.hud:getSelection()
         local mx, my = love.mouse.getPosition()
         local wx, wy = self.camera:toWorld(mx, my)
