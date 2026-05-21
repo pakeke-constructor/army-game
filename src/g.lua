@@ -1786,6 +1786,18 @@ function g.spawnParticle(particleName, x, y, amount)
 end
 
 
+function g.addWorldTextPopup(x, y, richtxt, font, vely, duration)
+    local sx, sy = g.worldToScreen(x, y)
+    textPopupService.addPopup(sx, sy, richtxt, font, vely, duration)
+end
+
+function g.addUITextPopup(x, y, richtxt, font, vely, duration)
+    local t = ui.getUIScalingTransform()
+    local sx, sy = t:transformPoint(x, y)
+    textPopupService.addPopup(sx, sy, richtxt, font, vely, duration)
+end
+
+
 -- Event Bus / Question Bus
 local reducers = require("src.modules.reducers")
 
