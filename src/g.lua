@@ -1786,15 +1786,23 @@ function g.spawnParticle(particleName, x, y, amount)
 end
 
 
-function g.addWorldTextPopup(x, y, richtxt, font, vely, duration)
+--- @param x number
+--- @param y number
+--- @param richtxt any
+--- @param args textPopupService.args?
+function g.addWorldTextPopup(x, y, richtxt, args)
     local sx, sy = g.worldToScreen(x, y)
-    textPopupService.addPopup(sx, sy, richtxt, font, vely, duration)
+    textPopupService.addPopup(sx, sy, richtxt, args)
 end
 
-function g.addUITextPopup(x, y, richtxt, font, vely, duration)
+--- @param x number
+--- @param y number
+--- @param richtxt any
+--- @param args textPopupService.args?
+function g.addUITextPopup(x, y, richtxt, args)
     local t = ui.getUIScalingTransform()
     local sx, sy = t:transformPoint(x, y)
-    textPopupService.addPopup(sx, sy, richtxt, font, vely, duration)
+    textPopupService.addPopup(sx, sy, richtxt, args)
 end
 
 
