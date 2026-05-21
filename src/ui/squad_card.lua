@@ -12,43 +12,25 @@ local STAT_LIST = {
 local STAT_FONT = nil
 local TITLE_FONT = nil
 
-local PERK_FONT = nil
 local PERK_DESC_FONT = nil
 
-local function addPerk(box, perk)
-    PERK_FONT = PERK_FONT or g.getBigFont(16)
+
+---@param region kirigami.Region
+---@param perk g.PerkInfo?
+---@param col objects.Color
+local function drawPerkSlot(region, perk, col)
+    if not perk then return end
+
+    local x, y, w, h = region:get()
+    local rr, gg, bb, aa = 0,0,0,1
+    love.graphics.setColor(rr,gg,bb,aa * 0.7)
+
     PERK_DESC_FONT = PERK_DESC_FONT or g.getSmallFont(16)
-    local iconSize = 20
-    local gap = 6
-    -- icon + title row (centered)
-    box:add({
-        getHeight = function() return iconSize end,
-        draw = function(ex, ey, ew, eh)
-            local textW = PERK_FONT:getWidth(perk.name)
-            local totalW = iconSize + gap + textW
-            local sx = ex + (ew - totalW) / 2
-            love.graphics.setColor(1, 1, 1)
-            if perk.image and g.isImage(perk.image) then
-                g.drawImageContained(perk.image, sx, ey, iconSize, iconSize)
-            end
-            love.graphics.setFont(PERK_FONT)
-            love.graphics.setColor(0.9, 0.85, 0.6)
-            love.graphics.print(perk.name, sx + iconSize + gap, ey + iconSize / 2 - PERK_FONT:getHeight() / 2)
-        end,
-    })
-    -- description row
-    box:add({
-        getHeight = function(innerW)
-            love.graphics.setFont(PERK_DESC_FONT)
-            local _, lines = PERK_DESC_FONT:getWrap(perk.description, innerW)
-            return #lines * PERK_DESC_FONT:getHeight()
-        end,
-        draw = function(ex, ey, ew, eh)
-            love.graphics.setFont(PERK_DESC_FONT)
-            love.graphics.setColor(0.7, 0.7, 0.75)
-            love.graphics.printf(perk.description, ex, ey, ew, "center")
-        end,
-    })
+
+    ui.drawSingleColorPanel(x, y, w, h)
+    local txt = helper.wrapRichtextColor(col, "{o}" .. perk.name .. "{/o}")
+    local desc = "{c r=0.7 g=0.7 b=0.75}" .. perk.description
+    richtext.printRichContained(txt .. "\n" .. desc, PERK_DESC_FONT, region:get())
 end
 
 
@@ -106,7 +88,7 @@ local function drawSquadCard(squadId, region, index)
     STAT_FONT = STAT_FONT or g.getSmallFont(16)
     TITLE_FONT = TITLE_FONT or g.getBigFont(16)
 
-    local box = ui.Box({maxWidth = w, padding = 12, spacing = 8}, function(bx, by, bw, bh)
+    local box = ui.Box({maxWidth = w, maxHeight = h, padding = 12, spacing = 8}, function(bx, by, bw, bh)
         if existingSquad then
             helper.drawEdgeTrailAnimation(region, col, 0.25, 20)
             helper.drawEdgeTrailAnimation(region, col, 0.75, 20)
@@ -249,12 +231,16 @@ local function drawSquadCard(squadId, region, index)
 
     -- Perks
     local perks = info.perks or {}
-    for i = 1, #perks do
-        local perkInfo = g.getPerkInfo(perks[i])
-        if perkInfo then
-            addPerk(box, perkInfo)
-        end
-    end
+    box:addFill({
+        getHeight = function() return 0 end,
+        draw = function(ex, ey, ew, eh)
+            local perkRegs = {Kirigami(ex, ey, ew, eh):splitVertical(1, 1, 1)}
+            for i = 1, 3 do
+                local perkInfo = perks[i] and g.getPerkInfo(perks[i]) or nil
+                drawPerkSlot(perkRegs[i]:padUnit(2, 2), perkInfo, col)
+            end
+        end,
+    })
 
     local ret = false
     if iml.wasJustClicked(x, y, w, h, 1, uid) then
@@ -282,7 +268,6 @@ local function drawSquadCard(squadId, region, index)
         richtext.printRichContainedNoWrap("{wavy amp=0.3}{o}" ..UPGRADE_COL.. UPGRADE, titleFont, r1:moveRatio(0,-0.7):padRatio(0.3):get())
 
         local buf = {}
-        local lv = existingSquad.level
         for statId, _ in pairs(info.statUpgradeScaling) do
             local statInfo = g.getStatInfo(statId)
             local base = def[statInfo.baseName] or 0

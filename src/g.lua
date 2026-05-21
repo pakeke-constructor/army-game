@@ -685,6 +685,9 @@ function g.defineSquad(id, info)
     end
 
     local def = info.entityDef
+    if (def.baseHealPower or def.baseAttackDamage) then
+        assert(def.baseAttackSpeed)
+    end
     def.team = def.team or "ally"
     def.partitions = def.partitions or {"unit", "ally"}
     def.ai = def.ai or { target = "enemy" }
