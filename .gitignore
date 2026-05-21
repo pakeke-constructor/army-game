@@ -13,6 +13,10 @@ steam_api64.dll
 *.ase
 *.aseprite
 
+*.kra
+*.kra~
+
+
 *.pyc
 jit/
 
