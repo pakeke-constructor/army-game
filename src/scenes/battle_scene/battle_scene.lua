@@ -233,6 +233,23 @@ local BATTLE_START = {
 }
 
 
+local CANT_AFFORD = interp("{c r=1 g=0.2 b=0.2}{o}Can't afford! (Need {%{manaType}})", {
+    context = "Popup shown when player tries to deploy a squad but doesn't have enough mana. %{manaType} is a richtext icon for the mana type (e.g. red, blue, green, yellow)."
+})
+
+---@param cost g.ManaBundle
+---@param counts g.ManaCounts
+---@return g.ManaType?
+local function findMissingMana(cost, counts)
+    for _, mt in ipairs(g.getManaTypelist()) do
+        if (cost[mt] or 0) > (counts[mt] or 0) then
+            return mt
+        end
+    end
+    return g.getManaTypelist()[1]
+end
+
+
 local dbg = function(r)
     if consts.DEV_MODE then lg.rectangle("line", r:get()) end
 end
@@ -432,6 +449,13 @@ function battle_scene:draw()
             local info = g.getSquadInfo(entry.squadId)
             if not info.cost or g.trySpendMana(g.getBattleManaCounts(), info.cost) then
                 entry:spawn(wx, wy)
+            else
+                local manaType = findMissingMana(info.cost, g.getBattleManaCounts())
+                local umx, umy = ui.getMouse()
+                g.addUITextPopup(umx, umy, CANT_AFFORD({manaType = manaType}), {
+                    fadeIn = 0.15,
+                    duration = 1.5,
+                })
             end
         end
     end

@@ -30,10 +30,7 @@ local LOC_HOVER_DAYS = loc("Days remaining until the next Incursion!", {}, {cont
 local function isSlotAvailable(slot)
     local army = g.getSortedArmyList()
     local squad = army[slot]
-    if (squad) and (not squad.deployed) and (squad.canAfford) then
-        return true
-    end
-    return false
+    return squad and (not squad.deployed) or false
 end
 
 ---@param from integer
@@ -43,13 +40,19 @@ local function getClosestAvailableSlot(from)
     local total = #army
     if total == 0 then return nil end
     from = helper.clamp(from, 1, total)
+    local fallback
     for offset = 0, total - 1 do
-        local left = from - offset
-        if left >= 1 and isSlotAvailable(left) then return left end
-        local right = from + offset
-        if right <= total and isSlotAvailable(right) then return right end
+        for _, slot in ipairs({from - offset, from + offset}) do
+            if slot >= 1 and slot <= total then
+                local sq = army[slot]
+                if sq and not sq.deployed then
+                    if sq.canAfford then return slot end
+                    fallback = fallback or slot
+                end
+            end
+        end
     end
-    return nil
+    return fallback
 end
 
 ---@param self g.HUD

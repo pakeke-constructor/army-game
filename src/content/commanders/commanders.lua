@@ -4,7 +4,7 @@ g.defineCommander("sir_horse", "Sir Horse", {
     description = loc("Basic commander"),
 
     startMana = {
-        [g.WILDCARD_MANA] = 10,
+        [g.WILDCARD_MANA] = 2,
         red = 2,
         green = 2
     },
