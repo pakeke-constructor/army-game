@@ -108,7 +108,7 @@ local shadow = {
 ---@field public faceDir integer?
 ---@field public taunt ecs.components.Taunt?
 ---@field public fear ecs.components.Fear?
----@field public team "ally"|"enemy"
+---@field public team ("ally"|"enemy")?
 ---@field public color objects.Color?
 ---@field public x number?
 ---@field public y number?

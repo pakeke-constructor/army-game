@@ -8,11 +8,6 @@ g.defineSquad("archer_squad", {
         image = "longbowman", -- placeholder
         shadow = {},
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-        partitions = {"unit", "ally"},
-        team = "ally",
-        ai = {
-            target = "enemy",
-        },
         attack = {
             attackType = "ranged",
             projectileType = "arrow",
@@ -31,7 +26,6 @@ g.defineSquad("archer_squad", {
         baseMaxHealth = 30,
     },
     unitCount = 4,
-    icon = "example_squad_icon",
     perks = {"sharpshooter"},
     cost = {red = 1},
 
@@ -48,8 +42,6 @@ g.defineSquad("healer_archer_squad", {
         image = "longbowman",
         shadow = {},
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-        partitions = {"unit", "ally"},
-        team = "ally",
         ai = {
             target = "ally",
         },
@@ -70,7 +62,6 @@ g.defineSquad("healer_archer_squad", {
         baseMaxHealth = 30,
     },
     unitCount = 4,
-    icon = "example_squad_icon",
     cost = {red = 1},
 })
 
@@ -83,11 +74,6 @@ g.defineSquad("militia_squad", {
         image = "militia",
         shadow = {},
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-        partitions = {"unit", "ally"},
-        team = "ally",
-        ai = {
-            target = "enemy",
-        },
         attack = {
             attackType = "melee",
         },
@@ -106,7 +92,6 @@ g.defineSquad("militia_squad", {
     statUpgradeScaling = {
         maxHealth = 0.5
     },
-    icon = "example_squad_icon",
     perks = {},
     cost = {green = 1},
 })
@@ -120,11 +105,6 @@ g.defineSquad("militia_band", {
         image = "militia",
         shadow = {},
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-        partitions = {"unit", "ally"},
-        team = "ally",
-        ai = {
-            target = "enemy",
-        },
         attack = {
             attackType = "melee",
         },
@@ -139,7 +119,6 @@ g.defineSquad("militia_band", {
         baseMaxHealth = 120,
     },
     unitCount = 6,
-    icon = "example_squad_icon",
     perks = {"berserker"},
     cost = {green = 1, red=1},
 })
@@ -154,11 +133,6 @@ g.defineSquad("aggravator_7000_squad", {
     entityDef = {
         image = "militia",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-        partitions = {"unit", "ally"},
-        team = "ally",
-        ai = {
-            target = "enemy",
-        },
         attack = {
             attackType = "melee",
         },
@@ -174,7 +148,6 @@ g.defineSquad("aggravator_7000_squad", {
         baseStartingArmor = 10,
     },
     unitCount = 1,
-    icon = "example_squad_icon",
     perks = {"racket"},
     cost = {red = 1, blue = 1},
 })
@@ -207,9 +180,6 @@ do
         entityDef = {
             image = "barbarian",
             physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-            partitions = {"unit", "ally"},
-            team = "ally",
-            ai = { target = "enemy" },
             attack = { attackType = "melee" },
             weapon = { image = "orc_battleaxe", type = "sword" },
             baseAttackDamage = 4,
@@ -219,7 +189,6 @@ do
             baseMaxHealth = 18,
         },
         unitCount = 3,
-        icon = "example_squad_icon",
         perks = {"defy"},
         cost = {red = 1},
         onDeploySquad = function(info, entities)
@@ -238,11 +207,6 @@ g.defineSquad("quartz_cannoneer_squad", {
     entityDef = {
         image = "longbowman",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-        partitions = {"unit", "ally"},
-        team = "ally",
-        ai = {
-            target = "enemy",
-        },
         attack = {
             attackType = "ranged",
             projectileType = "arrow",
@@ -259,7 +223,6 @@ g.defineSquad("quartz_cannoneer_squad", {
         baseMaxHealth = 8,
     },
     unitCount = 4,
-    icon = "example_squad_icon",
     perks = {"pinpoint"},
     cost = {blue = 1, red = 1},
 })
@@ -272,9 +235,6 @@ g.defineSquad("world_devourer_squad", {
     entityDef = {
         image = "militia",
         physics = { shape = "circle", radius = 6, ox = 0, oy = 0, mass = 1 },
-        partitions = {"unit", "ally"},
-        team = "ally",
-        ai = { target = "enemy" },
         attack = { attackType = "melee" },
         weapon = { image = "militia_sword", type = "sword" },
         baseAttackDamage = 2,
@@ -285,7 +245,6 @@ g.defineSquad("world_devourer_squad", {
         baseStartingArmor = 0,
     },
     unitCount = 4,
-    icon = "example_squad_icon",
     perks = {"consumption"},
     cost = {green = 1, red = 1},
 })

@@ -9,11 +9,6 @@ g.defineSquad("exo_soldier_squad", {
     entityDef = {
         image = "militia",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-        partitions = {"unit", "ally"},
-        team = "ally",
-        ai = {
-            target = "enemy",
-        },
         attack = {
             attackType = "melee",
         },
@@ -28,7 +23,6 @@ g.defineSquad("exo_soldier_squad", {
         baseMaxHealth = 6,
     },
     unitCount = 8,
-    icon = "example_squad_icon",
     cost = {yellow = 1},
 })
 
@@ -41,11 +35,6 @@ g.defineSquad("prospector_squad", {
     entityDef = {
         image = "militia",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-        partitions = {"unit", "ally"},
-        team = "ally",
-        ai = {
-            target = "enemy",
-        },
         attack = {
             attackType = "melee",
         },
@@ -61,7 +50,6 @@ g.defineSquad("prospector_squad", {
         baseStartingArmor = 2,
     },
     unitCount = 4,
-    icon = "example_squad_icon",
     perks = {"strike_gold"},
     cost = {yellow = 2},
 })
@@ -75,12 +63,9 @@ g.defineSquad("the_great_factory_squad", {
         image = "militia", -- placeholder
         isBuilding = true,
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 1, isStatic = true },
-        partitions = {"unit", "ally"},
-        team = "ally",
         baseMaxHealth = 40,
     },
     unitCount = 1,
-    icon = "example_squad_icon",
     perks = {"duplication"},
     onDeploySquad = function(info, entities)
         local squad = entities[1] and entities[1].squad
@@ -98,12 +83,9 @@ g.defineSquad("gold_mine_squad", {
         image = "militia", -- placeholder
         isBuilding = true,
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 1, isStatic = true },
-        partitions = {"unit", "ally"},
-        team = "ally",
         baseMaxHealth = 16,
     },
     unitCount = 1,
-    icon = "example_squad_icon",
     perks = {"extraction"},
     cost = {yellow = 2},
 })
@@ -117,9 +99,6 @@ g.defineSquad("endless_army_squad", {
     entityDef = {
         image = "militia",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-        partitions = {"unit", "ally"},
-        team = "ally",
-        ai = { target = "enemy" },
         attack = { attackType = "melee" },
         weapon = { image = "militia_sword", type = "sword" },
         baseAttackDamage = 1,
@@ -130,7 +109,6 @@ g.defineSquad("endless_army_squad", {
         baseStartingArmor = 1,
     },
     unitCount = 1,
-    icon = "example_squad_icon",
     perks = {"mass_production"},
     cost = {yellow = 1},
 })
@@ -142,9 +120,6 @@ g.defineSquad("wealth_elemental_squad", {
     entityDef = {
         image = "militia", -- placeholder
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 2 },
-        partitions = {"unit", "ally"},
-        team = "ally",
-        ai = { target = "enemy" },
         attack = { attackType = "melee" },
         weapon = { image = "militia_sword", type = "sword" },
         baseAttackDamage = 1,
@@ -155,7 +130,6 @@ g.defineSquad("wealth_elemental_squad", {
         baseStartingArmor = 8,
     },
     unitCount = 2,
-    icon = "example_squad_icon",
     perks = {"golden_bulk"},
     cost = {yellow = 1},
 })

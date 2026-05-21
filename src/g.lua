@@ -665,12 +665,6 @@ local currentEntityId = 0
 
 
 
--- set team automatiocally
--- derive physics from image-width
--- set partitions automatically
--- derive ai tables
-
-
 ---@param id string
 ---@param info g.SquadInfo|{id:nil}|{perks:nil}
 function g.defineSquad(id, info)
@@ -684,6 +678,23 @@ function g.defineSquad(id, info)
     info.statUpgradeScaling = info.statUpgradeScaling or {}
     info.entityId = info.entityId or (id .. "_unit")
     assert(info.entityDef, "Missing entityDef for squad: " .. id)
+
+    if not info.icon then
+        log.error("Squad had no icon: ", id)
+        info.icon = "example_squad_icon"
+    end
+
+    local def = info.entityDef
+    def.team = def.team or "ally"
+    def.partitions = def.partitions or {"unit", "ally"}
+    def.ai = def.ai or { target = "enemy" }
+    if not def.physics and def.image then
+        local w = g.getImageSize(def.image)
+        def.physics = { shape = "circle", radius = w / 2, ox = 0, oy = 0, mass = 1 }
+    end
+
+    local defaultIcon = id .. "_uniticon"
+    info.icon = info.icon or (g.isImage(defaultIcon) and defaultIcon) or "example_squad_icon"
 
     if not ENTITY_DEFS[info.entityId] then
         g.defineEntity(info.entityId, info.entityDef)

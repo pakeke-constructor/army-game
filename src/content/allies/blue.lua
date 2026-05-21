@@ -11,11 +11,6 @@ g.defineSquad("crystal_golems", {
     entityDef = {
         image = "gargoyle", -- no crystal-golem sprite; gargoyle stand-in
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 2 },
-        partitions = {"unit", "ally"},
-        team = "ally",
-        ai = {
-            target = "enemy",
-        },
         attack = {
             attackType = "melee",
         },
@@ -72,11 +67,6 @@ g.defineSquad("diver_squad", {
     entityDef = {
         image = "militia", -- no diver sprite; militia stand-in
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-        partitions = {"unit", "ally"},
-        team = "ally",
-        ai = {
-            target = "enemy",
-        },
         attack = {
             attackType = "melee",
         },
@@ -92,7 +82,6 @@ g.defineSquad("diver_squad", {
         baseStartingArmor = 2,
     },
     unitCount = 4,
-    icon = "example_squad_icon",
     perks = {"pressure"},
     cost = {blue = 1},
 })
@@ -106,11 +95,6 @@ g.defineSquad("monk_squad", {
     entityDef = {
         image = "incense_priest",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-        partitions = {"unit", "ally"},
-        team = "ally",
-        ai = {
-            target = "enemy",
-        },
         attack = {
             attackType = "melee",
         },
@@ -125,7 +109,6 @@ g.defineSquad("monk_squad", {
         baseMaxHealth = 8,
     },
     unitCount = 6,
-    icon = "example_squad_icon",
     perks = {"healthy_spirit"},
     cost = {blue = 1},
 })
@@ -138,11 +121,6 @@ g.defineSquad("militia_squad", {
     entityDef = {
         image = "militia",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-        partitions = {"unit", "ally"},
-        team = "ally",
-        ai = {
-            target = "enemy",
-        },
         attack = {
             attackType = "melee",
         },
@@ -170,11 +148,6 @@ g.defineSquad("archer_squad", {
     entityDef = {
         image = "longbowman",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-        partitions = {"unit", "ally"},
-        team = "ally",
-        ai = {
-            target = "enemy",
-        },
         attack = {
             attackType = "ranged",
             projectileType = "arrow",
@@ -203,11 +176,6 @@ g.defineSquad("orcball_player_squad", {
     entityDef = {
         image = "militia",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-        partitions = {"unit", "ally"},
-        team = "ally",
-        ai = {
-            target = "enemy",
-        },
         attack = {
             attackType = "melee",
         },
@@ -223,7 +191,6 @@ g.defineSquad("orcball_player_squad", {
         baseStartingArmor = 4,
     },
     unitCount = 4,
-    icon = "example_squad_icon",
     perks = {"body_slam"},
     cost = {blue = 1},
 })
@@ -236,11 +203,6 @@ g.defineSquad("defender_squad", {
     entityDef = {
         image = "militia",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-        partitions = {"unit", "ally"},
-        team = "ally",
-        ai = {
-            target = "enemy",
-        },
         attack = {
             attackType = "melee",
         },
@@ -256,7 +218,6 @@ g.defineSquad("defender_squad", {
         baseStartingArmor = 2,
     },
     unitCount = 6,
-    icon = "example_squad_icon",
     perks = {"knockback"},
     cost = {blue = 1},
 })
@@ -268,8 +229,6 @@ g.defineSquad("incense_holder_squad", {
     entityDef = {
         image = "longbowman",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-        partitions = {"unit", "ally"},
-        team = "ally",
         ai = {
             target = "ally",
         },
@@ -290,7 +249,6 @@ g.defineSquad("incense_holder_squad", {
         baseMaxHealth = 7,
     },
     unitCount = 4,
-    icon = "example_squad_icon",
     perks = {"invigorate"},
     cost = {blue = 2},
 })
@@ -303,11 +261,6 @@ g.defineSquad("clay_troll_squad", {
     entityDef = {
         image = "militia",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-        partitions = {"unit", "ally"},
-        team = "ally",
-        ai = {
-            target = "enemy",
-        },
         attack = {
             attackType = "melee",
         },
@@ -322,7 +275,6 @@ g.defineSquad("clay_troll_squad", {
         baseMaxHealth = 18,
     },
     unitCount = 4,
-    icon = "example_squad_icon",
     perks = {"protective_coating"},
     cost = {blue = 1},
 })
@@ -335,9 +287,6 @@ g.defineSquad("war_elephant_squad", {
     entityDef = {
         image = "war_hog",
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 2 },
-        partitions = {"unit", "ally"},
-        team = "ally",
-        ai = { target = "enemy" },
         attack = { attackType = "melee" },
         weapon = { image = "militia_sword", type = "sword" },
         baseAttackDamage = 4,
@@ -348,7 +297,6 @@ g.defineSquad("war_elephant_squad", {
         baseStartingArmor = 12,
     },
     unitCount = 2,
-    icon = "example_squad_icon",
     perks = {"helmheart"},
     cost = {blue = 2},
 })
@@ -363,9 +311,6 @@ g.defineSquad("war_elephant_squad", {
 --     entityDef = {
 --         image = "militia",
 --         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
---         partitions = {"unit", "ally"},
---         team = "ally",
---         ai = { target = "enemy" },
 --         attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 250 },
 --         weapon = { image = "placeholder", type = "bow" },
 --         baseAttackDamage = 3,
@@ -375,8 +320,6 @@ g.defineSquad("war_elephant_squad", {
 --         baseMaxHealth = 12,
 --     },
 --     unitCount = 3,
---     icon = "example_squad_icon",
---     perks = {"sputter"},
 --     cost = {blue = 1},
 -- })
 
@@ -388,9 +331,6 @@ g.defineSquad("magnet_elemental_squad", {
     entityDef = {
         image = "gargoyle",
         physics = { shape = "circle", radius = 6, ox = 0, oy = 0, mass = 1 },
-        partitions = {"unit", "ally"},
-        team = "ally",
-        ai = { target = "enemy" },
         attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 280 },
         weapon = { image = "placeholder", type = "bow" },
         baseAttackDamage = 2,
@@ -401,7 +341,6 @@ g.defineSquad("magnet_elemental_squad", {
         baseStartingArmor = 3,
     },
     unitCount = 2,
-    icon = "example_squad_icon",
     perks = {"shrapnelmancy"},
     cost = {blue = 1},
 })
@@ -416,9 +355,6 @@ g.defineSquad("immortal_eye_squad", {
         image = "militia", -- placeholder
         isBuilding = true,
         physics = { shape = "circle", radius = 10, ox = 0, oy = 0, mass = 1, isStatic = true },
-        partitions = {"unit", "ally"},
-        team = "ally",
-        ai = { target = "enemy" },
         attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 300 },
         weapon = { image = "placeholder", type = "bow" },
         baseAttackDamage = 1,
@@ -427,8 +363,6 @@ g.defineSquad("immortal_eye_squad", {
         baseMaxHealth = 80,
         baseStartingArmor = 10,
     },
-    unitCount = 1,
-    icon = "example_squad_icon",
     perks = {"rebirth"},
     cost = {blue = 2},
 })
@@ -441,9 +375,6 @@ g.defineSquad("bell_creature_squad", {
     entityDef = {
         image = "militia", -- placeholder
         physics = { shape = "circle", radius = 6, ox = 0, oy = 0, mass = 1 },
-        partitions = {"unit", "ally"},
-        team = "ally",
-        ai = { target = "enemy" },
         attack = { attackType = "melee" },
         weapon = { image = "militia_sword", type = "sword" },
         baseAttackDamage = 1,
@@ -454,7 +385,6 @@ g.defineSquad("bell_creature_squad", {
         baseStartingArmor = 5,
     },
     unitCount = 3,
-    icon = "example_squad_icon",
     perks = {"reverberate"},
     cost = {blue = 1},
 })
@@ -467,9 +397,6 @@ g.defineSquad("laser_gunner_squad", {
     entityDef = {
         image = "longbowman",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-        partitions = {"unit", "ally"},
-        team = "ally",
-        ai = { target = "enemy" },
         attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 280 },
         weapon = { image = "placeholder", type = "bow" },
         baseAttackDamage = 1,
@@ -479,7 +406,6 @@ g.defineSquad("laser_gunner_squad", {
         baseMaxHealth = 8,
     },
     unitCount = 4,
-    icon = "example_squad_icon",
     perks = {"laser_focus"},
     cost = {blue = 1},
 })
