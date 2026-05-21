@@ -1,0 +1,241 @@
+		SQUADS
+
+	COMMON
+
+
+	UNCOMMON
+
+
+	RARE
+
+
+	SUPER RARE
+
+
+		BLESSINGS
+
+	COMMON
+
+Lucky Sack
+Gain between 50-200 gold when you acquire this blessing.
+
+Scavenge
+Gain 5 gold when travelling to empty nodes.
+
+Valuable Lesson
+Gain 3 XP when you acquire this blessing
+
+Anger
++1 DMG to allied units with at least 3 DMG (includes buffs, not just base damage)
+
+Heart
++1 max HP to allied squads (NOT individual units, but a squad buff. When units are summoned, this doesn't apply)
+
+Luxury
+Squads that are at least level 3 gain +10% ASPD
+
+Grace
+Reduce demon fury by 2 when you acquire this blessing.
+
+Polished Pauldrons
+The Commander spawns with +10 armor
+
+Dial it...
+Your squads can be upgraded to level 11. (giving the regular buffs
+
+Overclock
+Your squads gain +50% attack speed but lose 2 max HP.
+
+Torment
+On-hurt, enemies have a 10% chance to take 1 additional damage. 
+
+Haste
++0.2 attack speed to allied squads.
+
+Mana Shield
++2 armor to all squads that cost at least 2 mana.
+
+
+
+	UNCOMMON
+
+Helpfulness
++1 Heal to allied squads.
+
+Wither
+Poisoned enemies have -40% ASPD.
+
+Disintegration
+Burning enemies take 1 extra damage from unit attacks.
+
+Profits
+Gain 5 gold per Yellow squad when entering a market.
+
+Evolution
+When Transformed, your units gain 5 max HP for the battle, stackable.
+
+Mobilization
+On every 10th unit that Spawns, also Spawn a 4HP Peasant. (all other stats are default/1.0)
+
+Volley
+Ranged units have +25% attack range.
+
+Alchemy License 
+When applying stacks of burn or poison, apply 1 more.
+
+Group Hug
+Inflicted buffs have a 25% chance to spread to a nearby ally, recursive.
+
+Gunpowder Mules
+Your explosions gain +50% size.
+
+Compress
+On-hurt, allies have a 10% chance to gain 1 ARMR.
+
+Industry
+Every 5 days, Upgrade a random squad.
+
+Water Cycle
+Each battle, for every 8 blue mana you spend, gain 1 blue mana.
+
+Bloodbath
+Your units have +25% lifesteal when below half HP.
+
+Trample
+Your units deal +50% DMG to enemies with less max HP than them.
+
+Trickster
+The first time you Transform a unit each combat, gain 2 blue mana.
+
+Bodybuilding
+When your units Heal, they also gain 1 Max HP for the battle.
+
+Electrocute
+On-hit, your units have a 25% chance to deal 3 extra damage.
+
+	RARE
+
+Fortify
+50% chance to double armor-gain during battle.
+
+Fireball
+When applying burn, 25% chance to create a medium-sized explosion for 4 DMG.
+
+Conquer
+When defeating a Tier 3 combat, your commander permanently gains +4 max HP and +1 DMG
+
+Stomp
+On-spawn, your units deal area damage equal to 25% max HP.
+
+Cursed Banquet
+Gain 2XP the first time you kill a friendly unit each battle.
+
+Pestilence
+Pests have +1 ASPD and DMG
+
+Upscaling
+Max level squads gain +50% units.
+
+Ubergrades
+Squads gain 0.1 ASPD and 1 ARMR when upgraded, stackable.
+
+Radiant Gift
+Gain 1 Colorless Mana
+
+Memento
+Your units re-trigger their On Spawn effects On Death.
+
+Magnify
+Your units’ projectiles have a 50% chance to gain 1 damage each time they pass through a Blue unit.
+
+Agony
+On-spawn, your units gain 5 burn and apply 10 burn to a nearby enemy.
+
+Goliath
+Your units have +1 ATK per 10 HP.
+
+Devouring Flames
+On-burn, the nearest ally heals equal to the burn amount.
+
+Arcane Appetite
+Upgrade a random Blue squad when praying at a Shrine
+
+Bulk Pheromones
+On-death, Green units give Pests 1 HP.
+
+Meditation
+The first time you place a squad each battle, regain blue mana equal to its cost.
+
+Plague
+Poison spreads to another nearby enemy when applied.
+
+Demonic Steed
+Your commander gains 5 damage, Flying, and Fearsome.
+
+Mischief
+Red squads gain the Infiltrate perk, allowing them to be placed behind enemy lines.
+
+Landmark
+The first building you place each fight has double stats.
+
+One Man Army
+If there is only one unit alive, it gains double DMG and ASPD.
+
+Acceleration
+Your units’ “Every X seconds” effects trigger twice as often.
+
+Crystallize
+When a full HP ally is healed, it gains 1 ARMR.
+
+Iron Exosuits
+Your units have +8% ASPD per ARMR they have.
+
+Spontaneous Combustion
+On-hit, your units have a 15% chance to inflict 5 burn.
+
+	SUPER RARE
+
+Grand Finale
+Your explosions have +20% area. This increases by 2% for the fight whenever an explosion is triggered.
+
+Hard Carapaces
+Green units and Pests have +2 armor
+
+Dark Inspiration
+After 10 friendly units die, your units gain 100% lifesteal for the rest of the battle.
+
+Golden Gamble
+When you enter a shop, your gold is randomized between 1 and 777
+
+Abandon
+All of your Red units’ armor is converted to ATK. (At combat start and when gaining armor, convert all armor into a damage buff for the fight)
+
+Meat Grinder
+Gain 4 colorless mana after 40 allied units die.
+
+Unbreakable
+When your units gain armor during combat, they gain an equal amount of max HP for the fight.
+
+Quaternity
+Gain access to ALL mana types, and gain 2 colorless mana.
+
+Soul Split
+x2 units and -50% HP to all non-building squads.
+
+Explosive Mutation
+Your Pests gain Volatile, causing a devastating explosion On-death.
+
+Cryomana
+Whenever you gain mana during combat, freeze 10 random enemies for 5s.
+
+Vengeance
+Your units gain 1 DMG for 5s when a unit with the same color dies.
+
+Pandaemonium
+Increase demon fury by an additional 2 after each combat. When you acquire a squad, it gains a random Perk.
+
+Wrathful Souls
+On-death, your units deal damage to a nearby enemy equal to 2x their ATK.
+
+Overload
+When an enemy gains more burn than max HP, instantly kill the enemy and apply 20% of the burn to nearby enemies. 
