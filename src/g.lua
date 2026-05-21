@@ -1803,8 +1803,12 @@ function g.addHandler(handler)
     end
 end
 
+
+local _resetCallEventCounts
+
 -- Called once per frame. Clears all handlers, then asks the scene to re-register them.
 function g.pollHandlers()
+    _resetCallEventCounts()
     for _, list in pairs(handlerCache) do
         table_clear(list)
     end
@@ -1940,17 +1944,27 @@ function g.newScope(parent)
 end
 
 
-local i = 1
+
+local MAX_EVENT_CALLS_PER_FRAME = consts.MAX_EVENT_CALLS_PER_FRAME -- max 20 events of a single type per frame
+local EVENT_COUNTS = {--[[
+    [event] -> integer
+]]}
+
+function _resetCallEventCounts()
+    for k,_ in pairs(EVENT_COUNTS) do
+        EVENT_COUNTS[k] = 0
+    end
+end
 
 -- Fire an event. No return value.
 -- Order: global handlers, then ent[ev], then ent.scope
 function g.call(ev, arg1, ...)
-    if ev == "preUpdate" then
-        i = 0
-    elseif i > 1 and ev == "postUpdate" then
-        print("i:", i)
+    local ct = EVENT_COUNTS[ev] or 0
+    if ct >= MAX_EVENT_CALLS_PER_FRAME then
+        return
     end
-    i = i + 1
+    ct = ct + 1; EVENT_COUNTS[ev] = ct
+
     -- 1. global handlers (via g.addHandler)
     local list = handlerCache[ev]
     for i = 1, #list do
