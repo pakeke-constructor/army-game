@@ -677,6 +677,7 @@ function g.defineSquad(id, info)
     info.statUpgradeScaling = info.statUpgradeScaling or {}
     info.entityId = info.entityId or (id .. "_unit")
     assert(info.entityDef, "Missing entityDef for squad: " .. id)
+
     if not ENTITY_DEFS[info.entityId] then
         g.defineEntity(info.entityId, info.entityDef)
     end
@@ -684,6 +685,14 @@ function g.defineSquad(id, info)
     for stat,scaling in pairs(info.statUpgradeScaling)do
         assert(g.getStatInfo(stat), "?")
         assert(scaling < 1, "Per-level stat scaling shouldn't be more than 100%. Must be number between (0,1)")
+    end
+    if (not next(info.statUpgradeScaling)) then
+        -- then there's no stat upgrades.
+        if info.unitCount > 2 and info.unitCountUpgradeScaling <= 0 then
+            info.unitCountUpgradeScaling = math.max(1, math.floor(info.unitCount * 0.25 + 0.5))
+        else
+            log.error("This unit NEEDS a stat upgrade, but doesn't have one: " .. id)
+        end
     end
     assert(info.icon)
     SQUAD_DEFS[id] = info
