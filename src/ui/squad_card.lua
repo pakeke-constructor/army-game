@@ -3,7 +3,7 @@ local hoverService = require("src.hud.hoverService")
 
 local STAT_LIST = {
     "maxHealth",
-    "DPS", -- special: calculated via (DMG x AS)
+    "DPS", -- special: calculated via (attackDamage x attackSpeed)
     "startingArmor",
     "moveSpeed",
     "attackRange",
@@ -28,9 +28,10 @@ local function drawPerkSlot(region, perk, col)
     PERK_DESC_FONT = PERK_DESC_FONT or g.getSmallFont(16)
 
     ui.drawSingleColorPanel(x, y, w, h)
-    local txt = helper.wrapRichtextColor(col, "{o}" .. perk.name .. "{/o}")
+    lg.setColor(1,1,1)
+    local txt = "{" .. perk.image .. "} {o}" .. helper.wrapRichtextColor(col, perk.name) .. "{/o}"
     local desc = "{c r=0.7 g=0.7 b=0.75}" .. perk.description
-    richtext.printRichContained(txt .. "\n" .. desc, PERK_DESC_FONT, region:get())
+    richtext.printRichContained(txt .. "\n" .. desc, PERK_DESC_FONT, region:padUnit(3):get())
 end
 
 
@@ -234,10 +235,23 @@ local function drawSquadCard(squadId, region, index)
     box:addFill({
         getHeight = function() return 0 end,
         draw = function(ex, ey, ew, eh)
-            local perkRegs = {Kirigami(ex, ey, ew, eh):splitVertical(1, 1, 1)}
-            for i = 1, 3 do
-                local perkInfo = perks[i] and g.getPerkInfo(perks[i]) or nil
-                drawPerkSlot(perkRegs[i]:padUnit(2, 2), perkInfo, col)
+            local reg = Kirigami(ex, ey, ew, eh)
+            if #perks == 1 then
+                local perkInfo = perks[1] and g.getPerkInfo(perks[1])
+                local _,reg1,_ = reg:splitVertical(1,3,1)
+                drawPerkSlot(reg1, perkInfo, col)
+            elseif #perks == 2 then
+                local reg1, reg2 = reg:splitHorizontal(1,1)
+                local perkInfo1 = perks[1] and g.getPerkInfo(perks[1])
+                local perkInfo2 = perks[2] and g.getPerkInfo(perks[2])
+                drawPerkSlot(reg1:padUnit(4), perkInfo1, col)
+                drawPerkSlot(reg2:padUnit(4), perkInfo2, col)
+            else
+                local perkRegs = {reg:splitVertical(1, 1, 1)}
+                for i = 1, 3 do
+                    local perkInfo = perks[i] and g.getPerkInfo(perks[i]) or nil
+                    drawPerkSlot(perkRegs[i]:padUnit(2, 2), perkInfo, col)
+                end
             end
         end,
     })
