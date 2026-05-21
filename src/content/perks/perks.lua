@@ -91,16 +91,17 @@ g.definePerk("berserker", "Berserker", {
     description = loc("This unit gains +5 attack when below 50% health."),
     image = "coin_icon",
     handlers = {
-        onAttack = function(ent, attack)
-            if ent.hp and ent.maxHp and ent.hp < ent.maxHp * 0.5 then
-                attack.damage = attack.damage + 5
+        getAttackDamageModifier = function(ent, attack)
+            if ent.health and ent.maxHealth and ent.health < ent.maxHealth * 0.5 then
+                return 5
             end
+            return 0
         end,
     },
 })
 
 g.definePerk("bolstering_brew", "Bolstering Brew", {
-    description = loc2("On-spawn, 2 nearby allies gain +50% (ASPD) and +1 DMG for 10 seconds."),
+    description = loc2("On-spawn, 2 nearby allies gain double (ASPD) for 10 seconds."),
     image = "coin_icon",
     handlers = {
         entitySpawned = function(ent)
@@ -301,7 +302,7 @@ g.definePerk("protective_coating", "Protective Coating", {
 })
 
 g.definePerk("ritual_sacrifice", "Ritual Sacrifice", {
-    description = loc2("On-spawn, kills a nearby ally to gain +2 (ATK) for the fight."),
+    description = loc2("On-spawn, kills a nearby ally to gain +4 (ATK) for the fight."),
     image = "coin_icon",
     handlers = {
         entitySpawned = function(ent)
@@ -314,9 +315,7 @@ g.definePerk("ritual_sacrifice", "Ritual Sacrifice", {
             end, 120)
             if victim then
                 g.killEntity(victim, ent)
-                g.addCustomEffect(ent, {
-                    getAttackDamageModifier = function(e) return 2 end,
-                }, 9999)
+                g.buffEntity(ent, "attackDamage", 4)
             end
         end,
     },
@@ -382,7 +381,7 @@ g.definePerk("life_force", "Life Force", {
 })
 
 g.definePerk("explosive", "Explosive", {
-    description = loc("On-hit, causes an explosion dealing full damage to nearby enemies."),
+    description = loc("Attacks cause explosions!"),
     image = "coin_icon",
     onHitDamage = function(attacker, dmg, target)
         g.explosion(target.x, target.y, attacker.attackDamage or 0, 70, attacker)
