@@ -380,14 +380,9 @@ g.definePerk("life_force", "Life Force", {
 g.definePerk("explosive", "Explosive", {
     description = loc("On-hit, causes an explosion dealing full damage to nearby enemies."),
     image = "coin_icon",
-    rawHandlers = {
-        projectileHit = function(self, projEnt, hitEnt)
-            if not hitEnt then return end
-            if not g.isAlive(self) then return end
-            if not projEnt.projectile or projEnt.projectile.ownerEnt ~= self then return end
-            g.explosion(hitEnt.x, hitEnt.y, self.attackDamage or 0, 70, self)
-        end,
-    },
+    onHitDamage = function(attacker, dmg, target)
+        g.explosion(target.x, target.y, attacker.attackDamage or 0, 70, attacker)
+    end,
 })
 
 g.definePerk("helmheart", "Helmheart", {
@@ -404,6 +399,7 @@ g.definePerk("helmheart", "Helmheart", {
         end,
     },
 })
+
 
 g.definePerk("sadistic", "Sadistic", {
     description = loc("When a nearby ally takes damage, gains 1 ATK for the battle."),

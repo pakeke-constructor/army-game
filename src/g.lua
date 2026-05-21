@@ -760,6 +760,7 @@ function g.isRangedUnit(entId)
     if etype.attack and etype.attack.attackType == "ranged" then
         return true
     end
+    return false
 end
 
 --- checks if an entity is a building type
@@ -1135,6 +1136,12 @@ function g.defineEntity(id, def)
     end
     if def.baseHealPower and def.baseHealPower > 0 then
         assert(not def.baseAttackDamage or def.baseAttackDamage <= 0, "Entities cannot be healers AND attackers at same time")
+    end
+    if def.physics and def.attack and def.attack.attackType == "melee" then
+        local minRange = def.physics.radius * 2
+        if def.baseAttackRange < minRange then
+            error("melee baseAttackRange (" .. def.baseAttackRange .. ") < physics radius*2 (" .. minRange .. ")")
+        end
     end
     local mt = {__index = def}
     ENTITY_DEFS[id] = mt
@@ -1933,9 +1940,17 @@ function g.newScope(parent)
 end
 
 
+local i = 1
+
 -- Fire an event. No return value.
 -- Order: global handlers, then ent[ev], then ent.scope
 function g.call(ev, arg1, ...)
+    if ev == "preUpdate" then
+        i = 0
+    elseif i > 1 and ev == "postUpdate" then
+        print("i:", i)
+    end
+    i = i + 1
     -- 1. global handlers (via g.addHandler)
     local list = handlerCache[ev]
     for i = 1, #list do

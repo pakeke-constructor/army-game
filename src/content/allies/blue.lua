@@ -355,28 +355,30 @@ g.defineSquad("war_elephant_squad", {
 
 
 
-g.defineSquad("living_spell_squad", {
-    name = loc("Living Spells"),
-    rarity = g.RARITIES.RARE,
-    entityDef = {
-        image = "militia",
-        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-        partitions = {"unit", "ally"},
-        team = "ally",
-        ai = { target = "enemy" },
-        attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 250 },
-        weapon = { image = "placeholder", type = "bow" },
-        baseAttackDamage = 3,
-        baseAttackSpeed = 0.4,
-        baseAttackRange = 130,
-        baseMoveSpeed = 40,
-        baseMaxHealth = 12,
-    },
-    unitCount = 3,
-    icon = "example_squad_icon",
-    perks = {"sputter"},
-    cost = {blue = 1},
-})
+-- perk was removed; this squad removed too.
+------------
+-- g.defineSquad("living_spell_squad", {
+--     name = loc("Living Spells"),
+--     rarity = g.RARITIES.RARE,
+--     entityDef = {
+--         image = "militia",
+--         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+--         partitions = {"unit", "ally"},
+--         team = "ally",
+--         ai = { target = "enemy" },
+--         attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 250 },
+--         weapon = { image = "placeholder", type = "bow" },
+--         baseAttackDamage = 3,
+--         baseAttackSpeed = 0.4,
+--         baseAttackRange = 130,
+--         baseMoveSpeed = 40,
+--         baseMaxHealth = 12,
+--     },
+--     unitCount = 3,
+--     icon = "example_squad_icon",
+--     perks = {"sputter"},
+--     cost = {blue = 1},
+-- })
 
 
 

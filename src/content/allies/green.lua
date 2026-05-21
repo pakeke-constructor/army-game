@@ -273,7 +273,7 @@ g.defineSquad("friendly_giant_squad", {
         },
         baseAttackDamage = 5,
         baseAttackSpeed = 0.5,
-        baseAttackRange = 25,
+        baseAttackRange = 40,
         baseMoveSpeed = 35,
         baseMaxHealth = 300,
     },
