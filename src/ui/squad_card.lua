@@ -147,7 +147,20 @@ local function drawSquadCard(squadId, region, index)
         end
     })
 
-    -- Stats: 3 wide, 2 high grid
+    -- Stats: 3 wide, 2 high grid. Sorted with important stats first.
+    local sortedStats = {}
+    for i = 1, #STAT_LIST do sortedStats[i] = STAT_LIST[i] end
+    do
+        local origIdx = {}
+        for i, s in ipairs(sortedStats) do origIdx[s] = i end
+        table.sort(sortedStats, function(a, b)
+            local ai = a == "DPS" or g.isStatImportant(a, info.entityId)
+            local bi = b == "DPS" or g.isStatImportant(b, info.entityId)
+            if ai ~= bi then return ai end
+            return origIdx[a] < origIdx[b]
+        end)
+    end
+
     local statCellH = 22
     local statRows = 2
     local statCols = 3
@@ -155,7 +168,7 @@ local function drawSquadCard(squadId, region, index)
         getHeight = function() return statCellH * statRows end,
         draw = function(ex, ey, ew, eh)
             local cellW = math.floor(ew / statCols)
-            for i = 1, #STAT_LIST do
+            for i = 1, #sortedStats do
                 local row = math.floor((i - 1) / statCols)
                 local col = (i - 1) % statCols
                 local cx = ex + col * cellW
@@ -164,7 +177,7 @@ local function drawSquadCard(squadId, region, index)
                 local ch = statCellH - 2
 
                 local value, icon, color, name, desc
-                local statId = STAT_LIST[i]
+                local statId = sortedStats[i]
                 local isDPS = statId == "DPS"
                 if isDPS then
                     -- its special! computed
@@ -188,7 +201,7 @@ local function drawSquadCard(squadId, region, index)
 
                 -- background
                 local important = isDPS or g.isStatImportant(statId, info.entityId)
-                local alpha = 0.4
+                local alpha = 0.2
                 if important then
                     alpha = 1
                 end
