@@ -2,11 +2,11 @@
 local hoverService = require("src.hud.hoverService")
 
 local STAT_LIST = {
-    {id = "maxHealth", label = "HP"},
-    {id = "DPS", label = "DPS"}, -- special: calculated via (DMG x AS)
-    {id = "startingArmor", label = "ARM"},
-    {id = "moveSpeed", label = "SPD"},
-    {id = "attackRange", label = "RNG"},
+    "maxHealth",
+    "DPS", -- special: calculated via (DMG x AS)
+    "startingArmor",
+    "moveSpeed",
+    "attackRange",
 }
 
 local STAT_FONT = nil
@@ -181,7 +181,7 @@ local function drawSquadCard(squadId, region, index)
                 local ch = statCellH - 2
 
                 local value, icon, color, name, desc
-                local statId = STAT_LIST[i].id
+                local statId = STAT_LIST[i]
                 local isDPS = statId == "DPS"
                 if isDPS then
                     -- its special! computed

@@ -664,6 +664,13 @@ local currentEntityId = 0
 ---@field drawSquadHover fun(x:number, y:number)?
 
 
+
+-- set team automatiocally
+-- derive physics from image-width
+-- set partitions automatically
+-- derive ai tables
+
+
 ---@param id string
 ---@param info g.SquadInfo|{id:nil}|{perks:nil}
 function g.defineSquad(id, info)

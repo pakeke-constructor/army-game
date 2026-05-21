@@ -94,7 +94,9 @@
 - In squad-card, Make stats panels better. Most important stats at top. Don't even show other panels.
 - In squad-card, compress perks to 3 slots. printRichContained. hard limit of 3 perks / squad
 - In squad-card, make it so unit-visual doesn't overflow
-- In squad-card, make it so upgrade is shown in shop UI
+
+
+- Make squads easier to define
 
 
 - IMPORTANT: FIX REMAINING PERKS / BLESSINGS / ETC.
