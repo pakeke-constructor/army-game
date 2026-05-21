@@ -127,22 +127,22 @@ local function drawSquadCard(squadId, region, index)
     })
 
     -- squad-units: Layed out in a flat horizontal line.
-    local unitGap = 2
     local unitWidth, unitHeight = g.getUnitDrawSize(info.entityId)
     box:add({
         getHeight = function() return unitHeight + 4 end,
         draw = function(ex, ey, ew, eh)
             if unitHeight == 0 then return end
             local count = g.getSquadUnitCount(squadId)
-            local totalW = count * unitWidth + (count - 1) * unitGap
-            local startX = ex + (ew - totalW) / 2
+            local cells = Kirigami(ex, ey, ew, eh):grid(count, 1)
             local r,gg,b,a = darkCol:getRGBA()
             love.graphics.setColor(r, gg, b, a * 0.6)
-            ui.drawSingleColorPanel(startX - 4, ey, totalW + 8, eh)
+            ui.drawSingleColorPanel(ex, ey, ew, eh)
             love.graphics.setColor(1, 1, 1, 0.85)
             for i = 1, count do
-                local ux = startX + (i - 1) * (unitWidth + unitGap)
-                g.drawUnitPreview(info.entityId, ux, ey + 2, unitWidth, unitHeight)
+                local cx, cy, cw, ch = cells[i]:get()
+                local ux = cx + (cw - unitWidth) / 2
+                local uy = cy + (ch - unitHeight) / 2
+                g.drawUnitPreview(info.entityId, ux, uy, unitWidth, unitHeight)
             end
         end
     })
