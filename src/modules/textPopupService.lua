@@ -39,9 +39,12 @@ function textPopups.update(dt)
     end
 end
 
-function textPopups.draw()
+function textPopups.draw(transform)
     love.graphics.push()
     love.graphics.origin()
+    if transform then
+        love.graphics.replaceTransform(transform)
+    end
     for _, p in ipairs(popups) do
         local a = 1 - (p.time / p.duration)
         love.graphics.setColor(1, 1, 1, a)

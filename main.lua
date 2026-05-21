@@ -193,7 +193,7 @@ function love.draw()
         iml.beginFrame()
         sc:draw()
         iml.endFrame()
-        textPopupService.draw()
+        textPopupService.draw(ui.getUIScalingTransform())
         vignette.draw()
     end
     devcmd.draw()

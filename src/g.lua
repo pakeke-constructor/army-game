@@ -1792,7 +1792,9 @@ end
 --- @param args textPopupService.args?
 function g.addWorldTextPopup(x, y, richtxt, args)
     local sx, sy = g.worldToScreen(x, y)
-    textPopupService.addPopup(sx, sy, richtxt, args)
+    local t = ui.getUIScalingTransform()
+    local ux, uy = t:inverseTransformPoint(sx, sy)
+    textPopupService.addPopup(ux, uy, richtxt, args)
 end
 
 --- @param x number
@@ -1800,9 +1802,7 @@ end
 --- @param richtxt any
 --- @param args textPopupService.args?
 function g.addUITextPopup(x, y, richtxt, args)
-    local t = ui.getUIScalingTransform()
-    local sx, sy = t:transformPoint(x, y)
-    textPopupService.addPopup(sx, sy, richtxt, args)
+    textPopupService.addPopup(x, y, richtxt, args)
 end
 
 
