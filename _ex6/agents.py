@@ -117,6 +117,15 @@ coder = Context("c_codex", yolo=False, model=M.CODEX_LATEST.id, reasoning="high"
 ])
 
 
+coder = Context("c_gem", yolo=False, model=M.GEMINI_LATEST.id, reasoning="high", messages=[
+    MAIN_SYSTEM_PROMPT,
+    CODE_MODE_SYS_PROMPT,
+    ENV_PROMPT,
+    # CODING_STYLE_PROMPT,
+    EX6_MD,
+])
+
+
 
 
 OMNI_PROMPT = ex6.Message(role = "system", 
