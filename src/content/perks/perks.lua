@@ -3,7 +3,7 @@
 local loc2 = g.locRich
 
 g.definePerk("pressure", "Pressure", {
-    description = loc("Has damage equal to your currently held Blue mana."),
+    description = loc2("Has damage equal to your currently held Blue mana."),
     image = "coin_icon",
     handlers = {
         getAttackDamageModifier = function(ent)
@@ -13,7 +13,7 @@ g.definePerk("pressure", "Pressure", {
 })
 
 g.definePerk("healthy_spirit", "Healthy Spirit", {
-    description = loc("Heals to full HP whenever Blue mana is spent."),
+    description = loc2("Heals to full HP whenever Blue mana is spent."),
     image = "coin_icon",
     handlers = {
         manaSpent = function(ent, manaRequirement)
@@ -577,7 +577,7 @@ g.definePerk("her_wrath", "Her Wrath", {
 })
 
 g.definePerk("forge_life", "Forge Life", {
-    description = loc("This unit has additional HEAL equal to its ARMR."),
+    description = loc2("This unit has additional (HEAL) equal to its (ARMR)."),
     image = "coin_icon",
     handlers = {
         getHealPowerModifier = function(ent)
@@ -617,7 +617,7 @@ g.definePerk("rebirth", "Rebirth", {
 })
 
 g.definePerk("vampiric", "Vampiric", {
-    description = loc("This unit heals for 3 HP on kill."),
+    description = loc("This unit heals for 3 (HP) on kill."),
     image = "coin_icon",
     handlers = {
         onKill = function(ent, target)

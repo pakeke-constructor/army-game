@@ -137,20 +137,20 @@ function map_scene:_buildFogClearCells()
     local clearCells = math.ceil(FOG_CLEAR_RADIUS / step)
     local cells = {}
 
-    local nearPlayer = {}
     local pnode = graph:getPlayerNode()
     if pnode then
         local queue = {pnode}
-        nearPlayer[pnode] = 0
+        local depths = {[pnode] = 0}
         local head = 1
         while head <= #queue do
             local node = queue[head]
-            local depth = nearPlayer[node]
+            local depth = depths[node]
             head = head + 1
+            node.seen = true
             if depth < FOG_REVEAL_DEPTH then
                 for _, nb in ipairs(graph:getNeighbors(node.x, node.y)) do
-                    if not nearPlayer[nb] then
-                        nearPlayer[nb] = depth + 1
+                    if not depths[nb] then
+                        depths[nb] = depth + 1
                         queue[#queue + 1] = nb
                     end
                 end
@@ -159,7 +159,7 @@ function map_scene:_buildFogClearCells()
     end
 
     for _, entry in ipairs(self.nodeList) do
-        if entry.node.visited or nearPlayer[entry.node] ~= nil then
+        if entry.node.seen then
             local cx = math.floor(entry.x / step)
             local cy = math.floor(entry.y / step)
             for dx = -clearCells, clearCells do

@@ -9,6 +9,7 @@ local Class = require("src.modules.objects.Class")
 ---@field oy number visual offset y
 ---@field nodeType string the type of node it is
 ---@field visited boolean? Has this node been visited or not?
+---@field seen boolean? Has this node been revealed from fog?
 local Node = Class("g:MapNode")
 
 function Node:init(x, y)
