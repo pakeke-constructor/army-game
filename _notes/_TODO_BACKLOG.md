@@ -89,6 +89,7 @@
 
 
 - Instead of referencing "ATK" and "ASPD" in descriptions; should populate with icon+colored text - so it's a bit more formalized. (E.g. `Gain 1 (ASPD)`, replaces with richtext.)
+To actually implement this, should replace the `loc` call with a `locrep()`
 
 
 - In squad-card, Make stats panels better. Most important stats at top. Don't even show other panels.

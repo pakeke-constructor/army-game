@@ -1,3 +1,7 @@
+
+
+local loc2 = g.locRich
+
 g.definePerk("pressure", "Pressure", {
     description = loc("Has damage equal to your currently held Blue mana."),
     image = "coin_icon",
@@ -58,7 +62,7 @@ g.definePerk("racket", "Racket", {
 })
 
 g.definePerk("body_slam", "Body Slam", {
-    description = loc("Gains bonus ATK equal to current ARMR. Loses 1 ARMR on each attack."),
+    description = loc2("Gains bonus (ATK) equal to current (ARMR). Loses 1 (ARMR) on each attack."),
     image = "coin_icon",
     handlers = {
         getAttackDamageModifier = function(ent)
@@ -96,7 +100,7 @@ g.definePerk("berserker", "Berserker", {
 })
 
 g.definePerk("bolstering_brew", "Bolstering Brew", {
-    description = loc("On-spawn, 2 nearby allies gain +50% ASPD and +1 DMG for 10 seconds."),
+    description = loc2("On-spawn, 2 nearby allies gain +50% (ASPD) and +1 DMG for 10 seconds."),
     image = "coin_icon",
     handlers = {
         entitySpawned = function(ent)
@@ -116,7 +120,7 @@ g.definePerk("bolstering_brew", "Bolstering Brew", {
 })
 
 g.definePerk("enrage", "Enrage", {
-    description = loc("The first time this unit takes damage, it gains 1.0 ASPD."),
+    description = loc2("The first time this unit takes damage, it gains 1.0 (ASPD)."),
     image = "coin_icon",
     handlers = {
         entityHurt = function(ent, damage, attacker)
@@ -258,7 +262,7 @@ g.definePerk("mass_production", "Mass-Production", {
 })
 
 g.definePerk("invigorate", "Invigorate", {
-    description = loc("Every 2 seconds, 5 nearby allies gain +50% ASPD for 4s."),
+    description = loc2("Every 2 seconds, 5 nearby allies gain +50% (ASPD) for 4s."),
     image = "coin_icon",
     rawHandlers = {
         perSecondUpdate = function(self, secondCount)
@@ -297,7 +301,7 @@ g.definePerk("protective_coating", "Protective Coating", {
 })
 
 g.definePerk("ritual_sacrifice", "Ritual Sacrifice", {
-    description = loc("On-spawn, kills a nearby ally to gain +2 ATK for the fight."),
+    description = loc2("On-spawn, kills a nearby ally to gain +2 (ATK) for the fight."),
     image = "coin_icon",
     handlers = {
         entitySpawned = function(ent)
@@ -319,7 +323,7 @@ g.definePerk("ritual_sacrifice", "Ritual Sacrifice", {
 })
 
 g.definePerk("conflagrate", "Conflagrate", {
-    description = loc("On-attack, a nearby ally takes 1 damage and gains +1 ATK for the fight."),
+    description = loc2("On-attack, a nearby ally takes 1 damage and gains +1 (ATK) for the fight."),
     image = "coin_icon",
     handlers = {
         onAttack = function(ent, target)
@@ -365,7 +369,7 @@ g.definePerk("defy", "Defy", {
 ]]
 
 g.definePerk("life_force", "Life Force", {
-    description = loc("Gain ATK equal to max HP. Take 4 x as much damage."),
+    description = loc2("Gain (ATK) equal to max (HP). Take 4 x as much damage."),
     image = "coin_icon",
     handlers = {
         getAttackDamageModifier = function(ent)
@@ -402,7 +406,7 @@ g.definePerk("helmheart", "Helmheart", {
 
 
 g.definePerk("sadistic", "Sadistic", {
-    description = loc("When a nearby ally takes damage, gains 1 ATK for the battle."),
+    description = loc2("When a nearby ally takes damage, gains 1 (ATK) for the battle."),
     image = "coin_icon",
     rawHandlers = {
         entityHurt = function(self, ent, damage, attacker)
@@ -495,7 +499,7 @@ g.definePerk("reverberate", "Reverberate", {
 })
 
 g.definePerk("laser_focus", "Laser Focus", {
-    description = loc("On-attack, this unit gains 0.1 ASPD. Stacks up to 30 times."),
+    description = loc2("On-attack, this unit gains 0.1 (ASPD). Stacks up to 30 times."),
     image = "coin_icon",
     handlers = {
         onAttack = function(ent, target)
