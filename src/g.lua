@@ -2174,9 +2174,7 @@ end
 function g.locRich(text, variables, context)
     local result = loc(text, variables or {}, context)
     for _, stat in ipairs(g.getStatList()) do
-        local shortName = stat.shortName:gsub("(%W)", "%%%1")
-        result = result:gsub("%(" .. shortName .. "%)", stat.richText)
-        result = result:gsub("%f[%w]" .. shortName .. "%f[^%w]", stat.richText)
+        result = result:gsub("%(" .. stat.shortName .. "%)", stat.richText)
     end
     return result
 end
