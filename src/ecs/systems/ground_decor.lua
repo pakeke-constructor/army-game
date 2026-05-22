@@ -24,8 +24,8 @@ local function spawnDecor(world)
 
     local w, h = world.border[3], world.border[4]
 
-    local darkcol = objects.Color("FF342D2D")
-    local lightcol = objects.Color("FF5A5252")
+    local darkcol = objects.Color("FF312B2B")
+    local lightcol = objects.Color("FF3C3434")
 
     local TPAD = 30
     local function drawPatch(x, y, count, variance)
@@ -60,12 +60,12 @@ local function spawnDecor(world)
         end
     end
 
-    local patchCount = love.math.random(9, 10)
+    local patchCount = love.math.random(19,22)
     for i = 1, patchCount do
         local x = math.floor(helper.lerp(TPAD, w - TPAD, love.math.random()))
         local y = math.floor(helper.lerp(TPAD, h - TPAD, love.math.random()))
-        local count = love.math.random(22, 34)
-        local variance = love.math.random(48, 56)
+        local count = love.math.random(16, 22)
+        local variance = love.math.random(38, 52)
         drawPatch(x, y, count, variance)
     end
 
