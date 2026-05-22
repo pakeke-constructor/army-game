@@ -323,7 +323,7 @@ end
 
 function map_scene:draw()
     local lg = love.graphics
-    lg.clear(g.COLORS.GROUND_COLOR)
+    lg.clear(g.COLORS.MAP_GROUND_COLOR)
 
     self.pixelCanvas:start(self.camera:getTransform())
     iml.pushTransform(self.camera:getTransform())

@@ -407,7 +407,7 @@ end
 
 function battle_scene:draw()
     self.camera:attach()
-    love.graphics.clear(0.15, 0.15, 0.15)
+    love.graphics.clear(g.COLORS.BATTLE_GROUND_COLOR:getRGBA())
     iml.pushTransform(self.camera:getTransform())
 
     local border = self.ecs.border

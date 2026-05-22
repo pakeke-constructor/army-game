@@ -2303,7 +2303,9 @@ g.COLORS = {
     ATTACK = objects.Color("FFA2741E"),
     MAP_EDGE = objects.Color(0.16, 0.28, 0.18),
     MAP_EDGE_HIGHLIGHT = objects.Color("FF396938"),
-    GROUND_COLOR = objects.Color(0.08, 0.06, 0.06, 1),
+
+    MAP_GROUND_COLOR = objects.Color("FF20261F"),
+    BATTLE_GROUND_COLOR = objects.Color("FF2C2929"),
 
     GOLD = objects.Color("FFD8B01F"),
     XP = objects.Color("FF2BC66E"),

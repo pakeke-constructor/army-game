@@ -194,7 +194,7 @@ end
 function EmptyNode:draw(wx, wy)
     love.graphics.setColor(g.COLORS.MAP_EDGE:getRGBA())
     love.graphics.ellipse("fill", wx, wy, 9, 5)
-    love.graphics.setColor(g.COLORS.GROUND_COLOR:getRGBA())
+    love.graphics.setColor(g.COLORS.MAP_GROUND_COLOR:getRGBA())
     love.graphics.ellipse("fill", wx, wy, 6, 3)
 end
 
