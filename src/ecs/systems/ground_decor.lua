@@ -12,15 +12,14 @@ local function def(id, i, drawOrder)
 end
 
 for i = 1, 5 do
-    def("decor_big_", i, -40)
-    def("decor_splotch_", i, -39)
-    def("decor_tex_", i, -38)
+    def("decor_big_", i, -200)
+    def("decor_splotch_", i, -120)
+    def("decor_tex_", i, -40)
 end
 
 
 ---@param world ecs.ECSWorld
 local function spawnDecor(world)
-    local SIZE_MULT = 1
     local decorations = {}
 
     local w, h = world.border[3], world.border[4]
@@ -28,34 +27,46 @@ local function spawnDecor(world)
     local darkcol = objects.Color("FF342D2D")
     local lightcol = objects.Color("FF5A5252")
 
-    local BIGPAD = 30
-    for i = 1, 40 * SIZE_MULT do
-        table.insert(decorations, {
-            x = math.floor(helper.lerp(BIGPAD, w - BIGPAD, love.math.random())),
-            y = math.floor(helper.lerp(BIGPAD, h - BIGPAD, love.math.random())),
-            image = "decor_big_" .. love.math.random(1, 4),
-            color = darkcol
-        })
-    end
-
-    local PAD = 12
-    for i = 1, 60 * SIZE_MULT do
-        table.insert(decorations, {
-            x = math.floor(helper.lerp(PAD, w - PAD * 2, love.math.random())),
-            y = math.floor(helper.lerp(PAD, h - PAD * 2, love.math.random())),
-            image = "decor_splotch_" .. love.math.random(1, 5),
-            color = darkcol
-        })
-    end
-
     local TPAD = 30
-    for i = 1, 30 * SIZE_MULT do
-        table.insert(decorations, {
-            x = math.floor(helper.lerp(TPAD, w - TPAD * 2, love.math.random())),
-            y = math.floor(helper.lerp(TPAD, h - TPAD * 2, love.math.random())),
-            image = "decor_tex_" .. love.math.random(1, 5),
-            color = lightcol
-        })
+    local function drawPatch(x, y, count, variance)
+        for i = 1, count do
+            local image
+            local color
+            local var = variance
+            local roll = love.math.random()
+            if roll < 0.45 then
+                image = "decor_big_" .. love.math.random(1, 4)
+                color = darkcol
+                var = var * 0.65
+            elseif roll < 0.75 then
+                image = "decor_splotch_" .. love.math.random(1, 5)
+                color = darkcol
+            else
+                image = "decor_tex_" .. love.math.random(1, 5)
+                color = lightcol
+            end
+
+            local px = math.floor(x + love.math.random(-var,var))
+            local py = math.floor(y + love.math.random(-var,var))
+            px = math.min(w - TPAD, math.max(TPAD, px))
+            py = math.min(h - TPAD, math.max(TPAD, py))
+
+            table.insert(decorations, {
+                x = px,
+                y = py,
+                image = image,
+                color = color
+            })
+        end
+    end
+
+    local patchCount = love.math.random(9, 10)
+    for i = 1, patchCount do
+        local x = math.floor(helper.lerp(TPAD, w - TPAD, love.math.random()))
+        local y = math.floor(helper.lerp(TPAD, h - TPAD, love.math.random()))
+        local count = love.math.random(22, 34)
+        local variance = love.math.random(48, 56)
+        drawPatch(x, y, count, variance)
     end
 
     for _, entry in ipairs(decorations) do
