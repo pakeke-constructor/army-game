@@ -1,20 +1,22 @@
 
 local ground_decor = {}
 
-local function def(id, i)
+local function def(id, i, drawOrder)
     local idd = id .. tostring(i)
     if g.isImage(idd) then
         g.defineEntity(idd, {
-            image = idd
+            image = idd,
+            drawOrder = drawOrder
         })
     end
 end
 
 for i = 1, 5 do
-    def("decor_big_", i)
-    def("decor_splotch_", i)
-    def("decor_tex_", i)
+    def("decor_big_", i, -40)
+    def("decor_splotch_", i, -39)
+    def("decor_tex_", i, -38)
 end
+
 
 ---@param world ecs.ECSWorld
 local function spawnDecor(world)
