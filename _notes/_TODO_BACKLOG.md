@@ -82,6 +82,11 @@
 -- units deploy sequentially, (stretched towards sky?)
 - EX6: Remove aggressive RestrictedPython sandboxing for agents; let them free.
 - Instead of referencing "ATK" and "ASPD" in descriptions; should populate with icon+colored text - so it's a bit more formalized. (E.g. `Gain 1 (ASPD)`, replaces with richtext.)
+- In squad-card, Make stats panels better. Most important stats at top. Don't even show other panels.
+- In squad-card, compress perks to 3 slots. printRichContained. hard limit of 3 perks / squad
+- In squad-card, make it so unit-visual doesn't overflow
+- Make squads easier to define
+
 
 
 
@@ -91,12 +96,29 @@
 
 
 
-- In squad-card, Make stats panels better. Most important stats at top. Don't even show other panels.
-- In squad-card, compress perks to 3 slots. printRichContained. hard limit of 3 perks / squad
-- In squad-card, make it so unit-visual doesn't overflow
+- Ground texture. rip from catx.
 
 
-- Make squads easier to define
+- Make the battle-scene be a bit more interesting.... instead of a dull rectangle all the time.
+- Maybe hardcode a few shapes?
+- Peanut shape, Oval shape, multi-circle-shape
+
+
+- Fix balance for base squads
+
+
+- Juice for spending mana: Should pop up above the units as you spend them
+- Juice for spending money in shop
+
+- Juice for breaking armor
+
+- Juice for dealing damage (see leo gif)
+
+
+- Juice for clicking on a map node
+
+
+- Fix balance for base squads
 
 
 - IMPORTANT: FIX REMAINING PERKS / BLESSINGS / ETC.
@@ -104,16 +126,6 @@
 
 - Change ranged-icon; it shouldnt be a sword, should be bow
 
-
-
-- Ground texture. rip from catx.
-
-
-
-- Juice for spending mana: Should pop up above the units as you spend them
-- Juice for spending money in shop
-
-- Juice for breaking armor
 
 
 

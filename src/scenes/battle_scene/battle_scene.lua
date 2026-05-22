@@ -51,7 +51,10 @@ function battle_scene:enter()
 
     self.randomI = love.math.random(1,1000) -- random integer, doesnt really matter
 
-    self.ecs = ECSWorld({"stats", "status_effects", "ai", "attacking", "physics", "shadows"})
+    self.ecs = ECSWorld({
+        "stats", "status_effects", "ai", "attacking",
+        "physics", "shadows", "ground_decor"
+    })
     self.camera = Camera(0, 0, CAMERA_ZOOM)
     self.particles = ParticleService()
     self.hud = HUD()
