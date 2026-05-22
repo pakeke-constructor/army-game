@@ -11,10 +11,15 @@ local function def(id, i, drawOrder)
     end
 end
 
+local GRASS_COLOR = g.snapToPalette(objects.Color("FF2E442A"))
+
+
 for i = 1, 5 do
     def("decor_big_", i, -200)
     def("decor_splotch_", i, -120)
     def("decor_tex_", i, -40)
+
+    def("grass_decor_", i, 0)
 end
 
 
@@ -60,13 +65,31 @@ local function spawnDecor(world)
         end
     end
 
-    local patchCount = love.math.random(19,22)
+    local noiseFreq = 0.01
+
+    local function noise(xx,yy)
+        return love.math.perlinNoise(xx*noiseFreq, yy*noiseFreq)
+    end
+
+    local patchCount = love.math.random(50,70)
     for i = 1, patchCount do
         local x = math.floor(helper.lerp(TPAD, w - TPAD, love.math.random()))
         local y = math.floor(helper.lerp(TPAD, h - TPAD, love.math.random()))
         local count = love.math.random(16, 22)
         local variance = love.math.random(38, 52)
-        drawPatch(x, y, count, variance)
+        if noise(x, y) < 0.5 then
+            drawPatch(x, y, count, variance)
+        end
+    end
+
+    local grassCount = 1000
+    for i = 1, grassCount do
+        local x = math.floor(helper.lerp(TPAD, w - TPAD, love.math.random()))
+        local y = math.floor(helper.lerp(TPAD, h - TPAD, love.math.random()))
+        if noise(x, y) > 0.5 then
+            local ent = g.spawnEntity("grass_decor_"..tostring(love.math.random(1,4)), x, y)
+            ent.color = GRASS_COLOR
+        end
     end
 
     for _, entry in ipairs(decorations) do

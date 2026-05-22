@@ -104,6 +104,9 @@
 - Peanut shape, Oval shape, multi-circle-shape
 
 
+- Xp / level up system
+
+
 - Fix balance for base squads
 
 
@@ -139,7 +142,12 @@
 
 - Event system: random map events on empty nodes
 
-- Shrine nodes UI
+
+- Shrine nodes UI:  [Choose to reduce demon-rage, OR choose a blessing]
+
+
+- Foundtain nodes UI:  [Choose to reduce demon-rage, OR choose a blessing]
+
 
 - Special-nodes wired up
 
