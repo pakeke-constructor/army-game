@@ -1371,9 +1371,9 @@ function g.killEntity(ent, killer)
         local amount = math.max(1, math.floor(g.ask("getMoneyMultiplier") + 0.5))
         g.addGold(amount)
         g.addWorldTextPopup(ent.x, ent.y - 10, "{GOLD_COLOR}$" .. tostring(amount), {
-            vely = -170,
-            velDamping = 0.98,
-            duration = 0.55
+            vely = -200,
+            velDamping = 0.995,
+            duration = 0.3
         })
     end
     ent:getWorld():removeEntity(ent)

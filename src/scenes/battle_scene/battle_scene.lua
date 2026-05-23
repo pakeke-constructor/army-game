@@ -151,8 +151,10 @@ function battle_scene:update(dt)
             -- choicePopupService.set("blessing")
             rewardPopupService.set({
                 gold = 100,
-                randomSquad = true
+                randomSquad = true,
 
+                randomBlessing = true
+                -- todo: remove this, blessings are obtained via other means
             })
             self.victoryPopupTime = 0
             run:winBattle()

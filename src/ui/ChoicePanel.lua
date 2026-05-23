@@ -62,12 +62,19 @@ function ChoicePanel:draw()
     local t = math.min(1, math.max(0, elapsed / FAN_OUT_DURATION))
     t = t * t * (3 - 2 * t)
     local cx = cardArea.x + cardArea.w / 2
+    local cy = cardArea.y + cardArea.h / 2
+    local scale = 0.5 + 0.5 * t
 
     for i,rr in ipairs(regions) do
         rr = rr:padRatio(0.15)
         local targetCx = rr.x + rr.w / 2
+        local targetCy = rr.y + rr.h / 2
         local animCx = cx + (targetCx - cx) * t
-        regions[i] = rr:set(animCx - rr.w / 2, nil, nil, nil)
+        local animCy = cy + (targetCy - cy) * t
+        local dx = animCx - targetCx
+        local dy = animCy - targetCy
+        rr = rr:padRatio(1 - scale)
+        regions[i] = rr:moveUnit(dx, dy)
     end
 
     if self.rType == "squad" then
@@ -87,7 +94,7 @@ function ChoicePanel:draw()
             local blessId = self.choices[i]
             local clicked = ui.drawBlessingCard(blessId, regions[i], i)
             if clicked then
-                g.addOrUpgradeSquad(blessId)
+                g.addBlessing(blessId)
                 return true
             end
         end
