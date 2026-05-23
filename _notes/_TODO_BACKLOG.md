@@ -86,6 +86,9 @@
 - In squad-card, compress perks to 3 slots. printRichContained. hard limit of 3 perks / squad
 - In squad-card, make it so unit-visual doesn't overflow
 - Make squads easier to define
+- Ground texture. rip from catx.
+- Xp / level up system
+
 
 
 
@@ -96,15 +99,11 @@
 
 
 
-- Ground texture. rip from catx.
 
 
 - Make the battle-scene be a bit more interesting.... instead of a dull rectangle all the time.
 - Maybe hardcode a few shapes?
 - Peanut shape, Oval shape, multi-circle-shape
-
-
-- Xp / level up system
 
 
 - Fix balance for base squads
