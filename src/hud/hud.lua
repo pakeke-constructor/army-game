@@ -23,6 +23,8 @@ local LOC_PAUSE = loc("II", {}, {context="HUD top bar, pause button icon text"})
 local LOC_HOVER_RAGE = loc("Demon Rage increases when you win a battle, making enemies stronger.", {}, {context="Tooltip when hovering demon rage in HUD"})
 local LOC_HOVER_GOLD = loc("Gold is used to buy items and upgrades at shops.", {}, {context="Tooltip when hovering gold in HUD"})
 local LOC_HOVER_DAYS = loc("Days remaining until the next Incursion!", {}, {context="Tooltip when hovering days-till-incursion in HUD. After X number of days, players will be forced to fight a 'boss'"})
+local LOC_HOVER_MANA = loc(" mana is used to deploy squads in battle.", {}, {context="Tooltip when hovering normal mana in HUD. Prefixed with hovered mana type icon/text at runtime."})
+local LOC_HOVER_WILDCARD_MANA = loc("Wildcard mana can be spent to deploy ANY squad.", {}, {context="Tooltip when hovering wildcard mana in HUD."})
 
 
 ---@param slot integer
@@ -353,6 +355,7 @@ local function drawManaBox(self)
     local rdiff = (math.pi*2) / ct
     local cx,cy = r:getCenter()
     local t = 0--love.timer.getTime()
+    local hoveredManaType = nil
     local function drawMana(mtype, i, manaImg)
         local x = cx + (r.w/3) * math.sin(t + i*rdiff)
         local y = cy + (r.h/3) * math.cos(t + i*rdiff)
@@ -374,6 +377,9 @@ local function drawManaBox(self)
             lg.setColor(0.3,0.3,0.3)
         end
         richtext.printRich(tostring(count), font, x+4,y-8, 100, "left")
+        if iml.isHovered(x-16, y-16, 36, 36, "hud_mana_" .. mtype) then
+            hoveredManaType = mtype
+        end
     end
     if ct > 0 then
         local i = 0
@@ -384,6 +390,17 @@ local function drawManaBox(self)
             end
         end
         drawMana(g.WILDCARD_MANA, i, "mana_colorless_small")
+    end
+
+    if hoveredManaType then
+        hoverService.requestHover(function(box, fonts)
+            if hoveredManaType == g.WILDCARD_MANA then
+                box:addText("{c r=0.7 g=0.7 b=0.75}" .. LOC_HOVER_WILDCARD_MANA, fonts.body)
+            else
+                local manaTypeText = "{" .. hoveredManaType .. "}"
+                box:addText("{c r=0.7 g=0.7 b=0.75}" .. manaTypeText .. LOC_HOVER_MANA, fonts.body)
+            end
+        end)
     end
 
     return w,h

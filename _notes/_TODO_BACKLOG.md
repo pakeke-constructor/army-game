@@ -87,8 +87,6 @@
 - In squad-card, make it so unit-visual doesn't overflow
 - Make squads easier to define
 - Ground texture. rip from catx.
-- Xp / level up system
-
 - earn gold when killing enemies
 - txt popup after killing enemies
 
@@ -100,6 +98,9 @@
 ### OK:: what do we need for a minimum-playable game?
 
 
+
+
+- Xp / level up system
 
 
 - Fix balance for base squads
@@ -117,7 +118,6 @@
 - Juice for clicking on a map node
 
 
-- Fix balance for base squads
 
 
 - IMPORTANT: FIX REMAINING PERKS / BLESSINGS / ETC.
