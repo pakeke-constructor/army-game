@@ -52,13 +52,13 @@ local function drawBlessingCard(blessingId, region, index)
             local textW = ew - iconSize - iconGap
             love.graphics.setColor(1, 1, 1)
             love.graphics.setFont(TITLE_FONT)
-            local name = "{c r=0.8 g=0.8 b=0.85}{wavy amp=0.5 freq=1}" .. info.name
+            local name = "{c r=0.9 g=0.9 b=0.95}{wavy amp=0.5 freq=1}" .. info.name
             richtext.printRich(name, TITLE_FONT, textX, ey, textW, "left")
         end,
     })
 
     -- Description
-    box:addText("{c r=0.7 g=0.7 b=0.75}" .. info.description, DESC_FONT)
+    box:addText("{c r=0.85 g=0.85 b=0.9}" .. info.description, DESC_FONT)
 
     local ww,hh = box:render(x, y + h/3)
 

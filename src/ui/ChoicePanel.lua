@@ -7,7 +7,7 @@ local ChoicePanel = objects.Class("g:ChoicePanel")
 
 
 local NUM_CHOICES = 3
-local FAN_OUT_DURATION = 0.2
+local FAN_OUT_DURATION = 0.15
 
 
 ---@param rType "squad"|"blessing"|"mana"
