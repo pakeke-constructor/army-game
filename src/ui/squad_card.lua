@@ -128,8 +128,11 @@ local function drawSquadCard(squadId, region, index)
 
     -- squad-units: Layed out in a flat horizontal line.
     local unitWidth, unitHeight = g.getUnitDrawSize(info.entityId)
+    local maxUnitRowHeight = math.max(1, math.floor(h * 0.15))
     box:add({
-        getHeight = function() return unitHeight + 4 end,
+        getHeight = function()
+            return math.min(unitHeight + 4, maxUnitRowHeight)
+        end,
         draw = function(ex, ey, ew, eh)
             if unitHeight == 0 then return end
             local count = g.getSquadUnitCount(squadId)
@@ -138,18 +141,26 @@ local function drawSquadCard(squadId, region, index)
             love.graphics.setColor(r, gg, b, a * 0.6)
             ui.drawSingleColorPanel(ex, ey, ew, eh)
             love.graphics.setColor(1, 1, 1, 0.85)
+            local t = g.getWorldTime() * 0.6
+            local drawUnitHeight = math.max(1, math.min(unitHeight, eh - 4))
             for i = 1, count do
                 local cx, cy, cw, ch = cells[i]:get()
                 local ux = cx + (cw - unitWidth) / 2
-                local uy = cy + (ch - unitHeight) / 2
-                g.drawUnitPreview(info.entityId, ux, uy, unitWidth, unitHeight)
+                local uy = cy + (ch - drawUnitHeight) / 2 + math.sin(t + i * 0.9) * 1
+                g.drawUnitPreview(info.entityId, ux, uy, unitWidth, drawUnitHeight)
             end
         end
     })
 
     -- Stats: 3 wide, 2 high grid. Sorted with important stats first.
+    local hasDPS = def.baseAttackSpeed and (def.baseHealPower or def.baseAttackDamage)
     local sortedStats = {}
-    for i = 1, #STAT_LIST do sortedStats[i] = STAT_LIST[i] end
+    for i = 1, #STAT_LIST do
+        local s = STAT_LIST[i]
+        if s ~= "DPS" or hasDPS then
+            sortedStats[#sortedStats+1] = s
+        end
+    end
     do
         local origIdx = {}
         for i, s in ipairs(sortedStats) do origIdx[s] = i end
