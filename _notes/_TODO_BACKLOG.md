@@ -98,56 +98,30 @@
 ### OK:: what do we need for a minimum-playable game?
 
 
-
-
 - Xp / level up system
-
-
 - Fix balance for base squads
-
 
 - Juice for spending mana: Should pop up above the units as you spend them
 - Juice for spending money in shop
 
-
 - Juice for breaking armor
-
 - Juice for dealing damage (see leo gif)
-
-
 - Juice for clicking on a map node
-
-
-
 
 - IMPORTANT: FIX REMAINING PERKS / BLESSINGS / ETC.
 
-
 - Change ranged-icon; it shouldnt be a sword, should be bow
-
-
-
 
 - CLAUDE.MD: Should know "roughly" how much each stat is worth.
 
-
-
-- Explain demon-fury when hovering it.  "+20% demon damage, +10% demon health!"
-
-
+- Explain demon-fury when hovering it.  "+10% demon damage, +10% demon health!"
 
 - Event system: random map events on empty nodes
 
-
-- Shrine nodes UI:  [Choose to reduce demon-rage, OR choose a blessing]
-
-
+- Shrine nodes UI:  [Choose to remove a squad, reducing demon-rage + gold, OR, upgrade a squad]
 - Fountain nodes UI:  [Choose to reduce demon-rage, OR choose a blessing]
 
-
 - Special-nodes wired up
-
-
 
 
 - Make the battle-scene be a bit more interesting.... instead of a dull rectangle all the time.

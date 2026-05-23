@@ -1372,7 +1372,7 @@ function g.killEntity(ent, killer)
         g.addGold(amount)
         g.addWorldTextPopup(ent.x, ent.y - 10, "{GOLD_COLOR}$" .. tostring(amount), {
             vely = -170,
-            velDamping = 0.97,
+            velDamping = 0.98,
             duration = 0.55
         })
     end

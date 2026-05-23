@@ -20,7 +20,8 @@ local LOC_DAYS = interp("%{n} days until {c r=1 g=0.3 b=0.3}attack", {context="H
 local LOC_ZONE = loc("Zone 1 - Forest", {}, {context="HUD top bar, current zone name. Hardcoded stub"})
 local LOC_PAUSE = loc("II", {}, {context="HUD top bar, pause button icon text"})
 
-local LOC_HOVER_RAGE = loc("Demon Rage increases when you win a battle, making enemies stronger.", {}, {context="Tooltip when hovering demon rage in HUD"})
+local LOC_HOVER_RAGE = interp("+%{pct}% demon damage, +%{pct}% demon health!", {context="Tooltip when hovering demon rage in HUD"})
+local LOC_HOVER_RAGE_ZERO = loc("demon-rage increases whenever you win a battle. The higher the demon-rage, the stronger the enemies", {}, {context="Tooltip when hovering demon rage in HUD when rage is zero"})
 local LOC_HOVER_GOLD = loc("Gold is used to buy items and upgrades at shops.", {}, {context="Tooltip when hovering gold in HUD"})
 local LOC_HOVER_DAYS = loc("Days remaining until the next Incursion!", {}, {context="Tooltip when hovering days-till-incursion in HUD. After X number of days, players will be forced to fight a 'boss'"})
 local LOC_HOVER_MANA = loc(" mana is used to deploy squads in battle.", {}, {context="Tooltip when hovering normal mana in HUD. Prefixed with hovered mana type icon/text at runtime."})
@@ -292,7 +293,8 @@ local function drawTopBar()
 
     drawXpBar(xp)
 
-    drawPanel(demonRage, "{demon_pitchfork}{c r=0.6 g=0.1 b=0} " .. tostring(run.demonRage), LOC_HOVER_RAGE)
+    local rageHover = run.demonRage <= 0 and LOC_HOVER_RAGE_ZERO or LOC_HOVER_RAGE({pct = run.demonRage * 10})
+    drawPanel(demonRage, "{demon_pitchfork}{c r=0.6 g=0.1 b=0} " .. tostring(run.demonRage), rageHover)
     drawPanel(gold, "{coin_icon} {GOLD_COLOR}" .. tostring(run.money), LOC_HOVER_GOLD)
 
     local _, _, _, dh = daysTillIncursion:get()

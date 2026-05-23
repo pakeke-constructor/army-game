@@ -36,6 +36,23 @@ end
 function battle_scene:pollHandlers()
     self.ecs:addSystemHandlers()
     g.addBlessingAndEntityHandlers()
+
+    local rageMul = 1 + (g.getRun().demonRage or 0) * 0.1
+    g.addHandler({
+        getAttackDamageMultiplier = function(ent)
+            if ent and ent.team == "enemy" then
+                return rageMul
+            end
+            return 1
+        end,
+        getMaxHealthMultiplier = function(ent)
+            if ent and ent.team == "enemy" then
+                return rageMul
+            end
+            return 1
+        end,
+    })
+
     g.addHandler({ postDraw = function()
         lg.setColor(1,1,1)
         self.particles:draw()
