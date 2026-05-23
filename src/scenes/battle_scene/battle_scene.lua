@@ -477,7 +477,7 @@ function battle_scene:draw()
         local fade = 1-((self.timeSinceEnteredScene - (INTRO_ZOOM_DURATION - INTRO_ZOOM_TEXT_FADE_TIME)) / INTRO_ZOOM_TEXT_FADE_TIME)
         lg.setColor(1,1,1, fade)
         local txt = BATTLE_START[self.randomI % #BATTLE_START + 1]
-        richtext.printRichContainedNoWrap("{o}{c r=0.7 g=0.1 b=0.2}"..txt, font, rr:padRatio(0.75):get())
+        richtext.printRichContainedNoWrap("{o}{c r=0.7 g=0.1 b=0.2}"..txt, font, rr:padRatio(0.85):get())
     end
 
     if self.sandbox then

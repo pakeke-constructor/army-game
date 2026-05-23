@@ -1367,6 +1367,15 @@ function g.killEntity(ent, killer)
     if killer then
         g.call("onKill", killer, ent)
     end
+    if ent.team == "enemy" then
+        local amount = math.max(1, math.floor(g.ask("getMoneyMultiplier") + 0.5))
+        g.addGold(amount)
+        g.addWorldTextPopup(ent.x, ent.y - 10, "{GOLD_COLOR}$" .. tostring(amount), {
+            vely = -170,
+            velDamping = 0.97,
+            duration = 0.55
+        })
+    end
     ent:getWorld():removeEntity(ent)
 end
 

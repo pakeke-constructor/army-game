@@ -89,6 +89,10 @@
 - Ground texture. rip from catx.
 - Xp / level up system
 
+- earn gold when killing enemies
+- txt popup after killing enemies
+
+
 
 
 
@@ -98,19 +102,12 @@
 
 
 
-
-
-
-- Make the battle-scene be a bit more interesting.... instead of a dull rectangle all the time.
-- Maybe hardcode a few shapes?
-- Peanut shape, Oval shape, multi-circle-shape
-
-
 - Fix balance for base squads
 
 
 - Juice for spending mana: Should pop up above the units as you spend them
 - Juice for spending money in shop
+
 
 - Juice for breaking armor
 
@@ -145,10 +142,20 @@
 - Shrine nodes UI:  [Choose to reduce demon-rage, OR choose a blessing]
 
 
-- Foundtain nodes UI:  [Choose to reduce demon-rage, OR choose a blessing]
+- Fountain nodes UI:  [Choose to reduce demon-rage, OR choose a blessing]
 
 
 - Special-nodes wired up
+
+
+
+
+- Make the battle-scene be a bit more interesting.... instead of a dull rectangle all the time.
+- Maybe hardcode a few shapes?
+- Peanut shape, Oval shape, multi-circle-shape
+
+
+
 
 
 - Proper ordered-rendering for map-scene

@@ -6,6 +6,7 @@ local popups = {}
 ---@class textPopupService.args
 ---@field font love.Font?
 ---@field vely number?
+---@field velDamping number? -- normalized 0..1. 0=no damping, 1=instant stop
 ---@field duration number?
 ---@field fadeIn number?
 
@@ -21,6 +22,7 @@ function textPopups.addPopup(x, y, richtxt, args)
         y = y,
         font = args.font or love.graphics.getFont(),
         vely = args.vely or -10,
+        velDamping = args.velDamping or 0,
         duration = args.duration or 3,
         fadeIn = args.fadeIn or 0,
         time = 0,
@@ -33,6 +35,11 @@ function textPopups.update(dt)
         local p = popups[i]
         p.time = p.time + dt
         p.y = p.y + p.vely * dt
+        if p.velDamping >= 1 then
+            p.vely = 0
+        elseif p.velDamping > 0 then
+            p.vely = p.vely * ((1 - p.velDamping) ^ dt)
+        end
         if p.time >= p.duration then
             table.remove(popups, i)
         end
