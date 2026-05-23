@@ -30,8 +30,8 @@ local function drawPerkSlot(region, perk, col)
     ui.drawSingleColorPanel(x, y, w, h)
     lg.setColor(1,1,1)
     local txt = "{" .. perk.image .. "} {o}" .. helper.wrapRichtextColor(col, perk.name) .. "{/o}"
-    local desc = "{c r=0.7 g=0.7 b=0.75}" .. perk.description
-    richtext.printRichContained(txt .. "\n" .. desc, PERK_DESC_FONT, region:padUnit(3):get())
+    local desc = "{c r=0.85 g=0.85 b=0.9}" .. perk.description
+    richtext.printRichContained(txt .. "\n" .. desc, PERK_DESC_FONT, region:padUnit(6):get())
 end
 
 
@@ -136,7 +136,8 @@ local function drawSquadCard(squadId, region, index)
         draw = function(ex, ey, ew, eh)
             if unitHeight == 0 then return end
             local count = g.getSquadUnitCount(squadId)
-            local cells = Kirigami(ex, ey, ew, eh):grid(count, 1)
+            local padX = count < 3 and 24 or 10
+            local cells = Kirigami(ex + padX, ey, ew - padX * 2, eh):grid(count, 1)
             local r,gg,b,a = darkCol:getRGBA()
             love.graphics.setColor(r, gg, b, a * 0.6)
             ui.drawSingleColorPanel(ex, ey, ew, eh)
