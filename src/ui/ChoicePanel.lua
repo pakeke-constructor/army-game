@@ -7,6 +7,7 @@ local ChoicePanel = objects.Class("g:ChoicePanel")
 
 
 local NUM_CHOICES = 3
+local FAN_OUT_DURATION = 0.2
 
 
 ---@param rType "squad"|"blessing"|"mana"
@@ -15,6 +16,7 @@ function ChoicePanel:init(rType, rarityWeights)
     self.rType = rType
     self.choices = {}
     self.rarityWeights = rarityWeights or consts.DEFAULT_RARITY_WEIGHTS
+    self.createdAt = love.timer.getTime()
 
     local manaCells = g.getRun().mana
 
@@ -56,8 +58,16 @@ function ChoicePanel:draw()
     local r = ui.getFullScreenRegion()
     local cardArea = r:padRatio(0.05, 0.1)
     local regions = cardArea:grid(#self.choices, 1)
+    local elapsed = love.timer.getTime() - self.createdAt
+    local t = math.min(1, math.max(0, elapsed / FAN_OUT_DURATION))
+    t = t * t * (3 - 2 * t)
+    local cx = cardArea.x + cardArea.w / 2
+
     for i,rr in ipairs(regions) do
-        regions[i] = rr:padRatio(0.15)
+        rr = rr:padRatio(0.15)
+        local targetCx = rr.x + rr.w / 2
+        local animCx = cx + (targetCx - cx) * t
+        regions[i] = rr:set(animCx - rr.w / 2, nil, nil, nil)
     end
 
     if self.rType == "squad" then
