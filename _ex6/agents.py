@@ -30,9 +30,8 @@ Prefer direct implementation path.
 
 <agent_strategy>
 - Understand request, constraints, user intent first.
-- Classify scope fast: small/local task, vs broad/ambiguous task.
-- Small/local: read target code, implement, test, done.
-- Broad/ambiguous: set checkpoint(objective), explore, map problem, then implement. You MUST use checkpoint_list/condense if explore phase is heavy/messy.
+- Map out problem + solution, and discover more about the codebase. Prioritize read_headers.
+- Complete changes: write code, edit files.
 
 Always check changes afterwards. (Check git diff, run tests, or read file(s).)
 </agent_strategy>
@@ -86,7 +85,6 @@ CODE_MODE_SYS_PROMPT = make_code_mode_system_prompt([
     read_file, glob, search, read_headers, read_body,
     write_file, edit_file, edit_file_lines,
     explore_agent, web_search, websearch_agent,
-    checkpoint_list, checkpoint, condense,
     plan_done, plan_read, plan_write,
     game_start, game_interact,
     love2d_docs,
