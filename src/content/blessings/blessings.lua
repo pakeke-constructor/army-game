@@ -33,11 +33,7 @@ g.defineBlessing("barrage", "Barrage", {
     },
 })
 
-local TICK_INTERVAL = 2
-local _injTimer    = TICK_INTERVAL
-local _fireTimer   = TICK_INTERVAL
-local _chillTimer  = TICK_INTERVAL
-local _misfortTimer = TICK_INTERVAL
+
 
 local function randomEnemy()
     local pool = {}
@@ -100,11 +96,8 @@ g.defineBlessing("injection", "Injection", {
     rarity = g.RARITIES.COMMON,
     mana = "green",
     handlers = {
-        preUpdate = function(dt)
-            if not g.tryGetECS() then return end
-            _injTimer = _injTimer - dt
-            if _injTimer <= 0 then
-                _injTimer = TICK_INTERVAL / g.ask("getTickIntervalMultiplier")
+        perSecondUpdate = function(secondCount)
+            if secondCount % 2 == 0 then
                 local target = randomEnemy()
                 if target then g.applyPoison(target, 1, nil) end
             end
@@ -118,11 +111,8 @@ g.defineBlessing("firestarter", "Firestarter", {
     rarity = g.RARITIES.COMMON,
     mana = "red",
     handlers = {
-        preUpdate = function(dt)
-            if not g.tryGetECS() then return end
-            _fireTimer = _fireTimer - dt
-            if _fireTimer <= 0 then
-                _fireTimer = TICK_INTERVAL / g.ask("getTickIntervalMultiplier")
+        perSecondUpdate = function(secondCount)
+            if secondCount % 2 == 0 then
                 local target = randomEnemy()
                 if target then g.applyBurn(target, 4, nil) end
             end
@@ -136,11 +126,8 @@ g.defineBlessing("chill", "Chill", {
     rarity = g.RARITIES.COMMON,
     mana = "blue",
     handlers = {
-        preUpdate = function(dt)
-            if not g.tryGetECS() then return end
-            _chillTimer = _chillTimer - dt
-            if _chillTimer <= 0 then
-                _chillTimer = TICK_INTERVAL / g.ask("getTickIntervalMultiplier")
+        perSecondUpdate = function(secondCount)
+            if secondCount % 2 == 0 then
                 local target = randomEnemy()
                 if target then g.applyFrozen(target, 1, nil) end
             end
@@ -153,11 +140,8 @@ g.defineBlessing("misfortune", "Misfortune", {
     image = "coin_icon",
     rarity = g.RARITIES.COMMON,
     handlers = {
-        preUpdate = function(dt)
-            if not g.tryGetECS() then return end
-            _misfortTimer = _misfortTimer - dt
-            if _misfortTimer <= 0 then
-                _misfortTimer = TICK_INTERVAL / g.ask("getTickIntervalMultiplier")
+        perSecondUpdate = function(secondCount)
+            if secondCount % 2 == 0 then
                 local target = randomEnemy()
                 if target then g.dealDamage(target, 3, nil) end
             end
