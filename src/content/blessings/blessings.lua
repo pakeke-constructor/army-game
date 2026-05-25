@@ -23,12 +23,14 @@ g.defineBlessing("blood_tithe", "Blood Tithe", {
 })
 
 g.defineBlessing("barrage", "Barrage", {
-    description = loc("All ranged units fire 1 extra projectile."),
-    image = "coin_icon",
-    rarity = g.RARITIES.LEGENDARY,
+    description = loc("20% chance for ranged units to fire 1 extra projectile."),
+    image = "blessing_barrage",
+    rarity = g.RARITIES.UNCOMMON,
     handlers = {
         getProjectileCountModifier = function()
-            return 1
+            if love.math.random() <= 0.2 then
+                return 1
+            end
         end,
     },
 })
@@ -120,20 +122,6 @@ g.defineBlessing("firestarter", "Firestarter", {
     },
 })
 
-g.defineBlessing("chill", "Chill", {
-    description = loc("Every 2 seconds, apply 1 freeze to a random enemy."),
-    image = "coin_icon",
-    rarity = g.RARITIES.COMMON,
-    mana = "blue",
-    handlers = {
-        perSecondUpdate = function(secondCount)
-            if secondCount % 2 == 0 then
-                local target = randomEnemy()
-                if target then g.applyFrozen(target, 1, nil) end
-            end
-        end,
-    },
-})
 
 g.defineBlessing("misfortune", "Misfortune", {
     description = loc("Every 2 seconds, deal 3 damage to a random enemy."),
@@ -149,9 +137,25 @@ g.defineBlessing("misfortune", "Misfortune", {
     },
 })
 
-g.defineBlessing("plague", "Plague", {
-    description = loc("Poison spreads to one nearby enemy when applied."),
+g.defineBlessing("chill", "Chill", {
+    description = loc("Every 2 seconds, apply 1 freeze to a random enemy."),
     image = "coin_icon",
+    rarity = g.RARITIES.COMMON,
+    mana = "blue",
+    handlers = {
+        perSecondUpdate = function(secondCount)
+            if secondCount % 2 == 0 then
+                local target = randomEnemy()
+                if target then g.applyFrozen(target, 1, nil) end
+            end
+        end,
+    },
+})
+
+
+g.defineBlessing("pestilence", "Pestilence", {
+    description = loc("Poison spreads to one nearby enemy when applied."),
+    image = "blessing_pestilence",
     rarity = g.RARITIES.RARE,
     mana = "green",
     handlers = {

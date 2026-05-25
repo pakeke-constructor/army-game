@@ -1,20 +1,24 @@
-		SQUADS
-
-	COMMON
 
 
-	UNCOMMON
+SQUADS
+
+COMMON
+UNCOMMON
+RARE
+SUPER RARE
 
 
-	RARE
+
+BLESSINGS
 
 
-	SUPER RARE
 
 
-		BLESSINGS
 
-	COMMON
+
+
+
+COMMON
 
 Lucky Sack
 Gain between 50-200 gold when you acquire this blessing.
@@ -57,7 +61,15 @@ Mana Shield
 
 
 
-	UNCOMMON
+
+
+
+
+
+
+
+
+UNCOMMON
 
 Helpfulness
 +1 Heal to allied squads.
@@ -113,7 +125,12 @@ On-hit, your units have a 25% chance to deal 3 extra damage.
 Naturalist
 +4 max HP to allied squads.
 
-	RARE
+
+
+
+
+
+RARE
 
 Bodybuilding
 When your units Heal, they also gain 1 Max HP for the battle.
@@ -196,7 +213,15 @@ Your units have +8% ASPD per ARMR they have.
 Spontaneous Combustion
 On-hit, your units have a 15% chance to inflict 5 burn.
 
-	SUPER RARE
+
+
+
+
+
+
+
+
+SUPER RARE
 
 Grand Finale
 Your explosions have +20% area. This increases by 2% for the fight whenever an explosion is triggered.

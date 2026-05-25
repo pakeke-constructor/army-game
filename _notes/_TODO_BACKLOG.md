@@ -90,7 +90,7 @@
 - earn gold when killing enemies
 - txt popup after killing enemies
 - Xp / level up system
-
+- Explain demon-fury when hovering it.  "+10% demon damage, +10% demon health!"
 
 
 
@@ -99,6 +99,8 @@
 
 
 - Fix balance for base squads
+
+- Add reroll to squad-select in ChoicePanel
 
 - Juice for spending mana: Should pop up above the units as you spend them
 - Juice for spending money in shop
@@ -113,7 +115,6 @@
 
 - CLAUDE.MD: Should know "roughly" how much each stat is worth.
 
-- Explain demon-fury when hovering it.  "+10% demon damage, +10% demon health!"
 
 - Event system: random map events on empty nodes
 
