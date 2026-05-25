@@ -1,3 +1,43 @@
+local loc2 = g.locRich
+
+g.defineBlessing("anger", "Anger", {
+    description = loc2("+1 (ATK) to allied units with at least 3 (ATK)."),
+    image = "blessing_anger",
+    rarity = g.RARITIES.COMMON,
+    handlers = {
+        getAttackDamageModifier = function(ent)
+            if ent.team == "ally" and (ent.attackDamage or 0) >= 3 then
+                return 1
+            end
+        end,
+    },
+})
+
+g.defineBlessing("heart", "Heart", {
+    description = loc2("+1 max (HP) to allied squads."),
+    image = "blessing_hearty",
+    rarity = g.RARITIES.COMMON,
+    handlers = {
+        getMaxHealthModifier = function(ent)
+            if ent.squad and ent.team == "ally" then
+                return 1
+            end
+        end,
+    },
+})
+
+g.defineBlessing("luxury", "Luxury", {
+    description = loc2("Squads that are at least level 3 gain +10% (ASPD)."),
+    image = "placeholder", -- PLACEHOLDER: no "luxury" sprite exists yet
+    rarity = g.RARITIES.COMMON,
+    handlers = {
+        getAttackSpeedMultiplier = function(ent)
+            if ent.squad and (ent.squad.level or 1) >= 3 then
+                return 1.1
+            end
+        end,
+    },
+})
 
 g.defineBlessing("golden_coffers", "Golden Coffers", {
     description = loc("Gain 50% more money from all sources."),
@@ -33,6 +73,25 @@ g.defineBlessing("scavenge", "Scavenge", {
             run.money = run.money + 5
         end,
     },
+})
+
+g.defineBlessing("valuable_lesson", "Valuable Lesson", {
+    description = loc("Gain 3 XP when you acquire this blessing."),
+    image = "blessing_valuablelesson",
+    rarity = g.RARITIES.COMMON,
+    onAdd = function()
+        g.addXP(3)
+    end,
+})
+
+g.defineBlessing("grace", "Grace", {
+    description = loc("Reduce demon-rage by 2 when you acquire this blessing."),
+    image = "placeholder", -- PLACEHOLDER: no "grace" sprite exists yet
+    rarity = g.RARITIES.COMMON,
+    onAdd = function()
+        local run = g.getRun()
+        run.demonRage = math.max(0, run.demonRage - 2)
+    end,
 })
 
 g.defineBlessing("lucky_sack", "Lucky Sack", {
