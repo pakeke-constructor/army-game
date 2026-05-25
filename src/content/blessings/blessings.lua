@@ -22,6 +22,28 @@ g.defineBlessing("blood_tithe", "Blood Tithe", {
     },
 })
 
+g.defineBlessing("scavenge", "Scavenge", {
+    description = loc("Gain 5 gold when travelling to empty nodes."),
+    image = "blessing_scavenge",
+    rarity = g.RARITIES.COMMON,
+    handlers = {
+        arrivedAtNode = function(nodeType, node)
+            if nodeType ~= "empty" or node.visited then return end
+            local run = g.getRun()
+            run.money = run.money + 5
+        end,
+    },
+})
+
+g.defineBlessing("lucky_sack", "Lucky Sack", {
+    description = loc("Gain between 50 and 200 gold when acquired."),
+    image = "blessing_luckysack",
+    rarity = g.RARITIES.UNCOMMON,
+    onAdd = function()
+        g.addGold(math.random(50, 200))
+    end,
+})
+
 g.defineBlessing("barrage", "Barrage", {
     description = loc("20% chance for ranged units to fire 1 extra projectile."),
     image = "blessing_barrage",

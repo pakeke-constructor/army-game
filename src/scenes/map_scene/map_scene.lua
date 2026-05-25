@@ -192,6 +192,7 @@ end
 
 ---@param node MapNode
 local function enterNode(node)
+    g.call("arrivedAtNode", node.nodeType, node)
     if not node.visited then
         node.visited = true
         node:enter()

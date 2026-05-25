@@ -15,12 +15,16 @@ BLESSINGS
 
 
 
+PROMPT:
+Implement this blessing, (put it in `src/content/blessings/blessings.lua`)
+Make sure to search for the corresponding image file of the same name, and think before implementing:
+
 
 
 
 COMMON
 
-Lucky Sack
+====Lucky Sack
 Gain between 50-200 gold when you acquire this blessing.
 
 Scavenge
@@ -178,7 +182,7 @@ Burning Restoration
 On-burn, the nearest ally heals equal to the burn amount.
 
 Arcane Appetite
-Upgrade a random Blue squad when praying at a Shrine
+On-spawn, your Blue units gain 2 max HP per remaining Blue mana after placing them.
 
 Bulk Pheromones
 On-death, Green units give Pests 1 HP.

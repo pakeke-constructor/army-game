@@ -49,6 +49,7 @@ g.defineEvent("squadDeployed")
 
 -- Economy / run
 g.defineEvent("goldGained")
+g.defineEvent("arrivedAtNode") -- args: nodeType, node
 -- g.defineEvent("rewardChosen")
 -- g.defineEvent("chestOpened")
 g.defineEvent("rerollShop")

@@ -148,7 +148,6 @@ local FeastNode = nodes.newClass("feast")
 
 function FeastNode:enter()
     local run = g.getRun()
-    run.food = run.maxFood
 end
 
 function FeastNode:draw(wx, wy)

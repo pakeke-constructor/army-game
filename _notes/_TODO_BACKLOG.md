@@ -98,9 +98,12 @@
 ### OK:: what do we need for a minimum-playable game?
 
 
-- Fix balance for base squads
+
+- Wire up stuff in New Content.txt
 
 - Add reroll to squad-select in ChoicePanel
+
+- Fix balance for base squads
 
 - Juice for spending mana: Should pop up above the units as you spend them
 - Juice for spending money in shop

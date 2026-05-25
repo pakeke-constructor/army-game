@@ -10,6 +10,7 @@
 ---@field rarity g.Rarity
 ---@field mana g.ManaType?
 ---@field handlers table<string, function>
+---@field onAdd fun()? Called once, the moment this blessing is first acquired.
 
 
 ---@class g.PerkInfo
@@ -1008,6 +1009,7 @@ function g.addBlessing(id)
     if not run.blessings[id] then
         run.blessings[id] = d
         g.call("blessingAdded", id)
+        if info.onAdd then info.onAdd() end
     end
 end
 
