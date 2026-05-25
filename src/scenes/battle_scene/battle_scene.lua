@@ -27,6 +27,7 @@ function battle_scene:init()
     self.sandbox = false -- dev-mode sandbox
     self.sandbox_squadPicker = false
     self.sandbox_squadLevelUpper = false
+    self.sandbox_blessingScreen = false
 
     self.editingSquadLineup = false
 end
@@ -277,12 +278,11 @@ end
 local dbg = function(r)
     if consts.DEV_MODE then lg.rectangle("line", r:get()) end
 end
-
 ---@param self g.BattleScene
 local function drawSandboxUI(self)
     local r = ui.getFullScreenRegion()
     local main, right = r:splitHorizontal(5,1)
-    local regs = right:grid(1,8)
+    local regs = right:grid(1,9)
     local c = objects.Color
     local ii = 1
     local function button(txt, col)
@@ -295,6 +295,9 @@ local function drawSandboxUI(self)
     end
     if button("Level Up squad(s)", c.BLUE) then
         self.sandbox_squadLevelUpper = true
+    end
+    if button("Blessings", c.YELLOW) then
+        self.sandbox_blessingScreen = true
     end
     if button("Spawn enemies", c.RED) then
         local b = self.ecs.border
@@ -378,6 +381,58 @@ local function drawSandboxUI(self)
             if iml.wasJustClicked(cx, cy, cw, ch, 1, idd) then
                 sq.level = sq.level + 1
             end
+        end
+    elseif self.sandbox_blessingScreen then
+        local panel = r:padRatio(0.06)
+        ui.drawDarkPanel(panel:get())
+        local top, body = panel:padUnit(8):splitHorizontal(1, 12)
+        if ui.Button("Close", c.GRAY, c.DARK_GRAY, top) then
+            self.sandbox_blessingScreen = false
+        end
+
+        local ids = {}
+        for _, id in ipairs(g.getBlessingList()) do
+            ids[#ids + 1] = id
+        end
+
+        local rarityOrder = {
+            COMMON = 1,
+            UNCOMMON = 2,
+            RARE = 3,
+            LEGENDARY = 4,
+            UNIQUE = 5,
+        }
+        table.sort(ids, function(a, b)
+            local ar = (g.getBlessingInfo(a).rarity or g.RARITIES.COMMON).id
+            local br = (g.getBlessingInfo(b).rarity or g.RARITIES.COMMON).id
+            local av = rarityOrder[ar] or 999
+            local bv = rarityOrder[br] or 999
+            if av == bv then
+                return a < b
+            end
+            return av < bv
+        end)
+
+        local gridReg, previewReg = body:splitHorizontal(4, 1)
+        local cols = 10
+        local rows = math.max(1, math.ceil(#ids / cols))
+        local cells = gridReg:grid(cols, rows)
+        local hoveredBlessing = nil
+        for i, id in ipairs(ids) do
+            local cell = cells[i]
+            local cx, cy, cw, ch = cell:get()
+            local uid = "sb_bless_" .. id
+            if iml.isHovered(cx, cy, cw, ch, uid) then
+                hoveredBlessing = id
+                lg.setColor(1, 1, 1, 0.12)
+                lg.rectangle("fill", cx, cy, cw, ch)
+            end
+            lg.setColor(1, 1, 1)
+            g.drawBlessingIcon(id, cx + cw / 2, cy + ch / 2)
+        end
+
+        if hoveredBlessing then
+            ui.drawBlessingCard(hoveredBlessing, previewReg:padUnit(6), 999)
         end
     end
 end
