@@ -170,6 +170,9 @@ end
 ---@param fromEntity ecs.Entity?
 function g.explosion(x, y, damage, radius, fromEntity)
     radius = radius or 60
+    if fromEntity then
+        radius = radius * g.ask("getExplosionSizeMultiplier", fromEntity)
+    end
     local radiusSq = radius * radius
     -- todo: make particles here
     g.iteratePartition("unit", x, y, function(ent)
