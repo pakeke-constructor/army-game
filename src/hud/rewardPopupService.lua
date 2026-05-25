@@ -5,9 +5,15 @@ local rewardPopupService = {}
 
 local active = nil
 
-function rewardPopupService.set(args)
-    active = RewardPanel(args)
+
+function rewardPopupService.battleReward(args)
+    active = RewardPanel("battle", args)
 end
+
+function rewardPopupService.levelUpReward(args)
+    active = RewardPanel("levelup", args)
+end
+
 
 function rewardPopupService.clear()
     active = nil

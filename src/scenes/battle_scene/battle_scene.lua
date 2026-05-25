@@ -149,11 +149,12 @@ function battle_scene:update(dt)
         if self.noEnemyTimer >= WIN_DELAY and (not self.victory) and (not self.sandbox) then
             self.victory = true
             -- choicePopupService.set("blessing")
-            rewardPopupService.set({
+            rewardPopupService.battleReward({
                 gold = 100,
                 randomSquad = true,
 
-                randomBlessing = true
+                randomBlessing = true,
+                randomMana = true
                 -- todo: remove this, blessings are obtained via other means
             })
             self.victoryPopupTime = 0
@@ -234,11 +235,12 @@ function battle_scene:keypressed(k)
             if rewardPopupService.getActive() then
                 rewardPopupService.clear()
             else
-                rewardPopupService.set({
+                rewardPopupService.battleReward({
                     gold = 123,
                     xp = 45,
                     randomBlessing = true,
                     randomSquad = true,
+                    randomMana = true,
                 })
             end
         end

@@ -28,7 +28,7 @@ end
 
 ---@return boolean
 function RewardPanel:hasAnyRewards()
-    return not not (self.gold or self.xp or self.randomBlessing or self.randomSquad)
+    return not not (self.gold or self.xp or self.randomBlessing or self.randomSquad or self.randomMana)
 end
 
 
@@ -54,6 +54,8 @@ local colStr = ("{c r=%.2f g=%.2f b=%.2f}"):format(
 local NEW_SQUAD =  "{recruit_icon} ".. colStr .. loc("Recruit new troops!")
 
 local NEW_BLESSING = "{blessing_icon} " ..colStr .. loc("Get random Blessing!")
+
+local NEW_MANA = colStr .. loc("Gain a Mana crystal!")
 
 
 
@@ -148,6 +150,13 @@ function RewardPanel:draw()
         addBar(NEW_SQUAD, function()
             choicePopupService.set("squad")
             self.randomSquad = nil
+        end)
+    end
+
+    if self.randomMana then
+        addBar(NEW_MANA, function()
+            choicePopupService.set("mana")
+            self.randomMana = nil
         end)
     end
 

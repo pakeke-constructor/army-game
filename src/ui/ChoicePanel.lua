@@ -1,6 +1,38 @@
 local newPicker = require("src.modules.Picker")
 
 
+---@param manaType g.ManaType
+---@param region kirigami.Region
+---@param index integer
+local function drawManaCard(manaType, region, index)
+    local info = g.getManaInfo(manaType)
+    local col = info.color
+    local darkCol = col:lerp(objects.Color(0,0,0,1), 0.6)
+    local bgCol1 = objects.Color(0.05, 0.05, 0.06, 0.7)
+    local uid = "mana_" .. manaType .. "_" .. index
+
+    local x, y, w, h = region:get()
+    iml.panel(x, y, w, h, uid)
+    local isHovered = iml.isHovered(x, y, w, h, uid)
+    if isHovered then darkCol = darkCol:lerp(col, 0.3) end
+
+    love.graphics.setColor(1, 1, 1)
+    helper.gradientRect("vertical", bgCol1, darkCol, x, y, w, h)
+    love.graphics.setColor(col:getRGBA())
+    ui.drawPanel(x-3, y-3, w+6, h+6)
+
+    local iconSize = math.min(w, h) * 0.5
+    love.graphics.setColor(1,1,1)
+    g.drawImageContained(info.imageLarge, x + w/2 - iconSize/2, y + h/2 - iconSize/2, iconSize, iconSize)
+
+    if iml.wasJustClicked(x, y, w, h, 1, uid) then
+        g.playUISound("ui_click_basic", 1.4, 0.8)
+        return true
+    end
+    return false
+end
+
+
 
 ---@class g.ChoicePanel: objects.Class
 local ChoicePanel = objects.Class("g:ChoicePanel")
@@ -26,6 +58,12 @@ function ChoicePanel:init(rType, rarityWeights)
     elseif rType == "blessing" then
         local pool = g.getBlessingsByMana(manaCells)
         self:_pickFromPool(pool, function(id) return g.getBlessingInfo(id) end)
+    elseif rType == "mana" then
+        for manaType in pairs(manaCells) do
+            if manaType ~= g.WILDCARD_MANA then
+                self.choices[#self.choices + 1] = manaType
+            end
+        end
     end
 end
 
@@ -95,6 +133,17 @@ function ChoicePanel:draw()
             local clicked = ui.drawBlessingCard(blessId, regions[i], i)
             if clicked then
                 g.addBlessing(blessId)
+                return true
+            end
+        end
+        return
+    end
+
+    if self.rType == "mana" then
+        for i = 1, #regions do
+            local manaType = self.choices[i]
+            if drawManaCard(manaType, regions[i], i) then
+                g.addPermanentMana(manaType)
                 return true
             end
         end
