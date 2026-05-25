@@ -9,15 +9,19 @@ local RewardPanel = objects.Class("g:RewardPanel")
 ---@field xp integer?
 ---@field randomSquad boolean?
 ---@field randomBlessing boolean?
+---@field randomMana boolean?
 
 
 
+---@param typ "levelup"|"battle"
 ---@param args g.RewardPanel.Rewards
-function RewardPanel:init(args)
+function RewardPanel:init(typ, args)
+    self.type = typ
     self.gold = args.gold
     self.xp = args.xp
     self.randomSquad = args.randomSquad
     self.randomBlessing = args.randomBlessing
+    self.randomMana = args.randomMana
 end
 
 
@@ -31,8 +35,14 @@ end
 
 
 local REWARDS_TXT = loc("Rewards", {}, {
-    context = "As in, the rewards after battle"
+    context = "As in, the rewards after battle / level-up"
 })
+
+local LEVEL_UP_TXT = loc("Level Up!", {}, {
+    context = "As in, at title showing a reward screen after battle / level-up"
+})
+
+
 
 
 
@@ -71,13 +81,14 @@ function RewardPanel:draw()
             return math.max(LARGE_FONT:getHeight(), hh)
         end,
         draw = function(x,y,w,h)
+            local txt = self.type == "battle" and LEVEL_UP_TXT or REWARDS_TXT
             local embelPad = 50
-            local padW = richtext.getWidth(REWARDS_TXT, LARGE_FONT) / 2 + embelPad
+            local padW = richtext.getWidth(txt, LARGE_FONT) / 2 + embelPad
             lg.setColor(1,1,1)
             g.drawImage(IMG, x+w/2+padW, y+h/2, 0, 1,1)
             g.drawImage(IMG, x+w/2-padW, y+h/2, 0, -1,1)
             lg.setColor(BROWN_COL)
-            richtext.printRichContained(REWARDS_TXT, LARGE_FONT, x,y,w,h)
+            richtext.printRichContained(txt, LARGE_FONT, x,y,w,h)
         end,
     })
 
