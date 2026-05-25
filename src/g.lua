@@ -1751,6 +1751,12 @@ function g.gotoScene(sceneName)
     return sceneManager.gotoScene(sceneName)
 end
 
+
+---@return boolean
+function g.isAnyPopupOpen()
+    return not not (rewardPopupService.getActive() or choicePopupService.getActive())
+end
+
 function g.gotoLastScene()
     return sceneManager.gotoLastScene()
 end

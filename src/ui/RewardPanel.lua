@@ -34,7 +34,7 @@ end
 
 
 
-local REWARDS_TXT = loc("Rewards", {}, {
+local BATTLE_REWARDS_TXT = loc("Rewards", {}, {
     context = "As in, the rewards after battle / level-up"
 })
 
@@ -83,7 +83,7 @@ function RewardPanel:draw()
             return math.max(LARGE_FONT:getHeight(), hh)
         end,
         draw = function(x,y,w,h)
-            local txt = self.type == "battle" and LEVEL_UP_TXT or REWARDS_TXT
+            local txt = self.type == "battle" and BATTLE_REWARDS_TXT or LEVEL_UP_TXT
             local embelPad = 50
             local padW = richtext.getWidth(txt, LARGE_FONT) / 2 + embelPad
             lg.setColor(1,1,1)

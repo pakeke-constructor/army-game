@@ -485,8 +485,7 @@ function battle_scene:draw()
     end
     self.hud:drawUI({ battleScene = true })
 
-    local anyPopupOpen = choicePopupService.getActive() or rewardPopupService.getActive()
-    if self.victory and (not anyPopupOpen) then
+    if self.victory and (not g.isAnyPopupOpen()) then
         g.gotoScene("map_scene")
     end
 

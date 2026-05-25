@@ -198,7 +198,32 @@ local function enterNode(node)
     end
 end
 
+
+local function checkLevelUp()
+    local run = g.getRun()
+    local xpReq = run:getXpRequirement()
+
+    if xpReq <= 0 or run.xp < xpReq then
+        return
+    end
+
+    if g.isAnyPopupOpen() then
+        return
+    end
+
+    -- otherwise, level up!
+    run.xp = run.xp - xpReq
+    run.level = run.level + 1
+
+    rewardPopupService.levelUpReward({
+        gold = 10 * run.level,
+        randomMana = true,
+    })
+end
+
 function map_scene:update(dt)
+    checkLevelUp()
+
     -- WASD panning
     local dx, dy = 0, 0
     if love.keyboard.isDown("w") or love.keyboard.isDown("up")    then dy = dy - 1 end

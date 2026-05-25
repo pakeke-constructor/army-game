@@ -89,7 +89,7 @@
 - Ground texture. rip from catx.
 - earn gold when killing enemies
 - txt popup after killing enemies
-
+- Xp / level up system
 
 
 
@@ -98,7 +98,6 @@
 ### OK:: what do we need for a minimum-playable game?
 
 
-- Xp / level up system
 - Fix balance for base squads
 
 - Juice for spending mana: Should pop up above the units as you spend them
