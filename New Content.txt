@@ -113,6 +113,9 @@ On-hit, your units have a 25% chance to deal 3 extra damage.
 Naturalist
 +4 max HP to allied squads.
 
+Spontaneous Combustion
+On-hit, your units have a 15% chance to inflict 5 burn.
+
 	RARE
 
 Bodybuilding
@@ -151,20 +154,20 @@ Your units re-trigger their On Spawn effects On Death.
 Magnify
 Your units’ projectiles have a 50% chance to gain 1 damage each time they pass through a Blue unit.
 
-Agony
+Wildfire
 On-spawn, your units gain 5 burn and apply 10 burn to a nearby enemy.
 
 Goliath
 Your units have +1 ATK per 10 HP.
 
-Burning Restoration
+Cauterize
 On-burn, the nearest ally heals equal to the burn amount.
 
 Arcane Appetite
-Upgrade a random Blue squad when praying at a Shrine
+On-spawn, your Blue units gain 2 max HP per remaining Blue mana after placing them.
 
 Bulk Pheromones
-On-death, Green units give Pests 1 HP.
+On-death, Green and Pests give all living Pests 1 MAX HP.
 
 Meditation
 The first time you place a squad each battle, regain blue mana equal to its cost.
@@ -192,9 +195,6 @@ When a full HP ally is healed, it gains 1 ARMR.
 
 Iron Exosuits
 Your units have +8% ASPD per ARMR they have.
-
-Spontaneous Combustion
-On-hit, your units have a 15% chance to inflict 5 burn.
 
 	SUPER RARE
 
