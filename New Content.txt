@@ -16,7 +16,7 @@ BLESSINGS
 
 
 PROMPT:
-Implement this blessing, (put it in `src/content/blessings/blessings.lua`)
+Implement these blessings, (put it in `src/content/blessings/blessings.lua`)
 Make sure to search for the corresponding image file of the same name, and think before implementing:
 
 
@@ -45,23 +45,24 @@ Reduce demon fury by 2 when you acquire this blessing.
 === Luxury
 Squads that are at least level 3 gain +10% ASPD
 
-Polished Pauldrons
-The Commander spawns with +10 armor
-
-(NOT IMPLEMENTED YET) Dial it...
+(NYI) Dial it...
 Your squads can be upgraded to level 11. (giving the regular buffs
 
-Overclock
+==== Overclock
 Your squads gain +50% attack speed but lose 2 max HP.
 
-Torment
-On-hurt, enemies have a 10% chance to take 1 additional damage. 
-
-Haste
+==== Haste
 +0.2 attack speed to allied squads.
 
-Mana Shield
+==== Mana Shield
 +2 armor to all squads that cost at least 2 mana.
+
+(NYI) Polished Pauldrons
+The Commander spawns with +10 armor
+
+==== Torment
+On-hurt, enemies have a 10% chance to take 1 additional damage. 
+
 
 
 
@@ -75,11 +76,20 @@ Mana Shield
 
 UNCOMMON
 
-Helpfulness
+===== Helpfulness
 +1 Heal to allied squads.
+
+===== Naturalist
++4 max HP to allied squads.
 
 Wither
 Poisoned enemies have -40% ASPD.
+
+Volley
+Ranged units have +25% attack range.
+
+Gunpowder Mules
+Your explosions gain +50% size.
 
 Disintegration
 Burning enemies take 1 extra damage from unit attacks.
@@ -93,8 +103,6 @@ When Transformed, your units gain 5 max HP for the battle, stackable.
 Mobilization
 On every 10th unit that Spawns, also Spawn a 4HP Peasant. (all other stats are default/1.0)
 
-Volley
-Ranged units have +25% attack range.
 
 Alchemy License 
 When applying stacks of burn or poison, apply 1 more.
@@ -125,9 +133,6 @@ The first time you Transform a unit each combat, gain 2 blue mana.
 
 Electrocute
 On-hit, your units have a 25% chance to deal 3 extra damage.
-
-Naturalist
-+4 max HP to allied squads.
 
 
 

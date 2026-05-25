@@ -26,6 +26,32 @@ g.defineBlessing("heart", "Heart", {
     },
 })
 
+g.defineBlessing("naturalist", "Naturalist", {
+    description = loc2("+4 max (HP) to allied squads."),
+    image = "blessing_naturalist",
+    rarity = g.RARITIES.UNCOMMON,
+    handlers = {
+        getMaxHealthModifier = function(ent)
+            if ent.squad and ent.team == "ally" then
+                return 4
+            end
+        end,
+    },
+})
+
+g.defineBlessing("helpfulness", "Helpfulness", {
+    description = loc2("+1 (HEAL) to allied squads."),
+    image = "blessing_helpfulness",
+    rarity = g.RARITIES.UNCOMMON,
+    handlers = {
+        getHealPowerModifier = function(ent)
+            if ent.squad and ent.team == "ally" then
+                return 1
+            end
+        end,
+    },
+})
+
 g.defineBlessing("luxury", "Luxury", {
     description = loc2("Squads that are at least level 3 gain +10% (ASPD)."),
     image = "placeholder", -- PLACEHOLDER: no "luxury" sprite exists yet
@@ -34,6 +60,65 @@ g.defineBlessing("luxury", "Luxury", {
         getAttackSpeedMultiplier = function(ent)
             if ent.squad and (ent.squad.level or 1) >= 3 then
                 return 1.1
+            end
+        end,
+    },
+})
+
+g.defineBlessing("overclock", "Overclock", {
+    description = loc2("Your squads gain +50% (ASPD) but lose 2 max (HP)."),
+    image = "blessing_overclock",
+    rarity = g.RARITIES.COMMON,
+    handlers = {
+        getAttackSpeedMultiplier = function(ent)
+            if ent.squad then return 1.5 end
+        end,
+        getMaxHealthModifier = function(ent)
+            if ent.squad then return -2 end
+        end,
+    },
+})
+
+g.defineBlessing("haste", "Haste", {
+    description = loc2("+0.2 (ASPD) to allied squads."),
+    image = "blessing_haste",
+    rarity = g.RARITIES.COMMON,
+    handlers = {
+        getAttackSpeedModifier = function(ent)
+            if ent.squad then return 0.2 end
+        end,
+    },
+})
+
+g.defineBlessing("mana_shield", "Mana Shield", {
+    description = loc2("+2 (ARMR) to squads that cost at least 2 mana."),
+    image = "blessing_manashield",
+    rarity = g.RARITIES.COMMON,
+    handlers = {
+        entitySpawned = function(ent)
+            local squad = ent.squad
+            if not squad then return end
+            local cost = g.getSquadInfo(squad.squadId).cost
+            local total = 0
+            if cost then
+                for _, v in pairs(cost) do total = total + v end
+            end
+            if total >= 2 then
+                g.addArmor(ent, 2)
+            end
+        end,
+    },
+})
+
+g.defineBlessing("torment", "Torment", {
+    description = loc2("On-hurt, enemies have a 10% chance to take 1 additional damage."),
+    image = "blessing_torment",
+    rarity = g.RARITIES.COMMON,
+    handlers = {
+        entityHurt = function(ent, damage, attacker)
+            if ent.team ~= "enemy" then return end
+            if love.math.random() <= 0.1 then
+                g.dealDamage(ent, 1, attacker)
             end
         end,
     },
