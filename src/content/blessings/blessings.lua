@@ -404,6 +404,51 @@ g.defineBlessing("disintegration", "Disintegration", {
     },
 })
 
+g.defineBlessing("alchemy_license", "Alchemy License", {
+    description = loc("When applying burn or poison, 50% chance to apply again."),
+    image = "blessing_alchemylicense",
+    rarity = g.RARITIES.UNCOMMON,
+    handlers = {
+        statusEffectApplied = function(ent, effectType, x, source)
+            if ent.team == "ally" then return end
+            if love.math.random()<0.5 then return end
+            if effectType == "burn" then
+                ent.burnTime = (ent.burnTime or 0) + x
+            elseif effectType == "poison" then
+                ent.poisonAmount = (ent.poisonAmount or 0) + x
+            end
+        end,
+    },
+})
+
+g.defineBlessing("compress", "Compress", {
+    description = loc2("On-hurt, allies have a 10% chance to gain 1 (ARMR)."),
+    image = "blessing_compress",
+    rarity = g.RARITIES.UNCOMMON,
+    handlers = {
+        entityHurt = function(ent, damage, attacker)
+            if ent.team ~= "ally" then return end
+            if love.math.random() <= 0.1 then
+                g.addArmor(ent, 1)
+            end
+        end,
+    },
+})
+
+g.defineBlessing("bloodbath", "Bloodbath", {
+    description = loc2("Your units have +25% (LIFESTEAL) when below half (HP)."),
+    image = "blessing_bloodbath",
+    rarity = g.RARITIES.UNCOMMON,
+    handlers = {
+        getLifestealModifier = function(ent)
+            if ent.team == "ally" and ent.health and ent.maxHealth
+                and ent.health < ent.maxHealth * 0.5 then
+                return 0.25
+            end
+        end,
+    },
+})
+
 g.defineBlessing("profits", "Profits", {
     description = loc("Gain 5 gold per Yellow squad when entering a market."),
     image = "blessing_profits",

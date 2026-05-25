@@ -97,30 +97,29 @@ Burning enemies take 1 extra damage from unit attacks.
 ==== Profits
 Gain 5 gold per Yellow squad when entering a market.
 
-Evolution
+(NYI) Evolution
 When Transformed, your units gain 5 max HP for the battle, stackable.
 
-Mobilization
+(NYI) Mobilization
 On every 10th unit that Spawns, also Spawn a 4HP Peasant. (all other stats are default/1.0)
 
-
-Alchemy License 
+===== Alchemy License 
 When applying stacks of burn or poison, apply 1 more.
 
-Group Hug
-Inflicted buffs have a 20% chance to spread to a nearby ally, recursive.
-
-Compress
+==== Compress
 On-hurt, allies have a 10% chance to gain 1 ARMR.
+
+==== Bloodbath
+Your units have +25% lifesteal when below half HP.
+
+Group Hug
+Buffs have a 20% chance to spread to a nearby ally, recursive.  (NOTE: doesnt apply on allies that already have buff)
 
 Industry
 Every 5 days, Upgrade a random squad.
 
 Water Cycle
 Each battle, for every 8 blue mana you spend, gain 1 blue mana.
-
-Bloodbath
-Your units have +25% lifesteal when below half HP.
 
 Overpower
 Your units deal +25% DMG to enemies with less max HP than them.
