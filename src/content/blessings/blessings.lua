@@ -345,3 +345,78 @@ g.defineBlessing("pestilence", "Pestilence", {
         end,
     },
 })
+
+g.defineBlessing("wither", "Wither", {
+    description = loc2("Poisoned enemies have -40% (ASPD)."),
+    image = "blessing_wither",
+    rarity = g.RARITIES.UNCOMMON,
+    mana = "green",
+    handlers = {
+        getAttackSpeedMultiplier = function(ent)
+            if ent.team == "enemy" and (ent.poisonTime or 0) > 0 then
+                return 0.6
+            end
+        end,
+    },
+})
+
+g.defineBlessing("volley", "Volley", {
+    description = loc2("Ranged units have +25% (RNG)."),
+    image = "blessing_volley",
+    rarity = g.RARITIES.UNCOMMON,
+    handlers = {
+        getAttackRangeMultiplier = function(ent)
+            if ent.attack and ent.attack.attackType == "ranged" then
+                return 1.25
+            end
+        end,
+    },
+})
+
+g.defineBlessing("gunpowder_mules", "Gunpowder Mules", {
+    description = loc("Your explosions gain +50% size."),
+    image = "blessing_gunpowdermules",
+    rarity = g.RARITIES.UNCOMMON,
+    mana = "red",
+    handlers = {
+        getExplosionSizeMultiplier = function(ent)
+            if ent and ent.team == "ally" then
+                return 1.5
+            end
+        end,
+    },
+})
+
+g.defineBlessing("disintegration", "Disintegration", {
+    description = loc("Burning enemies take 1 extra damage from unit attacks."),
+    image = "blessing_disintegration",
+    rarity = g.RARITIES.UNCOMMON,
+    mana = "red",
+    handlers = {
+        -- onHitDamage only fires for unit attacks (attacker present), never for
+        -- burn/poison ticks or explosions. Deal the bonus with a nil attacker so
+        -- it doesn't re-trigger onHitDamage (no recursion).
+        onHitDamage = function(attacker, damage, target)
+            if target.team == "enemy" and (target.burnTime or 0) > 0 then
+                g.dealDamage(target, 1, nil)
+            end
+        end,
+    },
+})
+
+g.defineBlessing("profits", "Profits", {
+    description = loc("Gain 5 gold per Yellow squad when entering a market."),
+    image = "blessing_profits",
+    rarity = g.RARITIES.UNCOMMON,
+    mana = "yellow",
+    handlers = {
+        shopEntered = function()
+            local count = 0
+            for _, sq in pairs(g.getRun().squads) do
+                local cost = g.getSquadInfo(sq.squadId).cost
+                if cost and cost.yellow then count = count + 1 end
+            end
+            g.addGold(count * 5)
+        end,
+    },
+})

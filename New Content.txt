@@ -82,19 +82,19 @@ UNCOMMON
 ===== Naturalist
 +4 max HP to allied squads.
 
-Wither
+==== Wither
 Poisoned enemies have -40% ASPD.
 
-Volley
+==== Volley
 Ranged units have +25% attack range.
 
-Gunpowder Mules
+==== Gunpowder Mules
 Your explosions gain +50% size.
 
-Disintegration
+==== Disintegration
 Burning enemies take 1 extra damage from unit attacks.
 
-Profits
+==== Profits
 Gain 5 gold per Yellow squad when entering a market.
 
 Evolution
@@ -108,10 +108,7 @@ Alchemy License
 When applying stacks of burn or poison, apply 1 more.
 
 Group Hug
-Inflicted buffs have a 25% chance to spread to a nearby ally, recursive.
-
-Gunpowder Mules
-Your explosions gain +50% size.
+Inflicted buffs have a 20% chance to spread to a nearby ally, recursive.
 
 Compress
 On-hurt, allies have a 10% chance to gain 1 ARMR.
