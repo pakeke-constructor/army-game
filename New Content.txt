@@ -101,25 +101,28 @@ Each battle, for every 8 blue mana you spend, gain 1 blue mana.
 Bloodbath
 Your units have +25% lifesteal when below half HP.
 
-Trample
-Your units deal +50% DMG to enemies with less max HP than them.
+Overpower
+Your units deal +25% DMG to enemies with less max HP than them.
 
 Trickster
 The first time you Transform a unit each combat, gain 2 blue mana.
 
-Bodybuilding
-When your units Heal, they also gain 1 Max HP for the battle.
-
 Electrocute
 On-hit, your units have a 25% chance to deal 3 extra damage.
 
+Naturalist
++4 max HP to allied squads.
+
 	RARE
+
+Bodybuilding
+When your units Heal, they also gain 1 Max HP for the battle.
 
 Fortify
 50% chance to double armor-gain during battle.
 
 Fireball
-When applying burn, 25% chance to create a medium-sized explosion for 4 DMG.
+When applying burn, create a medium-sized explosion for 4 DMG.
 
 Conquer
 When defeating a Tier 3 combat, your commander permanently gains +4 max HP and +1 DMG
@@ -154,7 +157,7 @@ On-spawn, your units gain 5 burn and apply 10 burn to a nearby enemy.
 Goliath
 Your units have +1 ATK per 10 HP.
 
-Devouring Flames
+Burning Restoration
 On-burn, the nearest ally heals equal to the burn amount.
 
 Arcane Appetite
