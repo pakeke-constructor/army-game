@@ -21,9 +21,12 @@ local function drawManaCard(manaType, region, index)
     love.graphics.setColor(col:getRGBA())
     ui.drawPanel(x-3, y-3, w+6, h+6)
 
-    local iconSize = math.min(w, h) * 0.5
+    local iconR, textR = region:padRatio(0.1):splitVertical(0.7, 0.3)
     love.graphics.setColor(1,1,1)
-    g.drawImageContained(info.imageLarge, x + w/2 - iconSize/2, y + h/2 - iconSize/2, iconSize, iconSize)
+    g.drawImageContained(info.imageLarge, iconR:padRatio(0.4):get())
+
+    local font = g.getBigFont(16)
+    richtext.printRichContainedNoWrap("{o}(+1 {" .. manaType .. "})", font, textR:get())
 
     if iml.wasJustClicked(x, y, w, h, 1, uid) then
         g.playUISound("ui_click_basic", 1.4, 0.8)
@@ -94,7 +97,11 @@ end
 
 function ChoicePanel:draw()
     local r = ui.getFullScreenRegion()
+    iml.panel(r:get())
     local cardArea = r:padRatio(0.05, 0.1)
+    if self.rType == "mana" then
+        cardArea = r:padRatio(0.3, 0.35)
+    end
     local regions = cardArea:grid(#self.choices, 1)
     local elapsed = love.timer.getTime() - self.createdAt
     local t = math.min(1, math.max(0, elapsed / FAN_OUT_DURATION))
@@ -105,6 +112,10 @@ function ChoicePanel:draw()
 
     for i,rr in ipairs(regions) do
         rr = rr:padRatio(0.15)
+        if self.rType == "mana" then
+            rr = rr:padRatio(0.3)
+            rr = rr:shrinkToAspectRatio(1,1)
+        end
         local targetCx = rr.x + rr.w / 2
         local targetCy = rr.y + rr.h / 2
         local animCx = cx + (targetCx - cx) * t
@@ -147,6 +158,7 @@ function ChoicePanel:draw()
                 return true
             end
         end
+        return
     end
 end
 

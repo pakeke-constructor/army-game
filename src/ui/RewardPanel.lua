@@ -55,7 +55,7 @@ local NEW_SQUAD =  "{recruit_icon} ".. colStr .. loc("Recruit new troops!")
 
 local NEW_BLESSING = "{blessing_icon} " ..colStr .. loc("Get random Blessing!")
 
-local NEW_MANA = colStr .. loc("Gain a Mana crystal!")
+local NEW_MANA =  "{mana_colorless_large} " .. colStr .. loc("Gain a Mana crystal!")
 
 
 

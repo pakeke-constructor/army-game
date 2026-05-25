@@ -391,7 +391,7 @@ local function drawManaBox(self)
                 i = i + 1
             end
         end
-        drawMana(g.WILDCARD_MANA, i, "mana_colorless_small")
+        drawMana(g.WILDCARD_MANA, i, "mana_colorless_large")
     end
 
     if hoveredManaType then
