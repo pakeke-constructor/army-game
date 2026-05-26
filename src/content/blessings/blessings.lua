@@ -126,7 +126,7 @@ g.defineBlessing("torment", "Torment", {
 
 g.defineBlessing("golden_coffers", "Golden Coffers", {
     description = loc("Gain 50% more money from all sources."),
-    image = "coin_icon",
+    image = "placeholder",
     rarity = g.RARITIES.RARE,
     handlers = {
         getMoneyMultiplier = function()
@@ -137,7 +137,7 @@ g.defineBlessing("golden_coffers", "Golden Coffers", {
 
 g.defineBlessing("blood_tithe", "Blood Tithe", {
     description = loc("Gain 5 gold after winning a battle."),
-    image = "coin_icon",
+    image = "placeholder",
     rarity = g.RARITIES.UNCOMMON,
     handlers = {
         battleWon = function()
@@ -228,7 +228,7 @@ g.defineBlessing("golden_gamble", "Golden Gamble", {
 
 g.defineBlessing("fuel", "Fuel", {
     description = loc("When applying burn to an enemy for the first time, apply 2 extra burn."),
-    image = "coin_icon",
+    image = "placeholder",
     rarity = g.RARITIES.UNCOMMON,
     mana = "red",
     handlers = {
@@ -241,7 +241,7 @@ g.defineBlessing("fuel", "Fuel", {
 
 g.defineBlessing("sadistic_flames", "Sadistic Flames", {
     description = loc("When an enemy receives burn, apply 1 extra burn per unique debuff on the target."),
-    image = "coin_icon",
+    image = "placeholder",
     rarity = g.RARITIES.LEGENDARY,
     mana = "red",
     handlers = {
@@ -260,7 +260,7 @@ g.defineBlessing("sadistic_flames", "Sadistic Flames", {
 
 g.defineBlessing("injection", "Injection", {
     description = loc("Every 2 seconds, apply 1 poison to a random enemy."),
-    image = "coin_icon",
+    image = "placeholder",
     rarity = g.RARITIES.COMMON,
     mana = "green",
     handlers = {
@@ -275,7 +275,7 @@ g.defineBlessing("injection", "Injection", {
 
 g.defineBlessing("firestarter", "Firestarter", {
     description = loc("Every 2 seconds, apply 4 burn to a random enemy."),
-    image = "coin_icon",
+    image = "placeholder",
     rarity = g.RARITIES.COMMON,
     mana = "red",
     handlers = {
@@ -291,7 +291,7 @@ g.defineBlessing("firestarter", "Firestarter", {
 
 g.defineBlessing("misfortune", "Misfortune", {
     description = loc("Every 2 seconds, deal 3 damage to a random enemy."),
-    image = "coin_icon",
+    image = "placeholder",
     rarity = g.RARITIES.COMMON,
     handlers = {
         perSecondUpdate = function(secondCount)
@@ -305,7 +305,7 @@ g.defineBlessing("misfortune", "Misfortune", {
 
 g.defineBlessing("chill", "Chill", {
     description = loc("Every 2 seconds, apply 1 freeze to a random enemy."),
-    image = "coin_icon",
+    image = "placeholder",
     rarity = g.RARITIES.COMMON,
     mana = "blue",
     handlers = {
@@ -675,7 +675,7 @@ g.defineBlessing("cursed_banquet", "Cursed Banquet", {
 
 g.defineBlessing("wildfire", "Wildfire", {
     description = loc("On-spawn, your units gain 5 burn and apply 10 burn to a random enemy."),
-    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    image = "wildfire",
     rarity = g.RARITIES.RARE,
     mana = "red",
     handlers = {
