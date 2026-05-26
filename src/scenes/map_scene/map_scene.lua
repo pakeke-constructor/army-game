@@ -74,7 +74,7 @@ function map_scene:enter()
     self.pixelCanvas = PixelCanvas.new(love.graphics.getDimensions())
     self.hud = HUD()
     self.dragging = false
-    self.commanderFacing = -1
+    self.commanderFacing = 1
 
     local run = g.getRun()
     if not run.mapGraph then
@@ -287,8 +287,8 @@ function map_scene:mousereleased(mx, my, button)
                         local ax, ay = graph:getDrawPos(path[1])
                         local bx, by = graph:getDrawPos(path[2])
                         local dist = math.sqrt((bx - ax)^2 + (by - ay)^2)
-                        if bx < ax then self.commanderFacing = 1 end
-                        if bx > ax then self.commanderFacing = -1 end
+                        if bx < ax then self.commanderFacing = -1 end
+                        if bx > ax then self.commanderFacing = 1 end
                         self.traveling = {
                             toNode = path[2],
                             ax = ax, ay = ay, bx = bx, by = by,

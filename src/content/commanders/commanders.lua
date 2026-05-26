@@ -10,7 +10,27 @@ g.defineCommander("sir_horse", "Sir Horse", {
         green = 2
     },
 
-    image = "basiccommander",
+    image = "sir_horse",
+
+    squadDef = {
+        rarity = g.RARITIES.UNIQUE,
+        unitCount = 1,
+        cost = {red = 1, green = 1},
+        statUpgradeScaling = {
+            maxHealth = 0.25,
+        },
+        entityDef = {
+            image = "sir_horse",
+            attack = {
+                attackType = "melee",
+            },
+            baseAttackDamage = 10,
+            baseAttackSpeed = 0.8,
+            baseAttackRange = 60,
+            baseMoveSpeed = 55,
+            baseMaxHealth = 220,
+        },
+    },
 
     onStart = function(run)
         g.addSquadToArmy("militia_squad")

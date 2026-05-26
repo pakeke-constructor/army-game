@@ -72,10 +72,16 @@ end
 ---@field description string
 ---@field image string
 ---@field startMana g.ManaBundle
+---@field squadDef (g.SquadInfo|{id:nil}|{name:nil}|{perks:nil})?
+---@field squadId string?
 ---@field onStart (fun(run: g.Run))?
 
 local COMMANDERS = {}
 local COMMANDER_LIST = {}
+
+local function getCommanderSquadId(id)
+    return "commander_" .. id
+end
 
 ---@param id string
 ---@param name string
@@ -87,6 +93,24 @@ function g.defineCommander(id, name, info)
     })
     info.id = id
     assert(info.image,"commanders need images")
+
+    local squadDef = info.squadDef
+    if squadDef then
+        assert(squadDef.entityDef, "commanders need squadDef.entityDef")
+        assert(squadDef.rarity == g.RARITIES.UNIQUE, "commander squad rarity must be UNIQUE")
+        assert((squadDef.unitCount or 1) == 1, "commander squad unitCount must be 1")
+        assert(squadDef.cost, "commanders need squadDef.cost")
+
+        squadDef.rarity = g.RARITIES.UNIQUE
+        squadDef.unitCount = 1
+        squadDef.name = squadDef.name or info.name
+        squadDef.icon = squadDef.icon or info.image
+
+        local squadId = getCommanderSquadId(id)
+        info.squadId = squadId
+        g.defineSquad(squadId, squadDef)
+    end
+
     COMMANDERS[id] = info
     COMMANDER_LIST[#COMMANDER_LIST + 1] = id
 end
@@ -129,6 +153,9 @@ function g.newRun(lopt)
                 g.addPermanentMana(manaType)
             end
         end
+    end
+    if cmdInfo.squadId then
+        g.addSquadToArmy(cmdInfo.squadId)
     end
     if cmdInfo.onStart then
         cmdInfo.onStart(currentRun)
@@ -890,7 +917,7 @@ function g.getSquadsByMana(manaCells)
     for _, squadId in ipairs(SQUAD_LIST) do
         local info = SQUAD_DEFS[squadId]
         local ok = true
-        for manaType, _ in pairs(info.cost) do
+        for manaType, _ in pairs(info.cost or {}) do
             if not available[manaType] then
                 ok = false
                 break

@@ -118,7 +118,7 @@ Your units have +25% lifesteal when below half HP.
 ==== Group Hug
 Buffs have a 20% chance to spread to a nearby ally, recursive.  (NOTE: doesnt apply on allies that already have buff)
 
-Industry
+(NYI) Industry
 Every 5 days, Upgrade a random squad.
 
 ==== Water Cycle
@@ -170,17 +170,17 @@ Max level squads gain +50% units.
 ==== Ubergrades *
 Squads gain 0.1 ASPD and 1 ARMR when upgraded, stackable.
 
-Memento *
-Your units re-trigger their On Spawn effects On Death.
-
 === (NYI) Magnify * (this is kinda hard, i think we should rework it)
 Projectiles have a 50% chance to gain 1 (DMG) when passing through a Blue unit.
 
 === Agony *
 On-spawn, your units gain 5 burn and apply 10 burn to a random enemy.
 
-Goliath *
+==== Goliath *
 Your units have +1 ATK per 10 HP.
+
+Memento *
+Your units re-trigger their On Spawn effects On Death.
 
 Burning Restoration *
 On-burn, the nearest ally heals equal to the burn amount.
@@ -193,9 +193,6 @@ On-death, Green units give Pests 1 HP.
 
 Meditation *
 The first time you place a squad each battle, regain blue mana equal to its cost.
-
-Plague *
-Poison spreads to another nearby enemy when applied.
 
 Demonic Steed *
 Your commander gains 5 damage, Flying, and Fearsome.
