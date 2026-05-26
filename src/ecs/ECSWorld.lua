@@ -3,7 +3,7 @@ local table_clear = require("table.clear")
 local PixelCanvas = require("src.modules.PixelCanvas")
 
 ---@class ecs.ECSWorld: objects.Class
----@field public data table
+---@field public data table<string, any>
 local ECSWorld = objects.Class("ecs:ECSWorld")
 
 
@@ -16,7 +16,8 @@ local PARTITION_CHUNKSIZE = 32
 function ECSWorld:init(systemNames)
     self.entities = objects.BufferedSet()
 
-    self.data = {}
+    self.data = {} -- system-storage
+
     self.backCanvas = PixelCanvas.new(love.graphics.getDimensions())
     self.frontCanvas = PixelCanvas.new(love.graphics.getDimensions())
     self.border = nil -- {0, 0, w, h} or nil for no border
@@ -145,6 +146,9 @@ function ECSWorld:update(dt)
                     e._damageLagAmount = nil
                 end
             end
+        end
+        if e._timeSinceDeployed then
+            e._timeSinceDeployed = e._timeSinceDeployed + dt
         end
         if e.vz then
             e.vz = e.vz - consts.GRAVITY * dt

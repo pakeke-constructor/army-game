@@ -27,6 +27,7 @@ function battle_scene:init()
     self.sandbox = false -- dev-mode sandbox
     self.sandbox_squadPicker = false
     self.sandbox_squadLevelUpper = false
+    self.sandbox_blessingScreen = false
 
     self.editingSquadLineup = false
 end
@@ -36,6 +37,23 @@ end
 function battle_scene:pollHandlers()
     self.ecs:addSystemHandlers()
     g.addBlessingAndEntityHandlers()
+
+    local rageMul = 1 + (g.getRun().demonRage or 0) * 0.1
+    g.addHandler({
+        getAttackDamageMultiplier = function(ent)
+            if ent and ent.team == "enemy" then
+                return rageMul
+            end
+            return 1
+        end,
+        getMaxHealthMultiplier = function(ent)
+            if ent and ent.team == "enemy" then
+                return rageMul
+            end
+            return 1
+        end,
+    })
+
     g.addHandler({ postDraw = function()
         lg.setColor(1,1,1)
         self.particles:draw()
@@ -51,7 +69,10 @@ function battle_scene:enter()
 
     self.randomI = love.math.random(1,1000) -- random integer, doesnt really matter
 
-    self.ecs = ECSWorld({"stats", "status_effects", "ai", "attacking", "physics", "shadows"})
+    self.ecs = ECSWorld({
+        "stats", "status_effects", "ai", "attacking",
+        "physics", "shadows", "ground_decor"
+    })
     self.camera = Camera(0, 0, CAMERA_ZOOM)
     self.particles = ParticleService()
     self.hud = HUD()
@@ -129,10 +150,13 @@ function battle_scene:update(dt)
         if self.noEnemyTimer >= WIN_DELAY and (not self.victory) and (not self.sandbox) then
             self.victory = true
             -- choicePopupService.set("blessing")
-            rewardPopupService.set({
+            rewardPopupService.battleReward({
                 gold = 100,
-                randomSquad = true
+                randomSquad = true,
 
+                randomBlessing = true,
+                randomMana = true
+                -- todo: remove this, blessings are obtained via other means
             })
             self.victoryPopupTime = 0
             run:winBattle()
@@ -212,11 +236,12 @@ function battle_scene:keypressed(k)
             if rewardPopupService.getActive() then
                 rewardPopupService.clear()
             else
-                rewardPopupService.set({
+                rewardPopupService.battleReward({
                     gold = 123,
                     xp = 45,
                     randomBlessing = true,
                     randomSquad = true,
+                    randomMana = true,
                 })
             end
         end
@@ -233,15 +258,31 @@ local BATTLE_START = {
 }
 
 
+local CANT_AFFORD = interp("{c r=1 g=0.2 b=0.2}{o}Can't afford! (Need {c r=1 b=1 g=1}{%{manaType}}{/c})", {
+    context = "Popup shown when player tries to deploy a squad but doesn't have enough mana. %{manaType} is a richtext icon for the mana type (e.g. red, blue, green, yellow)."
+})
+
+---@param cost g.ManaBundle
+---@param counts g.ManaCounts
+---@return g.ManaType?
+local function findMissingMana(cost, counts)
+    for _, mt in ipairs(g.getManaTypelist()) do
+        if (cost[mt] or 0) > (counts[mt] or 0) then
+            return mt
+        end
+    end
+    return g.getManaTypelist()[1]
+end
+
+
 local dbg = function(r)
     if consts.DEV_MODE then lg.rectangle("line", r:get()) end
 end
-
 ---@param self g.BattleScene
 local function drawSandboxUI(self)
     local r = ui.getFullScreenRegion()
     local main, right = r:splitHorizontal(5,1)
-    local regs = right:grid(1,8)
+    local regs = right:grid(1,9)
     local c = objects.Color
     local ii = 1
     local function button(txt, col)
@@ -254,6 +295,9 @@ local function drawSandboxUI(self)
     end
     if button("Level Up squad(s)", c.BLUE) then
         self.sandbox_squadLevelUpper = true
+    end
+    if button("Blessings", c.YELLOW) then
+        self.sandbox_blessingScreen = true
     end
     if button("Spawn enemies", c.RED) then
         local b = self.ecs.border
@@ -338,6 +382,58 @@ local function drawSandboxUI(self)
                 sq.level = sq.level + 1
             end
         end
+    elseif self.sandbox_blessingScreen then
+        local panel = r:padRatio(0.06)
+        ui.drawDarkPanel(panel:get())
+        local top, body = panel:padUnit(8):splitHorizontal(1, 12)
+        if ui.Button("Close", c.GRAY, c.DARK_GRAY, top) then
+            self.sandbox_blessingScreen = false
+        end
+
+        local ids = {}
+        for _, id in ipairs(g.getBlessingList()) do
+            ids[#ids + 1] = id
+        end
+
+        local rarityOrder = {
+            COMMON = 1,
+            UNCOMMON = 2,
+            RARE = 3,
+            LEGENDARY = 4,
+            UNIQUE = 5,
+        }
+        table.sort(ids, function(a, b)
+            local ar = (g.getBlessingInfo(a).rarity or g.RARITIES.COMMON).id
+            local br = (g.getBlessingInfo(b).rarity or g.RARITIES.COMMON).id
+            local av = rarityOrder[ar] or 999
+            local bv = rarityOrder[br] or 999
+            if av == bv then
+                return a < b
+            end
+            return av < bv
+        end)
+
+        local gridReg, previewReg = body:splitHorizontal(4, 1)
+        local cols = 10
+        local rows = math.max(1, math.ceil(#ids / cols))
+        local cells = gridReg:grid(cols, rows)
+        local hoveredBlessing = nil
+        for i, id in ipairs(ids) do
+            local cell = cells[i]
+            local cx, cy, cw, ch = cell:get()
+            local uid = "sb_bless_" .. id
+            if iml.isHovered(cx, cy, cw, ch, uid) then
+                hoveredBlessing = id
+                lg.setColor(1, 1, 1, 0.12)
+                lg.rectangle("fill", cx, cy, cw, ch)
+            end
+            lg.setColor(1, 1, 1)
+            g.drawBlessingIcon(id, cx + cw / 2, cy + ch / 2)
+        end
+
+        if hoveredBlessing then
+            ui.drawBlessingCard(hoveredBlessing, previewReg:padUnit(6), 999)
+        end
     end
 end
 
@@ -348,21 +444,46 @@ end
 ---@param wy number world y coord
 local function drawSquadHover(squad, wx,wy)
     local info = g.getSquadInfo(squad.squadId)
+    local einfo = g.getEntityDef(info.entityId)
     local offsets = squad:getFormationOffsets()
     lg.setColor(0.2, 1, 0.3, 0.5)
+
+    local w,h = 10,10
+    if einfo.image then
+        w,h = g.getImageSize(einfo.image)
+    end
+
+    local minX, minY, maxX, maxY = math.huge,math.huge,0,0
     for i = 1, #offsets do
         local ox, oy = offsets[i].x, offsets[i].y
         g.drawUnitPreview(info.entityId, wx + ox, wy + oy)
+        minX = math.min(minX, ox)
+        minY = math.min(minY, oy)
+        maxX = math.max(maxX, ox)
+        maxY = math.max(maxY, oy)
     end
     if info.drawSquadHover then
         info.drawSquadHover(wx, wy)
     end
+
+    do
+    local ww, hh = maxX-minX, maxY-minY
+    lg.setLineWidth(2)
+    lg.setColor(0.05,0.2,0.07, 0.25)
+    lg.rectangle("fill", wx+minX-w/2, wy+minY-h/2, ww+w, hh+h)
+    lg.setColor(0.1,0.7,0.3, 0.6)
+    lg.rectangle("line", wx+minX-w/2, wy+minY-h/2, ww+w, hh+h)
+    end
+    local smallFont = g.getSmallFont(16)
+    lg.setColor(info.rarity.color)
+    local yof2 = -24
+    richtext.printRichCentered("{wavy}{o}"..info.name, smallFont, wx, wy+minY+yof2, 1000, "left")
 end
 
 
 function battle_scene:draw()
     self.camera:attach()
-    love.graphics.clear(0.15, 0.15, 0.15)
+    love.graphics.clear(g.COLORS.BATTLE_GROUND_COLOR:getRGBA())
     iml.pushTransform(self.camera:getTransform())
 
     local border = self.ecs.border
@@ -399,7 +520,7 @@ function battle_scene:draw()
     ui.startUI()
 
     local sw, sh = love.graphics.getDimensions()
-    if not self.victory and iml.wasJustClicked(0, 0, sw, sh, 1, "deploy_click") then
+    if not self.victory and iml.wasJustPressed(0, 0, sw, sh, 1, "deploy_click") then
         local entry = self.hud:getSelection()
         local mx, my = love.mouse.getPosition()
         local wx, wy = self.camera:toWorld(mx, my)
@@ -407,13 +528,19 @@ function battle_scene:draw()
             local info = g.getSquadInfo(entry.squadId)
             if not info.cost or g.trySpendMana(g.getBattleManaCounts(), info.cost) then
                 entry:spawn(wx, wy)
+            else
+                local manaType = findMissingMana(info.cost, g.getBattleManaCounts())
+                local umx, umy = ui.getMouse()
+                g.addUITextPopup(umx, umy, CANT_AFFORD({manaType = manaType}), {
+                    fadeIn = 0.15,
+                    duration = 1.5,
+                })
             end
         end
     end
     self.hud:drawUI({ battleScene = true })
 
-    local anyPopupOpen = choicePopupService.getActive() or rewardPopupService.getActive()
-    if self.victory and (not anyPopupOpen) then
+    if self.victory and (not g.isAnyPopupOpen()) then
         g.gotoScene("map_scene")
     end
 
@@ -425,7 +552,7 @@ function battle_scene:draw()
         local fade = 1-((self.timeSinceEnteredScene - (INTRO_ZOOM_DURATION - INTRO_ZOOM_TEXT_FADE_TIME)) / INTRO_ZOOM_TEXT_FADE_TIME)
         lg.setColor(1,1,1, fade)
         local txt = BATTLE_START[self.randomI % #BATTLE_START + 1]
-        richtext.printRichContainedNoWrap("{o}{c r=0.7 g=0.1 b=0.2}"..txt, font, rr:padRatio(0.75):get())
+        richtext.printRichContainedNoWrap("{o}{c r=0.7 g=0.1 b=0.2}"..txt, font, rr:padRatio(0.85):get())
     end
 
     if self.sandbox then

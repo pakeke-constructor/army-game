@@ -1,12 +1,124 @@
+local loc2 = g.locRich
 
-g.defineBlessing("iron_hide", "Iron Hide", {
-    description = loc("Allies take 3 less damage from attacks."),
-    image = "coin_icon",
+g.defineBlessing("anger", "Anger", {
+    description = loc2("+1 (ATK) to allied units with at least 3 (ATK)."),
+    image = "blessing_anger",
+    rarity = g.RARITIES.COMMON,
+    handlers = {
+        getAttackDamageModifier = function(ent)
+            if ent.team == "ally" and (ent.attackDamage or 0) >= 3 then
+                return 1
+            end
+        end,
+    },
+})
+
+g.defineBlessing("heart", "Heart", {
+    description = loc2("+1 max (HP) to allied squads."),
+    image = "blessing_hearty",
+    rarity = g.RARITIES.COMMON,
+    handlers = {
+        getMaxHealthModifier = function(ent)
+            if ent.squad and ent.team == "ally" then
+                return 1
+            end
+        end,
+    },
+})
+
+g.defineBlessing("naturalist", "Naturalist", {
+    description = loc2("+4 max (HP) to allied squads."),
+    image = "blessing_naturalist",
     rarity = g.RARITIES.UNCOMMON,
     handlers = {
-        getDamageReduction = function(ent)
-            if ent.team == "ally" then
-                return 3
+        getMaxHealthModifier = function(ent)
+            if ent.squad and ent.team == "ally" then
+                return 4
+            end
+        end,
+    },
+})
+
+g.defineBlessing("helpfulness", "Helpfulness", {
+    description = loc2("+1 (HEAL) to allied squads."),
+    image = "blessing_helpfulness",
+    rarity = g.RARITIES.UNCOMMON,
+    handlers = {
+        getHealPowerModifier = function(ent)
+            if ent.squad and ent.team == "ally" then
+                return 1
+            end
+        end,
+    },
+})
+
+g.defineBlessing("luxury", "Luxury", {
+    description = loc2("Squads that are at least level 3 gain +10% (ASPD)."),
+    image = "placeholder", -- PLACEHOLDER: no "luxury" sprite exists yet
+    rarity = g.RARITIES.COMMON,
+    handlers = {
+        getAttackSpeedMultiplier = function(ent)
+            if ent.squad and (ent.squad.level or 1) >= 3 then
+                return 1.1
+            end
+        end,
+    },
+})
+
+g.defineBlessing("overclock", "Overclock", {
+    description = loc2("Your squads gain +50% (ASPD) but lose 2 max (HP)."),
+    image = "blessing_overclock",
+    rarity = g.RARITIES.COMMON,
+    handlers = {
+        getAttackSpeedMultiplier = function(ent)
+            if ent.squad then return 1.5 end
+        end,
+        getMaxHealthModifier = function(ent)
+            if ent.squad then return -2 end
+        end,
+    },
+})
+
+g.defineBlessing("haste", "Haste", {
+    description = loc2("+0.2 (ASPD) to allied squads."),
+    image = "blessing_haste",
+    rarity = g.RARITIES.COMMON,
+    handlers = {
+        getAttackSpeedModifier = function(ent)
+            if ent.squad then return 0.2 end
+        end,
+    },
+})
+
+g.defineBlessing("mana_shield", "Mana Shield", {
+    description = loc2("+2 (ARMR) to squads that cost at least 2 mana."),
+    image = "blessing_manashield",
+    rarity = g.RARITIES.COMMON,
+    handlers = {
+        entitySpawned = function(ent)
+            local squad = ent.squad
+            if not squad then return end
+            local cost = g.getSquadInfo(squad.squadId).cost
+            local total = 0
+            if cost then
+                for _, v in pairs(cost) do total = total + v end
+            end
+            if total >= 2 then
+                g.addArmor(ent, 2)
+            end
+        end,
+    },
+})
+
+g.defineBlessing("torment", "Torment", {
+    description = loc2("On-hurt, enemies have a 10% chance to take 1 additional damage."),
+    image = "blessing_torment",
+    rarity = g.RARITIES.COMMON,
+    handlers = {
+        entityHurt = function(ent, damage, attacker)
+            if ent.team ~= "enemy" then return end
+            if love.math.random() <= 0.1 then
+                g.dealDamage(ent, 1, attacker)
             end
         end,
     },
@@ -35,22 +147,61 @@ g.defineBlessing("blood_tithe", "Blood Tithe", {
     },
 })
 
-g.defineBlessing("barrage", "Barrage", {
-    description = loc("All ranged units fire 1 extra projectile."),
-    image = "coin_icon",
-    rarity = g.RARITIES.LEGENDARY,
+g.defineBlessing("scavenge", "Scavenge", {
+    description = loc("Gain 5 gold when travelling to empty nodes."),
+    image = "blessing_scavenge",
+    rarity = g.RARITIES.COMMON,
     handlers = {
-        getProjectileCountModifier = function()
-            return 1
+        arrivedAtNode = function(nodeType, node)
+            if nodeType ~= "empty" or node.visited then return end
+            local run = g.getRun()
+            run.money = run.money + 5
         end,
     },
 })
 
-local TICK_INTERVAL = 2
-local _injTimer    = TICK_INTERVAL
-local _fireTimer   = TICK_INTERVAL
-local _chillTimer  = TICK_INTERVAL
-local _misfortTimer = TICK_INTERVAL
+g.defineBlessing("valuable_lesson", "Valuable Lesson", {
+    description = loc("Gain 3 XP when you acquire this blessing."),
+    image = "blessing_valuablelesson",
+    rarity = g.RARITIES.COMMON,
+    onAdd = function()
+        g.addXP(3)
+    end,
+})
+
+g.defineBlessing("grace", "Grace", {
+    description = loc("Reduce demon-rage by 2 when you acquire this blessing."),
+    image = "placeholder", -- PLACEHOLDER: no "grace" sprite exists yet
+    rarity = g.RARITIES.COMMON,
+    onAdd = function()
+        local run = g.getRun()
+        run.demonRage = math.max(0, run.demonRage - 2)
+    end,
+})
+
+g.defineBlessing("lucky_sack", "Lucky Sack", {
+    description = loc("Gain between 50 and 200 gold when acquired."),
+    image = "blessing_luckysack",
+    rarity = g.RARITIES.UNCOMMON,
+    onAdd = function()
+        g.addGold(math.random(50, 200))
+    end,
+})
+
+g.defineBlessing("barrage", "Barrage", {
+    description = loc("20% chance for ranged units to fire 1 extra projectile."),
+    image = "blessing_barrage",
+    rarity = g.RARITIES.UNCOMMON,
+    handlers = {
+        getProjectileCountModifier = function()
+            if love.math.random() <= 0.2 then
+                return 1
+            end
+        end,
+    },
+})
+
+
 
 local function randomEnemy()
     local pool = {}
@@ -113,11 +264,8 @@ g.defineBlessing("injection", "Injection", {
     rarity = g.RARITIES.COMMON,
     mana = "green",
     handlers = {
-        preUpdate = function(dt)
-            if not g.tryGetECS() then return end
-            _injTimer = _injTimer - dt
-            if _injTimer <= 0 then
-                _injTimer = TICK_INTERVAL / g.ask("getTickIntervalMultiplier")
+        perSecondUpdate = function(secondCount)
+            if secondCount % 2 == 0 then
                 local target = randomEnemy()
                 if target then g.applyPoison(target, 1, nil) end
             end
@@ -131,13 +279,25 @@ g.defineBlessing("firestarter", "Firestarter", {
     rarity = g.RARITIES.COMMON,
     mana = "red",
     handlers = {
-        preUpdate = function(dt)
-            if not g.tryGetECS() then return end
-            _fireTimer = _fireTimer - dt
-            if _fireTimer <= 0 then
-                _fireTimer = TICK_INTERVAL / g.ask("getTickIntervalMultiplier")
+        perSecondUpdate = function(secondCount)
+            if secondCount % 2 == 0 then
                 local target = randomEnemy()
                 if target then g.applyBurn(target, 4, nil) end
+            end
+        end,
+    },
+})
+
+
+g.defineBlessing("misfortune", "Misfortune", {
+    description = loc("Every 2 seconds, deal 3 damage to a random enemy."),
+    image = "coin_icon",
+    rarity = g.RARITIES.COMMON,
+    handlers = {
+        perSecondUpdate = function(secondCount)
+            if secondCount % 2 == 0 then
+                local target = randomEnemy()
+                if target then g.dealDamage(target, 3, nil) end
             end
         end,
     },
@@ -149,11 +309,8 @@ g.defineBlessing("chill", "Chill", {
     rarity = g.RARITIES.COMMON,
     mana = "blue",
     handlers = {
-        preUpdate = function(dt)
-            if not g.tryGetECS() then return end
-            _chillTimer = _chillTimer - dt
-            if _chillTimer <= 0 then
-                _chillTimer = TICK_INTERVAL / g.ask("getTickIntervalMultiplier")
+        perSecondUpdate = function(secondCount)
+            if secondCount % 2 == 0 then
                 local target = randomEnemy()
                 if target then g.applyFrozen(target, 1, nil) end
             end
@@ -161,26 +318,10 @@ g.defineBlessing("chill", "Chill", {
     },
 })
 
-g.defineBlessing("misfortune", "Misfortune", {
-    description = loc("Every 2 seconds, deal 3 damage to a random enemy."),
-    image = "coin_icon",
-    rarity = g.RARITIES.COMMON,
-    handlers = {
-        preUpdate = function(dt)
-            if not g.tryGetECS() then return end
-            _misfortTimer = _misfortTimer - dt
-            if _misfortTimer <= 0 then
-                _misfortTimer = TICK_INTERVAL / g.ask("getTickIntervalMultiplier")
-                local target = randomEnemy()
-                if target then g.dealDamage(target, 3, nil) end
-            end
-        end,
-    },
-})
 
-g.defineBlessing("plague", "Plague", {
+g.defineBlessing("infection", "Infection", {
     description = loc("Poison spreads to one nearby enemy when applied."),
-    image = "coin_icon",
+    image = "blessing_pestilence",
     rarity = g.RARITIES.RARE,
     mana = "green",
     handlers = {
@@ -203,4 +344,478 @@ g.defineBlessing("plague", "Plague", {
             end
         end,
     },
+})
+
+g.defineBlessing("wither", "Wither", {
+    description = loc2("Poisoned enemies have -40% (ASPD)."),
+    image = "blessing_wither",
+    rarity = g.RARITIES.UNCOMMON,
+    mana = "green",
+    handlers = {
+        getAttackSpeedMultiplier = function(ent)
+            if ent.team == "enemy" and (ent.poisonTime or 0) > 0 then
+                return 0.6
+            end
+        end,
+    },
+})
+
+g.defineBlessing("volley", "Volley", {
+    description = loc2("Ranged units have +25% (RANGE)."),
+    image = "blessing_volley",
+    rarity = g.RARITIES.UNCOMMON,
+    handlers = {
+        getAttackRangeMultiplier = function(ent)
+            if ent.attack and ent.attack.attackType == "ranged" then
+                return 1.25
+            end
+        end,
+    },
+})
+
+g.defineBlessing("gunpowder_mules", "Gunpowder Mules", {
+    description = loc("Your explosions gain +50% size."),
+    image = "blessing_gunpowdermules",
+    rarity = g.RARITIES.UNCOMMON,
+    mana = "red",
+    handlers = {
+        getExplosionSizeMultiplier = function(ent)
+            if ent and ent.team == "ally" then
+                return 1.5
+            end
+        end,
+    },
+})
+
+g.defineBlessing("disintegration", "Disintegration", {
+    description = loc("Burning enemies take 1 extra damage from unit attacks."),
+    image = "blessing_disintegration",
+    rarity = g.RARITIES.UNCOMMON,
+    mana = "red",
+    handlers = {
+        -- onHitDamage only fires for unit attacks (attacker present), never for
+        -- burn/poison ticks or explosions. Deal the bonus with a nil attacker so
+        -- it doesn't re-trigger onHitDamage (no recursion).
+        onHitDamage = function(attacker, damage, target)
+            if target.team == "enemy" and (target.burnTime or 0) > 0 then
+                g.dealDamage(target, 1, nil)
+            end
+        end,
+    },
+})
+
+g.defineBlessing("electrocute", "Electrocute", {
+    description = loc("On-hit, your units have a 25% chance to deal 3 extra damage."),
+    image = "blessing_electrocute",
+    rarity = g.RARITIES.UNCOMMON,
+    mana = "blue",
+    handlers = {
+        -- nil attacker on the bonus hit so it doesn't re-trigger onHitDamage.
+        onHitDamage = function(attacker, damage, target)
+            if attacker.team ~= "ally" then return end
+            if love.math.random() <= 0.25 then
+                g.dealDamage(target, 3, nil)
+            end
+        end,
+    },
+})
+
+g.defineBlessing("alchemy_license", "Alchemy License", {
+    description = loc("When applying burn or poison, 50% chance to apply again."),
+    image = "blessing_alchemylicense",
+    rarity = g.RARITIES.UNCOMMON,
+    handlers = {
+        statusEffectApplied = function(ent, effectType, x, source)
+            if ent.team == "ally" then return end
+            if love.math.random()<0.5 then return end
+            if effectType == "burn" then
+                ent.burnTime = (ent.burnTime or 0) + x
+            elseif effectType == "poison" then
+                ent.poisonAmount = (ent.poisonAmount or 0) + x
+            end
+        end,
+    },
+})
+
+g.defineBlessing("compress", "Compress", {
+    description = loc2("On-hurt, allies have a 10% chance to gain 1 (ARMR)."),
+    image = "blessing_compress",
+    rarity = g.RARITIES.UNCOMMON,
+    handlers = {
+        entityHurt = function(ent, damage, attacker)
+            if ent.team ~= "ally" then return end
+            if love.math.random() <= 0.1 then
+                g.addArmor(ent, 1)
+            end
+        end,
+    },
+})
+
+g.defineBlessing("bloodbath", "Bloodbath", {
+    description = loc2("Your units have +25% (LIFESTEAL) when below half (HP)."),
+    image = "blessing_bloodbath",
+    rarity = g.RARITIES.UNCOMMON,
+    handlers = {
+        getLifestealModifier = function(ent)
+            if ent.team == "ally" and ent.health and ent.maxHealth
+                and ent.health < ent.maxHealth * 0.5 then
+                return 0.25
+            end
+        end,
+    },
+})
+
+g.defineBlessing("group_hug", "Group Hug", {
+    description = loc("Buffs have 20% chance to spread to nearest ally, recursively."),
+    image = "blessing_grouphug",
+    rarity = g.RARITIES.RARE,
+    handlers = {
+        -- Re-buffing fires entityBuffed again, so spreading is naturally recursive.
+        entityBuffed = function(ent, stat, increase)
+            if ent.team ~= "ally" or increase <= 0 then return end
+            if love.math.random() > 0.2 then return end
+            local closest, bestDist = nil, math.huge
+            g.iteratePartition("ally", ent.x, ent.y, function(other)
+                if other == ent or not g.isAlive(other) then return end
+                local dx, dy = other.x - ent.x, other.y - ent.y
+                local d = dx * dx + dy * dy
+                if d < bestDist then bestDist, closest = d, other end
+            end, 120)
+            if closest then g.buffEntity(closest, stat, increase) end
+        end,
+    },
+})
+
+g.defineBlessing("water_cycle", "Water Cycle", {
+    description = loc("Each battle, for every 8 blue mana you spend, gain 1 blue mana."),
+    image = "blessing_watercycle",
+    rarity = g.RARITIES.UNCOMMON,
+    mana = "blue",
+    startingData = 0,            -- tracks blue mana spent this battle
+    resetDataOnBattleStart = true,
+    handlers = {
+        manaSpent = function(manaRequirement)
+            local blue = manaRequirement and manaRequirement.blue or 0
+            if blue <= 0 then return end
+            local acc = g.getBlessingData("water_cycle") + blue
+            while acc >= 8 do
+                acc = acc - 8
+                g.addMana("blue", 1)
+            end
+            g.setBlessingData("water_cycle", acc)
+        end,
+    },
+})
+
+g.defineBlessing("overpower", "Overpower", {
+    description = loc2("Your units deal +25% damage to enemies with less max (HP) than them."),
+    image = "blessing_overpower",
+    rarity = g.RARITIES.UNCOMMON,
+    handlers = {
+        -- Dispatched as g.ask("getDamageTakenMultiplier", target, attacker).
+        getDamageTakenMultiplier = function(target, attacker)
+            if not attacker or attacker.team ~= "ally" then return end
+            if attacker.maxHealth > target.maxHealth then return 1.25 end
+        end,
+    },
+})
+
+g.defineBlessing("trickster", "Trickster", {
+    description = loc("The first time you Transform a unit each combat, gain 2 blue mana."),
+    image = "blessing_trickster",
+    rarity = g.RARITIES.UNCOMMON,
+    mana = "blue",
+    startingData = false,        -- have we triggered this combat?
+    resetDataOnBattleStart = true,
+    handlers = {
+        entityTransformed = function(oldEnt, newEnt)
+            if oldEnt.team ~= "ally" then return end
+            if g.getBlessingData("trickster") then return end
+            g.setBlessingData("trickster", true)
+            g.addMana("blue", 2)
+        end,
+    },
+})
+
+g.defineBlessing("profits", "Profits", {
+    description = loc("Gain 5 gold per Yellow squad when entering a market."),
+    image = "blessing_profits",
+    rarity = g.RARITIES.UNCOMMON,
+    mana = "yellow",
+    handlers = {
+        shopEntered = function()
+            local count = 0
+            for _, sq in pairs(g.getRun().squads) do
+                local cost = g.getSquadInfo(sq.squadId).cost
+                if cost and cost.yellow then count = count + 1 end
+            end
+            g.addGold(count * 5)
+        end,
+    },
+})
+
+
+g.defineBlessing("bodybuilding", "Bodybuilding", {
+    description = loc("When your units Heal, they also gain 1 max (HP) for the battle."),
+    image = "blessing_bodybuilding",
+    rarity = g.RARITIES.RARE,
+    handlers = {
+        entityHealed = function(ent, amount, healer)
+            if ent.team ~= "ally" then return end
+            g.buffEntity(ent, "maxHealth", 1)
+        end,
+    },
+})
+
+g.defineBlessing("pestilence", "Pestilence", {
+    description = loc("Pests have +1 (ASPD) and +1 (ATK)."),
+    image = "blessing_pestilence",
+    rarity = g.RARITIES.RARE,
+    mana = "green",
+    handlers = {
+        getAttackSpeedModifier = function(ent)
+            if ent.isPest then return 1 end
+        end,
+        getAttackDamageModifier = function(ent)
+            if ent.isPest then return 1 end
+        end,
+    },
+})
+
+g.defineBlessing("fortify", "Fortify", {
+    description = loc2("50% chance to double (ARMR) gained during battle."),
+    image = "blessing_fortify",
+    rarity = g.RARITIES.RARE,
+    handlers = {
+        -- Bump ent.armor directly (not g.addArmor) so we don't re-fire
+        -- armorIncreased and double again recursively.
+        armorIncreased = function(ent, amount)
+            if ent.team ~= "ally" then return end
+            if love.math.random() <= 0.5 then
+                ent.armor = (ent.armor or 0) + amount
+            end
+        end,
+    },
+})
+
+g.defineBlessing("fireball", "Fireball", {
+    description = loc("When applying burn, create a medium explosion for 4 damage."),
+    image = "blessing_fireball",
+    rarity = g.RARITIES.RARE,
+    mana = "red",
+    handlers = {
+        statusEffectApplied = function(ent, effectType, duration, source)
+            if effectType ~= "burn" or ent.team == "ally" then return end
+            if source then
+                g.explosion(ent.x, ent.y, 4, 70, source)
+            end
+        end,
+    },
+})
+
+g.defineBlessing("stomp", "Stomp", {
+    description = loc2("On-spawn, your units deal area damage equal to 25% max (HP)."),
+    image = "blessing_stomp",
+    rarity = g.RARITIES.RARE,
+    handlers = {
+        entitySpawned = function(ent)
+            if ent.team ~= "ally" or not ent.squad then return end
+            g.explosion(ent.x, ent.y, ent.maxHealth * 0.25, 70, ent)
+        end,
+    },
+})
+
+g.defineBlessing("upscaling", "Upscaling", {
+    description = loc("Max level squads gain +50% units."),
+    image = "blessing_upscaling",
+    rarity = g.RARITIES.COMMON,
+    handlers = {
+        getSquadUnitCountModifier = function(squadId)
+            local squad = g.getSquadFromArmy(squadId)
+            if not squad or squad.level < consts.MAX_SQUAD_LEVEL then return end
+            local base = g.getSquadInfo(squadId).unitCount
+            return math.floor(base * 0.5 + 0.5)
+        end,
+    },
+})
+
+g.defineBlessing("ubergrades", "Ubergrades", {
+    description = loc2("Squads gain +0.1 (ASPD) and +1 (ARMR) each time they're upgraded."),
+    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    rarity = g.RARITIES.UNCOMMON,
+    handlers = {
+        -- level 1 = no upgrades; each level past 1 is one upgrade.
+        getAttackSpeedModifier = function(ent)
+            if ent.squad and ent.team == "ally" then
+                return (ent.squad.level - 1) * 0.1
+            end
+        end,
+        entitySpawned = function(ent)
+            if not ent.squad or ent.team ~= "ally" then return end
+            g.addArmor(ent, ent.squad.level - 1)
+        end,
+    },
+})
+
+g.defineBlessing("cursed_banquet", "Cursed Banquet", {
+    description = loc("Gain 2 XP the first time you kill a friendly unit each battle."),
+    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    rarity = g.RARITIES.UNCOMMON,
+    startingData = false,        -- triggered this battle?
+    resetDataOnBattleStart = true,
+    handlers = {
+        onKill = function(killer, victim)
+            if killer.team ~= "ally" or victim.team ~= "ally" then return end
+            if g.getBlessingData("cursed_banquet") then return end
+            g.setBlessingData("cursed_banquet", true)
+            g.addXP(2)
+        end,
+    },
+})
+
+g.defineBlessing("agony", "Agony", {
+    description = loc("On-spawn, your units gain 5 burn and apply 10 burn to a random enemy."),
+    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    rarity = g.RARITIES.UNCOMMON,
+    mana = "red",
+    handlers = {
+        entitySpawned = function(ent)
+            if ent.team ~= "ally" then return end
+            g.applyBurn(ent, 5, nil)
+            local target = randomEnemy()
+            if target then g.applyBurn(target, 10, ent) end
+        end,
+    },
+})
+
+g.defineBlessing("goliath", "Goliath", {
+    description = loc2("Your units have +1 (ATK) per 10 max (HP)."),
+    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    rarity = g.RARITIES.UNCOMMON,
+    handlers = {
+        getAttackDamageModifier = function(ent)
+            if ent.team == "ally" then
+                return math.floor((ent.maxHealth or 0) / 10)
+            end
+        end,
+    },
+})
+
+g.defineBlessing("evolution", "Evolution", {
+    description = loc2("When Transformed, your units gain 5 max (HP) for the battle, stackable."),
+    image = "blessing_evolution",
+    rarity = g.RARITIES.UNCOMMON,
+    mana = "blue",
+    handlers = {
+        entityTransformed = function(oldEnt, newEnt)
+            if newEnt.team ~= "ally" then return end
+            g.buffEntity(newEnt, "maxHealth", 5)
+        end,
+    },
+})
+
+g.defineBlessing("burning_restoration", "Burning Restoration", {
+    description = loc2("When any burning unit dies, the nearest ally heals 5 (HP)."),
+    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    rarity = g.RARITIES.RARE,
+    mana = "red",
+    handlers = {
+        entityDeath = function(ent, killer)
+            if (ent.burnTime or 0) <= 0 then return end
+            local closest, bestDist = nil, math.huge
+            for _, other in g.getECS():iterate("team") do
+                if other ~= ent and other.team == "ally" and g.isAlive(other) then
+                    local dx, dy = other.x - ent.x, other.y - ent.y
+                    local d = dx * dx + dy * dy
+                    if d < bestDist then bestDist, closest = d, other end
+                end
+            end
+            if closest then g.healEntity(closest, 5) end
+        end,
+    },
+})
+
+g.defineBlessing("bulk_pheromones", "Bulk Pheromones", {
+    description = loc2("When a Green unit dies, ALL pests gain +1 max (HP)."),
+    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    rarity = g.RARITIES.RARE,
+    mana = "green",
+    handlers = {
+        entityDeath = function(ent, killer)
+            if ent.team ~= "ally" or not ent.squad then return end
+            local cost = g.getSquadInfo(ent.squad.squadId).cost
+            if not (cost and cost.green and cost.green > 0) then return end
+            for _, other in g.getECS():iterate("team") do
+                if other.team == "ally" and other.isPest and g.isAlive(other) then
+                    g.buffEntity(other, "maxHealth", 1)
+                end
+            end
+        end,
+    },
+})
+
+
+g.defineBlessing("arcane_appetite", "Arcane Appetite", {
+    description = loc("Gain +2 blue mana. Your commander starts the battle poisoned."),
+    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    rarity = g.RARITIES.UNCOMMON,
+    mana = "blue",
+    onAdd = function()
+        g.addPermanentMana("blue")
+        g.addPermanentMana("blue")
+    end,
+    handlers = {
+        -- Commander is deployed by the player, so poison it when it spawns.
+        -- Poison is constant DPS (never decays), so keep the amount small.
+        entitySpawned = function(ent)
+            if ent.isCommander then
+                g.applyPoison(ent, 2, nil)
+            end
+        end,
+    },
+})
+
+g.defineBlessing("meditation", "Meditation", {
+    description = loc("The first time you place a squad each battle, regain blue mana equal to its cost."),
+    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    rarity = g.RARITIES.UNCOMMON,
+    mana = "blue",
+    startingData = false,        -- have we refunded this battle?
+    resetDataOnBattleStart = true,
+    handlers = {
+        -- manaSpent only fires on squad deploy, so this = "first squad placed".
+        manaSpent = function(manaRequirement)
+            if g.getBlessingData("meditation") then return end
+            g.setBlessingData("meditation", true)
+            local total = 0
+            for _, v in pairs(manaRequirement) do total = total + v end
+            if total > 0 then g.addMana("blue", total) end
+        end,
+    },
+})
+
+g.defineBlessing("demonic_steed", "Demonic Steed", {
+    description = loc2("Your commander gains +5 (ATK), and fears enemies on-hit."),
+    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    rarity = g.RARITIES.UNCOMMON,
+    handlers = {
+        getAttackDamageModifier = function(ent)
+            if ent.isCommander then return 5 end
+        end,
+        -- onHitDamage's first arg is the attacker. Make the hit enemy flee the commander.
+        onHitDamage = function(attacker, damage, target)
+            if attacker.isCommander and target.team == "enemy" then
+                g.applyFear(target, attacker, 2)
+            end
+        end,
+    },
+})
+
+g.defineBlessing("radiant_gift", "Radiant Gift", {
+    description = loc("Gain 1 Wildcard Mana when you acquire this blessing."),
+    image = "placeholder", -- PLACEHOLDER: no "radiant gift" sprite exists yet
+    rarity = g.RARITIES.RARE,
+    onAdd = function()
+        g.addPermanentMana(g.WILDCARD_MANA)
+    end,
 })

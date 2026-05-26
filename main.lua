@@ -85,6 +85,7 @@ _G.vignette = require("src.modules.vignette.vignette")
 _G.HUD = require("src.hud.hud")
 _G.rewardPopupService = require("src.hud.rewardPopupService")
 _G.choicePopupService = require("src.hud.choicePopupService")
+_G.textPopupService = require("src.modules.textPopupService")
 
 _G.g = require("src.g")
 _G.devcmd = require("src.devcmd")
@@ -160,6 +161,7 @@ function love.update(dt)
         g.getRun():update(dt)
     end
     iml.setPointer(love.mouse.getPosition())
+    textPopupService.update(dt)
     local sc = sceneManager.getCurrentScene()
     if sc and sc.update then
         sc:update(dt)
@@ -191,6 +193,7 @@ function love.draw()
         iml.beginFrame()
         sc:draw()
         iml.endFrame()
+        textPopupService.draw(ui.getUIScalingTransform())
         vignette.draw()
     end
     devcmd.draw()

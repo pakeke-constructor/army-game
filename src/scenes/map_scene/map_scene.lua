@@ -74,7 +74,7 @@ function map_scene:enter()
     self.pixelCanvas = PixelCanvas.new(love.graphics.getDimensions())
     self.hud = HUD()
     self.dragging = false
-    self.commanderFacing = -1
+    self.commanderFacing = 1
 
     local run = g.getRun()
     if not run.mapGraph then
@@ -137,20 +137,20 @@ function map_scene:_buildFogClearCells()
     local clearCells = math.ceil(FOG_CLEAR_RADIUS / step)
     local cells = {}
 
-    local nearPlayer = {}
     local pnode = graph:getPlayerNode()
     if pnode then
         local queue = {pnode}
-        nearPlayer[pnode] = 0
+        local depths = {[pnode] = 0}
         local head = 1
         while head <= #queue do
             local node = queue[head]
-            local depth = nearPlayer[node]
+            local depth = depths[node]
             head = head + 1
+            node.seen = true
             if depth < FOG_REVEAL_DEPTH then
                 for _, nb in ipairs(graph:getNeighbors(node.x, node.y)) do
-                    if not nearPlayer[nb] then
-                        nearPlayer[nb] = depth + 1
+                    if not depths[nb] then
+                        depths[nb] = depth + 1
                         queue[#queue + 1] = nb
                     end
                 end
@@ -159,7 +159,7 @@ function map_scene:_buildFogClearCells()
     end
 
     for _, entry in ipairs(self.nodeList) do
-        if entry.node.visited or nearPlayer[entry.node] ~= nil then
+        if entry.node.seen then
             local cx = math.floor(entry.x / step)
             local cy = math.floor(entry.y / step)
             for dx = -clearCells, clearCells do
@@ -192,13 +192,39 @@ end
 
 ---@param node MapNode
 local function enterNode(node)
+    g.call("arrivedAtNode", node.nodeType, node)
     if not node.visited then
         node.visited = true
         node:enter()
     end
 end
 
+
+local function checkLevelUp()
+    local run = g.getRun()
+    local xpReq = run:getXpRequirement()
+
+    if xpReq <= 0 or run.xp < xpReq then
+        return
+    end
+
+    if g.isAnyPopupOpen() then
+        return
+    end
+
+    -- otherwise, level up!
+    run.xp = run.xp - xpReq
+    run.level = run.level + 1
+
+    rewardPopupService.levelUpReward({
+        gold = 10 * run.level,
+        randomMana = true,
+    })
+end
+
 function map_scene:update(dt)
+    checkLevelUp()
+
     -- WASD panning
     local dx, dy = 0, 0
     if love.keyboard.isDown("w") or love.keyboard.isDown("up")    then dy = dy - 1 end
@@ -261,8 +287,8 @@ function map_scene:mousereleased(mx, my, button)
                         local ax, ay = graph:getDrawPos(path[1])
                         local bx, by = graph:getDrawPos(path[2])
                         local dist = math.sqrt((bx - ax)^2 + (by - ay)^2)
-                        if bx < ax then self.commanderFacing = 1 end
-                        if bx > ax then self.commanderFacing = -1 end
+                        if bx < ax then self.commanderFacing = -1 end
+                        if bx > ax then self.commanderFacing = 1 end
                         self.traveling = {
                             toNode = path[2],
                             ax = ax, ay = ay, bx = bx, by = by,
@@ -323,7 +349,7 @@ end
 
 function map_scene:draw()
     local lg = love.graphics
-    lg.clear(g.COLORS.GROUND_COLOR)
+    lg.clear(g.COLORS.MAP_GROUND_COLOR)
 
     self.pixelCanvas:start(self.camera:getTransform())
     iml.pushTransform(self.camera:getTransform())

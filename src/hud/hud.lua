@@ -20,9 +20,12 @@ local LOC_DAYS = interp("%{n} days until {c r=1 g=0.3 b=0.3}attack", {context="H
 local LOC_ZONE = loc("Zone 1 - Forest", {}, {context="HUD top bar, current zone name. Hardcoded stub"})
 local LOC_PAUSE = loc("II", {}, {context="HUD top bar, pause button icon text"})
 
-local LOC_HOVER_RAGE = loc("Demon Rage increases when you win a battle, making enemies stronger.", {}, {context="Tooltip when hovering demon rage in HUD"})
+local LOC_HOVER_RAGE = interp("+%{pct}% demon damage, +%{pct}% demon health!", {context="Tooltip when hovering demon rage in HUD"})
+local LOC_HOVER_RAGE_ZERO = loc("demon-rage increases whenever you win a battle. The higher the demon-rage, the stronger the enemies", {}, {context="Tooltip when hovering demon rage in HUD when rage is zero"})
 local LOC_HOVER_GOLD = loc("Gold is used to buy items and upgrades at shops.", {}, {context="Tooltip when hovering gold in HUD"})
 local LOC_HOVER_DAYS = loc("Days remaining until the next Incursion!", {}, {context="Tooltip when hovering days-till-incursion in HUD. After X number of days, players will be forced to fight a 'boss'"})
+local LOC_HOVER_MANA = loc(" mana is used to deploy squads in battle.", {}, {context="Tooltip when hovering normal mana in HUD. Prefixed with hovered mana type icon/text at runtime."})
+local LOC_HOVER_WILDCARD_MANA = loc("Wildcard mana can be spent to deploy ANY squad.", {}, {context="Tooltip when hovering wildcard mana in HUD."})
 
 
 ---@param slot integer
@@ -30,10 +33,7 @@ local LOC_HOVER_DAYS = loc("Days remaining until the next Incursion!", {}, {cont
 local function isSlotAvailable(slot)
     local army = g.getSortedArmyList()
     local squad = army[slot]
-    if (squad) and (not squad.deployed) and (squad.canAfford) then
-        return true
-    end
-    return false
+    return squad and (not squad.deployed) or false
 end
 
 ---@param from integer
@@ -43,13 +43,19 @@ local function getClosestAvailableSlot(from)
     local total = #army
     if total == 0 then return nil end
     from = helper.clamp(from, 1, total)
+    local fallback
     for offset = 0, total - 1 do
-        local left = from - offset
-        if left >= 1 and isSlotAvailable(left) then return left end
-        local right = from + offset
-        if right <= total and isSlotAvailable(right) then return right end
+        for _, slot in ipairs({from - offset, from + offset}) do
+            if slot >= 1 and slot <= total then
+                local sq = army[slot]
+                if sq and not sq.deployed then
+                    if sq.canAfford then return slot end
+                    fallback = fallback or slot
+                end
+            end
+        end
     end
-    return nil
+    return fallback
 end
 
 ---@param self g.HUD
@@ -232,25 +238,11 @@ local function drawXpBar(reg)
     lg.setColor(g.COLORS.DARK_UI)
     lg.setColor(objects.Color("FF2E2C3C"))
     ui.drawSingleColorPanel(xpBar:get())
-    lg.setColor(objects.Color("FF145914"))
+    lg.setColor(objects.Color("FF33873E"))
 
-    do
     local xpW = (xp/xpReq) * xpBar.w
-    local stencilReg = xpBar:shrinkTo(xpW, xpBar.h)
-    lg.setColorMask(false)
-    lg.setStencilState("replace", "always", 1)
-    local prevShader = lg.getShader()
-    lg.setShader(helper.alphaTestShader)
-    ui.drawSingleColorPanel(stencilReg:get())
-    lg.setShader(prevShader)
-    lg.setStencilState("keep", "greater", 0)
-    lg.setColorMask(true)
-    local ox = math.sin(love.timer.getTime() * 0.3) * 8
-    local oy = math.cos(love.timer.getTime() * 0.21) * 4
-    lg.setColor(1, 1, 1)
-    g.drawImageOffset("army_healthbar_background", xpBar.x + ox, xpBar.y + xpBar.h/2 + oy, 0, nil, nil, 0.5, 0.5)
-    lg.setStencilState()
-    end
+    local fillReg = xpBar:shrinkTo(xpW, xpBar.h)
+    ui.drawSingleColorPanel(fillReg:get())
 
     -- draw xp text
     local txt1 = helper.wrapRichtextColor(objects.Color("FF80BD51"),("%d"):format(xp))
@@ -301,7 +293,8 @@ local function drawTopBar()
 
     drawXpBar(xp)
 
-    drawPanel(demonRage, "{demon_pitchfork}{c r=0.6 g=0.1 b=0} " .. tostring(run.demonRage), LOC_HOVER_RAGE)
+    local rageHover = run.demonRage <= 0 and LOC_HOVER_RAGE_ZERO or LOC_HOVER_RAGE({pct = run.demonRage * 10})
+    drawPanel(demonRage, "{demon_pitchfork}{c r=0.6 g=0.1 b=0} " .. tostring(run.demonRage), rageHover)
     drawPanel(gold, "{coin_icon} {GOLD_COLOR}" .. tostring(run.money), LOC_HOVER_GOLD)
 
     local _, _, _, dh = daysTillIncursion:get()
@@ -364,6 +357,7 @@ local function drawManaBox(self)
     local rdiff = (math.pi*2) / ct
     local cx,cy = r:getCenter()
     local t = 0--love.timer.getTime()
+    local hoveredManaType = nil
     local function drawMana(mtype, i, manaImg)
         local x = cx + (r.w/3) * math.sin(t + i*rdiff)
         local y = cy + (r.h/3) * math.cos(t + i*rdiff)
@@ -385,6 +379,9 @@ local function drawManaBox(self)
             lg.setColor(0.3,0.3,0.3)
         end
         richtext.printRich(tostring(count), font, x+4,y-8, 100, "left")
+        if iml.isHovered(x-16, y-16, 36, 36, "hud_mana_" .. mtype) then
+            hoveredManaType = mtype
+        end
     end
     if ct > 0 then
         local i = 0
@@ -394,7 +391,18 @@ local function drawManaBox(self)
                 i = i + 1
             end
         end
-        drawMana(g.WILDCARD_MANA, i, "mana_colorless_small")
+        drawMana(g.WILDCARD_MANA, i, "mana_colorless_large")
+    end
+
+    if hoveredManaType then
+        hoverService.requestHover(function(box, fonts)
+            if hoveredManaType == g.WILDCARD_MANA then
+                box:addText("{c r=0.7 g=0.7 b=0.75}" .. LOC_HOVER_WILDCARD_MANA, fonts.body)
+            else
+                local manaTypeText = "{" .. hoveredManaType .. "}"
+                box:addText("{c r=0.7 g=0.7 b=0.75}" .. manaTypeText .. LOC_HOVER_MANA, fonts.body)
+            end
+        end)
     end
 
     return w,h

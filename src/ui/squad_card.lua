@@ -2,53 +2,36 @@
 local hoverService = require("src.hud.hoverService")
 
 local STAT_LIST = {
-    {id = "maxHealth", label = "HP"},
-    {id = "DPS", label = "DPS"}, -- special: calculated via (DMG x AS)
-    {id = "armor", label = "ARM"},
-    {id = "moveSpeed", label = "SPD"},
-    {id = "attackRange", label = "RNG"},
+    "maxHealth",
+    "DPS", -- special: calculated via (attackDamage x attackSpeed)
+    "startingArmor",
+    "moveSpeed",
+    "attackRange",
 }
 
 local STAT_FONT = nil
 local TITLE_FONT = nil
 
-local PERK_FONT = nil
 local PERK_DESC_FONT = nil
 
-local function addPerk(box, perk)
-    PERK_FONT = PERK_FONT or g.getBigFont(16)
+
+---@param region kirigami.Region
+---@param perk g.PerkInfo?
+---@param col objects.Color
+local function drawPerkSlot(region, perk, col)
+    if not perk then return end
+
+    local x, y, w, h = region:get()
+    local rr, gg, bb, aa = 0,0,0,1
+    love.graphics.setColor(rr,gg,bb,aa * 0.7)
+
     PERK_DESC_FONT = PERK_DESC_FONT or g.getSmallFont(16)
-    local iconSize = 20
-    local gap = 6
-    -- icon + title row (centered)
-    box:add({
-        getHeight = function() return iconSize end,
-        draw = function(ex, ey, ew, eh)
-            local textW = PERK_FONT:getWidth(perk.name)
-            local totalW = iconSize + gap + textW
-            local sx = ex + (ew - totalW) / 2
-            love.graphics.setColor(1, 1, 1)
-            if perk.image and g.isImage(perk.image) then
-                g.drawImageContained(perk.image, sx, ey, iconSize, iconSize)
-            end
-            love.graphics.setFont(PERK_FONT)
-            love.graphics.setColor(0.9, 0.85, 0.6)
-            love.graphics.print(perk.name, sx + iconSize + gap, ey + iconSize / 2 - PERK_FONT:getHeight() / 2)
-        end,
-    })
-    -- description row
-    box:add({
-        getHeight = function(innerW)
-            love.graphics.setFont(PERK_DESC_FONT)
-            local _, lines = PERK_DESC_FONT:getWrap(perk.description, innerW)
-            return #lines * PERK_DESC_FONT:getHeight()
-        end,
-        draw = function(ex, ey, ew, eh)
-            love.graphics.setFont(PERK_DESC_FONT)
-            love.graphics.setColor(0.7, 0.7, 0.75)
-            love.graphics.printf(perk.description, ex, ey, ew, "center")
-        end,
-    })
+
+    ui.drawSingleColorPanel(x, y, w, h)
+    lg.setColor(1,1,1)
+    local txt = "{" .. perk.image .. "} {o}" .. helper.wrapRichtextColor(col, perk.name) .. "{/o}"
+    local desc = "{c r=0.85 g=0.85 b=0.9}" .. perk.description
+    richtext.printRichContained(txt .. "\n" .. desc, PERK_DESC_FONT, region:padUnit(6):get())
 end
 
 
@@ -106,7 +89,7 @@ local function drawSquadCard(squadId, region, index)
     STAT_FONT = STAT_FONT or g.getSmallFont(16)
     TITLE_FONT = TITLE_FONT or g.getBigFont(16)
 
-    local box = ui.Box({maxWidth = w, padding = 12, spacing = 8}, function(bx, by, bw, bh)
+    local box = ui.Box({maxWidth = w, maxHeight = h, padding = 12, spacing = 8}, function(bx, by, bw, bh)
         if existingSquad then
             helper.drawEdgeTrailAnimation(region, col, 0.25, 20)
             helper.drawEdgeTrailAnimation(region, col, 0.75, 20)
@@ -144,27 +127,52 @@ local function drawSquadCard(squadId, region, index)
     })
 
     -- squad-units: Layed out in a flat horizontal line.
-    local unitGap = 2
     local unitWidth, unitHeight = g.getUnitDrawSize(info.entityId)
+    local maxUnitRowHeight = math.max(1, math.floor(h * 0.15))
     box:add({
-        getHeight = function() return unitHeight + 4 end,
+        getHeight = function()
+            return math.min(unitHeight + 4, maxUnitRowHeight)
+        end,
         draw = function(ex, ey, ew, eh)
             if unitHeight == 0 then return end
             local count = g.getSquadUnitCount(squadId)
-            local totalW = count * unitWidth + (count - 1) * unitGap
-            local startX = ex + (ew - totalW) / 2
+            local padX = count < 3 and 24 or 10
+            local cells = Kirigami(ex + padX, ey, ew - padX * 2, eh):grid(count, 1)
             local r,gg,b,a = darkCol:getRGBA()
             love.graphics.setColor(r, gg, b, a * 0.6)
-            ui.drawSingleColorPanel(startX - 4, ey, totalW + 8, eh)
+            ui.drawSingleColorPanel(ex, ey, ew, eh)
             love.graphics.setColor(1, 1, 1, 0.85)
+            local t = g.getWorldTime() * 0.6
+            local drawUnitHeight = math.max(1, math.min(unitHeight, eh - 4))
             for i = 1, count do
-                local ux = startX + (i - 1) * (unitWidth + unitGap)
-                g.drawUnitPreview(info.entityId, ux, ey + 2, unitWidth, unitHeight)
+                local cx, cy, cw, ch = cells[i]:get()
+                local ux = cx + (cw - unitWidth) / 2
+                local uy = cy + (ch - drawUnitHeight) / 2 + math.sin(t + i * 0.9) * 1
+                g.drawUnitPreview(info.entityId, ux, uy, unitWidth, drawUnitHeight)
             end
         end
     })
 
-    -- Stats: 3 wide, 2 high grid
+    -- Stats: 3 wide, 2 high grid. Sorted with important stats first.
+    local hasDPS = def.baseAttackSpeed and (def.baseHealPower or def.baseAttackDamage)
+    local sortedStats = {}
+    for i = 1, #STAT_LIST do
+        local s = STAT_LIST[i]
+        if s ~= "DPS" or hasDPS then
+            sortedStats[#sortedStats+1] = s
+        end
+    end
+    do
+        local origIdx = {}
+        for i, s in ipairs(sortedStats) do origIdx[s] = i end
+        table.sort(sortedStats, function(a, b)
+            local ai = a == "DPS" or g.isStatImportant(a, info.entityId)
+            local bi = b == "DPS" or g.isStatImportant(b, info.entityId)
+            if ai ~= bi then return ai end
+            return origIdx[a] < origIdx[b]
+        end)
+    end
+
     local statCellH = 22
     local statRows = 2
     local statCols = 3
@@ -172,7 +180,7 @@ local function drawSquadCard(squadId, region, index)
         getHeight = function() return statCellH * statRows end,
         draw = function(ex, ey, ew, eh)
             local cellW = math.floor(ew / statCols)
-            for i = 1, #STAT_LIST do
+            for i = 1, #sortedStats do
                 local row = math.floor((i - 1) / statCols)
                 local col = (i - 1) % statCols
                 local cx = ex + col * cellW
@@ -181,7 +189,7 @@ local function drawSquadCard(squadId, region, index)
                 local ch = statCellH - 2
 
                 local value, icon, color, name, desc
-                local statId = STAT_LIST[i].id
+                local statId = sortedStats[i]
                 local isDPS = statId == "DPS"
                 if isDPS then
                     -- its special! computed
@@ -205,7 +213,7 @@ local function drawSquadCard(squadId, region, index)
 
                 -- background
                 local important = isDPS or g.isStatImportant(statId, info.entityId)
-                local alpha = 0.4
+                local alpha = 0.2
                 if important then
                     alpha = 1
                 end
@@ -249,12 +257,29 @@ local function drawSquadCard(squadId, region, index)
 
     -- Perks
     local perks = info.perks or {}
-    for i = 1, #perks do
-        local perkInfo = g.getPerkInfo(perks[i])
-        if perkInfo then
-            addPerk(box, perkInfo)
-        end
-    end
+    box:addFill({
+        getHeight = function() return 0 end,
+        draw = function(ex, ey, ew, eh)
+            local reg = Kirigami(ex, ey, ew, eh)
+            if #perks == 1 then
+                local perkInfo = perks[1] and g.getPerkInfo(perks[1])
+                local _,reg1,_ = reg:splitVertical(1,3,1)
+                drawPerkSlot(reg1, perkInfo, col)
+            elseif #perks == 2 then
+                local reg1, reg2 = reg:splitHorizontal(1,1)
+                local perkInfo1 = perks[1] and g.getPerkInfo(perks[1])
+                local perkInfo2 = perks[2] and g.getPerkInfo(perks[2])
+                drawPerkSlot(reg1:padUnit(4), perkInfo1, col)
+                drawPerkSlot(reg2:padUnit(4), perkInfo2, col)
+            else
+                local perkRegs = {reg:splitVertical(1, 1, 1)}
+                for i = 1, 3 do
+                    local perkInfo = perks[i] and g.getPerkInfo(perks[i]) or nil
+                    drawPerkSlot(perkRegs[i]:padUnit(2, 2), perkInfo, col)
+                end
+            end
+        end,
+    })
 
     local ret = false
     if iml.wasJustClicked(x, y, w, h, 1, uid) then
@@ -282,7 +307,6 @@ local function drawSquadCard(squadId, region, index)
         richtext.printRichContainedNoWrap("{wavy amp=0.3}{o}" ..UPGRADE_COL.. UPGRADE, titleFont, r1:moveRatio(0,-0.7):padRatio(0.3):get())
 
         local buf = {}
-        local lv = existingSquad.level
         for statId, _ in pairs(info.statUpgradeScaling) do
             local statInfo = g.getStatInfo(statId)
             local base = def[statInfo.baseName] or 0

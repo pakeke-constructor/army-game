@@ -4,6 +4,7 @@
 from _ex6.models import M
 from _ex6.code_mode import make_code_mode_system_prompt
 from _ex6.tools import read_headers, read_body, glob, search, write_file, edit_file, read_file, edit_file_lines, escalate, bash, explore_agent, CLAUDE_MD, ENV_PROMPT
+from _ex6.tools_checkpoints import checkpoint_list, checkpoint, condense
 from _ex6.skills import load_skill
 from _ex6.lua_coding_style import SYSTEM_PROMPT_CODING_STYLE
 from _ex6.tasks import plan_add_log, plan_done, plan_list, plan_read, plan_write
@@ -22,6 +23,27 @@ overview="main-system",
 content="""\
 You are a coding agent working alongside an experienced engineer in a terminal UI.
 
+<goal>
+Solve user request with minimal bloat.
+Prefer direct implementation path.
+</goal>
+
+<agent_strategy>
+- Understand request, constraints, user intent first.
+- Map out problem + solution, and discover more about the codebase. Prioritize read_headers.
+- Complete changes: write code, edit files.
+
+Always check changes afterwards. (Check git diff, run tests, or read file(s).)
+</agent_strategy>
+
+<agent_tactics>
+- Try the simplest approach first. Don't overthink.
+- Tool call(s) to verify, then act. Don't read the whole codebase before a 2-line edit.
+- If a search returns what you need, stop searching. Don't keep exploring "just in case."
+- If your approach is blocked, don't brute force. Step back, try a different angle, or ask.
+- Avoid backwards-compatibility hacks. If something is unused, delete it.
+</agent_tactics>
+
 <output_rules>
 Plain text only. No markdown headers, no tables, no emojis. Short lines.
 DO NOT explain your reasoning or thinking process. DO NOT narrate what you are about to do or what you just did.
@@ -35,14 +57,6 @@ The ONLY acceptable text output is: a direct answer, a clarifying question, or a
 - Don't add error handling for scenarios that can't happen.
 - Three similar lines > premature abstraction.
 </code_editing_rules>
-
-<agent_strategy>
-- Try the simplest approach first. Don't overthink.
-- Tool call(s) to verify, then act. Don't read the whole codebase before a 2-line edit.
-- If a search returns what you need, stop searching. Don't keep exploring "just in case."
-- If your approach is blocked, don't brute force. Step back, try a different angle, or ask.
-- Avoid backwards-compatibility hacks. If something is unused, delete it.
-</agent_strategy>
 
 <working_style>
 - Read code before modifying it. Never propose changes to code you haven't seen.
@@ -93,6 +107,15 @@ cache_manually(coder)
 
 
 coder = Context("c_codex", yolo=False, model=M.CODEX_LATEST.id, reasoning="high", messages=[
+    MAIN_SYSTEM_PROMPT,
+    CODE_MODE_SYS_PROMPT,
+    ENV_PROMPT,
+    # CODING_STYLE_PROMPT,
+    EX6_MD,
+])
+
+
+coder = Context("c_gem", yolo=False, model=M.GEMINI_LATEST.id, reasoning="high", messages=[
     MAIN_SYSTEM_PROMPT,
     CODE_MODE_SYS_PROMPT,
     ENV_PROMPT,

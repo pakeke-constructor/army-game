@@ -1,12 +1,48 @@
 local newPicker = require("src.modules.Picker")
 
 
+---@param manaType g.ManaType
+---@param region kirigami.Region
+---@param index integer
+local function drawManaCard(manaType, region, index)
+    local info = g.getManaInfo(manaType)
+    local col = info.color
+    local darkCol = col:lerp(objects.Color(0,0,0,1), 0.6)
+    local bgCol1 = objects.Color(0.05, 0.05, 0.06, 0.7)
+    local uid = "mana_" .. manaType .. "_" .. index
+
+    local x, y, w, h = region:get()
+    iml.panel(x, y, w, h, uid)
+    local isHovered = iml.isHovered(x, y, w, h, uid)
+    if isHovered then darkCol = darkCol:lerp(col, 0.3) end
+
+    love.graphics.setColor(1, 1, 1)
+    helper.gradientRect("vertical", bgCol1, darkCol, x, y, w, h)
+    love.graphics.setColor(col:getRGBA())
+    ui.drawPanel(x-3, y-3, w+6, h+6)
+
+    local iconR, textR = region:padRatio(0.1):splitVertical(0.7, 0.3)
+    love.graphics.setColor(1,1,1)
+    g.drawImageContained(info.imageLarge, iconR:padRatio(0.4):get())
+
+    local font = g.getBigFont(16)
+    richtext.printRichContainedNoWrap("{o}(+1 {" .. manaType .. "})", font, textR:get())
+
+    if iml.wasJustClicked(x, y, w, h, 1, uid) then
+        g.playUISound("ui_click_basic", 1.4, 0.8)
+        return true
+    end
+    return false
+end
+
+
 
 ---@class g.ChoicePanel: objects.Class
 local ChoicePanel = objects.Class("g:ChoicePanel")
 
 
 local NUM_CHOICES = 3
+local FAN_OUT_DURATION = 0.15
 
 
 ---@param rType "squad"|"blessing"|"mana"
@@ -15,6 +51,7 @@ function ChoicePanel:init(rType, rarityWeights)
     self.rType = rType
     self.choices = {}
     self.rarityWeights = rarityWeights or consts.DEFAULT_RARITY_WEIGHTS
+    self.createdAt = love.timer.getTime()
 
     local manaCells = g.getRun().mana
 
@@ -24,6 +61,12 @@ function ChoicePanel:init(rType, rarityWeights)
     elseif rType == "blessing" then
         local pool = g.getBlessingsByMana(manaCells)
         self:_pickFromPool(pool, function(id) return g.getBlessingInfo(id) end)
+    elseif rType == "mana" then
+        for manaType in pairs(manaCells) do
+            if manaType ~= g.WILDCARD_MANA then
+                self.choices[#self.choices + 1] = manaType
+            end
+        end
     end
 end
 
@@ -54,10 +97,35 @@ end
 
 function ChoicePanel:draw()
     local r = ui.getFullScreenRegion()
+    iml.panel(r:get())
     local cardArea = r:padRatio(0.05, 0.1)
+    if self.rType == "mana" then
+        cardArea = r:padRatio(0.3, 0.35)
+    end
     local regions = cardArea:grid(#self.choices, 1)
+    local elapsed = love.timer.getTime() - self.createdAt
+    local t = math.min(1, math.max(0, elapsed / FAN_OUT_DURATION))
+    t = t * t * (3 - 2 * t)
+    local cx = cardArea.x + cardArea.w / 2
+    local cy = cardArea.y + cardArea.h / 2
+    local scale = 0.5 + 0.5 * t
+
     for i,rr in ipairs(regions) do
-        regions[i] = rr:padRatio(0.15)
+        rr = rr:padRatio(0.15)
+        if self.rType == "mana" then
+            rr = rr:padRatio(0.3)
+            rr = rr:shrinkToAspectRatio(1,1)
+        elseif self.rType == "blessing" then
+            rr = rr:shrinkToAspectRatio(3, 2)
+        end
+        local targetCx = rr.x + rr.w / 2
+        local targetCy = rr.y + rr.h / 2
+        local animCx = cx + (targetCx - cx) * t
+        local animCy = cy + (targetCy - cy) * t
+        local dx = animCx - targetCx
+        local dy = animCy - targetCy
+        rr = rr:padRatio(1 - scale)
+        regions[i] = rr:moveUnit(dx, dy)
     end
 
     if self.rType == "squad" then
@@ -77,10 +145,22 @@ function ChoicePanel:draw()
             local blessId = self.choices[i]
             local clicked = ui.drawBlessingCard(blessId, regions[i], i)
             if clicked then
-                g.addOrUpgradeSquad(blessId)
+                g.addBlessing(blessId)
                 return true
             end
         end
+        return
+    end
+
+    if self.rType == "mana" then
+        for i = 1, #regions do
+            local manaType = self.choices[i]
+            if drawManaCard(manaType, regions[i], i) then
+                g.addPermanentMana(manaType)
+                return true
+            end
+        end
+        return
     end
 end
 

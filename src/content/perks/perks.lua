@@ -1,5 +1,9 @@
+
+
+local loc2 = g.locRich
+
 g.definePerk("pressure", "Pressure", {
-    description = loc("Has damage equal to your currently held Blue mana."),
+    description = loc2("Has damage equal to your currently held Blue mana."),
     image = "coin_icon",
     handlers = {
         getAttackDamageModifier = function(ent)
@@ -9,7 +13,7 @@ g.definePerk("pressure", "Pressure", {
 })
 
 g.definePerk("healthy_spirit", "Healthy Spirit", {
-    description = loc("Heals to full HP whenever Blue mana is spent."),
+    description = loc2("Heals to full HP whenever Blue mana is spent."),
     image = "coin_icon",
     handlers = {
         manaSpent = function(ent, manaRequirement)
@@ -58,7 +62,7 @@ g.definePerk("racket", "Racket", {
 })
 
 g.definePerk("body_slam", "Body Slam", {
-    description = loc("Gains bonus ATK equal to current ARMR. Loses 1 ARMR on each attack."),
+    description = loc2("Gains bonus (ATK) equal to current (ARMR). Loses 1 (ARMR) on each attack."),
     image = "coin_icon",
     handlers = {
         getAttackDamageModifier = function(ent)
@@ -72,15 +76,6 @@ g.definePerk("body_slam", "Body Slam", {
     },
 })
 
-g.definePerk("tough", "Tough", {
-    description = loc("This unit takes 2 less damage from attacks."),
-    image = "coin_icon",
-    handlers = {
-        getDamageReduction = function(ent)
-            return 2
-        end,
-    },
-})
 
 g.definePerk("sharpshooter", "Sharpshooter", {
     description = loc("This unit fires 1 extra projectile."),
@@ -96,16 +91,17 @@ g.definePerk("berserker", "Berserker", {
     description = loc("This unit gains +5 attack when below 50% health."),
     image = "coin_icon",
     handlers = {
-        onAttack = function(ent, attack)
-            if ent.hp and ent.maxHp and ent.hp < ent.maxHp * 0.5 then
-                attack.damage = attack.damage + 5
+        getAttackDamageModifier = function(ent, attack)
+            if ent.health and ent.maxHealth and ent.health < ent.maxHealth * 0.5 then
+                return 5
             end
+            return 0
         end,
     },
 })
 
 g.definePerk("bolstering_brew", "Bolstering Brew", {
-    description = loc("On-spawn, 2 nearby allies gain +50% ASPD and +1 DMG for 10 seconds."),
+    description = loc2("On-spawn, 2 nearby allies gain double (ASPD) for 10 seconds."),
     image = "coin_icon",
     handlers = {
         entitySpawned = function(ent)
@@ -125,7 +121,7 @@ g.definePerk("bolstering_brew", "Bolstering Brew", {
 })
 
 g.definePerk("enrage", "Enrage", {
-    description = loc("The first time this unit takes damage, it gains 1.0 ASPD."),
+    description = loc2("The first time this unit takes damage, it gains 1.0 (ASPD)."),
     image = "coin_icon",
     handlers = {
         entityHurt = function(ent, damage, attacker)
@@ -267,7 +263,7 @@ g.definePerk("mass_production", "Mass-Production", {
 })
 
 g.definePerk("invigorate", "Invigorate", {
-    description = loc("Every 2 seconds, 5 nearby allies gain +50% ASPD for 4s."),
+    description = loc2("Every 2 seconds, 5 nearby allies gain +50% (ASPD) for 4s."),
     image = "coin_icon",
     rawHandlers = {
         perSecondUpdate = function(self, secondCount)
@@ -306,7 +302,7 @@ g.definePerk("protective_coating", "Protective Coating", {
 })
 
 g.definePerk("ritual_sacrifice", "Ritual Sacrifice", {
-    description = loc("On-spawn, kills a nearby ally to gain +2 ATK for the fight."),
+    description = loc2("On-spawn, kills a nearby ally to gain +4 (ATK) for the fight."),
     image = "coin_icon",
     handlers = {
         entitySpawned = function(ent)
@@ -319,16 +315,14 @@ g.definePerk("ritual_sacrifice", "Ritual Sacrifice", {
             end, 120)
             if victim then
                 g.killEntity(victim, ent)
-                g.addCustomEffect(ent, {
-                    getAttackDamageModifier = function(e) return 2 end,
-                }, 9999)
+                g.buffEntity(ent, "attackDamage", 4)
             end
         end,
     },
 })
 
 g.definePerk("conflagrate", "Conflagrate", {
-    description = loc("On-attack, a nearby ally takes 1 damage and gains +1 ATK for the fight."),
+    description = loc2("On-attack, a nearby ally takes 1 damage and gains +1 (ATK) for the fight."),
     image = "coin_icon",
     handlers = {
         onAttack = function(ent, target)
@@ -374,32 +368,28 @@ g.definePerk("defy", "Defy", {
 ]]
 
 g.definePerk("life_force", "Life Force", {
-    description = loc("Converts any max HP gained into ATK."),
+    description = loc2("Gain (ATK) equal to max (HP). Take 4 x as much damage."),
     image = "coin_icon",
     handlers = {
-        entityBuffed = function(ent, stat, increase)
-            if stat ~= "maxHealth" or increase <= 0 then return end
-            g.buffEntity(ent, "maxHealth", -increase)
-            g.buffEntity(ent, "attackDamage", increase)
+        getAttackDamageModifier = function(ent)
+            return ent.maxHealth
+        end,
+        getDamageTakenMultiplier = function(ent)
+            return 4
         end,
     },
 })
 
 g.definePerk("explosive", "Explosive", {
-    description = loc("On-hit, causes an explosion dealing full damage to nearby enemies."),
+    description = loc("Attacks cause explosions!"),
     image = "coin_icon",
-    rawHandlers = {
-        projectileHit = function(self, projEnt, hitEnt)
-            if not hitEnt then return end
-            if not g.isAlive(self) then return end
-            if not projEnt.projectile or projEnt.projectile.ownerEnt ~= self then return end
-            g.explosion(hitEnt.x, hitEnt.y, self.attackDamage or 0, 70, self)
-        end,
-    },
+    onHitDamage = function(attacker, dmg, target)
+        g.explosion(target.x, target.y, attacker.attackDamage or 0, 70, attacker)
+    end,
 })
 
 g.definePerk("helmheart", "Helmheart", {
-    description = loc("Whenever a Blue unit spawns, gains 1 armor."),
+    description = loc("Whenever a Blue unit spawns, gains 1 ARMR."),
     image = "coin_icon",
     rawHandlers = {
         entitySpawned = function(self, ent)
@@ -413,8 +403,9 @@ g.definePerk("helmheart", "Helmheart", {
     },
 })
 
+
 g.definePerk("sadistic", "Sadistic", {
-    description = loc("When a nearby ally takes damage, gains 1 ATK for the battle."),
+    description = loc2("When a nearby ally takes damage, gains 1 (ATK) for the battle."),
     image = "coin_icon",
     rawHandlers = {
         entityHurt = function(self, ent, damage, attacker)
@@ -428,15 +419,6 @@ g.definePerk("sadistic", "Sadistic", {
     },
 })
 
-g.definePerk("sputter", "Sputter", {
-    description = loc("Gains +0.5 ASPD whenever mana is spent."),
-    image = "coin_icon",
-    handlers = {
-        manaSpent = function(ent, manaRequirement)
-            g.buffEntity(ent, "attackSpeed", 0.5)
-        end,
-    },
-})
 
 g.definePerk("shrapnelmancy", "Shrapnelmancy", {
     description = loc("When any ally loses armor, this unit deals 1 damage to a random nearby enemy."),
@@ -516,7 +498,7 @@ g.definePerk("reverberate", "Reverberate", {
 })
 
 g.definePerk("laser_focus", "Laser Focus", {
-    description = loc("On-attack, this unit gains 0.1 ASPD. Stacks up to 30 times."),
+    description = loc2("On-attack, this unit gains 0.1 (ASPD). Stacks up to 30 times."),
     image = "coin_icon",
     handlers = {
         onAttack = function(ent, target)
@@ -565,6 +547,7 @@ g.definePerk("circle_of_life", "Circle of Life", {
             if amount <= 0 then return end
             for _, other in ent:getWorld():iterate("team") do
                 if other.team == "ally" and g.isAlive(other) then
+                    g.buffEntity(other, "maxHealth", amount)
                     g.healEntity(other, amount)
                 end
             end
@@ -594,7 +577,7 @@ g.definePerk("her_wrath", "Her Wrath", {
 })
 
 g.definePerk("forge_life", "Forge Life", {
-    description = loc("This unit has additional HEAL equal to its ARMR."),
+    description = loc2("This unit has additional (HEAL) equal to its (ARMR)."),
     image = "coin_icon",
     handlers = {
         getHealPowerModifier = function(ent)
@@ -634,13 +617,11 @@ g.definePerk("rebirth", "Rebirth", {
 })
 
 g.definePerk("vampiric", "Vampiric", {
-    description = loc("This unit heals for 3 HP on kill."),
+    description = loc("This unit heals for 3 (HP) on kill."),
     image = "coin_icon",
     handlers = {
         onKill = function(ent, target)
-            if ent.hp and ent.maxHp then
-                ent.hp = math.min(ent.hp + 3, ent.maxHp)
-            end
+            g.healEntity(ent, 3, ent)
         end,
     },
 })

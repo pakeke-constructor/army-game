@@ -23,6 +23,7 @@ g.defineEvent("manaSpent")
 -- Entity lifecycle
 g.defineEvent("entitySpawned")
 g.defineEvent("entityDeath")
+g.defineEvent("entityTransformed")
 
 -- Entity combat
 g.defineEvent("entityHurt") -- called whenever any entity is hurt
@@ -49,6 +50,7 @@ g.defineEvent("squadDeployed")
 
 -- Economy / run
 g.defineEvent("goldGained")
+g.defineEvent("arrivedAtNode") -- args: nodeType, node
 -- g.defineEvent("rewardChosen")
 -- g.defineEvent("chestOpened")
 g.defineEvent("rerollShop")
@@ -62,8 +64,6 @@ local MUL = reducers.MULTIPLY
 
 g.defineQuestion("getEntityScale", MUL, 1)
 
-g.defineQuestion("getDamageReduction", ADD, 0)
-
 -- Questions: economy/rewards
 g.defineQuestion("getMoneyMultiplier", MUL, 1)
 g.defineQuestion("getRewardChoiceCount", ADD, 3)
@@ -74,5 +74,7 @@ g.defineQuestion("getProjectileSpeedMultiplier", MUL, 1)
 
 g.defineQuestion("getAoeRadius", ADD, 0) -- This works on entities without any base AOE. So if you want a perk/blessing to give AOE, use this.
 g.defineQuestion("getAoeDamageMultiplier", MUL, 1)
+g.defineQuestion("getExplosionSizeMultiplier", MUL, 1)
+g.defineQuestion("getDamageTakenMultiplier", MUL, 1)
 
 g.defineQuestion("getSquadUnitCountModifier", ADD, 0)

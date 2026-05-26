@@ -26,11 +26,12 @@ EXAMPLE:
 ---@field private padding number
 ---@field private spacing number
 ---@field private maxWidth number
+---@field private maxHeight number?
 ---@field private drawBg (fun(x:number,y:number,w:number,h:number))?
 local Box = {}
 Box.__index = Box
 
----@param args {padding:number?, spacing:number?, maxWidth:number}
+---@param args {padding:number?, spacing:number?, maxWidth:number, maxHeight:number?}
 ---@param drawBg (fun(x:number,y:number,w:number,h:number))?
 ---@return ui.Box
 function Box.new(args, drawBg)
@@ -39,6 +40,7 @@ function Box.new(args, drawBg)
         padding = args.padding or 0,
         spacing = args.spacing or 0,
         maxWidth = args.maxWidth,
+        maxHeight = args.maxHeight,
         drawBg = drawBg,
     }, Box)
 end
@@ -52,6 +54,11 @@ end
 ---@param child {getHeight: (fun(w:number):number), draw: (fun(x:number,y:number,w:number,h:number))}
 function Box:add(child)
     self.entries[#self.entries + 1] = { type = "custom", child = child }
+end
+
+---@param child {getHeight: (fun(w:number):number), draw: (fun(x:number,y:number,w:number,h:number))}
+function Box:addFill(child)
+    self.entries[#self.entries + 1] = { type = "fill", child = child }
 end
 
 ---@param h number
@@ -69,13 +76,17 @@ function Box:measure()
 
     local heights = {}
     local totalH = 0
+    local fillIndices = {}
     for i, e in ipairs(self.entries) do
         local h
         if e.type == "text" then
             local _, lines = richtext.getWrap(e.txt, e.font, innerW)
             h = lines * e.font:getHeight()
-        elseif e.type == "custom" then
+        elseif e.type == "custom" or e.type == "fill" then
             h = e.child.getHeight(innerW)
+            if e.type == "fill" then
+                fillIndices[#fillIndices + 1] = i
+            end
         else -- spacing
             h = e.h
         end
@@ -86,6 +97,16 @@ function Box:measure()
     local n = #self.entries
     local totalW = self.maxWidth
     local totalHeight = totalH + (n > 1 and sp * (n - 1) or 0) + pad * 2
+
+    if self.maxHeight and #fillIndices > 0 and totalHeight < self.maxHeight then
+        local extra = self.maxHeight - totalHeight
+        local each = extra / #fillIndices
+        for _, i in ipairs(fillIndices) do
+            heights[i] = heights[i] + each
+        end
+        totalHeight = self.maxHeight
+    end
+
     return totalW, totalHeight, heights
 end
 
@@ -111,7 +132,7 @@ function Box:render(x, y)
         local ex = x + pad
         if e.type == "text" then
             richtext.printRich(e.txt, e.font, ex, cy, innerW, "left")
-        elseif e.type == "custom" then
+        elseif e.type == "custom" or e.type == "fill" then
             e.child.draw(ex, cy, innerW, heights[i])
         end
         cy = cy + heights[i]

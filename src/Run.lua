@@ -33,6 +33,7 @@ function Run:init()
     self.blessings = {}
     self.day = 1
     self.demonRage = 0
+    self._battleWon = false
     self.mapGraph = nil
 end
 
@@ -66,6 +67,7 @@ function Run:resetForBattle()
     -- clear temporary fight-only bench squads
     self._battleSquads = {}
     self._sortedSquads = nil
+    self._battleWon = false
 
     -- and reset mana
     self._battleMana = {}
@@ -88,6 +90,9 @@ end
 
 
 function Run:winBattle()
+    if self._battleWon then return end
+    self._battleWon = true
+
     self._battleSquads = {}
     self._sortedSquads = nil
     self.demonRage = self.demonRage + 1

@@ -20,11 +20,11 @@ g.defineEntity("demon", {
     attack = {
         attackType = "melee",
     },
-    baseAttackDamage = 8,
+    baseAttackDamage = 2,
     baseAttackSpeed = 1,
     baseAttackRange = 80,
     baseMoveSpeed = 50,
-    baseMaxHealth = 80,
+    baseMaxHealth = 10,
 })
 
 g.defineEntity("archerdemon", {
@@ -48,10 +48,10 @@ g.defineEntity("archerdemon", {
         projectileType = "arrow",
         projectileSpeed = 200,
     },
-    baseAttackDamage = 6,
+    baseAttackDamage = 1,
     baseAttackSpeed = 0.7,
     baseAttackRange = 600,
     baseMoveSpeed = 45,
-    baseMaxHealth = 25,
+    baseMaxHealth = 5,
 })
 

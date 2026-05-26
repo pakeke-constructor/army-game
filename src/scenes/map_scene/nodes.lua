@@ -9,6 +9,7 @@ local Class = require("src.modules.objects.Class")
 ---@field oy number visual offset y
 ---@field nodeType string the type of node it is
 ---@field visited boolean? Has this node been visited or not?
+---@field seen boolean? Has this node been revealed from fog?
 local Node = Class("g:MapNode")
 
 function Node:init(x, y)
@@ -147,7 +148,6 @@ local FeastNode = nodes.newClass("feast")
 
 function FeastNode:enter()
     local run = g.getRun()
-    run.food = run.maxFood
 end
 
 function FeastNode:draw(wx, wy)
@@ -193,7 +193,7 @@ end
 function EmptyNode:draw(wx, wy)
     love.graphics.setColor(g.COLORS.MAP_EDGE:getRGBA())
     love.graphics.ellipse("fill", wx, wy, 9, 5)
-    love.graphics.setColor(g.COLORS.GROUND_COLOR:getRGBA())
+    love.graphics.setColor(g.COLORS.MAP_GROUND_COLOR:getRGBA())
     love.graphics.ellipse("fill", wx, wy, 6, 3)
 end
 

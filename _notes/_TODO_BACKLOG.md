@@ -75,7 +75,22 @@
 - Weapons system: Make it so weapons can be held/used
 - melee: swords + sword swinging
 - ranged: bows, + bow pointing in direction they aim
-
+- CLAUDE.MD: Tell agent to avoid setting stats directly (use actual example)
+- remove iron-hide, remove tough perk
+- Juice for placing units (deploy them sequentially so its satisfying?)
+-- show name above unit when hovering it
+-- units deploy sequentially, (stretched towards sky?)
+- EX6: Remove aggressive RestrictedPython sandboxing for agents; let them free.
+- Instead of referencing "ATK" and "ASPD" in descriptions; should populate with icon+colored text - so it's a bit more formalized. (E.g. `Gain 1 (ASPD)`, replaces with richtext.)
+- In squad-card, Make stats panels better. Most important stats at top. Don't even show other panels.
+- In squad-card, compress perks to 3 slots. printRichContained. hard limit of 3 perks / squad
+- In squad-card, make it so unit-visual doesn't overflow
+- Make squads easier to define
+- Ground texture. rip from catx.
+- earn gold when killing enemies
+- txt popup after killing enemies
+- Xp / level up system
+- Explain demon-fury when hovering it.  "+10% demon damage, +10% demon health!"
 
 
 
@@ -84,29 +99,40 @@
 
 
 
+- Wire up stuff in New Content.txt
 
-- CLAUDE.MD: Should know "roughly" how much each stat is worth.
+- Add reroll to squad-select in ChoicePanel
 
+- Fix balance for base squads
 
-- CLAUDE.MD: Tell agent to avoid setting stats directly (use actual example)
-
-
-- Juice for placing units (deploy them sequentially so its satisfying?)
 - Juice for spending mana: Should pop up above the units as you spend them
 - Juice for spending money in shop
 
 - Juice for breaking armor
+- Juice for dealing damage (see leo gif)
+- Juice for clicking on a map node
 
+- IMPORTANT: FIX REMAINING PERKS / BLESSINGS / ETC.
 
-- Explain demon-fury when hovering it.  "+20% demon damage, +10% demon health!"
+- Change ranged-icon; it shouldnt be a sword, should be bow
 
+- CLAUDE.MD: Should know "roughly" how much each stat is worth.
 
 
 - Event system: random map events on empty nodes
 
-- Shrine nodes UI
+- Shrine nodes UI:  [Choose to remove a squad, reducing demon-rage + gold, OR, upgrade a squad]
+- Fountain nodes UI:  [Choose to reduce demon-rage, OR choose a blessing]
 
 - Special-nodes wired up
+
+
+- Make the battle-scene be a bit more interesting.... instead of a dull rectangle all the time.
+- Maybe hardcode a few shapes?
+- Peanut shape, Oval shape, multi-circle-shape
+
+
+
 
 
 - Proper ordered-rendering for map-scene
@@ -125,21 +151,6 @@
 - (STATE) “Deterrent”: On-deploy, your next squad gains the Volatile Perk for the battle, exploding in a large area On-death.
 
 
-
-
-<agent_ideas>
-improvements to main-agent system-prompt.
-- Clearer defined workflow
-- explanation for how to use `condense/checkpoint`
-
-Set up omni-agent properly (maybe make an agent-creator helper in base-ex6?)
-
-- Have an agent that audits changes (git diffs) and checks for issues.
-That agent should utilize _ex6/coding_style.
-
-- add push-ifs-up methodology (inside `_ex6/coding_style`)  https://gieseanw.wordpress.com/2024/06/24/dont-push-ifs-up-put-them-as-close-to-the-source-of-data-as-possible/
-
-</agent_ideas>
 
 
 <scope_creep>

@@ -339,6 +339,50 @@ end
 
 
 
+--[[
+    grows a region to width/height
+]]
+---@param width number
+---@param height number
+function Region:growTo(width, height)
+    width, height = getWH(width, height)
+    local w = math.max(width, self.w)
+    local h = math.max(height, self.h)
+    if w ~= self.w or h ~= self.h then
+        return newRegion(self.x,self.y, w,h)
+    end
+    return self
+end
+
+
+
+--- Grows a region, increasing its width XOR height
+--- such that it fits a given ratio
+---@param ratioW number
+---@param ratioH number
+---@return kirigami.Region
+function Region:growToAspectRatio(ratioW, ratioH)
+    local scaleX = self.w / ratioW
+    local scaleY = self.h / ratioH
+    local scale = math.max(scaleX, scaleY)
+    local ratioRegion = newRegion(0,0, ratioW*scale, ratioH*scale)
+    return ratioRegion:center(self)
+end
+
+
+
+---@param multipleOf number
+---@return kirigami.Region
+function Region:growToMultipleOf(multipleOf)
+    local newW = math.ceil(self.w / multipleOf) * multipleOf
+    local newH = math.ceil(self.h / multipleOf) * multipleOf
+    local diffw = newW - self.w
+    local diffh = newH - self.h
+    return self:padUnit(-diffw / 2, -diffh / 2)
+end
+
+
+
 --- Returns a new region that is scaled to fit certain boundaries
 ---@param width number
 ---@param height number

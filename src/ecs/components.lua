@@ -108,7 +108,7 @@ local shadow = {
 ---@field public faceDir integer?
 ---@field public taunt ecs.components.Taunt?
 ---@field public fear ecs.components.Fear?
----@field public team "ally"|"enemy"
+---@field public team ("ally"|"enemy")?
 ---@field public color objects.Color?
 ---@field public x number?
 ---@field public y number?
@@ -120,8 +120,9 @@ local shadow = {
 ---@field public health number?
 ---@field public isHealer boolean? if this is true, the entity is a healer, and will heal with it's attacks.
 ---@field public isBuilding boolean? if this is true, entity is a building, and MUST be assigned a static physics body
+---@field public isCommander boolean? if this is true, entity is a commander
 ---@field public baseMaxHealth number?
----@field public baseArmor number?
+---@field public baseStartingArmor number?
 ---@field public baseAttackDamage number?
 ---@field public baseHealPower number?
 ---@field public baseAttackSpeed number?
@@ -159,6 +160,7 @@ local shadow = {
 ---@field public isPest number? returns true if this entity is a "pest"
 ---@field public _timeSinceDamaged number?
 ---@field public _timeSinceLostArmor number?
+---@field public _timeSinceDeployed number?
 ---@field public _damageLagAmount number?
 ---@field public onUpdate fun(ecs.Entity, number)?
 ---@field public onDraw fun(ecs.Entity)?
@@ -176,6 +178,8 @@ local shadow = {
 ---@field public statusEffectApplied fun(ecs.Entity, string, number, ecs.Entity?)?
 ---@field public physics ecs.components.Physics?
 ---@field public partitions string[]?
+---@field public ___removed boolean?
+---@field public ___dead boolean?
 local ecs_Entity = {}
 
 

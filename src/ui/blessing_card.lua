@@ -26,8 +26,8 @@ local function drawBlessingCard(blessingId, region, index)
     DESC_FONT = DESC_FONT or g.getSmallFont(16)
 
 
-    local box = ui.Box({maxWidth = w, padding = 12, spacing = 6}, function(bx, by, bw, bh)
-        iml.panel(bx,by,bw,by, uid)
+    local box = ui.Box({maxWidth = w, maxHeight = h, padding = 12, spacing = 6}, function(bx, by, bw, bh)
+        iml.panel(bx,by,bw,bh, uid)
         isHovered = iml.isHovered(bx,by, bw,bh, uid)
         if isHovered then
             darkCol = darkCol:lerp(liteCol, 0.25)
@@ -52,15 +52,21 @@ local function drawBlessingCard(blessingId, region, index)
             local textW = ew - iconSize - iconGap
             love.graphics.setColor(1, 1, 1)
             love.graphics.setFont(TITLE_FONT)
-            local name = "{c r=0.8 g=0.8 b=0.85}{wavy amp=0.5 freq=1}" .. info.name
+            local name = "{c r=0.9 g=0.9 b=0.95}{wavy amp=0.5 freq=1}" .. info.name
             richtext.printRich(name, TITLE_FONT, textX, ey, textW, "left")
         end,
     })
 
     -- Description
-    box:addText("{c r=0.7 g=0.7 b=0.75}" .. info.description, DESC_FONT)
+    box:addText("{c r=0.85 g=0.85 b=0.9}" .. info.description, DESC_FONT)
 
-    local ww,hh = box:render(x, y + h/3)
+    -- Spacer to fill remaining height so card is always full region height.
+    box:addFill({
+        getHeight = function() return 0 end,
+        draw = function() end,
+    })
+
+    local ww,hh = box:render(x, y)
 
     if iml.wasJustClicked(x, y, w, h, 1, uid) then
         g.playUISound("ui_click_basic", 1.4, 0.8)
