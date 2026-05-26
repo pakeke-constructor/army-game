@@ -319,7 +319,7 @@ g.defineBlessing("chill", "Chill", {
 })
 
 
-g.defineBlessing("pestilence", "Pestilence", {
+g.defineBlessing("infection", "Infection", {
     description = loc("Poison spreads to one nearby enemy when applied."),
     image = "blessing_pestilence",
     rarity = g.RARITIES.RARE,
@@ -399,6 +399,22 @@ g.defineBlessing("disintegration", "Disintegration", {
         onHitDamage = function(attacker, damage, target)
             if target.team == "enemy" and (target.burnTime or 0) > 0 then
                 g.dealDamage(target, 1, nil)
+            end
+        end,
+    },
+})
+
+g.defineBlessing("electrocute", "Electrocute", {
+    description = loc("On-hit, your units have a 25% chance to deal 3 extra damage."),
+    image = "blessing_electrocute",
+    rarity = g.RARITIES.UNCOMMON,
+    mana = "blue",
+    handlers = {
+        -- nil attacker on the bonus hit so it doesn't re-trigger onHitDamage.
+        onHitDamage = function(attacker, damage, target)
+            if attacker.team ~= "ally" then return end
+            if love.math.random() <= 0.25 then
+                g.dealDamage(target, 3, nil)
             end
         end,
     },
@@ -504,6 +520,23 @@ g.defineBlessing("overpower", "Overpower", {
     },
 })
 
+g.defineBlessing("trickster", "Trickster", {
+    description = loc("The first time you Transform a unit each combat, gain 2 blue mana."),
+    image = "blessing_trickster",
+    rarity = g.RARITIES.UNCOMMON,
+    mana = "blue",
+    startingData = false,        -- have we triggered this combat?
+    resetDataOnBattleStart = true,
+    handlers = {
+        entityTransformed = function(oldEnt, newEnt)
+            if oldEnt.team ~= "ally" then return end
+            if g.getBlessingData("trickster") then return end
+            g.setBlessingData("trickster", true)
+            g.addMana("blue", 2)
+        end,
+    },
+})
+
 g.defineBlessing("profits", "Profits", {
     description = loc("Gain 5 gold per Yellow squad when entering a market."),
     image = "blessing_profits",
@@ -519,4 +552,41 @@ g.defineBlessing("profits", "Profits", {
             g.addGold(count * 5)
         end,
     },
+})
+
+
+g.defineBlessing("bodybuilding", "Bodybuilding", {
+    description = loc("When your units Heal, they also gain 1 max (HP) for the battle."),
+    image = "blessing_bodybuilding",
+    rarity = g.RARITIES.RARE,
+    handlers = {
+        entityHealed = function(ent, amount, healer)
+            if ent.team ~= "ally" then return end
+            g.buffEntity(ent, "maxHealth", 1)
+        end,
+    },
+})
+
+g.defineBlessing("pestilence", "Pestilence", {
+    description = loc("Pests have +1 (ASPD) and +1 (ATK)."),
+    image = "blessing_pestilence",
+    rarity = g.RARITIES.RARE,
+    mana = "green",
+    handlers = {
+        getAttackSpeedModifier = function(ent)
+            if ent.isPest then return 1 end
+        end,
+        getAttackDamageModifier = function(ent)
+            if ent.isPest then return 1 end
+        end,
+    },
+})
+
+g.defineBlessing("radiant_gift", "Radiant Gift", {
+    description = loc("Gain 1 Wildcard Mana when you acquire this blessing."),
+    image = "placeholder", -- PLACEHOLDER: no "radiant gift" sprite exists yet
+    rarity = g.RARITIES.RARE,
+    onAdd = function()
+        g.addPermanentMana(g.WILDCARD_MANA)
+    end,
 })

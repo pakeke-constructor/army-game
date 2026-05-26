@@ -19,8 +19,7 @@ PROMPT:
 Implement these blessings, (put it in `src/content/blessings/blessings.lua`)
 Make sure to search for the corresponding image file of the same name, and think before implementing:
 
-If a blessing has statefulness, make sure to use blessingData, and 
-
+If a blessing has statefulness, make sure to use startingData and resetDataOnBattleStart.
 
 
 COMMON
@@ -125,10 +124,10 @@ Each battle, for every 8 blue mana you spend, gain 1 blue mana.
 ==== Overpower
 Your units deal +25% DMG to enemies with less max HP than them.
 
-Trickster
+==== Trickster
 The first time you Transform a unit each combat, gain 2 blue mana.
 
-Electrocute
+==== Electrocute
 On-hit, your units have a 25% chance to deal 3 extra damage.
 
 
@@ -140,6 +139,12 @@ RARE
 
 Bodybuilding
 When your units Heal, they also gain 1 Max HP for the battle.
+
+Pestilence
+Pests have +1 ASPD and DMG
+
+Radiant Gift
+Gain 1 Colorless Mana
 
 Fortify
 50% chance to double armor-gain during battle.
@@ -155,9 +160,6 @@ On-spawn, your units deal area damage equal to 25% max HP.
 
 Cursed Banquet
 Gain 2XP the first time you kill a friendly unit each battle.
-
-Pestilence
-Pests have +1 ASPD and DMG
 
 Upscaling
 Max level squads gain +50% units.
