@@ -21,6 +21,11 @@ g.defineCommander("sir_horse", "Sir Horse", {
         },
         entityDef = {
             image = "sir_horse",
+            isCommander = true,
+            weapon = {
+                type = "spear",
+                image = "sir_horse_spear"
+            },
             attack = {
                 attackType = "melee",
             },

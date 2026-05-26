@@ -120,6 +120,7 @@ local shadow = {
 ---@field public health number?
 ---@field public isHealer boolean? if this is true, the entity is a healer, and will heal with it's attacks.
 ---@field public isBuilding boolean? if this is true, entity is a building, and MUST be assigned a static physics body
+---@field public isCommander boolean? if this is true, entity is a commander
 ---@field public baseMaxHealth number?
 ---@field public baseStartingArmor number?
 ---@field public baseAttackDamage number?
