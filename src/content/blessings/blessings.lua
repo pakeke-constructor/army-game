@@ -215,7 +215,7 @@ end
 
 g.defineBlessing("golden_gamble", "Golden Gamble", {
     description = loc("When you enter a shop, your gold is randomized between 1 and 999."),
-    image = "coin_icon",
+    image = "blessing_goldengamble",
     rarity = g.RARITIES.LEGENDARY,
     mana = "yellow",
     handlers = {
@@ -641,7 +641,7 @@ g.defineBlessing("upscaling", "Upscaling", {
 
 g.defineBlessing("ubergrades", "Ubergrades", {
     description = loc2("Squads gain +0.1 (ASPD) and +1 (ARMR) each time they're upgraded."),
-    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    image = "blessing_ubergrades",
     rarity = g.RARITIES.UNCOMMON,
     handlers = {
         -- level 1 = no upgrades; each level past 1 is one upgrade.
@@ -659,7 +659,7 @@ g.defineBlessing("ubergrades", "Ubergrades", {
 
 g.defineBlessing("cursed_banquet", "Cursed Banquet", {
     description = loc("Gain 2 XP the first time you kill a friendly unit each battle."),
-    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    image = "blessing_cursedbanquet",
     rarity = g.RARITIES.UNCOMMON,
     startingData = false,        -- triggered this battle?
     resetDataOnBattleStart = true,
@@ -673,10 +673,10 @@ g.defineBlessing("cursed_banquet", "Cursed Banquet", {
     },
 })
 
-g.defineBlessing("agony", "Agony", {
+g.defineBlessing("wildfire", "Wildfire", {
     description = loc("On-spawn, your units gain 5 burn and apply 10 burn to a random enemy."),
     image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
-    rarity = g.RARITIES.UNCOMMON,
+    rarity = g.RARITIES.RARE,
     mana = "red",
     handlers = {
         entitySpawned = function(ent)
@@ -690,7 +690,7 @@ g.defineBlessing("agony", "Agony", {
 
 g.defineBlessing("goliath", "Goliath", {
     description = loc2("Your units have +1 (ATK) per 10 max (HP)."),
-    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    image = "blessing_goliath",
     rarity = g.RARITIES.UNCOMMON,
     handlers = {
         getAttackDamageModifier = function(ent)
@@ -716,7 +716,7 @@ g.defineBlessing("evolution", "Evolution", {
 
 g.defineBlessing("burning_restoration", "Burning Restoration", {
     description = loc2("When any burning unit dies, the nearest ally heals 5 (HP)."),
-    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    image = "blessing_cauterize",
     rarity = g.RARITIES.RARE,
     mana = "red",
     handlers = {
@@ -737,7 +737,7 @@ g.defineBlessing("burning_restoration", "Burning Restoration", {
 
 g.defineBlessing("bulk_pheromones", "Bulk Pheromones", {
     description = loc2("When a Green unit dies, ALL pests gain +1 max (HP)."),
-    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    image = "blessing_bulkpheremones",
     rarity = g.RARITIES.RARE,
     mana = "green",
     handlers = {
@@ -757,7 +757,7 @@ g.defineBlessing("bulk_pheromones", "Bulk Pheromones", {
 
 g.defineBlessing("arcane_appetite", "Arcane Appetite", {
     description = loc("Gain +2 blue mana. Your commander starts the battle poisoned."),
-    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    image = "blessing_arcaneappetite",
     rarity = g.RARITIES.UNCOMMON,
     mana = "blue",
     onAdd = function()
@@ -777,7 +777,7 @@ g.defineBlessing("arcane_appetite", "Arcane Appetite", {
 
 g.defineBlessing("meditation", "Meditation", {
     description = loc("The first time you place a squad each battle, regain blue mana equal to its cost."),
-    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    image = "blessing_meditation",
     rarity = g.RARITIES.UNCOMMON,
     mana = "blue",
     startingData = false,        -- have we refunded this battle?
@@ -796,7 +796,7 @@ g.defineBlessing("meditation", "Meditation", {
 
 g.defineBlessing("demonic_steed", "Demonic Steed", {
     description = loc2("Your commander gains +5 (ATK), and fears enemies on-hit."),
-    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    image = "blessing_demonicsteed",
     rarity = g.RARITIES.UNCOMMON,
     handlers = {
         getAttackDamageModifier = function(ent)
@@ -813,7 +813,7 @@ g.defineBlessing("demonic_steed", "Demonic Steed", {
 
 g.defineBlessing("radiant_gift", "Radiant Gift", {
     description = loc("Gain 1 Wildcard Mana when you acquire this blessing."),
-    image = "placeholder", -- PLACEHOLDER: no "radiant gift" sprite exists yet
+    image = "blessing_radiantgift",
     rarity = g.RARITIES.RARE,
     onAdd = function()
         g.addPermanentMana(g.WILDCARD_MANA)
