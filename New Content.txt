@@ -133,6 +133,8 @@ The first time you Transform a unit each combat, gain 2 blue mana.
 ==== Electrocute
 On-hit, your units have a 25% chance to deal 3 extra damage.
 
+(NYI) Spontaneous Combustion
+On-hit, your units have a 15% chance to inflict 5 burn.
 
 
 
@@ -170,7 +172,7 @@ Max level squads gain +50% units.
 ==== Ubergrades *
 Squads gain 0.1 ASPD and 1 ARMR when upgraded, stackable.
 
-=== (NYI) Magnify * (this is kinda hard, i think we should rework it)
+(NYI) Magnify * (this is kinda hard, i think we should rework it)
 Projectiles have a 50% chance to gain 1 (DMG) when passing through a Blue unit.
 
 === Agony *
@@ -182,14 +184,14 @@ Your units have +1 ATK per 10 HP.
 Memento *
 Your units re-trigger their On Spawn effects On Death.
 
-==== Burning Restoration *
+==== Cauterize *
 When ANY burning unit dies, the nearest ally heals 5 hp
 
 ==== Bulk Pheromones *
 When a Green unit dies, ALL pests gain +1 (MAX_HP).
 
 Arcane Appetite *
-On-spawn, your Blue units gain 2 max HP per remaining Blue mana after placing them.
+Gain +2 blue mana. Your commander starts the battle poisoned
 
 Meditation *
 The first time you place a squad each battle, regain blue mana equal to its cost.
@@ -197,11 +199,11 @@ The first time you place a squad each battle, regain blue mana equal to its cost
 Demonic Steed *
 Your commander gains 5 damage, Flying, and Fearsome.
 
-Mischief *
+Infiltration *
 Red squads gain the Infiltrate perk, allowing them to be placed behind enemy lines.
 
 Landmark *
-The first building you place each fight has double stats.
+The first building you place each fight has triple max HP.
 
 One Man Army *
 If there is only one unit alive, it gains double DMG and ASPD.
@@ -215,8 +217,6 @@ When a full HP ally is healed, it gains 1 ARMR.
 Iron Exosuits *
 Your units have +8% ASPD per ARMR they have.
 
-Spontaneous Combustion *
-On-hit, your units have a 15% chance to inflict 5 burn.
 
 
 
@@ -250,7 +250,7 @@ Unbreakable *
 When your units gain armor during combat, they gain an equal amount of max HP for the fight.
 
 Quaternity *
-Gain access to ALL mana types, and gain 2 colorless mana.
+Gain access to ALL mana types, and gain 3 colorless mana.
 
 Soul Split *
 x2 units and -50% HP to all non-building squads.

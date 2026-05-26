@@ -361,7 +361,7 @@ g.defineBlessing("wither", "Wither", {
 })
 
 g.defineBlessing("volley", "Volley", {
-    description = loc2("Ranged units have +25% (RNG)."),
+    description = loc2("Ranged units have +25% (RANGE)."),
     image = "blessing_volley",
     rarity = g.RARITIES.UNCOMMON,
     handlers = {
@@ -749,6 +749,63 @@ g.defineBlessing("bulk_pheromones", "Bulk Pheromones", {
                 if other.team == "ally" and other.isPest and g.isAlive(other) then
                     g.buffEntity(other, "maxHealth", 1)
                 end
+            end
+        end,
+    },
+})
+
+
+g.defineBlessing("arcane_appetite", "Arcane Appetite", {
+    description = loc("Gain +2 blue mana. Your commander starts the battle poisoned."),
+    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    rarity = g.RARITIES.UNCOMMON,
+    mana = "blue",
+    onAdd = function()
+        g.addPermanentMana("blue")
+        g.addPermanentMana("blue")
+    end,
+    handlers = {
+        -- Commander is deployed by the player, so poison it when it spawns.
+        -- Poison is constant DPS (never decays), so keep the amount small.
+        entitySpawned = function(ent)
+            if ent.isCommander then
+                g.applyPoison(ent, 2, nil)
+            end
+        end,
+    },
+})
+
+g.defineBlessing("meditation", "Meditation", {
+    description = loc("The first time you place a squad each battle, regain blue mana equal to its cost."),
+    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    rarity = g.RARITIES.UNCOMMON,
+    mana = "blue",
+    startingData = false,        -- have we refunded this battle?
+    resetDataOnBattleStart = true,
+    handlers = {
+        -- manaSpent only fires on squad deploy, so this = "first squad placed".
+        manaSpent = function(manaRequirement)
+            if g.getBlessingData("meditation") then return end
+            g.setBlessingData("meditation", true)
+            local total = 0
+            for _, v in pairs(manaRequirement) do total = total + v end
+            if total > 0 then g.addMana("blue", total) end
+        end,
+    },
+})
+
+g.defineBlessing("demonic_steed", "Demonic Steed", {
+    description = loc2("Your commander gains +5 (ATK), and fears enemies on-hit."),
+    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    rarity = g.RARITIES.UNCOMMON,
+    handlers = {
+        getAttackDamageModifier = function(ent)
+            if ent.isCommander then return 5 end
+        end,
+        -- onHitDamage's first arg is the attacker. Make the hit enemy flee the commander.
+        onHitDamage = function(attacker, damage, target)
+            if attacker.isCommander and target.team == "enemy" then
+                g.applyFear(target, attacker, 2)
             end
         end,
     },
