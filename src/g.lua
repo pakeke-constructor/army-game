@@ -200,6 +200,7 @@ function g.explosion(x, y, damage, radius, fromEntity)
     if fromEntity then
         radius = radius * g.ask("getExplosionSizeMultiplier", fromEntity)
     end
+    g.call("explosion", x, y, damage, radius, fromEntity)
     local radiusSq = radius * radius
     -- todo: make particles here
     g.iteratePartition("unit", x, y, function(ent)

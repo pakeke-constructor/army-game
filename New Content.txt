@@ -21,6 +21,7 @@ Make sure to search for the corresponding image file of the same name, and think
 
 - If a blessing has statefulness, make sure to use startingData and resetDataOnBattleStart.
 - If a blessing name has a * at the end, e.g. `Super Blessing *`, that means there is no image for that blessing yet, and instead you must use "placeholder".
+You should read src/content/blessings/blessings.lua before proceeding to understand the basics.
 
 BLESSINGS TO IMPLEMENT:
 
@@ -199,19 +200,19 @@ The first time you place a squad each battle, regain blue mana equal to its cost
 ==== Demonic Steed *
 Your commander gains 5 damage, Flying, and Fearsome.
 
-One Man Army *
+==== One Man Army *
 If there is only one unit alive, it gains double DMG and ASPD.
 
-Infiltration *
+==== Infiltration *
 Red squads can be placed behind enemy lines.
 
-Landmark *
+==== Landmark *
 The first building you place each fight has triple max HP.
 
-Crystallize *
+==== Crystallize *
 When a full HP ally is healed, it gains 1 ARMR.
 
-Iron Exosuits *
+==== Iron Exosuits *
 For every ARMR your units have, your units gain +8% ASPD.
 
 (NYI) Acceleration *
@@ -226,53 +227,55 @@ Your units’ “Every X seconds” effects trigger twice as often.
 
 
 
-SUPER RARE
+LEGENDARY RARITY:
 
-Grand Finale *
+Grand Finale
 Your explosions have +20% area. This increases by 2% for the fight whenever an explosion is triggered.
 
 Hard Carapaces *
 Green units and Pests have +2 armor
 
-Dark Inspiration *
+Dark Inspiration
 After 10 friendly units die, your units gain 100% lifesteal for the rest of the battle.
 
-Golden Gamble *
+Golden Gamble
 When you enter a shop, your gold is randomized between 1 and 777
 
-Abandon *
-All of your Red units’ armor is converted to ATK. (At combat start and when gaining armor, convert all armor into a damage buff for the fight)
-
-Meat Grinder *
+Meat Grinder
 Gain 4 colorless mana after 40 allied units die.
 
 Unbreakable *
 When your units gain armor during combat, they gain an equal amount of max HP for the fight.
 
-Quaternity *
+
+(NYI) Abandon
+All of your Red units’ armor is converted to ATK. (At combat start and when gaining armor, convert all armor into a damage buff for the fight)
+
+(NYI) Quaternity
 Gain access to ALL mana types, and gain 3 colorless mana.
 
-Soul Split *
+
+Soul Split
 x2 units and -50% HP to all non-building squads.
 
-Explosive Mutation *
+Explosive Mutation
 Your Pests gain Volatile, causing a devastating explosion On-death.
 
-Cryomana *
+Cryomana
 Whenever you gain mana during combat, freeze 10 random enemies for 5s.
 
-Vengeance *
+Vengeance
 Your units gain 1 DMG for 5s when a unit with the same color dies.
 
-Pandaemonium *
+Pandaemonium
 Increase demon fury by an additional 2 after each combat. When you acquire a squad, it gains a random Perk.
 
-Wrathful Souls *
+Wrathful Souls
 On-death, your units deal damage to a nearby enemy equal to 2x their ATK.
 
-Overload *
+Overload
 When an enemy gains more burn than max HP, instantly kill the enemy and apply 20% of the burn to nearby enemies. 
 
-Black Flames *
+Black Flames
 Burn deals +3 damage per tick
 

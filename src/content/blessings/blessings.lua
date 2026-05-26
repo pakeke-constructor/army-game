@@ -214,14 +214,14 @@ end
 
 
 g.defineBlessing("golden_gamble", "Golden Gamble", {
-    description = loc("When you enter a shop, your gold is randomized between 1 and 999."),
+    description = loc("When you enter a shop, your gold is randomized between 1 and 777."),
     image = "blessing_goldengamble",
     rarity = g.RARITIES.LEGENDARY,
     mana = "yellow",
     handlers = {
         shopEntered = function()
             local run = g.getRun()
-            run.money = math.random(1, 999)
+            run.money = math.random(1, 777)
         end,
     },
 })
@@ -913,6 +913,97 @@ g.defineBlessing("iron_exosuits", "Iron Exosuits", {
             if ent.team == "ally" and ent.armor and ent.armor > 0 then
                 return 1 + 0.08 * ent.armor
             end
+        end,
+    },
+})
+
+g.defineBlessing("grand_finale", "Grand Finale", {
+    description = loc("Your explosions have +20% area. This increases by 2% for the fight whenever an explosion is triggered."),
+    image = "blessing_grandfinale",
+    rarity = g.RARITIES.LEGENDARY,
+    mana = "red",
+    startingData = 0,            -- explosions triggered this fight
+    resetDataOnBattleStart = true,
+    handlers = {
+        explosion = function(x, y, damage, radius, fromEntity)
+            if not fromEntity or fromEntity.team ~= "ally" then return end
+            g.setBlessingData("grand_finale", g.getBlessingData("grand_finale") + 1)
+        end,
+        getExplosionSizeMultiplier = function(ent)
+            if not ent or ent.team ~= "ally" then return end
+            return 1.2 + 0.02 * g.getBlessingData("grand_finale")
+        end,
+    },
+})
+
+g.defineBlessing("hard_carapaces", "Hard Carapaces", {
+    description = loc2("Green units and Pests have +2 (ARMR)."),
+    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    rarity = g.RARITIES.LEGENDARY,
+    mana = "green",
+    handlers = {
+        entitySpawned = function(ent)
+            if ent.team ~= "ally" then return end
+            local isGreen = false
+            if ent.squad then
+                local cost = g.getSquadInfo(ent.squad.squadId).cost
+                isGreen = cost and cost.green and cost.green > 0
+            end
+            if isGreen or ent.isPest then
+                g.addArmor(ent, 2)
+            end
+        end,
+    },
+})
+
+g.defineBlessing("dark_inspiration", "Dark Inspiration", {
+    description = loc2("After 10 friendly units die, your units gain 100% (LIFESTEAL) for the rest of the battle."),
+    image = "blessing_darkinspiration",
+    rarity = g.RARITIES.LEGENDARY,
+    startingData = 0,            -- friendly deaths this battle
+    resetDataOnBattleStart = true,
+    handlers = {
+        entityDeath = function(ent, killer)
+            if ent.team ~= "ally" then return end
+            local c = g.getBlessingData("dark_inspiration")
+            if c < 10 then g.setBlessingData("dark_inspiration", c + 1) end
+        end,
+        getLifestealModifier = function(ent)
+            if ent.team == "ally" and g.getBlessingData("dark_inspiration") >= 10 then
+                return 1
+            end
+        end,
+    },
+})
+
+g.defineBlessing("meat_grinder", "Meat Grinder", {
+    description = loc("Gain 4 colorless mana after 40 allied units die."),
+    image = "blessing_meatgrinder",
+    rarity = g.RARITIES.LEGENDARY,
+    startingData = 0,            -- allied deaths this battle
+    resetDataOnBattleStart = true,
+    handlers = {
+        entityDeath = function(ent, killer)
+            if ent.team ~= "ally" then return end
+            local c = g.getBlessingData("meat_grinder")
+            if c >= 40 then return end
+            c = c + 1
+            g.setBlessingData("meat_grinder", c)
+            if c == 40 then g.addMana(g.WILDCARD_MANA, 4) end
+        end,
+    },
+})
+
+g.defineBlessing("unbreakable", "Unbreakable", {
+    description = loc2("When units gain (ARMR) in battle, gain an equal amount of max (HP) for the fight."),
+    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    rarity = g.RARITIES.LEGENDARY,
+    handlers = {
+        -- armorIncreased fires from g.addArmor. buffEntity(maxHealth) doesn't add
+        -- armor, so no recursion.
+        armorIncreased = function(ent, amount)
+            if ent.team ~= "ally" then return end
+            g.buffEntity(ent, "maxHealth", amount)
         end,
     },
 })
