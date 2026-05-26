@@ -1171,3 +1171,15 @@ g.defineBlessing("overload", "Overload", {
         end,
     },
 })
+
+g.defineBlessing("black_flames", "Black Flames", {
+    description = loc2("Burn deals double damage to enemies."),
+    image = "blessing_blackflames",
+    rarity = g.RARITIES.LEGENDARY,
+    mana = "red",
+    handlers = {
+        getBurnDPSMultiplier = function(ent)
+            if ent.team == "enemy" then return 2 end
+        end,
+    },
+})

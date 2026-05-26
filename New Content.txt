@@ -255,27 +255,27 @@ All of your Red units’ armor is converted to ATK. (At combat start and when ga
 Gain access to ALL mana types, and gain 3 colorless mana.
 
 
-Soul Split
+==== Soul Split
 x2 units and -50% max (HP) to all squads.    (NOTE: doesnt work on buildings)
 
-Explosive Mutation
+==== Explosive Mutation
 Your Pests cause a devastating explosion On-death.
 
-Cryomana
+==== Cryomana
 Whenever you gain mana during combat, freeze 10 random enemies for 5s.
 
-Vengeance
+==== Vengeance
 Your units gain 1 DMG for 5s when a unit with the same color dies.
 
-Wrathful Souls
+==== Wrathful Souls
 On-death, your units deal damage to a nearby enemy equal to 2x their ATK.
 
-Overload
+==== Overload
 When an enemy gains more burn than max HP, instantly kill the enemy and apply 20% of the burn to nearby enemies. 
 
-Black Flames
-Burn deals +3 damage per tick
+==== Black Flames
+Burn deals double damage to ALL entities
 
-Pandaemonium
+(NYI) Pandaemonium
 Increase demon fury by an additional 2 after each combat. When you acquire a squad, it gains a random Perk.
 

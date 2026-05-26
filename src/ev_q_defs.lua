@@ -78,6 +78,7 @@ g.defineQuestion("getAoeRadius", ADD, 0) -- This works on entities without any b
 g.defineQuestion("getAoeDamageMultiplier", MUL, 1)
 g.defineQuestion("getExplosionSizeMultiplier", MUL, 1)
 g.defineQuestion("getDamageTakenMultiplier", MUL, 1)
+g.defineQuestion("getBurnDPSMultiplier", MUL, 1)
 
 g.defineQuestion("getSquadUnitCountModifier", ADD, 0)
 g.defineQuestion("canDeployAnywhere", OR, false)

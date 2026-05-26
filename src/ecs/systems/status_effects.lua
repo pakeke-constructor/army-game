@@ -18,7 +18,8 @@ function statusFx.perSecondUpdate()
         -- Burn: high DPS
         if ent.burnTime and ent.burnTime > 0 then
             ent.burnTime = ent.burnTime - 1
-            g.dealDamage(ent, consts.BURN_DPS, nil, true)
+            local burnDps = consts.BURN_DPS * g.ask("getBurnDPSMultiplier", ent)
+            g.dealDamage(ent, burnDps, nil, true)
             if ent.burnTime <= 0 then ent.burnTime = nil end
         end
 
