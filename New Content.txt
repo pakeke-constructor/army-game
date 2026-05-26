@@ -229,22 +229,22 @@ Your units’ “Every X seconds” effects trigger twice as often.
 
 LEGENDARY RARITY:
 
-Grand Finale
+==== Grand Finale
 Your explosions have +20% area. This increases by 2% for the fight whenever an explosion is triggered.
 
-Hard Carapaces *
+==== Hard Carapaces *
 Green units and Pests have +2 armor
 
-Dark Inspiration
+==== Dark Inspiration
 After 10 friendly units die, your units gain 100% lifesteal for the rest of the battle.
 
-Golden Gamble
+==== Golden Gamble
 When you enter a shop, your gold is randomized between 1 and 777
 
-Meat Grinder
+==== Meat Grinder
 Gain 4 colorless mana after 40 allied units die.
 
-Unbreakable *
+==== Unbreakable *
 When your units gain armor during combat, they gain an equal amount of max HP for the fight.
 
 
@@ -256,19 +256,16 @@ Gain access to ALL mana types, and gain 3 colorless mana.
 
 
 Soul Split
-x2 units and -50% HP to all non-building squads.
+x2 units and -50% max (HP) to all squads.    (NOTE: doesnt work on buildings)
 
 Explosive Mutation
-Your Pests gain Volatile, causing a devastating explosion On-death.
+Your Pests cause a devastating explosion On-death.
 
 Cryomana
 Whenever you gain mana during combat, freeze 10 random enemies for 5s.
 
 Vengeance
 Your units gain 1 DMG for 5s when a unit with the same color dies.
-
-Pandaemonium
-Increase demon fury by an additional 2 after each combat. When you acquire a squad, it gains a random Perk.
 
 Wrathful Souls
 On-death, your units deal damage to a nearby enemy equal to 2x their ATK.
@@ -278,4 +275,7 @@ When an enemy gains more burn than max HP, instantly kill the enemy and apply 20
 
 Black Flames
 Burn deals +3 damage per tick
+
+Pandaemonium
+Increase demon fury by an additional 2 after each combat. When you acquire a squad, it gains a random Perk.
 

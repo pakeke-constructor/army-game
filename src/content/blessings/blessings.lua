@@ -1007,3 +1007,167 @@ g.defineBlessing("unbreakable", "Unbreakable", {
         end,
     },
 })
+
+-- =====================================================================
+-- Soul / legendary blessings
+-- =====================================================================
+
+-- up to n distinct alive enemies, picked at random (partial shuffle)
+local function randomEnemies(n)
+    local pool = {}
+    g.iteratePartition("enemy", 0, 0, function(e)
+        if g.isAlive(e) then pool[#pool+1] = e end
+    end, 99999)
+    for i = 1, math.min(n, #pool) do
+        local j = math.random(i, #pool)
+        pool[i], pool[j] = pool[j], pool[i]
+    end
+    local out = {}
+    for i = 1, math.min(n, #pool) do out[i] = pool[i] end
+    return out
+end
+
+-- {color=true} set of a squad's (non-wildcard) mana colors
+local function squadColors(squad)
+    local colors = {}
+    if not squad then return colors end
+    local cost = g.getSquadInfo(squad.squadId).cost
+    if cost then
+        for color, amt in pairs(cost) do
+            if color ~= g.WILDCARD_MANA and (amt or 0) > 0 then
+                colors[color] = true
+            end
+        end
+    end
+    return colors
+end
+
+-- does the squad share any color in the given set? (no allocation)
+local function squadSharesColor(squad, colorSet)
+    if not squad then return false end
+    local cost = g.getSquadInfo(squad.squadId).cost
+    if not cost then return false end
+    for color, amt in pairs(cost) do
+        if color ~= g.WILDCARD_MANA and (amt or 0) > 0 and colorSet[color] then
+            return true
+        end
+    end
+    return false
+end
+
+g.defineBlessing("soul_split", "Soul Split", {
+    description = loc2("Your squads have double units, but -50% max (HP). Buildings unaffected."),
+    image = "blessing_soulsplit",
+    rarity = g.RARITIES.LEGENDARY,
+    handlers = {
+        -- ADD reducer: returning the base count again = double total units.
+        getSquadUnitCountModifier = function(squadId)
+            local def = g.getSquadInfo(squadId).entityDef
+            if def.isBuilding or def.isCommander then return end
+            return g.getSquadInfo(squadId).unitCount
+        end,
+        getMaxHealthMultiplier = function(ent)
+            if ent.squad and ent.team == "ally" and not ent.isBuilding then
+                return 0.5
+            end
+        end,
+    },
+})
+
+g.defineBlessing("explosive_mutation", "Explosive Mutation", {
+    description = loc2("Your Pests cause a devastating explosion on-death."),
+    image = "blessing_explosivemutation",
+    rarity = g.RARITIES.LEGENDARY,
+    mana = "green",
+    handlers = {
+        entityDeath = function(ent, killer)
+            if ent.team ~= "ally" or not ent.isPest then return end
+            g.explosion(ent.x, ent.y, 10, 90, ent)
+        end,
+    },
+})
+
+g.defineBlessing("cryomana", "Cryomana", {
+    description = loc2("Whenever you gain mana during combat, freeze 10 random enemies for 5s."),
+    image = "blessing_cryomana",
+    rarity = g.RARITIES.LEGENDARY,
+    mana = "blue",
+    handlers = {
+        -- freezing doesn't add mana, so no recursion. Guard on ECS = "in combat".
+        manaAdded = function(manaType, count, sourceEnt)
+            if not g.tryGetECS() then return end
+            for _, e in ipairs(randomEnemies(10)) do
+                g.applyFrozen(e, 5, nil)
+            end
+        end,
+    },
+})
+
+g.defineBlessing("vengeance", "Vengeance", {
+    description = loc2("Your units gain +1 (ATK) for 5s when an allied unit of the same color dies."),
+    image = "blessing_vengeance",
+    rarity = g.RARITIES.LEGENDARY,
+    handlers = {
+        entityDeath = function(ent, killer)
+            if ent.team ~= "ally" or not ent.squad then return end
+            local colors = squadColors(ent.squad)
+            if not next(colors) then return end
+            for _, other in g.getECS():iterate("squad") do
+                if other ~= ent and other.team == "ally" and g.isAlive(other)
+                    and squadSharesColor(other.squad, colors) then
+                    g.addCustomEffect(other, {
+                        getAttackDamageModifier = function(e) return 1 end,
+                    }, 5)
+                end
+            end
+        end,
+    },
+})
+
+g.defineBlessing("wrathful_souls", "Wrathful Souls", {
+    description = loc2("When an ally dies, deal 2x it's (ATK) to a nearby enemy."),
+    image = "blessing_wrathfulsouls",
+    rarity = g.RARITIES.LEGENDARY,
+    handlers = {
+        entityDeath = function(ent, killer)
+            if ent.team ~= "ally" then return end
+            local dmg = (ent.attackDamage or 0) * 2
+            if dmg <= 0 then return end
+            local closest, bestDist = nil, math.huge
+            g.iteratePartition("enemy", ent.x, ent.y, function(other)
+                if not g.isAlive(other) then return end
+                local dx, dy = other.x - ent.x, other.y - ent.y
+                local d = dx * dx + dy * dy
+                if d < bestDist then bestDist, closest = d, other end
+            end, 160)
+            if closest then g.dealDamage(closest, dmg, ent) end
+        end,
+    },
+})
+
+g.defineBlessing("overload", "Overload", {
+    description = loc2("If more than half of all enemies are burning, apply burn to ALL enemies"),
+    image = "blessing_overload",
+    rarity = g.RARITIES.LEGENDARY,
+    mana = "red",
+    handlers = {
+        -- Update pattern: check the burning ratio once per second (not postUpdate,
+        -- so it stays off the per-frame hot path). Two cheap passes over the cached
+        -- "team" list, no allocation.
+        perSecondUpdate = function(secondCount)
+            local total, burning = 0, 0
+            for _, ent in g.getECS():iterate("team") do
+                if ent.team == "enemy" and g.isAlive(ent) then
+                    total = total + 1
+                    if (ent.burnTime or 0) > 0 then burning = burning + 1 end
+                end
+            end
+            if total == 0 or burning <= total / 2 then return end
+            for _, ent in g.getECS():iterate("team") do
+                if ent.team == "enemy" and g.isAlive(ent) then
+                    g.applyBurn(ent, 3, nil)   -- amount is tunable
+                end
+            end
+        end,
+    },
+})
