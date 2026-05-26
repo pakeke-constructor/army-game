@@ -6,6 +6,8 @@ local M = {}
 ---@field decorRadius number clearance from other decor
 ---@field chance number per-cell roll chance
 ---@field image string? image name (used for draw + radius)
+---@field opacity number? image name (used for draw + radius)
+
 
 local registry = {}
 
@@ -36,9 +38,10 @@ end
 
 
 
-M.define("grass_1", { image = "grass_1", chance = 0.15, nodeRadius = 4, decorRadius = 8 })
-M.define("grass_2", { image = "grass_2", chance = 0.3, nodeRadius = 4, decorRadius = 8 })
-M.define("grass_3", { image = "grass_3", chance = 0.2, nodeRadius = 4, decorRadius = 8 })
+local GRASS_OPACITY = 0.65
+M.define("grass_1", {image = "grass_1", chance = 0.15, nodeRadius = 4, decorRadius = 8, opacity = GRASS_OPACITY})
+M.define("grass_2", { image = "grass_2", chance = 0.3, nodeRadius = 4, decorRadius = 8, opacity = GRASS_OPACITY })
+M.define("grass_3", { image = "grass_3", chance = 0.2, nodeRadius = 4, decorRadius = 8, opacity = GRASS_OPACITY })
 
 
 -- Define built-in decor types

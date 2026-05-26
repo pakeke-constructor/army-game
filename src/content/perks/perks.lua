@@ -522,7 +522,7 @@ g.definePerk("golden_bulk", "Golden Bulk", {
 })
 
 g.definePerk("omen", "Omen", {
-    description = loc("On-heal, triggers the healed ally's On-death effects without killing it."),
+    description = loc("Triggers ally's On-death effects without killing them."),
     image = "coin_icon",
     handlers = {
         onAttack = function(ent, target)

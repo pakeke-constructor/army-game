@@ -375,7 +375,8 @@ function map_scene:draw()
             if d and (not n or d.y <= n.y) then
                 local dtype = decor_types.get(d.decorType)
                 if dtype and dtype.image then
-                    love.graphics.setColor(1, 1, 1, 1)
+                    local a = dtype.opacity or 1
+                    love.graphics.setColor(1, 1, 1, a)
                     local sx = (math.floor(hash(d.x,d.y))%2==0) and -1 or 1
                     -- 50% chance to draw flipped on scaleX
                     g.drawImage(dtype.image, d.x, d.y, 0, sx,1)

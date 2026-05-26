@@ -2394,10 +2394,10 @@ g.COLORS = {
     POISON = objects.Color("FF4CC44C"),
     HEALTH = objects.Color("FF397634"),
     ATTACK = objects.Color("FFA2741E"),
-    MAP_EDGE = objects.Color(0.16, 0.28, 0.18),
-    MAP_EDGE_HIGHLIGHT = objects.Color("FF396938"),
+    MAP_EDGE = objects.Color(0.16, 0.28, 0.18, 0.55),
+    MAP_EDGE_HIGHLIGHT = objects.Color("67396938"),
 
-    MAP_GROUND_COLOR = objects.Color("FF142210"),
+    MAP_GROUND_COLOR = objects.Color("FF0B0C0B"),
     BATTLE_GROUND_COLOR = objects.Color("FF2C2929"),
 
     GOLD = objects.Color("FFD8B01F"),
