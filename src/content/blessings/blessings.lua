@@ -701,6 +701,59 @@ g.defineBlessing("goliath", "Goliath", {
     },
 })
 
+g.defineBlessing("evolution", "Evolution", {
+    description = loc2("When Transformed, your units gain 5 max (HP) for the battle, stackable."),
+    image = "blessing_evolution",
+    rarity = g.RARITIES.UNCOMMON,
+    mana = "blue",
+    handlers = {
+        entityTransformed = function(oldEnt, newEnt)
+            if newEnt.team ~= "ally" then return end
+            g.buffEntity(newEnt, "maxHealth", 5)
+        end,
+    },
+})
+
+g.defineBlessing("burning_restoration", "Burning Restoration", {
+    description = loc2("When any burning unit dies, the nearest ally heals 5 (HP)."),
+    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    rarity = g.RARITIES.RARE,
+    mana = "red",
+    handlers = {
+        entityDeath = function(ent, killer)
+            if (ent.burnTime or 0) <= 0 then return end
+            local closest, bestDist = nil, math.huge
+            for _, other in g.getECS():iterate("team") do
+                if other ~= ent and other.team == "ally" and g.isAlive(other) then
+                    local dx, dy = other.x - ent.x, other.y - ent.y
+                    local d = dx * dx + dy * dy
+                    if d < bestDist then bestDist, closest = d, other end
+                end
+            end
+            if closest then g.healEntity(closest, 5) end
+        end,
+    },
+})
+
+g.defineBlessing("bulk_pheromones", "Bulk Pheromones", {
+    description = loc2("When a Green unit dies, ALL pests gain +1 max (HP)."),
+    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    rarity = g.RARITIES.RARE,
+    mana = "green",
+    handlers = {
+        entityDeath = function(ent, killer)
+            if ent.team ~= "ally" or not ent.squad then return end
+            local cost = g.getSquadInfo(ent.squad.squadId).cost
+            if not (cost and cost.green and cost.green > 0) then return end
+            for _, other in g.getECS():iterate("team") do
+                if other.team == "ally" and other.isPest and g.isAlive(other) then
+                    g.buffEntity(other, "maxHealth", 1)
+                end
+            end
+        end,
+    },
+})
+
 g.defineBlessing("radiant_gift", "Radiant Gift", {
     description = loc("Gain 1 Wildcard Mana when you acquire this blessing."),
     image = "placeholder", -- PLACEHOLDER: no "radiant gift" sprite exists yet

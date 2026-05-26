@@ -100,7 +100,7 @@ Burning enemies take 1 extra damage from unit attacks.
 ==== Profits
 Gain 5 gold per Yellow squad when entering a market.
 
-(NYI) Evolution
+==== Evolution
 When Transformed, your units gain 5 max HP for the battle, stackable.
 
 (NYI) Mobilization
@@ -182,14 +182,14 @@ Your units have +1 ATK per 10 HP.
 Memento *
 Your units re-trigger their On Spawn effects On Death.
 
-Burning Restoration *
-On-burn, the nearest ally heals equal to the burn amount.
+==== Burning Restoration *
+When ANY burning unit dies, the nearest ally heals 5 hp
+
+==== Bulk Pheromones *
+When a Green unit dies, ALL pests gain +1 (MAX_HP).
 
 Arcane Appetite *
 On-spawn, your Blue units gain 2 max HP per remaining Blue mana after placing them.
-
-Bulk Pheromones *
-On-death, Green units give Pests 1 HP.
 
 Meditation *
 The first time you place a squad each battle, regain blue mana equal to its cost.

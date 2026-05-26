@@ -31,7 +31,7 @@ g.defineCommander("sir_horse", "Sir Horse", {
             },
             baseAttackDamage = 10,
             baseAttackSpeed = 0.8,
-            baseAttackRange = 60,
+            baseAttackRange = 85,
             baseMoveSpeed = 55,
             baseMaxHealth = 220,
         },
