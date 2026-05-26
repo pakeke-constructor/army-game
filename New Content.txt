@@ -178,11 +178,11 @@ Poison spreads to another nearby enemy when applied.
 Demonic Steed
 Your commander gains 5 damage, Flying, and Fearsome.
 
-Mischief
+Infiltration
 Red squads gain the Infiltrate perk, allowing them to be placed behind enemy lines.
 
 Landmark
-The first building you place each fight has double stats.
+The first building you place each fight has triple max HP.
 
 One Man Army
 If there is only one unit alive, it gains double DMG and ASPD.
@@ -220,7 +220,7 @@ Unbreakable
 When your units gain armor during combat, they gain an equal amount of max HP for the fight.
 
 Quaternity
-Gain access to ALL mana types, and gain 2 colorless mana.
+Gain access to ALL mana types, and gain 3 colorless mana.
 
 Soul Split
 x2 units and -50% HP to all non-building squads.
