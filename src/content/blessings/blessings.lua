@@ -582,6 +582,47 @@ g.defineBlessing("pestilence", "Pestilence", {
     },
 })
 
+g.defineBlessing("fortify", "Fortify", {
+    description = loc2("50% chance to double (ARMR) gained during battle."),
+    image = "blessing_fortify",
+    rarity = g.RARITIES.RARE,
+    handlers = {
+        -- Bump ent.armor directly (not g.addArmor) so we don't re-fire
+        -- armorIncreased and double again recursively.
+        armorIncreased = function(ent, amount)
+            if ent.team ~= "ally" then return end
+            if love.math.random() <= 0.5 then
+                ent.armor = (ent.armor or 0) + amount
+            end
+        end,
+    },
+})
+
+g.defineBlessing("fireball", "Fireball", {
+    description = loc("When applying burn, create a medium explosion for 4 damage."),
+    image = "blessing_fireball",
+    rarity = g.RARITIES.RARE,
+    mana = "red",
+    handlers = {
+        statusEffectApplied = function(ent, effectType, duration, source)
+            if effectType ~= "burn" or ent.team == "ally" then return end
+            g.explosion(ent.x, ent.y, 4, 70, source)
+        end,
+    },
+})
+
+g.defineBlessing("stomp", "Stomp", {
+    description = loc2("On-spawn, your units deal area damage equal to 25% max (HP)."),
+    image = "blessing_stomp",
+    rarity = g.RARITIES.RARE,
+    handlers = {
+        entitySpawned = function(ent)
+            if ent.team ~= "ally" or not ent.squad then return end
+            g.explosion(ent.x, ent.y, ent.maxHealth * 0.25, 70, ent)
+        end,
+    },
+})
+
 g.defineBlessing("radiant_gift", "Radiant Gift", {
     description = loc("Gain 1 Wildcard Mana when you acquire this blessing."),
     image = "placeholder", -- PLACEHOLDER: no "radiant gift" sprite exists yet
