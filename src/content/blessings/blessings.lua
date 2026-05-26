@@ -822,7 +822,7 @@ g.defineBlessing("radiant_gift", "Radiant Gift", {
 
 g.defineBlessing("one_man_army", "One Man Army", {
     description = loc2("If only one of your units is alive, it gains double (ATK) and (ASPD)."),
-    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    image = "blessing_onemanarmy",
     rarity = g.RARITIES.RARE,
     startingData = false,        -- is exactly one ally unit alive?
     resetDataOnBattleStart = true,
@@ -856,8 +856,8 @@ g.defineBlessing("one_man_army", "One Man Army", {
 
 g.defineBlessing("infiltration", "Infiltration", {
     description = loc("Red squads can be deployed anywhere, even behind enemy lines."),
-    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
-    rarity = g.RARITIES.UNCOMMON,
+    image = "blessing_infiltration",
+    rarity = g.RARITIES.RARE,
     mana = "red",
     handlers = {
         -- Asked with the squad as 1st arg when working out deploy placement.
@@ -871,8 +871,8 @@ g.defineBlessing("infiltration", "Infiltration", {
 
 g.defineBlessing("landmark", "Landmark", {
     description = loc2("The first building you place each fight has triple max (HP)."),
-    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
-    rarity = g.RARITIES.UNCOMMON,
+    image = "blessing_landmark",
+    rarity = g.RARITIES.RARE,
     startingData = false,        -- have we marked this battle's landmark yet?
     resetDataOnBattleStart = true,
     handlers = {
@@ -890,8 +890,8 @@ g.defineBlessing("landmark", "Landmark", {
 
 g.defineBlessing("crystallize", "Crystallize", {
     description = loc2("When an ally is healed to full (HP), it gains 2 (ARMR)."),
-    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
-    rarity = g.RARITIES.UNCOMMON,
+    image = "blessing_crystallize",
+    rarity = g.RARITIES.RARE,
     handlers = {
         -- entityHealed only fires when real healing happened; ending at max HP
         -- means the heal topped the ally off, i.e. "healed to full".
@@ -906,7 +906,7 @@ g.defineBlessing("crystallize", "Crystallize", {
 
 g.defineBlessing("iron_exosuits", "Iron Exosuits", {
     description = loc2("For every (ARMR) your units have, they gain +8% (ASPD)."),
-    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    image = "blessing_ironexosuits",
     rarity = g.RARITIES.RARE,
     handlers = {
         getAttackSpeedMultiplier = function(ent)
