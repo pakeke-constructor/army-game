@@ -190,23 +190,23 @@ When ANY burning unit dies, the nearest ally heals 5 hp
 ==== Bulk Pheromones *
 When a Green unit dies, ALL pests gain +1 (MAX_HP).
 
-Arcane Appetite *
+==== Arcane Appetite *
 Gain +2 blue mana. Your commander starts the battle poisoned
 
-Meditation *
+==== Meditation *
 The first time you place a squad each battle, regain blue mana equal to its cost.
 
-Demonic Steed *
+==== Demonic Steed *
 Your commander gains 5 damage, Flying, and Fearsome.
+
+One Man Army *
+If there is only one unit alive, it gains double DMG and ASPD.
 
 Infiltration *
 Red squads gain the Infiltrate perk, allowing them to be placed behind enemy lines.
 
 Landmark *
 The first building you place each fight has triple max HP.
-
-One Man Army *
-If there is only one unit alive, it gains double DMG and ASPD.
 
 Acceleration *
 Your units’ “Every X seconds” effects trigger twice as often.
@@ -272,3 +272,7 @@ On-death, your units deal damage to a nearby enemy equal to 2x their ATK.
 
 Overload *
 When an enemy gains more burn than max HP, instantly kill the enemy and apply 20% of the burn to nearby enemies. 
+
+Black Flames *
+Burn deals +3 damage per tick
+
