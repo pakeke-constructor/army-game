@@ -439,13 +439,25 @@ end
 
 
 
+local function getSnappedDeployPosition(squad, wx, wy, region)
+    if (not region) or g.ask("canDeployAnywhere", squad) then
+        return wx, wy
+    end
+
+    local sx = math.max(region.x, math.min(region.x + region.w, wx))
+    local sy = math.max(region.y, math.min(region.y + region.h, wy))
+    return sx, sy
+end
+
 ---@param squad g.Squad
 ---@param wx number world x coord
 ---@param wy number world y coord
-local function drawSquadHover(squad, wx,wy)
+local function drawSquadHover(squad, wx, wy)
     local info = g.getSquadInfo(squad.squadId)
     local einfo = g.getEntityDef(info.entityId)
     local offsets = squad:getFormationOffsets()
+    local deployRegion = g.getSquadDeployRegion()
+    local sx, sy = getSnappedDeployPosition(squad, wx, wy, deployRegion)
     lg.setColor(0.2, 1, 0.3, 0.5)
 
     local w,h = 10,10
@@ -456,28 +468,28 @@ local function drawSquadHover(squad, wx,wy)
     local minX, minY, maxX, maxY = math.huge,math.huge,0,0
     for i = 1, #offsets do
         local ox, oy = offsets[i].x, offsets[i].y
-        g.drawUnitPreview(info.entityId, wx + ox, wy + oy)
+        g.drawUnitPreview(info.entityId, sx + ox, sy + oy)
         minX = math.min(minX, ox)
         minY = math.min(minY, oy)
         maxX = math.max(maxX, ox)
         maxY = math.max(maxY, oy)
     end
     if info.drawSquadHover then
-        info.drawSquadHover(wx, wy)
+        info.drawSquadHover(sx, sy)
     end
 
     do
     local ww, hh = maxX-minX, maxY-minY
     lg.setLineWidth(2)
     lg.setColor(0.05,0.2,0.07, 0.25)
-    lg.rectangle("fill", wx+minX-w/2, wy+minY-h/2, ww+w, hh+h)
+    lg.rectangle("fill", sx+minX-w/2, sy+minY-h/2, ww+w, hh+h)
     lg.setColor(0.1,0.7,0.3, 0.6)
-    lg.rectangle("line", wx+minX-w/2, wy+minY-h/2, ww+w, hh+h)
+    lg.rectangle("line", sx+minX-w/2, sy+minY-h/2, ww+w, hh+h)
     end
     local smallFont = g.getSmallFont(16)
     lg.setColor(info.rarity.color)
     local yof2 = -24
-    richtext.printRichCentered("{wavy}{o}"..info.name, smallFont, wx, wy+minY+yof2, 1000, "left")
+    richtext.printRichCentered("{wavy}{o}"..info.name, smallFont, sx, sy+minY+yof2, 1000, "left")
 end
 
 
@@ -487,7 +499,16 @@ function battle_scene:draw()
     iml.pushTransform(self.camera:getTransform())
 
     local border = self.ecs.border
+    lg.setColor(1, 1, 1, 1)
     love.graphics.rectangle("line", border[1], border[2], border[3], border[4])
+
+    local deployRegion = g.getSquadDeployRegion()
+    if deployRegion then
+        lg.setColor(0.15, 0.8, 0.2, 0.12)
+        love.graphics.rectangle("fill", deployRegion.x, deployRegion.y, deployRegion.w, deployRegion.h)
+        lg.setColor(0.2, 1, 0.3, 0.8)
+        love.graphics.rectangle("line", deployRegion.x, deployRegion.y, deployRegion.w, deployRegion.h)
+    end
 
     self.ecs:draw(self.camera:getTransform())
 
@@ -524,10 +545,15 @@ function battle_scene:draw()
         local entry = self.hud:getSelection()
         local mx, my = love.mouse.getPosition()
         local wx, wy = self.camera:toWorld(mx, my)
+        local deployRegion = g.getSquadDeployRegion()
+        local sx, sy = wx, wy
+        if entry then
+            sx, sy = getSnappedDeployPosition(entry, wx, wy, deployRegion)
+        end
         if entry and not entry.deployed then
             local info = g.getSquadInfo(entry.squadId)
             if not info.cost or g.trySpendMana(g.getBattleManaCounts(), info.cost) then
-                entry:spawn(wx, wy)
+                entry:spawn(sx, sy)
             else
                 local manaType = findMissingMana(info.cost, g.getBattleManaCounts())
                 local umx, umy = ui.getMouse()

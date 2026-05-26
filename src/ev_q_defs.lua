@@ -61,6 +61,7 @@ g.defineEvent("blessingAdded")
 -- Questions: stat modifiers
 local ADD = reducers.ADD
 local MUL = reducers.MULTIPLY
+local OR = reducers.OR
 
 g.defineQuestion("getEntityScale", MUL, 1)
 
@@ -78,3 +79,4 @@ g.defineQuestion("getExplosionSizeMultiplier", MUL, 1)
 g.defineQuestion("getDamageTakenMultiplier", MUL, 1)
 
 g.defineQuestion("getSquadUnitCountModifier", ADD, 0)
+g.defineQuestion("canDeployAnywhere", OR, false)
