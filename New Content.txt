@@ -19,6 +19,7 @@ PROMPT:
 Implement these blessings, (put it in `src/content/blessings/blessings.lua`)
 Make sure to search for the corresponding image file of the same name, and think before implementing:
 
+If a blessing has statefulness, make sure to use blessingData, and 
 
 
 
@@ -112,16 +113,16 @@ On-hurt, allies have a 10% chance to gain 1 ARMR.
 ==== Bloodbath
 Your units have +25% lifesteal when below half HP.
 
-Group Hug
+==== Group Hug
 Buffs have a 20% chance to spread to a nearby ally, recursive.  (NOTE: doesnt apply on allies that already have buff)
 
 Industry
 Every 5 days, Upgrade a random squad.
 
-Water Cycle
+==== Water Cycle
 Each battle, for every 8 blue mana you spend, gain 1 blue mana.
 
-Overpower
+==== Overpower
 Your units deal +25% DMG to enemies with less max HP than them.
 
 Trickster

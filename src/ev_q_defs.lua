@@ -23,6 +23,7 @@ g.defineEvent("manaSpent")
 -- Entity lifecycle
 g.defineEvent("entitySpawned")
 g.defineEvent("entityDeath")
+g.defineEvent("entityTransformed")
 
 -- Entity combat
 g.defineEvent("entityHurt") -- called whenever any entity is hurt
