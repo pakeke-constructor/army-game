@@ -158,26 +158,26 @@ On-spawn, your units deal area damage equal to 25% max HP.
 ==== Fireball
 When applying burn, create a medium-sized explosion for 4 DMG.
 
-Conquer *
+(NYI) Conquer *
 When defeating a Tier 3 combat, your commander permanently gains +4 max HP and +1 DMG
 
-Cursed Banquet *
+==== Cursed Banquet *
 Gain 2XP the first time you kill a friendly unit each battle.
 
-Upscaling
+==== Upscaling
 Max level squads gain +50% units.
 
-Ubergrades *
+==== Ubergrades *
 Squads gain 0.1 ASPD and 1 ARMR when upgraded, stackable.
 
 Memento *
 Your units re-trigger their On Spawn effects On Death.
 
-Magnify *
-Your units’ projectiles have a 50% chance to gain 1 damage each time they pass through a Blue unit.
+=== (NYI) Magnify * (this is kinda hard, i think we should rework it)
+Projectiles have a 50% chance to gain 1 (DMG) when passing through a Blue unit.
 
-Agony *
-On-spawn, your units gain 5 burn and apply 10 burn to a nearby enemy.
+=== Agony *
+On-spawn, your units gain 5 burn and apply 10 burn to a random enemy.
 
 Goliath *
 Your units have +1 ATK per 10 HP.

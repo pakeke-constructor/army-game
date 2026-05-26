@@ -657,6 +657,50 @@ g.defineBlessing("ubergrades", "Ubergrades", {
     },
 })
 
+g.defineBlessing("cursed_banquet", "Cursed Banquet", {
+    description = loc("Gain 2 XP the first time you kill a friendly unit each battle."),
+    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    rarity = g.RARITIES.UNCOMMON,
+    startingData = false,        -- triggered this battle?
+    resetDataOnBattleStart = true,
+    handlers = {
+        onKill = function(killer, victim)
+            if killer.team ~= "ally" or victim.team ~= "ally" then return end
+            if g.getBlessingData("cursed_banquet") then return end
+            g.setBlessingData("cursed_banquet", true)
+            g.addXP(2)
+        end,
+    },
+})
+
+g.defineBlessing("agony", "Agony", {
+    description = loc("On-spawn, your units gain 5 burn and apply 10 burn to a random enemy."),
+    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    rarity = g.RARITIES.UNCOMMON,
+    mana = "red",
+    handlers = {
+        entitySpawned = function(ent)
+            if ent.team ~= "ally" then return end
+            g.applyBurn(ent, 5, nil)
+            local target = randomEnemy()
+            if target then g.applyBurn(target, 10, ent) end
+        end,
+    },
+})
+
+g.defineBlessing("goliath", "Goliath", {
+    description = loc2("Your units have +1 (ATK) per 10 max (HP)."),
+    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    rarity = g.RARITIES.UNCOMMON,
+    handlers = {
+        getAttackDamageModifier = function(ent)
+            if ent.team == "ally" then
+                return math.floor((ent.maxHealth or 0) / 10)
+            end
+        end,
+    },
+})
+
 g.defineBlessing("radiant_gift", "Radiant Gift", {
     description = loc("Gain 1 Wildcard Mana when you acquire this blessing."),
     image = "placeholder", -- PLACEHOLDER: no "radiant gift" sprite exists yet
