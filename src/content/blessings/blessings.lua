@@ -449,6 +449,61 @@ g.defineBlessing("bloodbath", "Bloodbath", {
     },
 })
 
+g.defineBlessing("group_hug", "Group Hug", {
+    description = loc("Buffs have 20% chance to spread to nearest ally, recursively."),
+    image = "blessing_grouphug",
+    rarity = g.RARITIES.RARE,
+    handlers = {
+        -- Re-buffing fires entityBuffed again, so spreading is naturally recursive.
+        entityBuffed = function(ent, stat, increase)
+            if ent.team ~= "ally" or increase <= 0 then return end
+            if love.math.random() > 0.2 then return end
+            local closest, bestDist = nil, math.huge
+            g.iteratePartition("ally", ent.x, ent.y, function(other)
+                if other == ent or not g.isAlive(other) then return end
+                local dx, dy = other.x - ent.x, other.y - ent.y
+                local d = dx * dx + dy * dy
+                if d < bestDist then bestDist, closest = d, other end
+            end, 120)
+            if closest then g.buffEntity(closest, stat, increase) end
+        end,
+    },
+})
+
+g.defineBlessing("water_cycle", "Water Cycle", {
+    description = loc("Each battle, for every 8 blue mana you spend, gain 1 blue mana."),
+    image = "blessing_watercycle",
+    rarity = g.RARITIES.UNCOMMON,
+    mana = "blue",
+    startingData = 0,            -- tracks blue mana spent this battle
+    resetDataOnBattleStart = true,
+    handlers = {
+        manaSpent = function(manaRequirement)
+            local blue = manaRequirement and manaRequirement.blue or 0
+            if blue <= 0 then return end
+            local acc = g.getBlessingData("water_cycle") + blue
+            while acc >= 8 do
+                acc = acc - 8
+                g.addMana("blue", 1)
+            end
+            g.setBlessingData("water_cycle", acc)
+        end,
+    },
+})
+
+g.defineBlessing("overpower", "Overpower", {
+    description = loc2("Your units deal +25% damage to enemies with less max (HP) than them."),
+    image = "blessing_overpower",
+    rarity = g.RARITIES.UNCOMMON,
+    handlers = {
+        -- Dispatched as g.ask("getDamageTakenMultiplier", target, attacker).
+        getDamageTakenMultiplier = function(target, attacker)
+            if not attacker or attacker.team ~= "ally" then return end
+            if attacker.maxHealth > target.maxHealth then return 1.25 end
+        end,
+    },
+})
+
 g.defineBlessing("profits", "Profits", {
     description = loc("Gain 5 gold per Yellow squad when entering a market."),
     image = "blessing_profits",

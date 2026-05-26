@@ -2408,7 +2408,7 @@ g.defineStat("moveSpeed", "baseMoveSpeed", {
 g.defineStat("attackRange", "baseAttackRange", {
     displayName = "Attack Range",
     description = "Range of attacks",
-    shortName = "RNG",
+    shortName = "RANGE",
     color = objects.Color(0.8, 0.5, 0.2),
     icon = "range",
     isImportant = _importantIfRanged,
