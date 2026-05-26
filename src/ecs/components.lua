@@ -162,6 +162,7 @@ local shadow = {
 ---@field public _timeSinceLostArmor number?
 ---@field public _timeSinceDeployed number?
 ---@field public _damageLagAmount number?
+---@field public _landmark boolean? marked by the Landmark blessing: the first building placed this battle
 ---@field public onUpdate fun(ecs.Entity, number)?
 ---@field public onDraw fun(ecs.Entity)?
 ---@field public onAttack fun(ecs.Entity)?

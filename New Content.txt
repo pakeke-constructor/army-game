@@ -203,19 +203,19 @@ One Man Army *
 If there is only one unit alive, it gains double DMG and ASPD.
 
 Infiltration *
-Red squads gain the Infiltrate perk, allowing them to be placed behind enemy lines.
+Red squads can be placed behind enemy lines.
 
 Landmark *
 The first building you place each fight has triple max HP.
-
-Acceleration *
-Your units’ “Every X seconds” effects trigger twice as often.
 
 Crystallize *
 When a full HP ally is healed, it gains 1 ARMR.
 
 Iron Exosuits *
-Your units have +8% ASPD per ARMR they have.
+For every ARMR your units have, your units gain +8% ASPD.
+
+(NYI) Acceleration *
+Your units’ “Every X seconds” effects trigger twice as often.
 
 
 

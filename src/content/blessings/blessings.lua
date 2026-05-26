@@ -819,3 +819,100 @@ g.defineBlessing("radiant_gift", "Radiant Gift", {
         g.addPermanentMana(g.WILDCARD_MANA)
     end,
 })
+
+g.defineBlessing("one_man_army", "One Man Army", {
+    description = loc2("If only one of your units is alive, it gains double (ATK) and (ASPD)."),
+    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    rarity = g.RARITIES.RARE,
+    startingData = false,        -- is exactly one ally unit alive?
+    resetDataOnBattleStart = true,
+    handlers = {
+        -- Recompute the count ONCE per frame here (not inside the per-entity
+        -- multipliers below), so the hot-path stays a cheap data lookup.
+        postUpdate = function()
+            local ecs = g.tryGetECS()
+            if not ecs then return end
+            local count = 0
+            for _, ent in ecs:iterate("squad") do
+                if ent.team == "ally" and g.isAlive(ent) then
+                    count = count + 1
+                    if count > 1 then break end
+                end
+            end
+            g.setBlessingData("one_man_army", count == 1)
+        end,
+        getAttackDamageMultiplier = function(ent)
+            if ent.squad and ent.team == "ally" and g.getBlessingData("one_man_army") then
+                return 2
+            end
+        end,
+        getAttackSpeedMultiplier = function(ent)
+            if ent.squad and ent.team == "ally" and g.getBlessingData("one_man_army") then
+                return 2
+            end
+        end,
+    },
+})
+
+g.defineBlessing("infiltration", "Infiltration", {
+    description = loc("Red squads can be deployed anywhere, even behind enemy lines."),
+    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    rarity = g.RARITIES.UNCOMMON,
+    mana = "red",
+    handlers = {
+        -- Asked with the squad as 1st arg when working out deploy placement.
+        -- Returning true skips region-snapping, so the squad goes wherever clicked.
+        canDeployAnywhere = function(squad)
+            local cost = squad and g.getSquadInfo(squad.squadId).cost
+            if cost and (cost.red or 0) > 0 then return true end
+        end,
+    },
+})
+
+g.defineBlessing("landmark", "Landmark", {
+    description = loc2("The first building you place each fight has triple max (HP)."),
+    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    rarity = g.RARITIES.UNCOMMON,
+    startingData = false,        -- have we marked this battle's landmark yet?
+    resetDataOnBattleStart = true,
+    handlers = {
+        entitySpawned = function(ent)
+            if ent.team ~= "ally" or not ent.isBuilding then return end
+            if g.getBlessingData("landmark") then return end
+            g.setBlessingData("landmark", true)
+            ent._landmark = true
+        end,
+        getMaxHealthMultiplier = function(ent)
+            if ent._landmark then return 3 end
+        end,
+    },
+})
+
+g.defineBlessing("crystallize", "Crystallize", {
+    description = loc2("When an ally is healed to full (HP), it gains 2 (ARMR)."),
+    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    rarity = g.RARITIES.UNCOMMON,
+    handlers = {
+        -- entityHealed only fires when real healing happened; ending at max HP
+        -- means the heal topped the ally off, i.e. "healed to full".
+        entityHealed = function(ent, amount, healer)
+            if ent.team ~= "ally" then return end
+            if ent.health and ent.maxHealth and ent.health >= ent.maxHealth then
+                g.addArmor(ent, 2)
+            end
+        end,
+    },
+})
+
+g.defineBlessing("iron_exosuits", "Iron Exosuits", {
+    description = loc2("For every (ARMR) your units have, they gain +8% (ASPD)."),
+    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    rarity = g.RARITIES.RARE,
+    handlers = {
+        getAttackSpeedMultiplier = function(ent)
+            if ent.team == "ally" and ent.armor and ent.armor > 0 then
+                return 1 + 0.08 * ent.armor
+            end
+        end,
+    },
+})
