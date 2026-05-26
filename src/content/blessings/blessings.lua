@@ -606,7 +606,9 @@ g.defineBlessing("fireball", "Fireball", {
     handlers = {
         statusEffectApplied = function(ent, effectType, duration, source)
             if effectType ~= "burn" or ent.team == "ally" then return end
-            g.explosion(ent.x, ent.y, 4, 70, source)
+            if source then
+                g.explosion(ent.x, ent.y, 4, 70, source)
+            end
         end,
     },
 })
@@ -619,6 +621,38 @@ g.defineBlessing("stomp", "Stomp", {
         entitySpawned = function(ent)
             if ent.team ~= "ally" or not ent.squad then return end
             g.explosion(ent.x, ent.y, ent.maxHealth * 0.25, 70, ent)
+        end,
+    },
+})
+
+g.defineBlessing("upscaling", "Upscaling", {
+    description = loc("Max level squads gain +50% units."),
+    image = "blessing_upscaling",
+    rarity = g.RARITIES.COMMON,
+    handlers = {
+        getSquadUnitCountModifier = function(squadId)
+            local squad = g.getSquadFromArmy(squadId)
+            if not squad or squad.level < consts.MAX_SQUAD_LEVEL then return end
+            local base = g.getSquadInfo(squadId).unitCount
+            return math.floor(base * 0.5 + 0.5)
+        end,
+    },
+})
+
+g.defineBlessing("ubergrades", "Ubergrades", {
+    description = loc2("Squads gain +0.1 (ASPD) and +1 (ARMR) each time they're upgraded."),
+    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    rarity = g.RARITIES.UNCOMMON,
+    handlers = {
+        -- level 1 = no upgrades; each level past 1 is one upgrade.
+        getAttackSpeedModifier = function(ent)
+            if ent.squad and ent.team == "ally" then
+                return (ent.squad.level - 1) * 0.1
+            end
+        end,
+        entitySpawned = function(ent)
+            if not ent.squad or ent.team ~= "ally" then return end
+            g.addArmor(ent, ent.squad.level - 1)
         end,
     },
 })

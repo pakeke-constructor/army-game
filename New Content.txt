@@ -133,9 +133,6 @@ The first time you Transform a unit each combat, gain 2 blue mana.
 ==== Electrocute
 On-hit, your units have a 25% chance to deal 3 extra damage.
 
-==== Radiant Gift *
-Gain 1 Colorless Mana
-
 
 
 
@@ -149,13 +146,16 @@ When your units Heal, they also gain 1 Max HP for the battle.
 ==== Pestilence
 Pests have +1 ASPD and DMG
 
-Fortify
+==== Radiant Gift *
+Gain 1 Colorless Mana
+
+==== Fortify
 50% chance to double armor-gain during battle.
 
-Stomp
+==== Stomp
 On-spawn, your units deal area damage equal to 25% max HP.
 
-Fireball
+==== Fireball
 When applying burn, create a medium-sized explosion for 4 DMG.
 
 Conquer *
@@ -169,9 +169,6 @@ Max level squads gain +50% units.
 
 Ubergrades *
 Squads gain 0.1 ASPD and 1 ARMR when upgraded, stackable.
-
-Radiant Gift *
-Gain 1 Colorless Mana
 
 Memento *
 Your units re-trigger their On Spawn effects On Death.
