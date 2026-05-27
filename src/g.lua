@@ -713,6 +713,11 @@ local currentEntityId = 0
 
 
 
+---@param squadInfo g.SquadInfo
+local function estimateSquadPowerIndex(squadInfo)
+    --local dmg = 
+end
+
 ---@param id string
 ---@param info g.SquadInfo|{id:nil}|{perks:nil}
 function g.defineSquad(id, info)
@@ -1008,6 +1013,9 @@ local BLESSING_LIST = {}
 ---@param name string
 ---@param info g.BlessingInfo|{id:nil,name:nil}
 function g.defineBlessing(id, name, info)
+    if info.image == "placeholder" then
+        log.warn("No image for blessing:",id)
+    end
     assert(not BLESSING_DEFS[id], "Duplicate blessing: " .. id)
     info.name = loc(name, {}, {
         context = "The name of a blessing"

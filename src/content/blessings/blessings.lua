@@ -675,7 +675,7 @@ g.defineBlessing("cursed_banquet", "Cursed Banquet", {
 
 g.defineBlessing("wildfire", "Wildfire", {
     description = loc("On-spawn, your units gain 5 burn and apply 10 burn to a random enemy."),
-    image = "wildfire",
+    image = "blessing_wildfire",
     rarity = g.RARITIES.RARE,
     mana = "red",
     handlers = {

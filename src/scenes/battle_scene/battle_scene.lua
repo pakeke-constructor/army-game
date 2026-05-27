@@ -320,6 +320,13 @@ local function drawSandboxUI(self)
         for _, squad in ipairs(g.getSortedArmyList()) do
             squad.deployed = false
         end
+        local run = g.getRun()
+        run._battleMana = {}
+        for mana, count in pairs(run.mana) do
+            if count > 0 then
+                run._battleMana[mana] = count
+            end
+        end
     end
     if button("RESTART!!", c.GREEN) then
         love.event.quit("restart")
