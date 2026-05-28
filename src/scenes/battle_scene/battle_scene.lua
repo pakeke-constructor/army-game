@@ -27,7 +27,7 @@ function battle_scene:init()
     self.victory = false
     self.victoryPopupTime = 0
     self.shockwave = nil
-    self.lastEnemyDeath = nil
+    self.lastEnemyCount = 0
 
     self.sandbox = false -- dev-mode sandbox
     self.sandbox_squadPicker = false
@@ -66,7 +66,8 @@ function battle_scene:pollHandlers()
         end,
         entityDeath = function(ent)
             if ent.team ~= "enemy" then return end
-            self.lastEnemyDeath = { x = ent.x, y = ent.y }
+            if self.lastEnemyCount ~= 1 then return end
+            self.shockwave = { time = 0, x = ent.x, y = ent.y }
         end
     })
 end
@@ -91,7 +92,7 @@ function battle_scene:enter()
     self.victory = false
     self.victoryPopupTime = 0
     self.shockwave = nil
-    self.lastEnemyDeath = nil
+    self.lastEnemyCount = 0
     self.squadChoices = nil
     self.timeSinceEnteredScene = 0
 
@@ -154,14 +155,7 @@ function battle_scene:update(dt)
     self.ecs:update(dt)
 
     local enemyCount = countEnemies(self.ecs)
-    if self.lastEnemyDeath and enemyCount == 0 then
-        self.shockwave = {
-            time = 0,
-            x = self.lastEnemyDeath.x,
-            y = self.lastEnemyDeath.y,
-        }
-    end
-    self.lastEnemyDeath = nil
+    self.lastEnemyCount = enemyCount
 
     if not self.paused then
         self.particles:update(dt)
