@@ -1752,7 +1752,8 @@ function g.drawEntity(ent, x, y)
     local bodyRot = getBodyRot(ent)
     if ent.image then
         lg.setColor(ent.color or objects.Color.WHITE)
-        g.drawImageOffset(ent.image, x + (ent.ox or 0), y + (ent.oy or 0), (ent.rot or 0) + bodyRot, sx, sy, 0.5, 0.95, ent.kx, ent.ky)
+        local rot = (ent.rot or 0) + bodyRot + (ent.damageJolt or 0)
+        g.drawImageOffset(ent.image, x + (ent.ox or 0), y + (ent.oy or 0), rot, sx, sy, 0.5, 0.95, ent.kx, ent.ky)
 
         if ent.weapon then
             drawWeapon(ent,x,y)

@@ -78,7 +78,29 @@ function juice_system.onHitDamage(attacker, damage, target, isArmorHit)
     end
 end
 
+local JOLT_DECAY = 8
+local JOLT_MAX = 0.3
+
+function juice_system.entityHurt(ent, damage)
+    local maxHp = ent.maxHealth or 1
+    local pct = math.min(1, (damage + 50) / maxHp)
+    local sign = love.math.random() < 0.5 and -1 or 1
+    local newJolt = pct * JOLT_MAX * sign
+    if math.abs(ent.damageJolt or 0) < 2 * math.abs(newJolt) then
+        ent.damageJolt = newJolt
+    end
+end
+
 function juice_system.postUpdate(dt)
+    local world = g.getECS()
+    local decay = math.exp(-JOLT_DECAY * dt)
+    for _, ent in world:iterate("damageJolt") do
+        ent.damageJolt = ent.damageJolt * decay
+        if math.abs(ent.damageJolt) < 0.001 then
+            ent.damageJolt = nil
+        end
+    end
+
     local store = getStore()
     local active = store.activeSparks
     local pool = store.sparkPool
