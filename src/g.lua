@@ -66,6 +66,78 @@ end
 
 
 
+
+
+local PALETTE = {
+    {197, 48, 61},
+    {89, 71, 29},
+    {79, 45, 93},
+    {54, 199, 222},
+    {200, 82, 164},
+    {29, 58, 81},
+    {17, 18, 17},
+    {99, 99, 99},
+    {46, 68, 209},
+    {166, 84, 27},
+    {95, 57, 39},
+    {29, 27, 14},
+    {205, 133, 59},
+    {8, 8, 8},
+    {255, 255, 255},
+    {54, 30, 25},
+    {20, 14, 18},
+    {39, 39, 71},
+    {39, 55, 24},
+    {188, 227, 233},
+    {72, 72, 72},
+    {0, 0, 0},
+    {53, 125, 210},
+    {35, 100, 73},
+    {241, 241, 30},
+    {124, 200, 42},
+    {100, 106, 53},
+    {77, 140, 33},
+    {44, 44, 44},
+    {140, 159, 169},
+    {124, 34, 34},
+    {225, 185, 123}
+}
+for i, c in ipairs(PALETTE) do
+    PALETTE[i] = objects.Color.fromByteRGBA(c[1], c[2], c[3])
+end
+
+---Snap a color to the nearest palette entry.
+---Uses 4th-power channel distance to deeply penalize large per-channel differences.
+---Preserves the input alpha.
+---@param r number|objects.Color red [0..1], or a Color/table
+---@param gg number? green [0..1]
+---@param b number? blue [0..1]
+---@param a number? alpha [0..1] (default 1)
+---@return objects.Color
+function g.snapToPalette(r, gg, b, a)
+    if type(r) == "table" then
+        r, gg, b, a = r[1], r[2], r[3], r[4]
+    end
+    a = a or 1
+    local best, bestDist = nil, math.huge
+    for _, c in ipairs(PALETTE) do
+        local rbar = (r + c.r) * 0.5
+        local dr, dg, db = r - c.r, gg - c.g, b - c.b
+        -- redmean: cheap perceptual RGB distance
+        local dist = (2 + rbar)*dr*dr + 4*dg*dg + (3 - rbar)*db*db
+        if dist < bestDist then
+            bestDist = dist
+            best = c
+        end
+    end
+    assert(best, "?")
+    return best:clone():setRGBA(nil, nil, nil, a)
+end
+
+
+
+
+
 ---@class g.CommanderInfo
 ---@field id string
 ---@field name string
@@ -1518,6 +1590,11 @@ local HEALTHBAR_ON_TOP = true
 -- true if healthbar on top, 
 -- false implies healthbar on bottom
 
+local ENEMY_HEALTHBAR_COLOR = g.snapToPalette(1, 0.1, 0.1)
+local ALLY_HEALTHBAR_COLOR = g.snapToPalette(0.1, 1, 0.1)
+local NEUTRAL_HEALTHBAR_COLOR = g.snapToPalette(0.1, 0.4, 1)
+
+
 ---@param ent ecs.Entity
 ---@param x number
 ---@param y number
@@ -1544,11 +1621,11 @@ local function drawHealthBar(ent, x,y)
 
     -- green healthbar for allies, red for enemies
     if ent.team == "enemy" then
-        lg.setColor(g.snapToPalette(1, 0.1, 0.1))
+        lg.setColor(ENEMY_HEALTHBAR_COLOR)
     elseif ent.team == "ally" then
-        lg.setColor(g.snapToPalette(0.1, 1, 0.1))
+        lg.setColor(ALLY_HEALTHBAR_COLOR)
     else -- neutral unit
-        lg.setColor(g.snapToPalette(0.1, 0.4, 1))
+        lg.setColor(NEUTRAL_HEALTHBAR_COLOR)
     end
     lg.rectangle("fill", x - w/2, y + oy, w * frac, h)
 
@@ -2396,73 +2473,6 @@ function g.getStatInfo(id)
     return STAT_DEFS[id]
 end
 
-
-
-local PALETTE = {
-    {197, 48, 61},
-    {89, 71, 29},
-    {79, 45, 93},
-    {54, 199, 222},
-    {200, 82, 164},
-    {29, 58, 81},
-    {17, 18, 17},
-    {99, 99, 99},
-    {46, 68, 209},
-    {166, 84, 27},
-    {95, 57, 39},
-    {29, 27, 14},
-    {205, 133, 59},
-    {8, 8, 8},
-    {255, 255, 255},
-    {54, 30, 25},
-    {20, 14, 18},
-    {39, 39, 71},
-    {39, 55, 24},
-    {188, 227, 233},
-    {72, 72, 72},
-    {0, 0, 0},
-    {53, 125, 210},
-    {35, 100, 73},
-    {241, 241, 30},
-    {124, 200, 42},
-    {100, 106, 53},
-    {77, 140, 33},
-    {44, 44, 44},
-    {140, 159, 169},
-    {124, 34, 34},
-    {225, 185, 123}
-}
-for i, c in ipairs(PALETTE) do
-    PALETTE[i] = objects.Color.fromByteRGBA(c[1], c[2], c[3])
-end
-
----Snap a color to the nearest palette entry.
----Uses 4th-power channel distance to deeply penalize large per-channel differences.
----Preserves the input alpha.
----@param r number|objects.Color red [0..1], or a Color/table
----@param gg number? green [0..1]
----@param b number? blue [0..1]
----@param a number? alpha [0..1] (default 1)
----@return objects.Color
-function g.snapToPalette(r, gg, b, a)
-    if type(r) == "table" then
-        r, gg, b, a = r[1], r[2], r[3], r[4]
-    end
-    a = a or 1
-    local best, bestDist = nil, math.huge
-    for _, c in ipairs(PALETTE) do
-        local rbar = (r + c.r) * 0.5
-        local dr, dg, db = r - c.r, gg - c.g, b - c.b
-        -- redmean: cheap perceptual RGB distance
-        local dist = (2 + rbar)*dr*dr + 4*dg*dg + (3 - rbar)*db*db
-        if dist < bestDist then
-            bestDist = dist
-            best = c
-        end
-    end
-    assert(best, "?")
-    return best:clone():setRGBA(nil, nil, nil, a)
-end
 
 
 
