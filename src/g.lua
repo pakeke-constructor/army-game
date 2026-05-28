@@ -1260,6 +1260,7 @@ function g.spawnEntity(id, x, y, ...)
     if ent.startingArmor then
         g.addArmor(ent, ent.startingArmor)
     end
+    g.applyPoison(ent, 1)
     return ent
 end
 
@@ -2400,7 +2401,7 @@ g.COLORS = {
     HEAL = objects.Color("ffc852a4"),
 
     BURN = objects.Color("FFE17313"),
-    POISON = objects.Color("FF4CC44C"),
+    POISON = objects.Color("FF530C63"),
     HEALTH = objects.Color("FF397634"),
     ATTACK = objects.Color("FFA2741E"),
     MAP_EDGE = objects.Color(0.16, 0.28, 0.18, 0.55),
@@ -2499,7 +2500,7 @@ g.defineStat("startingArmor", "baseStartingArmor", {
     displayName = "Armor",
     description = "Reduces damage taken",
     shortName = "ARMR",
-    color = objects.Color(0.6, 0.6, 0.7),
+    color = objects.Color(0.3, 0.4, 0.7),
     icon = "armor",
     isImportant = _importantIfNonZero,
 })

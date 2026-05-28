@@ -556,7 +556,7 @@ g.defineBlessing("profits", "Profits", {
 
 
 g.defineBlessing("bodybuilding", "Bodybuilding", {
-    description = loc("When your units Heal, they also gain 1 max (HP) for the battle."),
+    description = loc2("When your units Heal, they also gain 1 max (HP) for the battle."),
     image = "blessing_bodybuilding",
     rarity = g.RARITIES.RARE,
     handlers = {
@@ -568,7 +568,7 @@ g.defineBlessing("bodybuilding", "Bodybuilding", {
 })
 
 g.defineBlessing("pestilence", "Pestilence", {
-    description = loc("Pests have +1 (ASPD) and +1 (ATK)."),
+    description = loc2("Pests have +1 (ASPD) and +1 (ATK)."),
     image = "blessing_pestilence",
     rarity = g.RARITIES.RARE,
     mana = "green",
@@ -1146,26 +1146,22 @@ g.defineBlessing("wrathful_souls", "Wrathful Souls", {
 })
 
 g.defineBlessing("overload", "Overload", {
-    description = loc2("If more than half of all enemies are burning, apply burn to ALL enemies"),
+    description = loc2("When an enemy gains more burn than its max HP, instantly kill it and apply 20% of the burn to nearby enemies."),
     image = "blessing_overload",
     rarity = g.RARITIES.LEGENDARY,
     mana = "red",
     handlers = {
-        -- Update pattern: check the burning ratio once per second (not postUpdate,
-        -- so it stays off the per-frame hot path). Two cheap passes over the cached
-        -- "team" list, no allocation.
-        perSecondUpdate = function(secondCount)
-            local total, burning = 0, 0
+        -- Checked once per second (off the per-frame hot path). Burn "amount" is
+        -- burnTime * BURN_DPS; if that exceeds maxHealth, overload the enemy.
+        perSecondUpdate = function()
             for _, ent in g.getECS():iterate("team") do
-                if ent.team == "enemy" and g.isAlive(ent) then
-                    total = total + 1
-                    if (ent.burnTime or 0) > 0 then burning = burning + 1 end
-                end
-            end
-            if total == 0 or burning <= total / 2 then return end
-            for _, ent in g.getECS():iterate("team") do
-                if ent.team == "enemy" and g.isAlive(ent) then
-                    g.applyBurn(ent, 3, nil)   -- amount is tunable
+                if ent.team == "enemy" and g.isAlive(ent) and (ent.burnTime or 0) > 0
+                    and ent.burnTime * consts.BURN_DPS > (ent.maxHealth or 0) then
+                    local spread, ox, oy = ent.burnTime * 0.2, ent.x, ent.y
+                    g.killEntity(ent)
+                    g.iteratePartition("enemy", ox, oy, function(other)
+                        if other ~= ent and g.isAlive(other) then g.applyBurn(other, spread) end
+                    end, 160)
                 end
             end
         end,
