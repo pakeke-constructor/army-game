@@ -79,13 +79,16 @@ local physics = {
 ---@field public image string
 ---@field public type "sword"|"spear"|"bow"|"staff"|"object"
 ---@field public swordSwingTime number?
+---@field public swordStrikeTime number?
+---@field public spearStrikeTime number?
 ---@field public bowRecoil number?
 ---@field public weaponBobbing number?
 ---@field public xOffset number?
 local weapon = {
     image = "militia_sword",
     type = "sword",
-    swingTime = 0.2,
+    swordSwingTime = 0.6,
+    swordStrikeTime = 0.2,
     bowRecoil = 0.1, -- 10% recoil
     weaponBobbing = 0.1, -- 10% bobbing
     xOffset = 10,

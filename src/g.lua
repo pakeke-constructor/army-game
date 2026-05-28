@@ -1578,6 +1578,14 @@ local function drawHealthBar(ent, x,y)
 end
 
 
+
+---@param ent ecs.Entity
+---@return number
+function g.getAttackCooldown(ent)
+    return 1 / (ent.attackSpeed or 1)
+end
+
+
 ---@param ent ecs.Entity
 ---@return "windup"|"swing"|"idle" phase, number t
 function g.getAttackPhase(ent)
@@ -1585,9 +1593,9 @@ function g.getAttackPhase(ent)
     if not wep or not ent._attackTimer or not ent.attackSpeed then
         return "idle", 0
     end
-    local windupDur = wep.swingTime or 0.2
-    local strikeDur = wep.strikeTime or 0.12
-    local cooldown = 1 / ent.attackSpeed
+    local cooldown = g.getAttackCooldown(ent)
+    local strikeDur = wep.swordStrikeTime or 0.12
+    local windupDur = wep.swordSwingTime or 0.2
     local sinceAttack = cooldown - ent._attackTimer
     if sinceAttack >= 0 and sinceAttack < strikeDur then
         return "swing", sinceAttack / strikeDur
@@ -1627,7 +1635,7 @@ local function drawWeapon(ent, x,y)
     elseif wep.type == "spear" then
         local face = ent.faceDir or 1
         local dx = face * (wep.xOffset or 10)
-        local swingTime = (wep.swingTime) or 0.2
+        local swingTime = (wep.sword) or 0.2
         local ratio = helper.clamp(1 - (atkTime / swingTime), 0, 1)
 
         local target = ent._aiTarget

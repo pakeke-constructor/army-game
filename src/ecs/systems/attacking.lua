@@ -187,6 +187,10 @@ function atckSys.preUpdate(dt)
         if not isValid(ent) then goto continue end
         if ent.frozenTime and ent.frozenTime > 0 then goto continue end
 
+        local attackCooldown = g.getAttackCooldown(ent)
+        ent._attackTimer = ent._attackTimer or (love.math.random() * attackCooldown)
+        ent._attackTimer = math.max(0, ent._attackTimer - dt)
+
         local target = ent._aiTarget
         if not target or not isValid(target) then
             goto continue
@@ -204,14 +208,10 @@ function atckSys.preUpdate(dt)
         end
 
         -- tick cooldown
-        local speed = ent.attackSpeed or 1
-        local timer = ent._attackTimer or (love.math.random() * (1 / speed))
-        timer = timer - dt
-        if timer <= 0 then
+        if ent._attackTimer <= 0 then
             doAttack(ent, target)
-            timer = 1 / speed
+            ent._attackTimer = attackCooldown
         end
-        ent._attackTimer = timer
 
         ::continue::
     end
