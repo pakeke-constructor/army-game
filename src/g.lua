@@ -1678,7 +1678,7 @@ local function drawWeapon(ent, x,y)
         local ratio = helper.clamp(1 - (atkTime / drawTime), 0, 1)
         local face = ent.faceDir or 1
         local target = ent._aiTarget
-        local rot = 0.25 * face
+        local rot = (face >= 0) and 0 or math.pi
         if target and target.x and target.y and ent.x and ent.y then
             rot = math.atan2((target.y - 12) - ent.y, target.x - ent.x)
         end
