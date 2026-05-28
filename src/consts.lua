@@ -25,6 +25,8 @@ consts.MAX_EVENT_CALLS_PER_FRAME = 20
 -- the maximum number of event calls of a certain type per frame.
 -- (avoids infinite loops in a robust way)
 
+consts.TAU = 2*math.pi
+
 consts.SHOP_BLESSING_COUNT = 6
 consts.SHOP_SQUAD_COUNT = 6
 

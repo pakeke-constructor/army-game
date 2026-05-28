@@ -28,7 +28,6 @@ function battle_scene:init()
     self.victoryPopupTime = 0
     self.shockwave = nil
     self.lastEnemyCount = 0
-    self.sparkTime = 0
 
     self.sandbox = false -- dev-mode sandbox
     self.sandbox_squadPicker = false
@@ -84,7 +83,7 @@ function battle_scene:enter()
 
     self.ecs = ECSWorld({
         "stats", "status_effects", "ai", "attacking",
-        "physics", "shadows", "ground_decor"
+        "physics", "shadows", "ground_decor", "spark_system"
     })
     self.camera = Camera(0, 0, CAMERA_ZOOM)
     self.particles = ParticleService()
@@ -145,7 +144,6 @@ end
 
 function battle_scene:update(dt)
     self.timeSinceEnteredScene = self.timeSinceEnteredScene + dt
-    self.sparkTime = self.sparkTime + dt
 
     local run = g.getRun()
     for _, squad in pairs(run.squads) do
@@ -258,9 +256,6 @@ function battle_scene:keypressed(k)
         end
         if k == "p" then
             self.paused = not self.paused
-        end
-        if k == "1" then
-            self.sparkTime = 0
         end
         if k == "r" then
             if rewardPopupService.getActive() then
@@ -477,6 +472,7 @@ end
 
 
 local function getSnappedDeployPosition(squad, wx, wy, region)
+    if true then return wx,wy end
     if (not region) or g.ask("canDeployAnywhere", squad) then
         return wx, wy
     end
@@ -548,23 +544,6 @@ end
 
 
 
----@type sparks.SparkArgs
-local SPARK_ARGS = {
-    duration = 0.11,
-    startRadius = 4,
-    endRadius = 9
-}
-
----@param x number
----@param y number
----@param ttime number
-local function drawSparkEffect(x,y, ttime)
-    for i=0,2,1 do
-        local rot = (2*math.pi * i)/3
-        helper.drawSpark(x, y, ttime, rot, SPARK_ARGS)
-    end
-end
-
 
 function battle_scene:draw()
     self.camera:attach()
@@ -577,9 +556,9 @@ function battle_scene:draw()
 
     local deployRegion = g.getSquadDeployRegion()
     if deployRegion then
-        lg.setColor(0.15, 0.8, 0.2, 0.12)
+        lg.setColor(g.snapToPalette(0.15, 0.8, 0.2, 0.05))
         love.graphics.rectangle("fill", deployRegion.x, deployRegion.y, deployRegion.w, deployRegion.h)
-        lg.setColor(0.2, 1, 0.3, 0.8)
+        lg.setColor(g.snapToPalette(0.2, 1, 0.3, 0.4))
         love.graphics.rectangle("line", deployRegion.x, deployRegion.y, deployRegion.w, deployRegion.h)
     end
 
@@ -659,8 +638,6 @@ function battle_scene:draw()
         drawSandboxUI(self)
     end
     ui.endUI()
-
-    drawSparkEffect(100, 100, self.sparkTime)
 
     if self.shockwave and self.shockwave.time < WIN_SHOCKWAVE_DURATION then
         local sw, sh = love.graphics.getDimensions()

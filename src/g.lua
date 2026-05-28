@@ -1579,6 +1579,25 @@ end
 
 
 ---@param ent ecs.Entity
+---@return "windup"|"swing"|"idle" phase, number t
+function g.getAttackPhase(ent)
+    local wep = ent.weapon
+    if not wep or not ent._attackTimer or not ent.attackSpeed then
+        return "idle", 0
+    end
+    local windupDur = wep.swingTime or 0.2
+    local strikeDur = wep.strikeTime or 0.12
+    local cooldown = 1 / ent.attackSpeed
+    local sinceAttack = cooldown - ent._attackTimer
+    if sinceAttack >= 0 and sinceAttack < strikeDur then
+        return "swing", sinceAttack / strikeDur
+    elseif ent._attackTimer < windupDur then
+        return "windup", 1 - ent._attackTimer / windupDur
+    end
+    return "idle", 0
+end
+
+---@param ent ecs.Entity
 ---@param x number
 ---@param y number
 local function drawWeapon(ent, x,y)
@@ -1590,14 +1609,19 @@ local function drawWeapon(ent, x,y)
     local atkTime = ent._attackTimer or 10
 
     if wep.type == "sword" then
-        local dx = (ent.faceDir or 1) * (wep.xOffset or 12)
-        local swingTime = (wep.swingTime) or 0.2
-        local ratio = helper.clamp(1 - (atkTime / swingTime), 0, 1)
         local face = ent.faceDir or 1
-        local rot = helper.EASINGS.easeOutBack(ratio) * 1.2 * face
-        local dxx, dyy = helper.fromPolar(rot, 7 * ratio ^ 0.5)
+        local dx = face * (wep.xOffset or 6)
+        local phase, t = g.getAttackPhase(ent)
+        local rotLogical = 0
+        if phase == "windup" then
+            rotLogical = -1.0 * helper.EASINGS.easeInCubic(t)
+        elseif phase == "swing" then
+            rotLogical = helper.lerp(-1.0, 1.4, helper.EASINGS.easeOutBack(t))
+        end
+        local dxx, dyy = helper.fromPolar(rotLogical, 7)
+        dxx = dxx * face
         dyy = dyy - math.floor(h/5)
-        g.drawImageOffset(wep.image, x + dx + dxx, y + dyy, rot, 1,1, 0.5, 0.95)
+        g.drawImageOffset(wep.image, x + dx + dxx, y + dyy, rotLogical * face, 1,1, 0.5, 0.95)
         -- drawImageOffset(imageName, x, y, r, sx, sy, ox, oy, kx, ky)
 
     elseif wep.type == "spear" then
@@ -1678,9 +1702,20 @@ function g.drawEntity(ent, x, y)
         ent:draw(x, y)
         return
     end
+    local bodyRot = 0
+    if ent.weapon and ent.weapon.type == "sword" then
+        local face = ent.faceDir or 1
+        local phase, t = g.getAttackPhase(ent)
+        if phase == "windup" then
+            bodyRot = -0.3 * helper.EASINGS.easeInCubic(t)
+        elseif phase == "swing" then
+            bodyRot = helper.lerp(-0.3, 0.2, helper.EASINGS.easeOutBack(t))
+        end
+        bodyRot = bodyRot * face
+    end
     if ent.image then
         lg.setColor(ent.color or objects.Color.WHITE)
-        g.drawImageOffset(ent.image, x + (ent.ox or 0), y + (ent.oy or 0), ent.rot or 0, sx, sy, 0.5, 0.95, ent.kx, ent.ky)
+        g.drawImageOffset(ent.image, x + (ent.ox or 0), y + (ent.oy or 0), (ent.rot or 0) + bodyRot, sx, sy, 0.5, 0.95, ent.kx, ent.ky)
 
         if ent.weapon then
             drawWeapon(ent,x,y)
