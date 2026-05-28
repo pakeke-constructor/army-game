@@ -525,6 +525,22 @@ local function drawSquadHover(squad, wx, wy)
 end
 
 
+
+---@param cost g.ManaBundle
+local function spawnManaIconPopups(cost)
+    local umx, umy = ui.getMouse()
+    for id,v in pairs(cost) do
+        local minfo = g.getManaInfo(id)
+        for i=1, v do
+            local RR = 20
+            local xx, yy = umx + love.math.random(-RR,RR), umy + love.math.random(-RR,RR) - 20
+            g.addUITextPopup(xx, yy, "{" .. minfo.image .. "}", {
+                duration = 0.9,
+            })
+        end
+    end
+end
+
 function battle_scene:draw()
     self.camera:attach()
     love.graphics.clear(g.COLORS.BATTLE_GROUND_COLOR:getRGBA())
@@ -586,6 +602,7 @@ function battle_scene:draw()
             local info = g.getSquadInfo(entry.squadId)
             if not info.cost or g.trySpendMana(g.getBattleManaCounts(), info.cost) then
                 entry:spawn(sx, sy)
+                spawnManaIconPopups(info.cost)
             else
                 local manaType = findMissingMana(info.cost, g.getBattleManaCounts())
                 local umx, umy = ui.getMouse()
