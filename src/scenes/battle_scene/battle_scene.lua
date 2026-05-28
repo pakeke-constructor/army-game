@@ -14,6 +14,9 @@ local INTRO_ZOOM_DURATION = 1.6
 local WIN_DELAY = 2.5
 local VICTORY_FADE_IN = 0.25
 
+local WIN_SHOCKWAVE_DURATION = 1.2
+local WIN_SHOCKWAVE_LINE_WIDTH = 98
+
 ---@class g.BattleScene
 ---@field hud g.HUD
 local battle_scene = {}
@@ -23,6 +26,8 @@ local battle_scene = {}
 function battle_scene:init()
     self.victory = false
     self.victoryPopupTime = 0
+    self.shockwave = nil
+    self.lastEnemyDeath = nil
 
     self.sandbox = false -- dev-mode sandbox
     self.sandbox_squadPicker = false
@@ -54,10 +59,16 @@ function battle_scene:pollHandlers()
         end,
     })
 
-    g.addHandler({ postDraw = function()
-        lg.setColor(1,1,1)
-        self.particles:draw()
-    end})
+    g.addHandler({
+        postDraw = function()
+            lg.setColor(1,1,1)
+            self.particles:draw()
+        end,
+        entityDeath = function(ent)
+            if ent.team ~= "enemy" then return end
+            self.lastEnemyDeath = { x = ent.x, y = ent.y }
+        end
+    })
 end
 
 
@@ -79,6 +90,8 @@ function battle_scene:enter()
     self.noEnemyTimer = 0
     self.victory = false
     self.victoryPopupTime = 0
+    self.shockwave = nil
+    self.lastEnemyDeath = nil
     self.squadChoices = nil
     self.timeSinceEnteredScene = 0
 
@@ -139,10 +152,21 @@ function battle_scene:update(dt)
 
     self:updateCamera(dt)
     self.ecs:update(dt)
+
+    local enemyCount = countEnemies(self.ecs)
+    if self.lastEnemyDeath and enemyCount == 0 then
+        self.shockwave = {
+            time = 0,
+            x = self.lastEnemyDeath.x,
+            y = self.lastEnemyDeath.y,
+        }
+    end
+    self.lastEnemyDeath = nil
+
     if not self.paused then
         self.particles:update(dt)
         -- track how long no enemies have existed
-        if countEnemies(self.ecs) == 0 then
+        if enemyCount == 0 then
             self.noEnemyTimer = self.noEnemyTimer + dt
         else
             self.noEnemyTimer = 0
@@ -166,6 +190,13 @@ function battle_scene:update(dt)
         end
     else
         self.victoryPopupTime = self.victoryPopupTime + dt
+    end
+
+    if self.shockwave then
+        self.shockwave.time = self.shockwave.time + dt
+        if self.shockwave.time >= WIN_SHOCKWAVE_DURATION then
+            self.shockwave = nil
+        end
     end
 end
 
@@ -592,6 +623,18 @@ function battle_scene:draw()
         drawSandboxUI(self)
     end
     ui.endUI()
+
+    if self.shockwave and self.shockwave.time < WIN_SHOCKWAVE_DURATION then
+        local sw, sh = love.graphics.getDimensions()
+        local sx, sy = self.camera:toScreen(self.shockwave.x, self.shockwave.y)
+        local p = self.shockwave.time / WIN_SHOCKWAVE_DURATION
+        local maxR = math.sqrt(sw * sw + sh * sh) * 1.2
+        lg.setColor(0.03, 0.03, 0.03, 0.9 * (1 - p))
+        lg.setLineWidth(WIN_SHOCKWAVE_LINE_WIDTH / 1200 * maxR)
+        lg.circle("line", sx, sy, maxR * p)
+        lg.setLineWidth(1)
+        lg.setColor(1, 1, 1, 1)
+    end
 end
 
 return battle_scene
