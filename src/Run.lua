@@ -10,6 +10,7 @@ local MapGraph = require("src.scenes.map_scene.MapGraph")
 ---@field _sortedSquads g.Squad[]?
 ---@field _battleSquads g.Squad[] temporary squads on the bench for the current fight only
 ---@field money number
+---@field key boolean The player can have at most 1 key
 ---@field mana g.ManaCounts
 ---@field _battleMana g.ManaCounts
 ---@field blessings {[string]: any}
@@ -29,6 +30,7 @@ function Run:init()
     self.level = 1
     self.xp = 20
     self.money = 0
+    self.key = false
     self.mana = {}
     self.blessings = {}
     self.day = 1
@@ -111,6 +113,7 @@ function Run:serialize()
         level = self.level,
         xp = self.xp,
         money = self.money,
+        key = self.key,
         mana = self.mana,
         _battleMana = self._battleMana,
         blessings = self.blessings,
@@ -120,7 +123,7 @@ function Run:serialize()
     }
 end
 
----@param data {squads: table[]?, level: integer?, xp: integer?, money: number?, mana: g.ManaCounts?, _battleMana: g.ManaCounts?, blessings: {[string]: any}?, day: integer?, demonRage: integer?, mapGraph: table?}?
+---@param data {squads: table[]?, level: integer?, xp: integer?, money: number?, mana: g.ManaCounts?, _battleMana: g.ManaCounts?, blessings: {[string]: any}?, day: integer?, demonRage: integer?, mapGraph: table?, key:boolean?}?
 ---@return g.Run
 function Run.deserialize(data)
     local run = Run()
@@ -134,6 +137,7 @@ function Run.deserialize(data)
     run.level = data.level or run.level
     run.xp = data.xp or run.xp
     run.money = data.money or run.money
+    run.key = data.key or run.key
     run.mana = data.mana or {}
     run._battleMana = data._battleMana or {}
     run.blessings = data.blessings or {}
