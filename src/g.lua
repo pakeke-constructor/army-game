@@ -1513,6 +1513,11 @@ local function drawIceCube(ent, x, y, sx,sy)
     g.drawImageContained("ice_cube", x-W/2, y-H/2, W,H)
 end
 
+
+local HEALTHBAR_ON_TOP = true
+-- true if healthbar on top, 
+-- false implies healthbar on bottom
+
 ---@param ent ecs.Entity
 ---@param x number
 ---@param y number
@@ -1520,11 +1525,15 @@ local function drawHealthBar(ent, x,y)
     if not ent.maxHealth then return end
     local w, h = 16, 2
     local frac = ent.health / ent.maxHealth
-    local _w,hhh = g.getImageSize(ent.image)
+
+    local oy = -2
+    if HEALTHBAR_ON_TOP then
+        local _w,hhh = g.getImageSize(ent.image)
+        oy= -hhh - 4
+    end
 
     -- black outline
     local out=2
-    local oy= -hhh - 4
     lg.setColor(0, 0, 0)
     lg.rectangle("fill", x - w/2 - out, y + oy - out, w + out*2, h + out*2)
 
@@ -1535,11 +1544,11 @@ local function drawHealthBar(ent, x,y)
 
     -- green healthbar for allies, red for enemies
     if ent.team == "enemy" then
-        lg.setColor(1, 0.1, 0.1)
+        lg.setColor(g.snapToPalette(1, 0.1, 0.1))
     elseif ent.team == "ally" then
-        lg.setColor(0.1, 1, 0.1)
+        lg.setColor(g.snapToPalette(0.1, 1, 0.1))
     else -- neutral unit
-        lg.setColor(0.1, 0.4, 1)
+        lg.setColor(g.snapToPalette(0.1, 0.4, 1))
     end
     lg.rectangle("fill", x - w/2, y + oy, w * frac, h)
 
@@ -1722,7 +1731,7 @@ end
 local DEPLOY_STRETCH_SY = 2.8
 local DEPLOY_ANIMATION_DURATION = 0.15
 
-local DEV_SHOW_RANGE = true
+local DEV_SHOW_RANGE = false
 DEV_SHOW_RANGE = consts.DEV_MODE and DEV_SHOW_RANGE
 
 
