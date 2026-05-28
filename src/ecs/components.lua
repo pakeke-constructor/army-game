@@ -179,7 +179,6 @@ local shadow = {
 ---@field public entityBuffed fun(ecs.Entity, table, number?)?
 ---@field public onKill fun(ecs.Entity, ecs.Entity)?
 ---@field public entityShootsProjectile fun(ecs.Entity, ecs.Entity)?
----@field public drawEntity fun(ecs.Entity)?
 ---@field public statusEffectApplied fun(ecs.Entity, string, number, ecs.Entity?)?
 ---@field public physics ecs.components.Physics?
 ---@field public partitions string[]?

@@ -1638,7 +1638,7 @@ local function drawWeapon(ent, x,y)
     elseif wep.type == "spear" then
         local face = ent.faceDir or 1
         local dx = face * (wep.xOffset or 10)
-        local swingTime = (wep.sword) or 0.2
+        local swingTime = (wep.spearStrikeTime) or 0.2
         local ratio = helper.clamp(1 - (atkTime / swingTime), 0, 1)
 
         local target = ent._aiTarget
@@ -1698,6 +1698,10 @@ end
 local DEPLOY_STRETCH_SY = 2.8
 local DEPLOY_ANIMATION_DURATION = 0.15
 
+local DEV_SHOW_RANGE = true
+DEV_SHOW_RANGE = consts.DEV_MODE and DEV_SHOW_RANGE
+
+
 function g.drawEntity(ent, x, y)
     local entScale = g.ask("getEntityScale", ent) * (ent.scale or 1)
     local sx, sy = (ent.sx or 1) * (ent.faceDir or 1) * entScale, (ent.sy or 1) * entScale
@@ -1709,9 +1713,8 @@ function g.drawEntity(ent, x, y)
         sx = sx * (0.3 + 0.7 * p)
         sy = sy * (DEPLOY_STRETCH_SY - (DEPLOY_STRETCH_SY - 1) * p)
     end
-    if ent.draw then
-        ent:draw(x, y)
-        return
+    if ent.onDraw then
+        ent:onDraw(x, y)
     end
     local bodyRot = 0
     if ent.weapon and ent.weapon.type == "sword" then
@@ -1735,6 +1738,10 @@ function g.drawEntity(ent, x, y)
         if ent.frozenTime and ent.frozenTime > 0 then
             drawIceCube(ent, x,y, sx,sy)
         end
+    end
+    if DEV_SHOW_RANGE and ent.attackRange then
+        lg.setColor(1,1,1,0.08 * math.min(1, (100/ent.attackRange)))
+        lg.circle("line", x,y, ent.attackRange)
     end
     if ent.health then
         lg.setColor(1,1,1)
