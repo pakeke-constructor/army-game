@@ -42,7 +42,7 @@ local ChoicePanel = objects.Class("g:ChoicePanel")
 
 
 local NUM_CHOICES = 3
-local FAN_OUT_DURATION = 0.15
+local FAN_OUT_DURATION = 0.11
 local REROLL_TXT = interp("Reroll (%{n})")
 
 
@@ -56,15 +56,23 @@ function ChoicePanel:init(rType, rerolls, rarityWeights)
     self.rarityWeights = rarityWeights or consts.DEFAULT_RARITY_WEIGHTS
     self.createdAt = love.timer.getTime()
 
+    self:_rollChoices()
+end
+
+
+---@private
+function ChoicePanel:_rollChoices()
+    self.choices = {}
+
     local manaCells = g.getRun().mana
 
-    if rType == "squad" then
+    if self.rType == "squad" then
         local pool = g.getSquadsByMana(manaCells)
         self:_pickFromPool(pool, function(id) return g.getSquadInfo(id) end)
-    elseif rType == "blessing" then
+    elseif self.rType == "blessing" then
         local pool = g.getBlessingsByMana(manaCells)
         self:_pickFromPool(pool, function(id) return g.getBlessingInfo(id) end)
-    elseif rType == "mana" then
+    elseif self.rType == "mana" then
         for manaType in pairs(manaCells) do
             if manaType ~= g.WILDCARD_MANA then
                 self.choices[#self.choices + 1] = manaType
@@ -166,35 +174,22 @@ function ChoicePanel:draw()
 
     if self.rerolls > 0 then
         local _, rerollR, _ = bot:splitHorizontal(2, 1, 2)
-        local IMG = "shop_reroll_button"
-        local x, y = rerollR:getCenter()
-        local btnR = Kirigami(0, 0, g.getImageSize(IMG)):center(rerollR)
-        g.drawImage(IMG, x, y)
+        rerollR = rerollR:moveRatio(0, -0.3)
+
+        local IMG = "reroll_button_body"
+        g.drawImageContained(IMG, rerollR:get())
 
         local font = g.getSmallFont(16)
         richtext.printRichContained(
             "{shop_reroll_icon} " .. REROLL_TXT({n = self.rerolls}),
             font,
-            btnR:padRatio(0.5):moveUnit(0, 1):get()
+            rerollR:padRatio(0.6):get()
         )
 
-        if iml.wasJustClicked(btnR:get()) then
+        if iml.wasJustClicked(rerollR:get()) then
             self.rerolls = self.rerolls - 1
-            self.choices = {}
             self.createdAt = love.timer.getTime()
-
-            local manaCells = g.getRun().mana
-            if self.rType == "squad" then
-                self:_pickFromPool(g.getSquadsByMana(manaCells), function(id) return g.getSquadInfo(id) end)
-            elseif self.rType == "blessing" then
-                self:_pickFromPool(g.getBlessingsByMana(manaCells), function(id) return g.getBlessingInfo(id) end)
-            elseif self.rType == "mana" then
-                for manaType in pairs(manaCells) do
-                    if manaType ~= g.WILDCARD_MANA then
-                        self.choices[#self.choices + 1] = manaType
-                    end
-                end
-            end
+            self:_rollChoices()
         end
     end
 end
