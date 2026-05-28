@@ -148,7 +148,7 @@ function RewardPanel:draw()
 
     if self.randomSquad then
         addBar(NEW_SQUAD, function()
-            choicePopupService.set("squad")
+            choicePopupService.set("squad", 2)
             self.randomSquad = nil
         end)
     end

@@ -43,12 +43,15 @@ local ChoicePanel = objects.Class("g:ChoicePanel")
 
 local NUM_CHOICES = 3
 local FAN_OUT_DURATION = 0.15
+local REROLL_TXT = interp("Reroll (%{n})")
 
 
 ---@param rType "squad"|"blessing"|"mana"
+---@param rerolls integer?
 ---@param rarityWeights g.RarityWeights?
-function ChoicePanel:init(rType, rarityWeights)
+function ChoicePanel:init(rType, rerolls, rarityWeights)
     self.rType = rType
+    self.rerolls = rerolls or 0
     self.choices = {}
     self.rarityWeights = rarityWeights or consts.DEFAULT_RARITY_WEIGHTS
     self.createdAt = love.timer.getTime()
@@ -97,8 +100,13 @@ end
 
 function ChoicePanel:draw()
     local r = ui.getFullScreenRegion()
+    local bot, cardArea = r, r
+    if self.rerolls > 0 then
+        cardArea, bot = r:splitVertical(8,1)
+    end
+
     iml.panel(r:get())
-    local cardArea = r:padRatio(0.05, 0.1)
+    cardArea = cardArea:padRatio(0.05, 0.1)
     if self.rType == "mana" then
         cardArea = r:padRatio(0.3, 0.35)
     end
@@ -137,10 +145,7 @@ function ChoicePanel:draw()
                 return true
             end
         end
-        return
-    end
-
-    if self.rType == "blessing" then
+    elseif self.rType == "blessing" then
         for i = 1, #regions do
             local blessId = self.choices[i]
             local clicked = ui.drawBlessingCard(blessId, regions[i], i)
@@ -149,10 +154,7 @@ function ChoicePanel:draw()
                 return true
             end
         end
-        return
-    end
-
-    if self.rType == "mana" then
+    elseif self.rType == "mana" then
         for i = 1, #regions do
             local manaType = self.choices[i]
             if drawManaCard(manaType, regions[i], i) then
@@ -160,7 +162,40 @@ function ChoicePanel:draw()
                 return true
             end
         end
-        return
+    end
+
+    if self.rerolls > 0 then
+        local _, rerollR, _ = bot:splitHorizontal(2, 1, 2)
+        local IMG = "shop_reroll_button"
+        local x, y = rerollR:getCenter()
+        local btnR = Kirigami(0, 0, g.getImageSize(IMG)):center(rerollR)
+        g.drawImage(IMG, x, y)
+
+        local font = g.getSmallFont(16)
+        richtext.printRichContained(
+            "{shop_reroll_icon} " .. REROLL_TXT({n = self.rerolls}),
+            font,
+            btnR:padRatio(0.5):moveUnit(0, 1):get()
+        )
+
+        if iml.wasJustClicked(btnR:get()) then
+            self.rerolls = self.rerolls - 1
+            self.choices = {}
+            self.createdAt = love.timer.getTime()
+
+            local manaCells = g.getRun().mana
+            if self.rType == "squad" then
+                self:_pickFromPool(g.getSquadsByMana(manaCells), function(id) return g.getSquadInfo(id) end)
+            elseif self.rType == "blessing" then
+                self:_pickFromPool(g.getBlessingsByMana(manaCells), function(id) return g.getBlessingInfo(id) end)
+            elseif self.rType == "mana" then
+                for manaType in pairs(manaCells) do
+                    if manaType ~= g.WILDCARD_MANA then
+                        self.choices[#self.choices + 1] = manaType
+                    end
+                end
+            end
+        end
     end
 end
 

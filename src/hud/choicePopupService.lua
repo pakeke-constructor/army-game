@@ -5,8 +5,8 @@ local choicePopupService = {}
 
 local active = nil
 
-function choicePopupService.set(rType, rarityWeights)
-    active = ChoicePanel(rType, rarityWeights)
+function choicePopupService.set(rType, rerolls, rarityWeights)
+    active = ChoicePanel(rType, rerolls or 0, rarityWeights)
 end
 
 function choicePopupService.clear()
