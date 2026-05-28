@@ -83,7 +83,7 @@ function battle_scene:enter()
 
     self.ecs = ECSWorld({
         "stats", "status_effects", "ai", "attacking",
-        "physics", "shadows", "ground_decor", "spark_system"
+        "physics", "shadows", "ground_decor", "juice_system"
     })
     self.camera = Camera(0, 0, CAMERA_ZOOM)
     self.particles = ParticleService()

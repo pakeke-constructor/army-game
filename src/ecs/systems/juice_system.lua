@@ -1,4 +1,4 @@
-local spark_system = {}
+local juice_system = {}
 
 local MAX_SPARKS = 20
 
@@ -13,11 +13,11 @@ local DURATION = SPARK_ARGS.duration
 
 local function getStore()
     local world = g.getECS()
-    world.data.sparkSystem = world.data.sparkSystem or {
+    world.data.juiceSystem = world.data.juiceSystem or {
         active = {},
         pool = {},
     }
-    return world.data.sparkSystem
+    return world.data.juiceSystem
 end
 
 local function acquireSpark(store)
@@ -30,7 +30,7 @@ local function acquireSpark(store)
     return {}
 end
 
-function spark_system.onHitDamage(attacker, damage, target)
+function juice_system.onHitDamage(attacker, damage, target)
     if not target then return end
 
     local store = getStore()
@@ -45,7 +45,7 @@ function spark_system.onHitDamage(attacker, damage, target)
     active[#active + 1] = spark
 end
 
-function spark_system.postUpdate(dt)
+function juice_system.postUpdate(dt)
     local store = getStore()
     local active = store.active
     local pool = store.pool
@@ -61,7 +61,7 @@ function spark_system.postUpdate(dt)
     end
 end
 
-function spark_system.postDraw()
+function juice_system.postDraw()
     local store = getStore()
     local active = store.active
 
@@ -74,4 +74,4 @@ function spark_system.postDraw()
     end
 end
 
-return spark_system
+return juice_system
