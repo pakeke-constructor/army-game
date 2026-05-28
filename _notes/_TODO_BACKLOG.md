@@ -94,6 +94,7 @@
 - Wire up stuff in New Content.txt
 - Add reroll to squad-select in ChoicePanel
 - Juice for spending mana: Should pop up above the units as you spend them
+- Juice for dealing damage (see leo gif)
 
 
 
@@ -101,32 +102,43 @@
 
 
 
-- Juice for dealing damage (see leo gif)
-- Juice for breaking armor
+- Fix ordered-rendering in map-scene. Draw images from their base (0.95h)
+- Fix commander being drawn behind
+- (IDEA: Make a 2 pass system, with `collectDrawables` or something)
+
 
 - key system
 
-- Fix balance for base squads
-
-- Juice for spending money in shop
-
-- Fix ordered-rendering in map-scene. Draw images from their base (0.95h)
-
-- Juice for clicking on a map node
-
-- IMPORTANT: FIX REMAINING PERKS / BLESSINGS / ETC.
-
 - Change ranged-icon; it shouldnt be a sword, should be bow
-
-- CLAUDE.MD: Should know "roughly" how much each stat is worth.
 
 
 - Event system: random map events on empty nodes
 
+
 - Shrine nodes UI:  [Choose to remove a squad, reducing demon-rage + gold, OR, upgrade a squad]
 - Fountain nodes UI:  [Choose to reduce demon-rage, OR choose a blessing]
 
-- Special-nodes wired up
+
+- Chest node + Chest-node UI
+
+
+- PROCESS: Play through the game a couple times. Just get a feel, then *balance*
+- IMPORTANT: FIX REMAINING PERKS / BLESSINGS / ETC.
+- Fix balance for base squads
+
+
+
+
+#### CUTOFF. EVERYTHING ABOVE THIS POINT IS 100% NECCESSARY.
+
+- Juice for clicking on a map node
+
+- Juice for breaking armor
+
+- Juice for spending money in shop
+
+- CLAUDE.MD: Should know "roughly" how much each stat is worth.
+
 
 
 - Make the battle-scene be a bit more interesting.... instead of a dull rectangle all the time.
@@ -134,10 +146,6 @@
 - Peanut shape, Oval shape, multi-circle-shape
 
 
-
-
-
-- Proper ordered-rendering for map-scene
 
 
 - Sound effects

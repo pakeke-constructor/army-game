@@ -379,7 +379,7 @@ function map_scene:draw()
                     love.graphics.setColor(1, 1, 1, a)
                     local sx = (math.floor(hash(d.x,d.y))%2==0) and -1 or 1
                     -- 50% chance to draw flipped on scaleX
-                    g.drawImage(dtype.image, d.x, d.y, 0, sx,1)
+                    g.drawImageOffset(dtype.image, d.x, d.y, 0, sx, 1, 0.5, 0.95)
                 end
                 i = i + 1
             elseif n then
