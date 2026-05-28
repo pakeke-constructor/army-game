@@ -3,7 +3,7 @@
 
 from _ex6.models import M
 from _ex6.code_mode import make_code_mode_system_prompt
-from _ex6.tools import read_headers, read_body, glob, search, write_file, edit_file, read_file, edit_file_lines, escalate, bash, explore_agent, CLAUDE_MD, ENV_PROMPT
+from _ex6.tools import read_headers, read_body, glob, search, write_file, edit_file, read_file, edit_file_lines, escalate, bash, explore_agent, CLAUDE_MD, ENV_PROMPT, git_working_tree
 from _ex6.tools_checkpoints import checkpoint_list, checkpoint, condense
 from _ex6.skills import load_skill
 from _ex6.lua_coding_style import SYSTEM_PROMPT_CODING_STYLE
@@ -86,6 +86,7 @@ CODE_MODE_SYS_PROMPT = make_code_mode_system_prompt([
     write_file, edit_file, edit_file_lines,
     explore_agent, web_search, websearch_agent,
     plan_done, plan_read, plan_write,
+    git_working_tree,
     game_start, game_interact,
     love2d_docs,
     load_skill
