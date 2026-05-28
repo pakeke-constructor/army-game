@@ -1260,7 +1260,6 @@ function g.spawnEntity(id, x, y, ...)
     if ent.startingArmor then
         g.addArmor(ent, ent.startingArmor)
     end
-    g.applyPoison(ent, 1)
     return ent
 end
 

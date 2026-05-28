@@ -595,6 +595,40 @@ function helper.circleHighlight(x, y, radius)
 end
 
 
+---@class sparks.SparkArgs
+---@field duration number
+---@field startRadius number?
+---@field endRadius number?
+---@field color [number,number,number,number]?
+local SPARK_ARGS
+
+local WHITE = {1,1,1,1}
+
+---@param x number
+---@param y number
+---@param time number
+---@param rot number
+---@param sparkArgs sparks.SparkArgs
+function helper.drawSpark(x, y, time, rot, sparkArgs)
+    local duration = sparkArgs.duration or 0.3
+    local startRadius = sparkArgs.startRadius or 4
+    local endRadius = sparkArgs.endRadius or 8
+    local color = sparkArgs.color or WHITE
+
+    if time > duration then
+        return
+    end
+
+    local t = (time % duration) / duration
+    local alpha = 1
+    local len = startRadius + (t) * (endRadius - startRadius)
+
+    local dx, dy = helper.fromPolar(rot, len)
+    lg.setColor(color[1], color[2], color[3], (color[4] or 1) * alpha)
+    -- lg.line(x, y, x + dx, y + dy)
+    g.drawImage("spark_bolt", x+dx, y+dy, rot)
+end
+
 
 local TOOLTIP_TEXT_MAX_WIDTH = 200
 ---@param text string

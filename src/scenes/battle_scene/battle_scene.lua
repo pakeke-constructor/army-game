@@ -28,6 +28,7 @@ function battle_scene:init()
     self.victoryPopupTime = 0
     self.shockwave = nil
     self.lastEnemyCount = 0
+    self.sparkTime = 0
 
     self.sandbox = false -- dev-mode sandbox
     self.sandbox_squadPicker = false
@@ -144,6 +145,7 @@ end
 
 function battle_scene:update(dt)
     self.timeSinceEnteredScene = self.timeSinceEnteredScene + dt
+    self.sparkTime = self.sparkTime + dt
 
     local run = g.getRun()
     for _, squad in pairs(run.squads) do
@@ -256,6 +258,9 @@ function battle_scene:keypressed(k)
         end
         if k == "p" then
             self.paused = not self.paused
+        end
+        if k == "1" then
+            self.sparkTime = 0
         end
         if k == "r" then
             if rewardPopupService.getActive() then
@@ -541,6 +546,26 @@ local function spawnManaIconPopups(cost)
     end
 end
 
+
+
+---@type sparks.SparkArgs
+local SPARK_ARGS = {
+    duration = 0.11,
+    startRadius = 4,
+    endRadius = 9
+}
+
+---@param x number
+---@param y number
+---@param ttime number
+local function drawSparkEffect(x,y, ttime)
+    for i=0,2,1 do
+        local rot = (2*math.pi * i)/3
+        helper.drawSpark(x, y, ttime, rot, SPARK_ARGS)
+    end
+end
+
+
 function battle_scene:draw()
     self.camera:attach()
     love.graphics.clear(g.COLORS.BATTLE_GROUND_COLOR:getRGBA())
@@ -634,6 +659,8 @@ function battle_scene:draw()
         drawSandboxUI(self)
     end
     ui.endUI()
+
+    drawSparkEffect(100, 100, self.sparkTime)
 
     if self.shockwave and self.shockwave.time < WIN_SHOCKWAVE_DURATION then
         local sw, sh = love.graphics.getDimensions()

@@ -239,7 +239,7 @@ g.defineBlessing("fuel", "Fuel", {
     },
 })
 
-g.defineBlessing("sadistic_flames", "Sadistic Flames", {
+g.defineBlessing("corrosive_compounds", "Corrosive Compounds", {
     description = loc("When an enemy receives burn, apply 1 extra burn per unique debuff on the target."),
     image = "placeholder",
     rarity = g.RARITIES.LEGENDARY,

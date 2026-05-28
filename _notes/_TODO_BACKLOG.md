@@ -93,6 +93,7 @@
 - Explain demon-fury when hovering it.  "+10% demon damage, +10% demon health!"
 - Wire up stuff in New Content.txt
 - Add reroll to squad-select in ChoicePanel
+- Juice for spending mana: Should pop up above the units as you spend them
 
 
 
@@ -100,15 +101,15 @@
 
 
 
+- Juice for dealing damage (see leo gif)
 
+- key system
 
 - Fix balance for base squads
 
-- Juice for spending mana: Should pop up above the units as you spend them
 - Juice for spending money in shop
 
 - Juice for breaking armor
-- Juice for dealing damage (see leo gif)
 - Juice for clicking on a map node
 
 - IMPORTANT: FIX REMAINING PERKS / BLESSINGS / ETC.
