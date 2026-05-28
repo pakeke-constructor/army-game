@@ -1714,6 +1714,7 @@ local function getBodyRot(ent)
     if ent.weapon then
         local typ = ent.weapon.type
         if typ == "sword" or typ == "spear" then
+            local mul = typ == "sword" and 1 or 0.4
             local face = ent.faceDir or 1
             local phase, t = g.getAttackPhase(ent)
             if phase == "windup" then
@@ -1721,7 +1722,7 @@ local function getBodyRot(ent)
             elseif phase == "swing" then
                 bodyRot = helper.lerp(-0.3, 0.2, helper.EASINGS.easeOutBack(t))
             end
-            bodyRot = bodyRot * face
+            bodyRot = bodyRot * face * mul
         end
     end
     return bodyRot
