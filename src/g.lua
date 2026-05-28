@@ -1224,6 +1224,9 @@ function g.defineEntity(id, def)
     if def.baseHealPower and def.baseHealPower > 0 then
         assert(not def.baseAttackDamage or def.baseAttackDamage <= 0, "Entities cannot be healers AND attackers at same time")
     end
+    if def.attack and def.attack.attackType == "ranged" then
+        def.isRanged = true
+    end
     if def.physics and def.attack and def.attack.attackType == "melee" then
         local minRange = def.physics.radius * 2
         if def.baseAttackRange < minRange then
@@ -1393,7 +1396,7 @@ function g.dealDamage(target, damage, attacker, ignoreQuestionBuses)
 
     if not ignoreQuestionBuses and target.armor then
         if attacker then
-            g.call("onHitDamage", attacker, damage, target)
+            g.call("onHitDamage", attacker, damage, target, true)
         end
         g.removeArmor(target, 1)
         return
@@ -1410,7 +1413,7 @@ function g.dealDamage(target, damage, attacker, ignoreQuestionBuses)
     target._timeSinceDamaged = 0
 
     if attacker then
-        g.call("onHitDamage", attacker, damage, target)
+        g.call("onHitDamage", attacker, damage, target, false)
     end
     g.call("entityHurt", target, damage)
 

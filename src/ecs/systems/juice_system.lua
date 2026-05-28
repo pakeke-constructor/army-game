@@ -45,26 +45,37 @@ local function acquireSpark(store)
     return {}
 end
 
-function juice_system.onHitDamage(attacker, damage, target)
-    if not target then return end
-
-    local store = getStore()
+local function spawnSpark(store, x, y)
     local active = store.activeSparks
     if #active >= MAX_SPARKS then return end
-
     local spark = acquireSpark(store)
-    spark.x = target.x + love.math.random(-2, 2)
-    spark.y = target.y + love.math.random(-2, 2) - 8
+    spark.x = x + love.math.random(-2, 2)
+    spark.y = y + love.math.random(-2, 2)
     spark.rot = love.math.random()*consts.TAU
     spark.time = 0
     active[#active + 1] = spark
+end
 
+local function spawnHit(store, x, y)
     local hits = store.activeHits
     hits[#hits + 1] = {
-        x = target.x + love.math.random(-1, 1),
-        y = target.y + love.math.random(-1, 1) - 8,
+        x = x + love.math.random(-1, 1),
+        y = y + love.math.random(-1, 1),
         time = 0,
     }
+end
+
+function juice_system.onHitDamage(attacker, damage, target, isArmorHit)
+    if not target then return end
+    local store = getStore()
+
+    if isArmorHit or (attacker and attacker.isRanged) then
+        spawnSpark(store, target.x, target.y - 8)
+    elseif attacker then
+        local mx = (attacker.x + target.x) * 0.5
+        local my = (attacker.y + target.y) * 0.5 - 8
+        spawnHit(store, mx, my)
+    end
 end
 
 function juice_system.postUpdate(dt)
