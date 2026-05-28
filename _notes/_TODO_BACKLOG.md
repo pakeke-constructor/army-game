@@ -92,7 +92,7 @@
 - Xp / level up system
 - Explain demon-fury when hovering it.  "+10% demon damage, +10% demon health!"
 - Wire up stuff in New Content.txt
-
+- Add reroll to squad-select in ChoicePanel
 
 
 
@@ -101,7 +101,6 @@
 
 
 
-- Add reroll to squad-select in ChoicePanel
 
 - Fix balance for base squads
 

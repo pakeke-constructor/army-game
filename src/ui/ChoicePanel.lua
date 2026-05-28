@@ -175,6 +175,11 @@ function ChoicePanel:draw()
     if self.rerolls > 0 then
         local _, rerollR, _ = bot:splitHorizontal(2, 1, 2)
         rerollR = rerollR:moveRatio(0, -0.3)
+        if iml.isHovered(rerollR:get()) then
+            lg.setColor(0.5,0.5,0.5)
+        else
+            lg.setColor(1,1,1)
+        end
 
         local IMG = "reroll_button_body"
         g.drawImageContained(IMG, rerollR:get())
