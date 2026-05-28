@@ -533,7 +533,7 @@ local function spawnManaIconPopups(cost)
     for id,v in pairs(cost) do
         local minfo = g.getManaInfo(id)
         for i=1, v do
-            local RR = 20
+            local RR = 10
             local xx, yy = umx + love.math.random(-RR,RR), umy + love.math.random(-RR,RR) - 20
             g.addUITextPopup(xx, yy, "{" .. minfo.image .. "}", {
                 duration = 0.9,

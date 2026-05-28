@@ -1667,14 +1667,14 @@ local function drawWeapon(ent, x,y)
             rot = helper.lerp(attackRot, 0, t)
         end
 
-        local stabDist = stab * (wep.stabDist or 14)
+        local stabDist = stab * (ent.attackRange / 2)
         local forwardRot = rot + FORWARD_OFFSET
         local stabx, staby = helper.fromPolar(forwardRot, stabDist)
         local dyy = staby - math.floor(h/5)
         g.drawImageOffset(wep.image, x + dx + stabx, y + dyy, rot, 1, 1, 0.5, 0.95)
     elseif wep.type == "bow" then
         local dx = (ent.faceDir or 1) * (wep.xOffset or 8)
-        local drawTime = (wep.swingTime) or 0.2
+        local drawTime = 0.2
         local ratio = helper.clamp(1 - (atkTime / drawTime), 0, 1)
         local face = ent.faceDir or 1
         local target = ent._aiTarget
@@ -1692,6 +1692,25 @@ local function drawWeapon(ent, x,y)
     elseif wep.type == "staff" then
     end
     -- g.drawImageOffset(wep.image, )
+end
+
+
+local function getBodyRot(ent)
+    local bodyRot = 0
+    if ent.weapon then
+        local typ = ent.weapon.type
+        if typ == "sword" or typ == "spear" then
+            local face = ent.faceDir or 1
+            local phase, t = g.getAttackPhase(ent)
+            if phase == "windup" then
+                bodyRot = -0.3 * helper.EASINGS.easeInCubic(t)
+            elseif phase == "swing" then
+                bodyRot = helper.lerp(-0.3, 0.2, helper.EASINGS.easeOutBack(t))
+            end
+            bodyRot = bodyRot * face
+        end
+    end
+    return bodyRot
 end
 
 
@@ -1716,17 +1735,7 @@ function g.drawEntity(ent, x, y)
     if ent.onDraw then
         ent:onDraw(x, y)
     end
-    local bodyRot = 0
-    if ent.weapon and ent.weapon.type == "sword" then
-        local face = ent.faceDir or 1
-        local phase, t = g.getAttackPhase(ent)
-        if phase == "windup" then
-            bodyRot = -0.3 * helper.EASINGS.easeInCubic(t)
-        elseif phase == "swing" then
-            bodyRot = helper.lerp(-0.3, 0.2, helper.EASINGS.easeOutBack(t))
-        end
-        bodyRot = bodyRot * face
-    end
+    local bodyRot = getBodyRot(ent)
     if ent.image then
         lg.setColor(ent.color or objects.Color.WHITE)
         g.drawImageOffset(ent.image, x + (ent.ox or 0), y + (ent.oy or 0), (ent.rot or 0) + bodyRot, sx, sy, 0.5, 0.95, ent.kx, ent.ky)
