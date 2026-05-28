@@ -1520,9 +1520,11 @@ local function drawHealthBar(ent, x,y)
     if not ent.maxHealth then return end
     local w, h = 16, 2
     local frac = ent.health / ent.maxHealth
+    local _w,hhh = g.getImageSize(ent.image)
+
     -- black outline
     local out=2
-    local oy=2
+    local oy= -hhh - 4
     lg.setColor(0, 0, 0)
     lg.rectangle("fill", x - w/2 - out, y + oy - out, w + out*2, h + out*2)
 
