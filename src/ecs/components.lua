@@ -153,6 +153,7 @@ local shadow = {
 ---@field public _projectileCloned boolean?
 ---@field public _projectileHits table<integer, boolean>?
 ---@field public _attackTimer number?
+---@field public _isInAttackRange boolean?
 ---@field public _attackTarget ecs.Entity?
 ---@field public _knockVx number?
 ---@field public _knockVy number?

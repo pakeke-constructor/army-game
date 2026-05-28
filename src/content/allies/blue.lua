@@ -151,7 +151,7 @@ g.defineSquad("archer_squad", {
         attack = {
             attackType = "ranged",
             projectileType = "arrow",
-            projectileSpeed = 250,
+            projectileSpeed = 350,
         },
         weapon = {
             image = "longbow",
@@ -235,7 +235,7 @@ g.defineSquad("incense_holder_squad", {
         attack = {
             attackType = "ranged",
             projectileType = "arrow",
-            projectileSpeed = 250,
+            projectileSpeed = 350,
         },
         weapon = {
             image = "militia", -- placeholder
@@ -397,7 +397,7 @@ g.defineSquad("laser_gunner_squad", {
     entityDef = {
         image = "longbowman",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-        attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 280 },
+        attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 380 },
         weapon = { image = "placeholder", type = "bow" },
         baseAttackDamage = 1,
         baseAttackSpeed = 0.5,

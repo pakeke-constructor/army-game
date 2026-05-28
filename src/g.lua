@@ -1590,6 +1590,9 @@ end
 ---@return "windup"|"swing"|"idle" phase, number t
 function g.getAttackPhase(ent)
     local wep = ent.weapon
+    if not ent._isInAttackRange then
+        return "idle", 0
+    end
     if not wep or not ent._attackTimer or not ent.attackSpeed then
         return "idle", 0
     end

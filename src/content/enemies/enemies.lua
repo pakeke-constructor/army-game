@@ -46,7 +46,7 @@ g.defineEntity("archerdemon", {
     attack = {
         attackType = "ranged",
         projectileType = "arrow",
-        projectileSpeed = 200,
+        projectileSpeed = 350,
     },
     baseAttackDamage = 1,
     baseAttackSpeed = 0.7,

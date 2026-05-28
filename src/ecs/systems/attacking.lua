@@ -190,6 +190,7 @@ function atckSys.preUpdate(dt)
         local attackCooldown = g.getAttackCooldown(ent)
         ent._attackTimer = ent._attackTimer or (love.math.random() * attackCooldown)
         ent._attackTimer = math.max(0, ent._attackTimer - dt)
+        ent._isInAttackRange = false
 
         local target = ent._aiTarget
         if not target or not isValid(target) then
@@ -206,6 +207,8 @@ function atckSys.preUpdate(dt)
             end
             if not target then goto continue end
         end
+
+        ent._isInAttackRange = true
 
         -- tick cooldown
         if ent._attackTimer <= 0 then

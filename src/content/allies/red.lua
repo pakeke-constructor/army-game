@@ -64,7 +64,7 @@ g.defineSquad("blade_thrower_squad", {
         attack = {
             attackType = "ranged",
             projectileType = "arrow",
-            projectileSpeed = 180,
+            projectileSpeed = 300,
         },
         weapon = {
             image = "dagger",

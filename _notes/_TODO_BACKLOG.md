@@ -102,6 +102,7 @@
 
 
 - Juice for dealing damage (see leo gif)
+- Juice for breaking armor
 
 - key system
 
@@ -109,7 +110,8 @@
 
 - Juice for spending money in shop
 
-- Juice for breaking armor
+- Fix ordered-rendering in map-scene. Draw images from their base (0.95h)
+
 - Juice for clicking on a map node
 
 - IMPORTANT: FIX REMAINING PERKS / BLESSINGS / ETC.
