@@ -72,8 +72,8 @@ function juice_system.onHitDamage(attacker, damage, target, isArmorHit)
     if isArmorHit or (attacker and attacker.isRanged) then
         spawnSpark(store, target.x, target.y - 8)
     elseif attacker then
-        local mx = (attacker.x + target.x) * 0.5
-        local my = (attacker.y + target.y) * 0.5 - 8
+        local mx = attacker.x * 0.2 + target.x * 0.8
+        local my = attacker.y * 0.2 + target.y * 0.8 - 8
         spawnHit(store, mx, my)
     end
 end
