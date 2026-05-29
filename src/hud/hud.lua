@@ -71,14 +71,16 @@ end
 ---@param y number
 ---@param selected boolean
 local function renderSquad(sq, x, y, selected)
+    local _, scName = g.getCurrentScene()
+    local isBattle = scName == "battle_scene"
     local size = SQUAD_ICON_SIZE
-    if selected then
+    if isBattle and selected then
         lg.setColor(1, 1, 1, 0.3)
         ui.drawSingleColorPanel(x - 2, y - 2, size + 4, size + 4)
     end
-    if sq.deployed then
+    if isBattle and sq.deployed then
         lg.setColor(0.15, 0.15, 0.15, 1)
-    elseif (not sq.canAfford) then
+    elseif isBattle and (not sq.canAfford) then
         lg.setColor(1, 1, 1, 0.35)
     else
         lg.setColor(1, 1, 1)
@@ -143,13 +145,16 @@ local function drawSquadBar(self, region)
     local startX = inner.x
     local baseY = inner.y + (inner.h - SQUAD_ICON_SIZE) / 2
 
+    local _, scName = g.getCurrentScene()
+    local isBattle = scName == "battle_scene"
+
     for i, entry in ipairs(trueArmy) do
         local sq = entry.sq
         local armyIdx = entry.idx
         local x = startX + (i - 1) * step
         local y = baseY
         local selected = (armyIdx == currentSlot)
-        if selected then
+        if isBattle and selected then
             y = y - 6
         end
         renderSquad(sq, x, y-4, selected)
@@ -431,27 +436,11 @@ end
 
 
 
----@param self g.HUD
-local function drawBattleHUD(self)
-    drawBottomBar(self, SQUAD_ICON_SIZE + 30)
-end
-
----@param self g.HUD
-local function drawMapHUD(self)
-    local sw, sh = ui.getScaledUIDimensions()
-    local region = Kirigami(0, sh - SQUAD_ICON_SIZE - 40, sw/2, SQUAD_ICON_SIZE + 40)
-    drawSquadBar(self, region)
-end
-
 ---@param opt g.hudArgs
 function HUD:drawUI(opt)
     drawTopBar()
 
-    if opt.battleScene then
-        drawBattleHUD(self)
-    elseif opt.mapScene then
-        drawMapHUD(self)
-    end
+    drawBottomBar(self, SQUAD_ICON_SIZE + 30)
 
     rewardPopupService.draw()
     choicePopupService.draw()

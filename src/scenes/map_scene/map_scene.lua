@@ -335,7 +335,7 @@ local function addCommander(scene, graph, pnode, builder)
     end
     local run = g.getRun()
     local cinfo = g.getCommanderInfo(run.commander)
-    builder:addImage(cinfo.image, cx, cy - 8, 0, scene.commanderFacing)
+    builder:addImage(cinfo.image, cx, cy, 0, scene.commanderFacing)
 end
 
 function map_scene:draw()

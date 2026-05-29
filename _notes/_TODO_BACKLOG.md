@@ -95,16 +95,14 @@
 - Add reroll to squad-select in ChoicePanel
 - Juice for spending mana: Should pop up above the units as you spend them
 - Juice for dealing damage (see leo gif)
+- Fix ordered-rendering in map-scene. Draw images from their base (0.95h)
+- Fix commander being drawn behind
+- (IDEA: Make a 2 pass system, with `collectDrawables` or something)
 
 
 
 ### OK:: what do we need for a minimum-playable game?
 
-
-
-- Fix ordered-rendering in map-scene. Draw images from their base (0.95h)
-- Fix commander being drawn behind
-- (IDEA: Make a 2 pass system, with `collectDrawables` or something)
 
 
 - key system
