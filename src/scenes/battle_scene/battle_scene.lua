@@ -555,7 +555,6 @@ function battle_scene:draw()
 
     local border = self.ecs.border
     lg.setColor(1, 1, 1, 1)
-    love.graphics.rectangle("line", border[1], border[2], border[3], border[4])
 
     local deployRegion = g.getSquadDeployRegion()
     if deployRegion then

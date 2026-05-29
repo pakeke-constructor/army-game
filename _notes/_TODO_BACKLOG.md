@@ -98,6 +98,7 @@
 - Fix ordered-rendering in map-scene. Draw images from their base (0.95h)
 - Fix commander being drawn behind
 - (IDEA: Make a 2 pass system, with `collectDrawables` or something)
+- FIX performance issues w/ Blessings: `randomEnemy` is way too expensive
 
 
 
@@ -107,8 +108,6 @@
 
 - key system
 
-
-- FIX performance issues w/ Blessings: `randomEnemy` is way too expensive
 
 
 - Change ranged-icon; it shouldnt be a sword, should be bow
