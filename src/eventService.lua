@@ -2,12 +2,25 @@
 local EVENT_TYPES = require("src.content.events.events")
 
 
+---@class g.randomEventService
+---@field _activeEventPass g.EventPass?
 local randomEventService = {}
 
 
+---@class g.EventOption
+---@field [1] string
+---@field [2] fun(evPass: g.EventPass)
+
 ---@class g.EventPass: objects.Class
+---@field id string
+---@field eventType g.RandomEventType
+---@field text string
+---@field options g.EventOption[]
+---@field _selectedOption integer?
 local EventPass = objects.Class("g:EventPass")
 
+---@param id string
+---@param evType g.RandomEventType
 function EventPass:init(id, evType)
     self.id = id
     self.eventType = evType
@@ -16,10 +29,12 @@ function EventPass:init(id, evType)
     self._selectedOption = nil
 end
 
+---@param options g.EventOption[]?
 function EventPass:setOptions(options)
     self.options = options or {}
 end
 
+---@param txt string
 function EventPass:changeText(txt)
     self.text = txt
 end
@@ -30,14 +45,14 @@ function EventPass:deleteThisOption()
     self._selectedOption = nil
 end
 
-
 function EventPass:leave()
     if randomEventService._activeEventPass == self then
         randomEventService._activeEventPass = nil
     end
 end
 
-
+---@param eventId string
+---@return g.EventPass?
 function randomEventService.startEvent(eventId)
     local evType = EVENT_TYPES[eventId]
     if not evType then return nil end
@@ -48,10 +63,9 @@ function randomEventService.startEvent(eventId)
     return pass
 end
 
-
-
-
+---@return g.EventPass?
 function randomEventService.startRandomEvent()
+    ---@type string[]
     local buf = {}
     for evId in pairs(EVENT_TYPES) do
         table.insert(buf, evId)
@@ -62,13 +76,10 @@ function randomEventService.startRandomEvent()
     return randomEventService.startEvent(idd)
 end
 
-
+---@return g.EventPass?
 function randomEventService.getActiveEvent()
     return randomEventService._activeEventPass
 end
-
-
-
 
 function randomEventService.draw()
     local ev = randomEventService._activeEventPass
@@ -92,6 +103,9 @@ function randomEventService.draw()
     local N = 4
     local buttons = buttonsR:grid(1, N)
     local i = N
+
+    ---@param txt string
+    ---@param func fun(evPass: g.EventPass)
     local function button(txt, func)
         i = i - 1
         local reg = buttons[i]:padRatio(0.1)

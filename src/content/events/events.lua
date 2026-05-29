@@ -1,8 +1,16 @@
 
 
+---@class g.RandomEventType
+---@field id string
+---@field description string
+---@field run fun(eventPass: g.EventPass)
+
+---@type table<string, g.RandomEventType>
 local EVENT_TYPES = {}
 
-
+---@param id string
+---@param desc string
+---@param func fun(eventPass: g.EventPass)
 local function defineEventType(id, desc, func)
     EVENT_TYPES[id] = {
         id = id,
@@ -23,6 +31,7 @@ local PICKUP_AFTER = loc("You pick up the rock, and are showered with gold! (Ear
 
 local LEAVE = loc("Leave the rock.")
 
+---@param eventPass g.EventPass
 defineEventType("rock_event", EVENT_TXT, function(eventPass)
     eventPass:setOptions({
         {PICKUP, function(evPass)
