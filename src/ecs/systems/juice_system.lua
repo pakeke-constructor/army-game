@@ -129,6 +129,7 @@ function juice_system.postDraw()
     local store = getStore()
     local active = store.activeSparks
 
+    lg.setColor(1,1,1)
     for i = 1, #active do
         local spark = active[i]
         for j = 0, 2 do
@@ -137,6 +138,7 @@ function juice_system.postDraw()
         end
     end
 
+    lg.setColor(1,1,1)
     local frames = getHitFrames()
     local hits = store.activeHits
     for i = 1, #hits do

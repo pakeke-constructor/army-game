@@ -459,6 +459,9 @@ local function drawSandboxUI(self)
                 lg.setColor(1, 1, 1, 0.12)
                 lg.rectangle("fill", cx, cy, cw, ch)
             end
+            if iml.wasJustClicked(cx, cy, cw, ch, 1, uid) then
+                g.addBlessing(id)
+            end
             lg.setColor(1, 1, 1)
             g.drawBlessingIcon(id, cx + cw / 2, cy + ch / 2)
         end

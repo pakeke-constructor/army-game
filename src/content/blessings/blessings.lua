@@ -204,10 +204,7 @@ g.defineBlessing("barrage", "Barrage", {
 
 
 local function randomEnemy()
-    local pool = {}
-    g.iteratePartition("enemy", 0, 0, function(e)
-        if g.isAlive(e) then pool[#pool+1] = e end
-    end, 99999)
+    local pool = g.getECS():getEnemyList()
     if #pool == 0 then return nil end
     return pool[math.random(#pool)]
 end

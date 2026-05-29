@@ -24,6 +24,8 @@ function ECSWorld:init(systemNames)
 
     self.componentIndex = {} -- [componentName] -> {ent, ent, ...}
     self.trackedComponents = objects.Set()
+    self.allyList = {}
+    self.enemyList = {}
     self.partitions = {
         -- [partitionId] -> objects.Partition
         unit = objects.Partition(PARTITION_CHUNKSIZE),
@@ -103,6 +105,21 @@ function ECSWorld:_rebuildPartitions()
     end
 end
 
+function ECSWorld:_rebuildTeamLists()
+    table_clear(self.allyList)
+    table_clear(self.enemyList)
+    for i = 1, self.entities.len do
+        local e = self.entities[i]
+        if g.isAlive(e) then
+            if e.team == "ally" then
+                self.allyList[#self.allyList + 1] = e
+            elseif e.team == "enemy" then
+                self.enemyList[#self.enemyList + 1] = e
+            end
+        end
+    end
+end
+
 function ECSWorld:addSystemHandlers()
     for i = 1, #self.systems do
         g.addHandler(self.systems[i])
@@ -121,6 +138,7 @@ function ECSWorld:update(dt)
     self.entities:flush()
     self:_rebuildPartitions()
     self:_rebuildComponentIndex()
+    self:_rebuildTeamLists()
     g.call("preUpdate", dt)
     for i = 1, self.entities.len do
         local e = self.entities[i]
@@ -254,6 +272,14 @@ function ECSWorld:iteratePartition(partitionId, x, y, fn, range)
     if part then
         part:query(x, y, fn, range)
     end
+end
+
+function ECSWorld:getAllyList()
+    return self.allyList
+end
+
+function ECSWorld:getEnemyList()
+    return self.enemyList
 end
 
 return ECSWorld
