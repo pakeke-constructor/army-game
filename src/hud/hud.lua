@@ -2,6 +2,7 @@
 local hoverService = require("src.hud.hoverService")
 
 ---@class g.HUD: objects.Class
+---@field hoveredSquad g.Squad?
 local HUD = objects.Class("g:HUD")
 
 function HUD:init()
@@ -114,6 +115,7 @@ end
 ---@param region kirigami.Region
 local function drawSquadBar(self, region)
     local army = g.getSortedArmyList()
+    self.hoveredSquad = nil
     if #army <= 0 then
         return
     end
@@ -163,6 +165,7 @@ local function drawSquadBar(self, region)
         end
         iml.panel(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, i)
         if iml.isHovered(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, i) then
+            self.hoveredSquad = sq
             hoverSquad(sq)
         end
     end
@@ -441,6 +444,12 @@ function HUD:drawUI(opt)
     drawTopBar()
 
     drawBottomBar(self, SQUAD_ICON_SIZE + 30)
+
+    if self.hoveredSquad then
+        local main = ui.getScreenRegion()
+        local _, left = main:padRatio(0.2):splitHorizontal(2, 1)
+        ui.drawSquadCard(self.hoveredSquad.squadId, left:padRatio(0.1), -999)
+    end
 
     rewardPopupService.draw()
     choicePopupService.draw()

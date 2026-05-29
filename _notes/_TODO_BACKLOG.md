@@ -107,6 +107,10 @@
 
 - key system
 
+
+- FIX performance issues w/ Blessings: `randomEnemy` is way too expensive
+
+
 - Change ranged-icon; it shouldnt be a sword, should be bow
 
 
