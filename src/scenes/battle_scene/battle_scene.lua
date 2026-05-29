@@ -548,6 +548,10 @@ end
 
 
 
+local DEPLOY_REGION_INNER = g.snapToPalette(0.15, 0.8, 0.2, 0.05)
+local DEPLOY_REGION_LINE = g.snapToPalette(0.2, 1, 0.3, 0.4)
+
+
 function battle_scene:draw()
     self.camera:attach()
     love.graphics.clear(g.COLORS.BATTLE_GROUND_COLOR:getRGBA())
@@ -558,9 +562,9 @@ function battle_scene:draw()
 
     local deployRegion = g.getSquadDeployRegion()
     if deployRegion then
-        lg.setColor(g.snapToPalette(0.15, 0.8, 0.2, 0.05))
+        lg.setColor(DEPLOY_REGION_INNER)
         love.graphics.rectangle("fill", deployRegion.x, deployRegion.y, deployRegion.w, deployRegion.h)
-        lg.setColor(g.snapToPalette(0.2, 1, 0.3, 0.4))
+        lg.setColor(DEPLOY_REGION_LINE)
         love.graphics.rectangle("line", deployRegion.x, deployRegion.y, deployRegion.w, deployRegion.h)
     end
 

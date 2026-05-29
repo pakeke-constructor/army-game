@@ -2423,7 +2423,7 @@ function g.defineStat(id, baseName, info)
         baseName = baseName,
         modQ = modQ,
         mulQ = mulQ,
-        color = info.color,
+        color = g.snapToPalette(info.color),
         icon = info.icon,
         isImportant = info.isImportant,
     }

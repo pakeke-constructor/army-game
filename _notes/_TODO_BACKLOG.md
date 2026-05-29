@@ -99,14 +99,12 @@
 - Fix commander being drawn behind
 - (IDEA: Make a 2 pass system, with `collectDrawables` or something)
 - FIX performance issues w/ Blessings: `randomEnemy` is way too expensive
+- key system
+
 
 
 
 ### OK:: what do we need for a minimum-playable game?
-
-
-
-- key system
 
 
 

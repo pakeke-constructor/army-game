@@ -28,6 +28,10 @@ local LOC_HOVER_DAYS = loc("Days remaining until the next Incursion!", {}, {cont
 local LOC_HOVER_MANA = loc(" mana is used to deploy squads in battle.", {}, {context="Tooltip when hovering normal mana in HUD. Prefixed with hovered mana type icon/text at runtime."})
 local LOC_HOVER_WILDCARD_MANA = loc("Wildcard mana can be spent to deploy ANY squad.", {}, {context="Tooltip when hovering wildcard mana in HUD."})
 
+local LOC_HOVER_KEYS = loc("Keys are used to unlock things.", {}, {context="Tooltip when hovering HUD"})
+local LOC_HOVER_NO_KEYS = loc("Keys are used to unlock things. (You have no keys!)", {}, {context="Tooltip when hovering HUD"})
+
+
 
 ---@param slot integer
 ---@return boolean
@@ -265,7 +269,7 @@ local function drawTopBar()
     local r = ui.getScreenRegion()
     local topBar, mainBar = r:splitVertical(0.1,0.9)
 
-    local xp, demonRage, gold, daysTillIncursion, zoneString, pausePanel = topBar:splitHorizontal(4, 2,2,4,4,1)
+    local xp, demonRage, gold, keys, daysTillIncursion, zoneString, pausePanel = topBar:splitHorizontal(4, 2,2,2, 4,4,1)
     --[[
     each of these ^^^ are panels.
 
@@ -304,6 +308,12 @@ local function drawTopBar()
     local rageHover = run.demonRage <= 0 and LOC_HOVER_RAGE_ZERO or LOC_HOVER_RAGE({pct = run.demonRage * 10})
     drawPanel(demonRage, "{demon_pitchfork}{c r=0.6 g=0.1 b=0} " .. tostring(run.demonRage), rageHover)
     drawPanel(gold, "{coin_icon} {GOLD_COLOR}" .. tostring(run.money), LOC_HOVER_GOLD)
+
+    local hasKeys = (run.keys or 0) > 0
+    --local append = hasKeys and "" or "{c r=0.2 g=0.2 b=0.2}"
+    local keyStr = tostring(run.keys).."/3"
+    local locHover = hasKeys and LOC_HOVER_KEYS or LOC_HOVER_NO_KEYS
+    drawPanel(keys, "{key_icon}".."{c r=0.54 g=0.5 b=0.5} "..keyStr, locHover)
 
     local _, _, _, dh = daysTillIncursion:get()
     local extraH = dh * 0.05
