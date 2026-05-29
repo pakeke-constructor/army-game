@@ -108,10 +108,10 @@
 
 
 
-- Change ranged-icon; it shouldnt be a sword, should be bow
-
-
 - Event system: random map events on empty nodes
+
+
+- Change ranged-icon; it shouldnt be a sword, should be bow
 
 
 - Shrine nodes UI:  [Choose to remove a squad, reducing demon-rage + gold, OR, upgrade a squad]
