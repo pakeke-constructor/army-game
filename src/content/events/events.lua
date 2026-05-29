@@ -5,7 +5,9 @@ local EVENT_TYPES = {}
 
 local function defineEventType(id, desc, func)
     EVENT_TYPES[id] = {
-        
+        id = id,
+        description = desc,
+        run = func,
     }
 end
 

@@ -463,6 +463,7 @@ function HUD:drawUI(opt)
 
     rewardPopupService.draw()
     choicePopupService.draw()
+    randomEventService.draw()
     hoverService.draw()
 end
 

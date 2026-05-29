@@ -85,6 +85,7 @@ _G.vignette = require("src.modules.vignette.vignette")
 _G.HUD = require("src.hud.hud")
 _G.rewardPopupService = require("src.hud.rewardPopupService")
 _G.choicePopupService = require("src.hud.choicePopupService")
+_G.randomEventService = require("src.eventService")
 _G.textPopupService = require("src.modules.textPopupService")
 
 _G.g = require("src.g")

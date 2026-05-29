@@ -1996,7 +1996,11 @@ end
 
 ---@return boolean
 function g.isAnyPopupOpen()
-    return not not (rewardPopupService.getActive() or choicePopupService.getActive())
+    return not not (
+        rewardPopupService.getActive()
+        or choicePopupService.getActive()
+        or randomEventService.getActiveEvent()
+    )
 end
 
 function g.gotoLastScene()

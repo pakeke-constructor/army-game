@@ -255,8 +255,13 @@ end
 
 
 function map_scene:keypressed(k)
-    if consts.DEV_MODE and k == "o" then
-        g.gotoScene("shop_scene")
+    if consts.DEV_MODE then
+        if k == "o" then
+            g.gotoScene("shop_scene")
+        end
+        if k == "q" then
+            randomEventService.startRandomEvent()
+        end
     end
 end
 
