@@ -335,7 +335,7 @@ local function addCommander(scene, graph, pnode, builder)
     end
     local run = g.getRun()
     local cinfo = g.getCommanderInfo(run.commander)
-    builder:add(cinfo.image, cx, cy - 8, 0, scene.commanderFacing)
+    builder:addImage(cinfo.image, cx, cy - 8, 0, scene.commanderFacing)
 end
 
 function map_scene:draw()
@@ -367,7 +367,7 @@ function map_scene:draw()
         for _, d in ipairs(self.decorList) do
             local dtype = decor_types.get(d.decorType)
             if dtype and dtype.image then
-                builder:add(dtype.image, d.x, d.y, 0, nil, dtype.opacity)
+                builder:addImage(dtype.image, d.x, d.y, 0, nil, dtype.opacity)
             end
         end
         for _, n in ipairs(self.nodeList) do

@@ -100,7 +100,7 @@ local function addDemons(node, builder, x, y)
             local radiusMul = 0.85 + hashf(node.id, i, 1) * 0.3
             local r = DEMON_DISTANCE * radiusMul
             local a = angle + angleOff
-            builder:add("node_combat_demon", x + math.cos(a) * r, y + DEMON_OY + math.sin(a) * r)
+            builder:addImage("node_combat_demon", x + math.cos(a) * r, y + DEMON_OY + math.sin(a) * r)
         end
     end
 end
@@ -130,7 +130,7 @@ end
 
 function BattleNode:buildDecor(builder, wx, wy)
     if not self.visited then
-        builder:add("node_combat_flag", wx-14, wy-2, 0, 1)
+        builder:addImage("node_combat_flag", wx-14, wy-2, 0, 1)
         addDemons(self, builder, wx, wy)
     end
 end
@@ -149,7 +149,7 @@ function FeastNode:enter()
 end
 
 function FeastNode:buildDecor(builder, wx, wy)
-    builder:add("node_banquet", wx, wy)
+    builder:addImage("node_banquet", wx, wy)
     addDemons(self, builder, wx, wy)
 end
 
@@ -166,7 +166,7 @@ function FountainNode:enter()
 end
 
 function FountainNode:buildDecor(builder, wx, wy)
-    builder:add("node_fountain", wx, wy)
+    builder:addImage("node_fountain", wx, wy)
     addDemons(self, builder, wx, wy)
 end
 
@@ -226,7 +226,7 @@ function ShopNode:enter()
 end
 
 function ShopNode:buildDecor(builder, wx, wy)
-    builder:add("node_town", wx, wy - 8)
+    builder:addImage("node_town", wx, wy - 8)
 end
 
 

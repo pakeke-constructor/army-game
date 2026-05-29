@@ -119,6 +119,7 @@ local shadow = {
 ---@field public vx number?
 ---@field public vy number?
 ---@field public vz number?
+---@field public drawOrder number?
 ---@field public scale number?
 ---@field public health number?
 ---@field public isHealer boolean? true IFF entity is a healer, and will heal with it's attacks.
