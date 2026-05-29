@@ -24,14 +24,15 @@ end
 
 ---@param wx number world x
 ---@param wy number world y
-function Node:draw(wx, wy)
+function Node:drawBelow(wx, wy)
     love.graphics.setColor(g.COLORS.MAP_EDGE:getRGBA())
     love.graphics.ellipse("fill", wx, wy, 4, 2)
 end
 
----@param wx number world x
----@param wy number world y
-function Node:drawBelow(wx, wy)
+---@param builder g.DecorBuilder
+---@param wx number
+---@param wy number
+function Node:buildDecor(builder, wx, wy)
 end
 
 
@@ -68,7 +69,6 @@ nodes.Node = Node
 
 
 
-
 local DEMON_DISTANCE = 20
 local DEMON_OY = -10
 
@@ -87,9 +87,10 @@ local function hashf(...)
 end
 
 ---@param node MapNode
+---@param builder g.DecorBuilder
 ---@param x number
 ---@param y number
-local function tryDrawDemons(node, x,y)
+local function addDemons(node, builder, x, y)
     if node.demonEncounter then
         local count = node.demonEncounter + 1
         local baseAngle = hashf(node.id) * math.pi * 2
@@ -99,7 +100,7 @@ local function tryDrawDemons(node, x,y)
             local radiusMul = 0.85 + hashf(node.id, i, 1) * 0.3
             local r = DEMON_DISTANCE * radiusMul
             local a = angle + angleOff
-            g.drawImage("node_combat_demon", x + math.cos(a) * r, y + DEMON_OY + math.sin(a) * r)
+            builder:add("node_combat_demon", x + math.cos(a) * r, y + DEMON_OY + math.sin(a) * r)
         end
     end
 end
@@ -114,26 +115,23 @@ local BattleNode = nodes.newClass("battle")
 function BattleNode:init(x,y)
     Node.init(self,x,y)
     self.demonEncounter = 0
-    --[[
-    relative difficulty of node, relative to current level:
-    0 = normal enemy
-    1 = harder enemy
-    2 = elite-level enemy
-    ]]
 end
 
 function BattleNode:enter()
     g.gotoScene("battle_scene")
 end
 
-function BattleNode:draw(wx, wy)
+function BattleNode:drawBelow(wx, wy)
     love.graphics.setColor(g.COLORS.MAP_EDGE:getRGBA())
     love.graphics.ellipse("fill", wx, wy, 8, 5)
     love.graphics.setColor(0.8, 0.3, 0.3, 1)
     love.graphics.ellipse("fill", wx, wy, 6, 3)
+end
+
+function BattleNode:buildDecor(builder, wx, wy)
     if not self.visited then
-        g.drawImage("node_combat_flag", wx-14, wy-20)
-        tryDrawDemons(self, wx,wy)
+        builder:add("node_combat_flag", wx-14, wy-2, 0, 1)
+        addDemons(self, builder, wx, wy)
     end
 end
 
@@ -150,11 +148,9 @@ function FeastNode:enter()
     local run = g.getRun()
 end
 
-function FeastNode:draw(wx, wy)
-    lg.setColor(1,1,1)
-    local sx = self.id%2==0 and 1 or -1
-    g.drawImage("node_banquet", wx, wy, 0, sx,1)
-    tryDrawDemons(self, wx,wy)
+function FeastNode:buildDecor(builder, wx, wy)
+    builder:add("node_banquet", wx, wy)
+    addDemons(self, builder, wx, wy)
 end
 
 nodes.FeastNode = FeastNode
@@ -169,10 +165,9 @@ local FountainNode = nodes.newClass("fountain")
 function FountainNode:enter()
 end
 
-function FountainNode:draw(wx, wy)
-    lg.setColor(1,1,1)
-    g.drawImage("node_fountain", wx, wy)
-    tryDrawDemons(self, wx,wy)
+function FountainNode:buildDecor(builder, wx, wy)
+    builder:add("node_fountain", wx, wy)
+    addDemons(self, builder, wx, wy)
 end
 
 nodes.FountainNode = FountainNode
@@ -190,7 +185,7 @@ function EmptyNode:enter()
     -- this node does nothing.
 end
 
-function EmptyNode:draw(wx, wy)
+function EmptyNode:drawBelow(wx, wy)
     love.graphics.setColor(g.COLORS.MAP_EDGE:getRGBA())
     love.graphics.ellipse("fill", wx, wy, 9, 5)
     love.graphics.setColor(g.COLORS.MAP_GROUND_COLOR:getRGBA())
@@ -198,8 +193,6 @@ function EmptyNode:draw(wx, wy)
 end
 
 nodes.EmptyNode = EmptyNode
-
-
 
 
 
@@ -218,8 +211,8 @@ local shop_scene
 function ShopNode:init(x,y)
     shop_scene = shop_scene or require("src.scenes.shop_scene.shop_scene")
     Node.init(self,x,y)
-    self.squadShop = {} -- List<squadId OR false>. False indicates been purchased
-    self.blessingShop = {} -- List<blessingId OR false>. False indicates been purchased
+    self.squadShop = {}
+    self.blessingShop = {}
     shop_scene.prefillShopNode(self)
 end
 
@@ -232,12 +225,9 @@ function ShopNode:enter()
     sc:setShop(self)
 end
 
-function ShopNode:draw(wx,wy)
-    lg.setColor(1,1,1)
-    local sx = self.id%2==0 and 1 or -1
-    g.drawImage("node_town", wx,wy-8, 0, sx, 1)
+function ShopNode:buildDecor(builder, wx, wy)
+    builder:add("node_town", wx, wy - 8)
 end
-
 
 
 

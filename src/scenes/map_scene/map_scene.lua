@@ -3,6 +3,7 @@ local Camera = require("lib.cam11")
 local MapGraph = require("src.scenes.map_scene.MapGraph")
 local PixelCanvas = require("src.modules.PixelCanvas")
 local decor_types = require("src.scenes.map_scene.decor_types")
+local DecorBuilder = require("src.scenes.map_scene.DecorBuilder")
 local fogService = require("src.fogService")
 
 local CAMERA_ZOOM = 1--0.5
@@ -35,12 +36,8 @@ end
 
 local function renderNodeAt(node, nx, ny, r, g, b, a, radius)
     local lg = love.graphics
-    if node and node.draw then
-        node:draw(nx, ny)
-    else
-        lg.setColor(r, g, b, a or 1)
-        lg.ellipse("fill", nx, ny, radius or NODE_RADIUS, (radius or NODE_RADIUS) * 0.5)
-    end
+    lg.setColor(r, g, b, a or 1)
+    lg.ellipse("fill", nx, ny, radius or NODE_RADIUS, (radius or NODE_RADIUS) * 0.5)
 end
 
 ---@param graph MapGraph
@@ -326,7 +323,8 @@ end
 ---@param scene g.MapScene
 ---@param graph MapGraph
 ---@param pnode any
-local function drawCommander(scene, graph, pnode)
+---@param builder g.DecorBuilder
+local function addCommander(scene, graph, pnode, builder)
     local cx, cy
     if scene.traveling then
         local trav = scene.traveling
@@ -337,14 +335,7 @@ local function drawCommander(scene, graph, pnode)
     end
     local run = g.getRun()
     local cinfo = g.getCommanderInfo(run.commander)
-    lg.setColor(1,1,1)
-    g.drawImage(cinfo.image, cx,cy-8, 0, scene.commanderFacing, 1)
-    -- love.graphics.setColor(1, 0.8, 0.2, 1)
-    -- love.graphics.circle("fill", cx, cy, PLAYER_RADIUS)
-end
-
-local function hash(x,y)
-    return math.abs(math.sin(x * 12.9898 + y * 78.233) * 43758.5453)
+    builder:add(cinfo.image, cx, cy - 8, 0, scene.commanderFacing)
 end
 
 function map_scene:draw()
@@ -366,27 +357,21 @@ function map_scene:draw()
             renderEdge(graph, a, b, g.COLORS.MAP_EDGE:getRGBA())
         end)
 
-        -- decor + nodes (sorted by y)
-        local i, j = 1, 1
-        while true do
-            local d = self.decorList and self.decorList[i]
-            local n = self.nodeList and self.nodeList[j]
-            if not d and not n then break end
-            if d and (not n or d.y <= n.y) then
-                local dtype = decor_types.get(d.decorType)
-                if dtype and dtype.image then
-                    local a = dtype.opacity or 1
-                    love.graphics.setColor(1, 1, 1, a)
-                    local sx = (math.floor(hash(d.x,d.y))%2==0) and -1 or 1
-                    -- 50% chance to draw flipped on scaleX
-                    g.drawImageOffset(dtype.image, d.x, d.y, 0, sx, 1, 0.5, 0.95)
-                end
-                i = i + 1
-            elseif n then
-                n.node:drawBelow(n.x, n.y)
-                renderNodeAt(n.node, n.x, n.y)
-                j = j + 1
+        -- ground ellipses
+        for _, n in ipairs(self.nodeList) do
+            n.node:drawBelow(n.x, n.y)
+        end
+
+        -- decor + node images, sorted by y
+        local builder = DecorBuilder()
+        for _, d in ipairs(self.decorList) do
+            local dtype = decor_types.get(d.decorType)
+            if dtype and dtype.image then
+                builder:add(dtype.image, d.x, d.y, 0, nil, dtype.opacity)
             end
+        end
+        for _, n in ipairs(self.nodeList) do
+            n.node:buildDecor(builder, n.x, n.y)
         end
 
         -- hover highlight: path from player to hovered node
@@ -409,9 +394,11 @@ function map_scene:draw()
                 end
             end
 
-            -- player / commander
-            drawCommander(self, graph, pnode)
+            -- commander (added to builder so it sorts by y)
+            addCommander(self, graph, pnode, builder)
         end
+
+        builder:finalize()
     end
 
     -- fog
