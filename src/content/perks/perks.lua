@@ -171,16 +171,11 @@ g.definePerk("swarmsurge", "Swarmsurge", {
 })
 
 g.definePerk("his_gratitude", "His Gratitude", {
-    description = loc("On death, deal massive damage to a random enemy."),
+    description = loc("On death, deal 10 damage to a random enemy."),
     image = "coin_icon",
     handlers = {
         entityDeath = function(ent, killer)
-            local enemies = {}
-            for _, other in ent:getWorld():iterate("team") do
-                if other.team == "enemy" and g.isAlive(other) then
-                    enemies[#enemies + 1] = other
-                end
-            end
+            local enemies = g.getECS():getEnemyList()
             if #enemies > 0 then
                 g.dealDamage(enemies[math.random(#enemies)], 4)
             end
@@ -563,12 +558,7 @@ g.definePerk("her_wrath", "Her Wrath", {
             if not g.isAlive(self) then return end
             if not ent or ent.team ~= "ally" then return end
             if not amount or amount <= 0 then return end
-            local enemies = {}
-            for _, other in self:getWorld():iterate("team") do
-                if other.team == "enemy" and g.isAlive(other) then
-                    enemies[#enemies + 1] = other
-                end
-            end
+            local enemies = g.getECS():getEnemyList()
             if #enemies > 0 then
                 g.dealDamage(enemies[math.random(#enemies)], amount)
             end
