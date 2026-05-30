@@ -101,6 +101,8 @@
 - FIX performance issues w/ Blessings: `randomEnemy` is way too expensive
 - key system
 - Event system: random map events on empty nodes
+- VIBE-COD: make it so enemies get yeeted offscreen on death
+
 
 
 
@@ -110,10 +112,6 @@
 
 - Improvements to squad-card UI: make border colors better, uniform
 - Improvements to squad-card UI: remove "UPGRADE" crap when hovering normally
-
-- Maybe when enemies die, leave a subtle gravestone sprite
-
-- VIBE-COD: make it so enemies get yeeted offscreen on death
 
 
 - Change ranged-icon; it shouldnt be a sword, should be bow
@@ -142,6 +140,9 @@
 - Juice for spending money in shop
 
 - CLAUDE.MD: Should know "roughly" how much each stat is worth.
+
+
+- Maybe when enemies die, leave a subtle gravestone sprite
 
 
 

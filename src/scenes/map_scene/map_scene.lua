@@ -20,6 +20,10 @@ local PATH_SEARCH_DEPTH = 3
 local FOG_CLEAR_RADIUS = 120
 local FOG_REVEAL_DEPTH = 4
 
+local GALLOP_FREQ = 18
+local GALLOP_TILT = 0.15
+local GALLOP_BOUNCE = 4
+
 
 ---@class g.MapScene
 local map_scene = {}
@@ -93,6 +97,7 @@ function map_scene:enter()
     self.hud = HUD()
     self.dragging = false
     self.commanderFacing = 1
+    self.gallop = 0
 
     local run = g.getRun()
     if not run.mapGraph then
@@ -256,6 +261,7 @@ function map_scene:update(dt)
     if self.traveling then
         local trav = self.traveling
         trav.t = trav.t + trav.speed * dt
+        self.gallop = self.gallop + dt * GALLOP_FREQ
         if trav.t >= 1 then
             local graph = g.getRun().mapGraph
             graph:setPlayerPosition(trav.toNode.x, trav.toNode.y)
@@ -354,16 +360,19 @@ end
 ---@param builder g.DecorBuilder
 local function addCommander(scene, graph, pnode, builder)
     local cx, cy
+    local r, bounce = 0, 0
     if scene.traveling then
         local trav = scene.traveling
         cx = trav.ax + (trav.bx - trav.ax) * trav.t
         cy = trav.ay + (trav.by - trav.ay) * trav.t
+        r = math.sin(scene.gallop) * GALLOP_TILT * scene.commanderFacing
+        bounce = -math.abs(math.sin(scene.gallop)) * GALLOP_BOUNCE
     else
         cx, cy = graph:getDrawPos(pnode)
     end
     local run = g.getRun()
     local cinfo = g.getCommanderInfo(run.commander)
-    builder:addImage(cinfo.image, cx, cy, 0, scene.commanderFacing)
+    builder:addImage(cinfo.image, cx, cy + bounce, r, scene.commanderFacing)
 end
 
 function map_scene:draw()
