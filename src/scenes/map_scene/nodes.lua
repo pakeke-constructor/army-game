@@ -1,5 +1,28 @@
 local Class = require("src.modules.objects.Class")
 
+
+
+local SHOP_TXT = loc("Shop: Spend money, upgrade squads")
+
+local BATTLE_TXTS = {
+    -- number = demonEncounter difficulty
+    [0] = loc("Battle: Demon Scouts (I)"),
+    [1] = loc("Battle: Demon Squad (II)"),
+    [2] = loc("Battle: Demon Army (III)"),
+}
+
+local EVENT_TXT = loc("Random event!")
+
+local FOUNTAIN_TXT = loc("Fountain: Reduces Demon-Fury")
+
+local SHRINE_TXT = loc("Shrine: Gain Blessings, Sacrifice Squads")
+
+local FEAST_TXT = loc("Feast: Obtain XP")
+
+local CAMPFIRE_TXT = loc("Campfire: Obtain XP")
+
+
+
 ---@class MapNode: objects.Class
 ---@field x integer grid x
 ---@field y integer grid y
@@ -21,6 +44,14 @@ end
 
 function Node:enter()
 end
+
+---@return string?
+function Node:getHoverDescription()
+    return nil -- 
+    --- return loc("blah blah")
+end
+
+
 
 ---@param wx number world x
 ---@param wy number world y
@@ -129,6 +160,10 @@ function BattleNode:enter()
     g.gotoScene("battle_scene")
 end
 
+function BattleNode:getHoverDescription()
+    return BATTLE_TXTS[self.demonEncounter] or BATTLE_TXTS[0]
+end
+
 function BattleNode:drawBelow(wx, wy)
     love.graphics.setColor(g.COLORS.MAP_EDGE:getRGBA())
     love.graphics.ellipse("fill", wx, wy, 8, 5)
@@ -155,6 +190,10 @@ function FeastNode:enter()
     local run = g.getRun()
 end
 
+function FeastNode:getHoverDescription()
+    return FEAST_TXT
+end
+
 function FeastNode:buildDecor(builder, wx, wy)
     builder:addImage("node_banquet", wx, wy)
     addDemons(self, builder, wx, wy)
@@ -170,6 +209,10 @@ nodes.FeastNode = FeastNode
 local FountainNode = nodes.newClass("fountain")
 
 function FountainNode:enter()
+end
+
+function FountainNode:getHoverDescription()
+    return FOUNTAIN_TXT
 end
 
 function FountainNode:buildDecor(builder, wx, wy)
@@ -213,6 +256,10 @@ local EventNode = nodes.newClass("event")
 
 function EventNode:enter()
     randomEventService.startRandomEvent()
+end
+
+function EventNode:getHoverDescription()
+    return EVENT_TXT
 end
 
 function EventNode:drawBelow(wx, wy)
@@ -267,6 +314,10 @@ function ShopNode:enter()
     local sc = g.getCurrentScene()
     ---@cast sc g.ShopScene
     sc:setShop(self)
+end
+
+function ShopNode:getHoverDescription()
+    return SHOP_TXT
 end
 
 function ShopNode:buildDecor(builder, wx, wy)

@@ -5,6 +5,7 @@ local PixelCanvas = require("src.modules.PixelCanvas")
 local decor_types = require("src.scenes.map_scene.decor_types")
 local DecorBuilder = require("src.scenes.map_scene.DecorBuilder")
 local fogService = require("src.fogService")
+local hoverService = require("src.hud.hoverService")
 
 local CAMERA_ZOOM = 1--0.5
 local NODE_RADIUS = 4
@@ -47,12 +48,9 @@ local function renderNode(graph, node, r, g, b, a, radius)
 end
 
 ---@param graph MapGraph
----@param pnode MapNode
-local function getHoveredNode(graph, pnode, wx, wy)
+local function getHoveredNode(graph, wx, wy)
     local best, bestDist = nil, math.huge
-    local neighbors = graph:getNeighbors(pnode.x, pnode.y)
-    for i = 1, #neighbors do
-        local node = neighbors[i]
+    graph:forEachNode(function(node)
         local nx, ny = graph:getDrawPos(node)
         local dx, dy = nx - wx, ny - wy
         local d2 = dx * dx + dy * dy
@@ -60,8 +58,12 @@ local function getHoveredNode(graph, pnode, wx, wy)
             best = node
             bestDist = d2
         end
+    end)
+    local maxDist = (graph.distanceBetweenNodes * HOVER_DIST_FRAC)
+    if best and bestDist <= maxDist * maxDist then
+        return best
     end
-    return best
+    return nil
 end
 
 function map_scene:enter()
@@ -282,7 +284,7 @@ function map_scene:mousereleased(mx, my, button)
             local pnode = graph and graph:getPlayerNode()
             if pnode then
                 local wx, wy = self.camera:toWorld(mx, my)
-                local hovered = getHoveredNode(graph, pnode, wx, wy)
+                local hovered = getHoveredNode(graph, wx, wy)
                 if hovered and hovered ~= pnode then
                     local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, PATH_SEARCH_DEPTH)
                     if path and #path >= 2 then
@@ -384,7 +386,7 @@ function map_scene:draw()
         if pnode then
             local mx, my = love.mouse.getPosition()
             local wx, wy = self.camera:toWorld(mx, my)
-            local hovered = getHoveredNode(graph, pnode, wx, wy)
+            local hovered = getHoveredNode(graph, wx, wy)
             if (not self.traveling) and hovered and hovered ~= pnode then
                 local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, PATH_SEARCH_DEPTH)
                 if path and #path >= 2 then
@@ -396,6 +398,12 @@ function map_scene:draw()
                         renderEdge(graph, path[i], path[i + 1], r, gg, b, a, 6)
                         renderNode(graph, path[i + 1], r, gg, b, a, NODE_RADIUS + 1)
                     end
+                end
+                local hoverDescription = hovered:getHoverDescription()
+                if hoverDescription then
+                    hoverService.requestHover(function(box, fonts)
+                        box:addText(hoverDescription, fonts.body)
+                    end)
                 end
             end
 
