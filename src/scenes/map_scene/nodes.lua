@@ -197,6 +197,43 @@ nodes.EmptyNode = EmptyNode
 
 
 
+
+-------------------------------
+-- EventNode
+-------------------------------
+---@class MapNode.EventNode: MapNode
+local EventNode = nodes.newClass("event")
+
+function EventNode:enter()
+    randomEventService.startRandomEvent()
+end
+
+function EventNode:drawBelow(wx, wy)
+    love.graphics.setColor(g.COLORS.MAP_EDGE:getRGBA())
+    love.graphics.ellipse("fill", wx, wy, 9, 5)
+    love.graphics.setColor(g.COLORS.MAP_GROUND_COLOR:getRGBA())
+    love.graphics.ellipse("fill", wx, wy, 6, 3)
+end
+
+local QCOL
+
+function EventNode:buildDecor(builder, wx,wy)
+    builder:addDrawable(wx,wy, function(x, y)
+        QCOL = QCOL or g.snapToPalette(objects.Color("FFED8014"))
+        local font = g.getBigFont(48)
+        local bobY = math.sin(love.timer.getTime()) * 3
+        lg.setColor(QCOL)
+        richtext.printRichCentered("{o}?", font, x, y+bobY, 100, "left")
+    end)
+end
+
+nodes.EventNode = EventNode
+
+
+
+
+
+
 -------------------------------
 --- shop node
 -------------------------------

@@ -428,7 +428,7 @@ end
 
 
 
-local SPECIAL_NODES = {"feast", "fountain", "shop"}
+local SPECIAL_NODES = {"feast", "fountain", "shop", "event"}
 -- TODO: add `town` in here too.
 
 local function isNextToNodeOfSameType(self, x, y, nodeType)
