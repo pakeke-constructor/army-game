@@ -428,7 +428,7 @@ end
 
 
 
-local SPECIAL_NODES = {"feast", "fountain", "shop", "event"}
+local SPECIAL_NODES = {"feast", "fountain", "shop"}
 -- TODO: add `town` in here too.
 
 local function isNextToNodeOfSameType(self, x, y, nodeType)
@@ -452,8 +452,11 @@ function MapGraph:_generateNodes(rng)
         if r < 0.25 then
             -- stays as battle (already is)
         elseif r < 0.40 then
+            local r2 = rng()
             local pick = SPECIAL_NODES[math.floor(rng() * #SPECIAL_NODES) + 1]
-            if not isNextToNodeOfSameType(self, node.x, node.y, pick) then
+            if r2 < 0.3 then
+                self:setNode(node.x, node.y, "event")
+            elseif not isNextToNodeOfSameType(self, node.x, node.y, pick) then
                 self:setNode(node.x, node.y, pick)
             end
         else

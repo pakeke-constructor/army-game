@@ -4,7 +4,7 @@ local Class = require("src.modules.objects.Class")
 ---@field x integer grid x
 ---@field y integer grid y
 ---@field id integer random id
----@field demonEncounter integer? (0 1 2) Demon-encounters can exist on any kind of node
+---@field demonEncounter integer? (0 1 2) TODO in future, maybe demon-encounters can exist on any kind of node?
 ---@field ox number visual offset x
 ---@field oy number visual offset y
 ---@field nodeType string the type of node it is
@@ -69,8 +69,6 @@ nodes.Node = Node
 
 
 
-local DEMON_DISTANCE = 20
-local DEMON_OY = -10
 
 -- rudimentary hash; takes any number of integer keys
 local function hash(...)
@@ -98,9 +96,12 @@ local function addDemons(node, builder, x, y)
             local angle = baseAngle + (i - 1) * (math.pi * 2 / count)
             local angleOff = (hashf(node.id, i) - 0.5) * 0.4
             local radiusMul = 0.85 + hashf(node.id, i, 1) * 0.3
-            local r = DEMON_DISTANCE * radiusMul
+            if count == 2 then
+                radiusMul = radiusMul * 0.6
+            end
+            local r = 20 * radiusMul
             local a = angle + angleOff
-            builder:addImage("node_combat_demon", x + math.cos(a) * r, y + DEMON_OY + math.sin(a) * r)
+            builder:addImage("node_combat_demon", x + math.cos(a) * r, y + math.sin(a) * r)
         end
     end
 end
@@ -130,8 +131,15 @@ end
 
 function BattleNode:buildDecor(builder, wx, wy)
     if not self.visited then
-        builder:addImage("node_combat_flag", wx-14, wy-2, 0, 1)
-        addDemons(self, builder, wx, wy)
+        if self.demonEncounter >= 1 then
+            if self.demonEncounter >= 2 then
+                -- its a "boss" encounter, add a flag.
+                builder:addImage("node_combat_flag", wx-14, wy-2, 0, 1)
+            end
+            addDemons(self, builder, wx, wy)
+        else
+            builder:addImage("node_combat_demon", wx, wy)
+        end
     end
 end
 
