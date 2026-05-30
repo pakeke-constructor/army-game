@@ -1,3 +1,5 @@
+local juiceService = require("src.juiceService")
+
 local juice_system = {}
 
 local MAX_SPARKS = 20
@@ -81,7 +83,7 @@ end
 local JOLT_DECAY = 8
 local JOLT_MAX = 0.3
 
-function juice_system.entityHurt(ent, damage)
+function juice_system.entityHurt(ent, damage, attacker)
     local maxHp = ent.maxHealth or 1
     local pct = math.min(1, (damage + 50) / maxHp)
     local sign = love.math.random() < 0.5 and -1 or 1
@@ -89,7 +91,49 @@ function juice_system.entityHurt(ent, damage)
     if math.abs(ent.damageJolt or 0) < 2 * math.abs(newJolt) then
         ent.damageJolt = newJolt
     end
+
+    -- damage number popup
+    if damage >= 1 then
+        local dmgPct = damage / maxHp
+        local big = dmgPct > 0.25
+        local prefix = big and "{w amp=1.5 freq=4 k=0.6}{c r=1 g=0.7 b=0.2}" or "{c r=1 g=1 b=1}"
+        g.addWorldTextPopup(ent.x + love.math.random(-4, 4), ent.y - 14,
+            prefix .. tostring(math.floor(damage + 0.5)), {
+                vely = -55,
+                velDamping = 0.985,
+                duration = big and 0.7 or 0.45,
+                fadeIn = 0.06,
+            })
+        juiceService.addCameraShake(math.min(0.35, dmgPct * 0.5))
+    end
 end
+
+
+---@param ent ecs.Entity
+---@param killer ecs.Entity
+function juice_system.entityDeath(ent, killer)
+    if not ent then return end
+    if not ent.isPest then
+        juiceService.addCameraShake(0.25)
+        juiceService.addTimePause(0.03)
+    end
+    -- death burst: ring of sparks
+    local store = getStore()
+    for i = 1, 5 do
+        local ang = (i / 5) * consts.TAU + love.math.random() * 0.3
+        spawnSpark(store, ent.x + math.cos(ang) * 6, ent.y + math.sin(ang) * 6 - 6)
+    end
+end
+
+function juice_system.explosion(x, y, damage, radius)
+    juiceService.addCameraShake(math.min(0.6, 0.2 + (radius or 60) / 300))
+    juiceService.addTimePause(0.05)
+end
+
+function juice_system.battleStarted()
+    juiceService.addCameraShake(0.4)
+end
+
 
 function juice_system.postUpdate(dt)
     local world = g.getECS()

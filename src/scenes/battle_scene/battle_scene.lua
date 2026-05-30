@@ -3,6 +3,7 @@ local encounters = require("src.scenes.battle_scene.encounters")
 local Camera = require("lib.cam11")
 local ParticleService = require(".particles.ParticleService")
 local fogService = require("src.fogService")
+local juiceService = require("src.juiceService")
 
 
 local CAMERA_SPEED = 400
@@ -76,6 +77,7 @@ end
 function battle_scene:enter()
     local run = g.getRun()
     run:resetForBattle()
+    juiceService.reset()
 
     self.editingSquadLineup = true
 
@@ -152,7 +154,9 @@ function battle_scene:update(dt)
     end
 
     self:updateCamera(dt)
-    self.ecs:update(dt)
+    juiceService.update(dt)
+    local timeScale = juiceService.consumeHitPause(dt)
+    self.ecs:update(dt * timeScale)
 
     local enemyCount = countEnemies(self.ecs)
     self.lastEnemyCount = enemyCount
@@ -553,6 +557,11 @@ local DEPLOY_REGION_LINE = g.snapToPalette(0.2, 1, 0.3, 0.4)
 
 
 function battle_scene:draw()
+    local _cx, _cy = self.camera:getPos()
+    local _sx, _sy = juiceService.getShakeOffset()
+    if _sx ~= 0 or _sy ~= 0 then
+        self.camera:setPos(_cx + _sx, _cy + _sy)
+    end
     self.camera:attach()
     love.graphics.clear(g.COLORS.BATTLE_GROUND_COLOR:getRGBA())
     iml.pushTransform(self.camera:getTransform())
@@ -655,6 +664,10 @@ function battle_scene:draw()
         lg.circle("line", sx, sy, maxR * p)
         lg.setLineWidth(1)
         lg.setColor(1, 1, 1, 1)
+    end
+
+    if _sx ~= 0 or _sy ~= 0 then
+        self.camera:setPos(_cx, _cy)
     end
 end
 

@@ -6,6 +6,7 @@ local decor_types = require("src.scenes.map_scene.decor_types")
 local DecorBuilder = require("src.scenes.map_scene.DecorBuilder")
 local fogService = require("src.fogService")
 local hoverService = require("src.hud.hoverService")
+local juiceService = require("src.juiceService")
 
 local CAMERA_ZOOM = 1--0.5
 local NODE_RADIUS = 4
@@ -84,6 +85,7 @@ local function getHoveredNode(graph, wx, wy)
 end
 
 function map_scene:enter()
+    juiceService.reset()
     self.ecs = ECSWorld()
     self.camera = Camera(0, 0, CAMERA_ZOOM)
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
@@ -268,7 +270,9 @@ function map_scene:update(dt)
     if not consts.DEV_MODE then
         self.camera:setZoom(CAMERA_ZOOM * ui.getUIScaling())
     end
-    self.camera:setPos(self.camX, self.camY)
+    juiceService.update(dt)
+    local _sx, _sy = juiceService.getShakeOffset()
+    self.camera:setPos(self.camX + _sx, self.camY + _sy)
     self.ecs:update(dt)
 end
 

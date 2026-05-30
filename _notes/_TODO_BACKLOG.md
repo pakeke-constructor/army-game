@@ -112,6 +112,8 @@
 - Improvements to squad-card UI: remove "UPGRADE" crap when hovering normally
 
 
+- VIBE-COD: make it so enemies get yeeted offscreen on death
+
 
 - Change ranged-icon; it shouldnt be a sword, should be bow
 
