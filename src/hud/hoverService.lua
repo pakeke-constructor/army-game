@@ -67,9 +67,9 @@ function hoverService.draw()
     local col1, col2 = p.col1, p.col2
     local box = ui.Box({maxWidth = MAX_WIDTH, padding = 10, spacing = 4}, function(bx, by, bw, bh)
         love.graphics.setColor(1, 1, 1)
-        helper.gradientRect("vertical", col1, col2, bx, by, bw, bh)
+        -- helper.gradientRect("vertical", col1, col2, bx, by, bw, bh)
         love.graphics.setColor(BORDER_COL:getRGBA())
-        ui.drawPanel(bx, by, bw, bh)
+        ui.drawDarkPanel(bx, by, bw, bh)
     end)
 
     local fonts = {

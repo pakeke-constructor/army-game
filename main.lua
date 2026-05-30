@@ -200,10 +200,11 @@ function love.draw()
     devcmd.draw()
     if consts.DEV_MODE then
         local _, sceneName = sceneManager.getCurrentScene()
+        local fps = love.timer.getFPS()
         love.graphics.setColor(1, 1, 1, 0.5)
         love.graphics.push()
         love.graphics.scale(2)
-        love.graphics.printf(sceneName or "", 0, 2, love.graphics.getWidth() / 2 - 4, "right")
+        love.graphics.printf((sceneName or "") .. "  FPS: " .. fps, 0, 2, love.graphics.getWidth() / 2 - 4, "right")
         love.graphics.pop()
         love.graphics.setColor(1, 1, 1, 1)
     end

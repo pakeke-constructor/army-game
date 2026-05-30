@@ -5,10 +5,31 @@ local Class = require("src.modules.objects.Class")
 local SHOP_TXT = loc("Shop: Spend money, upgrade squads")
 
 local BATTLE_TXTS = {
-    -- number = demonEncounter difficulty
-    [0] = loc("Battle: Demon Scouts (I)"),
-    [1] = loc("Battle: Demon Squad (II)"),
-    [2] = loc("Battle: Demon Army (III)"),
+    -- demonEncounter difficulty => pool of flavor names
+    [0] = {
+        loc("Battle: Demon Scouts (I)"),
+        loc("Battle: Demon Stragglers (I)"),
+        loc("Battle: Demon Whelps (I)"),
+        loc("Battle: Imp Rabble (I)"),
+        loc("Battle: Hellspawn Scouts (I)"),
+        loc("Battle: Cursed Vagrants (I)"),
+    },
+    [1] = {
+        loc("Battle: Demon Squad (II)"),
+        loc("Battle: Demon Warband (II)"),
+        loc("Battle: Infernal Patrol (II)"),
+        loc("Battle: Brimstone Raiders (II)"),
+        loc("Battle: Hellhound Pack (II)"),
+        loc("Battle: Demon Marauders (II)"),
+    },
+    [2] = {
+        loc("Battle: Demon Army (III)"),
+        loc("Battle: Demon Legion (III)"),
+        loc("Battle: Infernal Host (III)"),
+        loc("Battle: Hellfire Horde (III)"),
+        loc("Battle: Abyssal Vanguard (III)"),
+        loc("Battle: Doom Battalion (III)"),
+    },
 }
 
 local EVENT_TXT = loc("Random event!")
@@ -161,7 +182,8 @@ function BattleNode:enter()
 end
 
 function BattleNode:getHoverDescription()
-    return BATTLE_TXTS[self.demonEncounter] or BATTLE_TXTS[0]
+    local pool = BATTLE_TXTS[self.demonEncounter] or BATTLE_TXTS[0]
+    return pool[hash(self.id) % #pool + 1]
 end
 
 function BattleNode:drawBelow(wx, wy)
