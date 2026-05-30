@@ -78,7 +78,8 @@ function hoverService.draw()
     local x = p.mx + OFFSET_X
     local y = p.my + OFFSET_Y
     if x + totalW > sw then x = p.mx - totalW - OFFSET_X end
-    if y + totalH > sh then y = sh - totalH end
+    -- flip tooltip above mouse if it would clip the bottom (so cursor doesn't cover it)
+    if y + totalH > sh then y = p.my - totalH - OFFSET_Y end
     if x < 0 then x = 0 end
     if y < 0 then y = 0 end
 

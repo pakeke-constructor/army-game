@@ -251,6 +251,11 @@ local function killAllEnemies(self)
 end
 
 function battle_scene:keypressed(k)
+    local n = tonumber(k)
+    if n and n >= 1 and n <= 9 then
+        self.hud:selectVisibleSlot(n)
+    end
+
     if consts.DEV_MODE then
         if k == "k" then
             killAllEnemies(self)

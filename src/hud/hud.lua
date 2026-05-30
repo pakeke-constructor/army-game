@@ -474,6 +474,21 @@ function HUD:getSelection()
     return g.getSortedArmyList()[idx]
 end
 
+---@param visibleIndex integer 1..9, position among non-deployed squads as shown in HUD
+function HUD:selectVisibleSlot(visibleIndex)
+    local army = g.getSortedArmyList()
+    local seen = 0
+    for i, sq in ipairs(army) do
+        if not sq.deployed then
+            seen = seen + 1
+            if seen == visibleIndex then
+                self.selectedSlot = i
+                return
+            end
+        end
+    end
+end
+
 function HUD:wheelmoved(dx, dy)
     local dir = dy > 0 and 1 or -1
     local total = #g.getSortedArmyList()
