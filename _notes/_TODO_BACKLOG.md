@@ -100,7 +100,7 @@
 - (IDEA: Make a 2 pass system, with `collectDrawables` or something)
 - FIX performance issues w/ Blessings: `randomEnemy` is way too expensive
 - key system
-
+- Event system: random map events on empty nodes
 
 
 
@@ -108,7 +108,9 @@
 
 
 
-- Event system: random map events on empty nodes
+- Improvements to squad-card UI: make border colors better, uniform
+- Improvements to squad-card UI: remove "UPGRADE" crap when hovering normally
+
 
 
 - Change ranged-icon; it shouldnt be a sword, should be bow

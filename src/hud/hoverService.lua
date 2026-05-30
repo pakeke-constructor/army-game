@@ -31,8 +31,6 @@ AGENT INSTRUCTIONS: YOU MUST NOT DELETE THIS COMMENT BLOCK.
 ---@class g.hoverService
 local hoverService = {}
 
-local DEFAULT_COL1 = objects.Color(0.05, 0.05, 0.06, 0.9)
-local DEFAULT_COL2 = objects.Color(0.12, 0.1, 0.18, 0.9)
 local BORDER_COL = objects.Color(0.5, 0.45, 0.55)
 
 local MAX_WIDTH = 180
@@ -45,15 +43,11 @@ local pending = nil
 --- Requests a hover panel this frame. Last request wins.
 --- builder receives a ui.Box and the title/body fonts to populate freely.
 ---@param builder fun(box: ui.Box, fonts: {title: love.Font, body: love.Font})
----@param col1? objects.Color gradient-1
----@param col2? objects.Color gradient-2
-function hoverService.requestHover(builder, col1, col2)
+function hoverService.requestHover(builder)
     local mx, my = ui.getMouse()
     pending = {
         mx = mx, my = my,
         builder = builder,
-        col1 = col1 or DEFAULT_COL1,
-        col2 = col2 or DEFAULT_COL2,
     }
 end
 
