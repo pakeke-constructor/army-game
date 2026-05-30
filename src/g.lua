@@ -1829,7 +1829,8 @@ function g.drawEntity(ent, x, y)
     end
     local bodyRot = getBodyRot(ent)
     if ent.image then
-        lg.setColor(ent.color or objects.Color.WHITE)
+        local col = ent.color or objects.Color.WHITE
+        lg.setColor(col[1], col[2], col[3], col[4] * (ent.alpha or 1))
         local rot = (ent.rot or 0) + bodyRot + (ent.damageJolt or 0)
         g.drawImageOffset(ent.image, x + (ent.ox or 0), y + (ent.oy or 0), rot, sx, sy, 0.5, 0.95, ent.kx, ent.ky)
 

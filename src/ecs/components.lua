@@ -113,12 +113,14 @@ local shadow = {
 ---@field public fear ecs.components.Fear?
 ---@field public team ("ally"|"enemy")?
 ---@field public color objects.Color?
+---@field public alpha number? transparency
 ---@field public x number?
 ---@field public y number?
 ---@field public z number?
 ---@field public vx number?
 ---@field public vy number?
 ---@field public vz number?
+---@field public oyOverride number? oy (offsetY) defaults to 0.95, which is 95% of image, but you can override this here.
 ---@field public drawOrder number?
 ---@field public scale number?
 ---@field public health number?
