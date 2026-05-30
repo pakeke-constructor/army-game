@@ -13,6 +13,7 @@ local PLAYER_RADIUS = 5
 local PAN_SPEED = 200
 local HOVER_DIST_FRAC = 0.4 -- fraction of distanceBetweenNodes
 local COMMANDER_SPEED = 80 -- world pixels per second
+local CULL_PAD = 100
 
 local PATH_SEARCH_DEPTH = 3
 local FOG_CLEAR_RADIUS = 120
@@ -25,6 +26,11 @@ local map_scene = {}
 function map_scene:init()
 end
 
+local function isPointVisible(x, y, view, pad)
+    pad = pad or 0
+    return x >= view.x - pad and x <= view.x + view.w + pad and y >= view.y - pad and y <= view.y + view.h + pad
+end
+
 ---@param graph MapGraph
 local function renderEdge(graph, a, b, rr, gg, bb, aa, width)
     local lg = love.graphics
@@ -33,6 +39,17 @@ local function renderEdge(graph, a, b, rr, gg, bb, aa, width)
     lg.setColor(rr, gg, bb, aa or 1)
     lg.setLineWidth(width or 4)
     lg.line(ax, ay, bx, by)
+end
+
+local function isEdgeVisible(graph, a, b, view, pad)
+    local ax, ay = graph:getDrawPos(a)
+    local bx, by = graph:getDrawPos(b)
+    pad = pad or 0
+    local minX = math.min(ax, bx) - pad
+    local maxX = math.max(ax, bx) + pad
+    local minY = math.min(ay, by) - pad
+    local maxY = math.max(ay, by) + pad
+    return maxX >= view.x and minX <= view.x + view.w and maxY >= view.y and minY <= view.y + view.h
 end
 
 local function renderNodeAt(node, nx, ny, r, g, b, a, radius)
@@ -357,28 +374,46 @@ function map_scene:draw()
     local run = g.getRun()
     local graph = run.mapGraph
     if graph then
+        local sw, sh = love.graphics.getDimensions()
+        local x1, y1 = self.camera:toWorld(0, 0)
+        local x2, y2 = self.camera:toWorld(sw, sh)
+        local view = {
+            x = math.min(x1, x2),
+            y = math.min(y1, y2),
+            w = math.abs(x2 - x1),
+            h = math.abs(y2 - y1),
+        }
+
         -- drawGround (TODO)
 
         -- edges
         graph:forEachEdge(function(a, b)
-            renderEdge(graph, a, b, g.COLORS.MAP_EDGE:getRGBA())
+            if isEdgeVisible(graph, a, b, view, CULL_PAD) then
+                renderEdge(graph, a, b, g.COLORS.MAP_EDGE:getRGBA())
+            end
         end)
 
         -- ground ellipses
         for _, n in ipairs(self.nodeList) do
-            n.node:drawBelow(n.x, n.y)
+            if isPointVisible(n.x, n.y, view, CULL_PAD) then
+                n.node:drawBelow(n.x, n.y)
+            end
         end
 
         -- decor + node images, sorted by y
         local builder = DecorBuilder()
         for _, d in ipairs(self.decorList) do
-            local dtype = decor_types.get(d.decorType)
-            if dtype and dtype.image then
-                builder:addImage(dtype.image, d.x, d.y, 0, nil, dtype.opacity)
+            if isPointVisible(d.x, d.y, view, CULL_PAD) then
+                local dtype = decor_types.get(d.decorType)
+                if dtype and dtype.image then
+                    builder:addImage(dtype.image, d.x, d.y, 0, nil, dtype.opacity)
+                end
             end
         end
         for _, n in ipairs(self.nodeList) do
-            n.node:buildDecor(builder, n.x, n.y)
+            if isPointVisible(n.x, n.y, view, CULL_PAD) then
+                n.node:buildDecor(builder, n.x, n.y)
+            end
         end
 
         -- hover highlight: path from player to hovered node
@@ -412,25 +447,22 @@ function map_scene:draw()
         end
 
         builder:finalize()
-    end
 
-    -- fog
-    local sw, sh = love.graphics.getDimensions()
-    local x1, y1 = self.camera:toWorld(0, 0)
-    local x2, y2 = self.camera:toWorld(sw, sh)
-    local fogRegion = {
-        x = math.min(x1, x2),
-        y = math.min(y1, y2),
-        w = math.abs(x2 - x1),
-        h = math.abs(y2 - y1),
-    }
-    local step = 24
-    local clearCells = self:_buildFogClearCells()
-    fogService.renderFog(fogRegion, function(x, y)
-        local cx = math.floor(x / step)
-        local row = clearCells[cx]
-        return not (row and row[math.floor(y / step)])
-    end)
+        -- fog
+        local fogRegion = {
+            x = view.x,
+            y = view.y,
+            w = view.w,
+            h = view.h,
+        }
+        local step = 24
+        local clearCells = self:_buildFogClearCells()
+        fogService.renderFog(fogRegion, function(x, y)
+            local cx = math.floor(x / step)
+            local row = clearCells[cx]
+            return not (row and row[math.floor(y / step)])
+        end)
+    end
 
     lg.setColor(1, 1, 1, 1)
     iml.popTransform()

@@ -49,10 +49,42 @@ local function nodeKey(x, y)
     return x .. "," .. y
 end
 
-local function edgeKey(ax, ay, bx, by)
-    local ka, kb = nodeKey(ax, ay), nodeKey(bx, by)
+local function edgeKeyFromKeys(ka, kb)
     if ka > kb then ka, kb = kb, ka end
     return ka .. ">" .. kb
+end
+
+local function edgeKey(ax, ay, bx, by)
+    return edgeKeyFromKeys(nodeKey(ax, ay), nodeKey(bx, by))
+end
+
+local function linkAdj(self, ka, kb)
+    local a = self.adj[ka]
+    if not a then
+        a = {}
+        self.adj[ka] = a
+    end
+    local b = self.adj[kb]
+    if not b then
+        b = {}
+        self.adj[kb] = b
+    end
+    a[kb] = true
+    b[ka] = true
+end
+
+local function unlinkAdj(self, ka, kb)
+    local a = self.adj[ka]
+    if a then a[kb] = nil end
+    local b = self.adj[kb]
+    if b then b[ka] = nil end
+end
+
+local function removeEdgeByKeys(self, ka, kb)
+    local ek = edgeKeyFromKeys(ka, kb)
+    if not self.edges[ek] then return end
+    self.edges[ek] = nil
+    unlinkAdj(self, ka, kb)
 end
 
 
@@ -61,6 +93,7 @@ function MapGraph:init(width, height)
     self.height = height
     self.nodes = {}
     self.edges = {}
+    self.adj = {}
     self.decor = {}
     self.playerPosition = nil -- node key string, e.g. "2,0"
 end
@@ -106,12 +139,15 @@ function MapGraph:removeNode(x, y)
     local key = nodeKey(x, y)
     if not self.nodes[key] then return end
     self.nodes[key] = nil
-    -- remove all edges touching this node
-    for ek in pairs(self.edges) do
-        local ka, kb = ek:match("^(.-)>(.+)$")
-        if ka == key or kb == key then
-            self.edges[ek] = nil
+
+    local nbs = self.adj[key]
+    if nbs then
+        for nk in pairs(nbs) do
+            self.edges[edgeKeyFromKeys(key, nk)] = nil
+            local back = self.adj[nk]
+            if back then back[key] = nil end
         end
+        self.adj[key] = nil
     end
 end
 
@@ -142,12 +178,16 @@ function MapGraph:getPlayerNode()
 end
 
 function MapGraph:addEdge(ax, ay, bx, by)
-    if not self:hasNode(ax, ay) or not self:hasNode(bx, by) then return end
-    self.edges[edgeKey(ax, ay, bx, by)] = true
+    local ka, kb = nodeKey(ax, ay), nodeKey(bx, by)
+    if not self.nodes[ka] or not self.nodes[kb] then return end
+    local ek = edgeKeyFromKeys(ka, kb)
+    if self.edges[ek] then return end
+    self.edges[ek] = true
+    linkAdj(self, ka, kb)
 end
 
 function MapGraph:removeEdge(ax, ay, bx, by)
-    self.edges[edgeKey(ax, ay, bx, by)] = nil
+    removeEdgeByKeys(self, nodeKey(ax, ay), nodeKey(bx, by))
 end
 
 function MapGraph:hasEdge(ax, ay, bx, by)
@@ -161,17 +201,12 @@ end
 function MapGraph:getNeighbors(x, y)
     local result = {}
     local key = nodeKey(x, y)
-    for ek in pairs(self.edges) do
-        local ka, kb = ek:match("^(.-)>(.+)$")
-        local other
-        if ka == key then other = kb
-        elseif kb == key then other = ka
-        end
-        if other then
-            local node = self.nodes[other]
-            if node then
-                result[#result + 1] = node
-            end
+    local nbs = self.adj[key]
+    if not nbs then return result end
+    for nk in pairs(nbs) do
+        local node = self.nodes[nk]
+        if node then
+            result[#result + 1] = node
         end
     end
     return result
@@ -256,7 +291,8 @@ function MapGraph.generate(args, rng)
     end
     for _, ek in ipairs(edgeList) do
         if rng() < edgePrune then
-            self.edges[ek] = nil
+            local ka, kb = ek:match("^(.-)>(.+)$")
+            removeEdgeByKeys(self, ka, kb)
         end
     end
 
@@ -288,7 +324,7 @@ function MapGraph.generate(args, rng)
                 local dot = (dx1*dx2 + dy1*dy2) / (len1 * len2)
                 if dot > DOT_THRESHOLD then
                     local v = len1 > len2 and nbs[i] or nbs[j]
-                    self.edges[edgeKey(node.x, node.y, v.x, v.y)] = nil
+                    removeEdgeByKeys(self, nodeKey(node.x, node.y), nodeKey(v.x, v.y))
                 end
             end
         end
@@ -628,6 +664,8 @@ function MapGraph.deserialize(data)
     end
     for _, ek in ipairs(data.edges) do
         self.edges[ek] = true
+        local ka, kb = ek:match("^(.-)>(.+)$")
+        linkAdj(self, ka, kb)
     end
     self.playerPosition = data.playerPosition
     self.distanceBetweenNodes = data.distanceBetweenNodes
