@@ -123,6 +123,10 @@ function juice_system.entityDeath(ent, killer)
         local ang = (i / 5) * consts.TAU + love.math.random() * 0.3
         spawnSpark(store, ent.x + math.cos(ang) * 6, ent.y + math.sin(ang) * 6 - 6)
     end
+    -- flying corpse
+    if ent.image and not ent.isPest then
+        g.spawnEntity("body", ent.x, ent.y, ent)
+    end
 end
 
 function juice_system.explosion(x, y, damage, radius)

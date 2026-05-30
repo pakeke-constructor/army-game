@@ -111,6 +111,7 @@
 - Improvements to squad-card UI: make border colors better, uniform
 - Improvements to squad-card UI: remove "UPGRADE" crap when hovering normally
 
+- Maybe when enemies die, leave a subtle gravestone sprite
 
 - VIBE-COD: make it so enemies get yeeted offscreen on death
 
