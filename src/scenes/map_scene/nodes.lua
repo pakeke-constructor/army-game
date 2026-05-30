@@ -96,12 +96,19 @@ local function addDemons(node, builder, x, y)
             local angle = baseAngle + (i - 1) * (math.pi * 2 / count)
             local angleOff = (hashf(node.id, i) - 0.5) * 0.4
             local radiusMul = 0.85 + hashf(node.id, i, 1) * 0.3
-            if count == 2 then
+            if count == 1 then
+                radiusMul = radiusMul * 0.3
+            elseif count == 2 then
                 radiusMul = radiusMul * 0.6
             end
             local r = 20 * radiusMul
             local a = angle + angleOff
             builder:addImage("node_combat_demon", x + math.cos(a) * r, y + math.sin(a) * r)
+        end
+
+        if node.demonEncounter >= 2 then
+            -- its a "boss" encounter, add a flag.
+            builder:addImage("node_combat_flag", x-14, y-2, 0, 1)
         end
     end
 end
@@ -131,15 +138,7 @@ end
 
 function BattleNode:buildDecor(builder, wx, wy)
     if not self.visited then
-        if self.demonEncounter >= 1 then
-            if self.demonEncounter >= 2 then
-                -- its a "boss" encounter, add a flag.
-                builder:addImage("node_combat_flag", wx-14, wy-2, 0, 1)
-            end
-            addDemons(self, builder, wx, wy)
-        else
-            builder:addImage("node_combat_demon", wx, wy)
-        end
+        addDemons(self, builder, wx, wy)
     end
 end
 
