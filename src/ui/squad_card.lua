@@ -71,10 +71,9 @@ local function drawSquadCard(squadId, region, index)
     local existingSquad = g.getSquadFromArmy(squadId)
     local def = g.getEntityDef(info.entityId)
     local isHealer = def.baseHealPower
-    local rarity = info.rarity or g.RARITIES.COMMON
-    local darkCol = rarity.darkColor
-    local liteCol = rarity.lightColor
-    local col = rarity.color
+    local col = g.getManaBundleColor(info.cost)
+    local darkCol = col:lerp(objects.Color.BLACK, 0.55)
+    local liteCol = col:lerp(objects.Color.WHITE, 0.35)
     local bgCol1 = objects.Color(0.05, 0.05, 0.06, 0.7)
 
     local x, y, w, h = region:get()

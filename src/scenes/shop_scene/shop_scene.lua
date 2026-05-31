@@ -176,6 +176,7 @@ local function drawSquadBox(r, squadId, cost)
     local font = g.getSmallFont(16)
     local rar = sinfo.rarity
     local bg = RAR_MAP[rar]
+    local squadCol = g.getManaBundleColor(sinfo.cost)
     local canAfford = g.getRun().money >= cost
 
     local isHovered = iml.isHovered(r:get())
@@ -188,8 +189,8 @@ local function drawSquadBox(r, squadId, cost)
     if canAfford and squad then
         -- if player can upgrade their squad:
         -- Then draw a fancy background animation behind the card.
-        helper.drawEdgeTrailAnimation(r, rar.color, 0)
-        helper.drawEdgeTrailAnimation(r, rar.color, 0.5)
+        helper.drawEdgeTrailAnimation(r, squadCol, 0)
+        helper.drawEdgeTrailAnimation(r, squadCol, 0.5)
     end
 
     -- draw background:
@@ -202,7 +203,7 @@ local function drawSquadBox(r, squadId, cost)
 
     do
     local x,y,w,h = r:get()
-    helper.gradientRectStencil("vertical", rar.color,rar.lightColor, x,y,w,h, function ()
+    helper.gradientRectStencil("vertical", squadCol:lerp(objects.Color.BLACK, 0.2), squadCol:lerp(objects.Color.WHITE, 0.3), x,y,w,h, function ()
         ui.drawPanelThin(r:get())
     end)
     end
@@ -226,7 +227,6 @@ local function drawSquadBox(r, squadId, cost)
 
     -- unit name
     local txt = "{o}" .. sinfo.name
-    local squadCol = g.getManaBundleColor(sinfo.cost)
     local pop = gsman.mulColor(squadCol)
     richtext.printRichContainedNoWrap(txt, font, name:get())
     pop:pop()

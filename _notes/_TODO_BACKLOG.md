@@ -110,7 +110,7 @@
 
 
 
-- Improvements to squad-card UI: make border colors better, uniform
+- Improvements to squad-card UI: make border colors better, the color of the mana, NOT the color of rarity
 - Improvements to squad-card UI: remove "UPGRADE" crap when hovering normally
 
 
