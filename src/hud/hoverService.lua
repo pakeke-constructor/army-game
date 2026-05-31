@@ -64,6 +64,7 @@ function hoverService.draw()
         -- helper.gradientRect("vertical", col1, col2, bx, by, bw, bh)
         love.graphics.setColor(BORDER_COL:getRGBA())
         ui.drawDarkPanel(bx, by, bw, bh)
+        love.graphics.setColor(0.9, 0.9, 0.95)
     end)
 
     local fonts = {
