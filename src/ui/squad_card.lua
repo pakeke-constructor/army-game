@@ -17,19 +17,17 @@ local PERK_DESC_FONT = nil
 
 ---@param region kirigami.Region
 ---@param perk g.PerkInfo?
----@param col objects.Color
-local function drawPerkSlot(region, perk, col)
+---@param accentColor objects.Color
+local function drawPerkSlot(region, perk, accentColor)
     if not perk then return end
 
     local x, y, w, h = region:get()
-    local rr, gg, bb, aa = 0,0,0,1
-    love.graphics.setColor(rr,gg,bb,aa * 0.7)
 
     PERK_DESC_FONT = PERK_DESC_FONT or g.getSmallFont(16)
 
     ui.drawSingleColorPanel(x, y, w, h)
     lg.setColor(1,1,1)
-    local txt = "{" .. perk.image .. "} {o}" .. helper.wrapRichtextColor(col, perk.name) .. "{/o}"
+    local txt = "{" .. perk.image .. "} {o}" .. helper.wrapRichtextColor(accentColor, perk.name) .. "{/o}"
     local desc = "{c r=0.85 g=0.85 b=0.9}" .. perk.description
     richtext.printRichContained(txt .. "\n" .. desc, PERK_DESC_FONT, region:padUnit(6):get())
 end
@@ -54,7 +52,7 @@ local UPGRADE_UNITS = interp("+%{n} Units", {
     context = "An upgrade where the units in a squad increases. e.g. More soldiers; `+5 units`."
 })
 
-local UPGRADE_COL = "{UPGRADE_COLOR}"
+local UPGRADE_COLOR_TAG = "{UPGRADE_COLOR}"
 
 
 ---Draw a single squad card in a kirigami region. Returns true if clicked.
@@ -71,10 +69,11 @@ local function drawSquadCard(squadId, region, index)
     local existingSquad = g.getSquadFromArmy(squadId)
     local def = g.getEntityDef(info.entityId)
     local isHealer = def.baseHealPower
-    local col = g.getManaBundleColor(info.cost)
-    local darkCol = col:lerp(objects.Color.BLACK, 0.55)
-    local liteCol = col:lerp(objects.Color.WHITE, 0.35)
-    local bgCol1 = objects.Color(0.05, 0.05, 0.06, 0.7)
+    local manaColor = g.getManaBundleColor(info.cost)
+    local frameDarkColor = manaColor:lerp(objects.Color.BLACK, 0.65)
+    local panelBottomColor = manaColor:lerp(objects.Color.BLACK, 0.65)
+    local frameLightColor = manaColor:lerp(objects.Color.WHITE, 0.25)
+    local panelTopColor = objects.Color(0.05, 0.05, 0.06, 0.7)
 
     local x, y, w, h = region:get()
     local uid = squadId .. "_" .. index
@@ -82,7 +81,7 @@ local function drawSquadCard(squadId, region, index)
 
     local isHovered = iml.isHovered(x,y,w,h, uid)
     if isHovered then
-        darkCol = darkCol:lerp(col, 0.25)
+        frameDarkColor = frameDarkColor:lerp(manaColor, 0.10)
     end
 
     STAT_FONT = STAT_FONT or g.getSmallFont(16)
@@ -90,15 +89,15 @@ local function drawSquadCard(squadId, region, index)
 
     local box = ui.Box({maxWidth = w, maxHeight = h, padding = 12, spacing = 8}, function(bx, by, bw, bh)
         if existingSquad then
-            helper.drawEdgeTrailAnimation(region, col, 0.25, 20)
-            helper.drawEdgeTrailAnimation(region, col, 0.75, 20)
+            helper.drawEdgeTrailAnimation(region, manaColor, 0.25, 20)
+            helper.drawEdgeTrailAnimation(region, manaColor, 0.75, 20)
         end
         love.graphics.setColor(0,0,0)
         ui.drawPanel(x-3,y-3, w+6,h+6)
         love.graphics.setColor(1,1,1)
-        helper.gradientRect("vertical", bgCol1, darkCol, x,y,w,h)
+        helper.gradientRect("vertical", panelTopColor, frameDarkColor, x,y,w,h)
         ui.drawPanel(x,y,w,h)
-        helper.gradientRectStencil("vertical", liteCol, col, x,y,w,h, function()
+        helper.gradientRectStencil("vertical", frameLightColor, manaColor, x,y,w,h, function()
             ui.drawPanel(x,y,w,h)
         end)
     end)
@@ -137,7 +136,7 @@ local function drawSquadCard(squadId, region, index)
             local count = g.getSquadUnitCount(squadId)
             local padX = count < 3 and 24 or 10
             local cells = Kirigami(ex + padX, ey, ew - padX * 2, eh):grid(count, 1)
-            local r,gg,b,a = darkCol:getRGBA()
+            local r,gg,b,a = panelBottomColor:getRGBA()
             love.graphics.setColor(r, gg, b, a * 0.6)
             ui.drawSingleColorPanel(ex, ey, ew, eh)
             love.graphics.setColor(1, 1, 1, 0.85)
@@ -187,14 +186,14 @@ local function drawSquadCard(squadId, region, index)
                 local cw = cellW - 2
                 local ch = statCellH - 2
 
-                local value, icon, color, name, desc
+                local value, icon, statColor, name, desc
                 local statId = sortedStats[i]
                 local isDPS = statId == "DPS"
                 if isDPS then
                     -- its special! computed
                     value = def.baseAttackSpeed * (def.baseHealPower or def.baseAttackDamage)
                     icon = isHealer and "healpower" or "damage"
-                    color = isHealer and g.COLORS.HEAL or g.COLORS.DAMAGE
+                    statColor = isHealer and g.COLORS.HEAL or g.COLORS.DAMAGE
                     name = isHealer and HPS_NAME or DPS_NAME
                     desc = (isHealer and HPS_DESC or DPS_DESC)({
                         attackSpeed = def.baseAttackSpeed,
@@ -205,7 +204,7 @@ local function drawSquadCard(squadId, region, index)
                     local stat = g.getStatInfo(statId)
                     value = def and def[stat.baseName] or 0
                     icon = stat.icon
-                    color = stat.color
+                    statColor = stat.color
                     name = stat.displayName
                     desc = stat.description
                 end
@@ -223,14 +222,14 @@ local function drawSquadCard(squadId, region, index)
                     alpha = alpha * 0.75
                 end
                 do
-                local r,g,b,a = darkCol:getRGBA()
+                local r,g,b,a = panelBottomColor:getRGBA()
                 love.graphics.setColor(r,g,b,a*alpha)
                 ui.drawSingleColorPanel(cx, cy, cw, ch)
                 end
                 if isStatHovered then
                     -- print information about the stat
                     hoverService.requestHover(function (boxx, fonts)
-                        local rr,gg,bb = color.r, color.g, color.b
+                        local rr,gg,bb = statColor.r, statColor.g, statColor.b
                         boxx:addText(string.format("{c r=%.3f g=%.3f b=%.3f}%s", rr, gg, bb, name), fonts.title)
                         boxx:addText(desc, fonts.body)
                     end)
@@ -245,7 +244,7 @@ local function drawSquadCard(squadId, region, index)
                 -- text
                 do
                 love.graphics.setFont(STAT_FONT)
-                local r,g,b,a = color:getRGBA()
+                local r,g,b,a = statColor:getRGBA()
                 love.graphics.setColor(r,g,b,a*alpha)
                 local textX = cx + ch
                 richtext.printRich(tostring(value), STAT_FONT, textX, cy + ch / 2 - STAT_FONT:getHeight() / 2, cw - ch, "left")
@@ -263,18 +262,18 @@ local function drawSquadCard(squadId, region, index)
             if #perks == 1 then
                 local perkInfo = perks[1] and g.getPerkInfo(perks[1])
                 local _,reg1,_ = reg:splitVertical(1,3,1)
-                drawPerkSlot(reg1, perkInfo, col)
+                drawPerkSlot(reg1, perkInfo, manaColor)
             elseif #perks == 2 then
                 local reg1, reg2 = reg:splitHorizontal(1,1)
                 local perkInfo1 = perks[1] and g.getPerkInfo(perks[1])
                 local perkInfo2 = perks[2] and g.getPerkInfo(perks[2])
-                drawPerkSlot(reg1:padUnit(4), perkInfo1, col)
-                drawPerkSlot(reg2:padUnit(4), perkInfo2, col)
+                drawPerkSlot(reg1:padUnit(4), perkInfo1, manaColor)
+                drawPerkSlot(reg2:padUnit(4), perkInfo2, manaColor)
             else
                 local perkRegs = {reg:splitVertical(1, 1, 1)}
                 for i = 1, 3 do
                     local perkInfo = perks[i] and g.getPerkInfo(perks[i]) or nil
-                    drawPerkSlot(perkRegs[i]:padUnit(2, 2), perkInfo, col)
+                    drawPerkSlot(perkRegs[i]:padUnit(2, 2), perkInfo, manaColor)
                 end
             end
         end,
@@ -303,7 +302,7 @@ local function drawSquadCard(squadId, region, index)
         -- its an upgrade
         local r1, _ = region:splitVertical(1,8)
         local titleFont = g.getBigFont(16)
-        richtext.printRichContainedNoWrap("{wavy amp=0.3}{o}" ..UPGRADE_COL.. UPGRADE, titleFont, r1:moveRatio(0,-0.7):padRatio(0.3):get())
+        richtext.printRichContainedNoWrap("{wavy amp=0.3}{o}" .. UPGRADE_COLOR_TAG .. UPGRADE, titleFont, r1:moveRatio(0,-0.7):padRatio(0.3):get())
 
         local buf = {}
         for statId, _ in pairs(info.statUpgradeScaling) do
@@ -322,12 +321,12 @@ local function drawSquadCard(squadId, region, index)
             local title, txtReg = boxReg:splitVertical(2,3)
 
             love.graphics.setColor(1,1,1)
-            helper.drawEdgeTrailAnimation(boxReg, col, 0)
-            helper.drawEdgeTrailAnimation(boxReg, col, 0.5)
+            helper.drawEdgeTrailAnimation(boxReg, manaColor, 0)
+            helper.drawEdgeTrailAnimation(boxReg, manaColor, 0.5)
             lg.setColor(1,1,1)
             ui.drawDarkPanel(boxReg:get())
             local font = g.getSmallFont(16)
-            richtext.printRichContainedNoWrap("{wavy amp=0.5}"..UPGRADE_COL..UPGRADE, font, title:padUnit(2,2):get())
+            richtext.printRichContainedNoWrap("{wavy amp=0.5}" .. UPGRADE_COLOR_TAG .. UPGRADE, font, title:padUnit(2,2):get())
             richtext.printRichContainedNoWrap(str, font, txtReg:padUnit(4,4):get())
         end
     end
