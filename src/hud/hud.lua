@@ -449,6 +449,15 @@ end
 
 
 
+--- Returns the largest centered square in the area the HUD doesn't cover.
+---@return kirigami.Region
+function HUD:getFreeArea()
+    local barHeight = SQUAD_ICON_SIZE + 30
+    local _, mainBar = ui.getScreenRegion():splitVertical(0.1, 0.9)
+    local middle = mainBar:splitVerticalExact(0, barHeight)
+    return middle
+end
+
 ---@param opt g.hudArgs
 function HUD:drawUI(opt)
     drawTopBar()

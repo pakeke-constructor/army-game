@@ -335,22 +335,22 @@ end
 
 
 ---@param self g.ShopScene
-local function drawShopUI(self)
+local function drawShopUI(self, freeArea)
     local w,h = ui.getScaledUIDimensions()
     local shopBg = "shop_background"
     local iw,ih = g.getImageSize(shopBg)
 
     -- draw shop bg
-    g.drawImage(shopBg, w/2,h/2)
+    g.drawImageContained(shopBg, freeArea:get())
 
     local shopRegion
     do
-    local shopX,shopY = (w-iw)/2, (h-ih)/2
-    local topPad = 40
-    shopRegion = Kirigami(shopX,shopY+topPad,iw,ih-topPad)
+    local _
+    _,shopRegion,_ = freeArea:splitHorizontal(1,5,1)-- Kirigami(shopX,shopY+topPad,iw,ih-topPad)
     end
     -- local r1 = 
     --g.drawImageContained(shopBg, shopRegion:get())
+    dbg(shopRegion)
 
     local leftR,rightR = shopRegion:splitHorizontal(2,1)
 
@@ -388,6 +388,7 @@ local function drawShopUI(self)
     dbg(blessReg:padRatio(0.1))
 
     local rerollR, unitR = leftR:padRatio(0,-0.2,0,0):splitVertical(1,7)
+    rerollR = rerollR:moveRatio(0, 0.5)
 
     -- draw squad purchase
     local hoveredSquadId = nil
@@ -445,7 +446,8 @@ function shop_scene:draw()
     love.graphics.clear(0.1, 0.1, 0.1, 1)
 
     ui.startUI()
-    drawShopUI(self)
+    local freeArea = self.hud:getFreeArea()
+    drawShopUI(self, freeArea)
     self.hud:drawUI({ shopScene = true })
     ui.endUI()
 end

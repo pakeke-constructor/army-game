@@ -105,16 +105,25 @@
 - Improvements to squad-card UI: make border colors better, the color of the mana, NOT the color of rarity
 - Improvements to squad-card UI: remove "UPGRADE" crap when hovering normally
 - fix health-increase overflow (cap it)
-
+- fix max hp increase upgrades
 
 
 
 ### OK:: what do we need for a minimum-playable game?
 
 
-- fix shop
+- fix shop UI
 
-- fix max hp increase upgrades
+
+- add juice for healing
+- add juice for buffs
+
+
+- Add popup-numbers for buffs/healing/etc.
+
+
+- Give healing-ents projectiles
+
 
 
 - Change ranged-icon; it shouldnt be a sword, should be bow
