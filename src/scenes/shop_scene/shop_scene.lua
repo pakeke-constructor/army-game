@@ -435,7 +435,7 @@ local function drawShopUI(self)
         local rrr = creg:padRatio(0.1)
         lg.setColor(1,1,1)
         ui.drawDarkPanel(rrr:get())
-        ui.drawSquadCard(hoveredSquadId, rrr, 1)
+        ui.drawSquadCard(hoveredSquadId, rrr, 1, true)
     end
 end
 

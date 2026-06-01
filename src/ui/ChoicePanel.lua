@@ -147,7 +147,7 @@ function ChoicePanel:draw()
     if self.rType == "squad" then
         for i = 1, #regions do
             local squadId = self.choices[i]
-            local clicked = ui.drawSquadCard(squadId, regions[i], i)
+            local clicked = ui.drawSquadCard(squadId, regions[i], i, true)
             if clicked then
                 g.addOrUpgradeSquad(squadId)
                 return true

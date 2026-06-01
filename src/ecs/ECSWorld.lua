@@ -156,6 +156,9 @@ function ECSWorld:update(dt)
             end
         end
         if e.health then
+            if e.maxHealth and e.health > e.maxHealth then
+                e.health = e.maxHealth
+            end
             e._timeSinceDamaged = (e._timeSinceDamaged or 0xfffffffff) + dt
             e._timeSinceLostArmor = (e._timeSinceLostArmor or 0xfffffffff) + dt
             if e._damageLagAmount and e._damageLagAmount > 0 then

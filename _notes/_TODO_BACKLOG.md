@@ -102,6 +102,8 @@
 - key system
 - Event system: random map events on empty nodes
 - VIBE-COD: make it so enemies get yeeted offscreen on death
+- Improvements to squad-card UI: make border colors better, the color of the mana, NOT the color of rarity
+- Improvements to squad-card UI: remove "UPGRADE" crap when hovering normally
 
 
 
@@ -109,9 +111,10 @@
 ### OK:: what do we need for a minimum-playable game?
 
 
+- fix shop
 
-- Improvements to squad-card UI: make border colors better, the color of the mana, NOT the color of rarity
-- Improvements to squad-card UI: remove "UPGRADE" crap when hovering normally
+- fix max hp increase upgrades
+- fix health-increase overflow (cap it)
 
 
 - Change ranged-icon; it shouldnt be a sword, should be bow

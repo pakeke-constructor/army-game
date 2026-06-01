@@ -1335,8 +1335,10 @@ function g.spawnEntity(id, x, y, ...)
     if ent.startingArmor then
         g.addArmor(ent, ent.startingArmor)
     end
+    ent.health = ent.maxHealth
     return ent
 end
+
 
 ---@param oldEnt ecs.Entity
 ---@param newEntType string

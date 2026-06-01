@@ -59,14 +59,14 @@ local UPGRADE_COLOR_TAG = "{UPGRADE_COLOR}"
 ---@param squadId string
 ---@param region kirigami.Region
 ---@param index number
+---@param showUpgrade boolean?
 ---@return boolean
 ---@return number
 ---@return number
-local function drawSquadCard(squadId, region, index)
+local function drawSquadCard(squadId, region, index, showUpgrade)
     ui.assertUIStarted()
 
     local info = g.getSquadInfo(squadId)
-    local existingSquad = g.getSquadFromArmy(squadId)
     local def = g.getEntityDef(info.entityId)
     local isHealer = def.baseHealPower
     local manaColor = g.getManaBundleColor(info.cost)
@@ -74,6 +74,7 @@ local function drawSquadCard(squadId, region, index)
     local panelBottomColor = manaColor:lerp(objects.Color.BLACK, 0.65)
     local frameLightColor = manaColor:lerp(objects.Color.WHITE, 0.25)
     local panelTopColor = objects.Color(0.05, 0.05, 0.06, 0.7)
+    local canUpgrade = showUpgrade and g.getSquadFromArmy(squadId)
 
     local x, y, w, h = region:get()
     local uid = squadId .. "_" .. index
@@ -88,7 +89,7 @@ local function drawSquadCard(squadId, region, index)
     TITLE_FONT = TITLE_FONT or g.getBigFont(16)
 
     local box = ui.Box({maxWidth = w, maxHeight = h, padding = 12, spacing = 8}, function(bx, by, bw, bh)
-        if existingSquad then
+        if canUpgrade then
             helper.drawEdgeTrailAnimation(region, manaColor, 0.25, 20)
             helper.drawEdgeTrailAnimation(region, manaColor, 0.75, 20)
         end
@@ -298,7 +299,7 @@ local function drawSquadCard(squadId, region, index)
         g.drawManaCost(cost, x + rw / 2, y + rh, rw/2)
     end
 
-    if existingSquad then
+    if canUpgrade then
         -- its an upgrade
         local r1, _ = region:splitVertical(1,8)
         local titleFont = g.getBigFont(16)
