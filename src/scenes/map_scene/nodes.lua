@@ -209,7 +209,7 @@ nodes.BattleNode = BattleNode
 local FeastNode = nodes.newClass("feast")
 
 function FeastNode:enter()
-    local run = g.getRun()
+    nodeEventService.openFeastPopup(self)
 end
 
 function FeastNode:getHoverDescription()
@@ -231,6 +231,7 @@ nodes.FeastNode = FeastNode
 local FountainNode = nodes.newClass("fountain")
 
 function FountainNode:enter()
+    nodeEventService.openFountainPopup(self)
 end
 
 function FountainNode:getHoverDescription()

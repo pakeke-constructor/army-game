@@ -286,7 +286,7 @@ end
 function map_scene:keypressed(k)
     if consts.DEV_MODE then
         if k == "o" then
-            g.gotoScene("shop_scene")
+            nodeEventService.openFountainPopup()
         end
         if k == "q" then
             nodeEventService.startRandomEvent()

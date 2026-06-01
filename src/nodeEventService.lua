@@ -95,19 +95,71 @@ end
 
 
 
+local FOUNTAIN_TXT = loc("A serene fountain bubbles before you. Drink, and choose its gift.")
+local FOUNTAIN_RAGE = loc("Calm the demons.\n(Reduce demon-rage)")
+local FOUNTAIN_BLESSING = loc("Receive a blessing.")
+
+
+---@return kirigami.Region
+local function drawBasicWindow()
+    local screen = ui.getFullScreenRegion()
+    lg.setColor(1,1,1)
+    iml.panel(0,0,screen:get())
+    lg.setColor(0,0,0,.5)
+    lg.rectangle("fill",screen:get())
+
+    local _,window,_ = screen:splitHorizontal(1,5,1)
+    window = window:padRatio(0.3)
+    lg.setColor(1,1,1)
+    ui.drawDarkPanel(window:get())
+    return window
+end
+
+
 ---@param node MapNode?
 function nodeEventService.openShrinePopup(node)
     if nodeEventService.isActive() then return end
 
+    local window = drawBasicWindow()
 end
 
 
 
 
+local function drawChoiceButton(reg, txt, font)
+    reg = reg:padRatio(0.1)
+    if iml.isHovered(reg:get()) then
+        lg.setColor(0.6,0.6,0.6)
+    else
+        lg.setColor(1,1,1)
+    end
+    ui.drawDarkPanel(reg:get())
+    richtext.printRichContained(txt, font, reg:padRatio(0.1):get())
+    return iml.wasJustClicked(reg:get())
+end
+
+
+local function drawFountainPopup()
+    local window = drawBasicWindow():padRatio(0.2)
+
+    local font = g.getSmallFont(16)
+    local txtR, buttonsR = window:splitVertical(2,1)
+    richtext.printRichContained(FOUNTAIN_TXT, font, txtR:padRatio(0.2):get())
+
+    local leftR, rightR = buttonsR:splitHorizontal(1,1)
+    if drawChoiceButton(leftR, FOUNTAIN_RAGE, font) then
+        -- TODO: reduce demon-rage
+    end
+    if drawChoiceButton(rightR, FOUNTAIN_BLESSING, font) then
+        -- TODO: choose a blessing
+    end
+end
+
+
 ---@param node MapNode?
 function nodeEventService.openFountainPopup(node)
     if nodeEventService.isActive() then return end
-
+    nodeEventService._fountainPopup = true
 end
 
 
@@ -116,21 +168,13 @@ end
 function nodeEventService.openFeastPopup(node)
     if nodeEventService.isActive() then return end
 
+    local window = drawBasicWindow()
 end
 
 
 ---@param ev g.RandomEventPass
 local function drawRandomEvent(ev)
-    local screen = ui.getFullScreenRegion()
-    lg.setColor(1,1,1)
-    iml.panel(screen:get())
-    lg.setColor(0,0,0,.5)
-    lg.rectangle("fill",screen:get())
-
-    local _,window,_ = screen:splitHorizontal(1,5,1)
-    window = window:padRatio(0.3)
-    lg.setColor(1,1,1)
-    ui.drawDarkPanel(window:get())
+    local window = drawBasicWindow()
 
     local font = g.getSmallFont(16)
     local txtR, buttonsR = window:splitVertical(2,1)
@@ -172,7 +216,9 @@ function nodeEventService.draw()
     if ev then
         return drawRandomEvent(ev)
     end
-
+    if nodeEventService._fountainPopup then
+        return drawFountainPopup()
+    end
 end
 
 

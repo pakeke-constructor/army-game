@@ -106,13 +106,20 @@
 - Improvements to squad-card UI: remove "UPGRADE" crap when hovering normally
 - fix health-increase overflow (cap it)
 - fix max hp increase upgrades
-
+- fix shop UI
 
 
 ### OK:: what do we need for a minimum-playable game?
 
 
-- fix shop UI
+
+- Shrine nodes UI:  [sacrifice a squad, reducing demon-rage + gold, **OR** upgrade a squad]
+
+- Fountain nodes UI:  [Choose to reduce demon-rage **OR** choose a blessing]
+
+- Feast node UI:  +4 XP
+
+- Chest node + Chest-node UI
 
 
 - add juice for healing
@@ -125,25 +132,29 @@
 - Give healing-ents projectiles
 
 
-
-- Change ranged-icon; it shouldnt be a sword, should be bow
-
-
-- Shrine nodes UI:  [Choose to remove a squad, reducing demon-rage + gold, OR, upgrade a squad]
-- Fountain nodes UI:  [Choose to reduce demon-rage, OR choose a blessing]
-
-
-- Chest node + Chest-node UI
-
-
 - PROCESS: Play through the game a couple times. Just get a feel, then *balance*
 - IMPORTANT: FIX REMAINING PERKS / BLESSINGS / ETC.
 - Fix balance for base squads
 
 
 
+### LEO ASSET PRIORITY LIST: Ordered from highest-prio -> lowest prio
+Steam store page assets (highest prio)
+Ally Squad icons
+Ally Unit sprites (+ weapon sprites)
+2 more "impact" effect animations.
+Bow Icon for ranged-stat
+Squad icons for commanders (currently there's no icons for commanders)
+More demon-types
+More decor-sprites for map (grasses, bushes, skull, more tree types?)
+
+
+
 
 #### CUTOFF. EVERYTHING ABOVE THIS POINT IS 100% NECCESSARY.
+
+
+- Change ranged-icon; it shouldnt be a sword, should be bow
 
 - Juice for clicking on a map node
 
