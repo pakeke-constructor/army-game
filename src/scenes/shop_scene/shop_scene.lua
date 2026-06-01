@@ -296,6 +296,8 @@ local function drawBlessing(blesR, blessingId, cost)
     local binfo = g.getBlessingInfo(blessingId)
     local isHovered = iml.isHovered(blesR:get())
 
+    ui.drawDarkPanel(blesR:get())
+
     if isHovered then
         local bg = RAR_MAP[binfo.rarity]
         lg.setColor(1,1,1,0.7)
@@ -335,6 +337,7 @@ end
 
 
 ---@param self g.ShopScene
+---@param freeArea kirigami.Region
 local function drawShopUI(self, freeArea)
     local w,h = ui.getScaledUIDimensions()
     local shopBg = "shop_background"
@@ -343,13 +346,8 @@ local function drawShopUI(self, freeArea)
     -- draw shop bg
     g.drawImageContained(shopBg, freeArea:get())
 
-    local shopRegion
-    do
-    local _
-    _,shopRegion,_ = freeArea:splitHorizontal(1,5,1)-- Kirigami(shopX,shopY+topPad,iw,ih-topPad)
-    end
-    -- local r1 = 
-    --g.drawImageContained(shopBg, shopRegion:get())
+    local shopRegion = freeArea:shrinkToAspectRatio(iw,ih)
+
     dbg(shopRegion)
 
     local leftR,rightR = shopRegion:splitHorizontal(2,1)
