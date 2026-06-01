@@ -2019,7 +2019,7 @@ function g.isAnyPopupOpen()
     return not not (
         rewardPopupService.getActive()
         or choicePopupService.getActive()
-        or randomEventService.getActiveEvent()
+        or nodeEventService.isActive()
     )
 end
 

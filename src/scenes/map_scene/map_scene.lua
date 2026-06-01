@@ -289,7 +289,7 @@ function map_scene:keypressed(k)
             g.gotoScene("shop_scene")
         end
         if k == "q" then
-            randomEventService.startRandomEvent()
+            nodeEventService.startRandomEvent()
         end
     end
 end

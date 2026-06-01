@@ -277,7 +277,7 @@ nodes.EmptyNode = EmptyNode
 local EventNode = nodes.newClass("event")
 
 function EventNode:enter()
-    randomEventService.startRandomEvent()
+    nodeEventService.startRandomEvent()
 end
 
 function EventNode:getHoverDescription()
