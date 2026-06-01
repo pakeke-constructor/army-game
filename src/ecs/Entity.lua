@@ -26,4 +26,8 @@ function Entity:getWorld()
     return self._world
 end
 
+function Entity:getTypename()
+    return self.type
+end
+
 return Entity

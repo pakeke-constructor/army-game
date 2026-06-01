@@ -1064,11 +1064,12 @@ function g.spawnSquad(squad, x, y, ...)
     local offsets = squad:getFormationOffsets()
     local entities = {}
     for i = 1, #offsets do
-        local ent = g.spawnEntity(info.entityId, x + offsets[i].x, y + offsets[i].y, ...)
-        ent.scope = squadScope
-        ent.squad = squad
-        ent._timeSinceDeployed = -((i - 1) * DEPLOY_ANIMATION_STEP)
-        entities[i] = ent
+        g.spawnEntityWithInit(info.entityId, x + offsets[i].x, y + offsets[i].y, function(ent)
+            ent.scope = squadScope
+            ent.squad = squad
+            ent._timeSinceDeployed = -((i - 1) * DEPLOY_ANIMATION_STEP)
+            entities[i] = ent
+        end, ...)
     end
     if info.onDeploySquad then
         info.onDeploySquad(info, entities)
@@ -1311,12 +1312,14 @@ function g.defineEntity(id, def)
 end
 
 
+--- we need this coz sometimes we need fields to be set immediately BEFORE qbuses or anything run
 ---@param id string
 ---@param x number
 ---@param y number
+---@param initFunc (fun(e:ecs.Entity))?
 ---@param ... unknown
 ---@return ecs.Entity
-function g.spawnEntity(id, x, y, ...)
+function g.spawnEntityWithInit(id, x, y, initFunc, ...)
     local mt = ENTITY_DEFS[id]
     assert(mt, "Unknown entity type: " .. tostring(id))
     local ecs = g.getECS()
@@ -1330,14 +1333,28 @@ function g.spawnEntity(id, x, y, ...)
     if ent.init then
         ent:init(...)
     end
+    if initFunc then
+        initFunc(ent)
+    end
     ecs:addEntity(ent)
     g.call("entitySpawned", ent)
     if ent.startingArmor then
         g.addArmor(ent, ent.startingArmor)
     end
-    ent.health = ent.maxHealth
     return ent
 end
+
+---@param id string
+---@param x number
+---@param y number
+---@param ... unknown
+---@return ecs.Entity
+function g.spawnEntity(id, x, y, ...)
+    return g.spawnEntityWithInit(id, x,y, nil, ...)
+end
+
+
+
 
 
 ---@param oldEnt ecs.Entity

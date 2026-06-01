@@ -73,6 +73,9 @@ function stats.entitySpawned(ent)
             recomputeStat(ent, stat)
         end
     end
+    if ent.maxHealth then
+        ent.health = ent.maxHealth
+    end
 end
 
 function stats.preUpdate(dt)
