@@ -69,12 +69,10 @@ local stats = {}
 
 function stats.entitySpawned(ent)
     for _, stat in ipairs(g.getStatList()) do
-        local base = ent[stat.baseName]
-        if base then
-            ent[stat.name] = base
+        if ent[stat.baseName] or ent[stat.name] then
+            recomputeStat(ent, stat)
         end
     end
- 
 end
 
 function stats.preUpdate(dt)
