@@ -157,7 +157,7 @@ end
 local function drawBasicWindow()
     local screen = ui.getFullScreenRegion()
     lg.setColor(1,1,1)
-    iml.panel(0,0,screen:get())
+    iml.panel(screen:get())
     lg.setColor(0,0,0,.5)
     lg.rectangle("fill",screen:get())
 

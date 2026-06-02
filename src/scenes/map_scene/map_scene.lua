@@ -70,23 +70,21 @@ local function renderNode(graph, node, r, g, b, a, radius)
     renderNodeAt(node, nx, ny, r, g, b, a, radius)
 end
 
+--- Registers an iml panel per node (under the camera transform) and
+--- returns the hovered node, plus whether it was just clicked.
 ---@param graph MapGraph
-local function getHoveredNode(graph, wx, wy)
-    local best, bestDist = nil, math.huge
+---@return MapNode? hovered
+---@return MapNode? clicked
+local function updateNodePanels(graph)
+    local size = graph.distanceBetweenNodes * HOVER_DIST_FRAC
+    local hovered, clicked = nil, nil
     graph:forEachNode(function(node)
         local nx, ny = graph:getDrawPos(node)
-        local dx, dy = nx - wx, ny - wy
-        local d2 = dx * dx + dy * dy
-        if d2 < bestDist then
-            best = node
-            bestDist = d2
-        end
+        local x, y, w, h = nx - size, ny - size, size * 2, size * 2
+        if iml.isHovered(x, y, w, h, node) then hovered = node end
+        if iml.wasJustClicked(x, y, w, h, 1, node) then clicked = node end
     end)
-    local maxDist = (graph.distanceBetweenNodes * HOVER_DIST_FRAC)
-    if best and bestDist <= maxDist * maxDist then
-        return best
-    end
-    return nil
+    return hovered, clicked
 end
 
 function map_scene:enter()
@@ -299,50 +297,37 @@ function map_scene:keypressed(k)
     end
 end
 
+---@param graph MapGraph
+function map_scene:travelTo(graph, pnode, hovered)
+    if self.traveling or hovered == pnode then return end
+    local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, PATH_SEARCH_DEPTH)
+    if not (path and #path >= 2) then return end
+    local ax, ay = graph:getDrawPos(path[1])
+    local bx, by = graph:getDrawPos(path[2])
+    local dist = math.sqrt((bx - ax) ^ 2 + (by - ay) ^ 2)
+    if bx < ax then self.commanderFacing = -1 end
+    if bx > ax then self.commanderFacing = 1 end
+    self.traveling = {
+        toNode = path[2],
+        ax = ax, ay = ay, bx = bx, by = by,
+        t = 0, speed = dist > 0 and (COMMANDER_SPEED / dist) or 1,
+    }
+end
+
 function map_scene:mousepressed(mx, my, button)
     if button == 1 then
         self.dragging = true
-        self.dragMoved = false
     end
 end
 
 function map_scene:mousereleased(mx, my, button)
     if button == 1 then
         self.dragging = false
-        -- If we didn't drag, treat as a click
-        -- (HACK: checking iml.getHoveredPanel here. it's "fine")
-        if not self.dragMoved and not self.traveling and not iml.getHoveredPanel() then
-            local run = g.getRun()
-            local graph = run.mapGraph
-            local pnode = graph and graph:getPlayerNode()
-            if pnode then
-                local wx, wy = self.camera:toWorld(mx, my)
-                local hovered = getHoveredNode(graph, wx, wy)
-                if hovered and hovered ~= pnode then
-                    local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, PATH_SEARCH_DEPTH)
-                    if path and #path >= 2 then
-                        local ax, ay = graph:getDrawPos(path[1])
-                        local bx, by = graph:getDrawPos(path[2])
-                        local dist = math.sqrt((bx - ax)^2 + (by - ay)^2)
-                        if bx < ax then self.commanderFacing = -1 end
-                        if bx > ax then self.commanderFacing = 1 end
-                        self.traveling = {
-                            toNode = path[2],
-                            ax = ax, ay = ay, bx = bx, by = by,
-                            t = 0, speed = dist > 0 and (COMMANDER_SPEED / dist) or 1,
-                        }
-                    end
-                end
-            end
-        end
     end
 end
 
 function map_scene:mousemoved(mx, my, dmx, dmy)
     if self.dragging then
-        if math.abs(dmx) + math.abs(dmy) > 2 then
-            self.dragMoved = true
-        end
         local zoom = self.camera:getZoom()
         self.camX = self.camX - dmx / zoom
         self.camY = self.camY - dmy / zoom
@@ -438,9 +423,8 @@ function map_scene:draw()
         -- hover highlight: path from player to hovered node
         local pnode = graph:getPlayerNode()
         if pnode then
-            local mx, my = love.mouse.getPosition()
-            local wx, wy = self.camera:toWorld(mx, my)
-            local hovered = getHoveredNode(graph, wx, wy)
+            local hovered, clicked = updateNodePanels(graph)
+            if clicked then self:travelTo(graph, pnode, clicked) end
             if (not self.traveling) and hovered and hovered ~= pnode then
                 local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, PATH_SEARCH_DEPTH)
                 if path and #path >= 2 then
