@@ -5,6 +5,7 @@ local EVENT_TYPES = require("src.content.events.events")
 ---@class g.nodeEventService
 ---@field _activeRandomEventPass g.RandomEventPass?
 ---@field _popup string?
+---@field _popupData any
 local nodeEventService = {}
 
 
@@ -89,7 +90,9 @@ end
 
 
 local SHRINE_TXT = loc("A bloodstained shrine hums. Offer a squad for coin and calmer demons, or empower your army.")
-local SHRINE_SACRIFICE = loc("Sacrifice a squad.\n(-2 demon-rage, +30 gold)")
+local SHRINE_SACRIFICE = interp("Sacrifice %{squadName}.\n(-2 demon-rage, +30 gold)", {
+    context = "Shrine popup option text. %{squadName} is exact squad that will be removed"
+})
 local SHRINE_NO_SAC = loc("No squad to sacrifice.")
 local SHRINE_UPGRADE = loc("Upgrade a squad.")
 
@@ -107,6 +110,7 @@ local FEAST_XP = 4
 
 local function closePopup()
     nodeEventService._popup = nil
+    nodeEventService._popupData = nil
 end
 
 local function reduceDemonRage(amount)
@@ -121,6 +125,31 @@ local function getArmySquads()
         out[#out + 1] = squad
     end
     return out
+end
+
+
+---@param squad g.Squad
+---@return number
+local function getShrineSacrificeValue(squad)
+    local info = g.getSquadInfo(squad.squadId)
+    local value = squad.level or 1
+    if info.entityDef and info.entityDef.isCommander then
+        value = value + 1000
+    end
+    return value
+end
+
+
+---@return g.Squad?
+local function pickShrineSacrificeSquad()
+    local squads = getArmySquads()
+    table.sort(squads, function(a, b)
+        local va = getShrineSacrificeValue(a)
+        local vb = getShrineSacrificeValue(b)
+        if va ~= vb then return va < vb end
+        return a.squadId < b.squadId
+    end)
+    return squads[1]
 end
 
 
@@ -141,12 +170,17 @@ end
 
 
 ---@param popupName string
-local function openPopup(popupName)
+---@param popupData any
+local function openPopup(popupName, popupData)
     if nodeEventService.isActive() then return end
     nodeEventService._popup = popupName
+    nodeEventService._popupData = popupData
 end
 
-function nodeEventService.openShrinePopup() openPopup("shrine") end
+function nodeEventService.openShrinePopup()
+    local squad = pickShrineSacrificeSquad()
+    openPopup("shrine", squad and squad.squadId or nil)
+end
 function nodeEventService.openFountainPopup() openPopup("fountain") end
 function nodeEventService.openFeastPopup() openPopup("feast") end
 
@@ -162,6 +196,23 @@ local function drawChoiceButton(reg, txt, font)
     end
     ui.drawDarkPanel(reg:get())
     richtext.printRichContained(txt, font, reg:padRatio(0.1):get())
+    return iml.wasJustClicked(reg:get())
+end
+
+local function drawButtonWithImage(reg, txt, image, font)
+    reg = reg:padRatio(0.1)
+    if iml.isHovered(reg:get()) then
+        lg.setColor(0.6,0.6,0.6)
+    else
+        lg.setColor(1,1,1)
+    end
+    ui.drawDarkPanel(reg:get())
+
+    local iconR, txtR = reg:padRatio(0.1):splitHorizontal(1, 4)
+    lg.setColor(1,1,1)
+    g.drawImage(image, iconR:getCenter())
+
+    richtext.printRichContained(txt, font, txtR:padRatio(0.1):get())
     return iml.wasJustClicked(reg:get())
 end
 
@@ -181,12 +232,14 @@ local function drawShrinePopup()
     local buttonsR, font = beginPopup(SHRINE_TXT)
 
     local leftR, rightR = buttonsR:splitHorizontal(1,1)
-    local squads = getArmySquads()
-    local hasSquad = #squads > 0
-    local leftTxt = hasSquad and SHRINE_SACRIFICE or SHRINE_NO_SAC
+    local squadId = nodeEventService._popupData
+    local squad = squadId and g.getRun().squads[squadId] or nil
+    local hasSquad = squad ~= nil
+    local leftTxt = hasSquad and SHRINE_SACRIFICE({ squadName = g.getSquadInfo(squadId).name }) or SHRINE_NO_SAC
 
-    if drawChoiceButton(leftR, leftTxt, font) and hasSquad then
-        g.removeSquadFromArmy(helper.randomChoice(squads))
+    local squadInfo = hasSquad and g.getSquadInfo(squadId) or nil
+    if drawButtonWithImage(leftR, leftTxt, squadInfo and squadInfo.icon or "example_squad_icon", font) and hasSquad then
+        g.removeSquadFromArmy(squad)
         reduceDemonRage(SACRIFICE_RAGE_REDUCTION)
         closePopup()
         rewardPopupService.genericReward({ gold = SACRIFICE_GOLD })

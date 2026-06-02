@@ -107,19 +107,16 @@
 - fix health-increase overflow (cap it)
 - fix max hp increase upgrades
 - fix shop UI
+- Shrine nodes UI:  [sacrifice a squad, reducing demon-rage + gold, **OR** upgrade a squad]
+- Fountain nodes UI:  [Choose to reduce demon-rage **OR** choose a blessing]
+- Feast node UI:  +4 XP
+
 
 
 ### OK:: what do we need for a minimum-playable game?
 
 
 - BUG: Clicking on popup ui (nodeEventService) causes player to and move to underlying map-node. (add `iml` infrastructure)
-
-
-- Shrine nodes UI:  [sacrifice a squad, reducing demon-rage + gold, **OR** upgrade a squad]
-
-- Fountain nodes UI:  [Choose to reduce demon-rage **OR** choose a blessing]
-
-- Feast node UI:  +4 XP
 
 - Chest node + Chest-node UI
 
