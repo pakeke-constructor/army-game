@@ -94,7 +94,7 @@
 - Wire up stuff in New Content.txt
 - Add reroll to squad-select in ChoicePanel
 - Juice for spending mana: Should pop up above the units as you spend them
-- Juice for dealing damage (see leo gif)
+- Juice for dealing damag (see leo gif)
 - Fix ordered-rendering in map-scene. Draw images from their base (0.95h)
 - Fix commander being drawn behind
 - (IDEA: Make a 2 pass system, with `collectDrawables` or something)
@@ -145,7 +145,6 @@ Ally Unit sprites (+ weapon sprites)
 2 more "impact" effect animations.
 Bow Icon for ranged-stat
 Squad icons for commanders (currently there's no icons for commanders)
-More demon-types
 More decor-sprites for map (grasses, bushes, skull, more tree types?)
 
 

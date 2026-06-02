@@ -3,15 +3,23 @@ local RewardPanel = require("src.ui.RewardPanel")
 ---@class g.rewardPopupService
 local rewardPopupService = {}
 
+---@type g.RewardPanel?
 local active = nil
 
 
+---@param args g.RewardPanel.Rewards
 function rewardPopupService.battleReward(args)
     active = RewardPanel("battle", args)
 end
 
+---@param args g.RewardPanel.Rewards
 function rewardPopupService.levelUpReward(args)
     active = RewardPanel("levelup", args)
+end
+
+---@param args g.RewardPanel.Rewards
+function rewardPopupService.addReward(args)
+    active = RewardPanel("other", args)
 end
 
 
@@ -19,6 +27,7 @@ function rewardPopupService.clear()
     active = nil
 end
 
+---@return g.RewardPanel?
 function rewardPopupService.getActive()
     return active
 end

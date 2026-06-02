@@ -13,7 +13,7 @@ local RewardPanel = objects.Class("g:RewardPanel")
 
 
 
----@param typ "levelup"|"battle"
+---@param typ "levelup"|"battle"|"other"
 ---@param args g.RewardPanel.Rewards
 function RewardPanel:init(typ, args)
     self.type = typ
@@ -83,7 +83,7 @@ function RewardPanel:draw()
             return math.max(LARGE_FONT:getHeight(), hh)
         end,
         draw = function(x,y,w,h)
-            local txt = self.type == "battle" and BATTLE_REWARDS_TXT or LEVEL_UP_TXT
+            local txt = self.type == "levelup" and LEVEL_UP_TXT or BATTLE_REWARDS_TXT
             local embelPad = 50
             local padW = richtext.getWidth(txt, LARGE_FONT) / 2 + embelPad
             lg.setColor(1,1,1)
