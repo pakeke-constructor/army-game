@@ -4,11 +4,13 @@ local PixelCanvas = require("src.modules.PixelCanvas")
 local ambienceService = {}
 
 
-local WISP_COUNT = 68
-local WISP_MIN_SPEED = 12
-local WISP_MAX_SPEED = 40
-local WISP_MIN_SIZE = 5
-local WISP_MAX_SIZE = 8
+local WISP_COUNT = 28
+local WISP_MIN_SPEED = 3
+local WISP_MAX_SPEED = 20
+local WISP_WANDER = 40 -- how strongly direction drifts (accel per second)
+local WISP_SPEED_LIMIT = 20 -- hard cap on speed
+local WISP_MIN_SIZE = 2
+local WISP_MAX_SIZE = 3
 local WISP_MIN_LIFETIME = 3
 local WISP_MAX_LIFETIME = 6
 
@@ -29,7 +31,7 @@ local function randomWisp()
         vy = math.sin(angle) * speed,
         maxLifetime = WISP_MIN_LIFETIME + love.math.random()*(WISP_MAX_LIFETIME-WISP_MIN_LIFETIME),
         size = WISP_MIN_SIZE + love.math.random() * (WISP_MAX_SIZE - WISP_MIN_SIZE),
-        alpha = 0.20 + love.math.random() * 0.15,
+        alpha = 0.45 + love.math.random() * 0.2,
         wob = love.math.random() * math.pi * 2,
         lifetime = 0,
     }
@@ -51,7 +53,17 @@ function ambienceService.update(dt, transform)
     windowFromTransform(transform)
     for i, wisp in ipairs(wisps) do
         wisp.wob = wisp.wob + dt
-        wisp.x = wisp.x + (wisp.vx + math.sin(wisp.wob) * 6) * dt
+        -- random wander: nudge velocity in a random direction each frame
+        local a = love.math.random() * math.pi * 2
+        wisp.vx = wisp.vx + math.cos(a) * WISP_WANDER * dt
+        wisp.vy = wisp.vy + math.sin(a) * WISP_WANDER * dt
+        -- clamp speed
+        local spd = math.sqrt(wisp.vx * wisp.vx + wisp.vy * wisp.vy)
+        if spd > WISP_SPEED_LIMIT then
+            wisp.vx = wisp.vx / spd * WISP_SPEED_LIMIT
+            wisp.vy = wisp.vy / spd * WISP_SPEED_LIMIT
+        end
+        wisp.x = wisp.x + wisp.vx * dt
         wisp.y = wisp.y + wisp.vy * dt
         wisp.lifetime = wisp.lifetime + dt
         if wisp.lifetime >= wisp.maxLifetime then
@@ -81,9 +93,9 @@ function ambienceService.draw(transform)
     local lg = love.graphics
     canvas:start(transform)
     for _, wisp in ipairs(wisps) do
-        local t = wisp.lifetime / WISP_MAX_LIFETIME
-        local fade = math.min(t / 0.15, (1 - t) / 0.15, 1)
-        lg.setColor(1, 1, 1, wisp.alpha * fade + 0.3)
+        local t = wisp.lifetime / wisp.maxLifetime
+        local fade = math.min(t / 0.3, (1 - t) / 0.3, 1)
+        lg.setColor(1, 1, 1, wisp.alpha * fade)
         lg.circle("fill", wisp.x, wisp.y, wisp.size)
     end
     lg.setColor(1, 1, 1, 1)
