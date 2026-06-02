@@ -7,6 +7,7 @@ local DecorBuilder = require("src.scenes.map_scene.DecorBuilder")
 local fogService = require("src.fogService")
 local hoverService = require("src.hud.hoverService")
 local juiceService = require("src.juiceService")
+local ambienceService = require("src.ambienceService")
 
 local CAMERA_ZOOM = 1--0.5
 local NODE_RADIUS = 4
@@ -90,6 +91,7 @@ end
 
 function map_scene:enter()
     juiceService.reset()
+    ambienceService.reInitialize()
     self.ecs = ECSWorld()
     self.camera = Camera(0, 0, CAMERA_ZOOM)
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
@@ -277,6 +279,7 @@ function map_scene:update(dt)
         self.camera:setZoom(CAMERA_ZOOM * ui.getUIScaling())
     end
     juiceService.update(dt)
+    ambienceService.update(dt)
     local _sx, _sy = juiceService.getShakeOffset()
     self.camera:setPos(self.camX + _sx, self.camY + _sy)
     self.ecs:update(dt)
@@ -480,6 +483,8 @@ function map_scene:draw()
     lg.setColor(1, 1, 1, 1)
     iml.popTransform()
     self.pixelCanvas:finish()
+
+    ambienceService.draw()
 
     ui.startUI()
     self.hud:drawUI({ mapScene = true })

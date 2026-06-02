@@ -116,9 +116,13 @@
 ### OK:: what do we need for a minimum-playable game?
 
 
+- Add little "wisps", things that move across screen (like smoke debris) for map-scene AND battle-scene
+- Add godrays for map-scene and battle-scene
+
+
 - BUG: Clicking on popup ui (nodeEventService) causes player to and move to underlying map-node. (add `iml` infrastructure)
 
-- Chest node + Chest-node UI
+- Chest node + Chest-node UI  (spend keys)
 
 
 - add juice for healing
@@ -151,8 +155,11 @@ More decor-sprites for map (grasses, bushes, skull, more tree types?)
 
 #### CUTOFF. EVERYTHING ABOVE THIS POINT IS 100% NECCESSARY.
 
+- Make map objects (trees, bushes, etc,) bob up and down
+
+
 - Make blessing-select nicer (proper icons)
-- Make mana-select nicer
+- Make mana-select nicer (Remove the +1 stuff, add a proper title)
 
 
 - Change ranged-icon; it shouldnt be a sword, should be bow

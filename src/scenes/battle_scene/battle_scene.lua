@@ -4,6 +4,7 @@ local Camera = require("lib.cam11")
 local ParticleService = require(".particles.ParticleService")
 local fogService = require("src.fogService")
 local juiceService = require("src.juiceService")
+local ambienceService = require("src.ambienceService")
 
 
 local CAMERA_SPEED = 400
@@ -78,6 +79,7 @@ function battle_scene:enter()
     local run = g.getRun()
     run:resetForBattle()
     juiceService.reset()
+    ambienceService.reInitialize()
 
     self.editingSquadLineup = true
 
@@ -155,6 +157,7 @@ function battle_scene:update(dt)
 
     self:updateCamera(dt)
     juiceService.update(dt)
+    ambienceService.update(dt)
     local timeScale = juiceService.consumeHitPause(dt)
     self.ecs:update(dt * timeScale)
 
@@ -609,6 +612,8 @@ function battle_scene:draw()
 
     iml.popTransform()
     self.camera:detach()
+
+    ambienceService.draw()
 
     ui.startUI()
 
