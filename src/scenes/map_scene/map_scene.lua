@@ -154,10 +154,7 @@ function map_scene:enter()
     end
 
     self.camera:setPos(self.camX, self.camY)
-    local sw, sh = love.graphics.getDimensions()
-    local x1, y1 = self.camera:toWorld(0, 0)
-    local x2, y2 = self.camera:toWorld(sw, sh)
-    ambienceService.reInitialize(math.min(x1, x2), math.min(y1, y2), math.abs(x2 - x1), math.abs(y2 - y1))
+    ambienceService.reInitialize(self.camera:getTransform())
 end
 
 function map_scene:_buildFogClearCells()
@@ -286,12 +283,7 @@ function map_scene:update(dt)
     juiceService.update(dt)
     local _sx, _sy = juiceService.getShakeOffset()
     self.camera:setPos(self.camX + _sx, self.camY + _sy)
-    do
-        local sw, sh = love.graphics.getDimensions()
-        local x1, y1 = self.camera:toWorld(0, 0)
-        local x2, y2 = self.camera:toWorld(sw, sh)
-        ambienceService.update(dt, math.min(x1, x2), math.min(y1, y2), math.abs(x2 - x1), math.abs(y2 - y1))
-    end
+    ambienceService.update(dt, self.camera:getTransform())
     self.ecs:update(dt)
 end
 

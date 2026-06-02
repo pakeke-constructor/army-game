@@ -35,12 +35,20 @@ local function randomWisp()
     }
 end
 
----@param x number world-space window x
----@param y number world-space window y
----@param w number world-space window width
----@param h number world-space window height
-function ambienceService.update(dt, x, y, w, h)
-    window.x, window.y, window.w, window.h = x, y, w, h
+-- compute world-space window the player is looking at, from a camera transform
+local function windowFromTransform(transform)
+    local sw, sh = love.graphics.getDimensions()
+    local x1, y1 = transform:inverseTransformPoint(0, 0)
+    local x2, y2 = transform:inverseTransformPoint(sw, sh)
+    window.x = math.min(x1, x2)
+    window.y = math.min(y1, y2)
+    window.w = math.abs(x2 - x1)
+    window.h = math.abs(y2 - y1)
+end
+
+---@param transform love.Transform camera transform
+function ambienceService.update(dt, transform)
+    windowFromTransform(transform)
     for i, wisp in ipairs(wisps) do
         wisp.wob = wisp.wob + dt
         wisp.x = wisp.x + (wisp.vx + math.sin(wisp.wob) * 6) * dt
@@ -53,12 +61,9 @@ function ambienceService.update(dt, x, y, w, h)
 end
 
 
----@param x number world-space window x
----@param y number world-space window y
----@param w number world-space window width
----@param h number world-space window height
-function ambienceService.reInitialize(x, y, w, h)
-    window.x, window.y, window.w, window.h = x, y, w, h
+---@param transform love.Transform camera transform
+function ambienceService.reInitialize(transform)
+    windowFromTransform(transform)
     wisps = {}
     for i = 1, WISP_COUNT do
         wisps[i] = randomWisp()

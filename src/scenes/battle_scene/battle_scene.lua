@@ -111,10 +111,7 @@ function battle_scene:enter()
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
     self.camera:setPos(border[3] * 0.45, border[4] * 0.5)
 
-    local sw, sh = love.graphics.getDimensions()
-    local x1, y1 = self.camera:toWorld(0, 0)
-    local x2, y2 = self.camera:toWorld(sw, sh)
-    ambienceService.reInitialize(math.min(x1, x2), math.min(y1, y2), math.abs(x2 - x1), math.abs(y2 - y1))
+    ambienceService.reInitialize(self.camera:getTransform())
 end
 
 local function countEnemies(ecs)
@@ -162,12 +159,7 @@ function battle_scene:update(dt)
 
     self:updateCamera(dt)
     juiceService.update(dt)
-    do
-        local sw, sh = love.graphics.getDimensions()
-        local x1, y1 = self.camera:toWorld(0, 0)
-        local x2, y2 = self.camera:toWorld(sw, sh)
-        ambienceService.update(dt, math.min(x1, x2), math.min(y1, y2), math.abs(x2 - x1), math.abs(y2 - y1))
-    end
+    ambienceService.update(dt, self.camera:getTransform())
     local timeScale = juiceService.consumeHitPause(dt)
     self.ecs:update(dt * timeScale)
 
