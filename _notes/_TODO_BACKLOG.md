@@ -110,18 +110,18 @@
 - Shrine nodes UI:  [sacrifice a squad, reducing demon-rage + gold, **OR** upgrade a squad]
 - Fountain nodes UI:  [Choose to reduce demon-rage **OR** choose a blessing]
 - Feast node UI:  +4 XP
-
+- BUG: Clicking on popup ui (nodeEventService) causes map-clicks underneath
+- Add "wisps", move across screen (like smoke debris) for map/battle-scene
 
 
 ### OK:: what do we need for a minimum-playable game?
 
 
-- BUG: Clicking on popup ui (nodeEventService) causes player to and move to underlying map-node in map-scene. (To fix, map-scene should detect clicks via `iml` infrastructure)
 
 - Chest node + Chest-node UI  (spend keys)
 
 
-- add juice for healing
+- add juice for healing; when healing
 - add juice for buffs
 
 
@@ -129,6 +129,9 @@
 
 
 - Give healing-ents projectiles
+
+
+- Wire up sprites to ALL units (icons, entity-images, AND weapons)
 
 
 - PROCESS: Play through the game a couple times. Just get a feel, then *balance*
@@ -151,7 +154,8 @@ More decor-sprites for map (grasses, bushes, skull, more tree types?)
 
 #### CUTOFF. EVERYTHING ABOVE THIS POINT IS 100% NECCESSARY.
 
-- Add little "wisps", things that move across screen (like smoke debris) for map-scene AND battle-scene
+
+- Improve wisps: should use leaf-sprites
 - Add godrays for map-scene and battle-scene
 
 

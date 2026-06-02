@@ -1336,6 +1336,13 @@ function g.spawnEntityWithInit(id, x, y, initFunc, ...)
     if initFunc then
         initFunc(ent)
     end
+    if ent.ai and not ent.walkAnimation then
+        ent.walkAnimation = {
+            bounceHeight = 2.5,
+            rotationAmount = 0.12,
+            speed = 11,
+        }
+    end
     ecs:addEntity(ent)
     g.call("entitySpawned", ent)
     if ent.startingArmor then
@@ -1847,11 +1854,18 @@ function g.drawEntity(ent, x, y)
         ent:onDraw(x, y)
     end
     local bodyRot = getBodyRot(ent)
+    local walkBounce, walkWobble = 0, 0
+    if ent._walkTime and ent._walkTime > 0 and ent.walkAnimation then
+        local wa = ent.walkAnimation
+        local t = ent._walkTime * wa.speed
+        walkBounce = -math.abs(math.sin(t)) * wa.bounceHeight
+        walkWobble = math.sin(t) * wa.rotationAmount
+    end
     if ent.image then
         local col = ent.color or objects.Color.WHITE
         lg.setColor(col[1], col[2], col[3], col[4] * (ent.alpha or 1))
-        local rot = (ent.rot or 0) + bodyRot + (ent.damageJolt or 0)
-        g.drawImageOffset(ent.image, x + (ent.ox or 0), y + (ent.oy or 0), rot, sx, sy, 0.5, 0.95, ent.kx, ent.ky)
+        local rot = (ent.rot or 0) + bodyRot + (ent.damageJolt or 0) + walkWobble
+        g.drawImageOffset(ent.image, x + (ent.ox or 0), y + (ent.oy or 0) + walkBounce, rot, sx, sy, 0.5, 0.95, ent.kx, ent.ky)
 
         if ent.weapon then
             drawWeapon(ent,x,y)

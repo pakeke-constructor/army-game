@@ -171,6 +171,13 @@ function ECSWorld:update(dt)
         if e._timeSinceDeployed then
             e._timeSinceDeployed = e._timeSinceDeployed + dt
         end
+        local tvx, tvy = g.getVel(e)
+        local sameDir = (e.vx or 0) * tvx + (e.vy or 0) * tvy > 0
+        if e._aiMoving and sameDir then
+            e._walkTime = (e._walkTime or 0) + dt
+        else
+            e._walkTime = 0
+        end
         if e.vz then
             e.vz = e.vz - consts.GRAVITY * dt
             e.z = math.max(0, (e.z or 0) + e.vz * dt)

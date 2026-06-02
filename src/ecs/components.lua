@@ -102,12 +102,18 @@ local shadow = {
     opacity = 0.6,
 }
 
+---@class ecs.components.WalkAnimation
+---@field public bounceHeight number
+---@field public rotationAmount number
+---@field public speed number
+
 ---@class ecs.Components
 ---@field public ai ecs.components.AI?
 ---@field public attack ecs.components.Attack?
 ---@field public projectile ecs.components.Projectile?
 ---@field public weapon ecs.components.Weapon?
 ---@field public shadow ecs.components.Shadow?
+---@field public walkAnimation ecs.components.WalkAnimation?
 ---@field public faceDir integer?
 ---@field public taunt ecs.components.Taunt?
 ---@field public fear ecs.components.Fear?
