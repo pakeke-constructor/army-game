@@ -225,6 +225,28 @@ nodes.FeastNode = FeastNode
 
 
 -------------------------------
+-- ShrineNode
+-------------------------------
+---@class MapNode.ShrineNode: MapNode
+local ShrineNode = nodes.newClass("shrine")
+
+function ShrineNode:enter()
+    nodeEventService.openShrinePopup(self)
+end
+
+function ShrineNode:getHoverDescription()
+    return SHRINE_TXT
+end
+
+function ShrineNode:buildDecor(builder, wx, wy)
+    builder:addImage("node_shrine", wx, wy)
+    addDemons(self, builder, wx, wy)
+end
+
+nodes.ShrineNode = ShrineNode
+
+
+-------------------------------
 -- FountainNode
 -------------------------------
 ---@class MapNode.FountainNode: MapNode

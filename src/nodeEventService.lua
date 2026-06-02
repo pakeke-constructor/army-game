@@ -4,9 +4,7 @@ local EVENT_TYPES = require("src.content.events.events")
 
 ---@class g.nodeEventService
 ---@field _activeRandomEventPass g.RandomEventPass?
----@field _shrinePopup boolean?
----@field _fountainPopup boolean?
----@field _feastPopup boolean?
+---@field _popup string?
 local nodeEventService = {}
 
 
@@ -22,7 +20,7 @@ local nodeEventService = {}
 ---@field _selectedOption integer?
 local RandomEventPass = objects.Class("g:RandomEventPass")
 
---- RandomEventPass
+-- RandomEventPass
 do
 ---@param id string
 ---@param evType g.RandomEventType
@@ -85,19 +83,45 @@ end
 
 ---@return boolean
 function nodeEventService.isActive()
-    return not not (
-        nodeEventService._activeRandomEventPass
-        or nodeEventService._shrinePopup
-        or nodeEventService._fountainPopup
-        or nodeEventService._feastPopup
-    )
+    return not not (nodeEventService._activeRandomEventPass or nodeEventService._popup)
 end
 
 
 
+local SHRINE_TXT = loc("A bloodstained shrine hums. Offer a squad for coin and calmer demons, or empower your army.")
+local SHRINE_SACRIFICE = loc("Sacrifice a squad.\n(-2 demon-rage, +30 gold)")
+local SHRINE_NO_SAC = loc("No squad to sacrifice.")
+local SHRINE_UPGRADE = loc("Upgrade a squad.")
+
 local FOUNTAIN_TXT = loc("A serene fountain bubbles before you. Drink, and choose its gift.")
 local FOUNTAIN_RAGE = loc("Calm the demons.\n(Reduce demon-rage)")
 local FOUNTAIN_BLESSING = loc("Receive a blessing.")
+
+local FEAST_TXT = loc("A grand feast is laid out for your troops.")
+local FEAST_REWARD = loc("Feast.\n(+4 XP)")
+
+local SACRIFICE_RAGE_REDUCTION = 2
+local SACRIFICE_GOLD = 30
+local FOUNTAIN_RAGE_REDUCTION = 2
+local FEAST_XP = 4
+
+local function closePopup()
+    nodeEventService._popup = nil
+end
+
+local function reduceDemonRage(amount)
+    local run = g.getRun()
+    run.demonRage = math.max(0, run.demonRage - amount)
+end
+
+---@return g.Squad[]
+local function getArmySquads()
+    local out = {}
+    for _, squad in pairs(g.getRun().squads) do
+        out[#out + 1] = squad
+    end
+    return out
+end
 
 
 ---@return kirigami.Region
@@ -116,12 +140,15 @@ local function drawBasicWindow()
 end
 
 
----@param node MapNode?
-function nodeEventService.openShrinePopup(node)
+---@param popupName string
+local function openPopup(popupName)
     if nodeEventService.isActive() then return end
-
-    local window = drawBasicWindow()
+    nodeEventService._popup = popupName
 end
+
+function nodeEventService.openShrinePopup() openPopup("shrine") end
+function nodeEventService.openFountainPopup() openPopup("fountain") end
+function nodeEventService.openFeastPopup() openPopup("feast") end
 
 
 
@@ -139,36 +166,61 @@ local function drawChoiceButton(reg, txt, font)
 end
 
 
-local function drawFountainPopup()
+---@param txt string
+---@return kirigami.Region buttonsR, table font
+local function beginPopup(txt)
     local window = drawBasicWindow():padRatio(0.2)
-
     local font = g.getSmallFont(16)
     local txtR, buttonsR = window:splitVertical(2,1)
-    richtext.printRichContained(FOUNTAIN_TXT, font, txtR:padRatio(0.2):get())
+    richtext.printRichContained(txt, font, txtR:padRatio(0.2):get())
+    return buttonsR, font
+end
+
+
+local function drawShrinePopup()
+    local buttonsR, font = beginPopup(SHRINE_TXT)
+
+    local leftR, rightR = buttonsR:splitHorizontal(1,1)
+    local squads = getArmySquads()
+    local hasSquad = #squads > 0
+    local leftTxt = hasSquad and SHRINE_SACRIFICE or SHRINE_NO_SAC
+
+    if drawChoiceButton(leftR, leftTxt, font) and hasSquad then
+        g.removeSquadFromArmy(helper.randomChoice(squads))
+        reduceDemonRage(SACRIFICE_RAGE_REDUCTION)
+        closePopup()
+        rewardPopupService.genericReward({ gold = SACRIFICE_GOLD })
+    end
+
+    if drawChoiceButton(rightR, SHRINE_UPGRADE, font) then
+        closePopup()
+        choicePopupService.set("squad", 0)
+    end
+end
+
+
+local function drawFountainPopup()
+    local buttonsR, font = beginPopup(FOUNTAIN_TXT)
 
     local leftR, rightR = buttonsR:splitHorizontal(1,1)
     if drawChoiceButton(leftR, FOUNTAIN_RAGE, font) then
-        -- TODO: reduce demon-rage
+        reduceDemonRage(FOUNTAIN_RAGE_REDUCTION)
+        closePopup()
     end
     if drawChoiceButton(rightR, FOUNTAIN_BLESSING, font) then
-        -- TODO: choose a blessing
+        closePopup()
+        rewardPopupService.genericReward({ randomBlessing = true })
     end
 end
 
 
----@param node MapNode?
-function nodeEventService.openFountainPopup(node)
-    if nodeEventService.isActive() then return end
-    nodeEventService._fountainPopup = true
-end
+local function drawFeastPopup()
+    local buttonR, font = beginPopup(FEAST_TXT)
 
-
-
----@param node MapNode?
-function nodeEventService.openFeastPopup(node)
-    if nodeEventService.isActive() then return end
-
-    local window = drawBasicWindow()
+    if drawChoiceButton(buttonR, FEAST_REWARD, font) then
+        closePopup()
+        g.addXP(FEAST_XP)
+    end
 end
 
 
@@ -211,13 +263,20 @@ end
 
 
 
+local POPUP_DRAWERS = {
+    shrine = drawShrinePopup,
+    fountain = drawFountainPopup,
+    feast = drawFeastPopup,
+}
+
 function nodeEventService.draw()
     local ev = nodeEventService._activeRandomEventPass
     if ev then
         return drawRandomEvent(ev)
     end
-    if nodeEventService._fountainPopup then
-        return drawFountainPopup()
+    local drawer = POPUP_DRAWERS[nodeEventService._popup]
+    if drawer then
+        return drawer()
     end
 end
 

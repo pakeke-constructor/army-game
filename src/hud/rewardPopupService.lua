@@ -18,7 +18,7 @@ function rewardPopupService.levelUpReward(args)
 end
 
 ---@param args g.RewardPanel.Rewards
-function rewardPopupService.addReward(args)
+function rewardPopupService.genericReward(args)
     active = RewardPanel("other", args)
 end
 

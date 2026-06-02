@@ -112,6 +112,8 @@
 ### OK:: what do we need for a minimum-playable game?
 
 
+- BUG: Clicking on popup ui (nodeEventService) causes player to and move to underlying map-node. (add `iml` infrastructure)
+
 
 - Shrine nodes UI:  [sacrifice a squad, reducing demon-rage + gold, **OR** upgrade a squad]
 
@@ -151,6 +153,9 @@ More decor-sprites for map (grasses, bushes, skull, more tree types?)
 
 
 #### CUTOFF. EVERYTHING ABOVE THIS POINT IS 100% NECCESSARY.
+
+- Make blessing-select nicer (proper icons)
+- Make mana-select nicer
 
 
 - Change ranged-icon; it shouldnt be a sword, should be bow
