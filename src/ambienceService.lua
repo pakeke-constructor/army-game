@@ -1,25 +1,33 @@
--- Screen-space drifting "wisps" / smoke debris for ambience.
+-- World-space drifting "wisps" / smoke debris for ambience.
+local PixelCanvas = require("src.modules.PixelCanvas")
+
 local ambienceService = {}
 
 
-local WISP_COUNT = 28
+local WISP_COUNT = 68
 local WISP_MIN_SPEED = 12
 local WISP_MAX_SPEED = 40
 local WISP_MIN_SIZE = 5
 local WISP_MAX_SIZE = 8
-local WISP_MAX_LIFETIME = 14
+local WISP_MIN_LIFETIME = 3
+local WISP_MAX_LIFETIME = 6
 
 
 local wisps = {}
+local canvas = nil
 
-local function randomWisp(sw, sh)
+-- world-space window the player is looking at; wisps spawn within it
+local window = { x = 0, y = 0, w = 100, h = 100 }
+
+local function randomWisp()
     local angle = -math.pi * 0.25 + (love.math.random() - 0.5) * 0.6
     local speed = WISP_MIN_SPEED + love.math.random() * (WISP_MAX_SPEED - WISP_MIN_SPEED)
     return {
-        x = love.math.random() * sw,
-        y = love.math.random() * sh,
+        x = window.x + love.math.random() * window.w,
+        y = window.y + love.math.random() * window.h,
         vx = math.cos(angle) * speed,
         vy = math.sin(angle) * speed,
+        maxLifetime = WISP_MIN_LIFETIME + love.math.random()*(WISP_MAX_LIFETIME-WISP_MIN_LIFETIME),
         size = WISP_MIN_SIZE + love.math.random() * (WISP_MAX_SIZE - WISP_MIN_SIZE),
         alpha = 0.20 + love.math.random() * 0.15,
         wob = love.math.random() * math.pi * 2,
@@ -27,39 +35,54 @@ local function randomWisp(sw, sh)
     }
 end
 
-function ambienceService.update(dt)
-    local sw, sh = love.graphics.getDimensions()
-    for i, w in ipairs(wisps) do
-        w.wob = w.wob + dt
-        w.x = w.x + (w.vx + math.sin(w.wob) * 6) * dt
-        w.y = w.y + w.vy * dt
-        w.lifetime = w.lifetime + dt
-        if w.lifetime >= WISP_MAX_LIFETIME then
-            wisps[i] = randomWisp(sw, sh)
+---@param x number world-space window x
+---@param y number world-space window y
+---@param w number world-space window width
+---@param h number world-space window height
+function ambienceService.update(dt, x, y, w, h)
+    window.x, window.y, window.w, window.h = x, y, w, h
+    for i, wisp in ipairs(wisps) do
+        wisp.wob = wisp.wob + dt
+        wisp.x = wisp.x + (wisp.vx + math.sin(wisp.wob) * 6) * dt
+        wisp.y = wisp.y + wisp.vy * dt
+        wisp.lifetime = wisp.lifetime + dt
+        if wisp.lifetime >= wisp.maxLifetime then
+            wisps[i] = randomWisp()
         end
     end
 end
 
 
-function ambienceService.reInitialize()
-    local sw, sh = love.graphics.getDimensions()
+---@param x number world-space window x
+---@param y number world-space window y
+---@param w number world-space window width
+---@param h number world-space window height
+function ambienceService.reInitialize(x, y, w, h)
+    window.x, window.y, window.w, window.h = x, y, w, h
     wisps = {}
     for i = 1, WISP_COUNT do
-        wisps[i] = randomWisp(sw, sh)
+        wisps[i] = randomWisp()
     end
 end
 
 
-function ambienceService.draw(x,y, w,h)
-    if not wisps then return end
+---@param transform love.Transform camera transform (for pixel-perfect world-space rendering)
+function ambienceService.draw(transform)
+    if not canvas then
+        canvas = PixelCanvas.new(love.graphics.getDimensions())
+    end
+    canvas:resize(love.graphics.getDimensions())
+
     local lg = love.graphics
-    for _, w in ipairs(wisps) do
-        local t = w.lifetime / WISP_MAX_LIFETIME
+    canvas:start(transform)
+    for _, wisp in ipairs(wisps) do
+        local t = wisp.lifetime / WISP_MAX_LIFETIME
         local fade = math.min(t / 0.15, (1 - t) / 0.15, 1)
-        lg.setColor(1, 1, 1, w.alpha * fade)
-        lg.circle("fill", w.x, w.y, w.size)
+        lg.setColor(1, 1, 1, wisp.alpha * fade + 0.3)
+        lg.circle("fill", wisp.x, wisp.y, wisp.size)
     end
     lg.setColor(1, 1, 1, 1)
+    canvas:finish()
 end
 
 return ambienceService

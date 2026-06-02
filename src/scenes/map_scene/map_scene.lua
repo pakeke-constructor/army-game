@@ -91,7 +91,6 @@ end
 
 function map_scene:enter()
     juiceService.reset()
-    ambienceService.reInitialize()
     self.ecs = ECSWorld()
     self.camera = Camera(0, 0, CAMERA_ZOOM)
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
@@ -153,6 +152,12 @@ function map_scene:enter()
     else
         self.camX, self.camY = 0, 0
     end
+
+    self.camera:setPos(self.camX, self.camY)
+    local sw, sh = love.graphics.getDimensions()
+    local x1, y1 = self.camera:toWorld(0, 0)
+    local x2, y2 = self.camera:toWorld(sw, sh)
+    ambienceService.reInitialize(math.min(x1, x2), math.min(y1, y2), math.abs(x2 - x1), math.abs(y2 - y1))
 end
 
 function map_scene:_buildFogClearCells()
@@ -279,9 +284,14 @@ function map_scene:update(dt)
         self.camera:setZoom(CAMERA_ZOOM * ui.getUIScaling())
     end
     juiceService.update(dt)
-    ambienceService.update(dt)
     local _sx, _sy = juiceService.getShakeOffset()
     self.camera:setPos(self.camX + _sx, self.camY + _sy)
+    do
+        local sw, sh = love.graphics.getDimensions()
+        local x1, y1 = self.camera:toWorld(0, 0)
+        local x2, y2 = self.camera:toWorld(sw, sh)
+        ambienceService.update(dt, math.min(x1, x2), math.min(y1, y2), math.abs(x2 - x1), math.abs(y2 - y1))
+    end
     self.ecs:update(dt)
 end
 
@@ -484,7 +494,7 @@ function map_scene:draw()
     iml.popTransform()
     self.pixelCanvas:finish()
 
-    ambienceService.draw()
+    ambienceService.draw(self.camera:getTransform())
 
     ui.startUI()
     self.hud:drawUI({ mapScene = true })
