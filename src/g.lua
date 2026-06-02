@@ -1337,10 +1337,17 @@ function g.spawnEntityWithInit(id, x, y, initFunc, ...)
         initFunc(ent)
     end
     if ent.ai and not ent.walkAnimation then
+        local h = 30
+        if ent.image then
+            local _, ih = g.getImageSize(ent.image)
+            h = ih
+        end
+        -- normal units ~30 tall = scale 1; bigger = heavier
+        local scale = math.max(1, h / 30)
         ent.walkAnimation = {
-            bounceHeight = 2.5,
-            rotationAmount = 0.12,
-            speed = 11,
+            bounceHeight = 2.5 / scale,
+            rotationAmount = 0.12 / scale,
+            speed = 11 / scale,
         }
     end
     ecs:addEntity(ent)
