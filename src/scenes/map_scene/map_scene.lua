@@ -310,7 +310,8 @@ function map_scene:mousereleased(mx, my, button)
     if button == 1 then
         self.dragging = false
         -- If we didn't drag, treat as a click
-        if not self.dragMoved and not self.traveling then
+        -- (HACK: checking iml.getHoveredPanel here. it's "fine")
+        if not self.dragMoved and not self.traveling and not iml.getHoveredPanel() then
             local run = g.getRun()
             local graph = run.mapGraph
             local pnode = graph and graph:getPlayerNode()

@@ -95,6 +95,13 @@ local function assertIsFrame()
 end
 
 
+--- Returns the panel the pointer is currently over (if any).
+--- (Reflects the panel hovered during the previous frame's draw.)
+---@return iml._Panel?
+function iml.getHoveredPanel()
+    return lastHoveredPanel
+end
+
 function iml.beginFrame()
     local px, py = pointer_x, pointer_y
     local pdx, pdy = pointer_x-last_pointer_x, pointer_y-last_pointer_y

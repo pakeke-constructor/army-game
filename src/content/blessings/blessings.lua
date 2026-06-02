@@ -1052,9 +1052,10 @@ local function squadSharesColor(squad, colorSet)
     return false
 end
 
-g.defineBlessing("soul_split", "Soul Split", {
+g.defineBlessing("soulsplit", "Soul Split", {
     description = loc2("Your squads have double units, but -50% max (HP). Buildings unaffected."),
-    image = "blessing_soulsplit",
+    --image = "blessing_soulsplit",
+    image = "placeholder",
     rarity = g.RARITIES.LEGENDARY,
     handlers = {
         -- ADD reducer: returning the base count again = double total units.

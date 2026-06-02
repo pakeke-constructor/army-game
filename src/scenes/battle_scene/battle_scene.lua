@@ -79,7 +79,6 @@ function battle_scene:enter()
     local run = g.getRun()
     run:resetForBattle()
     juiceService.reset()
-    ambienceService.reInitialize()
 
     self.editingSquadLineup = true
 
