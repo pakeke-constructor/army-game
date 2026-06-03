@@ -66,6 +66,15 @@ local clickPresses = {--[[
     [button] = iml._Click
 ]]}
 
+---@type table<love.KeyConstant, boolean>
+local keyPresses = setmetatable({}, {__index = function() return false end})
+---@type table<love.KeyConstant, boolean>
+local keyReleases = setmetatable({}, {__index = function() return false end})
+---@type number?
+local wheelDx = nil
+---@type number?
+local wheelDy = nil
+
 
 
 local pointer_x = 0
@@ -93,6 +102,7 @@ local function assertIsFrame()
         error("No framestate was set! (Did you forget to call .beginFrame()..?)", 3)
     end
 end
+
 
 function iml.beginFrame()
     local px, py = pointer_x, pointer_y
@@ -322,6 +332,12 @@ end
 
 --- Returns true ONCE if the region was just clicked.
 --- (ie ONLY the frame after `mousereleased`.)
+---@param x number
+---@param y number
+---@param w number
+---@param h number
+---@param button integer?
+---@param key any?
 function iml.wasJustClicked(x,y,w,h, button, key)
     assertIsFrame()
     iml.panel(x,y,w,h, key)
@@ -447,8 +463,12 @@ function iml.endFrame()
 
     lastHoveredPanel = frameState.hoveredPanel or nil
     frameCount = frameCount + 1
-    clickReleases = {}
-    clickPresses = {}
+    table.clear(clickReleases)
+    table.clear(clickPresses)
+    table.clear(keyPresses)
+    table.clear(keyReleases)
+    wheelDx = nil
+    wheelDy = nil
     text = nil
 end
 
@@ -488,13 +508,32 @@ function iml.mousereleased(x, y, button, istouch, presses)
 end
 
 
+---@param key love.KeyConstant
+---@param scancode love.Scancode
+---@param isrepeat boolean
 function iml.keypressed(key, scancode, isrepeat)
-    if not frameState then return end
+    keyPresses[key] = true
 end
 
-function iml.keyreleased(key, scancode, isrepeat)
-    if not frameState then return end
+---@param key love.KeyConstant
+---@param scancode love.Scancode
+function iml.keyreleased(key, scancode)
+    keyReleases[key] = true
+end
 
+---This also returns true if iml.keypressed was called with same key and with isrepeat = true.
+---@param key love.KeyConstant
+function iml.wasKeyJustPressed(key)
+    local val = keyPresses[key]
+    keyPresses[key] = nil
+    return val
+end
+
+---@param key love.KeyConstant
+function iml.wasKeyJustReleased(key)
+    local val = keyReleases[key]
+    keyReleases[key] = nil
+    return val
 end
 
 
@@ -512,7 +551,15 @@ end
 
 
 function iml.wheelmoved(dx,dy)
-    -- TODO: implement me
+    wheelDx = dx
+    wheelDy = dy
+end
+
+---@return number?,number?
+function iml.consumeWheelMove()
+    local dx, dy = wheelDx, wheelDy
+    wheelDx, wheelDy = nil, nil
+    return dx, dy
 end
 
 
