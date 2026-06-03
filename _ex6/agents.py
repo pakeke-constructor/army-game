@@ -17,6 +17,7 @@ from ex6 import Context, Message
 
 
 
+
 MAIN_SYSTEM_PROMPT = ex6.Message(
 role ="system",
 overview="main-system",
@@ -77,20 +78,21 @@ The ONLY acceptable text output is: a direct answer, a clarifying question, or a
 
 
 
-CODING_STYLE_PROMPT = ex6.Message(role="system", overview="coding-style", content=SYSTEM_PROMPT_CODING_STYLE)
-
-
-
-CODE_MODE_SYS_PROMPT = make_code_mode_system_prompt([
+MAIN_TOOLS = [
     read_file, glob, search, read_headers, read_body,
     write_file, edit_file, edit_file_lines,
     explore_agent, web_search, websearch_agent,
     plan_done, plan_read, plan_write,
     git_working_tree,
-    game_start, game_interact,
     love2d_docs,
     load_skill
-])
+]
+
+MAIN_SYSTEM_PROMPT = MAIN_SYSTEM_PROMPT.with_tools(MAIN_TOOLS)
+
+CODING_STYLE_PROMPT = ex6.Message(role="system", overview="coding-style", content=SYSTEM_PROMPT_CODING_STYLE)
+
+CODE_MODE_SYS_PROMPT = make_code_mode_system_prompt(MAIN_TOOLS)
 
 
 EX6_MD = ex6.Message(role="system", content=open("EX6.md","r").read(), overview="EX6.md")
@@ -98,7 +100,6 @@ EX6_MD = ex6.Message(role="system", content=open("EX6.md","r").read(), overview=
 
 coder = Context("c_opus", yolo=False, model=M.OPUS_LATEST.id, reasoning="high", messages=[
     MAIN_SYSTEM_PROMPT,
-    CODE_MODE_SYS_PROMPT,
     ENV_PROMPT,
     # CODING_STYLE_PROMPT,
     EX6_MD,
@@ -109,7 +110,6 @@ cache_manually(coder)
 
 coder = Context("c_codex", yolo=False, model=M.CODEX_LATEST.id, reasoning="high", messages=[
     MAIN_SYSTEM_PROMPT,
-    CODE_MODE_SYS_PROMPT,
     ENV_PROMPT,
     # CODING_STYLE_PROMPT,
     EX6_MD,
