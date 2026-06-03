@@ -125,22 +125,22 @@
 
 
 - Make it so healing-ents are more "visual":
-- healing-ents shoot projectiles (e.g. chef shoots bread, healers shoot other projectiles)
+- Make it so healing-ents shoot projectiles (e.g. chef shoots bread, healers shoot other projectiles)
 - the projectiles heal properly on hit, and are super visual.
 
 
-- Currently, healing-ents dont shoot when they are 
+- add juice for healing; when healing, a green `%d{health_icon}` will pop up. use textPopupService
 
+- add juice for buffs. Should be like `+4 (ATK)` or whatever. Use textPopupService
 
-- add juice for healing; when healing, a green `%d{health_icon}` will pop up.
-- add juice for buffs. Should be like `+4 (ATK)` or whatever.
-
-
-- Add popup-numbers for buffs/healing/etc.
 
 
 
 - Wire up sprites to ALL units (icons, entity-images, AND weapons)
+
+
+- Make blessing ChoicePanel look better. Currently, looks bad.
+
 
 
 - PROCESS: Play through the game a couple times. Just get a feel, then *balance*
