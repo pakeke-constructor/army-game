@@ -36,6 +36,7 @@ local function isValid(ent)
     return not not (ent.health and g.isAlive(ent))
 end
 
+---@param ent ecs.Entity
 local function getTargetTeam(ent)
     if ent.ai and ent.ai.target == "enemy" then
         return ent.team == "ally" and "enemy" or "ally"
@@ -222,8 +223,11 @@ end
 
 
 -- PROJECTILE SYSTEM
+---@param world ecs.ECSWorld
+---@param ent ecs.Entity
+---@param dt number
 local function updateProjectile(world, ent, dt)
-    local proj = ent.projectile
+    local proj = assert(ent.projectile)
 
     -- face movement direction (account for z arc in visual rotation)
     local visualVy = ent.vy - (ent.vz or 0) / 2
@@ -239,10 +243,20 @@ local function updateProjectile(world, ent, dt)
     -- check collision with units (only if z is low enough)
     if ent.z < PROJ_Z_MAX then
         local targetTeam = proj.targetTeam or (proj.team == "ally" and "enemy" or "ally")
+        ---@type ecs.Entity?
         local hitEnt = nil
         local projHits = ent._projectileHits
         g.iteratePartition(targetTeam, ent.x, ent.y, function(other)
             if hitEnt then return end
+            -- Need this check because projectile meant for ally collies
+            -- with itself. However, a more sophisticated heurestic is
+            -- probably necessary.
+            -- There are 3 options:
+            -- 1. Do not allow collide with owner entity. This is currently used.
+            -- 2. Make it so healing-projectiles only collide with entities that have low/missing health
+            -- 3. Make it so healing-projectiles only collide with the entity that they were shot towards
+            -- TODO: If option 1 is no longer sufficient, rectify this.
+            if proj.ownerEnt == other then return end
             if projHits and projHits[other.id] then return end
             if not isValid(other) then return end
             local dx, dy = other.x - ent.x, other.y - ent.y

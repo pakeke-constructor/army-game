@@ -257,6 +257,11 @@ function g.newTestRun()
 end
 
 
+---@param partitionId string
+---@param x number
+---@param y number
+---@param fn fun(ent: ecs.Entity)
+---@param range number
 function g.iteratePartition(partitionId, x, y, fn, range)
     local ecs = g.getECS()
     ecs:iteratePartition(partitionId, x, y, fn, range)

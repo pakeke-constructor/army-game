@@ -251,7 +251,7 @@ end
 
 
 ---@param component string
----@return fun(table: ecs.Entity[], i?: integer):integer
+---@return fun(table: ecs.Entity[], i?: integer):(integer,ecs.Entity)
 ---@return ecs.Entity[]
 ---@return integer
 function ECSWorld:iterate(component)
