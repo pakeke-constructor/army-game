@@ -77,13 +77,31 @@ end
 ---@return MapNode? clicked
 local function updateNodePanels(graph)
     local size = graph.distanceBetweenNodes * HOVER_DIST_FRAC
+    local mx, my = iml.getTransformedPointer()
+    ---@type MapNode?
+    local potential = nil
+    local distance = math.huge
     local hovered, clicked = nil, nil
     graph:forEachNode(function(node)
         local nx, ny = graph:getDrawPos(node)
-        local x, y, w, h = nx - size, ny - size, size * 2, size * 2
-        if iml.isHovered(x, y, w, h, node) then hovered = node end
-        if iml.wasJustClicked(x, y, w, h, 1, node) then clicked = node end
+        local d = helper.magnitude(nx - mx, ny - my)
+        -- Do a circle distance check to select potential node.
+        if d <= size and d < distance then
+            potential = node
+            distance = d
+        end
     end)
+
+    if potential then
+        -- IML check is important because a popup may have higher priority panel
+        -- which can make these hovered and wasJustClicked call false (which is intended)
+        -- Since our selection is a circle, the IML rectangle check is always inside a circle.
+        local nx, ny = graph:getDrawPos(potential)
+        local x, y, w, h = nx - size, ny - size, size * 2, size * 2
+        if iml.isHovered(x, y, w, h, potential) then hovered = potential end
+        if iml.wasJustClicked(x, y, w, h, 1, potential) then clicked = potential end
+    end
+
     return hovered, clicked
 end
 
