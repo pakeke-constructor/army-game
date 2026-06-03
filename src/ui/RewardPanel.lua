@@ -60,8 +60,9 @@ local NEW_MANA =  "{mana_colorless_large} " .. colStr .. loc("Gain a Mana crysta
 
 
 function RewardPanel:draw()
-    local r = ui.getScreenRegion()
+    iml.panel(ui.getFullScreenRegion():get())
 
+    local r = ui.getScreenRegion()
     r = r:padRatio(0.2)
 
     ---@type ui.Box

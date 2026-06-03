@@ -552,6 +552,7 @@ end
 
 
 --- Iterate all nodes
+---@param fn fun(node:MapNode)
 function MapGraph:forEachNode(fn)
     for _, node in pairs(self.nodes) do
         fn(node)
