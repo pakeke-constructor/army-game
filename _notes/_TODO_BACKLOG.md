@@ -3,6 +3,8 @@
 
 
 
+# COMPLETED:
+
 - Make map-scene render nicely (trees, mountains, demons, etc)
 - Add demon-rage system
 - Add enemy-encounter system
