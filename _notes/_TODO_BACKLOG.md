@@ -112,23 +112,30 @@
 - Feast node UI:  +4 XP
 - BUG: Clicking on popup ui (nodeEventService) causes map-clicks underneath
 - Add "wisps", move across screen (like smoke debris) for map/battle-scene
+- Walk-animation for entities
 
 
 ### OK:: what do we need for a minimum-playable game?
 
 
 
-- Chest node + Chest-node UI  (spend keys)
+- Fix bug in map-scene, when hovering node-iml-panel, doesn't show the hovered-path, (because iml panel blocks)
 
 
-- add juice for healing; when healing
-- add juice for buffs
+- Make it so healing-ents are more "visual":
+- healing-ents shoot projectiles (e.g. chef shoots bread, healers shoot other projectiles)
+- the projectiles heal properly on hit, and are super visual.
+
+
+- Currently, healing-ents dont shoot when they are 
+
+
+- add juice for healing; when healing, a green `%d{health_icon}` will pop up.
+- add juice for buffs. Should be like `+4 (ATK)` or whatever.
 
 
 - Add popup-numbers for buffs/healing/etc.
 
-
-- Give healing-ents projectiles
 
 
 - Wire up sprites to ALL units (icons, entity-images, AND weapons)
@@ -154,6 +161,8 @@ More decor-sprites for map (grasses, bushes, skull, more tree types?)
 
 #### CUTOFF. EVERYTHING ABOVE THIS POINT IS 100% NECCESSARY.
 
+
+- Chest node + Chest-node UI  (spend keys)
 
 - Improve wisps: should use leaf-sprites
 - Add godrays for map-scene and battle-scene

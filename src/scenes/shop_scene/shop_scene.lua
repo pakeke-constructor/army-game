@@ -422,7 +422,7 @@ local function drawShopUI(self, freeArea)
     drawRerollButton(self, rerollR:padRatio(0.1))
 
     local scrW,scrH = ui.getScaledUIDimensions()
-    local exitR = Kirigami(0, scrH * (7/8), scrW/10,scrH/10)
+    local exitR = Kirigami(0, scrH * (4/8), scrW/10,scrH/10)
     if ui.DefaultButton("Exit", exitR) then
         g.gotoLastScene()
     end

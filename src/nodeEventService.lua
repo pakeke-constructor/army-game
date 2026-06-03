@@ -181,8 +181,12 @@ function nodeEventService.openShrinePopup()
     local squad = pickShrineSacrificeSquad()
     openPopup("shrine", squad and squad.squadId or nil)
 end
-function nodeEventService.openFountainPopup() openPopup("fountain") end
-function nodeEventService.openFeastPopup() openPopup("feast") end
+function nodeEventService.openFountainPopup()
+    openPopup("fountain")
+end
+function nodeEventService.openFeastPopup()
+    openPopup("feast")
+end
 
 
 
