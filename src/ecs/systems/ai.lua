@@ -29,6 +29,7 @@ local PATROL_PAUSE_MAX = 3.5
 local PATROL_ARRIVE_DIST = 4
 
 -- reused across frames
+---@type ecs.Entity[]
 local _sortBuf = {}
 
 -- returns squared distance
@@ -63,13 +64,15 @@ end
 
 
 -- Find the best target for `ent` from `candidates`
+---@param ent ecs.Entity
+---@param candidates ecs.Entity[]
 local function pickTarget(ent, candidates)
     local best, bestScore = nil, -math.huge
-    local ai = ent.ai
+    local ai = assert(ent.ai)
     local curTarget = ent._aiTarget
     for i = 1, #candidates do
         local c = candidates[i]
-        if isValidTarget(c) then
+        if isValidTarget(c) and c ~= ent then
             local getPrio = ai.getPriority
             if not getPrio then
                 if (ent.healPower or 0) > 0 then
@@ -128,6 +131,8 @@ local function updatePatrol(ent, dt)
     ent.vy = dy / dist * speed
 end
 
+---@param a ecs.Entity
+---@param b ecs.Entity
 local function staleSorter(a, b)
     return (a._lastTargetRefreshTime or STALE_DEFAULT) < (b._lastTargetRefreshTime or STALE_DEFAULT)
 end
@@ -135,6 +140,7 @@ end
 function aiSys.preUpdate(dt)
     local world = g.getECS()
     -- build side lists
+    ---@type ecs.Entity[],ecs.Entity[]
     local allies, enemies = {}, {}
     for _, ent in world:iterate("team") do
         if isValidTarget(ent) then
