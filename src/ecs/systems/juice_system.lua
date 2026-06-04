@@ -5,6 +5,7 @@ local juice_system = {}
 local MAX_SPARKS = 20
 local MAX_HEALS = 25
 local HIT_DURATION = 0.16
+local HEAL_DURATION = 0.75
 local HEAL_SPARKLE = {
     {"heal_sparkle_1", objects.Color("FFAEE94F")},
     {"heal_sparkle_2", objects.Color("FF39BC34")},
@@ -98,7 +99,7 @@ local function spawnHeal(store, ent)
         heals[#heals+1] = heal
     end
 
-    heal.expire = t + 1
+    heal.expire = t + HEAL_DURATION
     heal.target = ent
     heal.seed = love.math.random(0, 65535)
 end
@@ -168,7 +169,6 @@ end
 ---@param unitEnt ecs.Entity
 function juice_system.entityHealed(unitEnt)
     -- Spawn heal particle
-    print("healed", unitEnt:getTypename())
     local store = getStore()
     return spawnHeal(store, unitEnt)
 end
@@ -246,6 +246,11 @@ function juice_system.postDraw()
         local remaining = h.expire - t
         if remaining > 0 and not h.target.___removed then
             local state = helper.hashInteger(h.seed) * 65536
+            local offY = 0
+            if h.target.image then
+                local w, h = g.getImageSize(h.target.image)
+                offY = h / 2
+            end
 
             for i = 1, 8 do
                 local angle = state / 4294967296 * consts.TAU
@@ -256,7 +261,8 @@ function juice_system.postDraw()
                 local imgindex = math.floor(remaining * 8 + i) % 2 + 1
                 local imginfo = HEAL_SPARKLE[imgindex]
                 local x = math.cos(angle) * radius + h.target.x
-                local y = math.sin(angle) * radius + h.target.y - remaining * 10
+                -- It's should ellipse, so make the Y axis longer
+                local y = math.sin(angle) * radius * 1.5 + h.target.y + remaining * 10 - offY
                 lg.setColor(imginfo[2])
                 g.drawImage(imginfo[1], x, y)
             end
