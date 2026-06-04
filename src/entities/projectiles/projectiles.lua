@@ -21,3 +21,7 @@ defineProjectile("arrow", {
     image = "green_arrow",
 })
 
+
+defineProjectile("bread", {
+    image = "bread"
+})
