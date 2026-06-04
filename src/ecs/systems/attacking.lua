@@ -268,7 +268,7 @@ local function updateProjectile(world, ent, dt)
         if hitEnt then
             ent._projectileHits = ent._projectileHits or {}
             ent._projectileHits[hitEnt.id] = true
-            local amount = proj.damage or proj.healing or 0
+            local amount = math.max(proj.damage, proj.healing)
             dealDmg(hitEnt, proj.ownerEnt, amount)
             doAoe(proj.ownerEnt, hitEnt, amount)
             g.knockback(hitEnt, proj.ownerEnt.x, proj.ownerEnt.y, proj.knockback or consts.DEFAULT_RANGED_KNOCKBACK)
