@@ -75,6 +75,20 @@ local function spawnProjectile(attacker, target)
         zStart = h * 0.7
     end
 
+    local homingTarget = nil
+    if atk.projectileHoming then
+        ---@type ecs.components.Projectile.Homing
+        homingTarget = {
+            target = target,
+            time = 0,
+            flightDuration = flightTime,
+            zStart = zStart,
+        }
+        -- We'll interpolate projectile manually later
+        vz = 0
+        projSpeed = 0
+    end
+
     for i = 1, count do
         local spread = count > 1 and ((i - 1) / (count - 1) - 0.5) or 0
         local angle = math.atan2(dy, dx) + spread * 0.15
@@ -91,6 +105,7 @@ local function spawnProjectile(attacker, target)
             targetTeam = getTargetTeam(attacker),
             pierceCount = 1,
             knockback = atk.projectileKnockback or consts.DEFAULT_RANGED_KNOCKBACK,
+            homing = homingTarget,
         }
     end
 
@@ -229,9 +244,41 @@ end
 local function updateProjectile(world, ent, dt)
     local proj = assert(ent.projectile)
 
-    -- face movement direction (account for z arc in visual rotation)
-    local visualVy = ent.vy - (ent.vz or 0) / 2
-    ent.rot = math.atan2(visualVy, ent.vx)
+    -- For homing projectile, re-compute x, y, and z manually
+    local homing = proj.homing
+    if homing then
+        if homing.target.___removed then
+            world:removeEntity(ent)
+            return
+        end
+
+        homing.time = homing.time + dt
+        local t = helper.clamp(homing.time / homing.flightDuration, 0, 1)
+
+        if t >= 1 then
+            -- Force collide (likely triggered in below codepath but just in case)
+            g.call("projectileHit", ent, homing.target)
+            world:removeEntity(ent)
+            return
+        end
+
+        -- Update x,y,z
+        local x = helper.lerp(proj.ownerEnt.x, homing.target.x, t)
+        local y = helper.lerp(proj.ownerEnt.y, homing.target.y, t)
+        local z = homing.zStart + 0.5 * consts.GRAVITY * (homing.flightDuration ^ 2) * t * (1 - t)
+        local vx = x - ent.x
+        local vy = y - ent.y
+        local vz = z - ent.z
+        ent.x, ent.y, ent.z = x, y, z
+        -- face movement direction (account for z arc in visual rotation)
+        -- uses vx,vy,vz computed from previous frame
+        local visualVy = vy - (vz or 0) / 2
+        ent.rot = math.atan2(visualVy, vx)
+    else
+        -- face movement direction (account for z arc in visual rotation)
+        local visualVy = ent.vy - (ent.vz or 0) / 2
+        ent.rot = math.atan2(visualVy, ent.vx)
+    end
 
     -- hit ground (z is updated generically in ECSWorld:update)
     if (ent.z or 0) <= 0 then
@@ -252,11 +299,11 @@ local function updateProjectile(world, ent, dt)
             -- with itself. However, a more sophisticated heurestic is
             -- probably necessary.
             -- There are 3 options:
-            -- 1. Do not allow collide with owner entity. This is currently used.
-            -- 2. Make it so healing-projectiles only collide with entities that have low/missing health
-            -- 3. Make it so healing-projectiles only collide with the entity that they were shot towards
-            -- TODO: If option 1 is no longer sufficient, rectify this.
+            -- 1. Do not allow collide with owner entity.
+            -- 2. Make it so healing-projectiles only collide with entities that have low/missing health.
+            -- 3. Make it so healing-projectiles only collide with the entity that they were shot towards. This is currently used.
             if proj.ownerEnt == other then return end
+            if proj.homing and proj.homing.target ~= other then return end
             if projHits and projHits[other.id] then return end
             if not isValid(other) then return end
             local dx, dy = other.x - ent.x, other.y - ent.y

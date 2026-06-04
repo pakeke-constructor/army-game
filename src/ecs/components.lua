@@ -18,6 +18,7 @@ local ai = {
 ---@field public attackType "melee"|"ranged"
 ---@field public projectileType string?
 ---@field public projectileSpeed number?
+---@field public projectileHoming boolean?
 ---@field public aoeRadius number?
 ---@field public aoeDamageMultiplier number?
 local attack = {
@@ -25,6 +26,7 @@ local attack = {
     -- ranged attacks spawn a projectile entity type (e.g. "arrow")
     projectileType = "basic_arrow",
     projectileSpeed = 300, -- pixels/sec for projectiles
+    projectileHoming = false, -- true or false
 
     aoeRadius = 50 or nil, -- defaults to 0  (no AOE)
     aoeDamageMultiplier = 0.8 or nil,
@@ -33,12 +35,22 @@ local attack = {
 
 ---@class ecs.components.Projectile
 ---@field public damage number
+---@field public healing number
 ---@field public ownerEnt ecs.Entity?
 ---@field public team "ally"|"enemy"
+---@field public targetTeam "ally"|"enemy"
 ---@field public pierceCount number
+---@field public homing ecs.components.Projectile.Homing?
 local projectile = {
     -- damage, ownerEnt, team, pierceCount are set on spawn
 }
+
+---@class ecs.components.Projectile.Homing
+---@field public target ecs.Entity
+---@field public time number
+---@field public flightDuration number
+---@field public zStart number
+local homing = {}
 
 ---@class ecs.components.Taunt
 ---@field public ent ecs.Entity
