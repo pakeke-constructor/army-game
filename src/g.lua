@@ -109,10 +109,11 @@ end
 ---Snap a color to the nearest palette entry.
 ---Uses 4th-power channel distance to deeply penalize large per-channel differences.
 ---Preserves the input alpha.
----@param r number|objects.Color red [0..1], or a Color/table
----@param gg number? green [0..1]
----@param b number? blue [0..1]
+---@param r number red [0..1]
+---@param gg number green [0..1]
+---@param b number blue [0..1]
 ---@param a number? alpha [0..1] (default 1)
+---@overload fun(color:objects.Color):objects.Color
 ---@return objects.Color
 function g.snapToPalette(r, gg, b, a)
     if type(r) == "table" then
