@@ -672,12 +672,6 @@ function battle_scene:draw()
         g.gotoScene("map_scene")
     end
 
-    if self.defeat then
-        lg.setColor(1, 0.25, 0.25, 0.95)
-        lg.printf("Defeat (stub)", 0, sh * 0.45, sw*0.5, "center")
-        lg.setColor(1, 1, 1, 1)
-    end
-
     if self.timeSinceEnteredScene < INTRO_ZOOM_DURATION then
         local rr = ui.getScreenRegion()
         local font = g.getBigFont(16)
