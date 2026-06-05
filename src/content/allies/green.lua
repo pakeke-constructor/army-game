@@ -93,8 +93,9 @@ g.defineSquad("cook_squad", {
         },
         attack = {
             attackType = "ranged",
-            projectileType = "arrow",
+            projectileType = "bread",
             projectileSpeed = 250,
+            projectileHoming = true,
         },
         weapon = {
             image = "chefs_dish",

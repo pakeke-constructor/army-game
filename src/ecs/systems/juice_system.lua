@@ -3,7 +3,13 @@ local juiceService = require("src.juiceService")
 local juice_system = {}
 
 local MAX_SPARKS = 20
+local MAX_HEALS = 25
 local HIT_DURATION = 0.16
+local HEAL_DURATION = 0.75
+local HEAL_SPARKLE = {
+    {"heal_sparkle_1", g.snapToPalette(objects.Color("FF5ECA2C"))},
+    {"heal_sparkle_2", g.snapToPalette(objects.Color.WHITE)},
+}
 
 
 
@@ -33,6 +39,7 @@ local function getStore()
         activeSparks = {},
         sparkPool = {},
         activeHits = {},
+        activeHeals = {},
     }
     return world.data.juiceSystem
 end
@@ -65,6 +72,36 @@ local function spawnHit(store, x, y)
         y = y + love.math.random(-1, 1),
         time = 0,
     }
+end
+
+---@param ent ecs.Entity
+local function spawnHeal(store, ent)
+    if ent.___removed then
+        return
+    end
+
+    local heals = store.activeHeals
+    local t = love.timer.getTime()
+    local heal = nil
+
+    for _, h in ipairs(heals) do
+        if t > h.expire or h.target.___removed then
+            heal = h
+            break
+        end
+    end
+
+    if not heal then
+        if #heals >= MAX_HEALS then
+            return
+        end
+        heal = {}
+        heals[#heals+1] = heal
+    end
+
+    heal.expire = t + HEAL_DURATION
+    heal.target = ent
+    heal.seed = love.math.random(0, 65535)
 end
 
 function juice_system.onHitDamage(attacker, damage, target, isArmorHit)
@@ -127,6 +164,13 @@ function juice_system.entityDeath(ent, killer)
     if ent.image and not ent.isPest then
         g.spawnEntity("body", ent.x, ent.y, ent)
     end
+end
+
+---@param unitEnt ecs.Entity
+function juice_system.entityHealed(unitEnt)
+    -- Spawn heal particle
+    local store = getStore()
+    return spawnHeal(store, unitEnt)
 end
 
 function juice_system.explosion(x, y, damage, radius)
@@ -195,6 +239,40 @@ function juice_system.postDraw()
         local _, _, w, hh = frame:getViewport()
         lg.draw(g.getAtlas(), frame, h.x, h.y, 0, 1, 1, w/2, hh/2)
     end
+
+    local t = love.timer.getTime()
+    local c = gsman.setColor(1, 1, 1)
+    for _, h in ipairs(store.activeHeals) do
+        local remaining = h.expire - t
+        if remaining > 0 and not h.target.___removed then
+            local offY = 0
+            local radiusX, radiusY = 15, 15
+            if h.target.image then
+                local iw, ih = g.getImageSize(h.target.image)
+                offY = ih / 2
+                radiusX = iw / 2
+                radiusY = ih / 2
+            end
+
+            local state = helper.hashInteger(h.seed) * 65536
+            for i = 1, 4 do
+                -- These hash integers provides consistent PRNG number using single
+                -- state/seed value without the overhead of RNG object.
+                local angle = state / 4294967296 * consts.TAU
+                state = helper.hashInteger(state) * 65536
+                local radiusMul = state / 4294967296
+                state = helper.hashInteger(state) * 65536
+
+                local imgindex = math.floor(remaining * 8 + i) % 2 + 1
+                local imginfo = HEAL_SPARKLE[imgindex]
+                local x = math.cos(angle) * radiusX * radiusMul + h.target.x
+                local y = math.sin(angle) * radiusY * radiusMul + h.target.y + remaining * 10 - offY
+                lg.setColor(imginfo[2])
+                g.drawImage(imginfo[1], x, y)
+            end
+        end
+    end
+    c:pop()
 end
 
 return juice_system
