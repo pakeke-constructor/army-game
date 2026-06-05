@@ -1881,18 +1881,16 @@ function g.drawEntity(ent, x, y)
     if ent.image then
         local HIT_HEAL_COLOR_INDICATOR_DURATION = 0.25
         local col = ent.color or objects.Color.WHITE
-        local col2 = objects.Color.WHITE
 
         if math.min(ent._timeSinceDamaged or 0xffffffff, ent._timeSinceHealed or 0xffffffff) < HIT_HEAL_COLOR_INDICATOR_DURATION then
             if ent._timeSinceDamaged < ent._timeSinceHealed then
-                col2 = g.COLORS.DAMAGE
+                col = col * g.COLORS.DAMAGE
             elseif ent._timeSinceHealed < ent._timeSinceDamaged then
-                col2 = g.COLORS.HEAL
+                col = col * g.COLORS.HEAL
             end
         end
 
-        local colfinal = helper.multiplyAlpha(col * col2, ent.alpha or 1)
-        lg.setColor(colfinal)
+        lg.setColor(col[1], col[2], col[3], col[4] * (ent.alpha or 1))
         local rot = (ent.rot or 0) + bodyRot + (ent.damageJolt or 0) + walkWobble
         g.drawImageOffset(ent.image, x + (ent.ox or 0), y + (ent.oy or 0) + walkBounce, rot, sx, sy, 0.5, 0.95, ent.kx, ent.ky)
 
