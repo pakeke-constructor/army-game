@@ -28,3 +28,28 @@ g.defineEntity("body", {
         ent.alpha = math.min(1, math.max(0, t))
     end,
 })
+
+
+
+g.defineEntity("nexus", {
+    image = "placeholder",
+
+    -- "nexus" is an object that spawns at the start of every battle.
+    -- it has health; if destroyed, you lose the game.
+
+    -- nexus also shoots arrows at the nearest enemy too.
+
+    isBuilding = true,
+    team = "ally",
+    partitions = {"unit", "ally"},
+    physics = { shape = "circle", radius = 12, ox = 0, oy = 0, mass = 1, isStatic = true },
+    ai = { target = "enemy" },
+    attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 300 },
+    weapon = { image = "placeholder", type = "bow" },
+    baseAttackDamage = 3,
+    baseAttackSpeed = 0.8,
+    baseAttackRange = 250,
+    baseMaxHealth = 200,
+})
+
+

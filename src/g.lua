@@ -1342,7 +1342,7 @@ function g.spawnEntityWithInit(id, x, y, initFunc, ...)
     if initFunc then
         initFunc(ent)
     end
-    if ent.ai and not ent.walkAnimation then
+    if ent.ai and (not ent.walkAnimation) and (not ent.isBuilding) then
         local h = 30
         if ent.image then
             local _, ih = g.getImageSize(ent.image)

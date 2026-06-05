@@ -25,8 +25,17 @@ local battle_scene = {}
 
 
 
+local function defeat(self)
+    if self.defeat then return end
+    self.defeat = true
+    g.call("battleLost")
+    -- todo: do other stuff here, like popup, etc etc
+end
+
+
 function battle_scene:init()
     self.victory = false
+    self.defeat = false
     self.victoryPopupTime = 0
     self.shockwave = nil
     self.lastEnemyCount = 0
@@ -67,13 +76,15 @@ function battle_scene:pollHandlers()
             self.particles:draw()
         end,
         entityDeath = function(ent)
+            if ent.type == "nexus" and (not self.defeat) then
+                defeat(self)
+            end
             if ent.team ~= "enemy" then return end
             if self.lastEnemyCount ~= 1 then return end
             self.shockwave = { time = 0, x = ent.x, y = ent.y }
         end
     })
 end
-
 
 function battle_scene:enter()
     local run = g.getRun()
@@ -88,24 +99,32 @@ function battle_scene:enter()
         "stats", "status_effects", "ai", "attacking",
         "physics", "shadows", "ground_decor", "juice_system", "blood_system"
     })
+    g.setCurrentECS(self.ecs)
+
     self.camera = Camera(0, 0, CAMERA_ZOOM)
     self.particles = ParticleService()
     self.hud = HUD()
     self.noEnemyTimer = 0
     self.victory = false
+    self.defeated = false
     self.victoryPopupTime = 0
     self.shockwave = nil
     self.lastEnemyCount = 0
     self.squadChoices = nil
     self.timeSinceEnteredScene = 0
 
-    local run = g.getRun()
     if self.sandbox then
         self.ecs:setBorder(500, 300)
     else
-        g.setCurrentECS(self.ecs)
         encounters.startRandomEncounter(run.day, self.ecs)
     end
+
+    local deployRegion = g.getSquadDeployRegion()
+    if deployRegion then
+        local nx, ny = deployRegion:getCenter()
+        g.spawnEntity("nexus", nx, ny)
+    end
+
     local border = self.ecs.border
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
     self.camera:setPos(border[3] * 0.45, border[4] * 0.5)
@@ -164,6 +183,10 @@ function battle_scene:update(dt)
 
     local enemyCount = countEnemies(self.ecs)
     self.lastEnemyCount = enemyCount
+
+    if self.defeated then
+        return
+    end
 
     if not self.paused then
         self.particles:update(dt)
@@ -619,7 +642,7 @@ function battle_scene:draw()
     ui.startUI()
 
     local sw, sh = love.graphics.getDimensions()
-    if not self.victory and iml.wasJustPressed(0, 0, sw, sh, 1, "deploy_click") then
+    if (not self.victory) and (not self.defeat) and iml.wasJustPressed(0, 0, sw, sh, 1, "deploy_click") then
         local entry = self.hud:getSelection()
         local mx, my = love.mouse.getPosition()
         local wx, wy = self.camera:toWorld(mx, my)
@@ -647,6 +670,12 @@ function battle_scene:draw()
 
     if self.victory and (not g.isAnyPopupOpen()) then
         g.gotoScene("map_scene")
+    end
+
+    if self.defeat then
+        lg.setColor(1, 0.25, 0.25, 0.95)
+        lg.printf("Defeat (stub)", 0, sh * 0.45, sw*0.5, "center")
+        lg.setColor(1, 1, 1, 1)
     end
 
     if self.timeSinceEnteredScene < INTRO_ZOOM_DURATION then
