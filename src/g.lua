@@ -1523,7 +1523,6 @@ function g.dealDamage(target, damage, attacker, ignoreQuestionBuses)
 
     target.health = target.health - finalDmg
     target._timeSinceDamaged = 0
-    target._timeSinceHealed = 0
 
     if attacker then
         g.call("onHitDamage", attacker, damage, target, false)
@@ -1854,6 +1853,9 @@ local DEV_SHOW_RANGE = false
 DEV_SHOW_RANGE = consts.DEV_MODE and DEV_SHOW_RANGE
 
 
+---@param ent ecs.Entity
+---@param x number
+---@param y number
 function g.drawEntity(ent, x, y)
     local entScale = g.ask("getEntityScale", ent) * (ent.scale or 1)
     local sx, sy = (ent.sx or 1) * (ent.faceDir or 1) * entScale, (ent.sy or 1) * entScale
@@ -1871,14 +1873,26 @@ function g.drawEntity(ent, x, y)
     local bodyRot = getBodyRot(ent)
     local walkBounce, walkWobble = 0, 0
     if ent._walkTime and ent._walkTime > 0 and ent.walkAnimation then
-        local wa = ent.walkAnimation
+        local wa = assert(ent.walkAnimation)
         local t = ent._walkTime * wa.speed
         walkBounce = -math.abs(math.sin(t)) * wa.bounceHeight
         walkWobble = math.sin(t) * wa.rotationAmount
     end
     if ent.image then
+        local HIT_HEAL_COLOR_INDICATOR_DURATION = 0.25
         local col = ent.color or objects.Color.WHITE
-        lg.setColor(col[1], col[2], col[3], col[4] * (ent.alpha or 1))
+        local col2 = objects.Color.WHITE
+
+        if math.min(ent._timeSinceDamaged or 0xffffffff, ent._timeSinceHealed or 0xffffffff) < HIT_HEAL_COLOR_INDICATOR_DURATION then
+            if ent._timeSinceDamaged < ent._timeSinceHealed then
+                col2 = g.COLORS.DAMAGE
+            elseif ent._timeSinceHealed < ent._timeSinceDamaged then
+                col2 = g.COLORS.HEAL
+            end
+        end
+
+        local colfinal = helper.multiplyAlpha(col * col2, ent.alpha or 1)
+        lg.setColor(colfinal)
         local rot = (ent.rot or 0) + bodyRot + (ent.damageJolt or 0) + walkWobble
         g.drawImageOffset(ent.image, x + (ent.ox or 0), y + (ent.oy or 0) + walkBounce, rot, sx, sy, 0.5, 0.95, ent.kx, ent.ky)
 
