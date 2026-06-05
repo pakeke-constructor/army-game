@@ -7,7 +7,7 @@ local MAX_HEALS = 25
 local HIT_DURATION = 0.16
 local HEAL_DURATION = 0.75
 local HEAL_SPARKLE = {
-    {"heal_sparkle_1", g.snapToPalette(objects.Color("FF5ECA2C"))},
+    {"heal_sparkle_1", g.snapToPalette(objects.Color("FFAA2CCA"))},
     {"heal_sparkle_2", g.snapToPalette(objects.Color.WHITE)},
 }
 
@@ -166,11 +166,46 @@ function juice_system.entityDeath(ent, killer)
     end
 end
 
+local HEALING_TEXT = g.snapToPalette(objects.Color("FF2BC66E"))
+
 ---@param unitEnt ecs.Entity
-function juice_system.entityHealed(unitEnt)
+---@param addHealth number
+function juice_system.entityHealed(unitEnt, addHealth)
     -- Spawn heal particle
     local store = getStore()
-    return spawnHeal(store, unitEnt)
+    spawnHeal(store, unitEnt)
+
+    -- Add "Heal" text
+    local offy = 0
+    if unitEnt.image then
+        local _, ih = g.getImageSize(unitEnt.image)
+        offy = -ih
+    end
+    local healText = helper.wrapRichtextColor(HEALING_TEXT, string.format("%d", addHealth))
+    g.addWorldTextPopup(
+        unitEnt.x, unitEnt.y + offy,
+        healText.."{health}",
+        {duration = 1}
+    )
+end
+
+---@param ent ecs.Entity
+---@param stat string
+---@param increase number?
+function juice_system.entityBuffed(ent, stat, increase)
+    local statInfo = g.getStatInfo(stat)
+    local prefix = increase > 0 and "+" or ""
+    local text = helper.wrapRichtextColor(statInfo.color, string.format("%s%d", prefix, increase))
+    local offy = 0
+    if ent.image then
+        local _, ih = g.getImageSize(ent.image)
+        offy = -ih * 0.9
+    end
+    g.addWorldTextPopup(
+        ent.x, ent.y + offy,
+        text.."{"..statInfo.icon.."}",
+        {duration = 1}
+    )
 end
 
 function juice_system.explosion(x, y, damage, radius)
