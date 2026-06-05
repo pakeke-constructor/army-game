@@ -81,3 +81,37 @@ g.defineEntity("blazingbombardier", {
     baseMoveSpeed = 35,
     baseMaxHealth = 4,
 })
+
+g.defineEntity("brimstonecore", {
+    image = "brimstonecore",
+    shadow = {},
+    physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+    partitions = {"unit", "enemy"},
+    team = "enemy",
+    ai = {
+        target = "enemy",
+    },
+    weapon = {
+        type = "object",
+        image = "brimstonecore_shards"
+    },
+    attack = {
+        attackType = "melee",
+    },
+    baseAttackDamage = 1,
+    baseAttackSpeed = 1,
+    baseAttackRange = 80,
+    baseMoveSpeed = 50,
+    baseMaxHealth = 16,
+
+    onDraw = function(ent)
+        local dir = ent.id % 2 * 2 - 1
+        local t = love.timer.getTime()
+        local rot = (dir * consts.TAU * t / 5) % consts.TAU
+        local _, h = g.getImageSize(ent.image)
+        g.drawImage("brimstonecore_shards", ent.x, ent.y - h / 2, rot)
+    end,
+    entityDeath = function(ent)
+        g.explosion(ent.x, ent.y, 5, 17, ent)
+    end,
+})
