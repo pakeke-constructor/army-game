@@ -33,12 +33,19 @@ local LOC_HOVER_NO_KEYS = loc("Keys are used to unlock things. (You have no keys
 
 
 
+---@param sq g.Squad
+---@return boolean
+local function isSquadVisible(sq)
+    local _, scName = g.getCurrentScene()
+    return scName ~= "battle_scene" or not sq.deployed
+end
+
 ---@param slot integer
 ---@return boolean
 local function isSlotAvailable(slot)
     local army = g.getSortedArmyList()
     local squad = army[slot]
-    return squad and (not squad.deployed) or false
+    return squad and isSquadVisible(squad) or false
 end
 
 ---@param from integer
@@ -53,7 +60,7 @@ local function getClosestAvailableSlot(from)
         for _, slot in ipairs({from - offset, from + offset}) do
             if slot >= 1 and slot <= total then
                 local sq = army[slot]
-                if sq and not sq.deployed then
+                if sq and isSquadVisible(sq) then
                     if sq.canAfford then return slot end
                     fallback = fallback or slot
                 end
@@ -128,7 +135,7 @@ local function drawSquadBar(self, region)
 
     local trueArmy = {}
     for i, sq in ipairs(army) do
-        if not sq.deployed then
+        if isSquadVisible(sq) then
             table.insert(trueArmy, {sq = sq, idx = i})
         end
     end
@@ -488,7 +495,7 @@ function HUD:selectVisibleSlot(visibleIndex)
     local army = g.getSortedArmyList()
     local seen = 0
     for i, sq in ipairs(army) do
-        if not sq.deployed then
+        if isSquadVisible(sq) then
             seen = seen + 1
             if seen == visibleIndex then
                 self.selectedSlot = i

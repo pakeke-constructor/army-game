@@ -132,6 +132,15 @@ function battle_scene:enter()
     ambienceService.reInitialize(self.camera:getTransform())
 end
 
+
+
+function battle_scene:leave()
+    for _, squad in pairs(g.getRun().squads) do
+        squad.deployed = false
+    end
+end
+
+
 local function countEnemies(ecs)
     local count = 0
     for _, ent in ecs:iterate("team") do
