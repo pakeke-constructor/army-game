@@ -115,3 +115,37 @@ g.defineEntity("brimstonecore", {
         g.explosion(ent.x, ent.y, 5, 17, ent)
     end,
 })
+
+g.defineEntity("charredsoul", {
+    image = "charredsoul",
+    shadow = {},
+    physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+    partitions = {"unit", "enemy"},
+    team = "enemy",
+    ai = {
+        target = "enemy",
+    },
+    weapon = {
+        type = "object",
+        image = "brimstonecore_shards"
+    },
+    attack = {
+        attackType = "melee",
+    },
+    baseAttackDamage = 2,
+    baseAttackSpeed = 0.5,
+    baseAttackRange = 80,
+    baseMoveSpeed = 50,
+    baseMaxHealth = 6,
+
+    entitySpawned = function(ent)
+        ent._nextBuffTime = 0
+    end,
+    entityUpdate = function(ent, dt)
+        ent._nextBuffTime = ent._nextBuffTime + dt
+        while ent._nextBuffTime >= 3 do
+            g.buffEntity(ent, "attackSpeed", 0.2)
+            ent._nextBuffTime = ent._nextBuffTime - 3
+        end
+    end,
+})
