@@ -7,7 +7,7 @@ local MAX_HEALS = 25
 local HIT_DURATION = 0.16
 local HEAL_DURATION = 0.75
 local HEAL_SPARKLE = {
-    {"heal_sparkle_1", g.snapToPalette(objects.Color("FF5ECA2C"))},
+    {"heal_sparkle_1", g.snapToPalette(objects.Color("FFAA2CCA"))},
     {"heal_sparkle_2", g.snapToPalette(objects.Color.WHITE)},
 }
 
