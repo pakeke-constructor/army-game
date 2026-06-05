@@ -2112,7 +2112,7 @@ end
 
 --- @param x number
 --- @param y number
---- @param richtxt any
+--- @param richtxt string|richtext.ParsedText
 --- @param args textPopupService.args?
 function g.addWorldTextPopup(x, y, richtxt, args)
     local sx, sy = g.worldToScreen(x, y)
