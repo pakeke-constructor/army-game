@@ -521,6 +521,8 @@ local function getSnappedDeployPosition(squad, wx, wy, region)
     return sx, sy
 end
 
+local SQUAD_HOVER_COLOR = g.snapToPalette(0.2, 1, 0.3, 0.5)
+
 ---@param squad g.Squad
 ---@param wx number world x coord
 ---@param wy number world y coord
@@ -530,7 +532,7 @@ local function drawSquadHover(squad, wx, wy)
     local offsets = squad:getFormationOffsets()
     local deployRegion = g.getSquadDeployRegion()
     local sx, sy = getSnappedDeployPosition(squad, wx, wy, deployRegion)
-    lg.setColor(0.2, 1, 0.3, 0.5)
+    lg.setColor(SQUAD_HOVER_COLOR)
 
     local w,h = 10,10
     if einfo.image then
