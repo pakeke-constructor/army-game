@@ -25,7 +25,7 @@ local battle_scene = {}
 
 
 
-local function defeat(self)
+local function loseBattle(self)
     if self.defeat then return end
     self.defeat = true
     g.call("battleLost")
@@ -77,7 +77,7 @@ function battle_scene:pollHandlers()
         end,
         entityDeath = function(ent)
             if ent.type == "nexus" and (not self.defeat) then
-                defeat(self)
+                loseBattle(self)
             end
             if ent.team ~= "enemy" then return end
             if self.lastEnemyCount ~= 1 then return end
