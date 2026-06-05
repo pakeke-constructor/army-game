@@ -189,6 +189,25 @@ function juice_system.entityHealed(unitEnt, addHealth)
     )
 end
 
+---@param ent ecs.Entity
+---@param stat string
+---@param increase number?
+function juice_system.entityBuffed(ent, stat, increase)
+    local statInfo = g.getStatInfo(stat)
+    local prefix = increase > 0 and "+" or ""
+    local text = helper.wrapRichtextColor(statInfo.color, string.format("%s%d", prefix, increase))
+    local offy = 0
+    if ent.image then
+        local _, ih = g.getImageSize(ent.image)
+        offy = -ih * 0.9
+    end
+    g.addWorldTextPopup(
+        ent.x, ent.y + offy,
+        text.."{"..statInfo.icon.."}",
+        {duration = 1}
+    )
+end
+
 function juice_system.explosion(x, y, damage, radius)
     juiceService.addCameraShake(math.min(0.6, 0.2 + (radius or 60) / 300))
     juiceService.addTimePause(0.05)
