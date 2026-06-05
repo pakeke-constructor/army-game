@@ -126,6 +126,7 @@ local shadow = {
 ---@field public weapon ecs.components.Weapon?
 ---@field public shadow ecs.components.Shadow?
 ---@field public walkAnimation ecs.components.WalkAnimation?
+---@field public _walkTime number?
 ---@field public faceDir integer?
 ---@field public taunt ecs.components.Taunt?
 ---@field public fear ecs.components.Fear?
@@ -138,6 +139,13 @@ local shadow = {
 ---@field public vx number?
 ---@field public vy number?
 ---@field public vz number?
+---@field public rot number?
+---@field public sx number?
+---@field public sy number?
+---@field public ox number?
+---@field public oy number?
+---@field public kx number?
+---@field public ky number?
 ---@field public oyOverride number? oy (offsetY) defaults to 0.95, which is 95% of image, but you can override this here.
 ---@field public drawOrder number?
 ---@field public scale number?
