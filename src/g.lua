@@ -1983,6 +1983,7 @@ local function getFallbackFonts(size)
 end
 
 ---@param size number
+---@return love.Font
 function g.getBigFont(size)
     assert(size % 16 == 0, "Size must by divisible by 16")
     if not bigCache[size] then
@@ -1994,6 +1995,7 @@ function g.getBigFont(size)
 end
 
 ---@param size number
+---@return love.Font
 function g.getSmallFont(size)
     assert(size % 16 == 0, "Size must by divisible by 16")
     if not smolCache[size] then
@@ -2061,6 +2063,7 @@ function g.isAnyPopupOpen()
         rewardPopupService.getActive()
         or choicePopupService.getActive()
         or nodeEventService.isActive()
+        or gameoverPopupService.isActive()
     )
 end
 

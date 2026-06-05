@@ -26,16 +26,17 @@ local battle_scene = {}
 
 
 local function loseBattle(self)
-    if self.defeat then return end
-    self.defeat = true
+    if self.defeated then return end
+    self.defeated = true
     g.call("battleLost")
     -- todo: do other stuff here, like popup, etc etc
+    gameoverPopupService.show()
 end
 
 
 function battle_scene:init()
     self.victory = false
-    self.defeat = false
+    self.defeated = false
     self.victoryPopupTime = 0
     self.shockwave = nil
     self.lastEnemyCount = 0
@@ -76,7 +77,7 @@ function battle_scene:pollHandlers()
             self.particles:draw()
         end,
         entityDeath = function(ent)
-            if ent.type == "nexus" and (not self.defeat) then
+            if ent.type == "nexus" then
                 loseBattle(self)
             end
             if ent.team ~= "enemy" then return end
@@ -135,8 +136,10 @@ end
 
 
 function battle_scene:leave()
-    for _, squad in pairs(g.getRun().squads) do
-        squad.deployed = false
+    if g.hasRun() then
+        for _, squad in pairs(g.getRun().squads) do
+            squad.deployed = false
+        end
     end
 end
 
@@ -653,7 +656,7 @@ function battle_scene:draw()
     ui.startUI()
 
     local sw, sh = love.graphics.getDimensions()
-    if (not self.victory) and (not self.defeat) and iml.wasJustPressed(0, 0, sw, sh, 1, "deploy_click") then
+    if (not self.victory) and (not self.defeated) and iml.wasJustPressed(0, 0, sw, sh, 1, "deploy_click") then
         local entry = self.hud:getSelection()
         local mx, my = love.mouse.getPosition()
         local wx, wy = self.camera:toWorld(mx, my)
