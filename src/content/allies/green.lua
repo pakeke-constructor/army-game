@@ -54,7 +54,7 @@ g.defineSquad("druid_squad", {
     name = loc("Druids"),
     rarity = g.RARITIES.COMMON,
     entityDef = {
-        image = "longbowman", -- no druid sprite; longbowman stand-in
+        image = "incense_priest", -- no druid sprite; longbowman stand-in
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         ai = {
             target = "ally",
@@ -147,14 +147,10 @@ g.defineSquad("hog_squad", {
     name = loc("Hogs of War"),
     rarity = g.RARITIES.UNCOMMON,
     entityDef = {
-        image = "militia",
+        image = "war_hog",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
-        },
-        weapon = {
-            image = "militia", -- placeholder
-            type = "sword",
         },
         baseAttackDamage = 1,
         baseAttackSpeed = 1.5,
@@ -172,14 +168,10 @@ g.defineSquad("giant_toad_squad", {
     name = loc("Giant Toads"),
     rarity = g.RARITIES.UNCOMMON,
     entityDef = {
-        image = "militia",
+        image = "gianttoad",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
-        },
-        weapon = {
-            image = "militia", -- placeholder
-            type = "sword",
         },
         baseAttackDamage = 1,
         baseAttackSpeed = 1,
@@ -198,14 +190,10 @@ g.defineSquad("infested_squad", {
     name = loc("The Infested"),
     rarity = g.RARITIES.UNCOMMON,
     entityDef = {
-        image = "militia",
+        image = "pest",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
-        },
-        weapon = {
-            image = "militia", -- placeholder
-            type = "sword",
         },
         baseAttackDamage = 1,
         baseAttackSpeed = 1,

@@ -4,13 +4,13 @@ g.defineSquad("gremlin_technician_squad", {
     name = loc("Gremlin Technicians"),
     rarity = g.RARITIES.COMMON,
     entityDef = {
-        image = "militia",
+        image = "greenskin_assassin",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
         },
         weapon = {
-            image = "militia_sword",
+            image = "dagger",
             type = "sword",
         },
         baseAttackDamage = 3,
@@ -114,13 +114,13 @@ g.defineSquad("tribute_squad", {
     name = loc("Tributes"),
     rarity = g.RARITIES.UNCOMMON,
     entityDef = {
-        image = "militia",
+        image = "peasant",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
         },
         weapon = {
-            image = "militia", -- placeholder
+            image = "peasant_pitchfork",
             type = "sword",
         },
         baseAttackDamage = 1,
@@ -141,13 +141,13 @@ g.defineSquad("grime_executioner_squad", {
     name = loc("Grime Executioners"),
     rarity = g.RARITIES.RARE,
     entityDef = {
-        image = "militia",
+        image = "barbarian",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
         },
         weapon = {
-            image = "militia", -- placeholder
+            image = "orc_battleaxe",
             type = "sword",
         },
         baseAttackDamage = 6,
@@ -166,13 +166,13 @@ g.defineSquad("berserker_squad", {
     name = loc("Berserkers"),
     rarity = g.RARITIES.UNCOMMON,
     entityDef = {
-        image = "militia",
+        image = "war_hog",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
         },
         weapon = {
-            image = "militia", -- placeholder
+            image = "orc_battleaxe",
             type = "sword",
         },
         baseAttackDamage = 2,
@@ -192,13 +192,13 @@ g.defineSquad("dagger_bearer_squad", {
     name = loc("Dagger Bearers"),
     rarity = g.RARITIES.RARE,
     entityDef = {
-        image = "militia",
+        image = "greenskin_assassin",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
         },
         weapon = {
-            image = "militia", -- placeholder
+            image = "dagger",
             type = "sword",
         },
         baseAttackDamage = 3,
@@ -218,13 +218,13 @@ g.defineSquad("soul_furnace_squad", {
     name = loc("Soul Furnaces"),
     rarity = g.RARITIES.RARE,
     entityDef = {
-        image = "militia",
+        image = "charredsoul",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
         },
         weapon = {
-            image = "militia", -- placeholder
+            image = "speardemon_spear", -- placeholder
             type = "sword",
         },
         baseAttackDamage = 1,
@@ -265,7 +265,7 @@ g.defineSquad("pain_elemental_squad", {
     name = loc("Pain Elementals"),
     rarity = g.RARITIES.RARE,
     entityDef = {
-        image = "militia",
+        image = "gargoyle",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = { attackType = "melee" },
         weapon = { image = "militia_sword", type = "sword" },

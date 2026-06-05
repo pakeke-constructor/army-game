@@ -39,7 +39,7 @@ g.defineSquad("prospector_squad", {
             attackType = "melee",
         },
         weapon = {
-            image = "militia", -- placeholder
+            image = "dagger", -- placeholder
             type = "sword",
         },
         baseAttackDamage = 4,

@@ -15,7 +15,7 @@ g.defineSquad("crystal_golems", {
             attackType = "melee",
         },
         weapon = {
-            image = "militia_sword",
+            image = "dagger",
             type = "sword",
         },
         baseAttackDamage = 14,
@@ -71,7 +71,7 @@ g.defineSquad("diver_squad", {
             attackType = "melee",
         },
         weapon = {
-            image = "militia_sword",
+            image = "dagger",
             type = "sword",
         },
         baseAttackDamage = 1,
@@ -238,7 +238,7 @@ g.defineSquad("incense_holder_squad", {
             projectileSpeed = 350,
         },
         weapon = {
-            image = "militia", -- placeholder
+            image = "militia_sword", -- placeholder
             type = "bow",
         },
         isHealer = true,
@@ -265,7 +265,7 @@ g.defineSquad("clay_troll_squad", {
             attackType = "melee",
         },
         weapon = {
-            image = "militia", -- placeholder
+            image = "militia_sword", -- placeholder
             type = "sword",
         },
         baseAttackDamage = 1,
@@ -288,7 +288,7 @@ g.defineSquad("war_elephant_squad", {
         image = "war_hog",
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 2 },
         attack = { attackType = "melee" },
-        weapon = { image = "militia_sword", type = "sword" },
+        --weapon = { image = "militia_sword", type = "sword" },
         baseAttackDamage = 4,
         baseAttackSpeed = 0.6,
         baseAttackRange = 22,

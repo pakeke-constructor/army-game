@@ -313,7 +313,7 @@ local function drawTopBar()
     drawXpBar(xp)
 
     local rageHover = run.demonRage <= 0 and LOC_HOVER_RAGE_ZERO or LOC_HOVER_RAGE({pct = run.demonRage * 10})
-    drawPanel(demonRage, "{demon_pitchfork}{c r=0.6 g=0.1 b=0} " .. tostring(run.demonRage), rageHover)
+    drawPanel(demonRage, "{demonfury_icon}{c r=0.6 g=0.1 b=0}  " .. tostring(run.demonRage), rageHover)
     drawPanel(gold, "{coin_icon} {GOLD_COLOR}" .. tostring(run.money), LOC_HOVER_GOLD)
 
     local hasKeys = (run.keys or 0) > 0
