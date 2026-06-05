@@ -55,3 +55,29 @@ g.defineEntity("archerdemon", {
     baseMaxHealth = 5,
 })
 
+-- FIXME: Balancing of this
+
+g.defineEntity("blazingbombardier", {
+    image = "blazingbombardier",
+    shadow = {},
+    physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+    partitions = {"unit", "enemy"},
+    team = "enemy",
+    ai = {
+        target = "enemy",
+    },
+    weapon = {
+        type = "bow",
+        image = "blazingbombardier_bomb"
+    },
+    attack = {
+        attackType = "ranged",
+        projectileType = "blazingbombardier_bomb",
+        projectileSpeed = 250,
+    },
+    baseAttackDamage = 1,
+    baseAttackSpeed = 0.5,
+    baseAttackRange = 350,
+    baseMoveSpeed = 35,
+    baseMaxHealth = 4,
+})
