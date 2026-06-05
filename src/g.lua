@@ -2462,8 +2462,23 @@ g.RARITIES = {
 }
 
 
----@alias g.Stat {id:string, name:string, displayName:string, description:string, shortName:string, richText:string, baseName:string, modQ:string, mulQ:string, color:objects.Color, icon:string, isImportant:fun(ent:ecs.Entity, stat:string):boolean}
+---@class g.Stat
+---@field id string
+---@field name string
+---@field displayName string
+---@field description string
+---@field shortName string
+---@field richText string
+---@field baseName string
+---@field modQ string
+---@field mulQ string
+---@field color objects.Color
+---@field icon string
+---@field isImportant fun(ent:ecs.Entity, stat:string):boolean
+
+---@type g.Stat[]
 local STAT_LIST = {}
+---@type table<string, g.Stat>
 local STAT_DEFS = {}
 
 ---@param id string
