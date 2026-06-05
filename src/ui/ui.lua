@@ -32,12 +32,39 @@ end
 ---@param region kirigami.Region
 ---@return boolean
 function ui.DefaultButton(richTxt, region)
-    local col1 = objects.Color.GRAY
-    local col2 = objects.Color.DARK_GRAY
-    return ui.CustomButton(function (xx,yy,ww,hh)
-        local font = g.getSmallFont(16)
-        richtext.printRichContained(richTxt, font, xx,yy,ww,hh)
-    end, col1,col2, region)
+    ui.assertUIStarted()
+
+    local oy = -6
+    local detectPanel = region:padRatio(-0.3)
+
+    love.graphics.setColor(1,1,1)
+    if iml.isHovered(detectPanel:get()) then
+        oy = -2
+        lg.setColor(0,0,0)
+    end
+
+    if iml.wasJustHovered(detectPanel:get()) then
+        if g.playUISound then
+            g.playUISound("ui_tick", 1.6,0.35, 0,0)
+        end
+    end
+
+    lg.setColor(0.5,0.5,0.5)
+    ui.drawDarkPanel(region:get())
+    local mainFace = region:moveUnit(0,oy)
+    lg.setColor(1,1,1)
+    ui.drawDarkPanel(mainFace:get())
+
+    local font = g.getSmallFont(16)
+    richtext.printRichContained(richTxt, font, mainFace:padRatio(0.2):get())
+
+    if iml.wasJustClicked(detectPanel:get()) then
+        if g.playUISound then
+            g.playUISound("ui_click_basic", 1.4,0.8)
+        end
+        return true
+    end
+    return false
 end
 
 
