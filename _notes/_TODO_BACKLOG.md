@@ -115,24 +115,16 @@
 - BUG: Clicking on popup ui (nodeEventService) causes map-clicks underneath
 - Add "wisps", move across screen (like smoke debris) for map/battle-scene
 - Walk-animation for entities
-
-
-### OK:: what do we need for a minimum-playable game?
-
-
-
 - Fix bug in map-scene, when hovering node-iml-panel, doesn't show the hovered-path, (because iml panel blocks)
-
-
 - Make it so healing-ents are more "visual":
 - Make it so healing-ents shoot projectiles (e.g. chef shoots bread, healers shoot other projectiles)
 - the projectiles heal properly on hit, and are super visual.
-
-
 - add juice for healing; when healing, a green `%d{health_icon}` will pop up. use textPopupService
-
 - add juice for buffs. Should be like `+4 (ATK)` or whatever. Use textPopupService
 
+
+
+### OK:: what do we need for a minimum-playable game?
 
 
 
@@ -140,6 +132,12 @@
 
 
 - Make blessing ChoicePanel look better. Currently, looks bad.
+
+
+Make the battle-scene be a bit more interesting....
+instead of the world being a dull rectangle all the time, Maybe hardcode a few shapes?
+(Peanut shape, Oval shape, multi-circle-shape, random-shape?)
+In general, the battlefield should feel "cooler" and "bigger". Currently it's just small and boring.
 
 
 
@@ -189,14 +187,6 @@ More decor-sprites for map (grasses, bushes, skull, more tree types?)
 
 
 - Maybe when enemies die, leave a subtle gravestone sprite
-
-
-
-- Make the battle-scene be a bit more interesting.... instead of a dull rectangle all the time.
-- Maybe hardcode a few shapes?
-- Peanut shape, Oval shape, multi-circle-shape
-
-
 
 
 - Sound effects
