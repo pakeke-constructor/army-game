@@ -351,11 +351,11 @@ g.defineSquad("lifesmith_squad", {
     name = loc("Lifesmiths"),
     rarity = g.RARITIES.LEGENDARY,
     entityDef = {
-        image = "militia",
+        image = "incense_priest",
         physics = { shape = "circle", radius = 6, ox = 0, oy = 0, mass = 2 },
         ai = { target = "ally" },
         attack = { attackType = "melee" },
-        weapon = { image = "militia_sword", type = "sword" },
+        weapon = { image = "dagger", type = "sword" },
         isHealer = true,
         baseHealPower = 2,
         baseAttackSpeed = 0.8,
