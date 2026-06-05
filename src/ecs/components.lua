@@ -199,13 +199,13 @@ local shadow = {
 ---@field public _damageLagAmount number?
 ---@field public damageJolt number?
 ---@field public _landmark boolean? marked by the Landmark blessing: the first building placed this battle
----@field public onUpdate fun(ecs.Entity, number)?
----@field public onDraw fun(ecs.Entity)?
----@field public onAttack fun(ecs.Entity)?
----@field public entitySpawned fun(ecs.Entity)?
----@field public entityDeath fun(ecs.Entity, ecs.Entity?)?
----@field public entityHurt fun(ecs.Entity, number, ecs.Entity?)?
----@field public entityHealed fun(ecs.Entity, number, ecs.Entity?)?
+---@field public onUpdate fun(ent:ecs.Entity, dt:number)?
+---@field public onDraw fun(ent:ecs.Entity)?
+---@field public onAttack fun(ent:ecs.Entity)?
+---@field public entitySpawned fun(ent:ecs.Entity)?
+---@field public entityDeath fun(ent:ecs.Entity, killer:ecs.Entity?)?
+---@field public entityHurt fun(ent:ecs.Entity, damage:number, attacker:ecs.Entity?)?
+---@field public entityHealed fun(ent:ecs.Entity, amount:number, healer:ecs.Entity?)?
 ---@field public armorIncreased fun(ecs.Entity, number)?
 ---@field public armorDecreased fun(ecs.Entity, number)?
 ---@field public entityBuffed fun(ecs.Entity, table, number?)?
