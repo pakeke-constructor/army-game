@@ -1493,6 +1493,7 @@ function g.healEntity(ent, healAmount, healerEnt)
     local finalHeal = ent.health - oldHealth
 
     if finalHeal > 0 then
+        ent._timeSinceHealed = 0
         g.call("entityHealed", ent, finalHeal, healerEnt)
         g.call("onHitHeal", healerEnt, finalHeal, ent)
     end
@@ -1522,6 +1523,7 @@ function g.dealDamage(target, damage, attacker, ignoreQuestionBuses)
 
     target.health = target.health - finalDmg
     target._timeSinceDamaged = 0
+    target._timeSinceHealed = 0
 
     if attacker then
         g.call("onHitDamage", attacker, damage, target, false)

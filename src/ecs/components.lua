@@ -185,6 +185,7 @@ local shadow = {
 ---@field public poisonAmount number? -- if nil, no poison
 ---@field public isPest boolean? true if this entity is a "pest"
 ---@field public _timeSinceDamaged number?
+---@field public _timeSinceHealed number?
 ---@field public _timeSinceLostArmor number?
 ---@field public _timeSinceDeployed number?
 ---@field public _damageLagAmount number?

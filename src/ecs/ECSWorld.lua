@@ -14,6 +14,7 @@ local ECSWorld = objects.Class("ecs:ECSWorld")
 local PARTITION_CHUNKSIZE = 32
 
 function ECSWorld:init(systemNames)
+    ---@type objects.BufferedSet<ecs.Entity>
     self.entities = objects.BufferedSet()
 
     self.data = {} -- system-storage
@@ -24,10 +25,13 @@ function ECSWorld:init(systemNames)
 
     self.componentIndex = {} -- [componentName] -> {ent, ent, ...}
     self.trackedComponents = objects.Set()
+    ---@type ecs.Entity[]
     self.allyList = {}
+    ---@type ecs.Entity[]
     self.enemyList = {}
+    ---@type table<string, objects.Partition<ecs.Entity>>
     self.partitions = {
-        -- [partitionId] -> objects.Partition
+        -- [partitionId] -> objects.Partition<ecs.Entity>
         unit = objects.Partition(PARTITION_CHUNKSIZE),
         projectile = objects.Partition(PARTITION_CHUNKSIZE),
         ally = objects.Partition(PARTITION_CHUNKSIZE),
@@ -52,15 +56,18 @@ function ECSWorld:setBorder(w, h)
     self.border = {0, 0, w, h}
 end
 
+---@param e ecs.Entity
 function ECSWorld:addEntity(e)
     self.entities:addBuffered(e)
 end
 
+---@param e ecs.Entity
 function ECSWorld:removeEntity(e)
     e.___removed = true
     self.entities:removeBuffered(e)
 end
 
+---@param e ecs.Entity
 local function entHas(e, k)
     if rawget(e, k) ~= nil then return true end
     local mt = getmetatable(e)
@@ -96,9 +103,10 @@ function ECSWorld:_rebuildPartitions()
         if p then
             for j = 1, #p do
                 local pid = p[j]
-                assert(self.partitions[pid], "Unknown partition: " .. tostring(pid))
                 local part = self.partitions[pid]
-                if not part then part = objects.Partition(64); self.partitions[pid] = part end
+                if not part then
+                    error("Unknown partition: " .. tostring(pid))
+                end
                 part:add(e, e.x, e.y)
             end
         end
@@ -160,6 +168,7 @@ function ECSWorld:update(dt)
                 e.health = e.maxHealth
             end
             e._timeSinceDamaged = (e._timeSinceDamaged or 0xfffffffff) + dt
+            e._timeSinceHealed = (e._timeSinceHealed or 0xfffffffff) + dt
             e._timeSinceLostArmor = (e._timeSinceLostArmor or 0xfffffffff) + dt
             if e._damageLagAmount and e._damageLagAmount > 0 then
                 e._damageLagAmount = e._damageLagAmount * math.exp(-18 * dt)
