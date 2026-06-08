@@ -149,3 +149,33 @@ g.defineEntity("charredsoul", {
         end
     end,
 })
+
+g.defineEntity("crimsongoliath", {
+    image = "crimsongoliath_body",
+    shadow = {},
+    physics = { shape = "circle", radius = 32, ox = 0, oy = 0, mass = 1 },
+    partitions = {"unit", "enemy"},
+    team = "enemy",
+    ai = {
+        target = "enemy",
+    },
+    weapon = {
+        type = "object",
+        image = "crimsongoliath_axe"
+    },
+    attack = {
+        attackType = "melee",
+    },
+    baseAttackDamage = 6,
+    baseAttackSpeed = 0.5,
+    baseAttackRange = 80,
+    baseMoveSpeed = 20,
+    baseMaxHealth = 200,
+
+    onDraw = function(ent)
+        -- FIXME: Tweak this
+        g.drawImage("crimsongoliath_heads", ent.x, ent.y - 50)
+    end,
+    -- TODO: This thing on the notes.
+    -- Cleave: Also hits enemies in a small area in front of the target.
+})
