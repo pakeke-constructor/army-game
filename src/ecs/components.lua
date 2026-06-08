@@ -126,6 +126,7 @@ local shadow = {
 ---@field public weapon ecs.components.Weapon?
 ---@field public shadow ecs.components.Shadow?
 ---@field public walkAnimation ecs.components.WalkAnimation?
+---@field public _walkTime number?
 ---@field public faceDir integer?
 ---@field public taunt ecs.components.Taunt?
 ---@field public fear ecs.components.Fear?
@@ -138,6 +139,13 @@ local shadow = {
 ---@field public vx number?
 ---@field public vy number?
 ---@field public vz number?
+---@field public rot number?
+---@field public sx number?
+---@field public sy number?
+---@field public ox number?
+---@field public oy number?
+---@field public kx number?
+---@field public ky number?
 ---@field public oyOverride number? oy (offsetY) defaults to 0.95, which is 95% of image, but you can override this here.
 ---@field public drawOrder number?
 ---@field public scale number?
@@ -185,18 +193,19 @@ local shadow = {
 ---@field public poisonAmount number? -- if nil, no poison
 ---@field public isPest boolean? true if this entity is a "pest"
 ---@field public _timeSinceDamaged number?
+---@field public _timeSinceHealed number?
 ---@field public _timeSinceLostArmor number?
 ---@field public _timeSinceDeployed number?
 ---@field public _damageLagAmount number?
 ---@field public damageJolt number?
 ---@field public _landmark boolean? marked by the Landmark blessing: the first building placed this battle
----@field public onUpdate fun(ecs.Entity, number)?
----@field public onDraw fun(ecs.Entity)?
----@field public onAttack fun(ecs.Entity)?
----@field public entitySpawned fun(ecs.Entity)?
----@field public entityDeath fun(ecs.Entity, ecs.Entity?)?
----@field public entityHurt fun(ecs.Entity, number, ecs.Entity?)?
----@field public entityHealed fun(ecs.Entity, number, ecs.Entity?)?
+---@field public onUpdate fun(ent:ecs.Entity, dt:number)?
+---@field public onDraw fun(ent:ecs.Entity)?
+---@field public onAttack fun(ent:ecs.Entity)?
+---@field public entitySpawned fun(ent:ecs.Entity)?
+---@field public entityDeath fun(ent:ecs.Entity, killer:ecs.Entity?)?
+---@field public entityHurt fun(ent:ecs.Entity, damage:number, attacker:ecs.Entity?)?
+---@field public entityHealed fun(ent:ecs.Entity, amount:number, healer:ecs.Entity?)?
 ---@field public armorIncreased fun(ecs.Entity, number)?
 ---@field public armorDecreased fun(ecs.Entity, number)?
 ---@field public entityBuffed fun(ecs.Entity, table, number?)?

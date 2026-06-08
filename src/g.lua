@@ -1493,6 +1493,7 @@ function g.healEntity(ent, healAmount, healerEnt)
     local finalHeal = ent.health - oldHealth
 
     if finalHeal > 0 then
+        ent._timeSinceHealed = 0
         g.call("entityHealed", ent, finalHeal, healerEnt)
         g.call("onHitHeal", healerEnt, finalHeal, ent)
     end
@@ -1852,6 +1853,9 @@ local DEV_SHOW_RANGE = false
 DEV_SHOW_RANGE = consts.DEV_MODE and DEV_SHOW_RANGE
 
 
+---@param ent ecs.Entity
+---@param x number
+---@param y number
 function g.drawEntity(ent, x, y)
     local entScale = g.ask("getEntityScale", ent) * (ent.scale or 1)
     local sx, sy = (ent.sx or 1) * (ent.faceDir or 1) * entScale, (ent.sy or 1) * entScale
@@ -1869,13 +1873,23 @@ function g.drawEntity(ent, x, y)
     local bodyRot = getBodyRot(ent)
     local walkBounce, walkWobble = 0, 0
     if ent._walkTime and ent._walkTime > 0 and ent.walkAnimation then
-        local wa = ent.walkAnimation
+        local wa = assert(ent.walkAnimation)
         local t = ent._walkTime * wa.speed
         walkBounce = -math.abs(math.sin(t)) * wa.bounceHeight
         walkWobble = math.sin(t) * wa.rotationAmount
     end
     if ent.image then
+        local HIT_HEAL_COLOR_INDICATOR_DURATION = 0.25
         local col = ent.color or objects.Color.WHITE
+
+        if math.min(ent._timeSinceDamaged or 0xffffffff, ent._timeSinceHealed or 0xffffffff) < HIT_HEAL_COLOR_INDICATOR_DURATION then
+            if ent._timeSinceDamaged < ent._timeSinceHealed then
+                col = col * g.COLORS.DAMAGE
+            elseif ent._timeSinceHealed < ent._timeSinceDamaged then
+                col = col * g.COLORS.HEAL
+            end
+        end
+
         lg.setColor(col[1], col[2], col[3], col[4] * (ent.alpha or 1))
         local rot = (ent.rot or 0) + bodyRot + (ent.damageJolt or 0) + walkWobble
         g.drawImageOffset(ent.image, x + (ent.ox or 0), y + (ent.oy or 0) + walkBounce, rot, sx, sy, 0.5, 0.95, ent.kx, ent.ky)
@@ -1969,6 +1983,7 @@ local function getFallbackFonts(size)
 end
 
 ---@param size number
+---@return love.Font
 function g.getBigFont(size)
     assert(size % 16 == 0, "Size must by divisible by 16")
     if not bigCache[size] then
@@ -1980,6 +1995,7 @@ function g.getBigFont(size)
 end
 
 ---@param size number
+---@return love.Font
 function g.getSmallFont(size)
     assert(size % 16 == 0, "Size must by divisible by 16")
     if not smolCache[size] then
@@ -2047,6 +2063,7 @@ function g.isAnyPopupOpen()
         rewardPopupService.getActive()
         or choicePopupService.getActive()
         or nodeEventService.isActive()
+        or gameoverPopupService.isActive()
     )
 end
 
@@ -2096,7 +2113,7 @@ end
 
 --- @param x number
 --- @param y number
---- @param richtxt any
+--- @param richtxt string|richtext.ParsedText
 --- @param args textPopupService.args?
 function g.addWorldTextPopup(x, y, richtxt, args)
     local sx, sy = g.worldToScreen(x, y)
@@ -2446,8 +2463,23 @@ g.RARITIES = {
 }
 
 
----@alias g.Stat {id:string, name:string, displayName:string, description:string, shortName:string, richText:string, baseName:string, modQ:string, mulQ:string, color:objects.Color, icon:string, isImportant:fun(ent:ecs.Entity, stat:string):boolean}
+---@class g.Stat
+---@field id string
+---@field name string
+---@field displayName string
+---@field description string
+---@field shortName string
+---@field richText string
+---@field baseName string
+---@field modQ string
+---@field mulQ string
+---@field color objects.Color
+---@field icon string
+---@field isImportant fun(ent:ecs.Entity, stat:string):boolean
+
+---@type g.Stat[]
 local STAT_LIST = {}
+---@type table<string, g.Stat>
 local STAT_DEFS = {}
 
 ---@param id string

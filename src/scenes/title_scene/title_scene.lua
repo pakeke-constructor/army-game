@@ -12,8 +12,10 @@ end
 
 ---@param sandbox boolean?
 function title_scene:start(sandbox)
-    if self.started then return end
-    self.started = true
+    if g.hasRun() then
+        error("attempt to start with existing run??")
+    end
+
     g.newRun({
         commander = "sir_horse",
         difficulty = 0

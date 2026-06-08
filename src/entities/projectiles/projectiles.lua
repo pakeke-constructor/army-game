@@ -25,3 +25,12 @@ defineProjectile("arrow", {
 defineProjectile("bread", {
     image = "bread"
 })
+
+
+defineProjectile("blazingbombardier_bomb", {
+    image = "blazingbombardier_bomb",
+    ---@param projEnt ecs.Entity
+    projectileHit = function(projEnt)
+        g.explosion(projEnt.x, projEnt.y, 3, 10, projEnt.projectile.ownerEnt)
+    end
+})
