@@ -369,6 +369,28 @@ function ShopNode:buildDecor(builder, wx, wy)
     builder:addImage("node_town", wx, wy - 8)
 end
 
+nodes.ShopNode = ShopNode
+
+
+
+
+-------------------------------
+-- Dynamic Node
+-------------------------------
+
+---@class MapNode.DynamicNode: MapNode
+local DynamicNode = nodes.newClass("dynamic")
+
+function DynamicNode:enter()
+    error("forgot to roll dynamic node!")
+end
+
+function DynamicNode:buildDecor(builder, wx, wy)
+    -- TODO: Add fog or something to indicate it's "unrevealed"
+end
+
+nodes.DynamicNode = DynamicNode
+
 
 
 
