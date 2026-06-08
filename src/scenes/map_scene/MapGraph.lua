@@ -91,6 +91,7 @@ end
 function MapGraph:init(width, height)
     self.width = width
     self.height = height
+    self.distanceBetweenNodes = 130 -- sensible default just to silence LuaLS
     self.nodes = {}
     self.edges = {}
     self.adj = {}
@@ -98,6 +99,7 @@ function MapGraph:init(width, height)
     self.playerPosition = nil -- node key string, e.g. "2,0"
 end
 
+---@param node MapNode
 function MapGraph:getDrawPos(node)
     local sp = self.distanceBetweenNodes
     return (node.x * sp + node.ox) * self.scaleX, (node.y * sp + node.oy) * self.scaleY
@@ -119,9 +121,12 @@ function MapGraph:addNode(x, y, nodeType)
     return node
 end
 
+---@generic T: MapNode
 ---@param x integer
 ---@param y integer
----@param nodeType string|MapNode a node type string or a Node class
+---@param nodeType T a node type string or a Node class
+---@return T?
+---@overload fun(self:MapGraph,x:integer,y:integer,nodeType:string):(MapNode?)
 function MapGraph:setNode(x, y, nodeType)
     local key = nodeKey(x, y)
     if not self.nodes[key] then return nil end
