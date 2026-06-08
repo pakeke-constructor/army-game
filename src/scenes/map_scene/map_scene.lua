@@ -19,6 +19,7 @@ local CULL_PAD = 100
 
 local PATH_SEARCH_DEPTH = 3
 local FOG_CLEAR_RADIUS = 120
+local FOG_STEP = 24
 local FOG_REVEAL_DEPTH = 4
 
 local GALLOP_FREQ = 18
@@ -73,9 +74,10 @@ end
 --- Registers an iml panel per node (under the camera transform) and
 --- returns the hovered node, plus whether it was just clicked.
 ---@param graph MapGraph
+---@param clearCells table<integer, table<integer, boolean>>
 ---@return MapNode? hovered
 ---@return MapNode? clicked
-local function updateNodePanels(graph)
+local function updateNodePanels(graph, clearCells)
     local size = graph.distanceBetweenNodes * HOVER_DIST_FRAC
     local mx, my = iml.getTransformedPointer()
     ---@type MapNode?
@@ -84,6 +86,11 @@ local function updateNodePanels(graph)
     local hovered, clicked = nil, nil
     graph:forEachNode(function(node)
         local nx, ny = graph:getDrawPos(node)
+        local cx = math.floor(nx / FOG_STEP)
+        local cy = math.floor(ny / FOG_STEP)
+        if not (clearCells and clearCells[cx] and clearCells[cx][cy]) then
+            return
+        end
         local d = helper.magnitude(nx - mx, ny - my)
         -- Do a circle distance check to select potential node.
         if d <= size and d < distance then
@@ -176,8 +183,8 @@ end
 function map_scene:_buildFogClearCells()
     local run = g.getRun()
     local graph = run.mapGraph
-    local step = 24
-    local clearCells = math.ceil(FOG_CLEAR_RADIUS / step)
+    local clearCells = math.ceil(FOG_CLEAR_RADIUS / FOG_STEP)
+    ---@type table<integer, table<integer, boolean>>
     local cells = {}
 
     local pnode = graph:getPlayerNode()
@@ -203,8 +210,8 @@ function map_scene:_buildFogClearCells()
 
     for _, entry in ipairs(self.nodeList) do
         if entry.node.seen then
-            local cx = math.floor(entry.x / step)
-            local cy = math.floor(entry.y / step)
+            local cx = math.floor(entry.x / FOG_STEP)
+            local cy = math.floor(entry.y / FOG_STEP)
             for dx = -clearCells, clearCells do
                 local row = cells[cx + dx]
                 if not row then
@@ -438,10 +445,19 @@ function map_scene:draw()
             end
         end
 
+        -- fog processing
+        local fogRegion = {
+            x = view.x,
+            y = view.y,
+            w = view.w,
+            h = view.h,
+        }
+        local clearCells = self:_buildFogClearCells()
+
         -- hover highlight: path from player to hovered node
         local pnode = graph:getPlayerNode()
         if pnode then
-            local hovered, clicked = updateNodePanels(graph)
+            local hovered, clicked = updateNodePanels(graph, clearCells)
             if clicked then self:travelTo(graph, pnode, clicked) end
             if (not self.traveling) and hovered and hovered ~= pnode then
                 local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, PATH_SEARCH_DEPTH)
@@ -469,19 +485,11 @@ function map_scene:draw()
 
         builder:finalize()
 
-        -- fog
-        local fogRegion = {
-            x = view.x,
-            y = view.y,
-            w = view.w,
-            h = view.h,
-        }
-        local step = 24
-        local clearCells = self:_buildFogClearCells()
+        -- fog rendering
         fogService.renderFog(fogRegion, function(x, y)
-            local cx = math.floor(x / step)
+            local cx = math.floor(x / FOG_STEP)
             local row = clearCells[cx]
-            return not (row and row[math.floor(y / step)])
+            return not (row and row[math.floor(y / FOG_STEP)])
         end)
     end
 
