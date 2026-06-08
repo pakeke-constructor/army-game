@@ -216,3 +216,28 @@ g.defineEntity("direhound", {
         return ent._buffedTime > 0 and 2 or 1
     end,
 })
+
+g.defineEntity("greatbowdemon", { -- Hellfire Greatbowmen
+    image = "greatbowdemon",
+    shadow = {},
+    physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+    partitions = {"unit", "enemy"},
+    team = "enemy",
+    ai = {
+        target = "enemy",
+    },
+    weapon = {
+        type = "bow",
+        image = "greatbowdemon_bow"
+    },
+    attack = {
+        attackType = "ranged",
+        projectileType = "arrow",
+        projectileSpeed = 350,
+    },
+    baseAttackDamage = 8,
+    baseAttackSpeed = 0.5,
+    baseAttackRange = 1000,
+    baseMoveSpeed = 50,
+    baseMaxHealth = 8,
+})
