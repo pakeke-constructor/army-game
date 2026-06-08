@@ -138,11 +138,8 @@ g.defineEntity("charredsoul", {
     baseMoveSpeed = 50,
     baseMaxHealth = 6,
 
-    entitySpawned = function(ent)
-        ent._nextBuffTime = 0
-    end,
     entityUpdate = function(ent, dt)
-        ent._nextBuffTime = ent._nextBuffTime + dt
+        ent._nextBuffTime = (ent._nextBuffTime or 0) + dt
         while ent._nextBuffTime >= 3 do
             g.buffEntity(ent, "attackSpeed", 0.2)
             ent._nextBuffTime = ent._nextBuffTime - 3
@@ -203,17 +200,14 @@ g.defineEntity("direhound", {
     baseMoveSpeed = 60,
     baseMaxHealth = 35,
 
-    entitySpawned = function(ent)
-        ent._buffedTime = 8
-    end,
     onUpdate = function(ent, dt)
-        ent._buffedTime = math.max(ent._buffedTime - dt, 0)
+        ent._buffedTime = math.max((ent._buffedTime or 8) - dt, 0)
     end,
     getAttackDamageMultiplier = function(ent)
-        return ent._buffedTime > 0 and 2 or 1
+        return (ent._buffedTime or 0) > 0 and 2 or 1
     end,
     getAttackSpeedMultiplier = function(ent)
-        return ent._buffedTime > 0 and 2 or 1
+        return (ent._buffedTime or 0) > 0 and 2 or 1
     end,
 })
 
@@ -314,17 +308,14 @@ g.defineEntity("hellhound", {
     baseMoveSpeed = 100,
     baseMaxHealth = 6,
 
-    entitySpawned = function(ent)
-        ent._buffedTime = 8
-    end,
     onUpdate = function(ent, dt)
-        ent._buffedTime = math.max(ent._buffedTime - dt, 0)
+        ent._buffedTime = math.max((ent._buffedTime or 8) - dt, 0)
     end,
     getAttackDamageMultiplier = function(ent)
-        return ent._buffedTime > 0 and 2 or 1
+        return (ent._buffedTime or 0) > 0 and 2 or 1
     end,
     getAttackSpeedMultiplier = function(ent)
-        return ent._buffedTime > 0 and 2 or 1
+        return (ent._buffedTime or 0) > 0 and 2 or 1
     end,
 })
 
@@ -354,16 +345,14 @@ g.defineEntity("reaper", {
     baseMaxHealth = 40,
 
     -- FIXME: The way this "Death Touch" is implemented is ugly.
-    entitySpawned = function(ent)
-        ent._dmgThroughDT = false
-    end,
     entityHurt = function(ent, damage, attacker)
+        -- Need that _dmgThroughDT to prevent infinite loop in EV-bus
         if attacker and not ent._dmgThroughDT then
             local mh = attacker.maxHealth or attacker.baseMaxHealth or 0
             if mh > 0 then
                 ent._dmgThroughDT = true
                 g.dealDamage(ent, mh, attacker)
-                ent._dmgThroughDT = false
+                ent._dmgThroughDT = nil
             end
         end
     end
