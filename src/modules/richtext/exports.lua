@@ -153,6 +153,40 @@ function text.printRichCentered(txt, font, x, y, limit, align, rot, sx, sy)
     return text.printRich(parsed, font, x, y, limit, align, rot, sx, sy, ox, oy)
 end
 
+---Binary-search the optimal scale and dimensions to fit rich text
+---@param parsed richtext.ParsedText The pre-parsed rich text object
+---@param font love.Font
+---@param w number Target container width
+---@param h number Target container height
+---@return number scale, number tw, number th
+local function getContainedScale(parsed, font, w, h)
+    local lowScale = 0.1
+    local highScale = 10
+    local scale = 1.0
+    local finalTw, finalTh = w, h
+
+    for _ = 1, 8 do
+        local midScale = (lowScale + highScale) / 2
+        -- Simulate what the wrap width needs to be at this specific scale
+        local targetWrapW = w / midScale
+        local tw, lines = text.getWrap(parsed, font, targetWrapW)
+        local th = lines * font:getHeight()
+
+        -- Check if the scaled text block fits within the container's height budget
+        if th * midScale <= h then
+            -- Try to find an even larger perfect fit
+            scale = midScale
+            finalTw, finalTh = tw, th
+            lowScale = midScale + 0.01
+        else
+            -- Too tall, squeeze it down
+            highScale = midScale - 0.01
+        end
+    end
+
+    return scale, finalTw, finalTh
+end
+
 ---Prints rich text contained inside a x,y,w,h box
 ---@param txt string richtext
 ---@param font love.Font
@@ -162,10 +196,7 @@ end
 ---@param h number
 function text.printRichContained(txt, font, x,y,w,h)
     local parsed = ensureParsed(txt)
-    local tw, lines = text.getWrap(parsed, font, w)
-    local th = lines * font:getHeight()
-
-    local scale = math.min(w/tw, h/th)
+    local scale, tw, th = getContainedScale(parsed, font, w, h)
     local drawX, drawY = math.floor(x+w/2), math.floor(y+h/2)
 
     return text.printRich(parsed, font, drawX, drawY, tw, "left", 0, scale, scale, tw / 2, th / 2)
