@@ -291,3 +291,39 @@ g.defineEntity("hellbrute", {
     baseMoveSpeed = 75,
     baseMaxHealth = 1,
 })
+
+g.defineEntity("hellhound", {
+    image = "hellhound",
+    shadow = {},
+    physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+    partitions = {"unit", "enemy"},
+    team = "enemy",
+    ai = {
+        target = "enemy",
+    },
+    weapon = {
+        type = "object",
+        image = "1x1"
+    },
+    attack = {
+        attackType = "melee",
+    },
+    baseAttackDamage = 1,
+    baseAttackSpeed = 1.5,
+    baseAttackRange = 80,
+    baseMoveSpeed = 100,
+    baseMaxHealth = 6,
+
+    entitySpawned = function(ent)
+        ent._buffedTime = 8
+    end,
+    onUpdate = function(ent, dt)
+        ent._buffedTime = math.max(ent._buffedTime - dt, 0)
+    end,
+    getAttackDamageMultiplier = function(ent)
+        return ent._buffedTime > 0 and 2 or 1
+    end,
+    getAttackSpeedMultiplier = function(ent)
+        return ent._buffedTime > 0 and 2 or 1
+    end,
+})
