@@ -268,3 +268,26 @@ g.defineEntity("hellbat", {
     baseMoveSpeed = 75,
     baseMaxHealth = 1,
 })
+
+g.defineEntity("hellbrute", {
+    image = "hellbrute",
+    shadow = {},
+    physics = { shape = "circle", radius = 10, ox = 0, oy = 0, mass = 1 },
+    partitions = {"unit", "enemy"},
+    team = "enemy",
+    ai = {
+        target = "enemy",
+    },
+    weapon = {
+        type = "object",
+        image = "hellbrute_mace"
+    },
+    attack = {
+        attackType = "melee",
+    },
+    baseAttackDamage = 1,
+    baseAttackSpeed = 1.5,
+    baseAttackRange = 80,
+    baseMoveSpeed = 75,
+    baseMaxHealth = 1,
+})
