@@ -392,3 +392,28 @@ g.defineEntity("shielddemon", {
     baseMaxHealth = 6,
     baseStartingArmor = 6,
 })
+
+g.defineEntity("soulfirebearer", {
+    image = "soulfirebearer",
+    shadow = {},
+    physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+    partitions = {"unit", "enemy"},
+    team = "enemy",
+    ai = {
+        target = "enemy",
+    },
+    weapon = {
+        type = "staff",
+        image = "soulfirebearer_torch"
+    },
+    attack = {
+        -- FIXME: Pretty sure this one is ranged but I need to find projectile for this
+        attackType = "melee",
+    },
+    -- TODO: Damage stats.
+    baseAttackDamage = 1,
+    baseAttackSpeed = 0.5,
+    baseAttackRange = 80,
+    baseMoveSpeed = 50,
+    baseMaxHealth = 6,
+})
