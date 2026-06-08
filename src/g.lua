@@ -1882,11 +1882,15 @@ function g.drawEntity(ent, x, y)
         local HIT_HEAL_COLOR_INDICATOR_DURATION = 0.25
         local col = ent.color or objects.Color.WHITE
 
-        if math.min(ent._timeSinceDamaged or 0xffffffff, ent._timeSinceHealed or 0xffffffff) < HIT_HEAL_COLOR_INDICATOR_DURATION then
-            if ent._timeSinceDamaged < ent._timeSinceHealed then
-                col = col * g.COLORS.DAMAGE
-            elseif ent._timeSinceHealed < ent._timeSinceDamaged then
-                col = col * g.COLORS.HEAL
+        local timeSinceDmgd = ent._timeSinceDamaged or 0xfffffff
+        local timeSinceHeald = ent._timeSinceHealed or 0xfffffff
+        local timeSince = math.min(timeSinceDmgd, timeSinceHeald)
+        local amount = math.max(0, HIT_HEAL_COLOR_INDICATOR_DURATION - timeSince) / HIT_HEAL_COLOR_INDICATOR_DURATION
+        if amount > 0 then
+            if timeSinceDmgd < timeSinceHeald then
+                col = col:lerp(g.COLORS.DAMAGE, amount)
+            elseif timeSinceHeald < timeSinceDmgd then
+                col = col:lerp(g.COLORS.HEAL, amount)
             end
         end
 

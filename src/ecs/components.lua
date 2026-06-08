@@ -200,7 +200,7 @@ local shadow = {
 ---@field public damageJolt number?
 ---@field public _landmark boolean? marked by the Landmark blessing: the first building placed this battle
 ---@field public onUpdate fun(ent:ecs.Entity, dt:number)?
----@field public onDraw fun(ent:ecs.Entity)?
+---@field public onDraw fun(ent:ecs.Entity, x:number, y:number)?
 ---@field public onAttack fun(ent:ecs.Entity)?
 ---@field public entitySpawned fun(ent:ecs.Entity)?
 ---@field public entityDeath fun(ent:ecs.Entity, killer:ecs.Entity?)?
