@@ -327,3 +327,44 @@ g.defineEntity("hellhound", {
         return ent._buffedTime > 0 and 2 or 1
     end,
 })
+
+g.defineEntity("reaper", {
+    image = "reaper",
+    shadow = {},
+    physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+    partitions = {"unit", "enemy"},
+    team = "enemy",
+    ai = {
+        target = "enemy",
+        getPriority = function(selfEnt, targEnt)
+            return 0
+        end,
+    },
+    weapon = {
+        type = "object",
+        image = "reaper_scythe"
+    },
+    attack = {
+        attackType = "melee",
+    },
+    baseAttackDamage = 2,
+    baseAttackSpeed = 1,
+    baseAttackRange = 80,
+    baseMoveSpeed = 50,
+    baseMaxHealth = 40,
+
+    -- FIXME: The way this "Death Touch" is implemented is ugly.
+    entitySpawned = function(ent)
+        ent._dmgThroughDT = false
+    end,
+    entityHurt = function(ent, damage, attacker)
+        if attacker and not ent._dmgThroughDT then
+            local mh = attacker.maxHealth or attacker.baseMaxHealth or 0
+            if mh > 0 then
+                ent._dmgThroughDT = true
+                g.dealDamage(ent, mh, attacker)
+                ent._dmgThroughDT = false
+            end
+        end
+    end
+})
