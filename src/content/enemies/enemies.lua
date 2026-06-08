@@ -179,3 +179,40 @@ g.defineEntity("crimsongoliath", {
     -- TODO: This thing on the notes.
     -- Cleave: Also hits enemies in a small area in front of the target.
 })
+
+g.defineEntity("direhound", {
+    image = "direhound",
+    shadow = {},
+    physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+    partitions = {"unit", "enemy"},
+    team = "enemy",
+    ai = {
+        target = "enemy",
+    },
+    weapon = {
+        type = "object",
+        -- FIXME: Tweak
+        image = "direhound_jaw"
+    },
+    attack = {
+        attackType = "melee",
+    },
+    baseAttackDamage = 3,
+    baseAttackSpeed = 1.5,
+    baseAttackRange = 80,
+    baseMoveSpeed = 60,
+    baseMaxHealth = 35,
+
+    entitySpawned = function(ent)
+        ent._buffedTime = 8
+    end,
+    onUpdate = function(ent, dt)
+        ent._buffedTime = math.max(ent._buffedTime - dt, 0)
+    end,
+    getAttackDamageMultiplier = function(ent)
+        return ent._buffedTime > 0 and 2 or 1
+    end,
+    getAttackSpeedMultiplier = function(ent)
+        return ent._buffedTime > 0 and 2 or 1
+    end,
+})
