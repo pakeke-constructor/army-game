@@ -241,3 +241,30 @@ g.defineEntity("greatbowdemon", { -- Hellfire Greatbowmen
     baseMoveSpeed = 50,
     baseMaxHealth = 8,
 })
+
+g.defineEntity("hellbat", {
+    -- TODO: Mark this as flying
+    image = "hellbat",
+    shadow = {},
+    physics = { shape = "circle", radius = 4, ox = 0, oy = 0, mass = 1 },
+    partitions = {"unit", "enemy"},
+    team = "enemy",
+    ai = {
+        target = "enemy",
+        getPriority = function(selfEnt, targEnt)
+            return 0
+        end,
+    },
+    weapon = {
+        type = "object",
+        image = "1x1"
+    },
+    attack = {
+        attackType = "melee",
+    },
+    baseAttackDamage = 1,
+    baseAttackSpeed = 1.5,
+    baseAttackRange = 80,
+    baseMoveSpeed = 75,
+    baseMaxHealth = 1,
+})
