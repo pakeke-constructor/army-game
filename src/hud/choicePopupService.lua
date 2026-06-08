@@ -5,6 +5,9 @@ local choicePopupService = {}
 
 local active = nil
 
+---@param rType "squad"|"blessing"|"mana"
+---@param rerolls integer?
+---@param rarityWeights g.RarityWeights?
 function choicePopupService.set(rType, rerolls, rarityWeights)
     active = ChoicePanel(rType, rerolls or 0, rarityWeights)
 end
