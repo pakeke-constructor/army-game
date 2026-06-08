@@ -75,9 +75,8 @@ end
 ---@param graph MapGraph
 ---@param node MapNode Base node
 ---@param count {shrine:integer,fountain:integer,shop:integer}
----@param rng fun():number RNG function that returns [0, 1)
 ---@return MapNode
-local function rerollDynamicNode(graph, node, count, rng)
+local function rerollDynamicNode(graph, node, count)
     if nodes.getType(node) ~= "dynamic" then
         return node
     end
@@ -88,7 +87,7 @@ local function rerollDynamicNode(graph, node, count, rng)
         {nodes.FountainNode, totalWeight - count.fountain},
         {nodes.ShopNode, totalWeight - count.shop},
     }
-    local choice = helper.pickWeighted(list, rng)
+    local choice = helper.pickWeighted(list, graph.rng)
     ---@cast choice -integer
     return assert(graph:setNode(node.x, node.y, choice))
 end
@@ -319,8 +318,7 @@ function map_scene:update(dt)
 
         for _, entry in ipairs(self.nodeList) do
             if entry.node.seen and nodes.getType(entry.node) == "dynamic" then
-                -- FIXME: Change the RNG to be deterministic across runs?
-                local newNode = rerollDynamicNode(g.getRun().mapGraph, entry.node, count, love.math.random)
+                local newNode = rerollDynamicNode(g.getRun().mapGraph, entry.node, count)
                 newNode.seen = true
                 entry.node = newNode
 

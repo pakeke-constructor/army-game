@@ -97,6 +97,7 @@ function MapGraph:init(width, height)
     self.adj = {}
     self.decor = {}
     self.playerPosition = nil -- node key string, e.g. "2,0"
+    self.rng = love.math.random
 end
 
 ---@param node MapNode
@@ -243,7 +244,7 @@ function MapGraph.generate(args, rng)
     self.distanceBetweenNodes = args.distanceBetweenNodes
     self.scaleX = args.scaleX
     self.scaleY = args.scaleY
-    rng = rng or math.random
+    rng = rng or love.math.random
     self.rng = rng
 
     local hw = math.floor(width / 2)
