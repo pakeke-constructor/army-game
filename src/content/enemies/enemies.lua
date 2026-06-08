@@ -417,3 +417,26 @@ g.defineEntity("soulfirebearer", {
     baseMoveSpeed = 50,
     baseMaxHealth = 6,
 })
+
+g.defineEntity("speardemon", { -- Demon Spearmen
+    image = "speardemon",
+    shadow = {},
+    physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+    partitions = {"unit", "enemy"},
+    team = "enemy",
+    ai = {
+        target = "enemy",
+    },
+    weapon = {
+        type = "spear",
+        image = "speardemon_spear"
+    },
+    attack = {
+        attackType = "melee",
+    },
+    baseAttackDamage = 2,
+    baseAttackSpeed = 1,
+    baseAttackRange = 120,
+    baseMoveSpeed = 50,
+    baseMaxHealth = 6,
+})
