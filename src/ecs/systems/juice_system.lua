@@ -181,7 +181,7 @@ function juice_system.entityHealed(unitEnt, addHealth)
         local _, ih = g.getImageSize(unitEnt.image)
         offy = -ih
     end
-    local healText = helper.wrapRichtextColor(HEALING_TEXT, string.format("%d", addHealth))
+    local healText = helper.wrapRichtextColor(HEALING_TEXT, g.formatNumber(addHealth))
     g.addWorldTextPopup(
         unitEnt.x, unitEnt.y + offy,
         healText.."{health}",
@@ -191,11 +191,11 @@ end
 
 ---@param ent ecs.Entity
 ---@param stat string
----@param increase number?
+---@param increase number
 function juice_system.entityBuffed(ent, stat, increase)
     local statInfo = g.getStatInfo(stat)
     local prefix = increase > 0 and "+" or ""
-    local text = helper.wrapRichtextColor(statInfo.color, string.format("%s%d", prefix, increase))
+    local text = helper.wrapRichtextColor(statInfo.color, string.format("%s%s", prefix, g.formatNumber(increase)))
     local offy = 0
     if ent.image then
         local _, ih = g.getImageSize(ent.image)
