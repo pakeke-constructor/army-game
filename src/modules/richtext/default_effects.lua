@@ -107,4 +107,12 @@ return function(text)
         love.graphics.setColor(r, g, b, a)
     end
     text.defineEffect("rainbow", rainbowEffect, {perCharacter = true})
+
+    text.defineEffect("blink", function(args, x, y, context, next)
+        local frequency = args.f or 1
+        local value = (frequency * love.timer.getTime()) % 1
+        if value <= 0.5 then
+            next(context.textOrDrawable, x, y)
+        end
+    end)
 end

@@ -43,6 +43,8 @@ USAGE (adding a buff/perk/blessing):
 
 ]]
 
+---@param ent ecs.Entity
+---@param stat g.Stat
 local function recomputeStat(ent, stat)
     local base = ent[stat.baseName]
     if not base then return end
@@ -67,6 +69,7 @@ end
 ---@class g.systems.stats: ecs.System
 local stats = {}
 
+---@param ent ecs.Entity
 function stats.entitySpawned(ent)
     for _, stat in ipairs(g.getStatList()) do
         if ent[stat.baseName] or ent[stat.name] then
