@@ -87,6 +87,15 @@ function shop_scene.prefillShopNode(shopNode)
 
     -- fill blessings once
     local bPool = g.getBlessingsByMana(g.getPermanentManaCounts())
+    -- Remove ones that are already given
+    local existingBlessings = g.getRun().blessings
+    for i = #bPool, 1, -1 do
+        if existingBlessings[bPool[i]] then
+            table.remove(bPool, i)
+        end
+    end
+
+    -- Get weights
     local rw = consts.DEFAULT_RARITY_WEIGHTS
     local bWeights = {}
     for i, blessingId in ipairs(bPool) do
