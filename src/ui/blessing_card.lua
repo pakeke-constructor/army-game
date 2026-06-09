@@ -13,8 +13,9 @@ local function drawBlessingCard(blessingId, region, index)
     ui.assertUIStarted()
 
     local info = g.getBlessingInfo(blessingId)
-    local darkCol = g.RARITIES.COMMON.darkColor
-    local liteCol = g.RARITIES.COMMON.color
+    local rarity = info.rarity or g.RARITIES.COMMON
+    local darkCol = rarity.darkColor
+    local liteCol = rarity.color
     local bgCol1 = objects.Color(0.05, 0.05, 0.06, 0.7)
     local uid = blessingId .. "_" .. index
 
