@@ -444,6 +444,35 @@ function helper.newGradientMesh(dir, ...)
 end
 
 
+--- Creates a 1x1 radial gradient circle Mesh centered at (0,0).
+--- Draw it with love.graphics.draw(mesh, x, y, 0, radius, radius)
+---
+--- @param segments integer? Number of outer edge segments (default: 64)
+--- @return love.Mesh
+function helper.gradientCircleMesh(segments)
+    -- Enforce a minimum of 3 segments to actually form a polygon
+    segments = math.max(3, segments or 64)
+
+    ---@type [number,number,number,number,number,number,number,number][]
+    local vertices = {
+        -- 1. Center vertex (0, 0) - Fully opaque white
+        {0, 0, 0.5, 0.5, 1, 1, 1, 1}
+    }
+
+    -- 2. Perimeter vertices (Radius of 0.5 to make the total diameter 1)
+    for i = 0, segments do
+        local angle = (i / segments) * math.pi * 2
+        local x = math.cos(angle) * 0.5
+        local y = math.sin(angle) * 0.5
+        -- Edge vertices - Fully transparent white
+        vertices[#vertices+1] = {x, y, x + 0.5, y + 0.5, 1, 1, 1, 0}
+    end
+
+    -- Create and return the mesh using the "fan" draw mode
+    return love.graphics.newMesh(vertices, "fan", "static")
+end
+
+
 
 do
 local mesh = nil

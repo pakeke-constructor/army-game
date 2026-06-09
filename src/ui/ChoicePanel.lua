@@ -68,10 +68,10 @@ function ChoicePanel:_rollChoices()
 
     if self.rType == "squad" then
         local pool = g.getSquadsByMana(manaCells)
-        self:_pickFromPool(pool, function(id) return g.getSquadInfo(id) end)
+        self:_pickFromPool(pool, g.getSquadInfo)
     elseif self.rType == "blessing" then
         local pool = g.getBlessingsByMana(manaCells)
-        self:_pickFromPool(pool, function(id) return g.getBlessingInfo(id) end)
+        self:_pickFromPool(pool, g.getBlessingInfo)
     elseif self.rType == "mana" then
         for manaType in pairs(manaCells) do
             if manaType ~= g.WILDCARD_MANA then
@@ -82,6 +82,8 @@ function ChoicePanel:_rollChoices()
 end
 
 
+---@param pool string[]
+---@param getInfo fun(id:string):{rarity:g.Rarity}
 ---@private
 function ChoicePanel:_pickFromPool(pool, getInfo)
     if #pool == 0 then return end
@@ -91,7 +93,8 @@ function ChoicePanel:_pickFromPool(pool, getInfo)
         weights[i] = self.rarityWeights[info.rarity.id] or 0
     end
     local picker = newPicker(pool, weights)
-    local seen = {}
+    ---@type table<string, true?>
+    local seen = helper.shallowCopy(g.getRun().blessings)
     for _ = 1, NUM_CHOICES do
         local pick = picker:pick()
         -- avoid duplicates; try a few times

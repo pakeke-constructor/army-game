@@ -25,8 +25,8 @@ https://www.keithschwarz.com/darts-dice-coins/
 ---multiple times.
 ---
 ---If the item list is dynamic or it only needs be picked once then consider
----@class picker.Picker
----@field entryList any[]
+---@class picker.Picker<T>
+---@field entryList T[]
 ---@field alias table<integer, integer>
 ---@field prob table<integer, number>
 ---@field n integer
@@ -44,9 +44,10 @@ end
 
 
 
----@param items any[]
+---@generic T
+---@param items T[]
 ---@param weights number[]
----@return picker.Picker
+---@return picker.Picker<T>
 local function newPicker(items, weights)
     local self = setmetatable({}, Picker)
 
@@ -115,8 +116,10 @@ end
 --[[
     The Vose Alias method requires TWO random variables to work properly.
 ]]
+---@generic T
+---@param self picker.Picker<T>
 ---@param rng {random:fun(self:any):number}?
----@return any
+---@return T
 function Picker:pick(rng)
     local rand1, rand2
     if rng then
@@ -134,9 +137,11 @@ end
 
 ---Picks an entry and excludes it from future pickAndRemove calls.
 ---Not guaranteed unique, but tries up to maxTries times.
+---@generic T
+---@param self picker.Picker<T>
 ---@param rng {random:fun(self:any):number}?
 ---@param maxTries integer?
----@return any
+---@return T
 function Picker:pickAndRemove(rng, maxTries)
     maxTries = maxTries or 5
     if not self._excluded then
