@@ -446,7 +446,7 @@ local UI_HEIGHT = 360
 
 local function recalculateEverything()
     local w,h = lg.getDimensions()
-    globalScale = math.max(h / UI_HEIGHT, 1)
+    globalScale = math.floor(math.max(h / UI_HEIGHT, 1) + 0.5)
     globalScaleTransform:reset():scale(globalScale)
 
     gx, gy, gw, gh = love.window.getSafeArea()
