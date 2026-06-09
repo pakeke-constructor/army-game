@@ -187,6 +187,7 @@ local shadow = {
 ---@field public _attackTarget ecs.Entity?
 ---@field public _knockVx number?
 ---@field public _knockVy number?
+---@field public knockbackResistance number? -- +1 each knockback; reduces future knockback
 ---@field public _aiTarget ecs.Entity?
 ---@field public burnTime number? -- if nil, no burn
 ---@field public frozenTime number? -- if nil, not frozen

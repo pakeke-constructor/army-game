@@ -1601,6 +1601,9 @@ end
 ---@param y number
 ---@param strength number?
 function g.knockback(ent, x, y, strength)
+    strength = strength - (ent.knockbackResistance or 0)
+    if strength <= 0 then return end
+    ent.knockbackResistance = (ent.knockbackResistance or 0) + consts.KNOCKBACK_RESISTANCE_INCREMENT
     local dx, dy = ent.x - x, ent.y - y
     local dist = math.sqrt(dx * dx + dy * dy)
     if dist < 0.001 then dx, dy = 0, -1; dist = 1 end
