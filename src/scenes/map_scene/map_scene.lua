@@ -308,7 +308,7 @@ function map_scene:update(dt)
 
     -- Reroll dynamic nodes if they were seen.
     if self.nodeList then
-        local count = {shrine = 0, fountain = 0, shops = 0}
+        local count = {shrine = 0, fountain = 0, shop = 0}
         for _, entry in ipairs(self.nodeList) do
             local nodeType = nodes.getType(entry.node)
             if count[nodeType] then
@@ -474,7 +474,7 @@ function map_scene:draw()
         end
 
         -- decor + node images, sorted by y
-        local builder = DecorBuilder()
+        local builder = DecorBuilder() --[[@as g.DecorBuilder]]
         for _, d in ipairs(self.decorList) do
             if isPointVisible(d.x, d.y, view, CULL_PAD) then
                 local dtype = decor_types.get(d.decorType)
