@@ -19,7 +19,7 @@ consts.MAX_SQUAD_LEVEL = 6
 
 consts.GRAVITY = 300
 consts.DEFAULT_MELEE_KNOCKBACK = 90
-consts.DEFAULT_RANGED_KNOCKBACK = 60
+consts.DEFAULT_RANGED_KNOCKBACK = 50
 
 consts.MAX_EVENT_CALLS_PER_FRAME = 20
 -- the maximum number of event calls of a certain type per frame.

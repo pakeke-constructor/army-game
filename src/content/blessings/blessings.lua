@@ -161,7 +161,7 @@ g.defineBlessing("scavenge", "Scavenge", {
 })
 
 g.defineBlessing("valuable_lesson", "Valuable Lesson", {
-    description = loc("Gain 3 XP when you acquire this blessing."),
+    description = loc("Gain 3 XP."),
     image = "blessing_valuablelesson",
     rarity = g.RARITIES.COMMON,
     onAdd = function()
@@ -170,7 +170,7 @@ g.defineBlessing("valuable_lesson", "Valuable Lesson", {
 })
 
 g.defineBlessing("grace", "Grace", {
-    description = loc("Reduce demon-rage by 2 when you acquire this blessing."),
+    description = loc("Reduce demon-rage by 2."),
     image = "placeholder", -- PLACEHOLDER: no "grace" sprite exists yet
     rarity = g.RARITIES.COMMON,
     onAdd = function()
@@ -809,7 +809,7 @@ g.defineBlessing("demonic_steed", "Demonic Steed", {
 })
 
 g.defineBlessing("radiant_gift", "Radiant Gift", {
-    description = loc("Gain 1 Wildcard Mana when you acquire this blessing."),
+    description = loc("Gain 1 Wildcard Mana!"),
     image = "blessing_radiantgift",
     rarity = g.RARITIES.RARE,
     onAdd = function()

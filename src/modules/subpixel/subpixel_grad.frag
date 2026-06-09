@@ -1,5 +1,9 @@
 #pragma language glsl3
 
+// SUBPIXEL SHADER:
+// makes pixelart smoother-looking when rotated or scaled weirdly.
+// (E.g. rotated by 4.54565, scaled by 2.4938, pixels will still be nicely-sized)
+
 // Subpixel sampling using gradients (dFdx and dFdy) to calculate the size of
 // the screen pixel.
 // Borrowed from by CptPotato: https://github.com/CptPotato/GodotThings
