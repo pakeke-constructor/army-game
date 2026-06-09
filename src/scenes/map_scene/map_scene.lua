@@ -1,6 +1,7 @@
 local ECSWorld = require("src.ecs.ECSWorld")
 local Camera = require("lib.cam11")
 local MapGraph = require("src.scenes.map_scene.MapGraph")
+local nodes = require("src.scenes.map_scene.nodes")
 local PixelCanvas = require("src.modules.PixelCanvas")
 local decor_types = require("src.scenes.map_scene.decor_types")
 local DecorBuilder = require("src.scenes.map_scene.DecorBuilder")
@@ -69,6 +70,26 @@ end
 local function renderNode(graph, node, r, g, b, a, radius)
     local nx, ny = graph:getDrawPos(node)
     renderNodeAt(node, nx, ny, r, g, b, a, radius)
+end
+
+---@param graph MapGraph
+---@param node MapNode Base node
+---@param count {shrine:integer,fountain:integer,shop:integer}
+---@return MapNode
+local function rerollDynamicNode(graph, node, count)
+    if nodes.getType(node) ~= "dynamic" then
+        return node
+    end
+
+    local totalWeight = count.shrine + count.fountain + count.shop
+    local list = {
+        {nodes.ShrineNode, totalWeight - count.shrine},
+        {nodes.FountainNode, totalWeight - count.fountain},
+        {nodes.ShopNode, totalWeight - count.shop},
+    }
+    local choice = helper.pickWeighted(list, graph.rng)
+    ---@cast choice -integer
+    return assert(graph:setNode(node.x, node.y, choice))
 end
 
 --- Registers an iml panel per node (under the camera transform) and
@@ -157,6 +178,7 @@ function map_scene:enter()
     end)
 
     -- Build sorted node list for drawing
+    ---@type {node:MapNode,x:number,y:number}
     self.nodeList = {}
     run.mapGraph:forEachNode(function(node)
         local nx, ny = run.mapGraph:getDrawPos(node)
@@ -283,6 +305,28 @@ function map_scene:update(dt)
     if love.keyboard.isDown("d") or love.keyboard.isDown("right") then dx = dx + 1 end
     self.camX = self.camX + dx * PAN_SPEED * dt
     self.camY = self.camY + dy * PAN_SPEED * dt
+
+    -- Reroll dynamic nodes if they were seen.
+    if self.nodeList then
+        local count = {shrine = 0, fountain = 0, shop = 0}
+        for _, entry in ipairs(self.nodeList) do
+            local nodeType = nodes.getType(entry.node)
+            if count[nodeType] then
+                count[nodeType] = count[nodeType] + 1
+            end
+        end
+
+        for _, entry in ipairs(self.nodeList) do
+            if entry.node.seen and nodes.getType(entry.node) == "dynamic" then
+                local newNode = rerollDynamicNode(g.getRun().mapGraph, entry.node, count)
+                newNode.seen = true
+                entry.node = newNode
+
+                local newnt = nodes.getType(newNode)
+                count[newnt] = count[newnt] + 1
+            end
+        end
+    end
 
     -- Commander travel
     if self.traveling then
@@ -430,7 +474,7 @@ function map_scene:draw()
         end
 
         -- decor + node images, sorted by y
-        local builder = DecorBuilder()
+        local builder = DecorBuilder() --[[@as g.DecorBuilder]]
         for _, d in ipairs(self.decorList) do
             if isPointVisible(d.x, d.y, view, CULL_PAD) then
                 local dtype = decor_types.get(d.decorType)

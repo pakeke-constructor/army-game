@@ -91,13 +91,16 @@ end
 function MapGraph:init(width, height)
     self.width = width
     self.height = height
+    self.distanceBetweenNodes = 130 -- sensible default just to silence LuaLS
     self.nodes = {}
     self.edges = {}
     self.adj = {}
     self.decor = {}
     self.playerPosition = nil -- node key string, e.g. "2,0"
+    self.rng = love.math.random
 end
 
+---@param node MapNode
 function MapGraph:getDrawPos(node)
     local sp = self.distanceBetweenNodes
     return (node.x * sp + node.ox) * self.scaleX, (node.y * sp + node.oy) * self.scaleY
@@ -119,9 +122,12 @@ function MapGraph:addNode(x, y, nodeType)
     return node
 end
 
+---@generic T: MapNode
 ---@param x integer
 ---@param y integer
----@param nodeType string|MapNode a node type string or a Node class
+---@param nodeType T a node type string or a Node class
+---@return T?
+---@overload fun(self:MapGraph,x:integer,y:integer,nodeType:string):(MapNode?)
 function MapGraph:setNode(x, y, nodeType)
     local key = nodeKey(x, y)
     if not self.nodes[key] then return nil end
@@ -238,7 +244,7 @@ function MapGraph.generate(args, rng)
     self.distanceBetweenNodes = args.distanceBetweenNodes
     self.scaleX = args.scaleX
     self.scaleY = args.scaleY
-    rng = rng or math.random
+    rng = rng or love.math.random
     self.rng = rng
 
     local hw = math.floor(width / 2)
@@ -464,7 +470,10 @@ end
 
 
 
-local SPECIAL_NODES = {"feast", "fountain", "shrine", "shop"}
+local SPECIAL_NODES = {
+    "feast", "fountain", "shrine", "shop",
+    "dynamic", "dynamic", "dynamic", "dynamic"
+}
 -- TODO: add `town` in here too.
 
 local function isNextToNodeOfSameType(self, x, y, nodeType)
