@@ -2,6 +2,9 @@
 local TITLE_FONT = nil
 local DESC_FONT = nil
 
+local BLESSING_CARD_BG = objects.Color("#111111")
+local GRADIENT_CIRCLE = helper.gradientCircleMesh()
+
 ---Draw a blessing card in a kirigami region. Returns true if clicked.
 ---@param blessingId string
 ---@param region kirigami.Region
@@ -16,7 +19,7 @@ local function drawBlessingCard(blessingId, region, index)
     local rarity = info.rarity or g.RARITIES.COMMON
     local darkCol = rarity.darkColor
     local liteCol = rarity.color
-    local bgCol1 = objects.Color(0.05, 0.05, 0.06, 0.7)
+    local bgCol1 = objects.Color(0.05, 0.05, 0.06)
     local uid = blessingId .. "_" .. index
 
     local x, y, w, h = region:get()
@@ -32,8 +35,10 @@ local function drawBlessingCard(blessingId, region, index)
         if isHovered then
             darkCol = darkCol:lerp(liteCol, 0.25)
         end
-        love.graphics.setColor(1, 1, 1)
-        helper.gradientRect("vertical", bgCol1, darkCol, bx, by, bw, bh)
+        love.graphics.setColor(BLESSING_CARD_BG)
+        love.graphics.rectangle("fill", bx, by, bw, bh)
+        love.graphics.setColor(liteCol[1], liteCol[2], liteCol[3], liteCol[4] * 0.67)
+        love.graphics.draw(GRADIENT_CIRCLE, bx + bw / 2, by + bh / 2, 0, math.min(bw, bh))
         love.graphics.setColor(liteCol:getRGBA())
         ui.drawPanel(bx-3, by-3, bw+6, bh+6)
     end)

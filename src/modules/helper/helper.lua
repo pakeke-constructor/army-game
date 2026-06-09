@@ -460,7 +460,7 @@ function helper.gradientCircleMesh(segments)
     }
 
     -- 2. Perimeter vertices (Radius of 0.5 to make the total diameter 1)
-    for i = 1, segments do
+    for i = 0, segments do
         local angle = (i / segments) * math.pi * 2
         local x = math.cos(angle) * 0.5
         local y = math.sin(angle) * 0.5
@@ -469,18 +469,7 @@ function helper.gradientCircleMesh(segments)
     end
 
     -- Create and return the mesh using the "fan" draw mode
-    local mesh = love.graphics.newMesh(vertices, "fan", "static")
-
-    -- Make the vertex map. It's [1, 2, 3, ..., 2]
-    ---@type integer[]
-    local map = {}
-    for i = 1, #vertices do
-        map[#map+1] = i
-    end
-    map[#map+1] = 2
-    mesh:setVertexMap(map)
-
-    return mesh
+    return love.graphics.newMesh(vertices, "fan", "static")
 end
 
 
