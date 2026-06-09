@@ -39,6 +39,7 @@ consts.DEFAULT_RARITY_WEIGHTS = {
     UNCOMMON = 0.5,
     RARE = 0.3,
     LEGENDARY = 0.1,
+    ALMOST_UNIQUE = 0.000000001,
 }
 
 consts.STARTING_COMMANDER = "sir_horse"

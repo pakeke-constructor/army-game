@@ -2466,6 +2466,7 @@ g.RARITIES = {
     RARE = newRarity("RARE", "RARE (III)", objects.Color.fromByteRGBA(160,62,144)),
     LEGENDARY = newRarity("LEGENDARY", "LEGENDARY (IV)", objects.Color.fromByteRGBA(150,100,25)),
 
+    ALMOST_UNIQUE = newRarity("ALMOST_UNIQUE", "ALMOST UNIQUE", objects.Color.GRAY),
     UNIQUE = newRarity("UNIQUE", "UNIQUE", objects.Color.GRAY),
 }
 
