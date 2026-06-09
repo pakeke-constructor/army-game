@@ -171,7 +171,7 @@ Gain 2XP the first time you kill a friendly unit each battle.
 Max level squads gain +50% units.
 
 ==== Ubergrades *
-Squads gain 0.1 ASPD and 1 ARMR when upgraded, stackable.
+Squads gain 0.15 ASPD when upgraded, stackable.
 
 (NYI) Magnify * (this is kinda hard, i think we should rework it)
 Projectiles have a 50% chance to gain 1 (DMG) when passing through a Blue unit.
@@ -213,7 +213,7 @@ The first building you place each fight has triple max HP.
 When a full HP ally is healed, it gains 1 ARMR.
 
 ==== Iron Exosuits *
-For every ARMR your units have, your units gain +8% ASPD.
+For every ARMR your units have, they also gain +8% ASPD.
 
 (NYI) Acceleration *
 Your units’ “Every X seconds” effects trigger twice as often.
