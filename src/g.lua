@@ -2498,7 +2498,8 @@ function g.defineStat(id, baseName, info)
     local mulQ = "get" .. Name .. "Multiplier"
     g.defineQuestion(modQ, reducers.ADD, 0)
     g.defineQuestion(mulQ, reducers.MULTIPLY, 1)
-    local r, gg, b = info.color:getRGBA()
+    local col = g.snapToPalette(info.color)
+    local r, gg, b = col:getRGBA()
     local stat = {
         id = id,
         name = id,
@@ -2513,7 +2514,7 @@ function g.defineStat(id, baseName, info)
         baseName = baseName,
         modQ = modQ,
         mulQ = mulQ,
-        color = g.snapToPalette(info.color),
+        color = col,
         icon = info.icon,
         isImportant = info.isImportant,
     }
