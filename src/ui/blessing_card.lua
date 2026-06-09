@@ -13,9 +13,8 @@ local function drawBlessingCard(blessingId, region, index)
     ui.assertUIStarted()
 
     local info = g.getBlessingInfo(blessingId)
-    local rarity = info.rarity or g.RARITIES.COMMON
-    local darkCol = rarity.darkColor
-    local liteCol = rarity.color
+    local darkCol = g.RARITIES.COMMON.darkColor
+    local liteCol = g.RARITIES.COMMON.color
     local bgCol1 = objects.Color(0.05, 0.05, 0.06, 0.7)
     local uid = blessingId .. "_" .. index
 
@@ -39,7 +38,7 @@ local function drawBlessingCard(blessingId, region, index)
     end)
 
     -- Header: icon on left, name on right
-    local iconSize = 32
+    local iconSize = 24
     local iconGap = 10
     box:add({
         getHeight = function(innerW)
@@ -47,7 +46,8 @@ local function drawBlessingCard(blessingId, region, index)
         end,
         draw = function(ex, ey, ew, eh)
             love.graphics.setColor(1, 1, 1)
-            g.drawImageContained(info.image, ex, ey, iconSize, iconSize)
+            g.drawBlessingIcon(info.id, ex + iconSize / 2, ey + iconSize / 2)
+
             local textX = ex + iconSize + iconGap
             local textW = ew - iconSize - iconGap
             love.graphics.setColor(1, 1, 1)
