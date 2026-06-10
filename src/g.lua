@@ -786,14 +786,18 @@ local currentEntityId = 0
 ---@field icon string
 ---@field perks string[]
 ---@field cost g.ManaBundle
+---@field powerIndex number
 ---@field onDeploySquad (fun(squad: g.SquadInfo, entities: ecs.Entity[], x: number, y:number))?
 ---@field drawSquadHover fun(x:number, y:number)?
 
-
-
 ---@param squadInfo g.SquadInfo
 local function estimateSquadPowerIndex(squadInfo)
-    --local dmg = 
+    local def = squadInfo.entityDef
+    local attack = def.baseAttackDamage or 0
+    local attackSpeed = def.baseAttackSpeed or 0
+    local maxHealth = def.baseMaxHealth or 0
+    local rangedMult = g.isRangedUnit(squadInfo.entityId) and 2.5 or 1
+    return attack * attackSpeed * rangedMult * maxHealth
 end
 
 ---@param id string
@@ -847,6 +851,7 @@ function g.defineSquad(id, info)
         end
     end
     assert(info.icon)
+    info.powerIndex = estimateSquadPowerIndex(info)
     SQUAD_DEFS[id] = info
     SQUAD_LIST[#SQUAD_LIST + 1] = id
 end
@@ -1318,6 +1323,8 @@ function g.defineEntity(id, def)
 end
 
 
+local entInitTc = typecheck.assert("string","number","number")
+
 --- we need this coz sometimes we need fields to be set immediately BEFORE qbuses or anything run
 ---@param id string
 ---@param x number
@@ -1326,6 +1333,7 @@ end
 ---@param ... unknown
 ---@return ecs.Entity
 function g.spawnEntityWithInit(id, x, y, initFunc, ...)
+    entInitTc(id,x,y)
     local mt = ENTITY_DEFS[id]
     assert(mt, "Unknown entity type: " .. tostring(id))
     local ecs = g.getECS()

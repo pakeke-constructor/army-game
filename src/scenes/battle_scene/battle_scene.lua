@@ -418,6 +418,7 @@ local function drawSandboxUI(self)
         local cells = body:grid(cols, rows)
         for i, id in ipairs(ids) do
             local has = g.getSquadFromArmy(id)
+            local info = g.getSquadInfo(id)
             local cell = cells[i]
             local cx, cy, cw, ch = cell:get()
             local idd = "sb_pick_"..id
@@ -427,6 +428,7 @@ local function drawSandboxUI(self)
             end
             lg.setColor(1,1,1)
             g.drawSquadIcon(id, cx + cw/2, cy + ch/2, true)
+            lg.print(string.format("%.1f", info.powerIndex or 0), cx + cw * 0.62, cy + ch * 0.5)
             if iml.wasJustClicked(cx, cy, cw, ch, 1, idd) then
                 if not g.getSquadFromArmy(id) then
                     g.addSquadToArmy(id)
@@ -449,6 +451,7 @@ local function drawSandboxUI(self)
         local rows = math.max(1, math.ceil(#army / cols))
         local cells = body:grid(cols, rows)
         for i, sq in ipairs(army) do
+            local info = g.getSquadInfo(sq.squadId)
             local cell = cells[i]
             local cx, cy, cw, ch = cell:get()
             local idd = "sb_lvl_"..i
@@ -458,6 +461,7 @@ local function drawSandboxUI(self)
             end
             lg.setColor(1,1,1)
             g.drawSquadIcon(sq.squadId, cx + cw/2, cy + ch/2, true, sq.level)
+            lg.print(string.format("%.1f", info.powerIndex or 0), cx + cw * 0.62, cy + ch * 0.5)
             if iml.wasJustClicked(cx, cy, cw, ch, 1, idd) then
                 sq.level = sq.level + 1
             end

@@ -140,7 +140,7 @@ function love.load()
     if consts.DEV_MODE then
         love.keyboard.setTextInput(true)
     end
-    g.loadImagesFrom("assets")
+    g.loadImagesFrom("assets/sprites")
     g.loadImagesFrom("src/content")
     g.requireFolder("src/entities")
     g.requireFolder("src/content")
