@@ -569,6 +569,7 @@ function MapGraph:_generateNodes(rng, fromPortal)
         n = self:setNode(n.x, n.y, "empty") --[[@as MapNode.EmptyNode]]
     end
     n.seen = true
+    n.visited = true
 end
 
 
