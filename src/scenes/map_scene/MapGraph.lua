@@ -551,6 +551,11 @@ function MapGraph:_generateNodes(rng)
 
     -- pass-5: Set pieces (TODO)
     self:_placeSetPieces(rng)
+
+    -- HACK: Sometimes where player reside is occupied. Force it to be empty node.
+    local n = self:getPlayerNode()
+    n = self:setNode(n.x, n.y, "empty")
+    n.seen = true
 end
 
 
