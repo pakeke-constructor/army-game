@@ -98,6 +98,8 @@ function MapGraph:init(width, height)
     self.decor = {}
     self.playerPosition = nil -- node key string, e.g. "2,0"
     self.rng = love.math.random
+    self.scaleX = 1
+    self.scaleY = 0.6
 end
 
 ---@param node MapNode
@@ -229,6 +231,7 @@ end
 ---@field scaleX number
 ---@field scaleY number
 ---@field decorTypes? string[] list of decor type ids
+---@field fromPortal boolean? If true, new player position will be deactivated portal node.
 
 --- Generate a map procedurally.
 ---@param args MapGraph.GenArgs
@@ -240,7 +243,7 @@ function MapGraph.generate(args, rng)
     local edgePrune = args.edgePruneChance
     local diagChance = args.randomDiagonalChance
 
-    local self = MapGraph(width, height)
+    local self = MapGraph(width, height) --[[@as MapGraph]]
     self.distanceBetweenNodes = args.distanceBetweenNodes
     self.scaleX = args.scaleX
     self.scaleY = args.scaleY
@@ -363,7 +366,7 @@ function MapGraph.generate(args, rng)
 
     -- STAGE 2: Node generation
     self:setPlayerPosition(0, 0)
-    self:_generateNodes(rng)
+    self:_generateNodes(rng, not not args.fromPortal)
 
     ensureNodeOffsets() -- since more nodes were generated; add more here.
 
@@ -486,7 +489,8 @@ local function isNextToNodeOfSameType(self, x, y, nodeType)
 end
 
 ---@param rng fun():number
-function MapGraph:_generateNodes(rng)
+---@param fromPortal boolean
+function MapGraph:_generateNodes(rng, fromPortal)
     local playerKey = self.playerPosition
 
     -- pass-1: Assign node types.
@@ -552,9 +556,15 @@ function MapGraph:_generateNodes(rng)
     -- pass-5: Set pieces (TODO)
     self:_placeSetPieces(rng)
 
-    -- HACK: Sometimes where player reside is occupied. Force it to be empty node.
     local n = self:getPlayerNode()
-    n = self:setNode(n.x, n.y, "empty")
+    if fromPortal then
+        n = self:setNode(n.x, n.y, "portal") --[[@as MapNode.PortalNode]]
+        n.active = false
+    else
+        -- HACK: Sometimes where player reside is occupied (portal node is intentional).
+        -- Force it to be empty node.
+        n = self:setNode(n.x, n.y, "empty") --[[@as MapNode.EmptyNode]]
+    end
     n.seen = true
 end
 
@@ -667,7 +677,7 @@ function MapGraph:serialize()
         i = i + 1
         edges[i] = ek
     end
-    
+
     return { width = self.width, height = self.height, distanceBetweenNodes = self.distanceBetweenNodes, scaleX = self.scaleX, scaleY = self.scaleY, nodes = serializedNodes, edges = edges, decor = self.decor, playerPosition = self.playerPosition }
 end
 

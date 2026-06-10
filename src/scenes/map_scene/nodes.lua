@@ -417,6 +417,36 @@ end
 nodes.DynamicNode = DynamicNode
 
 
+-------------------------------
+-- Portal Node
+-------------------------------
+
+---@class MapNode.PortalNode: MapNode
+local PortalNode = nodes.newClass("portal")
+
+function PortalNode:init(x,y)
+    self.active = true
+end
+
+function PortalNode:enter()
+    if self.active then
+        local scene, name = g.getCurrentScene()
+        if name == "map_scene" then
+            scene:_buildMap(true)
+        end
+    end
+end
+
+function PortalNode:buildDecor(builder, wx, wy)
+    if self.active then
+        -- Draw active portal
+    else
+        -- Draw deactivated portal
+    end
+end
+
+nodes.PortalNode = PortalNode
+
 
 
 return nodes

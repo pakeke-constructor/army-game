@@ -146,30 +146,37 @@ function map_scene:enter()
 
     local run = g.getRun()
     if not run.mapGraph then
-        -- Run the proc gen algorithm until we have a valid setup.
-        -- (nodeCount > 20 is valid)
-        repeat run.mapGraph = MapGraph.generate({
-            width = 50,
-            height = 30,
-            nodePruneChance = 0.35,
-            edgePruneChance = 0.02,
-            distanceBetweenNodes = 130,
-            randomDiagonalChance = 0.5,
-            nodeOffsetFactor = 0.35,
-            scaleX = 1,
-            scaleY = 0.6,
-            decorTypes = {
-                "mountain_large",
-                "mountain_small_1",
-                "mountain_small_2",
-                "tree_large_1",
-                "tree_small_1",
-                "grass_1",
-                "grass_2",
-                "grass_3"
-            },
-        }) until run.mapGraph:countNodes() > 20
+        self:_buildMap()
     end
+end
+
+---@param fromPortal boolean?
+function map_scene:_buildMap(fromPortal)
+    local run = g.getRun()
+    -- Run the proc gen algorithm until we have a valid setup.
+    -- (nodeCount > 20 is valid)
+    repeat run.mapGraph = MapGraph.generate({
+        width = 50,
+        height = 30,
+        nodePruneChance = 0.35,
+        edgePruneChance = 0.02,
+        distanceBetweenNodes = 130,
+        randomDiagonalChance = 0.5,
+        nodeOffsetFactor = 0.35,
+        scaleX = 1,
+        scaleY = 0.6,
+        decorTypes = {
+            "mountain_large",
+            "mountain_small_1",
+            "mountain_small_2",
+            "tree_large_1",
+            "tree_small_1",
+            "grass_1",
+            "grass_2",
+            "grass_3"
+        },
+        fromPortal = not not fromPortal,
+    }) until run.mapGraph:countNodes() > 20
 
     -- Build sorted decor list for drawing
     self.decorList = {}
