@@ -173,7 +173,7 @@ local function getContainedScale(parsed, font, w, h)
         local th = lines * font:getHeight()
 
         -- Check if the scaled text block fits within the container's height budget
-        if th * midScale <= h then
+        if tw * midScale <= w and th * midScale <= h then
             -- Try to find an even larger perfect fit
             scale = midScale
             finalTw, finalTh = tw, th
