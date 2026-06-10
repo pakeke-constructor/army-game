@@ -42,6 +42,9 @@ local FEAST_TXT = loc("Feast: Obtain XP")
 
 local CAMPFIRE_TXT = loc("Campfire: Obtain XP")
 
+local PORTAL_ACTIVE_TXT = loc("Portal: Enter New Area")
+local PORTAL_INACTIVE_TXT = loc("Portal: Inactive")
+
 
 
 ---@class MapNode: objects.Class
@@ -439,6 +442,10 @@ function PortalNode:buildDecor(builder, wx, wy)
     else
         builder:addImage("node_portal_deactivated", wx, wy)
     end
+end
+
+function PortalNode:getHoverDescription()
+    return self.active and PORTAL_ACTIVE_TXT or PORTAL_INACTIVE_TXT
 end
 
 nodes.PortalNode = PortalNode
