@@ -114,7 +114,7 @@ COMMANDS.vacuum = function()
     if name ~= "map_scene" then return addLog("/vacuum only works in map scene") end
     ---@cast scene g.MapScene
     for _, node in ipairs(scene.nodeList) do
-        node.node.seen = true
+        node.seen = true
     end
     addLog("vacuumed all fogs")
 end
