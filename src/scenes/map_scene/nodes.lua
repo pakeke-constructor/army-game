@@ -430,12 +430,7 @@ function PortalNode:init(x,y)
 end
 
 function PortalNode:enter()
-    if self.active then
-        local scene, name = g.getCurrentScene()
-        if name == "map_scene" then
-            scene:_buildMap(true)
-        end
-    end
+    nodeEventService.openPortalPopup(self)
 end
 
 function PortalNode:buildDecor(builder, wx, wy)
