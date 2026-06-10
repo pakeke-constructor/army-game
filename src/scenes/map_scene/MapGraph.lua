@@ -22,7 +22,7 @@ STAGE-1: structure generation algorithm:
 STAGE-2: Node-generation (essentially 'filling in' the existing structure)
 - pass-1:
 - Make 25% of nodes enemy-nodes. 
-- Make 15% of nodes "special" nodes. Random choice between FeastNode, FountainNode for now. (Will add more later)
+- Make 20% of nodes "special" nodes. Random choice between FeastNode, FountainNode for now. (Will add more later)
 - pass-2:
 - Iterate over all enemy-nodes. 5% chance to increase difficulty by 2. 25% to increase difficulty by 1
 - Iterate over all enemy-nodes. For every node of difficulty 2: decrease difficulty by 1.
@@ -98,6 +98,8 @@ function MapGraph:init(width, height)
     self.decor = {}
     self.playerPosition = nil -- node key string, e.g. "2,0"
     self.rng = love.math.random
+    self.scaleX = 1
+    self.scaleY = 0.6
 end
 
 ---@param node MapNode
@@ -229,6 +231,7 @@ end
 ---@field scaleX number
 ---@field scaleY number
 ---@field decorTypes? string[] list of decor type ids
+---@field fromPortal boolean? If true, new player position will be deactivated portal node.
 
 --- Generate a map procedurally.
 ---@param args MapGraph.GenArgs
@@ -240,7 +243,7 @@ function MapGraph.generate(args, rng)
     local edgePrune = args.edgePruneChance
     local diagChance = args.randomDiagonalChance
 
-    local self = MapGraph(width, height)
+    local self = MapGraph(width, height) --[[@as MapGraph]]
     self.distanceBetweenNodes = args.distanceBetweenNodes
     self.scaleX = args.scaleX
     self.scaleY = args.scaleY
@@ -363,7 +366,7 @@ function MapGraph.generate(args, rng)
 
     -- STAGE 2: Node generation
     self:setPlayerPosition(0, 0)
-    self:_generateNodes(rng)
+    self:_generateNodes(rng, not not args.fromPortal)
 
     ensureNodeOffsets() -- since more nodes were generated; add more here.
 
@@ -471,7 +474,10 @@ end
 
 
 local SPECIAL_NODES = {
-    "feast", "fountain", "shrine", "shop",
+    "feast", "fountain", "shrine", "shop", "portal",
+    -- "dynamic" can be either "fountain", "shrine", or "shop"
+    -- the exact type will be determined once the node is seen
+    -- which is handled in map_scene.lua.
     "dynamic", "dynamic", "dynamic", "dynamic"
 }
 -- TODO: add `town` in here too.
@@ -486,7 +492,8 @@ local function isNextToNodeOfSameType(self, x, y, nodeType)
 end
 
 ---@param rng fun():number
-function MapGraph:_generateNodes(rng)
+---@param fromPortal boolean
+function MapGraph:_generateNodes(rng, fromPortal)
     local playerKey = self.playerPosition
 
     -- pass-1: Assign node types.
@@ -496,7 +503,7 @@ function MapGraph:_generateNodes(rng)
         local r = rng()
         if r < 0.25 then
             -- stays as battle (already is)
-        elseif r < 0.40 then
+        elseif r < 0.45 then
             local r2 = rng()
             local pick = SPECIAL_NODES[math.floor(rng() * #SPECIAL_NODES) + 1]
             if r2 < 0.3 then
@@ -551,6 +558,17 @@ function MapGraph:_generateNodes(rng)
 
     -- pass-5: Set pieces (TODO)
     self:_placeSetPieces(rng)
+
+    local n = self:getPlayerNode()
+    if fromPortal then
+        n = self:setNode(n.x, n.y, "portal") --[[@as MapNode.PortalNode]]
+        n.active = false
+    else
+        -- HACK: Sometimes where player reside is occupied (portal node is intentional).
+        -- Force it to be empty node.
+        n = self:setNode(n.x, n.y, "empty") --[[@as MapNode.EmptyNode]]
+    end
+    n.seen = true
 end
 
 
@@ -662,7 +680,7 @@ function MapGraph:serialize()
         i = i + 1
         edges[i] = ek
     end
-    
+
     return { width = self.width, height = self.height, distanceBetweenNodes = self.distanceBetweenNodes, scaleX = self.scaleX, scaleY = self.scaleY, nodes = serializedNodes, edges = edges, decor = self.decor, playerPosition = self.playerPosition }
 end
 
