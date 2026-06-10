@@ -19,25 +19,20 @@ local function drawBlessingCard(blessingId, region, index)
     local rarity = info.rarity or g.RARITIES.COMMON
     local darkCol = rarity.darkColor
     local liteCol = rarity.color
-    local bgCol1 = objects.Color(0.05, 0.05, 0.06)
     local uid = blessingId .. "_" .. index
 
     local x, y, w, h = region:get()
-    local isHovered = false
 
     TITLE_FONT = TITLE_FONT or g.getBigFont(16)
     DESC_FONT = DESC_FONT or g.getSmallFont(16)
 
 
     local box = ui.Box({maxWidth = w, maxHeight = h, padding = 12, spacing = 6}, function(bx, by, bw, bh)
-        iml.panel(bx,by,bw,bh, uid)
-        isHovered = iml.isHovered(bx,by, bw,bh, uid)
-        if isHovered then
-            darkCol = darkCol:lerp(liteCol, 0.25)
-        end
-        love.graphics.setColor(BLESSING_CARD_BG)
+        --iml.panel(bx,by,bw,bh, uid)
+        local isHovered = iml.isHovered(bx,by, bw,bh, uid)
+        love.graphics.setColor(isHovered and darkCol:darken(0.3) or BLESSING_CARD_BG)
         love.graphics.rectangle("fill", bx, by, bw, bh)
-        love.graphics.setColor(liteCol[1], liteCol[2], liteCol[3], liteCol[4] * 0.67)
+        love.graphics.setColor(liteCol[1], liteCol[2], liteCol[3], liteCol[4] * 0.5)
         love.graphics.draw(GRADIENT_CIRCLE, bx + bw / 2, by + bh / 2, 0, math.min(bw, bh))
         love.graphics.setColor(liteCol:getRGBA())
         ui.drawPanelThin(bx-3, by-3, bw+6, bh+6)
@@ -45,7 +40,7 @@ local function drawBlessingCard(blessingId, region, index)
 
     -- Header: icon on left, name on right
     local iconSize = 24
-    local iconGap = 10
+    local iconGap = 4
     box:add({
         getHeight = function(innerW)
             return math.max(iconSize, TITLE_FONT:getHeight())
