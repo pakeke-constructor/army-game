@@ -103,6 +103,10 @@ local FOUNTAIN_BLESSING = loc("Receive a blessing.")
 local FEAST_TXT = loc("A grand feast is laid out for your troops.")
 local FEAST_REWARD = loc("Feast.\n(+4 XP)")
 
+local PORTAL_TXT = loc("Mysterious Gateway\nTravel to a random node.")
+local PORTAL_ENTER = loc("Enter Portal")
+local PORTAL_LEAVE = loc("Leave")
+
 local SACRIFICE_RAGE_REDUCTION = 2
 local SACRIFICE_GOLD = 30
 local FOUNTAIN_RAGE_REDUCTION = 2
@@ -186,6 +190,11 @@ function nodeEventService.openFountainPopup()
 end
 function nodeEventService.openFeastPopup()
     openPopup("feast")
+end
+---@param node MapNode.PortalNode
+function nodeEventService.openPortalPopup(node)
+    if not (node and node.active) then return end
+    openPopup("portal", node)
 end
 
 
@@ -280,6 +289,26 @@ local function drawFeastPopup()
     end
 end
 
+local function drawPortalPopup()
+    local buttonsR, font = beginPopup(PORTAL_TXT)
+
+    local leftR, rightR = buttonsR:splitHorizontal(1,1)
+    if drawChoiceButton(leftR, PORTAL_ENTER, font) then
+        closePopup()
+        local scene, name = g.getCurrentScene()
+        if name == "map_scene" then
+            scene:_buildMap(true)
+        end
+    end
+    if drawChoiceButton(rightR, PORTAL_LEAVE, font) then
+        local node = nodeEventService._popupData
+        if node then
+            node.visited = false
+        end
+        closePopup()
+    end
+end
+
 
 ---@param ev g.RandomEventPass
 local function drawRandomEvent(ev)
@@ -324,6 +353,7 @@ local POPUP_DRAWERS = {
     shrine = drawShrinePopup,
     fountain = drawFountainPopup,
     feast = drawFeastPopup,
+    portal = drawPortalPopup,
 }
 
 function nodeEventService.draw()

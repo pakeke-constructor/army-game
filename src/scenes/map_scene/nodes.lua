@@ -42,6 +42,9 @@ local FEAST_TXT = loc("Feast: Obtain XP")
 
 local CAMPFIRE_TXT = loc("Campfire: Obtain XP")
 
+local PORTAL_ACTIVE_TXT = loc("Portal: Enter New Area")
+local PORTAL_INACTIVE_TXT = loc("Portal: Inactive")
+
 
 
 ---@class MapNode: objects.Class
@@ -416,6 +419,36 @@ end
 
 nodes.DynamicNode = DynamicNode
 
+
+-------------------------------
+-- Portal Node
+-------------------------------
+
+---@class MapNode.PortalNode: MapNode
+local PortalNode = nodes.newClass("portal")
+
+function PortalNode:init(x,y)
+    Node.init(self,x,y)
+    self.active = true
+end
+
+function PortalNode:enter()
+    nodeEventService.openPortalPopup(self)
+end
+
+function PortalNode:buildDecor(builder, wx, wy)
+    if self.active then
+        builder:addImage("node_portal", wx, wy)
+    else
+        builder:addImage("node_portal_deactivated", wx, wy)
+    end
+end
+
+function PortalNode:getHoverDescription()
+    return self.active and PORTAL_ACTIVE_TXT or PORTAL_INACTIVE_TXT
+end
+
+nodes.PortalNode = PortalNode
 
 
 
