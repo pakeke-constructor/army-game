@@ -148,6 +148,7 @@ function map_scene:enter()
     if not run.mapGraph then
         self:_buildMap()
     end
+    return self:_buildNodeState()
 end
 
 ---@param fromPortal boolean?
@@ -177,6 +178,11 @@ function map_scene:_buildMap(fromPortal)
         },
         fromPortal = not not fromPortal,
     }) until run.mapGraph:countNodes() > 20
+    return self:_buildNodeState()
+end
+
+function map_scene:_buildNodeState()
+    local run = g.getRun()
 
     -- Build sorted decor list for drawing
     self.decorList = {}
