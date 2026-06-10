@@ -103,9 +103,9 @@ local FOUNTAIN_BLESSING = loc("Receive a blessing.")
 local FEAST_TXT = loc("A grand feast is laid out for your troops.")
 local FEAST_REWARD = loc("Feast.\n(+4 XP)")
 
-local PORTAL_TXT = loc("A shimmering portal opens before you. This will teleport you far away. You will not be able to return. Enter it?")
-local PORTAL_ENTER = loc("Enter the portal.")
-local PORTAL_LEAVE = loc("Not yet.")
+local PORTAL_TXT = loc("Mysterious Gateway\nTravel to a random node.")
+local PORTAL_ENTER = loc("Enter Portal")
+local PORTAL_LEAVE = loc("Leave")
 
 local SACRIFICE_RAGE_REDUCTION = 2
 local SACRIFICE_GOLD = 30
