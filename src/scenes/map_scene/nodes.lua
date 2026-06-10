@@ -425,6 +425,7 @@ nodes.DynamicNode = DynamicNode
 local PortalNode = nodes.newClass("portal")
 
 function PortalNode:init(x,y)
+    Node.init(self,x,y)
     self.active = true
 end
 
@@ -439,9 +440,9 @@ end
 
 function PortalNode:buildDecor(builder, wx, wy)
     if self.active then
-        -- Draw active portal
+        builder:addImage("node_portal", wx, wy)
     else
-        -- Draw deactivated portal
+        builder:addImage("node_portal_deactivated", wx, wy)
     end
 end
 

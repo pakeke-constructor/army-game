@@ -22,7 +22,7 @@ STAGE-1: structure generation algorithm:
 STAGE-2: Node-generation (essentially 'filling in' the existing structure)
 - pass-1:
 - Make 25% of nodes enemy-nodes. 
-- Make 15% of nodes "special" nodes. Random choice between FeastNode, FountainNode for now. (Will add more later)
+- Make 20% of nodes "special" nodes. Random choice between FeastNode, FountainNode for now. (Will add more later)
 - pass-2:
 - Iterate over all enemy-nodes. 5% chance to increase difficulty by 2. 25% to increase difficulty by 1
 - Iterate over all enemy-nodes. For every node of difficulty 2: decrease difficulty by 1.
@@ -474,7 +474,10 @@ end
 
 
 local SPECIAL_NODES = {
-    "feast", "fountain", "shrine", "shop",
+    "feast", "fountain", "shrine", "shop", "portal",
+    -- "dynamic" can be either "fountain", "shrine", or "shop"
+    -- the exact type will be determined once the node is seen
+    -- which is handled in map_scene.lua.
     "dynamic", "dynamic", "dynamic", "dynamic"
 }
 -- TODO: add `town` in here too.
@@ -500,7 +503,7 @@ function MapGraph:_generateNodes(rng, fromPortal)
         local r = rng()
         if r < 0.25 then
             -- stays as battle (already is)
-        elseif r < 0.40 then
+        elseif r < 0.45 then
             local r2 = rng()
             local pick = SPECIAL_NODES[math.floor(rng() * #SPECIAL_NODES) + 1]
             if r2 < 0.3 then
