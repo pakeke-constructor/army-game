@@ -48,7 +48,7 @@ g.defineSquad("barbarian_squad", {
         baseMaxHealth = 6,
     },
     unitCount = 6,
-    icon = "barbarians_uniticon",
+    icon = "barbarian_uniticon",
     perks = {"bloodlust"},
     cost = {red = 1},
 })
@@ -103,7 +103,7 @@ g.defineSquad("brewer_squad", {
         baseMaxHealth = 5,
     },
     unitCount = 8,
-    icon = "brewers_uniticon",
+    icon = "brewer_uniticon",
     perks = {"bolstering_brew"},
     cost = {red = 1},
 })

@@ -109,7 +109,7 @@ g.defineSquad("cook_squad", {
         baseMaxHealth = 5,
     },
     unitCount = 4,
-    icon = "cooks_uniticon",
+    icon = "cook_uniticon",
     cost = {green = 1},
 })
 
@@ -136,7 +136,7 @@ g.defineSquad("peasant_squad", {
         baseMaxHealth = 8,
     },
     unitCount = 10,
-    icon = "angrymob_uniticon",
+    icon = "peasant_uniticon",
     cost = {green = 1},
 })
 
