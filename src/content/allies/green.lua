@@ -341,6 +341,7 @@ g.defineSquad("living_forest_squad", {
         baseStartingArmor = 4,
     },
     unitCount = 4,
+    icon = "livingforest_uniticon",
     perks = {"circle_of_life"},
     cost = {green = 1},
 })
@@ -388,5 +389,4 @@ g.defineSquad("swarm_squad", {
     unitCount = 20,
     cost = {green = 2},
 })
-
 

@@ -249,6 +249,7 @@ g.defineSquad("incense_holder_squad", {
         baseMaxHealth = 7,
     },
     unitCount = 4,
+    icon = "incenseholders_uniticon",
     perks = {"invigorate"},
     cost = {blue = 2},
 })
@@ -385,6 +386,7 @@ g.defineSquad("bell_creature_squad", {
         baseStartingArmor = 5,
     },
     unitCount = 3,
+    icon = "bellmen_uniticon",
     perks = {"reverberate"},
     cost = {blue = 1},
 })
@@ -409,4 +411,3 @@ g.defineSquad("laser_gunner_squad", {
     perks = {"laser_focus"},
     cost = {blue = 1},
 })
-
