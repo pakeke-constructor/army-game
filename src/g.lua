@@ -1056,7 +1056,7 @@ function g.removePerkFromSquad(squad, perkId)
 end
 
 
-local DEPLOY_ANIMATION_STEP = 0.04
+local DEPLOY_ANIMATION_STEP = 0.2
 
 ---@param squad g.Squad
 ---@param x number
@@ -1074,11 +1074,12 @@ function g.spawnSquad(squad, x, y, ...)
     end
     local offsets = squad:getFormationOffsets()
     local entities = {}
-    for i = 1, #offsets do
+    local numUnits = #offsets
+    for i = 1, numUnits do
         g.spawnEntityWithInit(info.entityId, x + offsets[i].x, y + offsets[i].y, function(ent)
             ent.scope = squadScope
             ent.squad = squad
-            ent._timeSinceDeployed = -((i - 1) * DEPLOY_ANIMATION_STEP)
+            ent._timeSinceDeployed = -(((i - 1)/numUnits) * DEPLOY_ANIMATION_STEP)
             entities[i] = ent
         end, ...)
     end
