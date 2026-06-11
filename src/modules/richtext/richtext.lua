@@ -252,6 +252,33 @@ local function splitWords(text)
 	return words
 end
 
+---@param font love.Font
+---@param text string
+---@param limitWidth number
+---@return string, string
+local function splitToWidth(font, text, limitWidth)
+	local currentW = 0
+	local breakIdx = 0
+	local lastChar = nil
+	for offset, code in utf8.codes(text) do
+		local char = utf8.char(code)
+		local charW = font:getWidth(char)
+		if lastChar then
+			charW = charW + font:getKerning(lastChar, char)
+		end
+		if currentW + charW > limitWidth then
+			if breakIdx == 0 then
+				breakIdx = offset + #char - 1
+			end
+			break
+		end
+		currentW = currentW + charW
+		lastChar = char
+		breakIdx = offset + #char - 1
+	end
+	return text:sub(1, breakIdx), text:sub(breakIdx + 1)
+end
+
 ---Layout the parsed text.
 ---@param font love.Font
 ---@param maxWidth number?
@@ -326,17 +353,16 @@ function ParsedText:layout(font, maxWidth, align)
 			for _, word in ipairs(words) do
 				if word == "\n" then
 					flushLine(true)
-				else
+					wordOffset = wordOffset + utf8.len(word)
+				elseif word:match("^%s+$") then
 					local w = font:getWidth(word)
 					local h = font:getHeight()
-					---@type richtext._EffectInfo[]
 					local effects = {}
 					for i, eff in ipairs(activeEffects) do
 						effects[i] = {
 							func = effectsRegistry[eff.name].render,
 							args = eff.args,
-							perCharacter =
-								effectsRegistry[eff.name].perCharacter
+							perCharacter = effectsRegistry[eff.name].perCharacter
 						}
 					end
 					addChunk({
@@ -348,8 +374,65 @@ function ParsedText:layout(font, maxWidth, align)
 						x = 0,
 						y = 0
 					})
+					wordOffset = wordOffset + utf8.len(word)
+				else
+					local remainingWord = word
+					while #remainingWord > 0 do
+						local curW = font:getWidth(remainingWord)
+						local h = font:getHeight()
+						if maxWidth and currentLine.width + curW > maxWidth then
+							if currentLine.width > 0 then
+								flushLine()
+							else
+								local limit = maxWidth - currentLine.width
+								local part, rest = splitToWidth(font, remainingWord, limit)
+								local partW = font:getWidth(part)
+								local effects = {}
+								for i, eff in ipairs(activeEffects) do
+									effects[i] = {
+										func = effectsRegistry[eff.name].render,
+										args = eff.args,
+										perCharacter = effectsRegistry[eff.name].perCharacter
+									}
+								end
+								addChunk({
+									text = part,
+									width = partW,
+									height = h,
+									effects = effects,
+									index = token.index + wordOffset,
+									x = 0,
+									y = 0
+								})
+								wordOffset = wordOffset + utf8.len(part)
+								remainingWord = rest
+								if #remainingWord > 0 then
+									flushLine()
+								end
+							end
+						else
+							local effects = {}
+							for i, eff in ipairs(activeEffects) do
+								effects[i] = {
+									func = effectsRegistry[eff.name].render,
+									args = eff.args,
+									perCharacter = effectsRegistry[eff.name].perCharacter
+								}
+							end
+							addChunk({
+								text = remainingWord,
+								width = curW,
+								height = h,
+								effects = effects,
+								index = token.index + wordOffset,
+								x = 0,
+								y = 0
+							})
+							wordOffset = wordOffset + utf8.len(remainingWord)
+							break
+						end
+					end
 				end
-				wordOffset = wordOffset + utf8.len(word)
 			end
 		elseif token.type == "image" then
 			local imageName = assert(token.name)
@@ -497,7 +580,7 @@ end
 function TextLayout:draw(x, y)
 	---@type richtext.Context
 	local sharedContext = {
-		font = nil,
+		font = self.font,
 		textOrDrawable = "",
 		index = 0,
 		quad = nil
