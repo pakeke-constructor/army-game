@@ -77,8 +77,26 @@ M.define("mountain_large", { image = "mountain_large_1", chance = 0.1, nodeRadiu
 M.define("mountain_small_1", { image = "mountain_small_1", chance = 0.3, nodeRadius = 15, decorRadius = 10 })
 M.define("mountain_small_2", { image = "mountain_small_2", chance = 0.1, nodeRadius = 15, decorRadius = 6 })
 
-M.define("tree_large_1", { image = "tree_large_1", chance = 0.2, nodeRadius = 20, decorRadius = 8 })
-M.define("tree_small_1", { image = "tree_small_1", chance = 0.3, nodeRadius = 12, decorRadius = 6 })
+
+---@param id integer
+local function treeAnimation(id)
+    local t = love.timer.getTime()
+    local offt = helper.hashInteger(id) / 65536
+
+    -- Sway
+    local a = (t + offt) * math.pi / 5
+    local k = math.sin(a) * math.sin(a * 2) * 0.08
+
+    -- Bobbing
+    local a2 = (t + offt + 0.5) * math.pi / 4
+    local s2 = (math.sin(a2) ^ 2)
+    local sy = 1 + s2 * 0.075
+
+    return 0, 0, 0, 1, sy, k, 0
+end
+
+M.define("tree_large_1", { image = "tree_large_1", chance = 0.2, nodeRadius = 20, decorRadius = 8, transformModifier = treeAnimation })
+M.define("tree_small_1", { image = "tree_small_1", chance = 0.3, nodeRadius = 12, decorRadius = 6, transformModifier = treeAnimation })
 -- M.define("tree_small_1_b", { image = "tree_small_1", chance = 0.05, nodeRadius = 8, decorRadius = 4 })
 
 
