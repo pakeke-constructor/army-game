@@ -1100,6 +1100,8 @@ local BLESSING_LIST = {}
 function g.defineBlessing(id, name, info)
     if info.image == "placeholder" then
         log.warn("No image for blessing:",id)
+    elseif not g.isImage(info.image) then
+        error("Invalid image: "..info.image)
     end
     assert(not BLESSING_DEFS[id], "Duplicate blessing: " .. id)
     info.name = loc(name, {}, {
