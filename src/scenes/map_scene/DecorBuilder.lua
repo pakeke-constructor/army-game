@@ -4,7 +4,7 @@ local Class = require("src.modules.objects.Class")
 local DecorBuilder = Class("g:DecorBuilder")
 
 local function hash(x, y)
-    return math.abs(math.sin(x * 12.9898 + y * 78.233) * 43758.5453)
+    return math.floor(math.sin(x * 12.9898 + y * 78.233) * 43758.5453 + 0.5)
 end
 
 function DecorBuilder:init()
