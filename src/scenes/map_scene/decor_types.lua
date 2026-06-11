@@ -57,11 +57,19 @@ function M.getSortedByRadius(ids)
 end
 
 
+---@param id integer
+local function grassSway(id)
+    local t = love.timer.getTime()
+    local offt = helper.hashInteger(id) / 65536
+    local a = (t + offt) * math.pi / 3
+    local k = math.sin(a) * math.sin(a * 2) * 0.4
+    return 0, 0, 0, 1, 1, k, 0
+end
 
 local GRASS_OPACITY = 0.65
-M.define("grass_1", {image = "grass_1", chance = 0.15, nodeRadius = 4, decorRadius = 8, opacity = GRASS_OPACITY})
-M.define("grass_2", { image = "grass_2", chance = 0.3, nodeRadius = 4, decorRadius = 8, opacity = GRASS_OPACITY })
-M.define("grass_3", { image = "grass_3", chance = 0.2, nodeRadius = 4, decorRadius = 8, opacity = GRASS_OPACITY })
+M.define("grass_1", { image = "grass_1", chance = 0.15, nodeRadius = 4, decorRadius = 8, opacity = GRASS_OPACITY, transformModifier = grassSway })
+M.define("grass_2", { image = "grass_2", chance = 0.3, nodeRadius = 4, decorRadius = 8, opacity = GRASS_OPACITY, transformModifier = grassSway })
+M.define("grass_3", { image = "grass_3", chance = 0.2, nodeRadius = 4, decorRadius = 8, opacity = GRASS_OPACITY, transformModifier = grassSway })
 
 
 -- Define built-in decor types
