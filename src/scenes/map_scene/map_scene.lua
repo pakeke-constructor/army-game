@@ -511,7 +511,7 @@ function map_scene:draw()
             if isPointVisible(d.x, d.y, view, CULL_PAD) then
                 local dtype = decor_types.get(d.decorType)
                 if dtype and dtype.image then
-                    builder:addImage(dtype.image, d.x, d.y, 0, nil, dtype.opacity)
+                    builder:addImage(dtype.image, d.x, d.y, 0, nil, dtype.opacity, dtype.transformModifier)
                 end
             end
         end

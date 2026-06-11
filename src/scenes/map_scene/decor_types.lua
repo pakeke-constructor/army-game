@@ -1,32 +1,52 @@
 local M = {}
 
 ---@class DecorTypeDef
----@field id string
 ---@field nodeRadius number clearance from nodes/edges
 ---@field decorRadius number clearance from other decor
 ---@field chance number per-cell roll chance
 ---@field image string? image name (used for draw + radius)
 ---@field opacity number? image name (used for draw + radius)
+---@field transformModifier (fun():(number,number,number,number,number,number,number))?
 
+---@class DecorTypeInfo: DecorTypeDef
+---@field id string
+---@field image string? image name (used for draw + radius)
+---@field opacity number image name (used for draw + radius)
+---@field transformModifier fun(id:integer):(number,number,number,number,number,number,number)
+
+---@param id integer deterministic ID
+---@return number ox
+---@return number oy
+---@return number r
+---@return number sx
+---@return number sy
+---@return number kx
+---@return number ky
+local function defaultTransformModifier(id)
+    return 0, 0, 0, 1, 1, 0, 0
+end
 
 local registry = {}
 
 ---@param id string
----@param def DecorTypeDef|{id:nil}
+---@param def DecorTypeDef
 function M.define(id, def)
+    ---@cast def DecorTypeInfo
     def.id = id
+    def.opacity = def.opacity or 1
+    def.transformModifier = def.transformModifier or defaultTransformModifier
     registry[id] = def
 end
 
 ---@param id string
----@return DecorTypeDef?
+---@return DecorTypeInfo?
 function M.get(id)
     return registry[id]
 end
 
 --- Returns decor types sorted by nodeRadius descending
 ---@param ids string[]
----@return DecorTypeDef[]
+---@return DecorTypeInfo[]
 function M.getSortedByRadius(ids)
     local result = {}
     for _, id in ipairs(ids) do
