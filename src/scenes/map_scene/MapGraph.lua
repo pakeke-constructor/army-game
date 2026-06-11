@@ -132,10 +132,13 @@ end
 ---@overload fun(self:MapGraph,x:integer,y:integer,nodeType:string):(MapNode?)
 function MapGraph:setNode(x, y, nodeType)
     local key = nodeKey(x, y)
-    if not self.nodes[key] then return nil end
+    local old = self.nodes[key]
+    if not old then return nil end
     local NodeClass = type(nodeType) == "string" and nodes.getClass(nodeType) or nodeType
     NodeClass = NodeClass or nodes.getClass("battle")
     local node = NodeClass(x, y)
+    node.ox = old.ox
+    node.oy = old.oy
     node.id = math.floor((love.math.random)() * 2147483647) + 1
     node.nodeType = NodeClass.nodeType or "battle"
     self.nodes[key] = node
@@ -569,6 +572,7 @@ function MapGraph:_generateNodes(rng, fromPortal)
         n = self:setNode(n.x, n.y, "empty") --[[@as MapNode.EmptyNode]]
     end
     n.seen = true
+    n.visited = true
 end
 
 

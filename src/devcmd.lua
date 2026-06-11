@@ -22,6 +22,7 @@ COMMANDS.help = function()
     addLog("/gold <amount> - add gold")
     addLog("/tp - teleport to cursor (map)")
     addLog("/sb - reset & enter sandbox battle")
+    addLog("/vacuum - removes all fogs")
     addLog("/help - show this")
 end
 
@@ -106,6 +107,16 @@ COMMANDS.tp = function()
         best:enter()
     end
     addLog("teleported")
+end
+
+COMMANDS.vacuum = function()
+    local scene, name = g.getCurrentScene()
+    if name ~= "map_scene" then return addLog("/vacuum only works in map scene") end
+    ---@cast scene g.MapScene
+    for _, node in ipairs(scene.nodeList) do
+        node.seen = true
+    end
+    addLog("vacuumed all fogs")
 end
 
 local function execCmd(line)

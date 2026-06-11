@@ -17,11 +17,13 @@ end
 ---@param r number?
 ---@param sx number? if nil, hashed from (x,y) to -1 or 1
 ---@param opacity number?
-function DecorBuilder:addImage(image, x, y, r, sx, opacity)
+---@param transformMod? fun(id:integer):(number,number,number,number,number,number,number) function that returns 7 numbers: offX, offY, rot, scaleX, scaleY, shearX, shearY
+function DecorBuilder:addImage(image, x, y, r, sx, opacity, transformMod)
     self.items[#self.items + 1] = {
         kind = "image",
         image = image, x = x, y = y,
         r = r or 0, sx = sx, opacity = opacity or 1,
+        transformMod = transformMod,
     }
 end
 
@@ -43,11 +45,26 @@ function DecorBuilder:finalize()
     for _, it in ipairs(self.items) do
         if it.kind == "image" then
             local sx = it.sx
+            local id = hash(it.x, it.y)
             if sx == nil then
-                sx = (math.floor(hash(it.x, it.y)) % 2 == 0) and -1 or 1
+                sx = (math.floor(id) % 2 == 0) and -1 or 1
             end
-            love.graphics.setColor(1, 1, 1, it.opacity)
-            g.drawImageOffset(it.image, it.x, it.y, it.r, sx, 1, 0.5, 0.95)
+
+            local offx, offy, rot, scx, scy, kx, ky = 0, 0, 0, 1, 1, 0, 0
+            if it.transformMod then
+                offx, offy, rot, scx, scy, kx, ky = it.transformMod(id)
+            end
+
+            local col = gsman.setColor(1, 1, 1, it.opacity)
+            g.drawImageOffset(
+                it.image,
+                it.x + offx, it.y + offy,
+                it.r + rot,
+                sx * scx, scy,
+                0.5, 0.95,
+                kx, ky
+            )
+            col:pop()
         else
             it.func(it.x, it.y)
         end

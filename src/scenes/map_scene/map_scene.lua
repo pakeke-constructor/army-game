@@ -40,6 +40,13 @@ local function isPointVisible(x, y, view, pad)
 end
 
 ---@param graph MapGraph
+---@param a MapNode
+---@param b MapNode
+---@param rr number
+---@param gg number
+---@param bb number
+---@param aa number?
+---@param width number?
 local function renderEdge(graph, a, b, rr, gg, bb, aa, width)
     local lg = love.graphics
     local ax, ay = graph:getDrawPos(a)
@@ -191,18 +198,21 @@ function map_scene:_buildNodeState()
     end)
 
     -- Build sorted node list for drawing
-    ---@type {node:MapNode,x:number,y:number}
+    ---@type MapNode[]
     self.nodeList = {}
     run.mapGraph:forEachNode(function(node)
-        local nx, ny = run.mapGraph:getDrawPos(node)
-        self.nodeList[#self.nodeList + 1] = {node = node, x = nx, y = ny}
+        self.nodeList[#self.nodeList + 1] = node
     end)
 
     local function byY(a, b)
         return a.y < b.y
     end
     table.sort(self.decorList, byY)
-    table.sort(self.nodeList, byY)
+    table.sort(self.nodeList, function(a, b)
+        local _, ay = run.mapGraph:getDrawPos(a)
+        local _, by = run.mapGraph:getDrawPos(b)
+        return ay < by
+    end)
 
     local pnode = run.mapGraph:getPlayerNode()
     if pnode then
@@ -243,10 +253,11 @@ function map_scene:_buildFogClearCells()
         end
     end
 
-    for _, entry in ipairs(self.nodeList) do
-        if entry.node.seen then
-            local cx = math.floor(entry.x / FOG_STEP)
-            local cy = math.floor(entry.y / FOG_STEP)
+    for _, node in ipairs(self.nodeList) do
+        if node.seen then
+            local nx, ny = graph:getDrawPos(node)
+            local cx = math.floor(nx / FOG_STEP)
+            local cy = math.floor(ny / FOG_STEP)
             for dx = -clearCells, clearCells do
                 local row = cells[cx + dx]
                 if not row then
@@ -321,19 +332,26 @@ function map_scene:update(dt)
 
     -- Reroll dynamic nodes if they were seen.
     if self.nodeList then
+        local graph = g.getRun().mapGraph
+        table.sort(self.nodeList, function(a, b)
+            local _, ay = graph:getDrawPos(a)
+            local _, by = graph:getDrawPos(b)
+            return ay < by
+        end)
+
         local count = {shrine = 0, fountain = 0, shop = 0}
-        for _, entry in ipairs(self.nodeList) do
-            local nodeType = nodes.getType(entry.node)
+        for _, node in ipairs(self.nodeList) do
+            local nodeType = nodes.getType(node)
             if count[nodeType] then
                 count[nodeType] = count[nodeType] + 1
             end
         end
 
-        for _, entry in ipairs(self.nodeList) do
-            if entry.node.seen and nodes.getType(entry.node) == "dynamic" then
-                local newNode = rerollDynamicNode(g.getRun().mapGraph, entry.node, count)
+        for i, node in ipairs(self.nodeList) do
+            if node.seen and nodes.getType(node) == "dynamic" then
+                local newNode = rerollDynamicNode(graph, node, count)
                 newNode.seen = true
-                entry.node = newNode
+                self.nodeList[i] = newNode
 
                 local newnt = nodes.getType(newNode)
                 count[newnt] = count[newnt] + 1
@@ -481,8 +499,9 @@ function map_scene:draw()
 
         -- ground ellipses
         for _, n in ipairs(self.nodeList) do
-            if isPointVisible(n.x, n.y, view, CULL_PAD) then
-                n.node:drawBelow(n.x, n.y)
+            local nx, ny = graph:getDrawPos(n)
+            if isPointVisible(nx, ny, view, CULL_PAD) then
+                n:drawBelow(nx, ny)
             end
         end
 
@@ -492,13 +511,14 @@ function map_scene:draw()
             if isPointVisible(d.x, d.y, view, CULL_PAD) then
                 local dtype = decor_types.get(d.decorType)
                 if dtype and dtype.image then
-                    builder:addImage(dtype.image, d.x, d.y, 0, nil, dtype.opacity)
+                    builder:addImage(dtype.image, d.x, d.y, 0, nil, dtype.opacity, dtype.transformModifier)
                 end
             end
         end
         for _, n in ipairs(self.nodeList) do
-            if isPointVisible(n.x, n.y, view, CULL_PAD) then
-                n.node:buildDecor(builder, n.x, n.y)
+            local nx, ny = graph:getDrawPos(n)
+            if isPointVisible(nx, ny, view, CULL_PAD) then
+                n:buildDecor(builder, nx, ny)
             end
         end
 
