@@ -241,20 +241,26 @@ function ShrineNode:getHoverDescription()
     return SHRINE_TXT
 end
 
-function ShrineNode:buildDecor(builder, wx, wy)
+---@param x number
+---@param y number
+local function drawShrineAnimated(x, y)
     local t = love.timer.getTime()
     local t1 = math.sin(t * 3) * 2
-    local r = math.sin(t1 / 2) * math.pi / 8
-
-    -- Note: We draw the shrine directly bypassing the decor builder
-    -- because it needs specific ordering.
     local col = gsman.setColor(1, 1, 1)
-    g.drawImageOffset("node_shrine_base", wx, wy + 4, 0, 1, 1, 0.5, 1)
-    g.drawImageOffset("node_shrine_wing", wx - 14, wy - 32 + t1, r, 1, 1, 1, 0.5)
-    g.drawImageOffset("node_shrine_wing", wx + 14, wy - 32 + t1, -r, -1, 1, 1, 0.5)
-    g.drawImage("node_shrine_body", wx, wy - 26 + t1, 0)
+    g.drawImageOffset("node_shrine_base", x, y + 4, 0, 1, 1, 0.5, 1)
+    helper.drawWings(x, y - 32, t, "node_shrine_wing", {
+        scale = 1,
+        distance = -22,
+        rotation = math.pi / 6,
+        rotationOffset = -math.pi / 12,
+        verticalOffsetMultiplier = 0.3,
+    })
+    g.drawImage("node_shrine_body", x, y - 26 + t1)
     col:pop()
+end
 
+function ShrineNode:buildDecor(builder, wx, wy)
+    builder:addDrawable(wx, wy, drawShrineAnimated)
     addDemons(self, builder, wx, wy)
 end
 

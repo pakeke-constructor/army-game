@@ -687,19 +687,30 @@ local WING_ROT_OFFSET = -0.4
 local WING_ROTATION = math.pi / 2
 local WING_DEFAULT_DISTANCE = 10
 
+---@class helper.drawWings.settings
+---@field public scale number?
+---@field public distance number?
+---@field public rotation number?
+---@field public rotationOffset number?
+---@field public verticalOffsetMultiplier number?
+
 ---@param x number
 ---@param y number
 ---@param time number
 ---@param wingImage string?
----@param scale number?
-function helper.drawWings(x,y, time, wingImage, scale, wingDistance)
+---@param wingSettings helper.drawWings.settings?
+function helper.drawWings(x,y, time, wingImage, wingSettings)
     wingImage = wingImage or "wing_visual"
-    scale=scale or 1
+    local scale = wingSettings and wingSettings.scale or 1
+    local wingDistance = wingSettings and wingSettings.distance or WING_DEFAULT_DISTANCE
+    local rotation = wingSettings and wingSettings.rotation or WING_ROTATION
+    local rotationOffset = wingSettings and wingSettings.rotationOffset or WING_ROT_OFFSET
+    local verticalOffsetMultiplier = wingSettings and wingSettings.verticalOffsetMultiplier or 1
 
     local t = time * WING_FLAP_SPEED
-    local offset = wingDistance or WING_DEFAULT_DISTANCE
-    local dy = math.floor(offset/2) * math.sin(t + 0.5)
-    local r = WING_ROTATION * ((math.sin(t) + 1)/2) + WING_ROT_OFFSET
+    local offset = wingDistance
+    local dy = math.floor(offset/2) * math.sin(t + 0.5) * verticalOffsetMultiplier
+    local r = rotation * ((math.sin(t) + 1)/2) + rotationOffset
     -- if imageShadow then
     --     love.graphics.setColor(0,0,0, 0.4)
     --     g.drawImage(wingImage, x + offset + o, y + dy + o, r, sx,sy, kx,ky)
