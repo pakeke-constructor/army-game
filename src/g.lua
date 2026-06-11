@@ -69,42 +69,39 @@ end
 
 
 local PALETTE = {
-    {197, 48, 61},
-    {89, 71, 29},
-    {79, 45, 93},
-    {54, 199, 222},
-    {200, 82, 164},
-    {29, 58, 81},
-    {17, 18, 17},
-    {99, 99, 99},
-    {46, 68, 209},
-    {166, 84, 27},
-    {95, 57, 39},
-    {29, 27, 14},
-    {205, 133, 59},
-    {8, 8, 8},
-    {255, 255, 255},
-    {54, 30, 25},
-    {20, 14, 18},
-    {39, 39, 71},
-    {39, 55, 24},
-    {188, 227, 233},
-    {72, 72, 72},
-    {0, 0, 0},
-    {53, 125, 210},
-    {35, 100, 73},
-    {241, 241, 30},
-    {124, 200, 42},
-    {100, 106, 53},
-    {77, 140, 33},
-    {44, 44, 44},
-    {140, 159, 169},
-    {124, 34, 34},
-    {225, 185, 123}
+    objects.Color("#c5303d"), -- {197, 48, 61}
+    objects.Color("#59471d"), -- {89, 71, 29}
+    objects.Color("#4f2d5d"), -- {79, 45, 93}
+    objects.Color("#36c7de"), -- {54, 199, 222}
+    objects.Color("#c852a4"), -- {200, 82, 164}
+    objects.Color("#1d3a51"), -- {29, 58, 81}
+    objects.Color("#111211"), -- {17, 18, 17}
+    objects.Color("#636363"), -- {99, 99, 99}
+    objects.Color("#2e44d1"), -- {46, 68, 209}
+    objects.Color("#a6541b"), -- {166, 84, 27}
+    objects.Color("#5f3927"), -- {95, 57, 39}
+    objects.Color("#1d1b0e"), -- {29, 27, 14}
+    objects.Color("#cd853b"), -- {205, 133, 59}
+    objects.Color("#080808"), -- {8, 8, 8}
+    objects.Color("#ffffff"), -- {255, 255, 255}
+    objects.Color("#361e19"), -- {54, 30, 25}
+    objects.Color("#140e12"), -- {20, 14, 18}
+    objects.Color("#272747"), -- {39, 39, 71}
+    objects.Color("#273718"), -- {39, 55, 24}
+    objects.Color("#bce3e9"), -- {188, 227, 233}
+    objects.Color("#484848"), -- {72, 72, 72}
+    objects.Color("#000000"), -- {0, 0, 0}
+    objects.Color("#357dd2"), -- {53, 125, 210}
+    objects.Color("#236449"), -- {35, 100, 73}
+    objects.Color("#f1f11e"), -- {241, 241, 30}
+    objects.Color("#7cc82a"), -- {124, 200, 42}
+    objects.Color("#646a35"), -- {100, 106, 53}
+    objects.Color("#4d8c21"), -- {77, 140, 33}
+    objects.Color("#2c2c2c"), -- {44, 44, 44}
+    objects.Color("#8c9fa9"), -- {140, 159, 169}
+    objects.Color("#7c2222"), -- {124, 34, 34}
+    objects.Color("#e1b97b"), -- {225, 185, 123}
 }
-for i, c in ipairs(PALETTE) do
-    PALETTE[i] = objects.Color.fromByteRGBA(c[1], c[2], c[3])
-end
 
 ---Snap a color to the nearest palette entry.
 ---Uses 4th-power channel distance to deeply penalize large per-channel differences.
