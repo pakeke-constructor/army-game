@@ -815,8 +815,17 @@ function g.defineSquad(id, info)
     assert(info.entityDef, "Missing entityDef for squad: " .. id)
 
     if not info.icon then
-        log.error("Squad had no icon: ", id)
-        info.icon = "example_squad_icon"
+        -- Infer icon name from id
+        local infericon = id:gsub("_squad", ""):gsub("_", "").."_uniticon"
+        if g.isImage(infericon) then
+            info.icon = infericon
+        else
+            log.error("Squad had no icon: ", id)
+            info.icon = "example_squad_icon"
+        end
+    end
+    if not g.isImage(info.icon) then
+        error("Squad has invalid icon: "..info.icon)
     end
 
     local def = info.entityDef
@@ -830,9 +839,6 @@ function g.defineSquad(id, info)
         local w = g.getImageSize(def.image)
         def.physics = { shape = "circle", radius = w / 2, ox = 0, oy = 0, mass = 1 }
     end
-
-    local defaultIcon = id .. "_uniticon"
-    info.icon = info.icon or (g.isImage(defaultIcon) and defaultIcon) or "example_squad_icon"
 
     if not ENTITY_DEFS[info.entityId] then
         g.defineEntity(info.entityId, info.entityDef)
