@@ -538,6 +538,8 @@ local function getSnappedDeployPosition(squad, wx, wy, region)
 end
 
 local SQUAD_HOVER_COLOR = g.snapToPalette(0.2, 1, 0.3, 0.5)
+local SQUAD_HOVER_COLOR_1 = g.snapToPalette(0.05,0.2,0.07, 0.25)
+local SQUAD_HOVER_COLOR_2 = g.snapToPalette(0.1,0.7,0.3, 0.6)
 
 ---@param squad g.Squad
 ---@param wx number world x coord
@@ -571,9 +573,9 @@ local function drawSquadHover(squad, wx, wy)
     do
     local ww, hh = maxX-minX, maxY-minY
     lg.setLineWidth(2)
-    lg.setColor(0.05,0.2,0.07, 0.25)
+    lg.setColor(SQUAD_HOVER_COLOR_1)
     lg.rectangle("fill", sx+minX-w/2, sy+minY-h/2, ww+w, hh+h)
-    lg.setColor(0.1,0.7,0.3, 0.6)
+    lg.setColor(SQUAD_HOVER_COLOR_2)
     lg.rectangle("line", sx+minX-w/2, sy+minY-h/2, ww+w, hh+h)
     end
     local smallFont = g.getSmallFont(16)
