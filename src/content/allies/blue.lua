@@ -54,7 +54,7 @@ g.defineSquad("crystal_golems", {
         end,
     },
     unitCount = 2,
-    icon = "gargoyles_uniticon",
+    icon = "gargoyles_uniticon", -- placeholder
     cost = {blue = 1},
 })
 
@@ -164,7 +164,7 @@ g.defineSquad("archer_squad", {
         baseMaxHealth = 5,
     },
     unitCount = 8,
-    icon = "archers_uniticon",
+    icon = "archer_uniticon",
     cost = {blue = 1},
 })
 
@@ -249,6 +249,7 @@ g.defineSquad("incense_holder_squad", {
         baseMaxHealth = 7,
     },
     unitCount = 4,
+    icon = "incenseholder_uniticon",
     perks = {"invigorate"},
     cost = {blue = 2},
 })
@@ -385,6 +386,7 @@ g.defineSquad("bell_creature_squad", {
         baseStartingArmor = 5,
     },
     unitCount = 3,
+    icon = "bellcreature_uniticon",
     perks = {"reverberate"},
     cost = {blue = 1},
 })
@@ -409,4 +411,3 @@ g.defineSquad("laser_gunner_squad", {
     perks = {"laser_focus"},
     cost = {blue = 1},
 })
-

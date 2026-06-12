@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Palette Color Picker & Snapper</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            background: #fff;
+            padding: 20px;
+            border: 1px solid #ccc;
+        }
+
+        .row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .box {
+            flex: 1;
+            padding: 15px;
+            border: 1px solid #aaa;
+            text-align: center;
+        }
+
+        .color-preview {
+            width: 100%;
+            height: 100px;
+            border: 1px solid #000;
+            margin-bottom: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            font-family: monospace;
+        }
+
+        .swatch {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            margin: 5px;
+            border: 1px solid #333;
+            cursor: pointer;
+        }
+
+        .swatch:hover {
+            outline: 2px solid #000;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Palette Color Picker & Snapper</h1>
+
+        <h3>1. Configure Palette (Hex list, one per line)</h3>
+        <textarea id="palette-input"></textarea>
+        <br>
+        <button onclick="loadPalette()">Update Palette</button>
+
+        <hr>
+
+        <h3>2. Color Picker & Snapper</h3>
+        <div class="row">
+            <div class="box">
+                <h4>Pick Color</h4>
+                <input type="color" id="color-picker" value="#ff0000" style="width: 80%; height: 40px;">
+                <p>Hex: <span id="picked-hex">#ff0000</span></p>
+                <p>RGB (0-1): <span id="picked-rgb">1.00, 0.00, 0.00</span></p>
+            </div>
+            <div class="box">
+                <h4>Snapped Color</h4>
+                <div class="color-preview" id="snapped-preview"></div>
+                <p>Hex: <span id="snapped-hex">-</span></p>
+                <p>RGB (0-1): <span id="snapped-rgb">-</span></p>
+                <button onclick="copySnappedHex()">Copy Hex</button>
+            </div>
+        </div>
+
+        <hr>
+
+        <h3>3. Palette Swatches</h3>
+        <div id="swatch-container"></div>
+    </div>
+
+    <script>
+        // Initial palette from g.lua
+        const defaultPalette = [
+            "#c5303d",
+            "#59471d",
+            "#4f2d5d",
+            "#36c7de",
+            "#c852a4",
+            "#1d3a51",
+            "#111211",
+            "#636363",
+            "#2e44d1",
+            "#a6541b",
+            "#5f3927",
+            "#1d1b0e",
+            "#cd853b",
+            "#080808",
+            "#ffffff",
+            "#361e19",
+            "#140e12",
+            "#272747",
+            "#273718",
+            "#bce3e9",
+            "#484848",
+            "#000000",
+            "#357dd2",
+            "#236449",
+            "#f1f11e",
+            "#7cc82a",
+            "#646a35",
+            "#4d8c21",
+            "#2c2c2c",
+            "#8c9fa9",
+            "#7c2222",
+            "#e1b97b",
+        ];
+
+        let palette = [];
+
+        // Helper to parse hex to 0-1 RGB
+        function hexToRgb01(hex) {
+            hex = hex.replace(/^#/, '');
+            if (hex.length === 3) {
+                hex = hex.split('').map(c => c + c).join('');
+            }
+            const num = parseInt(hex, 16);
+            return {
+                r: ((num >> 16) & 255) / 255,
+                g: ((num >> 8) & 255) / 255,
+                b: (num & 255) / 255
+            };
+        }
+
+        // Color snapping algorithm using redmean
+        function snapToPalette(r, g, b) {
+            let best = null;
+            let bestDist = Infinity;
+
+            for (const hex of palette) {
+                const c = hexToRgb01(hex);
+                const rbar = (r + c.r) * 0.5;
+                const dr = r - c.r;
+                const dg = g - c.g;
+                const db = b - c.b;
+                const dist = (2 + rbar) * dr * dr + 4 * dg * dg + (3 - rbar) * db * db;
+                if (dist < bestDist) {
+                    bestDist = dist;
+                    best = hex;
+                }
+            }
+            return best;
+        }
+
+        function loadPalette() {
+            const text = document.getElementById("palette-input").value;
+            palette = text.split("\n")
+                .map(line => line.trim().toLowerCase())
+                .filter(line => /^#?[0-9a-f]{3,6}$/.test(line));
+
+            // Normalize leading #
+            palette = palette.map(hex => hex.startsWith('#') ? hex : '#' + hex);
+
+            renderSwatches();
+            updateSnapping();
+        }
+
+        function renderSwatches() {
+            const container = document.getElementById("swatch-container");
+            container.innerHTML = "";
+            palette.forEach(hex => {
+                const swatch = document.createElement("div");
+                swatch.className = "swatch";
+                swatch.style.backgroundColor = hex;
+                swatch.title = hex;
+                swatch.onclick = () => {
+                    document.getElementById("color-picker").value = hex;
+                    updateSnapping();
+                };
+                container.appendChild(swatch);
+            });
+        }
+
+        function updateSnapping() {
+            const hex = document.getElementById("color-picker").value;
+            const rgb = hexToRgb01(hex);
+
+            document.getElementById("picked-hex").textContent = hex;
+            document.getElementById("picked-rgb").textContent = `${rgb.r.toFixed(3)}, ${rgb.g.toFixed(3)}, ${rgb.b.toFixed(3)}`;
+
+            const snappedHex = snapToPalette(rgb.r, rgb.g, rgb.b);
+            const snappedPreview = document.getElementById("snapped-preview");
+            const snappedHexEl = document.getElementById("snapped-hex");
+            const snappedRgbEl = document.getElementById("snapped-rgb");
+
+            if (snappedHex) {
+                snappedPreview.style.backgroundColor = snappedHex;
+                snappedHexEl.textContent = snappedHex;
+                const sRgb = hexToRgb01(snappedHex);
+                snappedRgbEl.textContent = `${sRgb.r.toFixed(3)}, ${sRgb.g.toFixed(3)}, ${sRgb.b.toFixed(3)}`;
+            } else {
+                snappedPreview.style.backgroundColor = "transparent";
+                snappedHexEl.textContent = "-";
+                snappedRgbEl.textContent = "-";
+            }
+        }
+
+        function copySnappedHex() {
+            const text = document.getElementById("snapped-hex").textContent;
+            if (text && text !== "-") {
+                navigator.clipboard.writeText(text);
+            }
+        }
+
+        // Initialize
+        document.getElementById("palette-input").value = defaultPalette.join("\n");
+        document.getElementById("color-picker").addEventListener("input", updateSnapping);
+
+        loadPalette();
+    </script>
+</body>
+
+</html>
