@@ -87,6 +87,11 @@ local function removeEdgeByKeys(self, ka, kb)
     unlinkAdj(self, ka, kb)
 end
 
+---@class MapGraph.GroundDecor
+---@field package image string
+---@field package color [integer,integer,integer,integer] in 0-255
+---@field package x number
+---@field package y number
 
 function MapGraph:init(width, height)
     self.width = width
@@ -96,6 +101,10 @@ function MapGraph:init(width, height)
     self.edges = {}
     self.adj = {}
     self.decor = {}
+    ---@type MapGraph.GroundDecor[]
+    self.groundDecor = {}
+    ---@type objects.Partition<MapGraph.GroundDecor>
+    self.groundDecorPart = objects.Partition(32)
     self.playerPosition = nil -- node key string, e.g. "2,0"
     self.rng = love.math.random
     self.scaleX = 1
@@ -459,6 +468,9 @@ function MapGraph.generate(args, rng)
         end
     end
 
+    -- 10. Generate ground decors (needs decors and nodes properly setup first)
+    self:_generateGroundDecors()
+
     return self
 end
 
@@ -582,6 +594,96 @@ function MapGraph:_placeSetPieces(rng)
 end
 
 
+
+---@type [string,integer][]
+local GROUND_TEXTURE = {
+    {"decor_big_1", 2},
+    {"decor_big_2", 2},
+    {"decor_big_3", 2},
+    {"decor_big_4", 2},
+    {"decor_splotch_1", 3},
+    {"decor_splotch_2", 3},
+    {"decor_splotch_3", 3},
+    {"decor_splotch_4", 3},
+    {"decor_splotch_5", 3},
+    {"decor_tex_1", 4},
+    {"decor_tex_2", 4},
+    {"decor_tex_3", 4},
+    {"decor_tex_4", 4},
+    {"decor_tex_5", 4},
+    {"grass_decor_1", 5},
+    {"grass_decor_2", 5},
+    {"grass_decor_3", 5},
+    {"grass_decor_4", 5},
+}
+
+local NO_RANDOM_ROT_GD = {
+    grass_decor_1 = true,
+    grass_decor_2 = true,
+    grass_decor_3 = true,
+    grass_decor_4 = true,
+}
+
+local GROUND_TEXTURE_COLORS = {
+    objects.Color("#646a35"),
+    objects.Color("#273718"),
+    objects.Color("#361e19"),
+}
+
+local GROUND_DECOR_LEIGHTWAY = 250
+local GROUND_DECOR_DENSITY_DIVIDER = 2048 -- more number = more sparse
+
+---@private
+function MapGraph:_generateGroundDecors()
+    local dMinX, dMaxX, dMinY, dMaxY = 0, 0, 0, 0
+    for _, node in ipairs(self.nodes) do
+        local wx, wy = self:getDrawPos(node)
+        dMinX = math.min(wx, dMinX)
+        dMaxX = math.max(wx, dMaxX)
+        dMinY = math.min(wy, dMinY)
+        dMaxY = math.max(wy, dMaxY)
+    end
+    for _, d in ipairs(self.decor) do
+        dMinX = math.min(d.x, dMinX)
+        dMaxX = math.max(d.x, dMaxX)
+        dMinY = math.min(d.y, dMinY)
+        dMaxY = math.max(d.y, dMaxY)
+    end
+    dMinX = dMinX - GROUND_DECOR_LEIGHTWAY
+    dMaxX = dMaxX + GROUND_DECOR_LEIGHTWAY
+    dMinY = dMinY - GROUND_DECOR_LEIGHTWAY
+    dMaxY = dMaxY + GROUND_DECOR_LEIGHTWAY
+
+    local count = math.floor((dMaxX - dMinX) * (dMaxY - dMinY) / GROUND_DECOR_DENSITY_DIVIDER)
+    log.info("Making "..count.." ground decors")
+    ---@param max integer
+    local function rngmax(max)
+        return math.floor(helper.lerp(1, max, self.rng()) + 0.5)
+    end
+    for _ = 1, count do
+        local col = helper.randomChoice(GROUND_TEXTURE_COLORS, rngmax)
+        local r, g, b = col:getByteRGBA()
+        local a = math.floor(helper.lerp(0.25, 0.4, self.rng()) * 255 + 0.5)
+        local tex = helper.pickWeighted(GROUND_TEXTURE, self.rng)
+        local wx = math.floor(helper.lerp(dMinX, dMaxX, self.rng()))
+        local wy = math.floor(helper.lerp(dMinY, dMaxY, self.rng()))
+        self.groundDecor[#self.groundDecor+1] = {
+            image = tex,
+            x = wx, y = wy,
+            color = {r, g, b, a}, -- storing as number for serialization purpose
+        }
+    end
+    self:_rebuildGDPartition()
+end
+
+function MapGraph:_rebuildGDPartition()
+    self.groundDecorPart:clear()
+    for _, gd in ipairs(self.groundDecor) do
+        self.groundDecorPart:add(gd, gd.x, gd.y)
+    end
+end
+
+
 --- Iterate all nodes
 ---@param fn fun(node:MapNode)
 function MapGraph:forEachNode(fn)
@@ -657,6 +759,31 @@ function MapGraph:forEachEdge(fn)
 end
 
 
+---@param view {x:number,y:number,w:number,h:number}
+function MapGraph:drawGroundDecors(view)
+    local useopacity = not love.keyboard.isModifierActive("capslock")
+
+    local range = math.max(view.w, view.h)
+    self.groundDecorPart:query(view.x + view.w / 2, view.y + view.h / 2, function(gd)
+        local isize = math.max(g.getImageSize(gd.image))
+
+        if helper.isInsideRect(gd.x, gd.y, view.x, view.y, view.w, view.h, isize) then
+            local r, gg, b, a = love.math.colorFromBytes(unpack(gd.color))
+            if not useopacity then
+                a = 1
+            end
+            local col = gsman.setColor(r * a, gg * a, b * a, 1)
+            local rot = 0
+            if not NO_RANDOM_ROT_GD[gd.image] then
+                rot = helper.hashIntegerPair(gd.x, gd.y) / 65536 * consts.TAU
+            end
+            g.drawImage(gd.image, gd.x, gd.y, rot)
+            col:pop()
+        end
+    end, range)
+end
+
+
 local function serializeNode(node)
     local data = {}
     for k, v in pairs(node) do
@@ -685,7 +812,18 @@ function MapGraph:serialize()
         edges[i] = ek
     end
 
-    return { width = self.width, height = self.height, distanceBetweenNodes = self.distanceBetweenNodes, scaleX = self.scaleX, scaleY = self.scaleY, nodes = serializedNodes, edges = edges, decor = self.decor, playerPosition = self.playerPosition }
+    return {
+        width = self.width,
+        height = self.height,
+        distanceBetweenNodes = self.distanceBetweenNodes,
+        scaleX = self.scaleX,
+        scaleY = self.scaleY,
+        nodes = serializedNodes,
+        edges = edges,
+        decor = self.decor,
+        groundDecor = self.groundDecor,
+        playerPosition = self.playerPosition
+    }
 end
 
 --- Deserialize from a plain table
@@ -704,6 +842,8 @@ function MapGraph.deserialize(data)
     self.scaleX = data.scaleX or 1
     self.scaleY = data.scaleY or 1
     self.decor = data.decor or {}
+    self.groundDecor = data.groundDecor or {}
+    self:_rebuildGDPartition()
     return self
 end
 

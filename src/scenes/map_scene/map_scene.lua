@@ -488,7 +488,8 @@ function map_scene:draw()
             h = math.abs(y2 - y1),
         }
 
-        -- drawGround (TODO)
+        -- drawGround
+        graph:drawGroundDecors(view)
 
         -- edges
         graph:forEachEdge(function(a, b)
