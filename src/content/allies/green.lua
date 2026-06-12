@@ -109,7 +109,7 @@ g.defineSquad("cook_squad", {
         baseMaxHealth = 5,
     },
     unitCount = 4,
-    icon = "cooks_uniticon",
+    icon = "cook_uniticon",
     cost = {green = 1},
 })
 
@@ -136,7 +136,7 @@ g.defineSquad("peasant_squad", {
         baseMaxHealth = 8,
     },
     unitCount = 10,
-    icon = "angrymob_uniticon",
+    icon = "peasant_uniticon",
     cost = {green = 1},
 })
 
@@ -341,6 +341,7 @@ g.defineSquad("living_forest_squad", {
         baseStartingArmor = 4,
     },
     unitCount = 4,
+    icon = "livingforest_uniticon",
     perks = {"circle_of_life"},
     cost = {green = 1},
 })
@@ -388,5 +389,4 @@ g.defineSquad("swarm_squad", {
     unitCount = 20,
     cost = {green = 2},
 })
-
 

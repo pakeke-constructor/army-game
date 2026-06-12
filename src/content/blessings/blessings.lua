@@ -54,7 +54,7 @@ g.defineBlessing("helpfulness", "Helpfulness", {
 
 g.defineBlessing("luxury", "Luxury", {
     description = loc2("Squads that are at least level 3 gain +10% (ASPD)."),
-    image = "placeholder", -- PLACEHOLDER: no "luxury" sprite exists yet
+    image = "blessing_luxury",
     rarity = g.RARITIES.COMMON,
     handlers = {
         getAttackSpeedMultiplier = function(ent)
@@ -126,7 +126,7 @@ g.defineBlessing("torment", "Torment", {
 
 g.defineBlessing("golden_coffers", "Golden Coffers", {
     description = loc("Gain 50% more money from all sources."),
-    image = "placeholder",
+    image = "blessing_goldencoffers",
     rarity = g.RARITIES.RARE,
     handlers = {
         getMoneyMultiplier = function()
@@ -137,7 +137,7 @@ g.defineBlessing("golden_coffers", "Golden Coffers", {
 
 g.defineBlessing("blood_tithe", "Blood Tithe", {
     description = loc("Gain 5 gold after winning a battle."),
-    image = "placeholder",
+    image = "blessing_bloodtithe",
     rarity = g.RARITIES.UNCOMMON,
     handlers = {
         battleWon = function()
@@ -171,7 +171,7 @@ g.defineBlessing("valuable_lesson", "Valuable Lesson", {
 
 g.defineBlessing("grace", "Grace", {
     description = loc("Reduce demon-rage by 2."),
-    image = "placeholder", -- PLACEHOLDER: no "grace" sprite exists yet
+    image = "blessing_grace",
     rarity = g.RARITIES.COMMON,
     onAdd = function()
         local run = g.getRun()
@@ -225,7 +225,7 @@ g.defineBlessing("golden_gamble", "Golden Gamble", {
 
 g.defineBlessing("fuel", "Fuel", {
     description = loc("When applying burn to an enemy for the first time, apply 2 extra burn."),
-    image = "placeholder",
+    image = "blessing_fuel",
     rarity = g.RARITIES.UNCOMMON,
     mana = "red",
     handlers = {
@@ -238,7 +238,7 @@ g.defineBlessing("fuel", "Fuel", {
 
 g.defineBlessing("corrosive_compounds", "Corrosive Compounds", {
     description = loc("When an enemy receives burn, apply 1 extra burn per unique debuff on the target."),
-    image = "placeholder",
+    image = "blessing_corrosive_compounds",
     rarity = g.RARITIES.LEGENDARY,
     mana = "red",
     handlers = {
@@ -257,7 +257,7 @@ g.defineBlessing("corrosive_compounds", "Corrosive Compounds", {
 
 g.defineBlessing("injection", "Injection", {
     description = loc("Every 2 seconds, apply 1 poison to a random enemy."),
-    image = "placeholder",
+    image = "blessing_injection",
     rarity = g.RARITIES.COMMON,
     mana = "green",
     handlers = {
@@ -272,7 +272,7 @@ g.defineBlessing("injection", "Injection", {
 
 g.defineBlessing("firestarter", "Firestarter", {
     description = loc("Every 2 seconds, apply 4 burn to a random enemy."),
-    image = "placeholder",
+    image = "blessing_firestarter",
     rarity = g.RARITIES.COMMON,
     mana = "red",
     handlers = {
@@ -288,7 +288,7 @@ g.defineBlessing("firestarter", "Firestarter", {
 
 g.defineBlessing("misfortune", "Misfortune", {
     description = loc("Every 2 seconds, deal 3 damage to a random enemy."),
-    image = "placeholder",
+    image = "blessing_misfortune",
     rarity = g.RARITIES.COMMON,
     handlers = {
         perSecondUpdate = function(secondCount)
@@ -302,7 +302,7 @@ g.defineBlessing("misfortune", "Misfortune", {
 
 g.defineBlessing("chill", "Chill", {
     description = loc("Every 2 seconds, apply 1 freeze to a random enemy."),
-    image = "placeholder",
+    image = "blessing_chill",
     rarity = g.RARITIES.COMMON,
     mana = "blue",
     handlers = {
@@ -318,7 +318,7 @@ g.defineBlessing("chill", "Chill", {
 
 g.defineBlessing("infection", "Infection", {
     description = loc("Poison spreads to one nearby enemy when applied."),
-    image = "blessing_pestilence",
+    image = "blessing_plague",
     rarity = g.RARITIES.RARE,
     mana = "green",
     handlers = {
@@ -935,7 +935,7 @@ g.defineBlessing("grand_finale", "Grand Finale", {
 
 g.defineBlessing("hard_carapaces", "Hard Carapaces", {
     description = loc2("Green units and Pests have +2 (ARMR)."),
-    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    image = "blessing_hardcarapace",
     rarity = g.RARITIES.LEGENDARY,
     mana = "green",
     handlers = {
@@ -993,7 +993,7 @@ g.defineBlessing("meat_grinder", "Meat Grinder", {
 
 g.defineBlessing("unbreakable", "Unbreakable", {
     description = loc2("When units gain (ARMR) in battle, gain an equal amount of max (HP) for the fight."),
-    image = "placeholder", -- PLACEHOLDER: name ends with *, no sprite yet
+    image = "blessing_unbreakable",
     rarity = g.RARITIES.LEGENDARY,
     handlers = {
         -- armorIncreased fires from g.addArmor. buffEntity(maxHealth) doesn't add
@@ -1189,4 +1189,3 @@ for i=1, 100 do
         -- if there's no more blessngs in the pool, one of these will be picked. That's why there's 500 of them
     })
 end
-
