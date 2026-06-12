@@ -597,24 +597,28 @@ end
 
 ---@type [string,integer][]
 local GROUND_TEXTURE = {
-    {"decor_big_1", 2},
-    {"decor_big_2", 2},
-    {"decor_big_3", 2},
-    {"decor_big_4", 2},
+    {"decor_mega_1", 6},
+    {"decor_mega_2", 6},
+    {"decor_mega_3", 6},
+    {"decor_mega_4", 6},
+    {"decor_big_1", 4},
+    {"decor_big_2", 4},
+    {"decor_big_3", 4},
+    {"decor_big_4", 4},
     {"decor_splotch_1", 3},
     {"decor_splotch_2", 3},
     {"decor_splotch_3", 3},
     {"decor_splotch_4", 3},
     {"decor_splotch_5", 3},
-    {"decor_tex_1", 4},
-    {"decor_tex_2", 4},
-    {"decor_tex_3", 4},
-    {"decor_tex_4", 4},
-    {"decor_tex_5", 4},
-    {"grass_decor_1", 5},
-    {"grass_decor_2", 5},
-    {"grass_decor_3", 5},
-    {"grass_decor_4", 5},
+    {"decor_tex_1", 2},
+    {"decor_tex_2", 2},
+    {"decor_tex_3", 2},
+    {"decor_tex_4", 2},
+    {"decor_tex_5", 2},
+    -- {"grass_decor_1", 5},
+    -- {"grass_decor_2", 5},
+    -- {"grass_decor_3", 5},
+    -- {"grass_decor_4", 5},
 }
 
 local NO_RANDOM_ROT_GD = {
@@ -631,7 +635,7 @@ local GROUND_TEXTURE_COLORS = {
 }
 
 local GROUND_DECOR_LEIGHTWAY = 250
-local GROUND_DECOR_DENSITY_DIVIDER = 2048 -- more number = more sparse
+local GROUND_DECOR_DENSITY_DIVIDER = 3072 -- more number = more sparse
 
 ---@private
 function MapGraph:_generateGroundDecors()
