@@ -168,7 +168,7 @@ function map_scene:_buildMap(fromPortal)
         height = 30,
         nodePruneChance = 0.35,
         edgePruneChance = 0.02,
-        distanceBetweenNodes = 130,
+        distanceBetweenNodes = 300,
         randomDiagonalChance = 0.5,
         nodeOffsetFactor = 0.35,
         scaleX = 1,

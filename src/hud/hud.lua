@@ -294,7 +294,6 @@ local function drawTopBar()
 
     local run = g.getRun()
     local font = g.getSmallFont(16)
-    local fh = font:getHeight()
 
     local function drawPanel(region, text, hoverText)
         local x, y, w, h = region:get()
@@ -302,7 +301,7 @@ local function drawTopBar()
         local DY = 30
         ui.drawDarkPanel(x, y-DY, w, h+DY)
         lg.setColor(1, 1, 1)
-        richtext.printRich(text, font, x, y + h / 2 - fh / 2, w, "center")
+        richtext.printRichContainedNoWrap(text, font, x, y, w, h)
         if hoverText and iml.isHovered(x, y, w, h, text) then
             hoverService.requestHover(function(box, fonts)
                 box:addText("{c r=0.7 g=0.7 b=0.75}" .. hoverText, fonts.body)
