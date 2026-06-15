@@ -90,6 +90,10 @@ end
 function Node:buildDecor(builder, wx, wy)
 end
 
+---@param dt number
+function Node:update(dt)
+end
+
 
 -- Registry + module
 local nodes = {}
@@ -213,6 +217,9 @@ nodes.BattleNode = BattleNode
 ---@class MapNode.FeastNode: MapNode
 local FeastNode = nodes.newClass("feast")
 
+---@type table<MapNode.FeastNode, love.graphics.ParticleSystem?>
+local firePSes = setmetatable({}, {__mode = "k"})
+
 function FeastNode:enter()
     nodeEventService.openFeastPopup(self)
 end
@@ -221,8 +228,45 @@ function FeastNode:getHoverDescription()
     return FEAST_TXT
 end
 
+function FeastNode:update(dt)
+    local firePS = firePSes[self]
+    if not firePS then
+        firePS = love.graphics.newParticleSystem(g.getAtlas())
+        firePS:setQuads({
+            g.getImageQuad("particle_4"),
+            g.getImageQuad("particle_3"),
+            g.getImageQuad("particle_2"),
+            g.getImageQuad("particle_1"),
+            g.getImageQuad("particle_2"),
+            g.getImageQuad("particle_1")
+        })
+        firePS:setParticleLifetime(0.5, 0.8)
+        firePS:setEmissionArea("uniform", 5, 3)
+        firePS:setColors(
+            {1, 1, 0},
+            {1, 0.5, 0},
+            {0.8, 0.2, 0},
+            {0.4,0.4,0.4},
+            {0.6,0.6,0.6}
+        )
+        firePS:setDirection(-math.pi/2)
+        firePS:setSpread(0.2)
+        firePS:setEmissionRate(15)
+        firePS:setSpeed(10, 23)
+        firePSes[self] = firePS
+    end
+    firePS:update(dt)
+end
+
 function FeastNode:buildDecor(builder, wx, wy)
     builder:addImage("node_banquet", wx, wy)
+    local firePS = firePSes[self]
+    if firePS then
+        builder:addDrawable(wx + 1, wy - 20, function(x, y)
+            love.graphics.draw(firePS, x, y)
+        end, 100)
+    end
+
     addDemons(self, builder, wx, wy)
 end
 
