@@ -762,7 +762,7 @@ g.defineBlessing("arcane_appetite", "Arcane Appetite", {
         g.addPermanentMana("blue")
     end,
     handlers = {
-        -- Commander is deployed by the player, so poison it when it spawns.
+        -- Poison commander when it spawns.
         -- Poison is constant DPS (never decays), so keep the amount small.
         entitySpawned = function(ent)
             if ent.isCommander then

@@ -315,22 +315,6 @@ function g.setCurrentECS(ecs)
     currentECS = ecs
 end
 
-function g.getSquadDeployRegion()
-    if (not currentECS) or (not currentECS.border) then
-        return nil
-    end
-    local border = currentECS.border
-    border = Kirigami(
-        border[1],
-        border[2],
-        border[3],
-        border[4]
-    )
-    local left,_,_ = border:splitHorizontal(1,2)
-    left = left:padRatio(0.3)
-    return left
-end
-
 ---@param amount number
 function g.addGold(amount)
     local run = g.getRun()
@@ -2020,7 +2004,7 @@ end
 function g.getSmallFont(size)
     assert(size % 16 == 0, "Size must by divisible by 16")
     if not smolCache[size] then
-        local f = love.graphics.newFont("assets/fonts/Match 7h.ttf", size, "mono", 1)
+        local f = love.graphics.newFont("assets/fonts/sburbits.ttf", size, "mono", 1)
         f:setFallbacks(getFallbackFonts(size))
         smolCache[size] = f
     end

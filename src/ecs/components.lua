@@ -154,6 +154,7 @@ local shadow = {
 ---@field public isRanged boolean? true IFF the entity is ranged attacker
 ---@field public isBuilding boolean? true IFF entity is a building, and MUST be assigned a static physics body
 ---@field public isCommander boolean? if this is true, entity is a commander
+---@field public playerControlled boolean?
 ---@field public baseMaxHealth number?
 ---@field public baseStartingArmor number?
 ---@field public baseAttackDamage number?
