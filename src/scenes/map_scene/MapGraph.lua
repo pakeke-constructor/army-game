@@ -629,9 +629,9 @@ local NO_RANDOM_ROT_GD = {
 }
 
 local GROUND_TEXTURE_COLORS = {
-    objects.Color("#646a35"),
-    objects.Color("#273718"),
-    objects.Color("#361e19"),
+    objects.Color("FF3B432A"),
+    objects.Color("FF384B28"),
+    objects.Color("FF483936"),
 }
 
 local GROUND_DECOR_LEIGHTWAY = 250
