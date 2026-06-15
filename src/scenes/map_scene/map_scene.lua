@@ -345,6 +345,7 @@ function map_scene:update(dt)
             if count[nodeType] then
                 count[nodeType] = count[nodeType] + 1
             end
+            node:update(dt)
         end
 
         for i, node in ipairs(self.nodeList) do

@@ -787,7 +787,7 @@ function MapGraph:drawGroundDecors(view)
     end, range)
 end
 
-
+---@param node MapNode
 local function serializeNode(node)
     local data = {}
     for k, v in pairs(node) do
@@ -797,6 +797,7 @@ local function serializeNode(node)
     return data
 end
 
+---@param data any
 local function deserializeNode(data)
     local cls = nodes.getClass(data.nodeType) or nodes.getClass("battle")
     return setmetatable(data, cls)

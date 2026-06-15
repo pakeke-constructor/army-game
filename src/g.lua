@@ -379,6 +379,7 @@ function g.getAtlas()
 end
 
 ---@param imageName string
+---@return love.Quad
 function g.getImageQuad(imageName)
     local quad = nameToQuad[imageName]
     if not quad then

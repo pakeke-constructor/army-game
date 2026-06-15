@@ -90,6 +90,10 @@ end
 function Node:buildDecor(builder, wx, wy)
 end
 
+---@param dt number
+function Node:update(dt)
+end
+
 
 -- Registry + module
 local nodes = {}
@@ -213,6 +217,9 @@ nodes.BattleNode = BattleNode
 ---@class MapNode.FeastNode: MapNode
 local FeastNode = nodes.newClass("feast")
 
+---@type table<MapNode.FeastNode, love.graphics.ParticleSystem?>
+local firePSes = setmetatable({}, {__mode = "k"})
+
 function FeastNode:enter()
     nodeEventService.openFeastPopup(self)
 end
@@ -221,8 +228,45 @@ function FeastNode:getHoverDescription()
     return FEAST_TXT
 end
 
+function FeastNode:update(dt)
+    local firePS = firePSes[self]
+    if not firePS then
+        firePS = love.graphics.newParticleSystem(g.getAtlas())
+        firePS:setQuads({
+            g.getImageQuad("particle_4"),
+            g.getImageQuad("particle_3"),
+            g.getImageQuad("particle_2"),
+            g.getImageQuad("particle_1"),
+            g.getImageQuad("particle_2"),
+            g.getImageQuad("particle_1")
+        })
+        firePS:setParticleLifetime(0.5, 0.8)
+        firePS:setEmissionArea("uniform", 5, 3)
+        firePS:setColors(
+            {1, 1, 0},
+            {1, 0.5, 0},
+            {0.8, 0.2, 0},
+            {0.4,0.4,0.4},
+            {0.6,0.6,0.6}
+        )
+        firePS:setDirection(-math.pi/2)
+        firePS:setSpread(0.2)
+        firePS:setEmissionRate(15)
+        firePS:setSpeed(10, 23)
+        firePSes[self] = firePS
+    end
+    firePS:update(dt)
+end
+
 function FeastNode:buildDecor(builder, wx, wy)
     builder:addImage("node_banquet", wx, wy)
+    local firePS = firePSes[self]
+    if firePS then
+        builder:addDrawable(wx + 1, wy - 20, function(x, y)
+            love.graphics.draw(firePS, x, y)
+        end, 100)
+    end
+
     addDemons(self, builder, wx, wy)
 end
 
@@ -447,6 +491,15 @@ nodes.DynamicNode = DynamicNode
 ---@class MapNode.PortalNode: MapNode
 local PortalNode = nodes.newClass("portal")
 
+---@type table<MapNode.PortalNode, love.graphics.ParticleSystem?>
+local portalPSes = setmetatable({}, {__mode = "k"})
+local PORTAL_COLORS = {
+    objects.Color.WHITE,
+    objects.Color("#c852a4"),
+    objects.Color("#4f2d5d"),
+    objects.Color("00140e12"),
+}
+
 function PortalNode:init(x,y)
     Node.init(self,x,y)
     self.active = true
@@ -456,9 +509,46 @@ function PortalNode:enter()
     nodeEventService.openPortalPopup(self)
 end
 
+function PortalNode:update(dt)
+    if not self.active then
+        return
+    end
+
+    local portalPS = portalPSes[self]
+    if not portalPS then
+        portalPS = love.graphics.newParticleSystem(g.getAtlas(), 1000)
+        portalPS:setQuads({
+            g.getImageQuad("particle_1"),
+            g.getImageQuad("particle_2"),
+            g.getImageQuad("particle_3"),
+            g.getImageQuad("particle_4"),
+        })
+        portalPS:setEmissionRate(10)
+        portalPS:setEmissionArea("uniform", 30, 30)
+        portalPS:setParticleLifetime(1.5, 2)
+        portalPS:setSizes(0.5)
+        --portalPS:setDirection(2.2)
+        portalPS:setSpread(3)
+        portalPS:setRadialAcceleration(-20, -20)
+        portalPS:setTangentialAcceleration(20, 20)
+        portalPS:setRotation(0, consts.TAU)
+        portalPS:setSpin(1, 4)
+        portalPS:setSpinVariation(0.3)
+        portalPS:setColors(unpack(PORTAL_COLORS))
+        portalPSes[self] = portalPS
+    end
+    portalPS:update(dt)
+end
+
 function PortalNode:buildDecor(builder, wx, wy)
     if self.active then
         builder:addImage("node_portal", wx, wy)
+        local portalPS = portalPSes[self]
+        if portalPS then
+            builder:addDrawable(wx, wy - 24, function(x, y)
+                love.graphics.draw(portalPS, x, y)
+            end, 100)
+        end
     else
         builder:addImage("node_portal_deactivated", wx, wy)
     end
