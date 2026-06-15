@@ -7,7 +7,6 @@ local juiceService = require("src.juiceService")
 local ambienceService = require("src.ambienceService")
 
 
-local CAMERA_SPEED = 400
 local CAMERA_ZOOM = 2
 
 local INTRO_ZOOM_TEXT_FADE_TIME = 0.4
@@ -40,6 +39,8 @@ function battle_scene:init()
     self.victoryPopupTime = 0
     self.shockwave = nil
     self.lastEnemyCount = 0
+    ---@type ecs.Entity?
+    self.commander = nil
 
     self.sandbox = false -- dev-mode sandbox
     self.sandbox_squadPicker = false
@@ -113,6 +114,7 @@ function battle_scene:enter()
     self.lastEnemyCount = 0
     self.squadChoices = nil
     self.timeSinceEnteredScene = 0
+    self.commander = nil
 
     g.pollHandlers()
 
@@ -125,6 +127,12 @@ function battle_scene:enter()
     local deployRegion = g.getSquadDeployRegion()
     if deployRegion then
         local nx, ny = deployRegion:getCenter()
+        local commanderInfo = g.getCommanderInfo(run.commander)
+        local commanderSquad = g.getSquadFromArmy(commanderInfo.squadId)
+        if commanderSquad then
+            self.commander = commanderSquad:spawn(nx, ny)[1]
+            self.commander.playerControlled = true
+        end
         g.spawnEntity("nexus", nx, ny)
     end
 
@@ -143,6 +151,7 @@ function battle_scene:leave()
             squad.deployed = false
         end
     end
+    self.commander = nil
 end
 
 
@@ -189,6 +198,7 @@ function battle_scene:update(dt)
         squad.canAfford = not info.cost or g.canAffordMana(run._battleMana, info.cost)
     end
 
+    self:updateCommanderInput()
     self:updateCamera(dt)
     juiceService.update(dt)
     ambienceService.update(dt, self.camera:getTransform())
@@ -239,6 +249,41 @@ function battle_scene:update(dt)
     end
 end
 
+local DEFAULT_COMMANDER_SPEED = 60
+
+
+function battle_scene:updateCommanderInput()
+    local ent = self.commander
+    if not (ent and g.isAlive(ent)) then return end
+
+    local mx, my = 0, 0
+    -- TODO: Allow this to be configurable
+    if love.keyboard.isScancodeDown("w") then my = my - 1 end
+    if love.keyboard.isScancodeDown("a") then mx = mx - 1 end
+    if love.keyboard.isScancodeDown("s") then my = my + 1 end
+    if love.keyboard.isScancodeDown("d") then mx = mx + 1 end
+
+    local moving = mx ~= 0 or my ~= 0
+    ent._aiMoving = moving
+    if not moving then
+        ent.vx, ent.vy = 0, 0
+        return
+    end
+
+    -- Normalize
+    local len = math.sqrt(mx * mx + my * my)
+    if len > 0 then
+        local speed = ent.moveSpeed or DEFAULT_COMMANDER_SPEED
+        mx = mx * speed / len
+        my = my * speed / len
+    end
+
+    ent.vx = mx
+    ent.vy = my
+    if mx < 0 then ent.faceDir = -1 end
+    if mx > 0 then ent.faceDir = 1 end
+end
+
 
 function battle_scene:updateCamera(dt)
     local cam = self.camera
@@ -255,14 +300,10 @@ function battle_scene:updateCamera(dt)
         cam:setZoom(CAMERA_ZOOM)
     end
 
-    local spd = CAMERA_SPEED / math.sqrt(cam:getZoom())
-    local mx, my = 0, 0
-    if love.keyboard.isScancodeDown("w") then my = my - spd * dt end
-    if love.keyboard.isScancodeDown("a") then mx = mx - spd * dt end
-    if love.keyboard.isScancodeDown("s") then my = my + spd * dt end
-    if love.keyboard.isScancodeDown("d") then mx = mx + spd * dt end
-    local x, y = cam:getPos()
-    cam:setPos(x + mx, y + my)
+    local ent = self.commander
+    if ent and g.isAlive(ent) then
+        cam:setPos(ent.x, ent.y)
+    end
 end
 
 function battle_scene:mousemoved(x, y, dx, dy)

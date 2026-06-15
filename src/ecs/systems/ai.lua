@@ -197,6 +197,10 @@ function aiSys.preUpdate(dt)
             goto continue
         end
 
+        if ent.playerControlled then
+            goto continue
+        end
+
         -- feared: runs away from opponent
         if ent.fear and ent.fear.duration and ent.fear.duration > 0 then
             local fearEnt = ent.fear.ent
