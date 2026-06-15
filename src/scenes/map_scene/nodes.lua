@@ -181,7 +181,9 @@ function BattleNode:init(x,y)
 end
 
 function BattleNode:enter()
-    g.gotoScene("battle_scene")
+    fadeToBlackService.fadeToFromBlack(0.5, function()
+        g.gotoScene("battle_scene")
+    end, 0.3)
 end
 
 function BattleNode:getHoverDescription()

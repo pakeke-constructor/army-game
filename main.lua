@@ -86,6 +86,7 @@ _G.HUD = require("src.hud.hud")
 _G.rewardPopupService = require("src.hud.rewardPopupService")
 _G.choicePopupService = require("src.hud.choicePopupService")
 _G.gameoverPopupService = require("src.hud.gameoverPopupService")
+_G.fadeToBlackService = require("src.hud.fadeToBlackService")
 _G.nodeEventService = require("src.nodeEventService")
 _G.textPopupService = require("src.modules.textPopupService")
 
@@ -164,6 +165,7 @@ function love.update(dt)
     end
     iml.setPointer(love.mouse.getPosition())
     textPopupService.update(dt)
+    fadeToBlackService.update(dt)
     local sc = sceneManager.getCurrentScene()
     if sc and sc.update then
         sc:update(dt)
@@ -197,6 +199,7 @@ function love.draw()
         iml.endFrame()
         textPopupService.draw(ui.getUIScalingTransform())
         vignette.draw()
+        fadeToBlackService.draw()
     end
     devcmd.draw()
     if consts.DEV_MODE then

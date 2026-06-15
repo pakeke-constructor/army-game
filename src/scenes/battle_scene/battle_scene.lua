@@ -114,6 +114,8 @@ function battle_scene:enter()
     self.squadChoices = nil
     self.timeSinceEnteredScene = 0
 
+    g.pollHandlers()
+
     if self.sandbox then
         self.ecs:setBorder(500, 300)
     else
