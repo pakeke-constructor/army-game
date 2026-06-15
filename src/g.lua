@@ -2004,7 +2004,7 @@ end
 function g.getSmallFont(size)
     assert(size % 16 == 0, "Size must by divisible by 16")
     if not smolCache[size] then
-        local f = love.graphics.newFont("assets/fonts/Match 7h.ttf", size, "mono", 1)
+        local f = love.graphics.newFont("assets/fonts/sburbits.ttf", size, "mono", 1)
         f:setFallbacks(getFallbackFonts(size))
         smolCache[size] = f
     end
