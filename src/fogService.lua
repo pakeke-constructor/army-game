@@ -27,8 +27,8 @@ local FOGS={
 "fog_of_war_cloud3",
 }
 
-local FOG_LAYER_MAX = 6
-local FOG_DARKEN_PER_LAYER = 0.16
+local FOG_LAYER_MAX = 4
+local FOG_DARKEN_PER_LAYER = 0.25
 local FOG_EXPAND_CELLS = 5
 local FOG_VARIATION_MOD = 4
 
@@ -87,6 +87,30 @@ local function hashCell(wx, wy, salt)
     return helper.hashIntegerPair(gx + salt * 7877, gy + salt * 6991)
 end
 
+local gridA, gridB, gridW, gridH -- cached grids; reallocated only when size changes
+local function getGrids(w, h)
+    if gridW ~= w or gridH ~= h then
+        gridA = objects.Grid(w, h)
+        gridB = objects.Grid(w, h)
+        gridW, gridH = w, h
+    end
+    return gridA, gridB
+end
+
+local batch -- persistent SpriteBatch over the atlas; lazy-init
+local fogQuads -- cached quads + center-origins for FOGS
+local function getFogQuads()
+    if not fogQuads then
+        fogQuads = {}
+        for i = 1, #FOGS do
+            local q = g.getImageQuad(FOGS[i])
+            local _,_,qw,qh = q:getViewport()
+            fogQuads[i] = {quad = q, ox = qw/2, oy = qh/2}
+        end
+    end
+    return fogQuads
+end
+
 ---@param r kirigami.Region -- world-space
 ---@param hasFog fun(x:number,y:number):boolean
 function fogService.renderFog(r, hasFog)
@@ -98,8 +122,7 @@ function fogService.renderFog(r, hasFog)
 
     local w = math.floor((x2 - x1) / FOG_STEP) + 1
     local h = math.floor((y2 - y1) / FOG_STEP) + 1
-    local a = objects.Grid(w, h)
-    local b = objects.Grid(w, h)
+    local a, b = getGrids(w, h)
 
     for gx = 0, w - 1 do
         for gy = 0, h - 1 do
@@ -121,10 +144,17 @@ function fogService.renderFog(r, hasFog)
         a, b = b, a
     end
 
+    local quads = getFogQuads()
+    if not batch then
+        batch = lg.newSpriteBatch(g.getAtlas(), 4096)
+    end
+    batch:clear()
+
+    -- layer FOG_LAYER_MAX -> 1 so deeper fog is added (drawn) behind edges
     for layer = FOG_LAYER_MAX, 1, -1 do
         local col = objects.Color(FOG_COLOR)
         local coll = col:darken((FOG_LAYER_MAX - layer) * FOG_DARKEN_PER_LAYER)
-        lg.setColor(coll[1], coll[2], coll[3], OPACITY)
+        batch:setColor(coll[1], coll[2], coll[3], OPACITY)
         for gx = 0, w - 1 do
             for gy = 0, h - 1 do
                 local v = a:get(gx, gy)
@@ -142,15 +172,19 @@ function fogService.renderFog(r, hasFog)
 
                     local lv = math.max(1, math.min(FOG_LAYER_MAX, v))
                     if lv == layer then
-                        local i = hashCell(x, y, 4)
+                        local i = k
                         local ox = (i % 19) - 10
                         local oy = (hashCell(x, y, 5) % 19) - 10
-                        g.drawImage(FOGS[i % #FOGS + 1], x + ox, y + oy, math.sin(t + (i % 100) / 100))
+                        local fq = quads[i % #FOGS + 1]
+                        batch:add(fq.quad, x + ox, y + oy, math.sin(t + (i % 10) / 3), 1.5, 1.5, fq.ox, fq.oy)
                     end
                 end
             end
         end
     end
+
+    lg.setColor(1, 1, 1, 1)
+    lg.draw(batch)
 end
 
 
