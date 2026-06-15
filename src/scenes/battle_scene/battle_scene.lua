@@ -569,30 +569,60 @@ end
 
 
 
-local function getSnappedDeployPosition(squad, wx, wy, region)
-    if true then return wx,wy end
-    if (not region) or g.ask("canDeployAnywhere", squad) then
+local DEPLOY_RADIUS = 100
+
+---@param self g.BattleScene
+local function getCommanderDeployBasePos(self)
+    if not self.commander then
+        return 0, 0
+    end
+
+    local commoy = 0
+    if self.commander.image then
+        local _, h = g.getImageSize(self.commander.image)
+        commoy = h/2
+    end
+
+    return self.commander.x, self.commander.y - commoy
+end
+
+---@param self g.BattleScene
+---@param squad g.Squad
+---@param wx number
+---@param wy number
+---@return number, number
+local function getSnappedDeployPosition(self, squad, wx, wy)
+    local commander = self.commander
+    if (not commander) or (not g.isAlive(commander)) or g.ask("canDeployAnywhere", squad) then
         return wx, wy
     end
 
-    local sx = math.max(region.x, math.min(region.x + region.w, wx))
-    local sy = math.max(region.y, math.min(region.y + region.h, wy))
-    return sx, sy
+    local commx, commy = getCommanderDeployBasePos(self)
+    local dx, dy = wx - commx, wy - commy
+    local dist = math.sqrt(dx * dx + dy * dy)
+    if dist <= DEPLOY_RADIUS then
+        return wx, wy
+    end
+    if dist <= 0 then
+        return commx, commy
+    end
+    return commx + dx / dist * DEPLOY_RADIUS,
+        commy + dy / dist * DEPLOY_RADIUS
 end
 
 local SQUAD_HOVER_COLOR = g.snapToPalette(0.2, 1, 0.3, 0.5)
 local SQUAD_HOVER_COLOR_1 = g.snapToPalette(0.05,0.2,0.07, 0.25)
 local SQUAD_HOVER_COLOR_2 = g.snapToPalette(0.1,0.7,0.3, 0.6)
 
+---@param self g.BattleScene
 ---@param squad g.Squad
 ---@param wx number world x coord
 ---@param wy number world y coord
-local function drawSquadHover(squad, wx, wy)
+local function drawSquadHover(self, squad, wx, wy)
     local info = g.getSquadInfo(squad.squadId)
     local einfo = g.getEntityDef(info.entityId)
     local offsets = squad:getFormationOffsets()
-    local deployRegion = g.getSquadDeployRegion()
-    local sx, sy = getSnappedDeployPosition(squad, wx, wy, deployRegion)
+    local sx, sy = getSnappedDeployPosition(self, squad, wx, wy)
     lg.setColor(SQUAD_HOVER_COLOR)
 
     local w,h = 10,10
@@ -664,12 +694,13 @@ function battle_scene:draw()
     local border = self.ecs.border
     lg.setColor(1, 1, 1, 1)
 
-    local deployRegion = g.getSquadDeployRegion()
-    if deployRegion then
+    local commander = self.commander
+    if commander and g.isAlive(commander) then
+        local commx, commy = getCommanderDeployBasePos(self)
         lg.setColor(DEPLOY_REGION_INNER)
-        love.graphics.rectangle("fill", deployRegion.x, deployRegion.y, deployRegion.w, deployRegion.h)
+        love.graphics.circle("fill", commx, commy, DEPLOY_RADIUS)
         lg.setColor(DEPLOY_REGION_LINE)
-        love.graphics.rectangle("line", deployRegion.x, deployRegion.y, deployRegion.w, deployRegion.h)
+        love.graphics.circle("line", commx, commy, DEPLOY_RADIUS)
     end
 
     self.ecs:draw(self.camera:getTransform())
@@ -692,7 +723,7 @@ function battle_scene:draw()
         local mx, my = love.mouse.getPosition()
         local wx, wy = self.camera:toWorld(mx, my)
         if squad and not squad.deployed then
-            drawSquadHover(squad, wx, wy)
+            drawSquadHover(self, squad, wx, wy)
             lg.setColor(1, 1, 1, 1)
         end
     end
@@ -704,15 +735,13 @@ function battle_scene:draw()
 
     ui.startUI()
 
-    local sw, sh = love.graphics.getDimensions()
     if (not self.victory) and (not self.defeated) and iml.wasJustPressed(0, 0, sw, sh, 1, "deploy_click") then
         local entry = self.hud:getSelection()
         local mx, my = love.mouse.getPosition()
         local wx, wy = self.camera:toWorld(mx, my)
-        local deployRegion = g.getSquadDeployRegion()
         local sx, sy = wx, wy
         if entry then
-            sx, sy = getSnappedDeployPosition(entry, wx, wy, deployRegion)
+            sx, sy = getSnappedDeployPosition(self, entry, wx, wy)
         end
         if entry and not entry.deployed then
             local info = g.getSquadInfo(entry.squadId)
@@ -752,7 +781,6 @@ function battle_scene:draw()
     ui.endUI()
 
     if self.shockwave and self.shockwave.time < WIN_SHOCKWAVE_DURATION then
-        local sw, sh = love.graphics.getDimensions()
         local sx, sy = self.camera:toScreen(self.shockwave.x, self.shockwave.y)
         local p = self.shockwave.time / WIN_SHOCKWAVE_DURATION
         local maxR = math.sqrt(sw * sw + sh * sh) * 1.2
