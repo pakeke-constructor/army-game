@@ -297,11 +297,12 @@ local function drawTopBar()
 
     local function drawPanel(region, text, hoverText)
         local x, y, w, h = region:get()
+        local txtR = region:padRatio(0.6)
         lg.setColor(1, 1, 1)
         local DY = 30
         ui.drawDarkPanel(x, y-DY, w, h+DY)
         lg.setColor(1, 1, 1)
-        richtext.printRichContainedNoWrap(text, font, x, y, w, h)
+        richtext.printRichContainedNoWrap(text, font, txtR:get())
         if hoverText and iml.isHovered(x, y, w, h, text) then
             hoverService.requestHover(function(box, fonts)
                 box:addText("{c r=0.7 g=0.7 b=0.75}" .. hoverText, fonts.body)
