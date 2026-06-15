@@ -78,7 +78,7 @@ function battle_scene:pollHandlers()
             self.particles:draw()
         end,
         entityDeath = function(ent)
-            if ent.type == "nexus" then
+            if ent == self.commander then
                 loseBattle(self)
             end
             if ent.team ~= "enemy" then return end
@@ -133,7 +133,6 @@ function battle_scene:enter()
             self.commander = commanderSquad:spawn(nx, ny)[1]
             self.commander.playerControlled = true
         end
-        g.spawnEntity("nexus", nx, ny)
     end
 
     local border = self.ecs.border

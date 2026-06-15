@@ -6,7 +6,7 @@ local visible = false
 local TEXT
 do
 local GAME_OVER = loc("GAME OVER!", nil, {context = "Player loses the game"})
-local DESCRIPTION = loc("you nexus has been destroyed... the last light of Kapathia dies.", nil, {context = "Fancy game over description"})
+local DESCRIPTION = loc("your commander has fallen... the last light of Kapathia dies.", nil, {context = "Fancy game over description"})
 TEXT = {
     GAME_OVER = "{blink}{c r=1 g=0 b=0}{o}"..GAME_OVER.."{/o}{/c}{/blink}",
     DESCRIPTION = "{c r=1 g=0 b=0}{o}"..DESCRIPTION.."{/o}{/c}",
