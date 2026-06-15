@@ -43,6 +43,8 @@ function DecorBuilder:finalize()
         return ((a.drawOrder or 0) + a.y) < ((b.drawOrder or 0) + b.y)
     end)
     for _, it in ipairs(self.items) do
+        local col = gsman.setColor(1, 1, 1, it.opacity)
+
         if it.kind == "image" then
             local sx = it.sx
             local id = hash(it.x, it.y)
@@ -55,7 +57,6 @@ function DecorBuilder:finalize()
                 offx, offy, rot, scx, scy, kx, ky = it.transformMod(id)
             end
 
-            local col = gsman.setColor(1, 1, 1, it.opacity)
             g.drawImageOffset(
                 it.image,
                 it.x + offx, it.y + offy,
@@ -64,10 +65,11 @@ function DecorBuilder:finalize()
                 0.5, 0.95,
                 kx, ky
             )
-            col:pop()
         else
             it.func(it.x, it.y)
         end
+
+        col:pop()
     end
 end
 
