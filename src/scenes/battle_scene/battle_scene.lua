@@ -97,6 +97,7 @@ function battle_scene:enter()
 
     self.randomI = love.math.random(1,1000) -- random integer, doesnt really matter
 
+    ---@type ecs.ECSWorld
     self.ecs = ECSWorld({
         "stats", "status_effects", "ai", "attacking",
         "physics", "shadows", "ground_decor", "juice_system", "blood_system"
@@ -124,9 +125,16 @@ function battle_scene:enter()
         encounters.startRandomEncounter(run.day, self.ecs)
     end
 
-    local deployRegion = g.getSquadDeployRegion()
-    if deployRegion then
-        local nx, ny = deployRegion:getCenter()
+    local border = self.ecs.border
+    do
+        local borderR = Kirigami(
+            border[1],
+            border[2],
+            border[3],
+            border[4]
+        )
+        local leftR,_,_ = borderR:splitHorizontal(1,2)
+        local nx, ny = leftR:getCenter()
         local commanderInfo = g.getCommanderInfo(run.commander)
         local commanderSquad = g.getSquadFromArmy(commanderInfo.squadId)
         if commanderSquad then
@@ -135,7 +143,6 @@ function battle_scene:enter()
         end
     end
 
-    local border = self.ecs.border
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
     self.camera:setPos(border[3] * 0.45, border[4] * 0.5)
 
