@@ -491,6 +491,15 @@ nodes.DynamicNode = DynamicNode
 ---@class MapNode.PortalNode: MapNode
 local PortalNode = nodes.newClass("portal")
 
+---@type table<MapNode.PortalNode, love.graphics.ParticleSystem?>
+local portalPSes = setmetatable({}, {__mode = "k"})
+local PORTAL_COLORS = {
+    objects.Color.WHITE,
+    objects.Color("#c852a4"),
+    objects.Color("#4f2d5d"),
+    objects.Color("00140e12"),
+}
+
 function PortalNode:init(x,y)
     Node.init(self,x,y)
     self.active = true
@@ -500,9 +509,46 @@ function PortalNode:enter()
     nodeEventService.openPortalPopup(self)
 end
 
+function PortalNode:update(dt)
+    if not self.active then
+        return
+    end
+
+    local portalPS = portalPSes[self]
+    if not portalPS then
+        portalPS = love.graphics.newParticleSystem(g.getAtlas(), 1000)
+        portalPS:setQuads({
+            g.getImageQuad("particle_1"),
+            g.getImageQuad("particle_2"),
+            g.getImageQuad("particle_3"),
+            g.getImageQuad("particle_4"),
+        })
+        portalPS:setEmissionRate(10)
+        portalPS:setEmissionArea("uniform", 30, 30)
+        portalPS:setParticleLifetime(1.5, 2)
+        portalPS:setSizes(0.5)
+        --portalPS:setDirection(2.2)
+        portalPS:setSpread(3)
+        portalPS:setRadialAcceleration(-20, -20)
+        portalPS:setTangentialAcceleration(20, 20)
+        portalPS:setRotation(0, consts.TAU)
+        portalPS:setSpin(1, 4)
+        portalPS:setSpinVariation(0.3)
+        portalPS:setColors(unpack(PORTAL_COLORS))
+        portalPSes[self] = portalPS
+    end
+    portalPS:update(dt)
+end
+
 function PortalNode:buildDecor(builder, wx, wy)
     if self.active then
         builder:addImage("node_portal", wx, wy)
+        local portalPS = portalPSes[self]
+        if portalPS then
+            builder:addDrawable(wx, wy - 24, function(x, y)
+                love.graphics.draw(portalPS, x, y)
+            end, 100)
+        end
     else
         builder:addImage("node_portal_deactivated", wx, wy)
     end
