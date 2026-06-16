@@ -286,7 +286,7 @@ g.defineSquad("war_elephant_squad", {
     name = loc("War Elephants"),
     rarity = g.RARITIES.RARE,
     entityDef = {
-        image = "war_hog",
+        image = "warhog",
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 2 },
         attack = { attackType = "melee" },
         --weapon = { image = "militia_sword", type = "sword" },

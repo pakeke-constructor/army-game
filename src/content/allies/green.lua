@@ -147,7 +147,7 @@ g.defineSquad("hog_squad", {
     name = loc("Hogs of War"),
     rarity = g.RARITIES.UNCOMMON,
     entityDef = {
-        image = "war_hog",
+        image = "warhog",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",

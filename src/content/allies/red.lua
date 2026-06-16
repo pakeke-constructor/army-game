@@ -166,7 +166,7 @@ g.defineSquad("berserker_squad", {
     name = loc("Berserkers"),
     rarity = g.RARITIES.UNCOMMON,
     entityDef = {
-        image = "war_hog",
+        image = "warhog",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
@@ -244,7 +244,7 @@ g.defineSquad("living_entropy_squad", {
     name = loc("Living Entropy"),
     rarity = g.RARITIES.RARE,
     entityDef = {
-        image = "his_manifestation",
+        image = "hismanifestation",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 300 },
         weapon = { image = "placeholder", type = "bow" },
