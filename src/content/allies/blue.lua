@@ -227,15 +227,16 @@ g.defineSquad("incense_holder_squad", {
     name = loc("Incense Holders"),
     rarity = g.RARITIES.RARE,
     entityDef = {
-        image = "longbowman",
+        image = "incense_priest",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         ai = {
             target = "ally",
         },
         attack = {
             attackType = "ranged",
-            projectileType = "arrow",
+            projectileType = "arrow", -- placeholder
             projectileSpeed = 350,
+            projectileHoming = true,
         },
         weapon = {
             image = "militia_sword", -- placeholder
@@ -374,7 +375,7 @@ g.defineSquad("bell_creature_squad", {
     name = loc("Bell Creatures"),
     rarity = g.RARITIES.RARE,
     entityDef = {
-        image = "militia", -- placeholder
+        image = "bellman",
         physics = { shape = "circle", radius = 6, ox = 0, oy = 0, mass = 1 },
         attack = { attackType = "melee" },
         weapon = { image = "militia_sword", type = "sword" },
