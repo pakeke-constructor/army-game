@@ -158,11 +158,21 @@ local function drawCost(money, r, discount)
 end
 
 
-local function dbg(r)
-    if consts.DEV_MODE then
-        lg.rectangle("line",r:get())
+---@param shopNode MapNode.ShopNode
+local function canRerollSquad(shopNode)
+    shop_scene.prefillShopNode(shopNode)
+
+    for i = 1, NUM_SQUAD_SLOTS do
+        if shopNode.squadShop[i] then
+            return true
+        end
     end
+
+    return false
 end
+
+
+local dbg = ui.debugRegion
 
 
 local RAR_MAP = {
@@ -283,7 +293,7 @@ local function drawRerollButton(self, r)
         font, body:padRatio(0.5):moveUnit(0,1):get()
     )
 
-    if iml.wasJustClicked(r2:get()) then
+    if iml.wasJustClicked(r2:get()) and canRerollSquad(self.shopNode) then
         local cost = getRerollCost(self)
         if g.trySpendGold(cost) then
             g.call("rerollShop")
