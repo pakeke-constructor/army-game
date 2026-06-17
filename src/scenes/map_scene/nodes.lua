@@ -45,6 +45,9 @@ local CAMPFIRE_TXT = loc("Campfire: Obtain XP")
 local PORTAL_ACTIVE_TXT = loc("Portal: Enter New Area")
 local PORTAL_INACTIVE_TXT = loc("Portal: Inactive")
 
+local NODE_FADE_OUT = 0.35
+local NODE_FADE_IN = 0.2
+
 
 
 ---@class MapNode: objects.Class
@@ -221,7 +224,9 @@ local FeastNode = nodes.newClass("feast")
 local firePSes = setmetatable({}, {__mode = "k"})
 
 function FeastNode:enter()
-    nodeEventService.openFeastPopup(self)
+    fadeToBlackService.fadeToFromBlack(NODE_FADE_OUT, function()
+        nodeEventService.openFeastPopup(self)
+    end, NODE_FADE_IN)
 end
 
 function FeastNode:getHoverDescription()
@@ -280,7 +285,9 @@ nodes.FeastNode = FeastNode
 local ShrineNode = nodes.newClass("shrine")
 
 function ShrineNode:enter()
-    nodeEventService.openShrinePopup(self)
+    fadeToBlackService.fadeToFromBlack(NODE_FADE_OUT, function()
+        nodeEventService.openShrinePopup(self)
+    end, NODE_FADE_IN)
 end
 
 function ShrineNode:getHoverDescription()
@@ -320,7 +327,9 @@ nodes.ShrineNode = ShrineNode
 local FountainNode = nodes.newClass("fountain")
 
 function FountainNode:enter()
-    nodeEventService.openFountainPopup(self)
+    fadeToBlackService.fadeToFromBlack(NODE_FADE_OUT, function()
+        nodeEventService.openFountainPopup(self)
+    end, NODE_FADE_IN)
 end
 
 function FountainNode:getHoverDescription()
@@ -367,9 +376,9 @@ nodes.EmptyNode = EmptyNode
 local EventNode = nodes.newClass("event")
 
 function EventNode:enter()
-    fadeToBlackService.fadeToFromBlack(0.35, function()
+    fadeToBlackService.fadeToFromBlack(NODE_FADE_OUT, function()
         nodeEventService.startRandomEvent()
-    end, 0.2)
+    end, NODE_FADE_IN)
 end
 
 function EventNode:getHoverDescription()
@@ -422,12 +431,14 @@ function ShopNode:init(x,y)
 end
 
 function ShopNode:enter()
-    shop_scene = shop_scene or require("src.scenes.shop_scene.shop_scene")
-    shop_scene.prefillShopNode(self)
-    g.gotoScene("shop_scene")
-    local sc = g.getCurrentScene()
-    ---@cast sc g.ShopScene
-    sc:setShop(self)
+    fadeToBlackService.fadeToFromBlack(NODE_FADE_OUT, function()
+        shop_scene = shop_scene or require("src.scenes.shop_scene.shop_scene")
+        shop_scene.prefillShopNode(self)
+        g.gotoScene("shop_scene")
+        local sc = g.getCurrentScene()
+        ---@cast sc g.ShopScene
+        sc:setShop(self)
+    end, NODE_FADE_IN)
 end
 
 function ShopNode:getHoverDescription()
@@ -508,7 +519,9 @@ function PortalNode:init(x,y)
 end
 
 function PortalNode:enter()
-    nodeEventService.openPortalPopup(self)
+    fadeToBlackService.fadeToFromBlack(NODE_FADE_OUT, function()
+        nodeEventService.openPortalPopup(self)
+    end, NODE_FADE_IN)
 end
 
 function PortalNode:update(dt)
