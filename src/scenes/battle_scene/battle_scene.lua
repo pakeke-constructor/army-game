@@ -691,7 +691,8 @@ local DEPLOY_REGION_INNER = g.snapToPalette(0.15, 0.8, 0.2, 0.05)
 local DEPLOY_REGION_LINE = g.snapToPalette(0.2, 1, 0.3, 0.4)
 local AUTO_ATTACK_RADIUS_SHOW = 2
 local AUTO_ATTACK_RADIUS_FADE_END = 2.5
-local AUTO_ATTACK_RADIUS_ALPHA = 0.4
+local AUTO_ATTACK_RADIUS_ALPHA = 0.09
+local LINE_WIDTH = 3
 
 
 local function drawCommanderRadius(self)
@@ -700,6 +701,7 @@ local function drawCommanderRadius(self)
         return
     end
 
+    local pop = gsman.setLineWidth(LINE_WIDTH)
     local squad = self.hud:getSelection()
     if squad and (not squad.deployed) then
         local commx, commy = getCommanderDeployBasePos(self)
@@ -728,10 +730,11 @@ local function drawCommanderRadius(self)
         alpha = alpha * (1 - t)
     end
 
-    lg.setLineWidth(1)
     lg.setColor(1, 1, 1, alpha)
     love.graphics.circle("line", commander.x, commander.y, commander.attackRange)
+    pop:pop()
 end
+
 
 function battle_scene:draw()
     local _cx, _cy = self.camera:getPos()
