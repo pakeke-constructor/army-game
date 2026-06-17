@@ -2539,10 +2539,35 @@ function g.getStatList()
 end
 
 
+
+
+
+local KEYWORDS = {
+    ["BURN"] = loc("{BURN_COLOR}Burn{/BURN_COLOR}", {}, {
+        context = "as in, a status-effect. 'Apply 2 BURN', or 'if unit has BURN, do foobar'."
+    }),
+    ["POISON"] = loc("{POISON_COLOR}Poison{/POISON_COLOR}", {}, {
+        context = "as in, a status-effect. 'Apply 2 POISON', or 'if unit has POISON, do foobar'."
+    })
+}
+
+for i=1, 10 do
+    KEYWORDS[i.."_BURN"] = loc("{BURN_COLOR} Burn{/BURN_COLOR}", {}, {
+        context = "as in, a status-effect. 'Apply 1 BURN'."
+    })
+    KEYWORDS[i.."_POISON"] = loc("{POISON_COLOR}Poison{/POISON_COLOR}", {}, {
+        context = "as in, a status-effect. 'Apply 1 POISON'."
+    })
+end
+
+
 function g.loc2(text, variables, context)
     local result = loc(text, variables or {}, context)
     for _, stat in ipairs(g.getStatList()) do
         result = result:gsub("%(" .. stat.shortName .. "%)", stat.richText)
+    end
+    for k,v in pairs(KEYWORDS) do
+        result = result:gsub("%("..k.."%)", v)
     end
     return result
 end
