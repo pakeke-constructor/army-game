@@ -119,9 +119,13 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
             local textW = ew - iconSize - iconGap
 
             love.graphics.setColor(1, 1, 1)
-            love.graphics.setFont(TITLE_FONT)
             local name = "{c r=0.8 g=0.8 b=0.85}{bob amp=0.5}" .. info.name
-            richtext.printRich(name, TITLE_FONT, textX, ey, textW, "left")
+            richtext.printRichContainedNoWrap(name, TITLE_FONT, textX, ey, textW, TITLE_FONT:getHeight(), "left")
+            -- Rarity
+            local rarity = info.rarity
+            love.graphics.setColor(rarity.color)
+            local rarityText = rarity.lightTextEffect..rarity.name
+            richtext.printRichContainedNoWrap(rarityText, STAT_FONT, textX, ey + 16, textW, STAT_FONT:getHeight(), "left")
         end,
     })
 
