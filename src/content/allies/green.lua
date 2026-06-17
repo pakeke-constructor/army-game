@@ -54,7 +54,7 @@ g.defineSquad("druid_squad", {
     name = loc("Druids"),
     rarity = g.RARITIES.COMMON,
     entityDef = {
-        image = "incense_priest", -- no druid sprite; longbowman stand-in
+        image = "druids",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         ai = {
             target = "ally",
@@ -65,8 +65,8 @@ g.defineSquad("druid_squad", {
             projectileSpeed = 250,
         },
         weapon = {
-            image = "longbow",
-            type = "bow",
+            image = "druids_staff",
+            type = "staff",
         },
         isHealer = true,
         baseHealPower = 2,
@@ -147,7 +147,7 @@ g.defineSquad("hog_squad", {
     name = loc("Hogs of War"),
     rarity = g.RARITIES.UNCOMMON,
     entityDef = {
-        image = "war_hog",
+        image = "warhog",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
@@ -190,7 +190,7 @@ g.defineSquad("infested_squad", {
     name = loc("The Infested"),
     rarity = g.RARITIES.UNCOMMON,
     entityDef = {
-        image = "pest",
+        image = "the_infested",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
@@ -202,6 +202,7 @@ g.defineSquad("infested_squad", {
         baseMaxHealth = 6,
     },
     unitCount = 8,
+    icon = "theinfested_uniticon",
     perks = {"infestation"},
     cost = {green = 1},
 })
@@ -212,13 +213,13 @@ g.defineSquad("friendly_giant_squad", {
     name = loc("Friendly Giant"),
     rarity = g.RARITIES.RARE,
     entityDef = {
-        image = "treant",
+        image = "friendlygiant",
         physics = { shape = "circle", radius = 14, ox = 0, oy = 0, mass = 3 },
         attack = {
             attackType = "melee",
         },
         weapon = {
-            image = "orc_battleaxe",
+            image = "friendlygiant_bigstick",
             type = "sword",
         },
         baseAttackDamage = 5,
@@ -237,7 +238,7 @@ g.defineSquad("forest_sentry_squad", {
     name = loc("Forest Sentries"),
     rarity = g.RARITIES.RARE,
     entityDef = {
-        image = "longbowman",
+        image = "forestsentry",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "ranged",
@@ -245,7 +246,7 @@ g.defineSquad("forest_sentry_squad", {
             projectileSpeed = 350,
         },
         weapon = {
-            image = "longbow",
+            image = "forest_sentry_bow",
             type = "bow",
         },
         baseAttackDamage = 1,
@@ -255,6 +256,7 @@ g.defineSquad("forest_sentry_squad", {
         baseMaxHealth = 6,
     },
     unitCount = 4,
+    icon = "forestsentries_uniticon",
     perks = {"life_force"},
     cost = {green = 1},
 })
@@ -265,7 +267,7 @@ g.defineSquad("arcane_blossom_squad", {
     name = loc("Arcane Blossoms"),
     rarity = g.RARITIES.RARE,
     entityDef = {
-        image = "treant",
+        image = "arcaneblossom",
         physics = { shape = "circle", radius = 7, ox = 0, oy = 0, mass = 1 },
         attack = { attackType = "melee" },
         weapon = { image = "militia_sword", type = "sword" },
@@ -277,7 +279,7 @@ g.defineSquad("arcane_blossom_squad", {
         baseStartingArmor = 3,
     },
     unitCount = 3,
-    icon = "treants_uniticon",
+    icon = "arcaneblossom_uniticon",
     perks = {"magnificence"},
     cost = {green = 1},
 })
@@ -289,7 +291,7 @@ g.defineSquad("world_tree_squad", {
     name = loc("World Tree"),
     rarity = g.RARITIES.LEGENDARY,
     entityDef = {
-        image = "treant",
+        image = "worldtree",
         isBuilding = true,
         physics = { shape = "circle", radius = 16, ox = 0, oy = 0, mass = 1, isStatic = true },
         baseMaxHealth = 300,
@@ -307,7 +309,7 @@ g.defineSquad("hive_recycler_squad", {
     name = loc("Hive Recyclers"),
     rarity = g.RARITIES.LEGENDARY,
     entityDef = {
-        image = "longbowman",
+        image = "hiverecycler",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         ai = { target = "ally" },
         attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 250 },
@@ -329,7 +331,7 @@ g.defineSquad("living_forest_squad", {
     name = loc("Living Forest"),
     rarity = g.RARITIES.LEGENDARY,
     entityDef = {
-        image = "treant",
+        image = "livingforest_body", -- TODO: Animate legs with `livingforest_legs`.
         physics = { shape = "circle", radius = 7, ox = 0, oy = 0, mass = 2 },
         attack = { attackType = "melee" },
         weapon = { image = "militia_sword", type = "sword" },
@@ -352,11 +354,11 @@ g.defineSquad("lifesmith_squad", {
     name = loc("Lifesmiths"),
     rarity = g.RARITIES.LEGENDARY,
     entityDef = {
-        image = "incense_priest",
+        image = "lifesmith",
         physics = { shape = "circle", radius = 6, ox = 0, oy = 0, mass = 2 },
         ai = { target = "ally" },
         attack = { attackType = "melee" },
-        weapon = { image = "dagger", type = "sword" },
+        weapon = { image = "lifesmith_hammer", type = "sword" },
         isHealer = true,
         baseHealPower = 2,
         baseAttackSpeed = 0.8,
@@ -366,6 +368,7 @@ g.defineSquad("lifesmith_squad", {
         baseStartingArmor = 0,
     },
     unitCount = 6,
+    icon = "lifesmiths_uniticon",
     perks = {"forge_life"},
     cost = {green = 1},
 })
@@ -376,10 +379,10 @@ g.defineSquad("swarm_squad", {
     name = loc("The Swarm"),
     rarity = g.RARITIES.LEGENDARY,
     entityDef = {
-        image = "militia",
+        image = "theswarm",
         physics = { shape = "circle", radius = 4, ox = 0, oy = 0, mass = 1 },
         attack = { attackType = "melee" },
-        weapon = { image = "placeholder", type = "sword" },
+        weapon = { image = "theswarm_grassblade", type = "sword" },
         baseAttackDamage = 1,
         baseAttackSpeed = 1,
         baseAttackRange = 18,
@@ -387,6 +390,7 @@ g.defineSquad("swarm_squad", {
         baseMaxHealth = 3,
     },
     unitCount = 20,
+    icon = "theswarm_uniticon",
     cost = {green = 2},
 })
 
