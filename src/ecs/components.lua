@@ -127,7 +127,7 @@ local shadow = {
 ---@field public shadow ecs.components.Shadow?
 ---@field public walkAnimation ecs.components.WalkAnimation?
 ---@field public _walkTime number?
----@field public _aiMoving boolean? true while the entity is actively moving toward its target (drives walk animation)
+---@field public _isMoving boolean? true while the entity is actively moving toward its target (drives walk animation)
 ---@field public faceDir integer?
 ---@field public taunt ecs.components.Taunt?
 ---@field public fear ecs.components.Fear?

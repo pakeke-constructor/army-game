@@ -237,7 +237,7 @@ function aiSys.preUpdate(dt)
         local minRange = attackRange * 0.7
         local maxRange = attackRange
 
-        local moving = ent._aiMoving
+        local moving = ent._isMoving
 
         -- hysteresis: start moving if beyond maxRange, stop if within minRange
         if dist > maxRange then
@@ -245,7 +245,7 @@ function aiSys.preUpdate(dt)
         elseif dist <= minRange then
             moving = false
         end
-        ent._aiMoving = moving
+        ent._isMoving = moving
 
         if moving and dist > 1 then
             local speed = ent.moveSpeed or 60

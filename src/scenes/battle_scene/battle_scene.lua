@@ -270,7 +270,7 @@ function battle_scene:updateCommanderInput()
     if love.keyboard.isScancodeDown("d") then mx = mx + 1 end
 
     local moving = mx ~= 0 or my ~= 0
-    ent._aiMoving = moving
+    ent._isMoving = moving
     if not moving then
         ent.vx, ent.vy = 0, 0
         return
