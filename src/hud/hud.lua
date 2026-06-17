@@ -12,7 +12,7 @@ end
 ---@class g.hudArgs
 ---@field battleScene boolean?
 ---@field mapScene boolean?
-local hudArgs
+---@field hoverSquadId string?
 
 local SQUAD_ICON_SIZE = 32
 local SQUAD_PADDING = 4
@@ -471,10 +471,11 @@ function HUD:drawUI(opt)
 
     drawBottomBar(self, SQUAD_ICON_SIZE + 30)
 
-    if self.hoveredSquad then
+    local hoveredSquadId = opt.hoverSquadId or (self.hoveredSquad and self.hoveredSquad.squadId)
+    if hoveredSquadId then
         local main = ui.getScreenRegion()
         local _, left = main:padRatio(0.2):splitHorizontal(2, 1)
-        ui.drawSquadCard(self.hoveredSquad.squadId, left:padRatio(0.1), -999)
+        ui.drawSquadCard(hoveredSquadId, left:padRatio(0.1), -999)
     end
 
     rewardPopupService.draw()
