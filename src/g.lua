@@ -1993,7 +1993,7 @@ end
 function g.getBigFont(size)
     assert(size % 16 == 0, "Size must by divisible by 16")
     if not bigCache[size] then
-        local f = love.graphics.newFont("assets/fonts/Smart 9h.ttf", size, "mono", 1)
+        local f = love.graphics.newFont("assets/fonts/sburbits.ttf", size, "mono", 1)
         f:setFallbacks(getFallbackFonts(size))
         bigCache[size] = f
     end

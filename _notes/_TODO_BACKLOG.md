@@ -131,14 +131,10 @@
 - Wire up sprites to ALL units (icons, entity-images, AND weapons)
 
 
-- Make blessing ChoicePanel look better. Currently, looks bad.
-
-
 Make the battle-scene be a bit more interesting....
 instead of the world being a dull rectangle all the time, Maybe hardcode a few shapes?
 (Peanut shape, Oval shape, multi-circle-shape, random-shape?)
 In general, the battlefield should feel "cooler" and "bigger". Currently it's just small and boring.
-
 
 
 - PROCESS: Play through the game a couple times. Just get a feel, then *balance*
@@ -163,12 +159,13 @@ More decor-sprites for map (grasses, bushes, skull, more tree types?)
 
 
 - Chest node + Chest-node UI  (spend keys)
+Port chest-open-animation directly from catx11.
+
 
 - Improve wisps: should use leaf-sprites
-- Add godrays for map-scene and battle-scene
 
+- Add godrays coming down from sky for map-scene and battle-scene
 
-- Make map objects (trees, bushes, etc,) bob up and down
 
 
 - Make blessing-select nicer (proper icons)
