@@ -208,6 +208,7 @@ g.defineSquad("dagger_bearer_squad", {
         baseMaxHealth = 12,
     },
     unitCount = 4,
+    squadOrder = 50,
     perks = {"ritual_sacrifice"},
     cost = {red = 1},
 })

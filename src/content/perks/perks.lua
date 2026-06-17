@@ -303,10 +303,12 @@ g.definePerk("ritual_sacrifice", "Ritual Sacrifice", {
         entitySpawned = function(ent)
             local victim = nil
             g.iteratePartition("ally", ent.x, ent.y, function(other)
-                if victim then return end
                 if other == ent then return end
                 if not g.isAlive(other) then return end
-                victim = other
+                if other.isCommander then return end
+                if (not victim) or (other.health < victim.health) then
+                    victim = other
+                end
             end, 120)
             if victim then
                 g.killEntity(victim, ent)

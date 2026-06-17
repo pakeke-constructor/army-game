@@ -450,6 +450,10 @@ local function drawSandboxUI(self)
             end
         end
     end
+    if button("Exit Sandbox", c.GRAY) then
+        self.sandbox = false
+        g.gotoScene("map_scene")
+    end
     if button("RESTART!!", c.GREEN) then
         love.event.quit("restart")
     end
@@ -477,7 +481,7 @@ local function drawSandboxUI(self)
             end
             lg.setColor(1,1,1)
             g.drawSquadIcon(id, cx + cw/2, cy + ch/2, true)
-            lg.print(string.format("%.1f", info.powerIndex or 0), cx + cw * 0.62, cy + ch * 0.5)
+            richtext.printRich("{o}"..string.format("%.1f", info.powerIndex or 0), lg.getFont(), cx + cw * 0.62, cy + ch * 0.5, 100, "left")
             if iml.wasJustClicked(cx, cy, cw, ch, 1, idd) then
                 if not g.getSquadFromArmy(id) then
                     g.addSquadToArmy(id)
@@ -510,7 +514,7 @@ local function drawSandboxUI(self)
             end
             lg.setColor(1,1,1)
             g.drawSquadIcon(sq.squadId, cx + cw/2, cy + ch/2, true, sq.level)
-            lg.print(string.format("%.1f", info.powerIndex or 0), cx + cw * 0.62, cy + ch * 0.5)
+            richtext.printRich("{o}"..string.format("%.1f", info.powerIndex or 0), lg.getFont(), cx + cw * 0.62, cy + ch * 0.5, 100, "left")
             if iml.wasJustClicked(cx, cy, cw, ch, 1, idd) then
                 sq.level = sq.level + 1
             end
