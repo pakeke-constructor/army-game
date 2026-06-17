@@ -3,14 +3,35 @@ local hoverService = require("src.hud.hoverService")
 
 
 
+local NUM_SQUAD_SLOTS = 6
+local NUM_BLESSING_SLOTS = 6
+
+local GLOW_CIRCLE_MESH = helper.gradientCircleMesh()
+
 ---@class g.ShopScene
 local shop_scene = {}
 
 function shop_scene:init()
+    ---@type [number,objects.Color][]
+    self.shopBoughtSince = {}
+    ---@type number[]
+    self.blessingBoughtSince = {}
+    for i = 1, NUM_SQUAD_SLOTS do
+        self.shopBoughtSince[i] = {0, objects.Color.WHITE}
+    end
+    for i = 1, NUM_BLESSING_SLOTS do
+        self.blessingBoughtSince[i] = 0
+    end
 end
 
 function shop_scene:enter()
     self.hud = HUD()
+    for i = 1, NUM_SQUAD_SLOTS do
+        self.shopBoughtSince[i] = {0, objects.Color.WHITE}
+    end
+    for i = 1, NUM_BLESSING_SLOTS do
+        self.blessingBoughtSince[i] = 0
+    end
 end
 
 function shop_scene:leave()
@@ -69,9 +90,6 @@ local BLESSING_COST = {
     RARE = 90,
     LEGENDARY = 130,
 }
-
-local NUM_SQUAD_SLOTS = 6
-local NUM_BLESSING_SLOTS = 6
 
 ---@param shopNode MapNode.ShopNode
 function shop_scene.prefillShopNode(shopNode)
@@ -262,10 +280,10 @@ local function drawSquadBox(r, squadId, cost)
             else
                 g.addSquadToArmy(squadId)
             end
-            return true, isHovered
+            return true, isHovered, squadCol
         end
     end
-    return false, isHovered
+    return false, isHovered, squadCol
 end
 
 
@@ -374,6 +392,7 @@ local function drawBlessing(blesR, blessingId, cost)
 end
 
 
+local BUY_GLOW_DUR = 0.6
 
 ---@param self g.ShopScene
 ---@param freeArea kirigami.Region
@@ -427,16 +446,32 @@ local function drawShopUI(self, freeArea)
     local rerollR, unitR = leftR:padRatio(0,-0.2,0,0):splitVertical(1,7)
     rerollR = rerollR:moveRatio(0, 0.5)
 
+
     -- draw squad purchase
     local hoveredSquadId = nil
+    local time = love.timer.getTime()
     dbg(unitR:padRatio(0.1))
     local units = unitR:padRatio(0.15):grid(3,2)
     for i, ur in ipairs(units) do
+        -- squad purchase animation
+        local t = math.max(0, time - self.shopBoughtSince[i][1]) / BUY_GLOW_DUR
+        if t > 0 and t <= 1 then
+            local c = self.shopBoughtSince[i][2]
+            local alpha = math.sqrt(math.abs(math.sin(t * math.pi)))
+            local calpha = gsman.mulColor(c[1], c[2], c[3], alpha)
+            local x, y = ur:getCenter()
+            local scale = math.min(ur.w, ur.h)
+            lg.draw(GLOW_CIRCLE_MESH, x, y, 0, scale, scale)
+            calpha:pop()
+        end
+
+        -- actual squad box
         local squadId = self.shopNode.squadShop[i]
         if squadId and squadId ~= false then
-            local clicked, hovered = drawSquadBox(ur:padUnit(6,10), squadId, 90 + helper.hashInteger(i) % 20)
+            local clicked, hovered, squadCol = drawSquadBox(ur:padUnit(6,10), squadId, 90 + helper.hashInteger(i) % 20)
             if clicked then
                 self.shopNode.squadShop[i] = false
+                self.shopBoughtSince[i] = {time, squadCol}
             end
             if hovered then
                 hoveredSquadId = squadId
@@ -446,12 +481,25 @@ local function drawShopUI(self, freeArea)
 
     local blessCells = blessReg:padRatio(0.15):grid(3,2)
     for i, blesR in ipairs(blessCells) do
+        -- blessing purchase animation
+        local t = math.max(0, time - self.blessingBoughtSince[i]) / BUY_GLOW_DUR
+        if t > 0 and t <= 1 then
+            local c = g.COLORS.GOLD
+            local alpha = 0.8 * math.sqrt(math.abs(math.sin(t * math.pi)))
+            local calpha = gsman.mulColor(c[1], c[2], c[3], alpha)
+            local x, y = blesR:getCenter()
+            local scale = math.min(blesR.w, blesR.h)
+            lg.draw(GLOW_CIRCLE_MESH, x, y, 0, scale, scale)
+            calpha:pop()
+        end
+
         local entry = self.shopNode.blessingShop[i]
         if entry and entry ~= false then
             local binfo = g.getBlessingInfo(entry)
             local cost = BLESSING_COST[binfo.rarity.id] or 50
             if drawBlessing(blesR, entry, cost) then
                 self.shopNode.blessingShop[i] = false
+                self.blessingBoughtSince[i] = time
             end
         end
     end
