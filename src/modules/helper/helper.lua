@@ -552,17 +552,19 @@ helper.alphaTestShader = alphaTestShader
 ---@param w number
 ---@param h number
 ---@param drawFunc fun()
-function helper.gradientRectStencil(dir, col1, col2, x,y,w,h, drawFunc)
-    love.graphics.setColorMask(false)
-    love.graphics.setStencilState("replace", "always", 1)
-    local sh = lg.getShader()
-    love.graphics.setShader(alphaTestShader)
+---@param keepStencil boolean?
+function helper.gradientRectStencil(dir, col1, col2, x,y,w,h, drawFunc, keepStencil)
+    love.graphics.setStencilMode("draw", 1)
+    local sh = gsman.setShader(alphaTestShader)
     drawFunc()
-    love.graphics.setShader(sh)
-    love.graphics.setStencilState("keep", "greater", 0)
-    love.graphics.setColorMask(true)
+    sh:pop()
+    love.graphics.setStencilMode("test", 1)
     helper.gradientRect(dir, col1, col2, x, y, w, h)
-    love.graphics.setStencilState()
+    love.graphics.setStencilMode()
+
+    if not keepStencil then
+        love.graphics.clear(false, true)
+    end
 end
 
 end
