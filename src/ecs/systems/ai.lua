@@ -22,6 +22,8 @@ local aiSys = {}
 
 local REFRESH_FRACTION = 0.05 -- re-target 5% of ents per frame
 local STALE_DEFAULT = -1000   -- never-targeted ents sort first
+local RETARGET_MIN = 0.8
+local RETARGET_MAX = 1.3
 
 local PATROL_RADIUS = 40
 local PATROL_PAUSE_MIN = 1.5
@@ -62,6 +64,9 @@ local function missingHealthPriority(ent, c)
     return math.max(0, missing)
 end
 
+local function nextRetargetDelay()
+    return RETARGET_MIN + love.math.random() * (RETARGET_MAX - RETARGET_MIN)
+end
 
 -- Find the best target for `ent` from `candidates`
 ---@param ent ecs.Entity
@@ -85,11 +90,11 @@ local function pickTarget(ent, candidates)
             -- tiebreak: closer is better (subtract tiny distance factor)
             local d2 = dist2(ent, c)
             -- deterministic per-pair noise for stable tie-breaking
-            local noise = (helper.hashInteger(ent.id * 1000 + c.id) % 1000) / 1000 * 0.5
-            local score = prio - d2 * 0.00001 + noise
+            local noise = (helper.hashInteger(ent.id * 1000 + c.id) % 1000) / 1000 * 0.25
+            local score = prio - d2 * 0.00003 + noise + love.math.random() * 0.25
             -- bias toward keeping current target
             if c == curTarget then
-                score = score + 1
+                score = score + 0.2
             end
             if score > bestScore then
                 best, bestScore = c, score
@@ -168,12 +173,14 @@ function aiSys.preUpdate(dt)
     for i = 1, n do
         local ent = _sortBuf[i]
 
-        -- re-target only the stalest entities
-        if i <= refreshCount then
+        -- re-target only the stalest entities, and only when timer is ready
+        ent._timeUntilRetarget = (ent._timeUntilRetarget or (love.math.random() * RETARGET_MAX)) - dt
+        if i <= refreshCount and ent._timeUntilRetarget <= 0 then
             local targetSide = getOpposingSide(ent)
             local candidates = targetSide == "ally" and allies or enemies
             ent._aiTarget = pickTarget(ent, candidates)
             ent._lastTargetRefreshTime = now
+            ent._timeUntilRetarget = nextRetargetDelay()
         end
 
         -- clear target if it died

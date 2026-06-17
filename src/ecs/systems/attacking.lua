@@ -218,11 +218,12 @@ function atckSys.preUpdate(dt)
         local range = ent.attackRange or 100
         local d2 = dist2(ent, target)
         if d2 > range * range then
-            -- melee: try to find a nearby target we CAN hit
-            if ent.attack.attackType ~= "ranged" then
-                target = findNearbyTarget(ent, world, range)
+            target = findNearbyTarget(ent, world, range)
+            if target then
+                ent._aiTarget = target
+            else
+                goto continue
             end
-            if not target then goto continue end
         end
 
         ent._isInAttackRange = true
