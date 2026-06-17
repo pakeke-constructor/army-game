@@ -211,14 +211,27 @@ end
 ---@param y number
 ---@param w number
 ---@param h number
-function text.printRichContainedNoWrap(txt, font, x,y,w,h)
+---@param align love.AlignMode? (justify is not supported; default is "center")
+function text.printRichContainedNoWrap(txt, font, x,y,w,h, align)
     local parsed = ensureParsed(txt)
     local tw = text.getWidth(parsed, font)
     local th = font:getHeight()
 
+    align = align or "center"
     local limit = w
     local scale = math.min(limit/tw, h/th)
-    local drawX, drawY = math.floor(x+w/2), math.floor(y+h/2)
+    local scaledTw = tw * scale
+    local drawX, drawY
+
+    if align == "left" then
+        drawX = x + scaledTw/2
+    elseif align == "right" then
+        drawX = x + w - scaledTw/2
+    else -- center
+        drawX = x + w/2
+    end
+
+    drawX, drawY = math.floor(drawX), math.floor(y + h/2)
 
     -- HACK: 
     -- Without the +0.0001, text wraps when it shouldnt
