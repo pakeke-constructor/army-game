@@ -685,7 +685,49 @@ end
 
 local DEPLOY_REGION_INNER = g.snapToPalette(0.15, 0.8, 0.2, 0.05)
 local DEPLOY_REGION_LINE = g.snapToPalette(0.2, 1, 0.3, 0.4)
+local AUTO_ATTACK_RADIUS_SHOW = 2
+local AUTO_ATTACK_RADIUS_FADE_END = 2.5
+local AUTO_ATTACK_RADIUS_ALPHA = 0.4
 
+
+local function drawCommanderRadius(self)
+    local commander = self.commander
+    if (not commander) or (not g.isAlive(commander)) then
+        return
+    end
+
+    local squad = self.hud:getSelection()
+    if squad and (not squad.deployed) then
+        local commx, commy = getCommanderDeployBasePos(self)
+        local mx, my = love.mouse.getPosition()
+        local wx, wy = self.camera:toWorld(mx, my)
+        local snappedX, snappedY = getSnappedDeployPosition(self, squad, wx, wy)
+        local snapped = (snappedX ~= wx) or (snappedY ~= wy)
+        local opacityMult = snapped and 1 or 0.5
+        local ir, ig, ib, ia = DEPLOY_REGION_INNER:getRGBA()
+        local lr, lgc, lb, la = DEPLOY_REGION_LINE:getRGBA()
+
+        lg.setColor(ir, ig, ib, ia * opacityMult)
+        love.graphics.circle("fill", commx, commy, DEPLOY_RADIUS)
+        lg.setColor(lr, lgc, lb, la * opacityMult)
+        love.graphics.circle("line", commx, commy, DEPLOY_RADIUS)
+    end
+
+    local timeSinceAutoAttack = commander._timeSinceAutoAttacked
+    if (not commander.attackRange) or (not timeSinceAutoAttack) or timeSinceAutoAttack >= AUTO_ATTACK_RADIUS_FADE_END then
+        return
+    end
+
+    local alpha = AUTO_ATTACK_RADIUS_ALPHA
+    if timeSinceAutoAttack > AUTO_ATTACK_RADIUS_SHOW then
+        local t = (timeSinceAutoAttack - AUTO_ATTACK_RADIUS_SHOW) / (AUTO_ATTACK_RADIUS_FADE_END - AUTO_ATTACK_RADIUS_SHOW)
+        alpha = alpha * (1 - t)
+    end
+
+    lg.setLineWidth(1)
+    lg.setColor(1, 1, 1, alpha)
+    love.graphics.circle("line", commander.x, commander.y, commander.attackRange)
+end
 
 function battle_scene:draw()
     local _cx, _cy = self.camera:getPos()
@@ -700,14 +742,7 @@ function battle_scene:draw()
     local border = self.ecs.border
     lg.setColor(1, 1, 1, 1)
 
-    local commander = self.commander
-    if commander and g.isAlive(commander) then
-        local commx, commy = getCommanderDeployBasePos(self)
-        lg.setColor(DEPLOY_REGION_INNER)
-        love.graphics.circle("fill", commx, commy, DEPLOY_RADIUS)
-        lg.setColor(DEPLOY_REGION_LINE)
-        love.graphics.circle("line", commx, commy, DEPLOY_RADIUS)
-    end
+    drawCommanderRadius(self)
 
     self.ecs:draw(self.camera:getTransform())
 

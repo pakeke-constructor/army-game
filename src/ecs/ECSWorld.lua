@@ -180,6 +180,9 @@ function ECSWorld:update(dt)
         if e._timeSinceDeployed then
             e._timeSinceDeployed = e._timeSinceDeployed + dt
         end
+        if e._timeSinceAutoAttacked then
+            e._timeSinceAutoAttacked = e._timeSinceAutoAttacked + dt
+        end
         local tvx, tvy = g.getVel(e)
         local sameDir = (e.vx or 0) * tvx + (e.vy or 0) * tvy > 0
         if e._aiMoving and sameDir then

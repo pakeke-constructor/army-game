@@ -163,6 +163,7 @@ end
 local function doAttack(attacker, target)
     if not g.isAlive(target) then return end
 
+    attacker._timeSinceAutoAttacked = 0
     g.call("onAttack", attacker, target)
 
     local atk = attacker.attack

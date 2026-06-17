@@ -127,6 +127,7 @@ local shadow = {
 ---@field public shadow ecs.components.Shadow?
 ---@field public walkAnimation ecs.components.WalkAnimation?
 ---@field public _walkTime number?
+---@field public _aiMoving boolean? true while the entity is actively moving toward its target (drives walk animation)
 ---@field public faceDir integer?
 ---@field public taunt ecs.components.Taunt?
 ---@field public fear ecs.components.Fear?
@@ -198,6 +199,7 @@ local shadow = {
 ---@field public _timeSinceHealed number?
 ---@field public _timeSinceLostArmor number?
 ---@field public _timeSinceDeployed number?
+---@field public _timeSinceAutoAttacked number?
 ---@field public _damageLagAmount number?
 ---@field public damageJolt number?
 ---@field public _landmark boolean? marked by the Landmark blessing: the first building placed this battle
