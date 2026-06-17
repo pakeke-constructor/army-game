@@ -344,25 +344,6 @@ local function drawTopBar()
 end
 
 
-
-
----@param self g.HUD
----@param barHeight number
-local function drawBottomBar(self, barHeight)
-    local sw, sh = ui.getScaledUIDimensions()
-    local run = g.getRun()
-    local region = Kirigami(0, sh - barHeight, sw, barHeight)
-    local squadBar, _, blessingBox = region:splitHorizontal(2, 1, 1)
-
-    ui.drawDarkPanel(squadBar:get())
-    iml.panel(squadBar:get()) -- dont a
-    drawSquadBar(self, squadBar:padUnit(6))
-
-    local mH=20
-    drawManaBar(0, squadBar.y - mH, squadBar.w, mH,  squadBar.w/2)
-end
-
-
 ---@return g.ManaCounts
 local function getManaCounts()
     local sc, scName = g.getCurrentScene()
