@@ -1,6 +1,6 @@
 
 
-local loc2 = g.locRich
+local loc2 = g.loc2
 
 g.definePerk("pressure", "Pressure", {
     description = loc2("Has damage equal to your currently held Blue mana."),

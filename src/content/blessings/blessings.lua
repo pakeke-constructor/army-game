@@ -1,4 +1,4 @@
-local loc2 = g.locRich
+local loc2 = g.loc2
 
 g.defineBlessing("anger", "Anger", {
     description = loc2("+1 (ATK) to allied units with at least 3 (ATK)."),

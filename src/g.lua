@@ -2539,7 +2539,7 @@ function g.getStatList()
 end
 
 
-function g.locRich(text, variables, context)
+function g.loc2(text, variables, context)
     local result = loc(text, variables or {}, context)
     for _, stat in ipairs(g.getStatList()) do
         result = result:gsub("%(" .. stat.shortName .. "%)", stat.richText)
