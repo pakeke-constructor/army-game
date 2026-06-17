@@ -23,9 +23,9 @@ local FOG_CLEAR_RADIUS = 120
 local FOG_STEP = 24
 local FOG_REVEAL_DEPTH = 4
 
-local GALLOP_FREQ = 18
-local GALLOP_TILT = 0.15
-local GALLOP_BOUNCE = 4
+local GALLOP_FREQ = 8
+local GALLOP_TILT = 0.2
+local GALLOP_BOUNCE = 8
 
 
 ---@class g.MapScene
