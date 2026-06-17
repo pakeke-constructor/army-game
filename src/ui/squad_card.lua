@@ -73,7 +73,7 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
     local frameDarkColor = manaColor:lerp(objects.Color.BLACK, 0.65)
     local panelBottomColor = manaColor:lerp(objects.Color.BLACK, 0.65)
     local frameLightColor = manaColor:lerp(objects.Color.WHITE, 0.25)
-    local panelTopColor = objects.Color(0.05, 0.05, 0.06, 0.7)
+    local panelTopColor = objects.Color(0.05, 0.05, 0.06, 0.9)
     local canUpgrade = showUpgrade and g.getSquadFromArmy(squadId)
 
     local x, y, w, h = region:get()
