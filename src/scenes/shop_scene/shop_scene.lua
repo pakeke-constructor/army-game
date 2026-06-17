@@ -139,6 +139,7 @@ function shop_scene:setShop(shopNode)
     self.shopNode = shopNode
 end
 
+local CANT_AFFORD_RT = "{c r=0.6 g=0.1 b=0.05}"
 
 ---@param money number
 ---@param r kirigami.Region 
@@ -148,7 +149,7 @@ local function drawCost(money, r, discount)
     local txt
     if g.getRun().money < money then
         -- cant afford! red color
-        txt = "{coin_icon}{c r=0.6 g=0.1 b=0.05} " .. money
+        txt = "{coin_icon}"..CANT_AFFORD_RT.." " .. money
     elseif discount then
         txt = "{coin_icon}{c r=0.15 b=0.1 g=0.6} " .. money
     else
@@ -196,7 +197,7 @@ local function drawSquadBox(r, squadId, cost)
     local rar = sinfo.rarity
     local bg = RAR_MAP[rar]
     local squadCol = g.getManaBundleColor(sinfo.cost)
-    local canAfford = g.getRun().money >= cost
+    local canAfford = g.canAffordGold(cost)
 
     local isHovered = iml.isHovered(r:get())
     local wasJustClicked = iml.wasJustClicked(r:get())
@@ -280,25 +281,44 @@ end
 local function drawRerollButton(self, r)
     local IMG = "shop_reroll_button"
     local x,y = r:getCenter()
-    local r2 = Kirigami(0,0, g.getImageSize(IMG))
-    r2 = r2:center(r)
+    local buttonR = Kirigami(0,0, g.getImageSize(IMG))
+    buttonR = buttonR:center(r)
+    local buttonDisplayR = buttonR
+
+    if iml.isHovered(buttonR:get()) then
+        buttonDisplayR = buttonDisplayR:moveUnit(0, -2)
+        y = y - 2
+    end
+
+    local cost = getRerollCost(self)
+    local canAfford = g.canAffordGold(cost)
+    local canReroll = canRerollSquad(self.shopNode)
+    local cdisabled = nil
+    if iml.isClicked(buttonR:get()) or (not canAfford) or (not canReroll) then
+        cdisabled = gsman.mulColor(0.5, 0.5, 0.5)
+    end
+
     g.drawImage(IMG, x,y)
 
     local font = g.getSmallFont(16)
-    local chain,body = r2:splitVertical(1,2)
+    local chain,body = buttonDisplayR:splitVertical(1,2)
     dbg(chain)
     dbg(body)
+    local moneyColor = canAfford and "{GOLD_COLOR}" or CANT_AFFORD_RT
     richtext.printRichContained(
-        "{shop_reroll_icon} {coin_icon} {GOLD_COLOR}" .. getRerollCost(self),
+        "{shop_reroll_icon} {coin_icon} " .. moneyColor .. getRerollCost(self),
         font, body:padRatio(0.5):moveUnit(0,1):get()
     )
 
-    if iml.wasJustClicked(r2:get()) and canRerollSquad(self.shopNode) then
-        local cost = getRerollCost(self)
+    if iml.wasJustClicked(buttonR:get()) and canReroll then
         if g.trySpendGold(cost) then
             g.call("rerollShop")
             shop_scene.rerollShopNodeInplace(self.shopNode)
         end
+    end
+
+    if cdisabled then
+        cdisabled:pop()
     end
 end
 
