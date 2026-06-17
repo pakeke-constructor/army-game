@@ -2909,18 +2909,25 @@ end
 
 --- Draw mana cost as individual beads, centered at (x,y), fitting within w.
 ---@param bundle g.ManaBundle
+---@return number smallWidth
+---@return number largeWidth
 function g.getManaCostWidth(bundle)
     local count = 0
     for _, manaType in ipairs(manaTypeList) do
         local n = bundle[manaType]
         if n and n > 0 then count = count + n end
     end
-    if count == 0 then return 0 end
-    local quad = g.getImageQuad(manaInfos[manaTypeList[1]].image)
-    local _, _, qw, _ = quad:getViewport()
-    return (count - 1) * qw + qw
+    if count == 0 then return 0,0 end
+    local manaInfo = manaInfos[manaTypeList[1]]
+    local ws = g.getImageSize(manaInfo.image)
+    local wl = g.getImageSize(manaInfo.imageLarge)
+    return count * ws, count * wl
 end
 
+---@param bundle g.ManaBundle
+---@param x number
+---@param y number
+---@param w number?
 function g.drawManaCost(bundle, x, y, w)
     w = w or 9999
     local beads = {}
@@ -2935,14 +2942,39 @@ function g.drawManaCost(bundle, x, y, w)
     local count = #beads
     if count == 0 then return end
 
-    local quad = g.getImageQuad(manaInfos[beads[1]].image)
-    local _, _, qw, _ = quad:getViewport()
-
+    local qw = g.getImageSize(manaInfos[beads[1]].image)
     local spacing = math.min(qw, count > 1 and (w - qw) / (count - 1) or qw)
     local startX = x - (count - 1) * spacing / 2
 
     for i, manaType in ipairs(beads) do
         g.drawImage(manaInfos[manaType].image, startX + (i - 1) * spacing, y)
+    end
+end
+
+---@param bundle g.ManaBundle
+---@param x number
+---@param y number
+---@param w number?
+function g.drawManaCostLarge(bundle, x, y, w)
+    w = w or 9999
+    local beads = {}
+    for _, manaType in ipairs(manaTypeList) do
+        local n = bundle[manaType]
+        if n and n > 0 then
+            for i = 1, n do
+                beads[#beads + 1] = manaType
+            end
+        end
+    end
+    local count = #beads
+    if count == 0 then return end
+
+    local qw = g.getImageSize(manaInfos[beads[1]].imageLarge)
+    local spacing = math.min(qw, count > 1 and (w - qw) / (count - 1) or qw)
+    local startX = x - (count - 1) * spacing / 2
+
+    for i, manaType in ipairs(beads) do
+        g.drawImage(manaInfos[manaType].imageLarge, startX + (i - 1) * spacing, y)
     end
 end
 

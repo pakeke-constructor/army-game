@@ -12,7 +12,7 @@ end
 ---@class g.hudArgs
 ---@field battleScene boolean?
 ---@field mapScene boolean?
-local hudArgs
+---@field hoverSquadId string?
 
 local SQUAD_ICON_SIZE = 32
 local SQUAD_PADDING = 4
@@ -257,11 +257,23 @@ local function drawXpBar(reg)
     lg.setColor(g.COLORS.DARK_UI)
     lg.setColor(objects.Color("FF2E2C3C"))
     ui.drawSingleColorPanel(xpBar:get())
-    lg.setColor(objects.Color("FF33873E"))
+    lg.setColor(objects.Color("FF145914"))
 
+    do
     local xpW = (xp/xpReq) * xpBar.w
-    local fillReg = xpBar:shrinkTo(xpW, xpBar.h)
-    ui.drawSingleColorPanel(fillReg:get())
+    local stencilReg = xpBar:shrinkTo(xpW, xpBar.h)
+    lg.setStencilMode("draw", 1)
+    local sh = gsman.setShader(helper.alphaTestShader)
+    ui.drawSingleColorPanel(stencilReg:get())
+    sh:pop()
+    lg.setStencilMode("test", 1)
+    local ox = math.sin(love.timer.getTime() * 0.3) * 8
+    local oy = math.cos(love.timer.getTime() * 0.21) * 4
+    lg.setColor(1, 1, 1)
+    g.drawImageOffset("army_healthbar_background", xpBar.x + ox, xpBar.y + xpBar.h/2 + oy, 0, nil, nil, 0.5, 0.5)
+    lg.setStencilMode()
+    lg.clear(false, true)
+    end
 
     -- draw xp text
     local txt1 = helper.wrapRichtextColor(objects.Color("FF80BD51"),("%d"):format(xp))
@@ -329,25 +341,6 @@ local function drawTopBar()
 
     drawPanel(zoneString, "{c r=0.2 g=0.5 b=0.3}{wavy freq=0.5}" .. LOC_ZONE)
     drawPanel(pausePanel, LOC_PAUSE)
-end
-
-
-
-
----@param self g.HUD
----@param barHeight number
-local function drawBottomBar(self, barHeight)
-    local sw, sh = ui.getScaledUIDimensions()
-    local run = g.getRun()
-    local region = Kirigami(0, sh - barHeight, sw, barHeight)
-    local squadBar, _, blessingBox = region:splitHorizontal(2, 1, 1)
-
-    ui.drawDarkPanel(squadBar:get())
-    iml.panel(squadBar:get()) -- dont a
-    drawSquadBar(self, squadBar:padUnit(6))
-
-    local mH=20
-    drawManaBar(0, squadBar.y - mH, squadBar.w, mH,  squadBar.w/2)
 end
 
 
@@ -471,10 +464,11 @@ function HUD:drawUI(opt)
 
     drawBottomBar(self, SQUAD_ICON_SIZE + 30)
 
-    if self.hoveredSquad then
+    local hoveredSquadId = opt.hoverSquadId or (self.hoveredSquad and self.hoveredSquad.squadId)
+    if hoveredSquadId then
         local main = ui.getScreenRegion()
         local _, left = main:padRatio(0.2):splitHorizontal(2, 1)
-        ui.drawSquadCard(self.hoveredSquad.squadId, left:padRatio(0.1), -999)
+        ui.drawSquadCard(hoveredSquadId, left:padRatio(0.1), -999)
     end
 
     rewardPopupService.draw()

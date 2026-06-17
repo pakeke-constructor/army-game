@@ -103,6 +103,20 @@ function Blend:pop()
     end
 end
 
+---@class gsman.Shader: objects.Class
+local Shader = objects.Class("gsman.Shader")
+
+---@param sh love.Shader?
+function Shader:init(sh)
+    ---@type love.Shader?
+    self.oldShader = love.graphics.getShader()
+    love.graphics.setShader(sh)
+end
+
+function Shader:pop()
+    love.graphics.setShader(self.oldShader)
+end
+
 ---@param lw number
 ---@return gsman.LineWidth
 ---@nodiscard
@@ -170,6 +184,13 @@ end
 ---@nodiscard
 function gsman.setBlendMode(blendmode, blendalphamode)
     return Blend(blendmode, blendalphamode)
+end
+
+---@param sh love.Shader?
+---@return gsman.Shader
+---@nodiscard
+function gsman.setShader(sh)
+    return Shader(sh)
 end
 
 return gsman

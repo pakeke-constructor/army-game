@@ -414,16 +414,14 @@ local function drawShopUI(self, freeArea)
         end
     end
 
-    if not hoveredSquadId then
-        local blessCells = blessReg:padRatio(0.15):grid(3,2)
-        for i, blesR in ipairs(blessCells) do
-            local entry = self.shopNode.blessingShop[i]
-            if entry and entry ~= false then
-                local binfo = g.getBlessingInfo(entry)
-                local cost = BLESSING_COST[binfo.rarity.id] or 50
-                if drawBlessing(blesR, entry, cost) then
-                    self.shopNode.blessingShop[i] = false
-                end
+    local blessCells = blessReg:padRatio(0.15):grid(3,2)
+    for i, blesR in ipairs(blessCells) do
+        local entry = self.shopNode.blessingShop[i]
+        if entry and entry ~= false then
+            local binfo = g.getBlessingInfo(entry)
+            local cost = BLESSING_COST[binfo.rarity.id] or 50
+            if drawBlessing(blesR, entry, cost) then
+                self.shopNode.blessingShop[i] = false
             end
         end
     end
@@ -436,15 +434,7 @@ local function drawShopUI(self, freeArea)
         g.gotoLastScene()
     end
 
-
-    if hoveredSquadId then
-        local screenReg = ui.getScreenRegion():padRatio(0.1, 0.3, 0.1, 0.1)
-        local _,_,creg = screenReg:splitHorizontal(1,1,1)
-        local rrr = creg:padRatio(0.1)
-        lg.setColor(1,1,1)
-        ui.drawDarkPanel(rrr:get())
-        ui.drawSquadCard(hoveredSquadId, rrr, 1, true)
-    end
+    return hoveredSquadId
 end
 
 
@@ -454,8 +444,8 @@ function shop_scene:draw()
 
     ui.startUI()
     local freeArea = self.hud:getFreeArea()
-    drawShopUI(self, freeArea)
-    self.hud:drawUI({ shopScene = true })
+    local hoveredSquadId = drawShopUI(self, freeArea)
+    self.hud:drawUI({ shopScene = true, hoverSquadId = hoveredSquadId })
     ui.endUI()
 end
 
