@@ -59,7 +59,7 @@ function textPopups.draw(transform)
         if p.fadeIn > 0 then
             scale = math.min(1, p.time / p.fadeIn)
         end
-        richtext.printRichCentered(p.txt, p.font, p.x, p.y, 1000, "left", 0, scale, scale)
+        richtext.printRichCentered(p.txt, p.font, math.floor(p.x), math.floor(p.y), 1000, "left", 0, scale, scale)
     end
     love.graphics.setColor(1, 1, 1, 1)
     love.graphics.pop()

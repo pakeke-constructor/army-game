@@ -83,6 +83,21 @@ return function(text)
     text.defineEffect("wavy", wavy, {perCharacter = true})
     text.defineEffect("w", wavy, {perCharacter = true})
 
+    ---@param args richtext.EffectArgs
+    ---@param x number
+    ---@param y number
+    ---@param context richtext.Context
+    ---@param next richtext.NextFunc
+    local function bob(args, x, y, context, next)
+        local f = args.freq or 0.5
+        local amp = args.amp or 1
+        local k = args.k or 1 -- `k` determines how "different" the letter are.
+        -- k = 0 indicates all letters bob up and down, in sync.
+        local dy = math.sin(2 * math.pi * f * love.timer.getTime()) * amp
+        return next(context.textOrDrawable, x, y + dy)
+    end
+    text.defineEffect("bob", bob, {perCharacter = true})
+
     local rainbow = {
         {0.85, 0.15, 0.15, 1.0},  -- Red
         {0.90, 0.55, 0.20, 1.0},  -- Orange

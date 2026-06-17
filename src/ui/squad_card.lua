@@ -120,7 +120,7 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
 
             love.graphics.setColor(1, 1, 1)
             love.graphics.setFont(TITLE_FONT)
-            local name = "{c r=0.8 g=0.8 b=0.85}{wavy amp=0.5 freq=1}" .. info.name
+            local name = "{c r=0.8 g=0.8 b=0.85}{bob amp=0.5}" .. info.name
             richtext.printRich(name, TITLE_FONT, textX, ey, textW, "left")
         end,
     })
@@ -303,7 +303,7 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
         -- its an upgrade
         local r1, _ = region:splitVertical(1,8)
         local titleFont = g.getBigFont(16)
-        richtext.printRichContainedNoWrap("{wavy amp=0.3}{o}" .. UPGRADE_COLOR_TAG .. UPGRADE, titleFont, r1:moveRatio(0,-0.7):padRatio(0.3):get())
+        richtext.printRichContainedNoWrap("{bob amp=0.3}{o}" .. UPGRADE_COLOR_TAG .. UPGRADE, titleFont, r1:moveRatio(0,-0.7):padRatio(0.3):get())
 
         local buf = {}
         for statId, _ in pairs(info.statUpgradeScaling) do

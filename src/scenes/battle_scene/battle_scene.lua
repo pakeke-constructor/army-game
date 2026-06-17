@@ -660,7 +660,7 @@ local function drawSquadHover(self, squad, wx, wy)
     local smallFont = g.getSmallFont(16)
     lg.setColor(info.rarity.color)
     local yof2 = -24
-    richtext.printRichCentered("{wavy}{o}"..info.name, smallFont, sx, sy+minY+yof2, 1000, "left")
+    richtext.printRichCentered("{bob}{o}"..info.name, smallFont, sx, sy+minY+yof2, 1000, "left")
 end
 
 

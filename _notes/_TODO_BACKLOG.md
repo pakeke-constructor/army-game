@@ -158,9 +158,6 @@ More decor-sprites for map (grasses, bushes, skull, more tree types?)
 #### CUTOFF. EVERYTHING ABOVE THIS POINT IS 100% NECCESSARY.
 
 
-- Chest node + Chest-node UI  (spend keys)
-Port chest-open-animation directly from catx11.
-
 
 - Improve wisps: should use leaf-sprites
 
