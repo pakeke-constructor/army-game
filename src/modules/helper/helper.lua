@@ -477,14 +477,30 @@ do
 
 local circleMesh
 
+---@class helper.drawGlow.args
+---@field pulseFrequency number?
+---@field pulseAmplitude number?
+---@field pulseOffset number?
+
 ---@param x number
 ---@param y number
----@param scale number?
-function helper.drawGlow(x, y, scale)
-    local s = scale or 1
+---@param color [number, number, number]
+---@param size number?
+---@param glowArgs helper.drawGlow.args?
+function helper.drawGlow(x, y, color, size, glowArgs)
+    local s = size or 1
+    local freq = glowArgs and glowArgs.pulseFrequency or 0
+    local amp = glowArgs and glowArgs.pulseAmplitude or 0
+    local offset = glowArgs and glowArgs.pulseOffset or 0
+
+    local pulse = math.sin(love.timer.getTime() * freq + offset) ^ 2 * amp
+
     circleMesh = circleMesh or helper.gradientCircleMesh()
-    love.graphics.draw(circleMesh, x, y, 0, s, s)
+    local col = gsman.setColor(color[1], color[2], color[3], 1)
+    love.graphics.draw(circleMesh, x, y, 0, s + pulse, s + pulse)
+    col:pop()
 end
+
 end
 
 

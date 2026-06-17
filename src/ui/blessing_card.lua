@@ -32,15 +32,10 @@ local function rotatingGlow(reg, args)
     local rx = w / 2
     local ry = h / 2
 
-    local pulse = math.sin(t * consts.TAU / 3 + offset) ^ 2
-    local opacity = helper.lerp(0.3, 0.7, pulse)
-    local scaleMul = helper.lerp(0.9, 1.1, pulse)
-
-    local col = gsman.setColor(color[1], color[2], color[3], opacity)
     for i = 1, glowCount do
         local phase = ((i - 1) / glowCount) * consts.TAU + offset
         local wobble = math.sin(t * wobbleFreq + phase) * wobbleAmp
-        local angle = t * rps + phase
+        local angle = t * rps * (0.6 + offset * 0.1) + phase
 
         local px = cx + rx * math.cos(angle)
         local py = cy + ry * math.sin(angle)
@@ -51,9 +46,12 @@ local function rotatingGlow(reg, args)
         px = px + ty / tl * wobble
         py = py - tx / tl * wobble
 
-        helper.drawGlow(px, py, glowScale * scaleMul)
+        helper.drawGlow(px, py, color, glowScale, {
+            pulseFrequency = consts.TAU / 3,
+            pulseAmplitude = glowScale * 0.1,
+            pulseOffset = offset,
+        })
     end
-    col:pop()
 end
 
 ---Draw a blessing card in a kirigami region. Returns true if clicked.
@@ -82,9 +80,9 @@ local function drawBlessingCard(blessingId, region, index)
         --iml.panel(bx,by,bw,bh, uid)
         local rc = rarity.color
         rotatingGlow(Kirigami(bx, by, bw, bh):padRatio(0.25), {
-            count = 3 + (index%2==0 and 1 or 0),
+            count = 3,
             offset = (index - 1) * 1.37,
-            glowScale = 125,
+            glowScale = 100,
             rps = 1,
             wobbleFreq = 0.1,
             wobbleAmp = 10,
