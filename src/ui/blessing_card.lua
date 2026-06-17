@@ -5,6 +5,57 @@ local DESC_FONT = nil
 local BLESSING_CARD_BG = objects.Color("#111111")
 local GRADIENT_CIRCLE = helper.gradientCircleMesh()
 
+---@class blessingCard.rotatingGlow.args
+---@field count integer?
+---@field offset number?
+---@field glowScale number?
+---@field rps number?
+---@field wobbleFreq number?
+---@field wobbleAmp number?
+---@field color [number, number, number]?
+
+---@param reg kirigami.Region
+---@param args blessingCard.rotatingGlow.args?
+local function rotatingGlow(reg, args)
+    local offset = args and args.offset or 0
+    local glowScale = args and args.glowScale or 1
+    local rps = args and args.rps or math.pi / 4
+    local wobbleFreq = args and args.wobbleFreq or 0
+    local wobbleAmp = args and args.wobbleAmp or 0
+    local glowCount = args and args.count or 4
+    local color = args and args.color or {1, 1, 1}
+
+    local x,y,w,h = reg:get()
+    local cx,cy = x + w/2, y + h/2
+    local t = love.timer.getTime()
+
+    local rx = w / 2
+    local ry = h / 2
+
+    local pulse = math.sin(t * consts.TAU / 3 + offset) ^ 2
+    local opacity = helper.lerp(0.3, 0.7, pulse)
+    local scaleMul = helper.lerp(0.9, 1.1, pulse)
+
+    local col = gsman.setColor(color[1], color[2], color[3], opacity)
+    for i = 1, glowCount do
+        local phase = ((i - 1) / glowCount) * consts.TAU + offset
+        local wobble = math.sin(t * wobbleFreq + phase) * wobbleAmp
+        local angle = t * rps + phase
+
+        local px = cx + rx * math.cos(angle)
+        local py = cy + ry * math.sin(angle)
+        local tx = -rx * math.sin(angle)
+        local ty = ry * math.cos(angle)
+        local tl = helper.magnitude(tx, ty)
+
+        px = px + ty / tl * wobble
+        py = py - tx / tl * wobble
+
+        helper.drawGlow(px, py, glowScale * scaleMul)
+    end
+    col:pop()
+end
+
 ---Draw a blessing card in a kirigami region. Returns true if clicked.
 ---@param blessingId string
 ---@param region kirigami.Region
@@ -29,19 +80,16 @@ local function drawBlessingCard(blessingId, region, index)
 
     local box = ui.Box({maxWidth = w, maxHeight = h, padding = 12, spacing = 6}, function(bx, by, bw, bh)
         --iml.panel(bx,by,bw,bh, uid)
-        local t = love.timer.getTime()
-        local opacity = helper.lerp(0.3, 0.7, math.sin(t * consts.TAU / 3) ^ 2)
         local rc = rarity.color
-        local col = gsman.setColor(rc[1], rc[2], rc[3], opacity)
-        helper.rotatingGlow(Kirigami(bx, by, bw, bh):padRatio(0.25), {
-            count = 4,
-            offset = index,
+        rotatingGlow(Kirigami(bx, by, bw, bh):padRatio(0.25), {
+            count = 3 + (index%2==0 and 1 or 0),
+            offset = (index - 1) * 1.37,
             glowScale = 125,
             rps = 1,
             wobbleFreq = 0.1,
             wobbleAmp = 10,
+            color = {rc[1], rc[2], rc[3]},
         })
-        col:pop()
 
         local isHovered = iml.isHovered(bx,by, bw,bh, uid)
         love.graphics.setColor(isHovered and darkCol:darken(0.3) or BLESSING_CARD_BG)
