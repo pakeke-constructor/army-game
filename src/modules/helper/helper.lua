@@ -472,6 +472,58 @@ function helper.gradientCircleMesh(segments)
     return love.graphics.newMesh(vertices, "fan", "static")
 end
 
+do
+
+local circleMesh = helper.gradientCircleMesh()
+
+---@class helper.rotatingGlow.args
+---@field count integer? Amount of glow. Default is 4
+---@field offset number? Rotation offset in radians. Default is 0
+---@field glowScale number? The scale of the glow. Default 1 = 1 pixel
+---@field rps number? Radians per second of the rotation. Default is 45 deg/sec
+---@field wobbleFreq number? Frequency of the wobble (how fast it is). Default is 0 (no wobble)
+---@field wobbleAmp number? Amplitude of the wobble (how strong it is). Default is 0 (no wobble)
+
+---The glow uses the current set color
+---@param reg kirigami.Region
+---@param args helper.rotatingGlow.args?
+function helper.rotatingGlow(reg, args)
+    local offset = args and args.offset or 0
+    local glowScale = args and args.glowScale or 1
+    local rps = args and args.rps or math.pi / 4 -- 45 deg/sec
+    local wobbleFreq = args and args.wobbleFreq or 0
+    local wobbleAmp = args and args.wobbleAmp or 0
+    local glowCount = args and args.count or 4
+
+    local x,y,w,h = reg:get()
+    local cx,cy = x + w/2, y + h/2
+    local t = love.timer.getTime()
+
+    local rx = w / 2
+    local ry = h / 2
+
+    for i = 1, glowCount do
+        -- The wobble is used to apply movement perpendicular to the
+        -- "glow circle" movement.
+        -- FIXME: It was in pixels. It should be relative to the ellipse radii.
+        local phase = ((i - 1) / glowCount + offset) * consts.TAU
+        local wobble = math.sin(t * wobbleFreq + phase) * wobbleAmp
+        local angle = t * rps + phase
+
+        local px = cx + rx * math.cos(angle)
+        local py = cy + ry * math.sin(angle)
+        local tx = -rx * math.sin(angle)
+        local ty = ry * math.cos(angle)
+        local tl = helper.magnitude(tx, ty)
+
+        px = px + ty / tl * wobble
+        py = py - tx / tl * wobble
+
+        love.graphics.draw(circleMesh, px, py, 0, glowScale, glowScale)
+    end
+end
+end
+
 
 
 do

@@ -29,6 +29,20 @@ local function drawBlessingCard(blessingId, region, index)
 
     local box = ui.Box({maxWidth = w, maxHeight = h, padding = 12, spacing = 6}, function(bx, by, bw, bh)
         --iml.panel(bx,by,bw,bh, uid)
+        local t = love.timer.getTime()
+        local opacity = helper.lerp(0.3, 0.7, math.sin(t * consts.TAU / 3) ^ 2)
+        local rc = rarity.color
+        local col = gsman.setColor(rc[1], rc[2], rc[3], opacity)
+        helper.rotatingGlow(Kirigami(bx, by, bw, bh):padRatio(0.25), {
+            count = 4,
+            offset = index,
+            glowScale = 125,
+            rps = 1,
+            wobbleFreq = 0.1,
+            wobbleAmp = 10,
+        })
+        col:pop()
+
         local isHovered = iml.isHovered(bx,by, bw,bh, uid)
         love.graphics.setColor(isHovered and darkCol:darken(0.3) or BLESSING_CARD_BG)
         love.graphics.rectangle("fill", bx, by, bw, bh)
