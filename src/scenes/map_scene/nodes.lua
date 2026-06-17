@@ -367,7 +367,9 @@ nodes.EmptyNode = EmptyNode
 local EventNode = nodes.newClass("event")
 
 function EventNode:enter()
-    nodeEventService.startRandomEvent()
+    fadeToBlackService.fadeToFromBlack(0.35, function()
+        nodeEventService.startRandomEvent()
+    end, 0.2)
 end
 
 function EventNode:getHoverDescription()
