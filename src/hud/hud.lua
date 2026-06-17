@@ -262,19 +262,17 @@ local function drawXpBar(reg)
     do
     local xpW = (xp/xpReq) * xpBar.w
     local stencilReg = xpBar:shrinkTo(xpW, xpBar.h)
-    lg.setColorMask(false)
-    lg.setStencilState("replace", "always", 1)
-    local prevShader = lg.getShader()
-    lg.setShader(helper.alphaTestShader)
+    lg.setStencilMode("draw", 1)
+    local sh = gsman.setShader(helper.alphaTestShader)
     ui.drawSingleColorPanel(stencilReg:get())
-    lg.setShader(prevShader)
-    lg.setStencilState("keep", "greater", 0)
-    lg.setColorMask(true)
+    sh:pop()
+    lg.setStencilMode("test", 1)
     local ox = math.sin(love.timer.getTime() * 0.3) * 8
     local oy = math.cos(love.timer.getTime() * 0.21) * 4
     lg.setColor(1, 1, 1)
     g.drawImageOffset("army_healthbar_background", xpBar.x + ox, xpBar.y + xpBar.h/2 + oy, 0, nil, nil, 0.5, 0.5)
-    lg.setStencilState()
+    lg.setStencilMode()
+    lg.clear(false, true)
     end
 
     -- draw xp text
