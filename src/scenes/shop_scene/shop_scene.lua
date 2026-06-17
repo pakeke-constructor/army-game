@@ -3,14 +3,35 @@ local hoverService = require("src.hud.hoverService")
 
 
 
+local NUM_SQUAD_SLOTS = 6
+local NUM_BLESSING_SLOTS = 6
+
+local GLOW_CIRCLE_MESH = helper.gradientCircleMesh()
+
 ---@class g.ShopScene
 local shop_scene = {}
 
 function shop_scene:init()
+    ---@type [number,objects.Color][]
+    self.shopBoughtSince = {}
+    ---@type number[]
+    self.blessingBoughtSince = {}
+    for i = 1, NUM_SQUAD_SLOTS do
+        self.shopBoughtSince[i] = {0, objects.Color.WHITE}
+    end
+    for i = 1, NUM_BLESSING_SLOTS do
+        self.blessingBoughtSince[i] = 0
+    end
 end
 
 function shop_scene:enter()
     self.hud = HUD()
+    for i = 1, NUM_SQUAD_SLOTS do
+        self.shopBoughtSince[i] = {0, objects.Color.WHITE}
+    end
+    for i = 1, NUM_BLESSING_SLOTS do
+        self.blessingBoughtSince[i] = 0
+    end
 end
 
 function shop_scene:leave()
@@ -69,9 +90,6 @@ local BLESSING_COST = {
     RARE = 90,
     LEGENDARY = 130,
 }
-
-local NUM_SQUAD_SLOTS = 6
-local NUM_BLESSING_SLOTS = 6
 
 ---@param shopNode MapNode.ShopNode
 function shop_scene.prefillShopNode(shopNode)
@@ -139,6 +157,7 @@ function shop_scene:setShop(shopNode)
     self.shopNode = shopNode
 end
 
+local CANT_AFFORD_RT = "{c r=0.6 g=0.1 b=0.05}"
 
 ---@param money number
 ---@param r kirigami.Region 
@@ -148,7 +167,7 @@ local function drawCost(money, r, discount)
     local txt
     if g.getRun().money < money then
         -- cant afford! red color
-        txt = "{coin_icon}{c r=0.6 g=0.1 b=0.05} " .. money
+        txt = "{coin_icon}"..CANT_AFFORD_RT.." " .. money
     elseif discount then
         txt = "{coin_icon}{c r=0.15 b=0.1 g=0.6} " .. money
     else
@@ -158,11 +177,21 @@ local function drawCost(money, r, discount)
 end
 
 
-local function dbg(r)
-    if consts.DEV_MODE then
-        lg.rectangle("line",r:get())
+---@param shopNode MapNode.ShopNode
+local function canRerollSquad(shopNode)
+    shop_scene.prefillShopNode(shopNode)
+
+    for i = 1, NUM_SQUAD_SLOTS do
+        if shopNode.squadShop[i] then
+            return true
+        end
     end
+
+    return false
 end
+
+
+local dbg = ui.debugRegion
 
 
 local RAR_MAP = {
@@ -186,7 +215,7 @@ local function drawSquadBox(r, squadId, cost)
     local rar = sinfo.rarity
     local bg = RAR_MAP[rar]
     local squadCol = g.getManaBundleColor(sinfo.cost)
-    local canAfford = g.getRun().money >= cost
+    local canAfford = g.canAffordGold(cost)
 
     local isHovered = iml.isHovered(r:get())
     local wasJustClicked = iml.wasJustClicked(r:get())
@@ -251,10 +280,10 @@ local function drawSquadBox(r, squadId, cost)
             else
                 g.addSquadToArmy(squadId)
             end
-            return true, isHovered
+            return true, isHovered, squadCol
         end
     end
-    return false, isHovered
+    return false, isHovered, squadCol
 end
 
 
@@ -270,25 +299,44 @@ end
 local function drawRerollButton(self, r)
     local IMG = "shop_reroll_button"
     local x,y = r:getCenter()
-    local r2 = Kirigami(0,0, g.getImageSize(IMG))
-    r2 = r2:center(r)
+    local buttonR = Kirigami(0,0, g.getImageSize(IMG))
+    buttonR = buttonR:center(r)
+    local buttonDisplayR = buttonR
+
+    if iml.isHovered(buttonR:get()) then
+        buttonDisplayR = buttonDisplayR:moveUnit(0, -2)
+        y = y - 2
+    end
+
+    local cost = getRerollCost(self)
+    local canAfford = g.canAffordGold(cost)
+    local canReroll = canRerollSquad(self.shopNode)
+    local cdisabled = nil
+    if iml.isClicked(buttonR:get()) or (not canAfford) or (not canReroll) then
+        cdisabled = gsman.mulColor(0.5, 0.5, 0.5)
+    end
+
     g.drawImage(IMG, x,y)
 
     local font = g.getSmallFont(16)
-    local chain,body = r2:splitVertical(1,2)
+    local chain,body = buttonDisplayR:splitVertical(1,2)
     dbg(chain)
     dbg(body)
+    local moneyColor = canAfford and "{GOLD_COLOR}" or CANT_AFFORD_RT
     richtext.printRichContained(
-        "{shop_reroll_icon} {coin_icon} {GOLD_COLOR}" .. getRerollCost(self),
+        "{shop_reroll_icon} {coin_icon} " .. moneyColor .. getRerollCost(self),
         font, body:padRatio(0.5):moveUnit(0,1):get()
     )
 
-    if iml.wasJustClicked(r2:get()) then
-        local cost = getRerollCost(self)
+    if iml.wasJustClicked(buttonR:get()) and canReroll then
         if g.trySpendGold(cost) then
             g.call("rerollShop")
             shop_scene.rerollShopNodeInplace(self.shopNode)
         end
+    end
+
+    if cdisabled then
+        cdisabled:pop()
     end
 end
 
@@ -344,6 +392,7 @@ local function drawBlessing(blesR, blessingId, cost)
 end
 
 
+local BUY_GLOW_DUR = 0.6
 
 ---@param self g.ShopScene
 ---@param freeArea kirigami.Region
@@ -397,16 +446,32 @@ local function drawShopUI(self, freeArea)
     local rerollR, unitR = leftR:padRatio(0,-0.2,0,0):splitVertical(1,7)
     rerollR = rerollR:moveRatio(0, 0.5)
 
+
     -- draw squad purchase
     local hoveredSquadId = nil
+    local time = love.timer.getTime()
     dbg(unitR:padRatio(0.1))
     local units = unitR:padRatio(0.15):grid(3,2)
     for i, ur in ipairs(units) do
+        -- squad purchase animation
+        local t = math.max(0, time - self.shopBoughtSince[i][1]) / BUY_GLOW_DUR
+        if t > 0 and t <= 1 then
+            local c = self.shopBoughtSince[i][2]
+            local alpha = math.sqrt(math.abs(math.sin(t * math.pi)))
+            local calpha = gsman.mulColor(c[1], c[2], c[3], alpha)
+            local x, y = ur:getCenter()
+            local scale = math.min(ur.w, ur.h)
+            lg.draw(GLOW_CIRCLE_MESH, x, y, 0, scale, scale)
+            calpha:pop()
+        end
+
+        -- actual squad box
         local squadId = self.shopNode.squadShop[i]
         if squadId and squadId ~= false then
-            local clicked, hovered = drawSquadBox(ur:padUnit(6,10), squadId, 90 + helper.hashInteger(i) % 20)
+            local clicked, hovered, squadCol = drawSquadBox(ur:padUnit(6,10), squadId, 90 + helper.hashInteger(i) % 20)
             if clicked then
                 self.shopNode.squadShop[i] = false
+                self.shopBoughtSince[i] = {time, squadCol}
             end
             if hovered then
                 hoveredSquadId = squadId
@@ -416,12 +481,25 @@ local function drawShopUI(self, freeArea)
 
     local blessCells = blessReg:padRatio(0.15):grid(3,2)
     for i, blesR in ipairs(blessCells) do
+        -- blessing purchase animation
+        local t = math.max(0, time - self.blessingBoughtSince[i]) / BUY_GLOW_DUR
+        if t > 0 and t <= 1 then
+            local c = g.COLORS.GOLD
+            local alpha = 0.8 * math.sqrt(math.abs(math.sin(t * math.pi)))
+            local calpha = gsman.mulColor(c[1], c[2], c[3], alpha)
+            local x, y = blesR:getCenter()
+            local scale = math.min(blesR.w, blesR.h)
+            lg.draw(GLOW_CIRCLE_MESH, x, y, 0, scale, scale)
+            calpha:pop()
+        end
+
         local entry = self.shopNode.blessingShop[i]
         if entry and entry ~= false then
             local binfo = g.getBlessingInfo(entry)
             local cost = BLESSING_COST[binfo.rarity.id] or 50
             if drawBlessing(blesR, entry, cost) then
                 self.shopNode.blessingShop[i] = false
+                self.blessingBoughtSince[i] = time
             end
         end
     end

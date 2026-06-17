@@ -207,6 +207,15 @@ function ui.jaggedRectangle(mode, radius, x,y,w,h)
 end
 
 
+---For debugging purpose only. Does nothing on release builds.
+---@param region kirigami.Region
+---@param mode love.DrawMode?
+function ui.debugRegion(region, mode)
+    if consts.SHOW_DEV_STUFF then
+        lg.rectangle(mode or "line", region:get())
+    end
+end
+
 
 local singleColorPanel = nil
 ---@param x number
