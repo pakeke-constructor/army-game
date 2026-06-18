@@ -2173,12 +2173,45 @@ function g.getMouseTargetEntity(requester)
     end
 
     local bestCandidate = nil
+    local bestScore = -0xfffffffffff
 
-    for _, ent in ecs:iterate("team") do
-    end
+    g.iteratePartition("unit", mx, my, function(ent)
+        if not g.isAlive(ent) then return end
+        if commander and ent.team == commander.team then return end
 
-    return nil
+        if not ent.health then return end
+
+        local dx, dy = ent.x - mx, ent.y - my
+        local mouseD2 = dx * dx + dy * dy
+
+        local commanderD2 = 0
+        local inRange = true
+        if commanderX and commanderRange2 then
+            local cdx, cdy = ent.x - commanderX, ent.y - commanderY
+            commanderD2 = cdx * cdx + cdy * cdy
+            inRange = commanderD2 <= commanderRange2
+        end
+
+        local score
+        if inRange then
+            -- in-range tiers: enemy > neutral; closer to mouse; closer to commander
+            score = 1e18
+            if isEnemyFor(commander, ent) then score = score + 1e15 end
+            score = score - mouseD2 * 1e3 - commanderD2
+        else
+            -- out-of-range: just closest to mouse
+            score = -mouseD2
+        end
+
+        if score > bestScore then
+            bestScore = score
+            bestCandidate = ent
+        end
+    end, 200)
+
+    return bestCandidate
 end
+
 
 
 function g.getWorldTime()
