@@ -1328,7 +1328,6 @@ function g.spawnEntityWithInit(id, x, y, initFunc, ...)
     local mt = ENTITY_DEFS[id]
     assert(mt, "Unknown entity type: " .. tostring(id))
     local ecs = g.getECS()
-    assert(ecs, "g.spawnEntity called when ECS isnt active")
     currentEntityId = currentEntityId + 1
     local ent = setmetatable({
         id = currentEntityId,
