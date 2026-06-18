@@ -18,7 +18,7 @@ local WISP_MAX_LIFETIME = 6
 local wisps = {}
 
 local CLOUD_AMOUNT = 100
-local CLOUD_SPRITES = {"cloud1", "cloud2", "cloud3", "cloud4"}
+local CLOUD_SPRITES = {"cloud1"}
 local CLOUD_SPEED = 5
 local CLOUD_MARGIN = 0.25 -- band around the view (fraction of window) clouds live in
 local CLOUD_FADE = 0.2    -- fade-in/out distance near the band edge (fraction of window)
