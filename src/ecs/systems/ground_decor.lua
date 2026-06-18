@@ -58,7 +58,7 @@ local function spawnDecor(world)
     end
 
     local function spawnBunch(cx, cy)
-        local count = love.math.random(8, 16)
+        local count = love.math.random(6, 10)
         for i = 1, count do
             local bestX, bestY
             local bestScore = math.huge

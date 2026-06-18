@@ -91,7 +91,7 @@ function physicsSys.preUpdate(dt)
             initBody(ent, d)
         end
         local body = bodies[ent]
-        if not ent.physics.isStatic then
+        if body and (not ent.physics.isStatic) then
             local vx, vy = g.getVel(ent)
             body:setLinearVelocity(vx, vy)
         end

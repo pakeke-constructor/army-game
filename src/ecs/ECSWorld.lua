@@ -172,7 +172,7 @@ function ECSWorld:_rebuildComponentIndex()
         local list = idx[k]
         for i = 1, self.entities.len do
             local e = self.entities[i]
-            if entHas(e, k) then
+            if entHas(e, k) and not (e.___dead or e.___removed) then
                 list[#list + 1] = e
             end
         end
@@ -363,7 +363,7 @@ function ECSWorld:iterate(component)
         self.trackedComponents:add(component)
         for i = 1, self.entities.len do
             local e = self.entities[i]
-            if entHas(e, component) then
+            if entHas(e, component) and not (e.___dead or e.___removed) then
                 list[#list + 1] = e
             end
         end
