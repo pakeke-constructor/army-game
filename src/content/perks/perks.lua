@@ -318,6 +318,19 @@ g.definePerk("ritual_sacrifice", "Ritual Sacrifice", {
     },
 })
 
+g.definePerk("ritual", "Ritual", {
+    description = loc2("On-spawn, gains +1 (ATK) per 2 allies that have died this combat."),
+    image = "coin_icon",
+    handlers = {
+        entitySpawned = function(ent)
+            local amount = math.floor(g.ask("getAllyDeathsThisBattle") / 2)
+            if amount > 0 then
+                g.buffEntity(ent, "attackDamage", amount)
+            end
+        end,
+    },
+})
+
 g.definePerk("conflagrate", "Conflagrate", {
     description = loc2("On-attack, a nearby ally takes 1 damage and gains +1 (ATK) for the fight."),
     image = "coin_icon",
