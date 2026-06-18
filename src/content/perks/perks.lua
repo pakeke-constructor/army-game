@@ -646,5 +646,25 @@ g.definePerk("manaborn", "Manaborn Legion", {
 g.definePerk("ice_touch", "Ice Touch", {
     description = loc("On-hit, 25% chance to Freeze for 5s. {c r=0.388 g=0.388 b=0.388}Prioritizes unfrozen targets.{/c}"),
     image = "coin_icon",
-    -- TODO: Implement handlers from description.
+    handlers = {
+        entitySpawned = function(ent)
+            if not ent.ai then return end
+            local oldGetPriority = ent.ai.getPriority
+            ent.ai = {
+                target = ent.ai.target,
+                getPriority = function(selfEnt, targEnt)
+                    local prio = oldGetPriority and oldGetPriority(selfEnt, targEnt) or 0
+                    if (targEnt.frozenTime or 0) <= 0 then
+                        prio = prio + 1000
+                    end
+                    return prio
+                end,
+            }
+        end,
+        onHitDamage = function(ent, damage, target)
+            if target and love.math.random() < 0.25 then
+                g.applyFrozen(target, 5, ent)
+            end
+        end,
+    },
 })
