@@ -357,7 +357,7 @@ local function drawManaBox(self)
     local hoveredManaType = nil
     local function drawMana(mtype, i, manaImg)
         local x = cx + (r.w/3) * math.sin(t + i*rdiff)
-        local y = cy + (r.h/3) * math.cos(t + i*rdiff)
+        local y = cy + (r.h/4) * math.cos(t + i*rdiff)
         if ct <= 1 then
             -- just center it:
             x,y = cx,cy

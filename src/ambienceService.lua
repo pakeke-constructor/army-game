@@ -16,6 +16,11 @@ local WISP_MAX_LIFETIME = 6
 
 
 local wisps = {}
+
+local CLOUD_AMOUNT = 30
+
+local clouds = {}
+
 local canvas = nil
 
 -- world-space window the player is looking at; wisps spawn within it
@@ -34,6 +39,16 @@ local function randomWisp()
         alpha = 0.45 + love.math.random() * 0.2,
         wob = love.math.random() * math.pi * 2,
         lifetime = 0,
+    }
+end
+
+local function randomCloud()
+    return {
+        x = window.x + love.math.random() * window.w,
+        y = window.y + love.math.random() * window.h,
+        alpha = 0.45 + love.math.random() * 0.2,
+        r = love.math.random() * math.pi * 2,
+        
     }
 end
 
@@ -70,6 +85,10 @@ function ambienceService.update(dt, transform)
             wisps[i] = randomWisp()
         end
     end
+
+    for i, cloud in ipairs(clouds) do
+        cloud.x = cloud.x + 5 * dt
+    end
 end
 
 
@@ -79,6 +98,11 @@ function ambienceService.reInitialize(transform)
     wisps = {}
     for i = 1, WISP_COUNT do
         wisps[i] = randomWisp()
+    end
+
+    clouds = {}
+    for i=1, CLOUD_AMOUNT do
+        clouds[i] = randomCloud()
     end
 end
 
@@ -99,6 +123,11 @@ function ambienceService.draw(transform)
         lg.circle("fill", wisp.x, wisp.y, wisp.size)
     end
     lg.setColor(1, 1, 1, 1)
+
+    for _, cloud in ipairs(clouds) do
+        lg.setColor(1, 1, 1, cloud.alpha)
+        g.drawImage("cloud1", cloud.x, cloud.y, cloud.r)
+    end
     canvas:finish()
 end
 
