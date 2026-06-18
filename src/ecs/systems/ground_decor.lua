@@ -15,6 +15,7 @@ local GRASS_COLOR = g.snapToPalette(objects.Color("FF2E442A"))
 
 
 for i = 1, 5 do
+    def("decor_mega_", i, -250)
     def("decor_big_", i, -200)
     def("decor_splotch_", i, -120)
     def("decor_tex_", i, -40)
@@ -36,10 +37,13 @@ local function spawnDecor(world)
         local id
         local dLight = 0
         local roll = love.math.random()
-        if roll < 0.45 then
+        if roll < 0.4 then
+            id = "decor_mega_" .. love.math.random(1, 4)
+            dLight = 0.1
+        elseif roll < 0.65 then
             id = "decor_big_" .. love.math.random(1, 4)
             dLight = 0.1
-        elseif roll < 0.75 then
+        elseif roll < 0.85 then
             id = "decor_splotch_" .. love.math.random(1, 5)
         else
             id = "decor_tex_" .. love.math.random(1, 5)

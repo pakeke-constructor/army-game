@@ -87,7 +87,7 @@ function physicsSys.preUpdate(dt)
 
     -- init new bodies, sync velocities
     for _, ent in world:iterate("physics") do
-        if not bodies[ent] then
+        if not bodies[ent] and g.isAlive(ent) then
             initBody(ent, d)
         end
         local body = bodies[ent]
