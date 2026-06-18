@@ -25,10 +25,20 @@ local function drawPerkSlot(region, perk, accentColor)
 
     PERK_DESC_FONT = PERK_DESC_FONT or g.getSmallFont(16)
 
+    local r,g,b = accentColor:darken(0.8):getRGBA()
+    lg.setColor(r, g, b)
     ui.drawSingleColorPanel(x, y, w, h)
+
+    -- local r,g,b = accentColor:getRGBA()
+    -- lg.setColor(r, g, b, 0.2)
+    -- ui.drawSingleColorPanel(x, y, w, h)
+
+    local r,g,b = accentColor:darken(0.9):getRGBA()
+    
     lg.setColor(1,1,1)
-    local txt = "{" .. perk.image .. "} {o}" .. helper.wrapRichtextColor(accentColor, perk.name) .. "{/o}"
-    local desc = "{c r=0.85 g=0.85 b=0.9}" .. perk.description
+    local colorChange = " {o r=" .. r .. " g=" .. g .. " b=" .. b .. "} "
+    local txt = "{" .. perk.image .. "}{o} " .. helper.wrapRichtextColor(accentColor, perk.name) .. "{/o}"
+    local desc = "{c r=0.85 g=0.85 b=0.9}" .. colorChange .. perk.description .. "{/o}"
     richtext.printRichContained(txt .. "\n" .. desc, PERK_DESC_FONT, region:padUnit(6):get())
 end
 
@@ -119,13 +129,13 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
             local textW = ew - iconSize - iconGap
 
             love.graphics.setColor(1, 1, 1)
-            local name = "{c r=0.8 g=0.8 b=0.85}{bob amp=0.5}" .. info.name
+            local name = "{c r=0.8 g=0.8 b=0.85}{bob amp=0.5} {o}" .. info.name
             richtext.printRichContainedNoWrap(name, TITLE_FONT, textX, ey, textW, TITLE_FONT:getHeight(), "left")
             -- Rarity
             local rarity = info.rarity
             love.graphics.setColor(rarity.color)
             local rarityText = rarity.lightTextEffect..rarity.name
-            richtext.printRichContainedNoWrap(rarityText, STAT_FONT, textX, ey + 16, textW, STAT_FONT:getHeight(), "left")
+            richtext.printRichContainedNoWrap("{o}" .. rarityText, STAT_FONT, textX, ey + 16, textW, STAT_FONT:getHeight(), "left")
         end,
     })
 
@@ -142,6 +152,8 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
             local padX = count < 3 and 24 or 10
             local cells = Kirigami(ex + padX, ey, ew - padX * 2, eh):grid(count, 1)
             local r,gg,b,a = panelBottomColor:getRGBA()
+            love.graphics.setColor(r/4,gg/4,b/4)
+            ui.drawSingleColorPanel(ex-3,ey-3, ew+6,eh+6)
             love.graphics.setColor(r, gg, b, a * 0.6)
             ui.drawSingleColorPanel(ex, ey, ew, eh)
             love.graphics.setColor(1, 1, 1, 0.85)
@@ -183,6 +195,7 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
         getHeight = function() return statCellH * statRows end,
         draw = function(ex, ey, ew, eh)
             local cellW = math.floor(ew / statCols)
+            
             for i = 1, #sortedStats do
                 local row = math.floor((i - 1) / statCols)
                 local col = (i - 1) % statCols
@@ -228,6 +241,8 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
                 end
                 do
                 local r,g,b,a = panelBottomColor:getRGBA()
+                love.graphics.setColor(r/4,g/4,b/4)
+                ui.drawSingleColorPanel(cx-3,cy-3, cw+6,ch+6)
                 love.graphics.setColor(r,g,b,a*alpha)
                 ui.drawSingleColorPanel(cx, cy, cw, ch)
                 end
@@ -252,7 +267,7 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
                 local r,g,b,a = statColor:getRGBA()
                 love.graphics.setColor(r,g,b,a*alpha)
                 local textX = cx + ch
-                richtext.printRich(tostring(value), STAT_FONT, textX, cy + ch / 2 - STAT_FONT:getHeight() / 2, cw - ch, "left")
+                richtext.printRich("{o}" .. tostring(value), STAT_FONT, textX, cy + ch / 2 - STAT_FONT:getHeight() / 2, cw - ch, "left")
                 end
             end
         end,
@@ -266,7 +281,7 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
             local reg = Kirigami(ex, ey, ew, eh)
             if #perks == 1 then
                 local perkInfo = perks[1] and g.getPerkInfo(perks[1])
-                local _,reg1,_ = reg:splitVertical(1,3,1)
+                local _,reg1,_ = reg:splitVertical(1,2,1)
                 drawPerkSlot(reg1, perkInfo, manaColor)
             elseif #perks == 2 then
                 local reg1, reg2 = reg:splitHorizontal(1,1)
