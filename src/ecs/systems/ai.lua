@@ -205,6 +205,7 @@ function aiSys.preUpdate(dt)
         end
 
         if ent.playerControlled then
+            ent._aiTarget = g.getMouseTargetEntity(ent)
             goto continue
         end
 

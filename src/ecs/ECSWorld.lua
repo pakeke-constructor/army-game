@@ -66,7 +66,7 @@ local function generateShape(w, h)
     }
     for i = 1, n do
         local t = (i - 1) / (n - 1)
-        local rx = math.min(w, h) * (love.math.random(30, 40) / 100) * (10 / (10+n))
+        local rx = math.min(w, h) * (love.math.random(40, 50) / 100) * (14 / (10+n))
         local ry = rx * love.math.random(100, 130) / 100
         -- cap radii + clamp center so the whole oval stays inside the bounding box
         rx = math.min(rx, w / 2)

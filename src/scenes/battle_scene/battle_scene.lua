@@ -716,6 +716,32 @@ local AUTO_ATTACK_RADIUS_SHOW = 2
 local AUTO_ATTACK_RADIUS_FADE_END = 2.5
 local AUTO_ATTACK_RADIUS_ALPHA = 0.09
 local LINE_WIDTH = 3
+local COMMANDER_TARGET_SPIN_SPEED = 4
+
+local function drawCommanderTarget(self)
+    local commander = self.commander
+    if (not commander) or (not g.isAlive(commander)) then
+        return
+    end
+
+    local target = commander._aiTarget
+    if not (target and g.isAlive(target)) then
+        return
+    end
+
+    local d2 = (target.x - commander.x) ^ 2 + (target.y - commander.y) ^ 2
+    local inRange = d2 <= (commander.attackRange or 100) ^ 2
+    local IMG="commander_target_2"
+    if inRange then
+        lg.setColor(g.COLORS.DAMAGE:getRGBA())
+        g.drawImageOffset(IMG, target.x, target.y - 20, love.timer.getTime() * COMMANDER_TARGET_SPIN_SPEED, 1, 1, 0.5, 0.5)
+    else
+        local dist = helper.magnitude(target.x-commander.x, target.y-commander.y)
+        local fade = helper.clamp((commander.attackRange*2) / dist, 0,1)
+        lg.setColor(1, 1, 1, fade)
+        g.drawImageOffset(IMG, target.x, target.y - 20, 0, 1, 1, 0.5, 0.5)
+    end
+end
 
 
 local function drawCommanderRadius(self)
@@ -798,6 +824,8 @@ function battle_scene:draw()
             lg.setColor(1, 1, 1, 1)
         end
     end
+
+    drawCommanderTarget(self)
 
     iml.popTransform()
     self.camera:detach()

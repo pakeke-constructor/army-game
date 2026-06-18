@@ -2097,6 +2097,90 @@ function g.worldToScreen(x, y)
     return x, y
 end
 
+local MOUSE_TARGET_ENEMY_RADIUS = 90
+local MOUSE_TARGET_NEUTRAL_RADIUS = 90
+
+local function isMouseHoveringEntity(mx, my, ent)
+    local r = 20
+    local phys = ent.physics
+    if phys then
+        if phys.shape == "circle" and phys.radius then
+            r = phys.radius
+        elseif phys.shape == "rect" and phys.w and phys.h then
+            r = math.max(phys.w, phys.h) * 0.5
+        end
+    elseif ent.image then
+        local w, h = g.getImageSize(ent.image)
+        r = math.max(w, h) * 0.35
+    end
+    local dx = ent.x - mx
+    local dy = ent.y - my
+    return dx * dx + dy * dy <= r * r
+end
+
+local function isEnemyFor(requester, other)
+    if not requester or not requester.team then
+        return other.team == "enemy"
+    end
+    return other.team and other.team ~= requester.team and other.team ~= "neutral"
+end
+
+---@param requester ecs.Entity?
+---@return ecs.Entity?
+function g.getMouseTargetEntity(requester)
+    local ecs = g.tryGetECS()
+    if not ecs then return nil end
+
+    local sx, sy = love.mouse.getPosition()
+    local mx, my = g.screenToWorld(sx, sy)
+
+    local hoveredNeutral = nil
+    local nearestEnemy = nil
+    local nearestEnemyD2 = math.huge
+
+    for _, ent in ecs:iterate("team") do
+        if g.isAlive(ent) and ent.health then
+            if ent.team == "neutral" then
+                if isMouseHoveringEntity(mx, my, ent) then
+                    hoveredNeutral = ent
+                end
+            elseif isEnemyFor(requester, ent) then
+                local dx = ent.x - mx
+                local dy = ent.y - my
+                local d2 = dx * dx + dy * dy
+                if d2 < nearestEnemyD2 then
+                    nearestEnemyD2 = d2
+                    nearestEnemy = ent
+                end
+            end
+        end
+    end
+
+    if hoveredNeutral then
+        local safe = true
+        local r2 = MOUSE_TARGET_NEUTRAL_RADIUS * MOUSE_TARGET_NEUTRAL_RADIUS
+        for _, ent in ecs:iterate("team") do
+            if g.isAlive(ent) and ent.health and isEnemyFor(requester, ent) then
+                local dx = ent.x - hoveredNeutral.x
+                local dy = ent.y - hoveredNeutral.y
+                if dx * dx + dy * dy <= r2 then
+                    safe = false
+                    break
+                end
+            end
+        end
+        if safe then
+            return hoveredNeutral
+        end
+    end
+
+    if nearestEnemy and nearestEnemyD2 <= MOUSE_TARGET_ENEMY_RADIUS * MOUSE_TARGET_ENEMY_RADIUS then
+        return nearestEnemy
+    end
+
+    return nil
+end
+
 
 function g.getWorldTime()
     -- todo: add a proper counter here; allows for faster game-speed
