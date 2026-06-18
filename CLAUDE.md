@@ -33,7 +33,17 @@ src/scenes/map_scene/*: Map-scene stuff. Has a graph of nodes for players to nav
 src/scenes/battle_scene/*: Battle-scene stuff. Contains an ECS. Nodes on the map may trigger battles.
 src/hud/*: HUD related stuff, used by multiple scenes
 src/ecs/*: Entity-component-system stuff.
-src/ecs/systems/*: ECS Systems. (projectile, ent movement, pathing, etc)
+src/ecs/systems/*: ECS Systems, loaded into the ECS in battle_scene:
+src/ecs/systems/ai.lua: Decides what each unit does. Picks a target to attack. Makes idle units patrol around.
+src/ecs/systems/attacking.lua: Units attack their target. Spawns projectiles, deals damage, does AoE/explosions.
+src/ecs/systems/stats.lua: Re-calculates every unit's stats (health, damage, etc) every frame. Buffs apply here.
+src/ecs/systems/status_effects.lua: Handles fire, poison, and other effects. Draws their particles.
+src/ecs/systems/physics.lua: Runs the Box2D physics world. Makes/destroys a physics body for each unit.
+src/ecs/systems/blood_system.lua: Draws blood splotches on the ground when units get hit or die. Visual only.
+src/ecs/systems/juice_system.lua: Visual "feel" effects. Hit sparks, heal sparkles, damage numbers, screen shake.
+src/ecs/systems/shadows.lua: Draws a simple shadow blob under each unit. Visual only.
+src/ecs/systems/ground_decor.lua: Spawns grass and other ground decoration at the start. Visual only.
+src/ecs/systems/example_system.lua: A blank template showing the shape of a system. Copy this to make a new one.
 src/ecs/components.lua: All component type-definitions
 src/modules/*: Extra modules (analytics, lighting, richtext, typechecking)
 src/Run.lua: Represents a run. Stores food, squads, map-state, blessings etc. (can be serialized)
