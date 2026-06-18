@@ -31,7 +31,13 @@ src/g.lua: All core functions stored here, exposed via `g.*` namespace
 src/scenes/*: All scenes defined here, in folders.
 src/scenes/map_scene/*: Map-scene stuff. Has a graph of nodes for players to navigate
 src/scenes/battle_scene/*: Battle-scene stuff. Contains an ECS. Nodes on the map may trigger battles.
+src/scenes/shop_scene/*: Shop-scene. Enter via a shop-node
+
+src/sound/bgm.lua: Background music. Plays/crossfades music tracks by priority. Higher priority wins.
+src/sound/sfx.lua: Sound effects. Define sounds, then play them with random pitch/volume variation.
+
 src/hud/*: HUD related stuff, used by multiple scenes
+
 src/ecs/*: Entity-component-system stuff.
 src/ecs/systems/*: ECS Systems, loaded into the ECS in battle_scene:
 src/ecs/systems/ai.lua: Decides what each unit does. Picks a target to attack. Makes idle units patrol around.
@@ -45,10 +51,30 @@ src/ecs/systems/shadows.lua: Draws a simple shadow blob under each unit. Visual 
 src/ecs/systems/ground_decor.lua: Spawns grass and other ground decoration at the start. Visual only.
 src/ecs/systems/example_system.lua: A blank template showing the shape of a system. Copy this to make a new one.
 src/ecs/components.lua: All component type-definitions
+
 src/modules/*: Extra modules (analytics, lighting, richtext, typechecking)
+
 src/Run.lua: Represents a run. Stores food, squads, map-state, blessings etc. (can be serialized)
 src/Squad.lua: Represents a Squad; list of units (+ perks)
 src/consts.lua: Constants.
+src/ev_q_defs.lua: Declares every event and question used in the game (the names you call/ask).
+src/settings.lua: Saved player settings (fullscreen, language). Load/save to disk.
+src/devcmd.lua: In-game dev console. Type commands to spawn units, give gold, teleport, etc. Dev-only.
+src/t.lua: Agent testing helpers. Lets the agent enter battle, spawn things, and inspect the game.
+
+src/content/*: All the actual game content (data). allies, enemies, blessings, perks, commanders, events, encounters.
+src/entities/*: Non-unit entity definitions. Projectiles, decor, and misc entities.
+src/ui/*: Reusable UI widgets. Cards (squad/blessing/spell), panels, boxes.
+
+src/ambienceService.lua: Visual ambience. Used by battle + map scenes.
+src/fogService.lua: Generic fog-system; draws dark fog-of-war. Used by battle + map scenes.
+src/nodeEventService.lua: Runs map-node popups (shrine, fountain, feast, portal, random events).
+src/juiceService.lua: Screen shake and hit-pause (brief slow-mo on impact). Anything can request some.
+src/hud/fadeToBlackService.lua: Fade the screen to/from black. Used by map nodes to hide scene transitions.
+src/hud/choicePopupService.lua: Popup that makes the player pick one of a few choices (squad, blessing, mana).
+src/hud/rewardPopupService.lua: Popup that shows rewards after a battle or level-up, and lets the player take one.
+src/hud/hoverService.lua: Draws a hover tooltip box next to the mouse. Anything can request one each frame.
+src/hud/gameoverPopupService.lua: The "you lost" popup shown when the run ends.
 
 (^^^ NOTE: SOME OF THIS ISN'T COMPLETED YET.)
 </architecture>
