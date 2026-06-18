@@ -17,11 +17,17 @@ local WISP_MAX_LIFETIME = 6
 
 local wisps = {}
 
-local CLOUD_AMOUNT = 30
+local CLOUD_AMOUNT = 100
+local CLOUD_SPRITES = {"cloud1", "cloud2", "cloud3", "cloud4"}
+local CLOUD_SPEED = 5
+local CLOUD_MARGIN = 0.25 -- band around the view (fraction of window) clouds live in
+local CLOUD_FADE = 0.2    -- fade-in/out distance near the band edge (fraction of window)
 
 local clouds = {}
 
 local canvas = nil
+local cloudCanvas = nil
+local CLOUD_ALPHA = 0.05
 
 -- world-space window the player is looking at; wisps spawn within it
 local window = { x = 0, y = 0, w = 100, h = 100 }
@@ -43,12 +49,17 @@ local function randomWisp()
 end
 
 local function randomCloud()
+    local sizeFactor = love.math.random(120, 150)/100
+    local mx, my = window.w * CLOUD_MARGIN, window.h * CLOUD_MARGIN
     return {
-        x = window.x + love.math.random() * window.w,
-        y = window.y + love.math.random() * window.h,
+        x = window.x - mx + love.math.random() * (window.w + 2*mx),
+        y = window.y - my + love.math.random() * (window.h + 2*my),
         alpha = 0.45 + love.math.random() * 0.2,
         r = love.math.random() * math.pi * 2,
-        
+        size = sizeFactor,
+        layer = (sizeFactor+1)/2,
+        sprite = CLOUD_SPRITES[love.math.random(1, #CLOUD_SPRITES)],
+        fade = 1,
     }
 end
 
@@ -86,8 +97,28 @@ function ambienceService.update(dt, transform)
         end
     end
 
-    for i, cloud in ipairs(clouds) do
-        cloud.x = cloud.x + 5 * dt
+    -- clouds drift, wrap to the opposite side when they leave the band, and
+    -- fade out/in near the edges. Uses parallax-adjusted position (px/py).
+    local sw, sh = love.graphics.getDimensions()
+    local camX, camY = transform:inverseTransformPoint(sw/2, sh/2)
+    local mx, my = window.w * CLOUD_MARGIN, window.h * CLOUD_MARGIN
+    local l, r = window.x - mx, window.x + window.w + mx
+    local top, bot = window.y - my, window.y + window.h + my
+
+    for _, cloud in ipairs(clouds) do
+        cloud.x = cloud.x + CLOUD_SPEED * dt
+
+        local px = cloud.x + camX * (1 - cloud.layer)
+        local py = cloud.y + camY * (1 - cloud.layer)
+        if px > r then cloud.x = cloud.x - (r - l)
+        elseif px < l then cloud.x = cloud.x + (r - l) end
+        if py > bot then cloud.y = cloud.y - (bot - top)
+        elseif py < top then cloud.y = cloud.y + (bot - top) end
+
+        px = cloud.x + camX * (1 - cloud.layer)
+        py = cloud.y + camY * (1 - cloud.layer)
+        local dist = math.min(px - l, r - px, py - top, bot - py)
+        cloud.fade = math.max(0, math.min(dist / (window.w * CLOUD_FADE), 1))
     end
 end
 
@@ -109,6 +140,10 @@ end
 
 ---@param transform love.Transform camera transform (for pixel-perfect world-space rendering)
 function ambienceService.draw(transform)
+    ----
+    -- WISP
+    ----
+
     if not canvas then
         canvas = PixelCanvas.new(love.graphics.getDimensions())
     end
@@ -123,12 +158,32 @@ function ambienceService.draw(transform)
         lg.circle("fill", wisp.x, wisp.y, wisp.size)
     end
     lg.setColor(1, 1, 1, 1)
-
-    for _, cloud in ipairs(clouds) do
-        lg.setColor(1, 1, 1, cloud.alpha)
-        g.drawImage("cloud1", cloud.x, cloud.y, cloud.r)
-    end
     canvas:finish()
+
+    ----
+    -- CLOUDS
+    ----
+    local sw, sh = love.graphics.getDimensions()
+    if not cloudCanvas or cloudCanvas:getWidth() ~= sw or cloudCanvas:getHeight() ~= sh then
+        cloudCanvas = lg.newCanvas(sw, sh)
+    end
+    local camX, camY = transform:inverseTransformPoint(sw/2, sh/2)
+
+    lg.push("all")
+    lg.setCanvas(cloudCanvas)
+    lg.clear(0, 0, 0, 0)
+    lg.applyTransform(transform)
+    for _, cloud in ipairs(clouds) do
+        local px = cloud.x + camX * (1 - cloud.layer)
+        local py = cloud.y + camY * (1 - cloud.layer)
+        lg.setColor(1, 1, 1, cloud.fade)
+        g.drawImage(cloud.sprite, px, py, cloud.r, cloud.size*2, cloud.size*2)
+    end
+    lg.pop()
+
+    lg.setColor(1, 1, 1, CLOUD_ALPHA)
+    lg.draw(cloudCanvas)
+    lg.setColor(1, 1, 1, 1)
 end
 
 return ambienceService
