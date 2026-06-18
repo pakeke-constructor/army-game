@@ -334,9 +334,13 @@ end
 
 
 ---@param self g.HUD
-local function drawManaBox(self)
+---@param noDraw boolean?
+local function drawManaBox(self, noDraw)
     local img = "hud_bottom_left_mana_box"
     local w,h = g.getImageSize(img)
+    if noDraw then
+        return w,h
+    end
     local r = Kirigami(0,0,w,h)
     local sr = ui.getFullScreenRegion()
     r = r:attachToBottomOf(sr):clampInside(sr)
@@ -408,7 +412,7 @@ end
 
 ---@param self g.HUD
 local function drawBottomBar(self, barHeight)
-    local w,h = drawManaBox(self)
+    local w,h = drawManaBox(self, true)
 
     local sw, sh = ui.getScaledUIDimensions()
     local run = g.getRun()
@@ -424,6 +428,8 @@ local function drawBottomBar(self, barHeight)
     -- Blessing box
     ui.drawDarkPanel(blessingBar:get())
     drawLeftBlessingBar(blessingBar)
+
+    drawManaBox(self, false)
 end
 
 
