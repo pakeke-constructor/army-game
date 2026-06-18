@@ -62,7 +62,7 @@ g.defineEntity("treasure_chest_objective", {
     side = "neutral",
     partitions = {"unit", "neutral"},
     physics = { shape = "circle", radius = 6, ox = 0, oy = 0, mass = 1, isStatic = true },
-    baseMaxHealth = 120,
+    baseMaxHealth = 8,
     shadow = {},
     entityDeath = function(ent, killer)
         g.addGold(50)
