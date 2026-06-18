@@ -52,9 +52,15 @@ src/ecs/systems/ground_decor.lua: Spawns grass and other ground decoration at th
 src/ecs/systems/example_system.lua: A blank template showing the shape of a system. Copy this to make a new one.
 src/ecs/components.lua: All component type-definitions
 
-src/modules/*: Extra modules (analytics, lighting, richtext, typechecking)
+src/modules/*: Extra modules (analytics, lighting, richtext, typechecking). The most-used modules are listed below:
+src/modules/objects/*: Core data-types. Class (OOP), Color, Enum, plus Array/Set/Grid/Heap etc. Global `objects`.
+src/modules/richtext/*: Text rendering with {effect} tags and %{var} interpolation. Global `richtext`. Used everywhere.
+src/modules/localization.lua: Translates text. Global `loc(txt, vars, ctx)`. MUST be called at load-time.
+src/modules/reducers.lua: The reducer functions (ADD, MULTIPLY, OR, MIN...) used when defining questions.
+src/modules/helper/helper.lua: Grab-bag of small utility functions. Global `helper`.
+src/modules/Picker.lua: Weighted random picker. Pick a random item from a list with weights.
 
-src/Run.lua: Represents a run. Stores food, squads, map-state, blessings etc. (can be serialized)
+src/Run.lua: Represents a run. Stores squads, map-state, blessings etc. (can be serialized)
 src/Squad.lua: Represents a Squad; list of units (+ perks)
 src/consts.lua: Constants.
 src/ev_q_defs.lua: Declares every event and question used in the game (the names you call/ask).
