@@ -7,13 +7,13 @@ g.defineSquad("exo_soldier_squad", {
     name = loc("Exo-Soldiers"),
     rarity = g.RARITIES.UNCOMMON,
     entityDef = {
-        image = "militia",
+        image = "exosoldiers_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
         },
         weapon = {
-            image = "militia", -- placeholder
+            image = "exosoldiers_arm",
             type = "sword",
         },
         baseAttackDamage = 1,
@@ -33,13 +33,13 @@ g.defineSquad("prospector_squad", {
     name = loc("Prospectors"),
     rarity = g.RARITIES.UNCOMMON,
     entityDef = {
-        image = "militia",
+        image = "prospectors_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
         },
         weapon = {
-            image = "dagger", -- placeholder
+            image = "prospectors_pickaxe",
             type = "sword",
         },
         baseAttackDamage = 4,
@@ -60,12 +60,13 @@ g.defineSquad("the_great_factory_squad", {
     name = loc("The Great Factory"),
     rarity = g.RARITIES.LEGENDARY,
     entityDef = {
-        image = "militia", -- placeholder
+        image = "greatfactory_unit",
         isBuilding = true,
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 1, isStatic = true },
         baseMaxHealth = 40,
     },
     unitCount = 1,
+    icon = "greatfactory_uniticon",
     perks = {"duplication"},
     onDeploySquad = function(info, entities)
         local squad = entities[1] and entities[1].squad
@@ -80,7 +81,7 @@ g.defineSquad("gold_mine_squad", {
     name = loc("Gold Mine"),
     rarity = g.RARITIES.UNCOMMON,
     entityDef = {
-        image = "militia", -- placeholder
+        image = "goldmine_unit",
         isBuilding = true,
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 1, isStatic = true },
         baseMaxHealth = 16,
@@ -97,10 +98,10 @@ g.defineSquad("endless_army_squad", {
     name = loc("The Endless Army"),
     rarity = g.RARITIES.LEGENDARY,
     entityDef = {
-        image = "militia",
+        image = "endlessarmy_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = { attackType = "melee" },
-        weapon = { image = "militia_sword", type = "sword" },
+        weapon = { image = "endlessarmy_sword", type = "sword" },
         baseAttackDamage = 1,
         baseAttackSpeed = 1,
         baseAttackRange = 18,
@@ -118,10 +119,10 @@ g.defineSquad("wealth_elemental_squad", {
     name = loc("Wealth Elementals"),
     rarity = g.RARITIES.LEGENDARY,
     entityDef = {
-        image = "militia", -- placeholder
+        image = "wealthelementals_unit",
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 2 },
         attack = { attackType = "melee" },
-        weapon = { image = "militia_sword", type = "sword" },
+        weapon = { image = "wealthelementals_shield", type = "sword" },
         baseAttackDamage = 1,
         baseAttackSpeed = 0.6,
         baseAttackRange = 22,

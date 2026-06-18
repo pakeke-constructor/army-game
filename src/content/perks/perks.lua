@@ -609,11 +609,42 @@ g.definePerk("rebirth", "Rebirth", {
 })
 
 g.definePerk("vampiric", "Vampiric", {
-    description = loc("This unit heals for 3 (HP) on kill."),
+    description = loc2("This unit heals for 3 (HP) on kill."),
     image = "coin_icon",
     handlers = {
         onKill = function(ent, target)
             g.healEntity(ent, 3, ent)
         end,
     },
+})
+
+g.definePerk("manaborn", "Manaborn Legion", {
+    -- FIXME: Do proper BLUE_MANA registration on loc2 for this.
+    description = loc2("For every 5 seconds, consume 1 {blue} Blue Mana to summon a {c r=0.11 g=0.49 b=0.72}Living Mana{/c}. {c r=0.11 g=0.49 b=0.72}Living Mana{/c} gives 1 {blue} Blue Mana On-death."),
+    image = "mana_blue_small",
+    rawHandlers = {
+        perSecondUpdate = function(ent)
+            if ent:getTypename() ~= "anima_incubator" then
+                return
+            end
+
+            ent._livingManaSpawnTimer = (ent._livingManaSpawnTimer or 0) + 1
+            if ent._livingManaSpawnTimer >= 5 then
+                if g.trySpendMana(g.getBattleManaCounts(), {blue = 1}) then
+                    local SPAWN_RADIUS = 20
+                    local a = math.random() * consts.TAU
+                    local ox = math.cos(a) * SPAWN_RADIUS
+                    local oy = math.sin(a) * SPAWN_RADIUS
+                    g.spawnEntity("living_mana", ent.x + ox, ent.y + oy)
+                    ent._livingManaSpawnTimer = 0
+                end
+            end
+        end
+    }
+})
+
+g.definePerk("ice_touch", "Ice Touch", {
+    description = loc("On-hit, 25% chance to Freeze for 5s. {c r=0.388 g=0.388 b=0.388}Prioritizes unfrozen targets.{/c}"),
+    image = "coin_icon",
+    -- TODO: Implement handlers from description.
 })

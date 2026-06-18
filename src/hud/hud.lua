@@ -249,7 +249,10 @@ local function drawXpBar(reg)
     local ox = math.sin(love.timer.getTime() * 0.3) * 8
     local oy = math.cos(love.timer.getTime() * 0.21) * 4
     lg.setColor(1, 1, 1)
+    -- Need to tile this otherwise it won't extend through the whole bar
+    local bgBarW = g.getImageSize("army_healthbar_background")
     g.drawImageOffset("army_healthbar_background", xpBar.x + ox, xpBar.y + xpBar.h/2 + oy, 0, nil, nil, 0.5, 0.5)
+    g.drawImageOffset("army_healthbar_background", xpBar.x + ox + bgBarW, xpBar.y + xpBar.h/2 + oy, 0, nil, nil, 0.5, 0.5)
     lg.setStencilMode()
     lg.clear(false, true)
     end

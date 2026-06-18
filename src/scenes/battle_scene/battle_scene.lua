@@ -889,7 +889,7 @@ function battle_scene:draw()
         richtext.printRichContainedNoWrap("{o}{c r=0.7 g=0.1 b=0.2}"..txt, font, rr:padRatio(0.85):get())
     end
 
-    if self.sandbox then
+    if self.sandbox and consts.SHOW_DEV_STUFF then
         drawSandboxUI(self)
     end
     ui.endUI()

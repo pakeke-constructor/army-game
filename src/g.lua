@@ -801,7 +801,14 @@ function g.defineSquad(id, info)
         local infericon = id:gsub("_squad", ""):gsub("_", "").."_uniticon"
         if g.isImage(infericon) then
             info.icon = infericon
-        else
+        end
+
+        infericon = id:gsub("_squad", ""):gsub("_", "").."s_uniticon"
+        if g.isImage(infericon) then
+            info.icon = infericon
+        end
+
+        if not info.icon then
             log.error("Squad had no icon: ", id)
             info.icon = "example_squad_icon"
         end
@@ -1328,7 +1335,6 @@ function g.spawnEntityWithInit(id, x, y, initFunc, ...)
     local mt = ENTITY_DEFS[id]
     assert(mt, "Unknown entity type: " .. tostring(id))
     local ecs = g.getECS()
-    assert(ecs, "g.spawnEntity called when ECS isnt active")
     currentEntityId = currentEntityId + 1
     local ent = setmetatable({
         id = currentEntityId,
