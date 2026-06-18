@@ -642,3 +642,9 @@ g.definePerk("manaborn", "Manaborn Legion", {
         end
     }
 })
+
+g.definePerk("ice_touch", "Ice Touch", {
+    description = loc("On-hit, 25% chance to Freeze for 5s. {c r=0.388 g=0.388 b=0.388}Prioritizes unfrozen targets.{/c}"),
+    image = "coin_icon",
+    -- TODO: Implement handlers from description.
+})

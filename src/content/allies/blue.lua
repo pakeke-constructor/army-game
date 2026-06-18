@@ -460,3 +460,29 @@ g.defineSquad("anima_incubator_squad", {
     perks = {"manaborn"},
     cost = {blue = 1},
 })
+
+g.defineSquad("ice_mage_squad", {
+    name = loc("Ice Mage"),
+    rarity = g.RARITIES.UNCOMMON,
+    entityDef = {
+        image = "icemage",
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "ranged",
+            projectileType = "arrow", -- placeholder
+            projectileSpeed = 300
+        },
+        weapon = {
+            image = "icemage_staff",
+            type = "staff"
+        },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 0.5,
+        baseAttackRange = 120,
+        baseMoveSpeed = 50,
+        baseMaxHealth = 12,
+    },
+    unitCount = 4,
+    perks = {"ice_touch"},
+    cost = {blue = 1},
+})
