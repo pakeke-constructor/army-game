@@ -1347,6 +1347,10 @@ function g.spawnEntityWithInit(id, x, y, initFunc, ...)
     if initFunc then
         initFunc(ent)
     end
+    if ent.randomizeScaleX then
+        local baseSx = math.abs(ent.sx or 1)
+        ent.sx = (love.math.random() < 0.5) and -baseSx or baseSx
+    end
     if ent.ai and (not ent.walkAnimation) and (not ent.isBuilding) then
         local h = 30
         if ent.image then

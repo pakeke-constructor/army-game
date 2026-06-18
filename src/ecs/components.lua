@@ -143,6 +143,7 @@ local shadow = {
 ---@field public rot number?
 ---@field public sx number?
 ---@field public sy number?
+---@field public randomizeScaleX boolean? if true, sx is randomized to +abs(sx) or -abs(sx) on spawn
 ---@field public ox number?
 ---@field public oy number?
 ---@field public kx number?
