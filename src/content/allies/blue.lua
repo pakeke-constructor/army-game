@@ -87,6 +87,31 @@ g.defineSquad("diver_squad", {
 })
 
 
+g.defineSquad("test_subjects_squad", {
+    name = loc("Test Subjects"),
+    rarity = g.RARITIES.RARE,
+    entityDef = {
+        image = "testsubject",
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "melee",
+        },
+        weapon = {
+            image = "dagger",
+            type = "sword",
+        },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 1,
+        baseAttackRange = 18,
+        baseMoveSpeed = 55,
+        baseMaxHealth = 8,
+    },
+    unitCount = 4,
+    perks = {"catalyze"},
+    cost = {blue = 1},
+})
+
+
 
 
 g.defineSquad("monk_squad", {

@@ -695,3 +695,19 @@ g.definePerk("ice_touch", "Ice Touch", {
         end,
     },
 })
+
+g.definePerk("catalyze", "Catalyze", {
+    description = loc2("When Transformed, gain +50% (HP) and (ASPD)."),
+    image = "coin_icon",
+    rawHandlers = {
+        entityTransformed = function(self, oldEnt, newEnt)
+            if self ~= oldEnt then return end
+            local hp = (newEnt.maxHealth or 0) * 0.5
+            local aspd = (newEnt.attackSpeed or 0) * 0.5
+            g.buffEntity(newEnt, "maxHealth", hp)
+            newEnt.maxHealth = (newEnt.maxHealth or 0) + hp
+            g.healEntity(newEnt, hp, self)
+            g.buffEntity(newEnt, "attackSpeed", aspd)
+        end,
+    },
+})
