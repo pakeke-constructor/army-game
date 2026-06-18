@@ -2,6 +2,7 @@
 .env
 .vscode
 .clinerules
+.codex
 
 _notes/private
 _notes/.obsidian
