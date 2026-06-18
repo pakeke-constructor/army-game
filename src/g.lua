@@ -2135,6 +2135,19 @@ local function isEnemyFor(requester, other)
     return other.team and other.team ~= requester.team and other.team ~= "neutral"
 end
 
+
+-- PLAN (redo target selection from scratch):
+-- 1) Build candidate list from alive entities with health under mouse-target radius.
+-- 2) Split candidates by commander attack range first:
+--    - In-range candidates always beat out-of-range candidates.
+--    - If no in-range candidate exists, use closest candidate to mouse.
+-- 3) If multiple in-range candidates exist, rank by:
+--    a) Enemy over neutral.
+--    b) Closest to mouse.
+--    c) Closest to commander.
+-- 4) Use one score pass (no separate neutral safety pass).
+-- 5) Return best candidate, else nil.
+
 ---@param requester ecs.Entity?
 ---@return ecs.Entity?
 function g.getMouseTargetEntity(requester)
@@ -2144,48 +2157,24 @@ function g.getMouseTargetEntity(requester)
     local sx, sy = love.mouse.getPosition()
     local mx, my = g.screenToWorld(sx, sy)
 
-    local hoveredNeutral = nil
-    local nearestEnemy = nil
-    local nearestEnemyD2 = math.huge
+    local commander = requester
+    if requester and not requester.isCommander then
+        local scene = g.getCurrentScene()
+        if scene then
+            commander = scene.commander
+        end
+    end
+
+    local commanderX, commanderY, commanderRange2
+    if commander and g.isAlive(commander) and commander.attackRange then
+        commanderX = commander.x
+        commanderY = commander.y
+        commanderRange2 = commander.attackRange * commander.attackRange
+    end
+
+    local bestCandidate = nil
 
     for _, ent in ecs:iterate("team") do
-        if g.isAlive(ent) and ent.health then
-            if ent.team == "neutral" then
-                if isMouseHoveringEntity(mx, my, ent) then
-                    hoveredNeutral = ent
-                end
-            elseif isEnemyFor(requester, ent) then
-                local dx = ent.x - mx
-                local dy = ent.y - my
-                local d2 = dx * dx + dy * dy
-                if d2 < nearestEnemyD2 then
-                    nearestEnemyD2 = d2
-                    nearestEnemy = ent
-                end
-            end
-        end
-    end
-
-    if hoveredNeutral then
-        local safe = true
-        local r2 = MOUSE_TARGET_NEUTRAL_RADIUS * MOUSE_TARGET_NEUTRAL_RADIUS
-        for _, ent in ecs:iterate("team") do
-            if g.isAlive(ent) and ent.health and isEnemyFor(requester, ent) then
-                local dx = ent.x - hoveredNeutral.x
-                local dy = ent.y - hoveredNeutral.y
-                if dx * dx + dy * dy <= r2 then
-                    safe = false
-                    break
-                end
-            end
-        end
-        if safe then
-            return hoveredNeutral
-        end
-    end
-
-    if nearestEnemy and nearestEnemyD2 <= MOUSE_TARGET_ENEMY_RADIUS * MOUSE_TARGET_ENEMY_RADIUS then
-        return nearestEnemy
     end
 
     return nil
