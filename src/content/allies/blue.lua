@@ -412,3 +412,51 @@ g.defineSquad("laser_gunner_squad", {
     perks = {"laser_focus"},
     cost = {blue = 1},
 })
+
+
+
+g.defineEntity("living_mana", {
+    name = loc("Living Mana"),
+    image = "mana_blue_large",
+    physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 0.3 },
+    attack = { attackType = "melee" },
+    weapon = { image = "1x1", type = "object" },
+    partitions = {"unit", "ally"},
+    team = "ally",
+    ai = { target = "enemy" },
+    isPest = true,
+    walkAnimation = { bounceHeight = 0, rotationAmount = 0, speed = 0 },
+
+    baseAttackDamage = 1,
+    baseAttackSpeed = 0.5,
+    baseAttackRange = 80,
+    baseMoveSpeed = 100,
+    baseMaxHealth = 8,
+
+    -- Part of Manaborn perk, supposedly
+    entityDeath = function(ent)
+        g.addMana("blue", 1, ent)
+    end
+})
+
+g.defineSquad("anima_incubator_squad", {
+    name = loc("Anima Incubator"),
+    rarity = g.RARITIES.RARE,
+    entityId = "anima_incubator",
+    entityDef = {
+        image = "anima_incubator",
+        isBuilding = true,
+        physics = { shape = "circle", isStatic = true, radius = 20, ox = 0, oy = 0, mass = 5 },
+        attack = { attackType = "melee" },
+        weapon = { image = "1x1", type = "object" },
+
+        baseAttackDamage = 1,
+        baseAttackSpeed = 0.5,
+        baseAttackRange = 120,
+        baseMoveSpeed = 0,
+        baseMaxHealth = 200,
+    },
+    unitCount = 1,
+    perks = {"manaborn"},
+    cost = {blue = 1},
+})
