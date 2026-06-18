@@ -22,6 +22,7 @@ COMMANDS.help = function()
     addLog("/gold <amount> - add gold")
     addLog("/tp - teleport to cursor (map)")
     addLog("/sb - reset & enter sandbox battle")
+    addLog("/rb - reset battle & zoom out (map-gen test)")
     addLog("/vacuum - removes all fogs")
     addLog("/help - show this")
 end
@@ -35,6 +36,17 @@ COMMANDS.sb = function()
     battle.sandbox = true
     g.gotoScene("battle_scene")
     addLog("sandbox mode")
+end
+
+COMMANDS.rb = function()
+    if not g.hasRun() then
+        g.newRun({ commander = consts.STARTING_COMMANDER, difficulty = 0 })
+    end
+    local battle = require("src.scenes.battle_scene.battle_scene")
+    battle.sandbox = true
+    g.gotoScene("battle_scene")
+    battle.devZoomOut = true
+    addLog("reset battle (zoomed out)")
 end
 
 COMMANDS.get = function(args)

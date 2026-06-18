@@ -21,7 +21,7 @@ function ECSWorld:init(systemNames)
 
     self.backCanvas = PixelCanvas.new(love.graphics.getDimensions())
     self.frontCanvas = PixelCanvas.new(love.graphics.getDimensions())
-    self.border = nil -- {0, 0, w, h} or nil for no border
+    self.boundingBox = nil -- {0, 0, w, h} or nil for no bounds
     self.shape = nil -- list of ellipses {cx,cy,rx,ry}; world is union of them
 
     self.componentIndex = {} -- [componentName] -> {ent, ent, ...}
@@ -53,41 +53,38 @@ function ECSWorld:init(systemNames)
     end
 end
 
--- Generate a "world shape" as a union of ellipses covering the border rect.
+-- Generate a "world shape" as a union of scattered ellipses covering the
+-- bounding box. Non-uniform blobs make it feel like a scrappy battlefield.
 -- Fog is cleared inside the shape, and entities are clamped inside it.
 local function generateShape(w, h)
-    local cx, cy = w / 2, h / 2
-    local roll = love.math.random(1, 3)
-    if roll == 1 then
-        -- oval
-        return { { cx = cx, cy = cy, rx = w * 0.55, ry = h * 0.6 } }
-    elseif roll == 2 then
-        -- peanut: two overlapping circles along x
-        local r = h * 0.62
-        return {
-            { cx = w * 0.30, cy = cy, rx = r, ry = r },
-            { cx = w * 0.70, cy = cy, rx = r, ry = r },
+    local cy = h / 2
+    local shape = {}
+    local n = love.math.random(4, 6)
+    for i = 1, n do
+        local t = (i - 1) / (n - 1)
+        local rx = math.min(w, h) * love.math.random(40, 70) / 100
+        local ry = rx * love.math.random(100, 130) / 100
+        -- cap radii + clamp center so the whole oval stays inside the bounding box
+        rx = math.min(rx, w / 2)
+        ry = math.min(ry, h / 2)
+        local cx = helper.lerp(w * 0.2, w * 0.8, t) + love.math.random(-50, 50)
+        local cyy = cy + love.math.random(-h * 0.3, h * 0.3)
+        cx = helper.clamp(cx, rx, w - rx)
+        cyy = helper.clamp(cyy, ry, h - ry)
+        shape[i] = {
+            cx = cx,
+            cy = cyy,
+            rx = rx,
+            ry = ry,
         }
-    else
-        -- multi-circle: scattered overlapping blobs
-        local shape = {}
-        local n = love.math.random(3, 4)
-        for i = 1, n do
-            local t = (i - 1) / (n - 1)
-            local r = math.min(w, h) * love.math.random(40, 60) / 100
-            shape[i] = {
-                cx = helper.lerp(w * 0.25, w * 0.75, t) + love.math.random(-30, 30),
-                cy = cy + love.math.random(-h * 0.2, h * 0.2),
-                rx = r,
-                ry = r,
-            }
-        end
-        return shape
     end
+    return shape
 end
 
-function ECSWorld:setBorder(w, h)
-    self.border = {0, 0, w, h}
+
+
+function ECSWorld:setBounds(w, h)
+    self.boundingBox = {0, 0, w, h}
     self.shape = generateShape(w, h)
 end
 
@@ -323,6 +320,11 @@ function ECSWorld:draw(transform)
         self.frontCanvas:start(transform)
     end
     g.call("postDraw")
+    if consts.DEV_MODE then
+        local b = self.boundingBox or {1,1,1,1}
+        lg.setColor(1,1,1)
+        lg.rectangle("line", b[1],b[2],b[3],b[4])
+    end
     if transform then
         self.frontCanvas:finish()
     end

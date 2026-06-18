@@ -43,6 +43,8 @@ function battle_scene:init()
     self.commander = nil
 
     self.sandbox = false -- dev-mode sandbox
+    self.devZoomOut = false
+    self.devZoomOutApplied = false
     self.sandbox_squadPicker = false
     self.sandbox_squadLevelUpper = false
     self.sandbox_blessingScreen = false
@@ -89,6 +91,9 @@ function battle_scene:pollHandlers()
 end
 
 function battle_scene:enter()
+    -- /rb sets devZoomOut after gotoScene, so always reset here
+    self.devZoomOut = false
+    self.devZoomOutApplied = false
     local run = g.getRun()
     run:resetForBattle()
     juiceService.reset()
@@ -120,12 +125,12 @@ function battle_scene:enter()
     g.pollHandlers()
 
     if self.sandbox then
-        self.ecs:setBorder(500, 300)
+        self.ecs:setBounds(500, 300)
     else
         encounters.startRandomEncounter(run.day, self.ecs)
     end
 
-    local border = self.ecs.border
+    local border = self.ecs.boundingBox
     do
         local borderR = Kirigami(
             border[1],
@@ -295,8 +300,21 @@ function battle_scene:updateCamera(dt)
     local cam = self.camera
     cam:setViewport(0, 0, love.graphics.getDimensions())
 
+    -- dev: free camera. Frame the whole battlefield once, then let the
+    -- user pan/zoom freely (no intro zoom, no commander follow).
+    if consts.DEV_MODE and self.devZoomOut then
+        if not self.devZoomOutApplied then
+            self.devZoomOutApplied = true
+            local border = self.ecs.boundingBox
+            local sw, sh = love.graphics.getDimensions()
+            cam:setZoom(math.min(sw / border[3], sh / border[4]) * 0.8)
+            cam:setPos(border[3] * 0.5, border[4] * 0.5)
+        end
+        return
+    end
+
     if self.timeSinceEnteredScene < INTRO_ZOOM_DURATION then
-        local border = self.ecs.border
+        local border = self.ecs.boundingBox
         local sw, sh = love.graphics.getDimensions()
         local fitZoom = math.min(sw / border[3], sh / border[4])
         local t = self.timeSinceEnteredScene / INTRO_ZOOM_DURATION
@@ -321,6 +339,11 @@ function battle_scene:mousemoved(x, y, dx, dy)
 end
 
 function battle_scene:wheelmoved(dx, dy)
+    if consts.DEV_MODE and self.devZoomOut then
+        local z = self.camera:getZoom()
+        self.camera:setZoom(math.max(0.1, z * (1 + dy * 0.1)))
+        return
+    end
     self.hud:wheelmoved(dx, dy)
 end
 
@@ -422,7 +445,7 @@ local function drawSandboxUI(self)
         self.sandbox_blessingScreen = true
     end
     if button("Spawn enemies", c.RED) then
-        local b = self.ecs.border
+        local b = self.ecs.boundingBox
         local cx, cy = b[1] + b[3] * 0.75 + math.random(-20,20), b[2] + b[4] * 0.5 + math.random(-20,20)
         for i = 1, 8 do
             local ox = love.math.random(-40, 40)

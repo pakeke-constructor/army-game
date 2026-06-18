@@ -95,11 +95,25 @@ function EnemySpawner:finalize(ecs)
     for _, id in ipairs(melee) do ordered[#ordered + 1] = id end
     for _, id in ipairs(ranged) do ordered[#ordered + 1] = id end
 
-    -- lay out in rows centered on spawn position
+    -- lay out in rows centered on spawn position. Sample random points inside
+    -- the fog shape and pick the one furthest from the player's spawn (left-center).
     if not (self._x and self._y) then
-        local x,y,w,h = ecs.border[1],ecs.border[2],ecs.border[3],ecs.border[4]
-        self._x = x + w * (2/3)
-        self._y = y + h * (2/5)
+        local bx, by, w, h = ecs.boundingBox[1], ecs.boundingBox[2], ecs.boundingBox[3], ecs.boundingBox[4]
+        local playerX, playerY = bx + w / 4, by + h / 2
+        local bestX, bestY, bestD
+        for i = 1, 200 do
+            local x = self._rng:random() * w + bx
+            local y = self._rng:random() * h + by
+            if ecs:isInsideShape(x, y) then
+                local dx, dy = x - playerX, y - playerY
+                local d = dx * dx + dy * dy
+                if not bestD or d > bestD then
+                    bestD, bestX, bestY = d, x, y
+                end
+            end
+        end
+        self._x = bestX or (bx + w * (2 / 3))
+        self._y = bestY or (by + h * (2 / 5))
     end
     local ox, oy = self._x, self._y
     for i, id in ipairs(ordered) do

@@ -25,25 +25,17 @@ end
 
 ---@param world ecs.ECSWorld
 local function spawnDecor(world)
-    local decorations = {}
-
-    local w, h = world.border[3], world.border[4]
-
-    local darkcol = objects.Color("FF312B2B")
-    local lightcol = objects.Color("FF3C3434")
+    local w, h = world.boundingBox[3], world.boundingBox[4]
 
     local noiseFreq = 0.01
-
-    local function noise(xx,yy)
-        return love.math.perlinNoise(xx*noiseFreq, yy*noiseFreq)
+    local function noise(xx, yy)
+        return love.math.perlinNoise(xx * noiseFreq, yy * noiseFreq)
     end
 
-    local TPAD = 30
     local function spawnRandomPatch(x, y)
         local id
-        local color
-        local roll = love.math.random()
         local dLight = 0
+        local roll = love.math.random()
         if roll < 0.45 then
             id = "decor_big_" .. love.math.random(1, 4)
             dLight = 0.1
@@ -54,36 +46,26 @@ local function spawnDecor(world)
             dLight = -0.05
         end
 
-        local ent = g.spawnEntity(id, x,y)
-        local n = noise(x,y)
+        local ent = g.spawnEntity(id, x, y)
+        local n = noise(x, y)
         ent.color = objects.Color.clone(objects.Color.BLACK)
         ent.color:lighten(n + dLight)
         ent.color.a = 0.1
     end
 
-    local patchCount = 100
-    for i = 1, patchCount do
-        local x = math.floor(helper.lerp(TPAD, w - TPAD, love.math.random()))
-        local y = math.floor(helper.lerp(TPAD, h - TPAD, love.math.random()))
-        if world:isInsideShape(x, y) then
-            spawnRandomPatch(x,y)
+    local GRID = 40
+    local SPAWN_CHANCE = 0.5
+    for gx = GRID / 2, w, GRID do
+        for gy = GRID / 2, h, GRID do
+            if love.math.random() < SPAWN_CHANCE then
+                local x = gx + love.math.random(-GRID / 2, GRID / 2)
+                local y = gy + love.math.random(-GRID / 2, GRID / 2)
+                if world:isInsideShape(x, y) then
+                    spawnRandomPatch(x, y)
+                end
+            end
         end
     end
-
-    -- local grassCount = 1000
-    -- for i = 1, grassCount do
-    --     local x = math.floor(helper.lerp(TPAD, w - TPAD, love.math.random()))
-    --     local y = math.floor(helper.lerp(TPAD, h - TPAD, love.math.random()))
-    --     if noise(x, y) > 0.5 then
-    --         local ent = g.spawnEntity("grass_decor_"..tostring(love.math.random(1,4)), x, y)
-    --         ent.color = GRASS_COLOR
-    --     end
-    -- end
-
-    -- for _, entry in ipairs(decorations) do
-    --     local ent = g.spawnEntity(entry.image, entry.x, entry.y)
-    --     ent.color = entry.color
-    -- end
 end
 
 function ground_decor.preUpdate()
@@ -91,7 +73,7 @@ function ground_decor.preUpdate()
     if world.data.groundDecorSpawned then
         return
     end
-    if not world.border then
+    if not world.boundingBox then
         return
     end
     spawnDecor(world)

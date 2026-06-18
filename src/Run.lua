@@ -28,7 +28,7 @@ function Run:init()
     self._sortedSquads = nil
     self._battleSquads = {}
     self.level = 1
-    self.xp = 20
+    self.xp = 0
     self.money = 0
     self.keys = 0
     self.mana = {}
@@ -50,7 +50,7 @@ end
 
 
 function Run:getXpRequirement()
-    return 100 -- TODO. implement properly.
+    return 10 -- TODO. implement properly.
 end
 
 
