@@ -234,12 +234,12 @@ g.defineSquad("incense_holder_squad", {
         },
         attack = {
             attackType = "ranged",
-            projectileType = "arrow", -- placeholder
+            projectileType = "incense_pan",
             projectileSpeed = 350,
             projectileHoming = true,
         },
         weapon = {
-            image = "militia_sword", -- placeholder
+            image = "incense_pan",
             type = "bow",
         },
         isHealer = true,
