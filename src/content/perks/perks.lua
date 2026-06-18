@@ -170,6 +170,22 @@ g.definePerk("swarmsurge", "Swarmsurge", {
     },
 })
 
+g.definePerk("growth", "Growth", {
+    description = loc("Permanently gains +1 Max HP for every 4 Green mana played this fight."),
+    image = "mana_green_small",
+    rawHandlers = {
+        manaSpent = function(ent, manaRequirement)
+            local green = manaRequirement and manaRequirement.green or 0
+            if green <= 0 then return end
+            ent._growthGreen = (ent._growthGreen or 0) + green
+            local stacks = math.floor(ent._growthGreen / 4)
+            if stacks <= 0 then return end
+            ent._growthGreen = ent._growthGreen - stacks * 4
+            g.buffEntity(ent, "maxHealth", stacks)
+        end,
+    },
+})
+
 g.definePerk("his_gratitude", "His Gratitude", {
     description = loc("On death, deal 10 damage to a random enemy."),
     image = "coin_icon",
