@@ -53,6 +53,7 @@ function battle_scene:init()
     self.victoryPopupTime = 0
     self.shockwave = nil
     self.lastEnemyCount = 0
+    self.allyDeathsThisBattle = 0
     ---@type ecs.Entity?
     self.commander = nil
 
@@ -89,6 +90,9 @@ function battle_scene:pollHandlers()
     })
 
     g.addHandler({
+        getAllyDeathsThisBattle = function()
+            return self.allyDeathsThisBattle
+        end,
         postDraw = function()
             lg.setColor(1,1,1)
             self.particles:draw()
@@ -96,6 +100,9 @@ function battle_scene:pollHandlers()
         entityDeath = function(ent)
             if ent == self.commander then
                 loseBattle(self)
+            end
+            if ent.team == "ally" then
+                self.allyDeathsThisBattle = self.allyDeathsThisBattle + 1
             end
             if ent.team ~= "enemy" then return end
             if self.lastEnemyCount ~= 1 then return end
@@ -129,6 +136,7 @@ function battle_scene:enter()
     self.noEnemyTimer = 0
     self.victory = false
     self.defeated = false
+    self.allyDeathsThisBattle = 0
     self.victoryPopupTime = 0
     self.shockwave = nil
     self.lastEnemyCount = 0
