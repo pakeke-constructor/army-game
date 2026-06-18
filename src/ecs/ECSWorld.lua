@@ -60,9 +60,13 @@ local function generateShape(w, h)
     local cy = h / 2
     local shape = {}
     local n = love.math.random(4, 6)
+    shape[1] = {
+        cx = w/2, cy = h/2,
+        rx = w/4, ry = h/4
+    }
     for i = 1, n do
         local t = (i - 1) / (n - 1)
-        local rx = math.min(w, h) * love.math.random(40, 70) / 100
+        local rx = math.min(w, h) * (love.math.random(30, 40) / 100) * (10 / (10+n))
         local ry = rx * love.math.random(100, 130) / 100
         -- cap radii + clamp center so the whole oval stays inside the bounding box
         rx = math.min(rx, w / 2)
@@ -71,12 +75,12 @@ local function generateShape(w, h)
         local cyy = cy + love.math.random(-h * 0.3, h * 0.3)
         cx = helper.clamp(cx, rx, w - rx)
         cyy = helper.clamp(cyy, ry, h - ry)
-        shape[i] = {
+        table.insert(shape, {
             cx = cx,
             cy = cyy,
             rx = rx,
             ry = ry,
-        }
+        })
     end
     return shape
 end

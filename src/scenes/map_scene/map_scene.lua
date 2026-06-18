@@ -90,9 +90,9 @@ local function rerollDynamicNode(graph, node, count)
 
     local totalWeight = count.shrine + count.fountain + count.shop
     local list = {
-        {nodes.ShrineNode, totalWeight - count.shrine},
-        {nodes.FountainNode, totalWeight - count.fountain},
-        {nodes.ShopNode, totalWeight - count.shop},
+        {nodes.ShrineNode, math.max(1, totalWeight - count.shrine)},
+        {nodes.FountainNode, math.max(1, totalWeight - count.fountain)},
+        {nodes.ShopNode, math.max(1, totalWeight - count.shop)},
     }
     local choice = helper.pickWeighted(list, graph.rng)
     ---@cast choice -integer

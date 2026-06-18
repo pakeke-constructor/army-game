@@ -125,7 +125,7 @@ function battle_scene:enter()
     g.pollHandlers()
 
     if self.sandbox then
-        self.ecs:setBounds(500, 300)
+        self.ecs:setBounds(1900, 1100)
     else
         encounters.startRandomEncounter(run.day, self.ecs)
     end
