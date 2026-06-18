@@ -22,6 +22,7 @@ function shop_scene:init()
     for i = 1, NUM_BLESSING_SLOTS do
         self.blessingBoughtSince[i] = 0
     end
+    self.xpBoughtSince = {0, 0}
 end
 
 function shop_scene:enter()
@@ -32,6 +33,7 @@ function shop_scene:enter()
     for i = 1, NUM_BLESSING_SLOTS do
         self.blessingBoughtSince[i] = 0
     end
+    self.xpBoughtSince[1], self.xpBoughtSince[2] = 0, 0
 end
 
 function shop_scene:leave()
@@ -393,6 +395,7 @@ end
 
 
 local BUY_GLOW_DUR = 0.6
+local XP_BUY_COLOR = objects.Color("#7cc82a")
 
 ---@param self g.ShopScene
 ---@param freeArea kirigami.Region
@@ -415,29 +418,47 @@ local function drawShopUI(self, freeArea)
     -- xp purchasing.
     do
     local leftXp, rightXp = xpReg:padRatio(0.1):splitHorizontal(1,1)
-    local function drawXpBuy(reg, img, xpAmount, cost)
+    local t = love.timer.getTime()
+    ---@param reg kirigami.Region
+    ---@param img string
+    ---@param xpAmount integer
+    ---@param cost integer
+    ---@param boughtSinceIndex integer
+    local function drawXpBuy(reg, img, xpAmount, cost, boughtSinceIndex, glowSize)
         local _,main,bot,_ = reg:splitVertical(2,6,2,1)
         local x,y = main:getCenter()
         local canAfford = g.canAffordGold(cost)
         local isHovered = iml.isHovered(main:get())
+        local isClicked = iml.isClicked(main:get())
         local wasJustClicked = iml.wasJustClicked(main:get())
 
-        if canAfford then
+        -- Do "purchased" animation
+        local tween = math.max(0, t - self.xpBoughtSince[boughtSinceIndex]) / BUY_GLOW_DUR
+        if tween > 0 and tween <= 1 then
+            local c = XP_BUY_COLOR
+            local a = math.sqrt(math.abs(math.sin(tween * math.pi)))
+            lg.setColor(c.r, c.g, c.b, a)
+            lg.draw(GLOW_CIRCLE_MESH, x, y, 0, glowSize, glowSize)
+        end
+
+        -- Do button drawing and check
+        if canAfford and not isClicked then
             lg.setColor(1,1,1)
         else
             lg.setColor(0.6,0.6,0.6,0.7)
         end
-        local oy = isHovered and -2 or 0
+        local oy = (isHovered and canAfford) and -2 or 0
         g.drawImage(img, x,y+oy)
         if wasJustClicked and g.trySpendGold(cost) then
             g.addXP(xpAmount)
+            self.xpBoughtSince[boughtSinceIndex] = t
         end
         lg.setColor(1,1,1)
         drawCost(cost, bot)
     end
 
-    drawXpBuy(rightXp:padRatio(0.3), "shop_xp_large", 4, 60)
-    drawXpBuy(leftXp:padRatio(0.3), "shop_xp_small", 1, 20)
+    drawXpBuy(rightXp:padRatio(0.3), "shop_xp_large", 4, 60, 2, 80)
+    drawXpBuy(leftXp:padRatio(0.3), "shop_xp_small", 1, 20, 1, 55)
     end
 
     dbg(xpReg:padRatio(0.1))
