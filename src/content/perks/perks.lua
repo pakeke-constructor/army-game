@@ -494,6 +494,33 @@ g.definePerk("reverberate", "Reverberate", {
     },
 })
 
+
+g.definePerk("eureka", "Eureka", {
+    description = loc("When this unit is Buffed, spreads the buff to 6 nearby allies."),
+    image = "coin_icon",
+    handlers = {
+        entityBuffed = function(ent, stat, increase)
+            ---@type [ecs.Entity,number][]
+            local entAllies = {}
+            g.iteratePartition("ally", ent.x, ent.y, function(other)
+                if g.isAlive(other) and other:getTypename() ~= ent:getTypename() then
+                    entAllies[#entAllies+1] = {other, helper.magnitude(other.x - ent.x, other.y - ent.y)}
+                end
+            end, 160)
+
+            -- Sort by closest
+            table.sort(entAllies, function(a, b)
+                return a[2] < b[2]
+            end)
+
+            -- Buff them
+            for i = 1, math.min(#entAllies, 6) do
+                g.buffEntity(entAllies[i][1], stat, increase)
+            end
+        end,
+    },
+})
+
 g.definePerk("laser_focus", "Laser Focus", {
     description = loc2("On-attack, this unit gains 0.1 (ASPD). Stacks up to 30 times."),
     image = "coin_icon",

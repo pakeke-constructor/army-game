@@ -92,6 +92,22 @@ g.defineSquad("gold_mine_squad", {
 })
 
 
+g.defineSquad("living_laboratory_squad", {
+    name = loc("Living Laboratory"),
+    rarity = g.RARITIES.RARE,
+    entityDef = {
+        image = "livinglaboratory",
+        isBuilding = true,
+        physics = { shape = "circle", radius = 14, ox = 0, oy = 0, mass = 1, isStatic = true },
+        baseMaxHealth = 120,
+        baseStartingArmor = 4,
+    },
+    unitCount = 1,
+    perks = {"eureka"},
+    cost = {yellow = 1},
+})
+
+
 
 
 g.defineSquad("endless_army_squad", {
@@ -134,4 +150,3 @@ g.defineSquad("wealth_elemental_squad", {
     perks = {"golden_bulk"},
     cost = {yellow = 1},
 })
-
