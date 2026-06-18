@@ -32,6 +32,20 @@ local function loseBattle(self)
     gameoverPopupService.show()
 end
 
+local function spawnTestNeutralObjectives(self)
+    local border = self.ecs.boundingBox
+    local cx = border[1] + border[3] * 0.6
+    local cy = border[2] + border[4] * 0.5
+    local offsets = {
+        {0, 0},
+        {100, -70},
+        {100, 70},
+    }
+    for _, off in ipairs(offsets) do
+        g.spawnEntity("treasure_chest_objective", cx + off[1], cy + off[2])
+    end
+end
+
 
 function battle_scene:init()
     self.victory = false
@@ -129,6 +143,7 @@ function battle_scene:enter()
     else
         encounters.startRandomEncounter(run.day, self.ecs)
     end
+    spawnTestNeutralObjectives(self)
 
     local border = self.ecs.boundingBox
     do
@@ -733,7 +748,7 @@ local function drawCommanderTarget(self)
     local inRange = d2 <= (commander.attackRange or 100) ^ 2
     local IMG="commander_target_3"
     if inRange then
-        lg.setColor(g.COLORS.DAMAGE:getRGBA())
+        lg.setColor(1,1,1)
         g.drawImageOffset(IMG, target.x, target.y - 20, love.timer.getTime() * COMMANDER_TARGET_SPIN_SPEED, 1, 1, 0.5, 0.5)
     else
         local dist = helper.magnitude(target.x-commander.x, target.y-commander.y)

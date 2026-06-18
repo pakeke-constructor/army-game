@@ -34,6 +34,7 @@ function ECSWorld:init(systemNames)
     self.partitions = {
         -- [partitionId] -> objects.Partition<ecs.Entity>
         unit = objects.Partition(PARTITION_CHUNKSIZE),
+        neutral = objects.Partition(PARTITION_CHUNKSIZE),
         projectile = objects.Partition(PARTITION_CHUNKSIZE),
         ally = objects.Partition(PARTITION_CHUNKSIZE),
         enemy = objects.Partition(PARTITION_CHUNKSIZE)

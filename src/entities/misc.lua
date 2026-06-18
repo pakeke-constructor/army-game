@@ -52,4 +52,15 @@ g.defineEntity("nexus", {
     baseMaxHealth = 200,
 })
 
+g.defineEntity("treasure_chest_objective", {
+    image = "placeholder",
+    isBuilding = true,
+    team = "neutral",
+    side = "neutral",
+    partitions = {"unit", "neutral"},
+    physics = { shape = "circle", radius = 6, ox = 0, oy = 0, mass = 1, isStatic = true },
+    baseMaxHealth = 120,
+    shadow = {}
+})
+
 

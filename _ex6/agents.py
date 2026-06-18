@@ -64,7 +64,6 @@ The ONLY acceptable text output is: a direct answer, a clarifying question, or a
 - Before using an API or module, look up the actual definition first.
 - Write the simplest code that works. Avoid over-engineering, unnecessary abstractions, and speculative features.
 - Prefer editing existing files over creating new ones.
-- You MUST use explore_agent for broad codebase questions; it's a lot cheaper than exploring yourself.
 </working_style>
 """
 )
@@ -81,7 +80,7 @@ The ONLY acceptable text output is: a direct answer, a clarifying question, or a
 MAIN_TOOLS = [
     read_file, glob, search, read_headers, read_body,
     write_file, edit_file, edit_file_lines,
-    explore_agent, web_search, websearch_agent,
+    # web_search, websearch_agent,
     plan_done, plan_read, plan_write,
     git_working_tree,
     love2d_docs,
