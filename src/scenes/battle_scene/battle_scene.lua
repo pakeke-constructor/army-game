@@ -731,7 +731,7 @@ local function drawCommanderTarget(self)
 
     local d2 = (target.x - commander.x) ^ 2 + (target.y - commander.y) ^ 2
     local inRange = d2 <= (commander.attackRange or 100) ^ 2
-    local IMG="commander_target_2"
+    local IMG="commander_target_3"
     if inRange then
         lg.setColor(g.COLORS.DAMAGE:getRGBA())
         g.drawImageOffset(IMG, target.x, target.y - 20, love.timer.getTime() * COMMANDER_TARGET_SPIN_SPEED, 1, 1, 0.5, 0.5)
