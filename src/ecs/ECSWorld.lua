@@ -107,6 +107,21 @@ function ECSWorld:isInsideShape(x, y)
     return false
 end
 
+---@return integer
+function ECSWorld:getNumOverlappingShapes(x, y)
+    local shape = self.shape
+    if not shape then return 0 end
+    local count = 0
+    for i = 1, #shape do
+        local e = shape[i]
+        local dx, dy = (x - e.cx) / e.rx, (y - e.cy) / e.ry
+        if dx * dx + dy * dy <= 1 then
+            count = count + 1
+        end
+    end
+    return count
+end
+
 -- Returns x,y clamped to the nearest point inside/on the shape.
 function ECSWorld:clampToShape(x, y)
     local shape = self.shape
