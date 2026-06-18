@@ -22,6 +22,7 @@ function ECSWorld:init(systemNames)
     self.backCanvas = PixelCanvas.new(love.graphics.getDimensions())
     self.frontCanvas = PixelCanvas.new(love.graphics.getDimensions())
     self.border = nil -- {0, 0, w, h} or nil for no border
+    self.shape = nil -- list of ellipses {cx,cy,rx,ry}; world is union of them
 
     self.componentIndex = {} -- [componentName] -> {ent, ent, ...}
     self.trackedComponents = objects.Set()
@@ -52,8 +53,76 @@ function ECSWorld:init(systemNames)
     end
 end
 
+-- Generate a "world shape" as a union of ellipses covering the border rect.
+-- Fog is cleared inside the shape, and entities are clamped inside it.
+local function generateShape(w, h)
+    local cx, cy = w / 2, h / 2
+    local roll = love.math.random(1, 3)
+    if roll == 1 then
+        -- oval
+        return { { cx = cx, cy = cy, rx = w * 0.55, ry = h * 0.6 } }
+    elseif roll == 2 then
+        -- peanut: two overlapping circles along x
+        local r = h * 0.62
+        return {
+            { cx = w * 0.30, cy = cy, rx = r, ry = r },
+            { cx = w * 0.70, cy = cy, rx = r, ry = r },
+        }
+    else
+        -- multi-circle: scattered overlapping blobs
+        local shape = {}
+        local n = love.math.random(3, 4)
+        for i = 1, n do
+            local t = (i - 1) / (n - 1)
+            local r = math.min(w, h) * love.math.random(40, 60) / 100
+            shape[i] = {
+                cx = helper.lerp(w * 0.25, w * 0.75, t) + love.math.random(-30, 30),
+                cy = cy + love.math.random(-h * 0.2, h * 0.2),
+                rx = r,
+                ry = r,
+            }
+        end
+        return shape
+    end
+end
+
 function ECSWorld:setBorder(w, h)
     self.border = {0, 0, w, h}
+    self.shape = generateShape(w, h)
+end
+
+---@return boolean
+function ECSWorld:isInsideShape(x, y)
+    local shape = self.shape
+    if not shape then return true end
+    for i = 1, #shape do
+        local e = shape[i]
+        local dx, dy = (x - e.cx) / e.rx, (y - e.cy) / e.ry
+        if dx * dx + dy * dy <= 1 then
+            return true
+        end
+    end
+    return false
+end
+
+-- Returns x,y clamped to the nearest point inside/on the shape.
+function ECSWorld:clampToShape(x, y)
+    local shape = self.shape
+    if not shape or self:isInsideShape(x, y) then return x, y end
+    local bestX, bestY, bestD
+    for i = 1, #shape do
+        local e = shape[i]
+        local dx, dy = (x - e.cx) / e.rx, (y - e.cy) / e.ry
+        local d = math.sqrt(dx * dx + dy * dy)
+        if d == 0 then d = 1e-6 end
+        local px = e.cx + (dx / d) * e.rx
+        local py = e.cy + (dy / d) * e.ry
+        local dist = (px - x) * (px - x) + (py - y) * (py - y)
+        if not bestD or dist < bestD then
+            bestD, bestX, bestY = dist, px, py
+        end
+    end
+    return bestX, bestY
 end
 
 ---@param e ecs.Entity
@@ -204,13 +273,11 @@ function ECSWorld:update(dt)
             end
         end
     end
-    local border = self.border
-    if border then
+    if self.shape then
         for i = 1, self.entities.len do
             local e = self.entities[i]
             if e.team then
-                local cx = math.min(math.max(e.x, border[1]), border[3])
-                local cy = math.min(math.max(e.y, border[2]), border[4])
+                local cx, cy = self:clampToShape(e.x, e.y)
                 if cx ~= e.x or cy ~= e.y then
                     g.setPos(e, cx, cy)
                 end

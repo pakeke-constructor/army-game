@@ -65,7 +65,9 @@ local function spawnDecor(world)
     for i = 1, patchCount do
         local x = math.floor(helper.lerp(TPAD, w - TPAD, love.math.random()))
         local y = math.floor(helper.lerp(TPAD, h - TPAD, love.math.random()))
-        spawnRandomPatch(x,y)
+        if world:isInsideShape(x, y) then
+            spawnRandomPatch(x,y)
+        end
     end
 
     -- local grassCount = 1000

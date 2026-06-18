@@ -746,7 +746,6 @@ function battle_scene:draw()
     love.graphics.clear(g.COLORS.BATTLE_GROUND_COLOR:getRGBA())
     iml.pushTransform(self.camera:getTransform())
 
-    local border = self.ecs.border
     lg.setColor(1, 1, 1, 1)
 
     drawCommanderRadius(self)
@@ -762,8 +761,9 @@ function battle_scene:draw()
         w = math.abs(x2 - x1),
         h = math.abs(y2 - y1),
     }
+    local ecs = self.ecs
     fogService.renderFog(fogRegion, function(x, y)
-        return x < border[1] or x > border[1] + border[3] or y < border[2] or y > border[2] + border[4]
+        return not ecs:isInsideShape(x, y)
     end)
 
     if not self.victory then
