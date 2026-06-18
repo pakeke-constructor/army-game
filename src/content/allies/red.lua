@@ -137,8 +137,8 @@ g.defineSquad("tribute_squad", {
 
 
 
-g.defineSquad("grime_executioner_squad", {
-    name = loc("Grime Executioners"),
+g.defineSquad("executioner_squad", {
+    name = loc("Executioners"),
     rarity = g.RARITIES.RARE,
     entityDef = {
         image = "barbarian",
@@ -214,8 +214,8 @@ g.defineSquad("dagger_bearer_squad", {
 
 
 
-g.defineSquad("soul_furnace_squad", {
-    name = loc("Soul Furnaces"),
+g.defineSquad("furnace_golems_squad", {
+    name = loc("Furnace Golems"),
     rarity = g.RARITIES.RARE,
     entityDef = {
         image = "charredsoul",
