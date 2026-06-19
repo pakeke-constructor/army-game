@@ -3186,7 +3186,17 @@ function g.defineManaType(id, color)
         color = color,
     }
     table.insert(manaTypeList, id)
-    defineColorTag(id:upper().."_MANA_COLOR", color)
+
+    local idup = id:upper()
+    defineColorTag(idup .. "_MANA_COLOR", color)
+    local rt = string.format(
+        "{%s}{%s} %s Mana{/%s}",
+        idup.."_MANA_COLOR",
+        mana_small,
+        id:sub(1, 1):upper()..id:sub(2), -- Capitalize
+        idup.."_MANA_COLOR"
+    )
+    KEYWORDS[idup .. "_MANA"] = loc(rt, {}, {context = "Mana is a currency used to spawn squad and spells"})
 end
 
 
