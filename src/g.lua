@@ -25,6 +25,7 @@
 ---@class g.TraitInfo
 ---@field id string
 ---@field name string
+---@field color table
 ---@field description string
 ---@field handlers table<string, fun(ent: ecs.Entity, ...): any>? Per-entity handlers, scoped to the unit that has the trait. Only fires when dispatched AT this entity.
 ---@field deployAnywhere boolean? Units with this trait can be deployed anywhere (eg flying).
@@ -2989,6 +2990,7 @@ g.defineStat("projectileAccuracy", "baseProjectileAccuracy", {
 g.defineTrait("flying", "Flying", {
     description = loc("Can be deployed anywhere on the battlefield."),
     deployAnywhere = true,
+    color = g.snapToPalette(1,1,1),
 })
 
 g.defineTrait("fireproof", "Fireproof", {
@@ -2998,10 +3000,12 @@ g.defineTrait("fireproof", "Fireproof", {
             return 0
         end,
     },
+    color = g.snapToPalette(1,0,0),
 })
 
 g.defineTrait("loyal", "Loyal", {
     description = loc("A loyal unit."),
+    color = g.snapToPalette(0,1,0),
 })
 
 

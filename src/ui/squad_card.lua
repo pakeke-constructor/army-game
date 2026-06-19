@@ -36,10 +36,12 @@ local function drawPerkSlot(region, perk, accentColor)
     local r,g,b = accentColor:darken(0.9):getRGBA()
     
     lg.setColor(1,1,1)
-    local colorChange = " {o r=" .. r .. " g=" .. g .. " b=" .. b .. "} "
-    local txt = "{" .. perk.image .. "}{o} " .. helper.wrapRichtextColor(accentColor, perk.name) .. "{/o}"
+    local colorChange = "{o r=" .. r .. " g=" .. g .. " b=" .. b .. "}"
+    local title = "{" .. perk.image .. "}{o}" .. helper.wrapRichtextColor(accentColor, perk.name) .. "{/o}"
     local desc = "{c r=0.85 g=0.85 b=0.9}" .. colorChange .. perk.description .. "{/o}"
-    richtext.printRichContained(txt .. "\n" .. desc, PERK_DESC_FONT, region:padUnit(6):get())
+    local titleRegion = region:splitVertical(1,2):moveRatio(0,-0.4)
+    richtext.printRichContained(title, PERK_DESC_FONT, titleRegion:get())
+    richtext.printRichContained(desc, PERK_DESC_FONT, region:padUnit(4):get())
 end
 
 
@@ -108,7 +110,7 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
     STAT_FONT = STAT_FONT or g.getSmallFont(16)
     TITLE_FONT = TITLE_FONT or g.getBigFont(16)
 
-    local box = ui.Box({maxWidth = w, maxHeight = h, padding = 12, spacing = 8}, function(bx, by, bw, bh)
+    local box = ui.Box({maxWidth = w, maxHeight = h, padding = 12, spacing = 0}, function(bx, by, bw, bh)
         if canUpgrade then
             helper.drawEdgeTrailAnimation(region, manaColor, 0.25, 20)
             helper.drawEdgeTrailAnimation(region, manaColor, 0.75, 20)
@@ -148,6 +150,8 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
             richtext.printRichContainedNoWrap("{o}" .. rarityText, STAT_FONT, textX, ey + 16, textW, STAT_FONT:getHeight(), "left")
         end,
     })
+
+    box:addSpacing(6)
 
     -- squad-units: Layed out in a flat horizontal line.
     local unitWidth, unitHeight = g.getUnitDrawSize(info.entityId)
@@ -197,6 +201,8 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
             return origIdx[a] < origIdx[b]
         end)
     end
+
+    box:addSpacing(4)
 
     local statCellH = 22
     local statRows = 2
@@ -295,9 +301,11 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
         end,
     })
 
+    box:addSpacing(4)
+
     -- Traits:
     if hasAnyTraits then
-        local H = 10
+        local H = 8
         local function drawTraitBox(traitInfo, xx, yy, ww, hh)
             if not traitInfo then return end
 
@@ -310,7 +318,7 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
             ui.drawSingleColorPanel(xx, yy, ww, hh)
 
             love.graphics.setColor(1, 1, 1)
-            richtext.printRichContainedNoWrap("{o}" .. traitInfo.name, STAT_FONT, xx + pad*2, yy, ww - pad*4, hh, "center")
+            richtext.printRichContainedNoWrap(traitInfo.name, STAT_FONT, xx + pad*2, yy, ww - pad*4, hh, "center")
 
             if isHovered2 then
                 hoverService.requestHover(function(boxx, fonts)
