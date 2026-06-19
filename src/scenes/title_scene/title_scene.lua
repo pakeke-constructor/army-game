@@ -8,7 +8,7 @@ local buttons = {
         local battle = require("src.scenes.battle_scene.battle_scene")
         battle.sandbox = true
         g.gotoScene("battle_scene")
-    end},
+    end, skipFade = true},
     {name = "EXIT", onClick = function ()
         love.event.quit()
     end}
@@ -95,8 +95,15 @@ function title_scene:draw()
             hoveredButton = i
         end
         if iml.wasJustClicked(rx, ry, rw, rh, 1, button) then
-            self:start()
-            button.onClick()
+            if button.skipFade then
+                self:start()
+                button.onClick()
+            else
+                fadeToBlackService.fadeToFromBlack(0.5, function()
+                    self:start()
+                    button.onClick()
+                end)
+            end
         end
 
         local msg = button.name
