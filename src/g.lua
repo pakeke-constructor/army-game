@@ -1993,10 +1993,16 @@ function g.drawEntity(ent, x, y)
         walkBounce = -math.abs(math.sin(t)) * wa.bounceHeight
         walkWobble = math.sin(t) * wa.rotationAmount
     end
+    local isFlying = g.hasTrait(ent, "flying")
+    if isFlying and ent.image then
+        local _, h = g.getImageSize(ent.image)
+        walkBounce = math.sin(love.timer.getTime() * 1.2 + ent.id * 7.2389) * h * 0.3
+        walkWobble = 0
+    end
     if ent.image then
-        if g.hasTrait(ent, "flying") then
+        if isFlying then
             lg.setColor(1, 1, 1, ent.alpha or 1)
-            local w,h = g.getImageSize(ent.image)
+            local _,h = g.getImageSize(ent.image)
             helper.drawWings(x, (y - h*0.7) + (ent.oy or 0) + walkBounce, love.timer.getTime() + ent.id * 7.2389)
         end
         local HIT_HEAL_COLOR_INDICATOR_DURATION = 0.25
