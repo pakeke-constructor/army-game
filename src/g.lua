@@ -1088,6 +1088,7 @@ function g.spawnSquad(squad, x, y, ...)
             ent.scope = squadScope
             ent.squad = squad
             ent._timeSinceDeployed = -(((i - 1)/numUnits) * DEPLOY_ANIMATION_STEP)
+            g.addTrait(ent, "flying")
             for _, traitName in ipairs(info.startingTraits) do
                 g.addTrait(ent, traitName)
             end
@@ -1993,6 +1994,11 @@ function g.drawEntity(ent, x, y)
         walkWobble = math.sin(t) * wa.rotationAmount
     end
     if ent.image then
+        if g.hasTrait(ent, "flying") then
+            lg.setColor(1, 1, 1, ent.alpha or 1)
+            local w,h = g.getImageSize(ent.image)
+            helper.drawWings(x, (y - h*0.7) + (ent.oy or 0) + walkBounce, love.timer.getTime() + ent.id * 7.2389)
+        end
         local HIT_HEAL_COLOR_INDICATOR_DURATION = 0.25
         local col = ent.color or objects.Color.WHITE
 
