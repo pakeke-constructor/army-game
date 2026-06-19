@@ -13,13 +13,19 @@
 ---@field onAdd fun()? Called once, the moment this blessing is first acquired.
 
 
----@class g.PerkInfo
----@field id string
+---@class g.PerkDef
+---@field name string (for definition, untranslated name; for info, translated name)
 ---@field description string
 ---@field image string
----@field handlers table<string, fun(ent: ecs.Entity, ...): any> Scoped to the entity. Only fires when the event/question is dispatched AT this entity (eg g.call("onHit", ent)). Cheap; default choice.
+---@field handlers table<string, fun(ent: ecs.Entity, ...): any>? Scoped to the entity. Only fires when the event/question is dispatched AT this entity (eg g.call("onHit", ent)). Cheap; default choice.
 ---@field rawHandlers table<string, fun(ent: ecs.Entity, ...): any>? Scene-level. Fires for EVERY dispatch of that event globally, regardless of target. Use when the perk needs to listen to things happening elsewhere (eg "when any ally is hurt"). More expensive; use only when `handlers` can't express it.
 ---@field armyHandlers table<string, fun(squad: g.Squad, ...): any>? Army-level. Registered once per army squad holding this perk, regardless of whether it has deployed. First arg is the owning squad. Use for effects computed from run state that must be known before the squad spawns (eg modifying this squad's own unit count).
+
+---@class g.PerkInfo: g.PerkDef
+---@field id string
+---@field handlers table<string, fun(ent: ecs.Entity, ...): any> Scoped to the entity. Only fires when the event/question is dispatched AT this entity (eg g.call("onHit", ent)). Cheap; default choice.
+---@field rawHandlers table<string, fun(ent: ecs.Entity, ...): any> Scene-level. Fires for EVERY dispatch of that event globally, regardless of target. Use when the perk needs to listen to things happening elsewhere (eg "when any ally is hurt"). More expensive; use only when `handlers` can't express it.
+---@field armyHandlers table<string, fun(squad: g.Squad, ...): any> Army-level. Registered once per army squad holding this perk, regardless of whether it has deployed. First arg is the owning squad. Use for effects computed from run state that must be known before the squad spawns (eg modifying this squad's own unit count).
 
 
 ---@class g.TraitInfo
@@ -765,24 +771,35 @@ local ENTITY_DEFS = {}
 local ENTITY_LIST = {}
 local currentEntityId = 0
 
-
----@class g.SquadInfo
----@field id string
+---@class g.SquadDef
 ---@field squadOrder integer? Use this to help determine the "order" of squads. -10 = deployed first, 0 = deployed middle/unimportant, 10 = deployed last. By default, buildings = -10, melee = 0, ranged = 10. Which means that the placement ordering in HUD will be (buildings, melee, ranged).  You MUST edit this if the unit benefits from being placed first/last, e.g. "when deployed, buff all allies." <-- this should be set order = 50 or something, so it's deployed LAST. By contrast, a unit that has a perk: "Whenever an ally is spawned, earn $1", <-- this should have squadOrder = -30 or something; to ensure it's FIRST.
----@field entityId string
+---@field entityId string?
 ---@field entityDef ecs.Components
----@field rarity g.Rarity
----@field unitCount integer
----@field statUpgradeScaling table<string, number> { [statName] -> number }
+---@field unitCount integer? (default is 1)
+---@field statUpgradeScaling table<string, number>? { [statName] -> number }
 ---@field unitCountUpgradeScaling integer?
----@field name string
----@field icon string
----@field perks string[]
+---@field name string (for definition, untranslated name; for info, translated name)
+---@field nameContext string? context passed to `loc` function
+---@field rarity g.Rarity
+---@field icon string?
+---@field perks (g.PerkDef|string|false)[]?
 ---@field startingTraits string[]? Trait ids applied to every unit in this squad on spawn.
----@field cost g.ManaBundle
----@field powerIndex number
+---@field cost g.ManaBundle?
 ---@field onDeploySquad (fun(squad: g.SquadInfo, entities: ecs.Entity[], x: number, y:number))?
 ---@field drawSquadHover fun(x:number, y:number)?
+
+---@class g.SquadInfo: g.SquadDef
+---@field id string
+---@field squadOrder integer
+---@field entityId string
+---@field unitCount integer
+---@field statUpgradeScaling table<string, number> { [statName] -> number }
+---@field unitCountUpgradeScaling integer
+---@field icon string
+---@field perks string[]
+---@field startingTraits string[] Trait ids applied to every unit in this squad on spawn.
+---@field cost g.ManaBundle
+---@field powerIndex number
 
 ---@param squadInfo g.SquadInfo
 local function estimateSquadPowerIndex(squadInfo)
@@ -795,18 +812,22 @@ local function estimateSquadPowerIndex(squadInfo)
 end
 
 ---@param id string
----@param info g.SquadInfo|{id:nil}|{perks:nil}
+---@param info g.SquadDef
 function g.defineSquad(id, info)
-    assert(not SQUAD_DEFS[id], "Duplicate squad: " .. id)
+    if SQUAD_DEFS[id] then
+        error("Duplicate squad: " .. id)
+    end
+
     info.id = id
-    info.perks = info.perks or {}
     info.startingTraits = info.startingTraits or {}
     info.unitCount = info.unitCount or 1
-    info.name = assert(info.name)
+    info.name = loc(assert(info.name), {}, {context = info.nameContext or "Name of a squad."})
     info.rarity = assert(info.rarity)
     info.unitCountUpgradeScaling = info.unitCountUpgradeScaling or 0
     info.statUpgradeScaling = info.statUpgradeScaling or {}
     info.entityId = info.entityId or (id .. "_unit")
+    info.cost = info.cost or {}
+    info.squadOrder = info.squadOrder or 0
     assert(info.entityDef, "Missing entityDef for squad: " .. id)
 
     if not info.icon then
@@ -861,6 +882,27 @@ function g.defineSquad(id, info)
     end
     assert(info.icon)
     info.powerIndex = estimateSquadPowerIndex(info)
+
+    -- register perks
+    ---@type string[]
+    local perkIds = {}
+    if info.perks then
+        for i, pdef in ipairs(info.perks) do
+            if pdef then
+                if type(pdef) == "string" then
+                    perkIds[#perkIds+1] = pdef
+                else
+                    local pid = id.."_perk_"..i
+                    g.definePerk(pid, pdef)
+                    perkIds[#perkIds + 1] = pid
+                end
+            end
+        end
+    end
+    table.sort(perkIds)
+    info.perks = perkIds
+
+    ---@cast info g.SquadInfo
     SQUAD_DEFS[id] = info
     SQUAD_LIST[#SQUAD_LIST + 1] = id
 end
@@ -1273,18 +1315,26 @@ end
 ---   rawHandlers.onAllyHurt = function(selfEnt, ally, dmg) ... end
 --- Use rawHandlers when listening to things not happening to the entity itself.
 ---@param id string
----@param name string
----@param info g.PerkInfo|{id:nil,name:nil}
-function g.definePerk(id, name, info)
-    assert(not PERK_DEFS[id], "Duplicate perk: " .. id)
-    info.name = loc(name, {}, {
+---@param info g.PerkDef
+function g.definePerk(id, info)
+    if PERK_DEFS[id] then
+        error("Duplicate perk: " .. id)
+    end
+
+    ---@cast info g.PerkInfo
+    info.name = loc(info.name, {}, {
         context = "The name of a perk"
     })
     info.id = id
+    info.handlers = info.handlers or {}
+    info.rawHandlers = info.rawHandlers or {}
+    info.armyHandlers = info.armyHandlers or {}
     PERK_DEFS[id] = info
     PERK_LIST[#PERK_LIST + 1] = id
 end
 
+---@param id string
+---@return g.PerkInfo
 function g.getPerkInfo(id)
     return assert(PERK_DEFS[id], "Unknown perk: " .. tostring(id))
 end
