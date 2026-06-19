@@ -90,9 +90,6 @@ function battle_scene:pollHandlers()
     })
 
     g.addHandler({
-        getAllyDeathsThisBattle = function()
-            return self.allyDeathsThisBattle
-        end,
         postDraw = function()
             lg.setColor(1,1,1)
             self.particles:draw()
@@ -102,7 +99,7 @@ function battle_scene:pollHandlers()
                 loseBattle(self)
             end
             if ent.team == "ally" then
-                self.allyDeathsThisBattle = self.allyDeathsThisBattle + 1
+                self.ecs.deathAllies = self.ecs.deathAllies + 1
             end
             if ent.team ~= "enemy" then return end
             if self.lastEnemyCount ~= 1 then return end

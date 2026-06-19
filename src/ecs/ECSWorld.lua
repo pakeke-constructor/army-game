@@ -39,6 +39,7 @@ function ECSWorld:init(systemNames)
         ally = objects.Partition(PARTITION_CHUNKSIZE),
         enemy = objects.Partition(PARTITION_CHUNKSIZE)
     }
+    self.deathAllies = 0
 
     -- Load systems (each system is a plain table of event/question handlers)
     self.systems = {}
