@@ -90,9 +90,6 @@ function battle_scene:pollHandlers()
     })
 
     g.addHandler({
-        getSquadStatBuffModifier = function ()
-            return math.floor(g.getWorldTime())
-        end,
         postDraw = function()
             lg.setColor(1,1,1)
             self.particles:draw()
