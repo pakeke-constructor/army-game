@@ -20,22 +20,20 @@ g.defineSquad("forest_sprite_squad", {
         baseMaxHealth = 5,
     },
     unitCount = 6,
-    perks = {
-        {
-            name = "Restore",
-            description = g.loc2("On-spawn, nearby allies are healed to full (HP)."),
-            image = "coin_icon",
-            handlers = {
-                entitySpawned = function(ent)
-                    g.iteratePartition("ally", ent.x, ent.y, function(other)
-                        if other == ent then return end
-                        if not g.isAlive(other) then return end
-                        g.healEntity(other, other.maxHealth or 999)
-                    end, 150)
-                end,
-            },
-        }
-    },
+    perks = {{
+        name = "Restore",
+        description = g.loc2("On-spawn, nearby allies are healed to full (HP)."),
+        image = "coin_icon",
+        handlers = {
+            entitySpawned = function(ent)
+                g.iteratePartition("ally", ent.x, ent.y, function(other)
+                    if other == ent then return end
+                    if not g.isAlive(other) then return end
+                    g.healEntity(other, other.maxHealth or 999)
+                end, 150)
+            end,
+        },
+    }},
     cost = {green = 1},
 })
 
@@ -67,20 +65,18 @@ g.defineSquad("druid_squad", {
         baseMaxHealth = 7,
     },
     unitCount = 6,
-    perks = {
-        {
-            name = "Vitalize",
-            description = loc("On-heal, the target gains 1 max HP."),
-            image = "coin_icon",
-            handlers = {
-                onAttack = function(ent, target)
-                    if ent.healPower and target and g.isAlive(target) then
-                        g.buffEntity(target, "maxHealth", 1)
-                    end
-                end,
-            },
-        }
-    },
+    perks = {{
+        name = "Vitalize",
+        description = loc("On-heal, the target gains 1 max HP."),
+        image = "coin_icon",
+        handlers = {
+            onAttack = function(ent, target)
+                if ent.healPower and target and g.isAlive(target) then
+                    g.buffEntity(target, "maxHealth", 1)
+                end
+            end,
+        },
+    }},
     cost = {green = 1},
 })
 
@@ -206,19 +202,17 @@ g.defineSquad("treant_squad", {
     },
     unitCount = 5,
     icon = "treants_uniticon",
-    perks = {
-        {
-            name = "Growth",
-            description = loc("Permanently gains +1 Max HP for every 4 Green mana played this fight."),
-            image = "mana_green_small",
-            rawHandlers = {
-                manaSpent = function(ent, manaRequirement)
-                    -- TODO: Need to discuss this perk further because it
-                    -- was ambiguos in certain ways.
-                end,
-            },
-        }
-    },
+    perks = {{
+        name = "Growth",
+        description = loc("Permanently gains +1 Max HP for every 4 Green mana played this fight."),
+        image = "mana_green_small",
+        rawHandlers = {
+            manaSpent = function(ent, manaRequirement)
+                -- TODO: Need to discuss this perk further because it
+                -- was ambiguos in certain ways.
+            end,
+        },
+    }},
     cost = {green = 2},
 })
 
@@ -262,18 +256,16 @@ g.defineSquad("infested_squad", {
     },
     unitCount = 8,
     icon = "theinfested_uniticon",
-    perks = {
-        {
-            name = "Infestation",
-            description = loc("On death, spawn a Pest."),
-            image = "coin_icon",
-            handlers = {
-                entityDeath = function(ent)
-                    g.spawnEntity("pest", ent.x, ent.y)
-                end,
-            },
-        }
-    },
+    perks = {{
+        name = "Infestation",
+        description = loc("On death, spawn a Pest."),
+        image = "coin_icon",
+        handlers = {
+            entityDeath = function(ent)
+                g.spawnEntity("pest", ent.x, ent.y)
+            end,
+        },
+    }},
     cost = {green = 1},
 })
 
@@ -327,21 +319,19 @@ g.defineSquad("forest_sentry_squad", {
     },
     unitCount = 4,
     icon = "forestsentries_uniticon",
-    perks = {
-        {
-            name = "Life Force",
-            description = g.loc2("Gain (ATK) equal to max (HP). Take 4 x as much damage."),
-            image = "coin_icon",
-            handlers = {
-                getAttackDamageModifier = function(ent)
-                    return ent.maxHealth
-                end,
-                getDamageTakenMultiplier = function(ent)
-                    return 4
-                end,
-            },
-        }
-    },
+    perks = {{
+        name = "Life Force",
+        description = g.loc2("Gain (ATK) equal to max (HP). Take 4 x as much damage."),
+        image = "coin_icon",
+        handlers = {
+            getAttackDamageModifier = function(ent)
+                return ent.maxHealth
+            end,
+            getDamageTakenMultiplier = function(ent)
+                return 4
+            end,
+        },
+    }},
     cost = {green = 1},
 })
 
@@ -373,44 +363,42 @@ g.defineSquad("arcane_blossom_squad", {
     },
     unitCount = 3,
     icon = "arcaneblossom_uniticon",
-    perks = {
-        {
-            name = "Magnificence",
-            description = g.loc2("When this unit heals or gains max HP, spread the effect to 3 random nearby allies without this perk."),
-            image = "coin_icon",
-            handlers = {
-                entityHealed = function(ent, amount, healer)
-                    local nearby = {}
-                    g.iteratePartition("ally", ent.x, ent.y, function(other)
-                        if other == ent then return end
-                        if not g.isAlive(other) then return end
-                        if hasMagnificence(other) then return end
-                        nearby[#nearby + 1] = other
-                    end, 120)
-                    for i = 1, math.min(3, #nearby) do
-                        local idx = math.random(i, #nearby)
-                        nearby[i], nearby[idx] = nearby[idx], nearby[i]
-                        g.healEntity(nearby[i], amount)
-                    end
-                end,
-                entityBuffed = function(ent, stat, increase)
-                    if stat ~= "maxHealth" or increase <= 0 then return end
-                    local nearby = {}
-                    g.iteratePartition("ally", ent.x, ent.y, function(other)
-                        if other == ent then return end
-                        if not g.isAlive(other) then return end
-                        if hasMagnificence(other) then return end
-                        nearby[#nearby + 1] = other
-                    end, 120)
-                    for i = 1, math.min(3, #nearby) do
-                        local idx = math.random(i, #nearby)
-                        nearby[i], nearby[idx] = nearby[idx], nearby[i]
-                        g.buffEntity(nearby[i], "maxHealth", increase)
-                    end
-                end,
-            },
-        }
-    },
+    perks = {{
+        name = "Magnificence",
+        description = g.loc2("When this unit heals or gains max HP, spread the effect to 3 random nearby allies without this perk."),
+        image = "coin_icon",
+        handlers = {
+            entityHealed = function(ent, amount, healer)
+                local nearby = {}
+                g.iteratePartition("ally", ent.x, ent.y, function(other)
+                    if other == ent then return end
+                    if not g.isAlive(other) then return end
+                    if hasMagnificence(other) then return end
+                    nearby[#nearby + 1] = other
+                end, 120)
+                for i = 1, math.min(3, #nearby) do
+                    local idx = math.random(i, #nearby)
+                    nearby[i], nearby[idx] = nearby[idx], nearby[i]
+                    g.healEntity(nearby[i], amount)
+                end
+            end,
+            entityBuffed = function(ent, stat, increase)
+                if stat ~= "maxHealth" or increase <= 0 then return end
+                local nearby = {}
+                g.iteratePartition("ally", ent.x, ent.y, function(other)
+                    if other == ent then return end
+                    if not g.isAlive(other) then return end
+                    if hasMagnificence(other) then return end
+                    nearby[#nearby + 1] = other
+                end, 120)
+                for i = 1, math.min(3, #nearby) do
+                    local idx = math.random(i, #nearby)
+                    nearby[i], nearby[idx] = nearby[idx], nearby[i]
+                    g.buffEntity(nearby[i], "maxHealth", increase)
+                end
+            end,
+        },
+    }},
     cost = {green = 1},
 })
 
@@ -428,24 +416,22 @@ g.defineSquad("world_tree_squad", {
         baseStartingArmor = 5,
     },
     unitCount = 1,
-    perks = {
-        {
-            name = "Her Wrath",
-            description = loc("Whenever an ally heals, this building damages a random enemy equal to 100% of the heal value."),
-            image = "coin_icon",
-            rawHandlers = {
-                entityHealed = function(self, ent, amount, healer)
-                    if not g.isAlive(self) then return end
-                    if not ent or ent.team ~= "ally" then return end
-                    if not amount or amount <= 0 then return end
-                    local enemies = g.getECS():getEnemyList()
-                    if #enemies > 0 then
-                        g.dealDamage(enemies[math.random(#enemies)], amount)
-                    end
-                end,
-            },
-        }
-    },
+    perks = {{
+        name = "Her Wrath",
+        description = loc("Whenever an ally heals, this building damages a random enemy equal to 100% of the heal value."),
+        image = "coin_icon",
+        rawHandlers = {
+            entityHealed = function(self, ent, amount, healer)
+                if not g.isAlive(self) then return end
+                if not ent or ent.team ~= "ally" then return end
+                if not amount or amount <= 0 then return end
+                local enemies = g.getECS():getEnemyList()
+                if #enemies > 0 then
+                    g.dealDamage(enemies[math.random(#enemies)], amount)
+                end
+            end,
+        },
+    }},
     cost = {green = 2},
 })
 
@@ -469,23 +455,21 @@ g.defineSquad("hive_recycler_squad", {
         baseMaxHealth = 7,
     },
     unitCount = 2,
-    perks = {
-        {
-            name = "Swarmsurge",
-            description = loc("Whenever any {GREEN_MANA_COLOR}Green unit{/GREEN_MANA_COLOR} dies, this unit summons a Pest."),
-            image = "coin_icon",
-            rawHandlers = {
-                entityDeath = function(self, ent, killer)
-                    if not g.isAlive(self) then return end
-                    local squadId = ent.type and ent.type:match("^(.-)_unit$")
-                    if not squadId then return end
-                    local ok, info = pcall(g.getSquadInfo, squadId)
-                    if not ok or not (info and info.cost and info.cost.green) then return end
-                    g.spawnEntity("pest", self.x, self.y)
-                end,
-            },
-        }
-    },
+    perks = {{
+        name = "Swarmsurge",
+        description = loc("Whenever any {GREEN_MANA_COLOR}Green unit{/GREEN_MANA_COLOR} dies, this unit summons a Pest."),
+        image = "coin_icon",
+        rawHandlers = {
+            entityDeath = function(self, ent, killer)
+                if not g.isAlive(self) then return end
+                local squadId = ent.type and ent.type:match("^(.-)_unit$")
+                if not squadId then return end
+                local ok, info = pcall(g.getSquadInfo, squadId)
+                if not ok or not (info and info.cost and info.cost.green) then return end
+                g.spawnEntity("pest", self.x, self.y)
+            end,
+        },
+    }},
     cost = {green = 1},
 })
 
@@ -507,25 +491,23 @@ g.defineSquad("living_forest_squad", {
     },
     unitCount = 4,
     icon = "livingforest_uniticon",
-    perks = {
-        {
-            name = "Circle of Life",
-            description = loc("On-death, all allies gain 10% of this unit's max HP."),
-            image = "coin_icon",
-            handlers = {
-                entityDeath = function(ent, killer)
-                    local amount = (ent.maxHealth or 0) * 0.1
-                    if amount <= 0 then return end
-                    for _, other in ent:getWorld():iterate("team") do
-                        if other.team == "ally" and g.isAlive(other) then
-                            g.buffEntity(other, "maxHealth", amount)
-                            g.healEntity(other, amount)
-                        end
+    perks = {{
+        name = "Circle of Life",
+        description = loc("On-death, all allies gain 10% of this unit's max HP."),
+        image = "coin_icon",
+        handlers = {
+            entityDeath = function(ent, killer)
+                local amount = (ent.maxHealth or 0) * 0.1
+                if amount <= 0 then return end
+                for _, other in ent:getWorld():iterate("team") do
+                    if other.team == "ally" and g.isAlive(other) then
+                        g.buffEntity(other, "maxHealth", amount)
+                        g.healEntity(other, amount)
                     end
-                end,
-            },
-        }
-    },
+                end
+            end,
+        },
+    }},
     cost = {green = 1},
 })
 
@@ -550,18 +532,16 @@ g.defineSquad("lifesmith_squad", {
     },
     unitCount = 6,
     icon = "lifesmiths_uniticon",
-    perks = {
-        {
-            name = "Forge Life",
-            description = g.loc2("This unit has additional (HEAL) equal to its (ARMR)."),
-            image = "coin_icon",
-            handlers = {
-                getHealPowerModifier = function(ent)
-                    return math.floor(ent.armor or 0)
-                end,
-            },
-        }
-    },
+    perks = {{
+        name = "Forge Life",
+        description = g.loc2("This unit has additional (HEAL) equal to its (ARMR)."),
+        image = "coin_icon",
+        handlers = {
+            getHealPowerModifier = function(ent)
+                return math.floor(ent.armor or 0)
+            end,
+        },
+    }},
     cost = {green = 1},
 })
 

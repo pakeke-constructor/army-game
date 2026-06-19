@@ -26,18 +26,16 @@ g.defineSquad("archer_squad", {
         baseMaxHealth = 30,
     },
     unitCount = 4,
-    perks = {
-        {
-            name = "Sharpshooter",
-            description = loc("This unit fires 1 extra projectile."),
-            image = "coin_icon",
-            handlers = {
-                getProjectileCountModifier = function(ent)
-                    return 1
-                end,
-            },
-        }
-    },
+    perks = {{
+        name = "Sharpshooter",
+        description = loc("This unit fires 1 extra projectile."),
+        image = "coin_icon",
+        handlers = {
+            getProjectileCountModifier = function(ent)
+                return 1
+            end,
+        },
+    }},
     cost = {red = 1},
 
     statUpgradeScaling = {attackSpeed = 0.5},
@@ -130,21 +128,19 @@ g.defineSquad("militia_band", {
         baseMaxHealth = 120,
     },
     unitCount = 6,
-    perks = {
-        {
-            name = "Berserker",
-            description = loc("This unit gains +5 attack when below 50% health."),
-            image = "coin_icon",
-            handlers = {
-                getAttackDamageModifier = function(ent, attack)
-                    if ent.health and ent.maxHealth and ent.health < ent.maxHealth * 0.5 then
-                        return 5
-                    end
-                    return 0
-                end,
-            },
-        }
-    },
+    perks = {{
+        name = "Berserker",
+        description = loc("This unit gains +5 attack when below 50% health."),
+        image = "coin_icon",
+        handlers = {
+            getAttackDamageModifier = function(ent, attack)
+                if ent.health and ent.maxHealth and ent.health < ent.maxHealth * 0.5 then
+                    return 5
+                end
+                return 0
+            end,
+        },
+    }},
     cost = {green = 1, red=1},
 })
 ]]
@@ -173,21 +169,19 @@ g.defineSquad("aggravator_7000_squad", {
         baseStartingArmor = 10,
     },
     unitCount = 1,
-    perks = {
-        {
-            name = "Racket",
-            description = loc("On-attack, all enemies in a large area are Taunted to target this unit."),
-            image = "coin_icon",
-            handlers = {
-                onAttack = function(ent, target)
-                    g.iteratePartition("enemy", ent.x, ent.y, function(other)
-                        if not g.isAlive(other) then return end
-                        other.taunt = { ent = ent }
-                    end, 200)
-                end,
-            },
-        }
-    },
+    perks = {{
+        name = "Racket",
+        description = loc("On-attack, all enemies in a large area are Taunted to target this unit."),
+        image = "coin_icon",
+        handlers = {
+            onAttack = function(ent, target)
+                g.iteratePartition("enemy", ent.x, ent.y, function(other)
+                    if not g.isAlive(other) then return end
+                    other.taunt = { ent = ent }
+                end, 200)
+            end,
+        },
+    }},
     cost = {red = 1, blue = 1},
 })
 
@@ -228,7 +222,10 @@ do
             baseMaxHealth = 18,
         },
         unitCount = 3,
-        perks = {"defy"},
+        perks = {{
+            description = loc("For the first 15s of battle, on-death, summon a copy with +1 ATK."),
+            image = "coin_icon",
+        }},
         cost = {red = 1},
         onDeploySquad = function(info, entities)
             for _, ent in ipairs(entities) do
@@ -262,23 +259,21 @@ g.defineSquad("quartz_cannoneer_squad", {
         baseMaxHealth = 8,
     },
     unitCount = 4,
-    perks = {
-        {
-            name = "Pinpoint",
-            description = loc("Deals double damage to enemies beyond 350 units away."),
-            image = "coin_icon",
-            handlers = {
-                onAttack = function(ent, target)
-                    if target then
-                        local dx, dy = ent.x - target.x, ent.y - target.y
-                        if dx*dx + dy*dy > 350*350 then
-                            ent.attackDamage = (ent.attackDamage or 0) * 2
-                        end
+    perks = {{
+        name = "Pinpoint",
+        description = loc("Deals double damage to enemies beyond 350 units away."),
+        image = "coin_icon",
+        handlers = {
+            onAttack = function(ent, target)
+                if target then
+                    local dx, dy = ent.x - target.x, ent.y - target.y
+                    if dx*dx + dy*dy > 350*350 then
+                        ent.attackDamage = (ent.attackDamage or 0) * 2
                     end
-                end,
-            },
-        }
-    },
+                end
+            end,
+        },
+    }},
     cost = {blue = 1, red = 1},
 })
 
@@ -300,21 +295,19 @@ g.defineSquad("world_devourer_squad", {
         baseStartingArmor = 0,
     },
     unitCount = 4,
-    perks = {
-        {
-            name = "Consumption",
-            description = loc("On-kill, spawn a copy of this unit."),
-            image = "coin_icon",
-            handlers = {
-                onKill = function(ent, target)
-                    if not g.isAlive(ent) then return end
-                    if ent.type then
-                        g.spawnEntity(ent.type, ent.x, ent.y)
-                    end
-                end,
-            },
-        }
-    },
+    perks = {{
+        name = "Consumption",
+        description = loc("On-kill, spawn a copy of this unit."),
+        image = "coin_icon",
+        handlers = {
+            onKill = function(ent, target)
+                if not g.isAlive(ent) then return end
+                if ent.type then
+                    g.spawnEntity(ent.type, ent.x, ent.y)
+                end
+            end,
+        },
+    }},
     cost = {green = 1, red = 1},
 })
 
