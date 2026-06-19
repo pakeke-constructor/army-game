@@ -24,7 +24,10 @@ local hoveredButton
 local lg = love.graphics
 local spawnX = 0 -- the left x of most of the buttons
 local spawnY = 0
-local gapPerButton = 80
+local gapPerButton = 70
+local BUTTON_W = 300
+
+local buttonCells -- one Kirigami region per button (shared by hit-test + draw)
 
 function title_scene:init()
 end
@@ -32,17 +35,14 @@ end
 function title_scene:enter()
 end
 
-local BUTTON_W = 200
-
--- the hit-rect for button i (matches the drawn text region)
-local function buttonRect(i)
-    return spawnX-30, spawnY+gapPerButton*(i-1-0.5), BUTTON_W, gapPerButton
-end
-
 function title_scene:update(dt)
     local w, h = lg.getDimensions()
     spawnX = w * 1/6
     spawnY = h * 1/2
+
+    -- one column of cells, vertically centered on the button list
+    local col = Kirigami(spawnX, spawnY - gapPerButton/2, BUTTON_W, gapPerButton*#buttons)
+    buttonCells = col:columns(#buttons)
 
     -- hoveredButton is set in :draw (iml only runs inside the draw frame)
     for i, button in ipairs(buttons) do
@@ -78,14 +78,14 @@ function title_scene:draw()
 
     lg.setColor(1, 1, 1, 1)
 
-    local capw, caph = g.getImageSize("smallcapsule")
-    g.drawImage("smallcapsule", spawnX+capw/2, spawnY - caph)
+    local capw, caph = g.getImageSize("logo")
+    g.drawImage("logo", spawnX+capw/2, spawnY - caph)
     
 
     
     hoveredButton = nil
     for i, button in ipairs(buttons) do
-        local rx, ry, rw, rh = buttonRect(i)
+        local rx, ry, rw, rh = buttonCells[i]:get()
         if iml.isHovered(rx, ry, rw, rh, button) then
             hoveredButton = i
         end
@@ -102,10 +102,8 @@ function title_scene:draw()
             end
         end
 
-        local msg = button.name
-        local x = spawnX + (button.offsetX or 0)
         lg.setColor((i == hoveredButton) and {1,1,0.6,1} or {1,1,1,1})
-        lg.print(msg, smallFont, x, spawnY + (i-1)*gapPerButton - smallFont:getHeight()/2)
+        richtext.printRichContainedNoWrap(button.name, smallFont, rx + (button.offsetX or 0), ry, rw, rh, "left")
     end
 end
 
