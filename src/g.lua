@@ -837,6 +837,7 @@ function g.defineSquad(id, info)
     def.team = def.team or "ally"
     def.partitions = def.partitions or {"unit", "ally"}
     def.ai = def.ai or { target = "enemy" }
+    def.shadow = def.shadow or {}
     if not def.physics and def.image then
         local w = g.getImageSize(def.image)
         def.physics = { shape = "circle", radius = w / 2, ox = 0, oy = 0, mass = 1 }
@@ -1088,7 +1089,6 @@ function g.spawnSquad(squad, x, y, ...)
             ent.scope = squadScope
             ent.squad = squad
             ent._timeSinceDeployed = -(((i - 1)/numUnits) * DEPLOY_ANIMATION_STEP)
-            g.addTrait(ent, "flying")
             for _, traitName in ipairs(info.startingTraits) do
                 g.addTrait(ent, traitName)
             end
