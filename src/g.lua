@@ -2717,6 +2717,17 @@ local function lightenColor(col, val)
     return objects.Color(nr, ng, nb, a)
 end
 
+---@param tagname string
+---@param col objects.Color
+local function defineColorTag(tagname, col)
+    richtext.defineEffect(tagname, function (args, x, y, context, next)
+        local r, gg, b, a = love.graphics.getColor()
+        lg.setColor(col[1], col[2], col[3], (col[4] or 1) * a)
+        next(context.textOrDrawable, x, y)
+        lg.setColor(r, gg, b, a)
+    end)
+end
+
 ---@param id string
 ---@param name string
 ---@param color objects.Color
@@ -2724,19 +2735,6 @@ end
 local function newRarity(id, name, color)
     local lightTextEffect = id .. "_COLOR_LIGHT"
     local darkTextEffect = id .. "_COLOR_DARK"
-    richtext.defineEffect(lightTextEffect, function (args, x, y, context, next)
-        local r, gg, b, a = love.graphics.getColor()
-        love.graphics.setColor(color.r or 1, color.g or 1, color.b or 1, (color.a or 1) * a)
-        next(context.textOrDrawable, x, y)
-        love.graphics.setColor(r, gg, b, a)
-    end)
-
-    richtext.defineEffect(darkTextEffect, function (args, x, y, context, next)
-        local r, gg, b, a = love.graphics.getColor()
-        love.graphics.setColor(color.r or 1, color.g or 1, color.b or 1, (color.a or 1) * a)
-        next(context.textOrDrawable, x, y)
-        love.graphics.setColor(r, gg, b, a)
-    end)
 
     local rar = {
         id = id,
@@ -2749,6 +2747,8 @@ local function newRarity(id, name, color)
         darkColor = darkenColor(color, 0.45),
         lightColor = lightenColor(color, 0.3)
     }
+    defineColorTag(darkTextEffect, rar.darkColor)
+    defineColorTag(lightTextEffect, rar.lightColor)
 
     return rar
 end
@@ -2852,15 +2852,29 @@ for i=1, 10 do
     })
 end
 
+---@param s string
+local function applyLoc2Replace(s)
+    local tag = s:sub(2, -2)
+    if not tag:find("^[A-Z0-9_]+$") then
+        return s
+    end
+
+    for _, sinfo in ipairs(g.getStatList()) do
+        if sinfo.shortName == tag then
+            return sinfo.richText
+        end
+    end
+
+    if KEYWORDS[tag] then
+        return KEYWORDS[tag]
+    end
+
+    error("Invalid tag: "..tag)
+end
+
 function g.loc2(text, variables, context)
     local result = loc(text, variables or {}, context)
-    for _, stat in ipairs(g.getStatList()) do
-        result = result:gsub("%(" .. stat.shortName .. "%)", stat.richText)
-    end
-    for k,v in pairs(KEYWORDS) do
-        result = result:gsub("%("..k.."%)", v)
-    end
-    return result
+    return (result:gsub("(%b())", applyLoc2Replace))
 end
 
 
@@ -2919,12 +2933,7 @@ g.COLORS = {
 }
 
 for k,v in pairs(g.COLORS) do
-    richtext.defineEffect(k .. "_COLOR", function (args, x, y, context, next)
-        local r, gg, b, a = love.graphics.getColor()
-        love.graphics.setColor(v)
-        next(context.textOrDrawable, x, y)
-        love.graphics.setColor(r, gg, b, a)
-    end)
+    defineColorTag(k.."_COLOR", v)
 end
 
 
@@ -3177,6 +3186,7 @@ function g.defineManaType(id, color)
         color = color,
     }
     table.insert(manaTypeList, id)
+    defineColorTag(id:upper().."_MANA_COLOR", color)
 end
 
 
