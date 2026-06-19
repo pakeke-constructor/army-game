@@ -87,6 +87,31 @@ g.defineSquad("diver_squad", {
 })
 
 
+g.defineSquad("test_subjects_squad", {
+    name = loc("Test Subjects"),
+    rarity = g.RARITIES.RARE,
+    entityDef = {
+        image = "testsubject",
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "melee",
+        },
+        weapon = {
+            image = "dagger",
+            type = "sword",
+        },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 1,
+        baseAttackRange = 18,
+        baseMoveSpeed = 55,
+        baseMaxHealth = 8,
+    },
+    unitCount = 4,
+    perks = {"catalyze"},
+    cost = {blue = 1},
+})
+
+
 
 
 g.defineSquad("monk_squad", {
@@ -234,12 +259,12 @@ g.defineSquad("incense_holder_squad", {
         },
         attack = {
             attackType = "ranged",
-            projectileType = "arrow", -- placeholder
+            projectileType = "incense_pan",
             projectileSpeed = 350,
             projectileHoming = true,
         },
         weapon = {
-            image = "militia_sword", -- placeholder
+            image = "incense_pan",
             type = "bow",
         },
         isHealer = true,
@@ -410,5 +435,79 @@ g.defineSquad("laser_gunner_squad", {
     },
     unitCount = 4,
     perks = {"laser_focus"},
+    cost = {blue = 1},
+})
+
+
+
+g.defineEntity("living_mana", {
+    name = loc("Living Mana"),
+    image = "mana_blue_large",
+    physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 0.3 },
+    attack = { attackType = "melee" },
+    weapon = { image = "1x1", type = "object" },
+    partitions = {"unit", "ally"},
+    team = "ally",
+    ai = { target = "enemy" },
+    isPest = true,
+    walkAnimation = { bounceHeight = 0, rotationAmount = 0, speed = 0 },
+
+    baseAttackDamage = 1,
+    baseAttackSpeed = 0.5,
+    baseAttackRange = 80,
+    baseMoveSpeed = 100,
+    baseMaxHealth = 8,
+
+    -- Part of Manaborn perk, supposedly
+    entityDeath = function(ent)
+        g.addMana("blue", 1, ent)
+    end
+})
+
+g.defineSquad("anima_incubator_squad", {
+    name = loc("Anima Incubator"),
+    rarity = g.RARITIES.RARE,
+    entityId = "anima_incubator",
+    entityDef = {
+        image = "anima_incubator",
+        isBuilding = true,
+        physics = { shape = "circle", isStatic = true, radius = 20, ox = 0, oy = 0, mass = 5 },
+        attack = { attackType = "melee" },
+        weapon = { image = "1x1", type = "object" },
+
+        baseAttackDamage = 1,
+        baseAttackSpeed = 0.5,
+        baseAttackRange = 120,
+        baseMoveSpeed = 0,
+        baseMaxHealth = 200,
+    },
+    unitCount = 1,
+    perks = {"manaborn"},
+    cost = {blue = 1},
+})
+
+g.defineSquad("ice_mage_squad", {
+    name = loc("Ice Mage"),
+    rarity = g.RARITIES.UNCOMMON,
+    entityDef = {
+        image = "icemage",
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "ranged",
+            projectileType = "arrow", -- placeholder
+            projectileSpeed = 300
+        },
+        weapon = {
+            image = "icemage_staff",
+            type = "staff"
+        },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 0.5,
+        baseAttackRange = 120,
+        baseMoveSpeed = 50,
+        baseMaxHealth = 12,
+    },
+    unitCount = 4,
+    perks = {"ice_touch"},
     cost = {blue = 1},
 })

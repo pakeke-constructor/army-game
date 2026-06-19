@@ -170,6 +170,22 @@ g.definePerk("swarmsurge", "Swarmsurge", {
     },
 })
 
+g.definePerk("growth", "Growth", {
+    description = loc("Permanently gains +1 Max HP for every 4 Green mana played this fight."),
+    image = "mana_green_small",
+    rawHandlers = {
+        manaSpent = function(ent, manaRequirement)
+            local green = manaRequirement and manaRequirement.green or 0
+            if green <= 0 then return end
+            ent._growthGreen = (ent._growthGreen or 0) + green
+            local stacks = math.floor(ent._growthGreen / 4)
+            if stacks <= 0 then return end
+            ent._growthGreen = ent._growthGreen - stacks * 4
+            g.buffEntity(ent, "maxHealth", stacks)
+        end,
+    },
+})
+
 g.definePerk("his_gratitude", "His Gratitude", {
     description = loc("On death, deal 10 damage to a random enemy."),
     image = "coin_icon",
@@ -313,6 +329,20 @@ g.definePerk("ritual_sacrifice", "Ritual Sacrifice", {
             if victim then
                 g.killEntity(victim, ent)
                 g.buffEntity(ent, "attackDamage", 4)
+            end
+        end,
+    },
+})
+
+g.definePerk("ritual", "Ritual", {
+    description = loc2("On-spawn, gains +1 (ATK) per 2 allies that have died this combat."),
+    image = "coin_icon",
+    handlers = {
+        entitySpawned = function(ent)
+            local ecs = g.getECS()
+            local amount = math.floor(ecs.allyDeathsThisBattle / 2)
+            if amount > 0 then
+                g.buffEntity(ent, "attackDamage", amount)
             end
         end,
     },
@@ -494,6 +524,33 @@ g.definePerk("reverberate", "Reverberate", {
     },
 })
 
+
+g.definePerk("eureka", "Eureka", {
+    description = loc("When this unit is Buffed, spreads the buff to 6 nearby allies."),
+    image = "coin_icon",
+    handlers = {
+        entityBuffed = function(ent, stat, increase)
+            ---@type [ecs.Entity,number][]
+            local entAllies = {}
+            g.iteratePartition("ally", ent.x, ent.y, function(other)
+                if g.isAlive(other) and other:getTypename() ~= ent:getTypename() then
+                    entAllies[#entAllies+1] = {other, helper.magnitude(other.x - ent.x, other.y - ent.y)}
+                end
+            end, 160)
+
+            -- Sort by closest
+            table.sort(entAllies, function(a, b)
+                return a[2] < b[2]
+            end)
+
+            -- Buff them
+            for i = 1, math.min(#entAllies, 6) do
+                g.buffEntity(entAllies[i][1], stat, increase)
+            end
+        end,
+    },
+})
+
 g.definePerk("laser_focus", "Laser Focus", {
     description = loc2("On-attack, this unit gains 0.1 (ASPD). Stacks up to 30 times."),
     image = "coin_icon",
@@ -609,11 +666,67 @@ g.definePerk("rebirth", "Rebirth", {
 })
 
 g.definePerk("vampiric", "Vampiric", {
-    description = loc("This unit heals for 3 (HP) on kill."),
+    description = loc2("This unit heals for 3 (HP) on kill."),
     image = "coin_icon",
     handlers = {
         onKill = function(ent, target)
             g.healEntity(ent, 3, ent)
+        end,
+    },
+})
+
+g.definePerk("manaborn", "Manaborn Legion", {
+    -- FIXME: Do proper BLUE_MANA registration on loc2 for this.
+    description = loc2("For every 5 seconds, consume 1 {blue} Blue Mana to summon a {c r=0.11 g=0.49 b=0.72}Living Mana{/c}. {c r=0.11 g=0.49 b=0.72}Living Mana{/c} gives 1 {blue} Blue Mana On-death."),
+    image = "mana_blue_small",
+    rawHandlers = {
+        perSecondUpdate = function(ent)
+            if ent:getTypename() ~= "anima_incubator" then
+                return
+            end
+
+            ent._livingManaSpawnTimer = (ent._livingManaSpawnTimer or 0) + 1
+            if ent._livingManaSpawnTimer >= 5 then
+                if g.trySpendMana(g.getBattleManaCounts(), {blue = 1}) then
+                    local SPAWN_RADIUS = 20
+                    local a = math.random() * consts.TAU
+                    local ox = math.cos(a) * SPAWN_RADIUS
+                    local oy = math.sin(a) * SPAWN_RADIUS
+                    g.spawnEntity("living_mana", ent.x + ox, ent.y + oy)
+                    ent._livingManaSpawnTimer = 0
+                end
+            end
+        end
+    }
+})
+
+g.definePerk("ice_touch", "Ice Touch", {
+    description = loc("On-hit, 25% chance to Freeze for 5s. {c r=0.388 g=0.388 b=0.388}Prioritizes unfrozen targets.{/c}"),
+    image = "coin_icon",
+    handlers = {
+        getAITargetPriorityModifier = function(selfEnt, targEnt)
+            return (targEnt.frozenTime or 0) > 0 and 1000 or 0
+        end,
+        onHitDamage = function(ent, damage, target)
+            if target and love.math.random() < 0.25 then
+                g.applyFrozen(target, 5, ent)
+            end
+        end,
+    },
+})
+
+g.definePerk("catalyze", "Catalyze", {
+    description = loc2("When Transformed, gain +50% (HP) and (ASPD)."),
+    image = "coin_icon",
+    rawHandlers = {
+        entityTransformed = function(self, oldEnt, newEnt)
+            if self ~= oldEnt then return end
+            local hp = (newEnt.maxHealth or 0) * 0.5
+            local aspd = (newEnt.attackSpeed or 0) * 0.5
+            g.buffEntity(newEnt, "maxHealth", hp)
+            newEnt.maxHealth = (newEnt.maxHealth or 0) + hp
+            g.healEntity(newEnt, hp, self)
+            g.buffEntity(newEnt, "attackSpeed", aspd)
         end,
     },
 })

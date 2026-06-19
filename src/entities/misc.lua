@@ -33,6 +33,7 @@ g.defineEntity("body", {
 
 g.defineEntity("nexus", {
     image = "placeholder",
+    -- NOTE: UNUSED AS OF JUNE 2026; replaced with commander win-con
 
     -- "nexus" is an object that spawns at the start of every battle.
     -- it has health; if destroyed, you lose the game.
@@ -50,6 +51,22 @@ g.defineEntity("nexus", {
     baseAttackSpeed = 0.8,
     baseAttackRange = 250,
     baseMaxHealth = 200,
+})
+
+
+
+g.defineEntity("treasure_chest_objective", {
+    image = "placeholder",
+    isBuilding = true,
+    team = "neutral",
+    side = "neutral",
+    partitions = {"unit", "neutral"},
+    physics = { shape = "circle", radius = 6, ox = 0, oy = 0, mass = 1, isStatic = true },
+    baseMaxHealth = 8,
+    shadow = {},
+    entityDeath = function(ent, killer)
+        g.addGold(50)
+    end,
 })
 
 

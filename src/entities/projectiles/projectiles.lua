@@ -34,3 +34,8 @@ defineProjectile("blazingbombardier_bomb", {
         g.explosion(projEnt.x, projEnt.y, 3, 10, projEnt.projectile.ownerEnt)
     end
 })
+
+
+defineProjectile("incense_pan", {
+    image = "incense_pan"
+})

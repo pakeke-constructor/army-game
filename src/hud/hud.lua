@@ -249,7 +249,10 @@ local function drawXpBar(reg)
     local ox = math.sin(love.timer.getTime() * 0.3) * 8
     local oy = math.cos(love.timer.getTime() * 0.21) * 4
     lg.setColor(1, 1, 1)
+    -- Need to tile this otherwise it won't extend through the whole bar
+    local bgBarW = g.getImageSize("army_healthbar_background")
     g.drawImageOffset("army_healthbar_background", xpBar.x + ox, xpBar.y + xpBar.h/2 + oy, 0, nil, nil, 0.5, 0.5)
+    g.drawImageOffset("army_healthbar_background", xpBar.x + ox + bgBarW, xpBar.y + xpBar.h/2 + oy, 0, nil, nil, 0.5, 0.5)
     lg.setStencilMode()
     lg.clear(false, true)
     end
@@ -334,9 +337,13 @@ end
 
 
 ---@param self g.HUD
-local function drawManaBox(self)
+---@param noDraw boolean?
+local function drawManaBox(self, noDraw)
     local img = "hud_bottom_left_mana_box"
     local w,h = g.getImageSize(img)
+    if noDraw then
+        return w,h
+    end
     local r = Kirigami(0,0,w,h)
     local sr = ui.getFullScreenRegion()
     r = r:attachToBottomOf(sr):clampInside(sr)
@@ -408,7 +415,7 @@ end
 
 ---@param self g.HUD
 local function drawBottomBar(self, barHeight)
-    local w,h = drawManaBox(self)
+    local w,h = drawManaBox(self, true)
 
     local sw, sh = ui.getScaledUIDimensions()
     local run = g.getRun()
@@ -424,6 +431,8 @@ local function drawBottomBar(self, barHeight)
     -- Blessing box
     ui.drawDarkPanel(blessingBar:get())
     drawLeftBlessingBar(blessingBar)
+
+    drawManaBox(self, false)
 end
 
 

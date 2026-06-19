@@ -295,7 +295,7 @@ local function updateProjectile(world, ent, dt)
         ---@type ecs.Entity?
         local hitEnt = nil
         local projHits = ent._projectileHits
-        g.iteratePartition(targetTeam, ent.x, ent.y, function(other)
+        local function checkHit(other)
             if hitEnt then return end
             -- Need this check because projectile meant for ally collies
             -- with itself. However, a more sophisticated heurestic is
@@ -313,7 +313,9 @@ local function updateProjectile(world, ent, dt)
             if d2 <= PROJ_HIT_RADIUS * PROJ_HIT_RADIUS then
                 hitEnt = other
             end
-        end, PROJ_HIT_RADIUS)
+        end
+        g.iteratePartition(targetTeam, ent.x, ent.y, checkHit, PROJ_HIT_RADIUS)
+        g.iteratePartition("neutral", ent.x, ent.y, checkHit, PROJ_HIT_RADIUS)
         if hitEnt then
             ent._projectileHits = ent._projectileHits or {}
             ent._projectileHits[hitEnt.id] = true

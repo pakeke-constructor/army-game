@@ -34,10 +34,14 @@ function ECSWorld:init(systemNames)
     self.partitions = {
         -- [partitionId] -> objects.Partition<ecs.Entity>
         unit = objects.Partition(PARTITION_CHUNKSIZE),
+        neutral = objects.Partition(PARTITION_CHUNKSIZE),
         projectile = objects.Partition(PARTITION_CHUNKSIZE),
         ally = objects.Partition(PARTITION_CHUNKSIZE),
         enemy = objects.Partition(PARTITION_CHUNKSIZE)
     }
+
+    self.allyDeathsThisBattle = 0
+    self.enemyDeathsThisBattle = 0
 
     -- Load systems (each system is a plain table of event/question handlers)
     self.systems = {}
@@ -60,9 +64,13 @@ local function generateShape(w, h)
     local cy = h / 2
     local shape = {}
     local n = love.math.random(4, 6)
+    shape[1] = {
+        cx = w/2, cy = h/2,
+        rx = w/4, ry = h/4
+    }
     for i = 1, n do
         local t = (i - 1) / (n - 1)
-        local rx = math.min(w, h) * love.math.random(40, 70) / 100
+        local rx = math.min(w, h) * (love.math.random(40, 50) / 100) * (14 / (10+n))
         local ry = rx * love.math.random(100, 130) / 100
         -- cap radii + clamp center so the whole oval stays inside the bounding box
         rx = math.min(rx, w / 2)
@@ -71,12 +79,12 @@ local function generateShape(w, h)
         local cyy = cy + love.math.random(-h * 0.3, h * 0.3)
         cx = helper.clamp(cx, rx, w - rx)
         cyy = helper.clamp(cyy, ry, h - ry)
-        shape[i] = {
+        table.insert(shape, {
             cx = cx,
             cy = cyy,
             rx = rx,
             ry = ry,
-        }
+        })
     end
     return shape
 end
@@ -100,6 +108,21 @@ function ECSWorld:isInsideShape(x, y)
         end
     end
     return false
+end
+
+---@return integer
+function ECSWorld:getNumOverlappingShapes(x, y)
+    local shape = self.shape
+    if not shape then return 0 end
+    local count = 0
+    for i = 1, #shape do
+        local e = shape[i]
+        local dx, dy = (x - e.cx) / e.rx, (y - e.cy) / e.ry
+        if dx * dx + dy * dy <= 1 then
+            count = count + 1
+        end
+    end
+    return count
 end
 
 -- Returns x,y clamped to the nearest point inside/on the shape.
@@ -152,7 +175,7 @@ function ECSWorld:_rebuildComponentIndex()
         local list = idx[k]
         for i = 1, self.entities.len do
             local e = self.entities[i]
-            if entHas(e, k) then
+            if entHas(e, k) and not (e.___dead or e.___removed) then
                 list[#list + 1] = e
             end
         end
@@ -343,7 +366,7 @@ function ECSWorld:iterate(component)
         self.trackedComponents:add(component)
         for i = 1, self.entities.len do
             local e = self.entities[i]
-            if entHas(e, component) then
+            if entHas(e, component) and not (e.___dead or e.___removed) then
                 list[#list + 1] = e
             end
         end

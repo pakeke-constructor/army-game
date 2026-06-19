@@ -184,6 +184,36 @@ g.defineSquad("giant_toad_squad", {
 })
 
 
+g.defineSquad("treant_squad", {
+    name = loc("Treants"),
+    rarity = g.RARITIES.UNCOMMON,
+    entityDef = {
+        image = "treant",
+        physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 2 },
+        attack = {
+            attackType = "melee",
+        },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 0.8,
+        baseAttackRange = 24,
+        baseMoveSpeed = 35,
+        baseMaxHealth = 24,
+        baseStartingArmor = 2,
+    },
+    unitCount = 5,
+    icon = "treants_uniticon",
+    perks = {"growth"},
+    cost = {green = 2},
+    ---@param info g.SquadInfo
+    ---@param entities ecs.Entity[]
+    onDeploySquad = function(info, entities)
+        for _, ent in ipairs(entities) do
+            ent._growthGreen = info.cost.green
+        end
+    end,
+})
+
+
 
 
 g.defineSquad("infested_squad", {
@@ -393,4 +423,3 @@ g.defineSquad("swarm_squad", {
     icon = "theswarm_uniticon",
     cost = {green = 2},
 })
-

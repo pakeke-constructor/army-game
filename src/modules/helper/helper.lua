@@ -65,6 +65,7 @@ end
 
 ---Randomly picks an item from the list.
 ---If you don't need weighted pick, consider using `helper.randomChoice` instead.
+--- IMPORTANT NOTE: BE SUPER CAREFUL, if any weight is 0, it WILL crash. Take care if generating weights dynamically.
 ---@generic T
 ---@param itemsAndWeights {[1]:T,[2]:number}[] List of items and its weights.
 ---@param rng (fun():number)? Random number generator function to use.

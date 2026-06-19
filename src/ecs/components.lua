@@ -37,8 +37,8 @@ local attack = {
 ---@field public damage number
 ---@field public healing number
 ---@field public ownerEnt ecs.Entity?
----@field public team "ally"|"enemy"
----@field public targetTeam "ally"|"enemy"
+---@field public team "ally"|"enemy"|"neutral"
+---@field public targetTeam "ally"|"enemy"|"neutral"
 ---@field public pierceCount number
 ---@field public homing ecs.components.Projectile.Homing?
 local projectile = {
@@ -131,7 +131,7 @@ local shadow = {
 ---@field public faceDir integer?
 ---@field public taunt ecs.components.Taunt?
 ---@field public fear ecs.components.Fear?
----@field public team ("ally"|"enemy")?
+---@field public team ("ally"|"enemy"|"neutral")?
 ---@field public color objects.Color?
 ---@field public alpha number? transparency
 ---@field public x number?
@@ -143,6 +143,7 @@ local shadow = {
 ---@field public rot number?
 ---@field public sx number?
 ---@field public sy number?
+---@field public randomizeScaleX boolean? if true, sx is randomized to +abs(sx) or -abs(sx) on spawn
 ---@field public ox number?
 ---@field public oy number?
 ---@field public kx number?
@@ -181,6 +182,7 @@ local shadow = {
 ---@field public squad g.Squad?
 ---@field public scope g.Scope?
 ---@field public buffs {[string]: number}?
+---@field public traits {[string]: boolean?}?
 ---@field public __cachedPerkHandler table<string, function>|false?
 ---@field public _projectileCloned boolean?
 ---@field public _projectileHits table<integer, boolean>?

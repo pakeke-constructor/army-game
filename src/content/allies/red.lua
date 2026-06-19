@@ -137,8 +137,8 @@ g.defineSquad("tribute_squad", {
 
 
 
-g.defineSquad("grime_executioner_squad", {
-    name = loc("Grime Executioners"),
+g.defineSquad("executioner_squad", {
+    name = loc("Executioners"),
     rarity = g.RARITIES.RARE,
     entityDef = {
         image = "barbarian",
@@ -215,8 +215,8 @@ g.defineSquad("dagger_bearer_squad", {
 
 
 
-g.defineSquad("soul_furnace_squad", {
-    name = loc("Soul Furnaces"),
+g.defineSquad("furnace_golems_squad", {
+    name = loc("Furnace Golems"),
     rarity = g.RARITIES.RARE,
     entityDef = {
         image = "charredsoul",
@@ -257,6 +257,26 @@ g.defineSquad("living_entropy_squad", {
     },
     unitCount = 2,
     perks = {"explosive"},
+    cost = {red = 2},
+})
+
+
+g.defineSquad("his_manifestation_squad", {
+    name = loc("His Manifestation"),
+    rarity = g.RARITIES.LEGENDARY,
+    entityDef = {
+        image = "hismanifestation",
+        physics = { shape = "circle", radius = 10, ox = 0, oy = 0, mass = 3 },
+        attack = { attackType = "melee" },
+        weapon = { image = "1x1", type = "sword" },
+        baseAttackDamage = 6,
+        baseAttackSpeed = 0.8,
+        baseAttackRange = 22,
+        baseMoveSpeed = 45,
+        baseMaxHealth = 40,
+    },
+    unitCount = 1,
+    perks = {"ritual"},
     cost = {red = 2},
 })
 
@@ -302,4 +322,3 @@ g.defineSquad("doom_herald_squad", {
     perks = {"omen"},
     cost = {red = 1},
 })
-

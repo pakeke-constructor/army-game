@@ -32,6 +32,20 @@ local function loseBattle(self)
     gameoverPopupService.show()
 end
 
+local function spawnTestNeutralObjectives(self)
+    local border = self.ecs.boundingBox
+    local cx = border[1] + border[3] * 0.6
+    local cy = border[2] + border[4] * 0.5
+    local offsets = {
+        {0, 0},
+        {100, -70},
+        {100, 70},
+    }
+    for _, off in ipairs(offsets) do
+        g.spawnEntity("treasure_chest_objective", cx + off[1], cy + off[2])
+    end
+end
+
 
 function battle_scene:init()
     self.victory = false
@@ -39,6 +53,7 @@ function battle_scene:init()
     self.victoryPopupTime = 0
     self.shockwave = nil
     self.lastEnemyCount = 0
+    self.allyDeathsThisBattle = 0
     ---@type ecs.Entity?
     self.commander = nil
 
@@ -83,9 +98,15 @@ function battle_scene:pollHandlers()
             if ent == self.commander then
                 loseBattle(self)
             end
-            if ent.team ~= "enemy" then return end
-            if self.lastEnemyCount ~= 1 then return end
-            self.shockwave = { time = 0, x = ent.x, y = ent.y }
+            if ent.team == "ally" then
+                self.ecs.allyDeathsThisBattle = self.ecs.allyDeathsThisBattle + 1
+            end
+            if ent.team == "enemy" then
+                self.ecs.enemyDeathsThisBattle = self.ecs.enemyDeathsThisBattle + 1
+                if self.lastEnemyCount == 1 then
+                    self.shockwave = { time = 0, x = ent.x, y = ent.y }
+                end
+            end
         end
     })
 end
@@ -115,6 +136,7 @@ function battle_scene:enter()
     self.noEnemyTimer = 0
     self.victory = false
     self.defeated = false
+    self.allyDeathsThisBattle = 0
     self.victoryPopupTime = 0
     self.shockwave = nil
     self.lastEnemyCount = 0
@@ -125,10 +147,11 @@ function battle_scene:enter()
     g.pollHandlers()
 
     if self.sandbox then
-        self.ecs:setBounds(500, 300)
+        self.ecs:setBounds(1900, 1100)
     else
         encounters.startRandomEncounter(run.day, self.ecs)
     end
+    spawnTestNeutralObjectives(self)
 
     local border = self.ecs.boundingBox
     do
@@ -626,7 +649,7 @@ end
 ---@return number, number
 local function getSnappedDeployPosition(self, squad, wx, wy)
     local commander = self.commander
-    if (not commander) or (not g.isAlive(commander)) or g.ask("canDeployAnywhere", squad) then
+    if (not commander) or (not g.isAlive(commander)) or g.ask("canDeployAnywhere", squad) or g.squadCanDeployAnywhere(squad) then
         return wx, wy
     end
 
@@ -716,6 +739,32 @@ local AUTO_ATTACK_RADIUS_SHOW = 2
 local AUTO_ATTACK_RADIUS_FADE_END = 2.5
 local AUTO_ATTACK_RADIUS_ALPHA = 0.09
 local LINE_WIDTH = 3
+local COMMANDER_TARGET_SPIN_SPEED = 4
+
+local function drawCommanderTarget(self)
+    local commander = self.commander
+    if (not commander) or (not g.isAlive(commander)) then
+        return
+    end
+
+    local target = commander._aiTarget
+    if not (target and g.isAlive(target)) then
+        return
+    end
+
+    local d2 = (target.x - commander.x) ^ 2 + (target.y - commander.y) ^ 2
+    local inRange = d2 <= (commander.attackRange or 100) ^ 2
+    local IMG="commander_target_3"
+    if inRange then
+        lg.setColor(1,1,1)
+        g.drawImageOffset(IMG, target.x, target.y - 20, love.timer.getTime() * COMMANDER_TARGET_SPIN_SPEED, 1, 1, 0.5, 0.5)
+    else
+        local dist = helper.magnitude(target.x-commander.x, target.y-commander.y)
+        local fade = helper.clamp((commander.attackRange*2) / dist, 0,1)
+        lg.setColor(1, 1, 1, fade)
+        g.drawImageOffset(IMG, target.x, target.y - 20, 0, 1, 1, 0.5, 0.5)
+    end
+end
 
 
 local function drawCommanderRadius(self)
@@ -799,6 +848,8 @@ function battle_scene:draw()
         end
     end
 
+    drawCommanderTarget(self)
+
     iml.popTransform()
     self.camera:detach()
 
@@ -846,7 +897,7 @@ function battle_scene:draw()
         richtext.printRichContainedNoWrap("{o}{c r=0.7 g=0.1 b=0.2}"..txt, font, rr:padRatio(0.85):get())
     end
 
-    if self.sandbox then
+    if self.sandbox and consts.SHOW_DEV_STUFF then
         drawSandboxUI(self)
     end
     ui.endUI()
