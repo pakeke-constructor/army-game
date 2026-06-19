@@ -2877,6 +2877,8 @@ g.COLORS = {
     MAP_GROUND_COLOR = objects.Color("FF0B0C0B"),
     BATTLE_GROUND_COLOR = objects.Color("FF2C2929"),
 
+    REROLL = g.snapToPalette(0.1,1,0.05),
+
     GOLD = objects.Color("FFD8B01F"),
     XP = objects.Color("FF2BC66E"),
     DARK_UI = objects.Color("FF0c0c19"),

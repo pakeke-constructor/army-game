@@ -310,17 +310,18 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
         local H = 10
         local function drawTraitBox(traitInfo, xx, yy, ww, hh)
             if not traitInfo then return end
+            xx,yy,ww,hh = Kirigami(xx,yy,ww,hh):padUnit(2,0,2,0):get()
 
             local px, py = iml.getTransformedPointer()
             local isHovered2 = px >= xx and py >= yy and px <= xx + ww and py <= yy + hh
 
-            local r, gg, b, a = panelBottomColor:getRGBA()
+            local r, gg, b, a = traitInfo.color:getRGBA()
             local pad = 1
-            local dark = isHovered2 and 0.5 or 1
+            local dark = isHovered2 and 0.7 or 1
             love.graphics.setColor(r*dark, gg*dark, b*dark, isHovered2 and 0.9 or 0.75)
             ui.drawSingleColorPanel(xx, yy, ww, hh)
 
-            love.graphics.setColor(traitInfo.color)
+            love.graphics.setColor(g.COLORS.DARK_UI)
             richtext.printRichContainedNoWrap(traitInfo.name, STAT_FONT, xx + pad*2, yy, ww - pad*4, hh, "center")
 
             if isHovered2 then
