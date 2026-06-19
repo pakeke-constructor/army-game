@@ -2,7 +2,7 @@ local title_scene = {}
 
 local buttons = {
     {name = "START", onClick = function ()
-        g.gotoScene("map_scene")
+        g.gotoScene("runSelect_scene")
     end},
     {name = "SANDBOX", onClick = function ()
         local battle = require("src.scenes.battle_scene.battle_scene")
