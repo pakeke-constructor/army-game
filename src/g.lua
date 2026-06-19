@@ -22,6 +22,14 @@
 ---@field armyHandlers table<string, fun(squad: g.Squad, ...): any>? Army-level. Registered once per army squad holding this perk, regardless of whether it has deployed. First arg is the owning squad. Use for effects computed from run state that must be known before the squad spawns (eg modifying this squad's own unit count).
 
 
+---@class g.TraitInfo
+---@field id string
+---@field name string
+---@field description string
+---@field handlers table<string, fun(ent: ecs.Entity, ...): any>? Per-entity handlers, scoped to the unit that has the trait. Only fires when dispatched AT this entity.
+---@field deployAnywhere boolean? Units with this trait can be deployed anywhere (eg flying).
+
+
 ---@class g.RarityWeights
 ---@field COMMON number
 ---@field UNCOMMON number
@@ -745,6 +753,9 @@ end
 local PERK_DEFS = {}
 local PERK_LIST = {}
 
+local TRAIT_DEFS = {}
+local TRAIT_LIST = {}
+
 -- Squad system
 local SQUAD_DEFS = {}
 local SQUAD_LIST = {}
@@ -767,6 +778,7 @@ local currentEntityId = 0
 ---@field name string
 ---@field icon string
 ---@field perks string[]
+---@field startingTraits string[]? Trait ids applied to every unit in this squad on spawn.
 ---@field cost g.ManaBundle
 ---@field powerIndex number
 ---@field onDeploySquad (fun(squad: g.SquadInfo, entities: ecs.Entity[], x: number, y:number))?
@@ -788,6 +800,7 @@ function g.defineSquad(id, info)
     assert(not SQUAD_DEFS[id], "Duplicate squad: " .. id)
     info.id = id
     info.perks = info.perks or {}
+    info.startingTraits = info.startingTraits or {}
     info.unitCount = info.unitCount or 1
     info.name = assert(info.name)
     info.rarity = assert(info.rarity)
@@ -1075,6 +1088,9 @@ function g.spawnSquad(squad, x, y, ...)
             ent.scope = squadScope
             ent.squad = squad
             ent._timeSinceDeployed = -(((i - 1)/numUnits) * DEPLOY_ANIMATION_STEP)
+            for _, traitName in ipairs(info.startingTraits) do
+                g.addTrait(ent, traitName)
+            end
             entities[i] = ent
         end, ...)
     end
@@ -1270,6 +1286,91 @@ function g.getPerkList()
     return PERK_LIST
 end
 
+
+-- Trait system
+-- Traits are a simpler, more commodified step down from perks. Per-unit, applied
+-- to an entity's scope. Eg flying, fireproof, loyal.
+
+--- Define a trait.
+---@param id string
+---@param name string
+---@param info g.TraitInfo|{id:nil,name:nil}
+function g.defineTrait(id, name, info)
+    assert(not TRAIT_DEFS[id], "Duplicate trait: " .. id)
+    info.name = loc(name, {}, { context = "The name of a trait" })
+    info.id = id
+    TRAIT_DEFS[id] = info
+    TRAIT_LIST[#TRAIT_LIST + 1] = id
+end
+
+---@param id string
+---@return g.TraitInfo
+function g.getTraitInfo(id)
+    return assert(TRAIT_DEFS[id], "Unknown trait: " .. tostring(id))
+end
+
+---@return string[]
+function g.getTraitDefList()
+    return TRAIT_LIST
+end
+
+--- Add a trait to an entity. Registers its handlers on the entity's scope.
+---@param ent ecs.Entity
+---@param traitName string
+function g.addTrait(ent, traitName)
+    local info = g.getTraitInfo(traitName)
+    ent.traits = ent.traits or {}
+    if ent.traits[traitName] then return end
+    if info.handlers then
+        g.addCustomEffect(ent, info.handlers, nil, "trait_" .. traitName)
+    end
+    ent.traits[traitName] = true
+end
+
+--- Remove a trait from an entity.
+---@param ent ecs.Entity
+---@param traitName string
+function g.removeTrait(ent, traitName)
+    if not (ent.traits and ent.traits[traitName]) then return end
+    ent.traits[traitName] = nil
+    local info = g.getTraitInfo(traitName)
+    if info.handlers and ent.scope then
+        ent.scope:removeHandler(info.handlers)
+    end
+end
+
+---@param ent ecs.Entity
+---@return boolean
+function g.hasTrait(ent, traitName)
+    return ent.traits ~= nil and ent.traits[traitName] == true
+end
+
+--- True if a squad's starting traits let it deploy anywhere (eg flying).
+---@param squad g.Squad
+---@return boolean
+function g.squadCanDeployAnywhere(squad)
+    local info = g.getSquadInfo(squad.squadId)
+    for _, traitName in ipairs(info.startingTraits) do
+        if g.getTraitInfo(traitName).deployAnywhere then
+            return true
+        end
+    end
+    return false
+end
+
+--- List of trait names on an entity.
+---@param ent ecs.Entity
+---@return string[]
+function g.getTraitList(ent)
+    local list = {}
+    if ent.traits then
+        for name in pairs(ent.traits) do
+            list[#list + 1] = name
+        end
+    end
+    return list
+end
+
 --- Add a custom effect (handler) to an entity. Promotes shared scopes so it only affects this entity.
 --- If `tag` is given, the effect is "tagged": re-adding with same tag overwrites the previous one (no stacking).
 ---@param ent table
@@ -1426,6 +1527,7 @@ end
 ---@param source ecs.Entity?
 ---@return boolean applied
 function g.applyBurn(ent, duration, source)
+    if g.hasTrait(ent, "fireproof") then return false end
     local wasActive = ent.burnTime and ent.burnTime > 0
     ent.burnTime = (ent.burnTime or 0) + duration
     if not wasActive then
@@ -2826,6 +2928,34 @@ g.defineStat("projectileAccuracy", "baseProjectileAccuracy", {
     icon = "hourglass_icon",
     isImportant = _importantIfRanged,
 })
+
+
+
+
+
+
+-- built-in traits:
+
+g.defineTrait("flying", "Flying", {
+    description = loc("Can be deployed anywhere on the battlefield."),
+    deployAnywhere = true,
+})
+
+g.defineTrait("fireproof", "Fireproof", {
+    description = loc("Immune to burning."),
+    handlers = {
+        getBurnDPSMultiplier = function(ent)
+            return 0
+        end,
+    },
+})
+
+g.defineTrait("loyal", "Loyal", {
+    description = loc("A loyal unit."),
+})
+
+
+
 
 
 

@@ -641,7 +641,7 @@ end
 ---@return number, number
 local function getSnappedDeployPosition(self, squad, wx, wy)
     local commander = self.commander
-    if (not commander) or (not g.isAlive(commander)) or g.ask("canDeployAnywhere", squad) then
+    if (not commander) or (not g.isAlive(commander)) or g.ask("canDeployAnywhere", squad) or g.squadCanDeployAnywhere(squad) then
         return wx, wy
     end
 
