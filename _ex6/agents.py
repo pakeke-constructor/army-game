@@ -94,14 +94,14 @@ CODING_STYLE_PROMPT = ex6.Message(role="system", overview="coding-style", conten
 CODE_MODE_SYS_PROMPT = make_code_mode_system_prompt(MAIN_TOOLS)
 
 
-EX6_MD = ex6.Message(role="system", content=open("EX6.md","r").read(), overview="EX6.md")
+CLAUDE_MD = ex6.Message(role="system", content=open("CLAUDE.md","r").read(), overview="CLAUDE.md")
 
 
 coder = Context("c_opus", yolo=False, model=M.OPUS_LATEST.id, reasoning="high", messages=[
     MAIN_SYSTEM_PROMPT,
     ENV_PROMPT,
     # CODING_STYLE_PROMPT,
-    EX6_MD,
+    CLAUDE_MD,
 ])
 cache_manually(coder)
 
@@ -111,7 +111,7 @@ coder = Context("c_codex", yolo=False, model=M.CODEX_LATEST.id, reasoning="high"
     MAIN_SYSTEM_PROMPT,
     ENV_PROMPT,
     # CODING_STYLE_PROMPT,
-    EX6_MD,
+    CLAUDE_MD,
 ])
 
 
@@ -119,7 +119,7 @@ coder = Context("c_gem", yolo=False, model=M.GEMINI_LATEST.id, reasoning="high",
     MAIN_SYSTEM_PROMPT,
     ENV_PROMPT,
     # CODING_STYLE_PROMPT,
-    EX6_MD,
+    CLAUDE_MD,
 ])
 
 

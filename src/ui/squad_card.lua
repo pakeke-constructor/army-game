@@ -89,6 +89,12 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
     local frameLightColor = manaColor:lerp(objects.Color.WHITE, 0.25)
     local panelTopColor = objects.Color(0.05, 0.05, 0.06, 0.9)
     local canUpgrade = showUpgrade and g.getSquadFromArmy(squadId)
+    local traits = info.startingTraits or {}
+    local traitInfos = {}
+    for i = 1, #traits do
+        table.insert(traitInfos, (g.getTraitInfo(traits[i])))
+    end
+    local hasAnyTraits = #traitInfos > 0
 
     local x, y, w, h = region:get()
     local uid = squadId .. "_" .. index
@@ -288,6 +294,55 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
             end
         end,
     })
+
+    -- Traits:
+    if hasAnyTraits then
+        local H = 10
+        local function drawTraitBox(traitInfo, xx, yy, ww, hh)
+            if not traitInfo then return end
+
+            local px, py = iml.getTransformedPointer()
+            local isHovered2 = px >= xx and py >= yy and px <= xx + ww and py <= yy + hh
+
+            local r, gg, b, a = panelBottomColor:getRGBA()
+            local pad = 1
+            love.graphics.setColor(r, gg, b, isHovered2 and 0.9 or 0.75)
+            ui.drawSingleColorPanel(xx, yy, ww, hh)
+
+            love.graphics.setColor(1, 1, 1)
+            richtext.printRichContainedNoWrap("{o}" .. traitInfo.name, STAT_FONT, xx + pad*2, yy, ww - pad*4, hh, "center")
+
+            if isHovered2 then
+                hoverService.requestHover(function(boxx, fonts)
+                    boxx:addText(traitInfo.name, fonts.title)
+                    boxx:addText(traitInfo.description, fonts.body)
+                end)
+            end
+        end
+
+        box:add({
+            getHeight = function(w)
+                return H
+            end,
+            draw = function(xx, yy, ww, hh)
+                lg.setColor(1,1,1)
+                -- lg.circle("fill",xx,yy, 100)
+                -- print(#traits)
+                local reg = Kirigami(xx, yy, ww, hh)
+                local a, b, c = reg:padRatio(0.1):splitHorizontal(1, 1, 1)
+                if #traitInfos == 1 then
+                    drawTraitBox(traitInfos[1], b:get())
+                elseif #traitInfos == 2 then
+                    drawTraitBox(traitInfos[1], a:get())
+                    drawTraitBox(traitInfos[2], b:get())
+                else
+                    drawTraitBox(traitInfos[1], a:get())
+                    drawTraitBox(traitInfos[2], b:get())
+                    drawTraitBox(traitInfos[3], c:get())
+                end
+            end
+        })
+    end
 
     -- Perks
     local perks = info.perks or {}

@@ -141,6 +141,15 @@ Defined via `g.definePerk(id, name, info)`. Info has two handler tables:
   Use only when listening to things not happening to the entity itself (eg "any ally hurt").
 </perks>
 
+<traits>
+Traits are just per-unit tags. A simpler step down from perks. Eg flying, fireproof, loyal.
+
+- Define with `g.defineTrait(id, name, info)`. Info may have `handlers` (per-entity, like perk handlers) and flag fields (eg `deployAnywhere`).
+- Add/remove/check on an entity: `g.addTrait(ent, name)`, `g.removeTrait(ent, name)`, `g.hasTrait(ent, name)`.
+- Stored on `ent.traits` as a set: `ent.traits[name] = true`. Handlers register on the entity's scope.
+- Squads can have `startingTraits`, applied to every unit in the squad on spawn.
+</traits>
+
 <stats>
 Entity stats, eg ent.attackDamage, ent.maxHealth, ent.attackSpeed, etc are handled in `stats.lua`.
 When modifying stats:
