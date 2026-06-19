@@ -1,31 +1,7 @@
 
 
-
-
-g.defineEntity("pest", {
-    image = "pest",
-    physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-    partitions = {"unit", "ally"},
-    team = "ally",
-    ai = {
-        target = "enemy",
-    },
-    attack = {
-        attackType = "melee",
-    },
-    isPest = true,
-    baseAttackDamage = 1,
-    baseAttackSpeed = 1,
-    baseAttackRange = 18,
-    baseMoveSpeed = 60,
-    baseMaxHealth = 1,
-})
-
-
-
-
 g.defineSquad("forest_sprite_squad", {
-    name = loc("Forest Sprites"),
+    name = "Forest Sprites",
     rarity = g.RARITIES.COMMON,
     entityDef = {
         image = "militia", -- no forest-sprite sprite; militia stand-in
@@ -44,14 +20,29 @@ g.defineSquad("forest_sprite_squad", {
         baseMaxHealth = 5,
     },
     unitCount = 6,
-    perks = {"restore"},
+    perks = {
+        {
+            name = "Restore",
+            description = g.loc2("On-spawn, nearby allies are healed to full (HP)."),
+            image = "coin_icon",
+            handlers = {
+                entitySpawned = function(ent)
+                    g.iteratePartition("ally", ent.x, ent.y, function(other)
+                        if other == ent then return end
+                        if not g.isAlive(other) then return end
+                        g.healEntity(other, other.maxHealth or 999)
+                    end, 150)
+                end,
+            },
+        }
+    },
     cost = {green = 1},
 })
 
 
 
 g.defineSquad("druid_squad", {
-    name = loc("Druids"),
+    name = "Druids",
     rarity = g.RARITIES.COMMON,
     entityDef = {
         image = "druids",
@@ -76,14 +67,27 @@ g.defineSquad("druid_squad", {
         baseMaxHealth = 7,
     },
     unitCount = 6,
-    perks = {"vitalize"},
+    perks = {
+        {
+            name = "Vitalize",
+            description = loc("On-heal, the target gains 1 max HP."),
+            image = "coin_icon",
+            handlers = {
+                onAttack = function(ent, target)
+                    if ent.healPower and target and g.isAlive(target) then
+                        g.buffEntity(target, "maxHealth", 1)
+                    end
+                end,
+            },
+        }
+    },
     cost = {green = 1},
 })
 
 
 
 g.defineSquad("cook_squad", {
-    name = loc("Cooks"),
+    name = "Cooks",
     rarity = g.RARITIES.COMMON,
     entityDef = {
         image = "cook",
@@ -117,7 +121,7 @@ g.defineSquad("cook_squad", {
 
 
 g.defineSquad("peasant_squad", {
-    name = loc("Peasants"),
+    name = "Peasants",
     rarity = g.RARITIES.COMMON,
     entityDef = {
         image = "peasant",
@@ -144,7 +148,7 @@ g.defineSquad("peasant_squad", {
 
 
 g.defineSquad("hog_squad", {
-    name = loc("Hogs of War"),
+    name = "Hogs of War",
     rarity = g.RARITIES.UNCOMMON,
     entityDef = {
         image = "warhog",
@@ -165,7 +169,7 @@ g.defineSquad("hog_squad", {
 
 
 g.defineSquad("giant_toad_squad", {
-    name = loc("Giant Toads"),
+    name = "Giant Toads",
     rarity = g.RARITIES.UNCOMMON,
     entityDef = {
         image = "gianttoad",
@@ -185,7 +189,7 @@ g.defineSquad("giant_toad_squad", {
 
 
 g.defineSquad("treant_squad", {
-    name = loc("Treants"),
+    name = "Treants",
     rarity = g.RARITIES.UNCOMMON,
     entityDef = {
         image = "treant",
@@ -202,22 +206,47 @@ g.defineSquad("treant_squad", {
     },
     unitCount = 5,
     icon = "treants_uniticon",
-    perks = {"growth"},
+    perks = {
+        {
+            name = "Growth",
+            description = loc("Permanently gains +1 Max HP for every 4 Green mana played this fight."),
+            image = "mana_green_small",
+            rawHandlers = {
+                manaSpent = function(ent, manaRequirement)
+                    -- TODO: Need to discuss this perk further because it
+                    -- was ambiguos in certain ways.
+                end,
+            },
+        }
+    },
     cost = {green = 2},
-    ---@param info g.SquadInfo
-    ---@param entities ecs.Entity[]
-    onDeploySquad = function(info, entities)
-        for _, ent in ipairs(entities) do
-            ent._growthGreen = info.cost.green
-        end
-    end,
 })
 
 
 
 
+
+g.defineEntity("pest", {
+    image = "pest",
+    physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+    partitions = {"unit", "ally"},
+    team = "ally",
+    ai = {
+        target = "enemy",
+    },
+    attack = {
+        attackType = "melee",
+    },
+    isPest = true,
+    baseAttackDamage = 1,
+    baseAttackSpeed = 1,
+    baseAttackRange = 18,
+    baseMoveSpeed = 60,
+    baseMaxHealth = 1,
+})
+
 g.defineSquad("infested_squad", {
-    name = loc("The Infested"),
+    name = "The Infested",
     rarity = g.RARITIES.UNCOMMON,
     entityDef = {
         image = "the_infested",
@@ -233,14 +262,25 @@ g.defineSquad("infested_squad", {
     },
     unitCount = 8,
     icon = "theinfested_uniticon",
-    perks = {"infestation"},
+    perks = {
+        {
+            name = "Infestation",
+            description = loc("On death, spawn a Pest."),
+            image = "coin_icon",
+            handlers = {
+                entityDeath = function(ent)
+                    g.spawnEntity("pest", ent.x, ent.y)
+                end,
+            },
+        }
+    },
     cost = {green = 1},
 })
 
 
 
 g.defineSquad("friendly_giant_squad", {
-    name = loc("Friendly Giant"),
+    name = "Friendly Giant",
     rarity = g.RARITIES.RARE,
     entityDef = {
         image = "friendlygiant",
@@ -265,7 +305,7 @@ g.defineSquad("friendly_giant_squad", {
 
 
 g.defineSquad("forest_sentry_squad", {
-    name = loc("Forest Sentries"),
+    name = "Forest Sentries",
     rarity = g.RARITIES.RARE,
     entityDef = {
         image = "forestsentry",
@@ -287,14 +327,37 @@ g.defineSquad("forest_sentry_squad", {
     },
     unitCount = 4,
     icon = "forestsentries_uniticon",
-    perks = {"life_force"},
+    perks = {
+        {
+            name = "Life Force",
+            description = g.loc2("Gain (ATK) equal to max (HP). Take 4 x as much damage."),
+            image = "coin_icon",
+            handlers = {
+                getAttackDamageModifier = function(ent)
+                    return ent.maxHealth
+                end,
+                getDamageTakenMultiplier = function(ent)
+                    return 4
+                end,
+            },
+        }
+    },
     cost = {green = 1},
 })
 
 
 
+
+local function hasMagnificence(ent)
+    if not ent.squad then return false end
+    for _, p in ipairs(ent.squad.perks or {}) do
+        if p == "magnificence" then return true end
+    end
+    return false
+end
+
 g.defineSquad("arcane_blossom_squad", {
-    name = loc("Arcane Blossoms"),
+    name = "Arcane Blossoms",
     rarity = g.RARITIES.RARE,
     entityDef = {
         image = "arcaneblossom",
@@ -310,7 +373,44 @@ g.defineSquad("arcane_blossom_squad", {
     },
     unitCount = 3,
     icon = "arcaneblossom_uniticon",
-    perks = {"magnificence"},
+    perks = {
+        {
+            name = "Magnificence",
+            description = g.loc2("When this unit heals or gains max HP, spread the effect to 3 random nearby allies without this perk."),
+            image = "coin_icon",
+            handlers = {
+                entityHealed = function(ent, amount, healer)
+                    local nearby = {}
+                    g.iteratePartition("ally", ent.x, ent.y, function(other)
+                        if other == ent then return end
+                        if not g.isAlive(other) then return end
+                        if hasMagnificence(other) then return end
+                        nearby[#nearby + 1] = other
+                    end, 120)
+                    for i = 1, math.min(3, #nearby) do
+                        local idx = math.random(i, #nearby)
+                        nearby[i], nearby[idx] = nearby[idx], nearby[i]
+                        g.healEntity(nearby[i], amount)
+                    end
+                end,
+                entityBuffed = function(ent, stat, increase)
+                    if stat ~= "maxHealth" or increase <= 0 then return end
+                    local nearby = {}
+                    g.iteratePartition("ally", ent.x, ent.y, function(other)
+                        if other == ent then return end
+                        if not g.isAlive(other) then return end
+                        if hasMagnificence(other) then return end
+                        nearby[#nearby + 1] = other
+                    end, 120)
+                    for i = 1, math.min(3, #nearby) do
+                        local idx = math.random(i, #nearby)
+                        nearby[i], nearby[idx] = nearby[idx], nearby[i]
+                        g.buffEntity(nearby[i], "maxHealth", increase)
+                    end
+                end,
+            },
+        }
+    },
     cost = {green = 1},
 })
 
@@ -318,7 +418,7 @@ g.defineSquad("arcane_blossom_squad", {
 
 
 g.defineSquad("world_tree_squad", {
-    name = loc("World Tree"),
+    name = "World Tree",
     rarity = g.RARITIES.LEGENDARY,
     entityDef = {
         image = "worldtree",
@@ -328,7 +428,24 @@ g.defineSquad("world_tree_squad", {
         baseStartingArmor = 5,
     },
     unitCount = 1,
-    perks = {"her_wrath"},
+    perks = {
+        {
+            name = "Her Wrath",
+            description = loc("Whenever an ally heals, this building damages a random enemy equal to 100% of the heal value."),
+            image = "coin_icon",
+            rawHandlers = {
+                entityHealed = function(self, ent, amount, healer)
+                    if not g.isAlive(self) then return end
+                    if not ent or ent.team ~= "ally" then return end
+                    if not amount or amount <= 0 then return end
+                    local enemies = g.getECS():getEnemyList()
+                    if #enemies > 0 then
+                        g.dealDamage(enemies[math.random(#enemies)], amount)
+                    end
+                end,
+            },
+        }
+    },
     cost = {green = 2},
 })
 
@@ -336,7 +453,7 @@ g.defineSquad("world_tree_squad", {
 
 
 g.defineSquad("hive_recycler_squad", {
-    name = loc("Hive Recyclers"),
+    name = "Hive Recyclers",
     rarity = g.RARITIES.LEGENDARY,
     entityDef = {
         image = "hiverecycler",
@@ -352,13 +469,29 @@ g.defineSquad("hive_recycler_squad", {
         baseMaxHealth = 7,
     },
     unitCount = 2,
-    perks = {"swarmsurge"},
+    perks = {
+        {
+            name = "Swarmsurge",
+            description = loc("Whenever any {GREEN_MANA_COLOR}Green unit{/GREEN_MANA_COLOR} dies, this unit summons a Pest."),
+            image = "coin_icon",
+            rawHandlers = {
+                entityDeath = function(self, ent, killer)
+                    if not g.isAlive(self) then return end
+                    local squadId = ent.type and ent.type:match("^(.-)_unit$")
+                    if not squadId then return end
+                    local ok, info = pcall(g.getSquadInfo, squadId)
+                    if not ok or not (info and info.cost and info.cost.green) then return end
+                    g.spawnEntity("pest", self.x, self.y)
+                end,
+            },
+        }
+    },
     cost = {green = 1},
 })
 
 
 g.defineSquad("living_forest_squad", {
-    name = loc("Living Forest"),
+    name = "Living Forest",
     rarity = g.RARITIES.LEGENDARY,
     entityDef = {
         image = "livingforest_body", -- TODO: Animate legs with `livingforest_legs`.
@@ -374,14 +507,32 @@ g.defineSquad("living_forest_squad", {
     },
     unitCount = 4,
     icon = "livingforest_uniticon",
-    perks = {"circle_of_life"},
+    perks = {
+        {
+            name = "Circle of Life",
+            description = loc("On-death, all allies gain 10% of this unit's max HP."),
+            image = "coin_icon",
+            handlers = {
+                entityDeath = function(ent, killer)
+                    local amount = (ent.maxHealth or 0) * 0.1
+                    if amount <= 0 then return end
+                    for _, other in ent:getWorld():iterate("team") do
+                        if other.team == "ally" and g.isAlive(other) then
+                            g.buffEntity(other, "maxHealth", amount)
+                            g.healEntity(other, amount)
+                        end
+                    end
+                end,
+            },
+        }
+    },
     cost = {green = 1},
 })
 
 
 
 g.defineSquad("lifesmith_squad", {
-    name = loc("Lifesmiths"),
+    name = "Lifesmiths",
     rarity = g.RARITIES.LEGENDARY,
     entityDef = {
         image = "lifesmith",
@@ -399,14 +550,25 @@ g.defineSquad("lifesmith_squad", {
     },
     unitCount = 6,
     icon = "lifesmiths_uniticon",
-    perks = {"forge_life"},
+    perks = {
+        {
+            name = "Forge Life",
+            description = g.loc2("This unit has additional (HEAL) equal to its (ARMR)."),
+            image = "coin_icon",
+            handlers = {
+                getHealPowerModifier = function(ent)
+                    return math.floor(ent.armor or 0)
+                end,
+            },
+        }
+    },
     cost = {green = 1},
 })
 
 
 
 g.defineSquad("swarm_squad", {
-    name = loc("The Swarm"),
+    name = "The Swarm",
     rarity = g.RARITIES.LEGENDARY,
     entityDef = {
         image = "theswarm",
