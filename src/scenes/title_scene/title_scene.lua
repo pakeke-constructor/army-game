@@ -46,8 +46,10 @@ function title_scene:update(dt)
 
     -- hoveredButton is set in :draw (iml only runs inside the draw frame)
     for i, button in ipairs(buttons) do
-        local target = (i == hoveredButton) and 30 or 0
-        button.offsetX = helper.lerp(button.offsetX or 0, target, dt * 12)
+        local target = (i == hoveredButton) and 1 or 0
+        local rate = (i == hoveredButton) and 5 or 14
+        button.t = helper.lerp(button.t or 0, target, dt*rate)
+        button.offsetX = helper.lerp(0, 30, helper.EASINGS.easeOutBack(button.t))
     end
 end
 
@@ -79,12 +81,15 @@ function title_scene:draw()
     g.drawImage("smallcapsule", spawnX+capw/2, spawnY - caph)
     
 
-    lg.setFont(smallFont)
+    
     hoveredButton = nil
     for i, button in ipairs(buttons) do
         local rx, ry, rw, rh = buttonRect(i)
         if iml.isHovered(rx, ry, rw, rh, button) then
             hoveredButton = i
+        end
+        if iml.wasJustHovered(rx, ry, rw, rh, button) then
+            g.playUISound("ui_tick")
         end
         if iml.wasJustClicked(rx, ry, rw, rh, 1, button) then
             if button.skipFade then
@@ -99,7 +104,7 @@ function title_scene:draw()
         local msg = button.name
         local x = spawnX + (button.offsetX or 0)
         lg.setColor((i == hoveredButton) and {1,1,0.6,1} or {1,1,1,1})
-        lg.print(msg, x, spawnY + (i-1)*gapPerButton - smallFont:getHeight()/2)
+        lg.print(msg, smallFont, x, spawnY + (i-1)*gapPerButton - smallFont:getHeight()/2)
     end
 end
 

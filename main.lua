@@ -164,6 +164,7 @@ function love.update(dt)
         g.getRun():update(dt)
     end
     iml.setPointer(love.mouse.getPosition())
+    g.updateSfx()
     textPopupService.update(dt)
     fadeToBlackService.update(dt)
     local sc = sceneManager.getCurrentScene()

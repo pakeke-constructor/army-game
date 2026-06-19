@@ -654,6 +654,11 @@ function g.playUISound(soundname, pitch, volume, pitchVar, volumeVar)
 end
 
 
+function g.updateSfx()
+    sfx.update()
+end
+
+
 local validExtensions = {
     wav = true,
     mp3 = true,
