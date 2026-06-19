@@ -40,13 +40,28 @@ function runSelect:update(dt)
     root = Kirigami(0, 0, w, h)
 end
 
+-- splits reg into n square cells, laid in a row, spread evenly with equal gaps
+local function squareCells(reg, n)
+    local side = math.min(reg.w / n, reg.h)
+    local gap = (reg.w - side * n) / (n + 1)
+    local y = reg.y + (reg.h - side) / 2
+    local cells = {}
+    for i = 1, n do
+        local x = reg.x + gap * i + side * (i - 1)
+        cells[i] = reg:set(x, y, side, side)
+    end
+    return cells
+end
+
 local function drawCommanderList(icons)
     local list = g.getCommanderList()
-    local cells = icons:columns(#list)
+    local cells = squareCells(icons, #list)
     for i, reg in ipairs(cells) do
         local id = list[i]
         local info = g.getCommanderInfo(id)
         local x, y, rw, rh = reg:padRatio(0.1):get()
+        love.graphics.setColor(1,1,1,1)
+        ui.drawPanel(x,y,rw,rh)
         g.drawImageContained(info.image, x, y, rw, rh)
 
         if iml.wasJustClicked(x, y, rw, rh, 1, id) then
