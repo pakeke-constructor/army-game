@@ -438,7 +438,7 @@ g.defineSquad("war_elephant_squad", {
     perks = {
         {
             name = "Helmheart",
-            description = loc("Whenever a Blue unit spawns, gains 1 (ARMR)."),
+            description = g.loc2("Whenever a Blue unit spawns, gains 1 (ARMR)."),
             image = "coin_icon",
             rawHandlers = {
                 entitySpawned = function(self, ent)

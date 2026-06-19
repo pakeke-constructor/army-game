@@ -2,7 +2,7 @@
 --[[
 
 g.defineSquad("archer_squad", {
-    name = loc("Archer squad"),
+    name = "Archer squad",
     rarity = g.RARITIES.RARE,
     entityDef = {
         image = "longbowman", -- placeholder
@@ -26,7 +26,18 @@ g.defineSquad("archer_squad", {
         baseMaxHealth = 30,
     },
     unitCount = 4,
-    perks = {"sharpshooter"},
+    perks = {
+        {
+            name = "Sharpshooter",
+            description = loc("This unit fires 1 extra projectile."),
+            image = "coin_icon",
+            handlers = {
+                getProjectileCountModifier = function(ent)
+                    return 1
+                end,
+            },
+        }
+    },
     cost = {red = 1},
 
     statUpgradeScaling = {attackSpeed = 0.5},
@@ -36,7 +47,7 @@ g.defineSquad("archer_squad", {
 
 
 g.defineSquad("healer_archer_squad", {
-    name = loc("Healer archer squad"),
+    name = "Healer archer squad",
     rarity = g.RARITIES.RARE,
     entityDef = {
         image = "longbowman",
@@ -68,7 +79,7 @@ g.defineSquad("healer_archer_squad", {
 
 
 g.defineSquad("militia_squad", {
-    name = loc("Militia squad"),
+    name = "Militia squad",
     rarity = g.RARITIES.UNCOMMON,
     entityDef = {
         image = "militia",
@@ -99,7 +110,7 @@ g.defineSquad("militia_squad", {
 
 
 g.defineSquad("militia_band", {
-    name = loc("Militia beserkers"),
+    name = "Militia beserkers",
     rarity = g.RARITIES.RARE,
     entityDef = {
         image = "militia",
@@ -119,7 +130,21 @@ g.defineSquad("militia_band", {
         baseMaxHealth = 120,
     },
     unitCount = 6,
-    perks = {"berserker"},
+    perks = {
+        {
+            name = "Berserker",
+            description = loc("This unit gains +5 attack when below 50% health."),
+            image = "coin_icon",
+            handlers = {
+                getAttackDamageModifier = function(ent, attack)
+                    if ent.health and ent.maxHealth and ent.health < ent.maxHealth * 0.5 then
+                        return 5
+                    end
+                    return 0
+                end,
+            },
+        }
+    },
     cost = {green = 1, red=1},
 })
 ]]
@@ -128,7 +153,7 @@ g.defineSquad("militia_band", {
 
 
 g.defineSquad("aggravator_7000_squad", {
-    name = loc("Aggravator 7000"),
+    name = "Aggravator 7000",
     rarity = g.RARITIES.UNCOMMON,
     entityDef = {
         image = "militia",
@@ -148,7 +173,21 @@ g.defineSquad("aggravator_7000_squad", {
         baseStartingArmor = 10,
     },
     unitCount = 1,
-    perks = {"racket"},
+    perks = {
+        {
+            name = "Racket",
+            description = loc("On-attack, all enemies in a large area are Taunted to target this unit."),
+            image = "coin_icon",
+            handlers = {
+                onAttack = function(ent, target)
+                    g.iteratePartition("enemy", ent.x, ent.y, function(other)
+                        if not g.isAlive(other) then return end
+                        other.taunt = { ent = ent }
+                    end, 200)
+                end,
+            },
+        }
+    },
     cost = {red = 1, blue = 1},
 })
 
@@ -175,7 +214,7 @@ do
     end
 
     g.defineSquad("eternal_soldier_squad", {
-        name = loc("Eternal Soldiers"),
+        name = "Eternal Soldiers",
         rarity = g.RARITIES.RARE,
         entityDef = {
             image = "barbarian",
@@ -202,7 +241,7 @@ end
 
 
 g.defineSquad("quartz_cannoneer_squad", {
-    name = loc("Quartz Cannoneers"),
+    name = "Quartz Cannoneers",
     rarity = g.RARITIES.UNCOMMON,
     entityDef = {
         image = "longbowman",
@@ -223,14 +262,30 @@ g.defineSquad("quartz_cannoneer_squad", {
         baseMaxHealth = 8,
     },
     unitCount = 4,
-    perks = {"pinpoint"},
+    perks = {
+        {
+            name = "Pinpoint",
+            description = loc("Deals double damage to enemies beyond 350 units away."),
+            image = "coin_icon",
+            handlers = {
+                onAttack = function(ent, target)
+                    if target then
+                        local dx, dy = ent.x - target.x, ent.y - target.y
+                        if dx*dx + dy*dy > 350*350 then
+                            ent.attackDamage = (ent.attackDamage or 0) * 2
+                        end
+                    end
+                end,
+            },
+        }
+    },
     cost = {blue = 1, red = 1},
 })
 
 
 
 g.defineSquad("world_devourer_squad", {
-    name = loc("World Devourers"),
+    name = "World Devourers",
     rarity = g.RARITIES.LEGENDARY,
     entityDef = {
         image = "militia",
@@ -245,7 +300,21 @@ g.defineSquad("world_devourer_squad", {
         baseStartingArmor = 0,
     },
     unitCount = 4,
-    perks = {"consumption"},
+    perks = {
+        {
+            name = "Consumption",
+            description = loc("On-kill, spawn a copy of this unit."),
+            image = "coin_icon",
+            handlers = {
+                onKill = function(ent, target)
+                    if not g.isAlive(ent) then return end
+                    if ent.type then
+                        g.spawnEntity(ent.type, ent.x, ent.y)
+                    end
+                end,
+            },
+        }
+    },
     cost = {green = 1, red = 1},
 })
 
