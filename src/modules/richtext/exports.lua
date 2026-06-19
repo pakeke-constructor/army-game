@@ -158,10 +158,11 @@ end
 ---@param font love.Font
 ---@param w number Target container width
 ---@param h number Target container height
+---@param maxScale number? Optional cap on how large the text may be scaled up
 ---@return number scale, number tw, number th
-local function getContainedScale(parsed, font, w, h)
+local function getContainedScale(parsed, font, w, h, maxScale)
     local lowScale = 0.1
-    local highScale = 10
+    local highScale = maxScale or 10
     local scale = 1.0
     local finalTw, finalTh = w, h
 
@@ -194,9 +195,10 @@ end
 ---@param y number
 ---@param w number
 ---@param h number
-function text.printRichContained(txt, font, x,y,w,h)
+---@param maxScale number? Optional cap on how large the text may be scaled up
+function text.printRichContained(txt, font, x,y,w,h, maxScale)
     local parsed = ensureParsed(txt)
-    local scale, tw, th = getContainedScale(parsed, font, w, h)
+    local scale, tw, th = getContainedScale(parsed, font, w, h, maxScale)
     local drawX, drawY = math.floor(x+w/2), math.floor(y+h/2)
 
     return text.printRich(parsed, font, drawX, drawY, tw, "left", 0, scale, scale, tw / 2, th / 2)

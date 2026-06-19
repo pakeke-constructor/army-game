@@ -39,9 +39,11 @@ local function drawPerkSlot(region, perk, accentColor)
     local colorChange = "{o r=" .. r .. " g=" .. g .. " b=" .. b .. "}"
     local title = "{" .. perk.image .. "}{o}" .. helper.wrapRichtextColor(accentColor, perk.name) .. "{/o}"
     local desc = "{c r=0.85 g=0.85 b=0.9}" .. colorChange .. perk.description .. "{/o}"
-    local titleRegion = region:splitVertical(1,2):moveRatio(0,-0.4)
-    richtext.printRichContained(title, PERK_DESC_FONT, titleRegion:get())
-    richtext.printRichContained(desc, PERK_DESC_FONT, region:padUnit(4):get())
+    local titleRegion = region:splitVertical(1,2):moveRatio(0,-0.5)
+    local tx, ty, tw, th = titleRegion:get()
+    richtext.printRichContained(title, PERK_DESC_FONT, tx, ty, tw, th, 1)
+    local dx, dy, dw, dh = region:padUnit(4):get()
+    richtext.printRichContained(desc, PERK_DESC_FONT, dx, dy, dw, dh, 1)
 end
 
 
@@ -305,7 +307,7 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
 
     -- Traits:
     if hasAnyTraits then
-        local H = 8
+        local H = 10
         local function drawTraitBox(traitInfo, xx, yy, ww, hh)
             if not traitInfo then return end
 
@@ -314,10 +316,11 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
 
             local r, gg, b, a = panelBottomColor:getRGBA()
             local pad = 1
-            love.graphics.setColor(r, gg, b, isHovered2 and 0.9 or 0.75)
+            local dark = isHovered2 and 0.5 or 1
+            love.graphics.setColor(r*dark, gg*dark, b*dark, isHovered2 and 0.9 or 0.75)
             ui.drawSingleColorPanel(xx, yy, ww, hh)
 
-            love.graphics.setColor(1, 1, 1)
+            love.graphics.setColor(traitInfo.color)
             richtext.printRichContainedNoWrap(traitInfo.name, STAT_FONT, xx + pad*2, yy, ww - pad*4, hh, "center")
 
             if isHovered2 then
