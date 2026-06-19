@@ -704,19 +704,8 @@ g.definePerk("ice_touch", "Ice Touch", {
     description = loc("On-hit, 25% chance to Freeze for 5s. {c r=0.388 g=0.388 b=0.388}Prioritizes unfrozen targets.{/c}"),
     image = "coin_icon",
     handlers = {
-        entitySpawned = function(ent)
-            if not ent.ai then return end
-            local oldGetPriority = ent.ai.getPriority
-            ent.ai = {
-                target = ent.ai.target,
-                getPriority = function(selfEnt, targEnt)
-                    local prio = oldGetPriority and oldGetPriority(selfEnt, targEnt) or 0
-                    if (targEnt.frozenTime or 0) <= 0 then
-                        prio = prio + 1000
-                    end
-                    return prio
-                end,
-            }
+        getAITargetPriorityModifier = function(selfEnt, targEnt)
+            return (targEnt.frozenTime or 0) > 0 and 1000 or 0
         end,
         onHitDamage = function(ent, damage, target)
             if target and love.math.random() < 0.25 then
