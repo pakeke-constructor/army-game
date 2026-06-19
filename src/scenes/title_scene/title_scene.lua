@@ -48,6 +48,7 @@ function title_scene:update(dt)
     for i, button in ipairs(buttons) do
         local target = (i == hoveredButton) and 1 or 0
         local rate = (i == hoveredButton) and 5 or 14
+        rate = rate * 2
         button.t = helper.lerp(button.t or 0, target, dt*rate)
         button.offsetX = helper.lerp(0, 30, helper.EASINGS.easeOutBack(button.t))
     end
