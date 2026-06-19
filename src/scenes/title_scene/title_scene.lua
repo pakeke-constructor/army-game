@@ -5,6 +5,11 @@ local buttons = {
         g.gotoScene("runSelect_scene")
     end},
     {name = "SANDBOX", onClick = function ()
+        g.newRun({
+            commander = "sir_horse",
+            difficulty = 0
+        })
+
         local battle = require("src.scenes.battle_scene.battle_scene")
         battle.sandbox = true
         g.gotoScene("battle_scene")
@@ -46,19 +51,6 @@ function title_scene:update(dt)
     end
 end
 
-
----@param sandbox boolean?
-function title_scene:start(sandbox)
-    if g.hasRun() then
-        error("attempt to start with existing run??")
-    end
-
-    g.newRun({
-        commander = "sir_horse",
-        difficulty = 0
-    })
-end
-
 function title_scene:draw()
     local w, h = lg.getDimensions()
 
@@ -96,11 +88,9 @@ function title_scene:draw()
         end
         if iml.wasJustClicked(rx, ry, rw, rh, 1, button) then
             if button.skipFade then
-                self:start()
                 button.onClick()
             else
-                fadeToBlackService.fadeToFromBlack(0.5, function()
-                    self:start()
+                fadeToBlackService.fadeToFromBlack(0.3, function()
                     button.onClick()
                 end)
             end
