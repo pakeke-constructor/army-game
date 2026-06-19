@@ -315,13 +315,13 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
             local px, py = iml.getTransformedPointer()
             local isHovered2 = px >= xx and py >= yy and px <= xx + ww and py <= yy + hh
 
-            local r, gg, b, a = traitInfo.color:getRGBA()
+            local r, gg, b, a = g.COLORS.DARK_UI:getRGBA()
             local pad = 1
             local dark = isHovered2 and 0.7 or 1
             love.graphics.setColor(r*dark, gg*dark, b*dark, isHovered2 and 0.9 or 0.75)
             ui.drawSingleColorPanel(xx, yy, ww, hh)
 
-            love.graphics.setColor(g.COLORS.DARK_UI)
+            love.graphics.setColor(traitInfo.color)
             richtext.printRichContainedNoWrap(traitInfo.name, STAT_FONT, xx + pad*2, yy, ww - pad*4, hh, "center")
 
             if isHovered2 then

@@ -796,16 +796,6 @@ local function estimateSquadPowerIndex(squadInfo)
 end
 
 
-local function TEST_REMOVE_LATER_giveRandomTraits(info)
-    local pool = { unpack(g.getTraitDefList()) }
-    local count = math.min(#pool, love.math.random(1, 3))
-    info.startingTraits = {}
-    for i = 1, count do
-        local j = love.math.random(i, #pool)
-        pool[i], pool[j] = pool[j], pool[i]
-        info.startingTraits[i] = pool[i]
-    end
-end
 
 ---@param id string
 ---@param info g.SquadInfo|{id:nil}|{perks:nil}
@@ -814,7 +804,6 @@ function g.defineSquad(id, info)
     info.id = id
     info.perks = info.perks or {}
     info.startingTraits = info.startingTraits or {}
-    TEST_REMOVE_LATER_giveRandomTraits(info)
     info.unitCount = info.unitCount or 1
     info.name = assert(info.name)
     info.rarity = assert(info.rarity)
