@@ -13,13 +13,19 @@
 ---@field onAdd fun()? Called once, the moment this blessing is first acquired.
 
 
----@class g.PerkInfo
----@field id string
+---@class g.PerkDef
+---@field name string (for definition, untranslated name; for info, translated name)
 ---@field description string
 ---@field image string
----@field handlers table<string, fun(ent: ecs.Entity, ...): any> Scoped to the entity. Only fires when the event/question is dispatched AT this entity (eg g.call("onHit", ent)). Cheap; default choice.
+---@field handlers table<string, fun(ent: ecs.Entity, ...): any>? Scoped to the entity. Only fires when the event/question is dispatched AT this entity (eg g.call("onHit", ent)). Cheap; default choice.
 ---@field rawHandlers table<string, fun(ent: ecs.Entity, ...): any>? Scene-level. Fires for EVERY dispatch of that event globally, regardless of target. Use when the perk needs to listen to things happening elsewhere (eg "when any ally is hurt"). More expensive; use only when `handlers` can't express it.
 ---@field armyHandlers table<string, fun(squad: g.Squad, ...): any>? Army-level. Registered once per army squad holding this perk, regardless of whether it has deployed. First arg is the owning squad. Use for effects computed from run state that must be known before the squad spawns (eg modifying this squad's own unit count).
+
+---@class g.PerkInfo: g.PerkDef
+---@field id string
+---@field handlers table<string, fun(ent: ecs.Entity, ...): any> Scoped to the entity. Only fires when the event/question is dispatched AT this entity (eg g.call("onHit", ent)). Cheap; default choice.
+---@field rawHandlers table<string, fun(ent: ecs.Entity, ...): any> Scene-level. Fires for EVERY dispatch of that event globally, regardless of target. Use when the perk needs to listen to things happening elsewhere (eg "when any ally is hurt"). More expensive; use only when `handlers` can't express it.
+---@field armyHandlers table<string, fun(squad: g.Squad, ...): any> Army-level. Registered once per army squad holding this perk, regardless of whether it has deployed. First arg is the owning squad. Use for effects computed from run state that must be known before the squad spawns (eg modifying this squad's own unit count).
 
 
 ---@class g.TraitInfo
@@ -766,24 +772,35 @@ local ENTITY_DEFS = {}
 local ENTITY_LIST = {}
 local currentEntityId = 0
 
-
----@class g.SquadInfo
----@field id string
+---@class g.SquadDef
 ---@field squadOrder integer? Use this to help determine the "order" of squads. -10 = deployed first, 0 = deployed middle/unimportant, 10 = deployed last. By default, buildings = -10, melee = 0, ranged = 10. Which means that the placement ordering in HUD will be (buildings, melee, ranged).  You MUST edit this if the unit benefits from being placed first/last, e.g. "when deployed, buff all allies." <-- this should be set order = 50 or something, so it's deployed LAST. By contrast, a unit that has a perk: "Whenever an ally is spawned, earn $1", <-- this should have squadOrder = -30 or something; to ensure it's FIRST.
----@field entityId string
+---@field entityId string?
 ---@field entityDef ecs.Components
----@field rarity g.Rarity
----@field unitCount integer
----@field statUpgradeScaling table<string, number> { [statName] -> number }
+---@field unitCount integer? (default is 1)
+---@field statUpgradeScaling table<string, number>? { [statName] -> number }
 ---@field unitCountUpgradeScaling integer?
----@field name string
----@field icon string
----@field perks string[]
+---@field name string (for definition, untranslated name; for info, translated name)
+---@field nameContext string? context passed to `loc` function
+---@field rarity g.Rarity
+---@field icon string?
+---@field perks (g.PerkDef|string|false)[]? Perks will be given ID `id.."_perk_..i` if `g.PerkDef` is passed. Use `false` to skip IDs. Pass existing perk ID to use that instead.
 ---@field startingTraits string[]? Trait ids applied to every unit in this squad on spawn.
----@field cost g.ManaBundle
----@field powerIndex number
+---@field cost g.ManaBundle?
 ---@field onDeploySquad (fun(squad: g.SquadInfo, entities: ecs.Entity[], x: number, y:number))?
 ---@field drawSquadHover fun(x:number, y:number)?
+
+---@class g.SquadInfo: g.SquadDef
+---@field id string
+---@field squadOrder integer
+---@field entityId string
+---@field unitCount integer
+---@field statUpgradeScaling table<string, number> { [statName] -> number }
+---@field unitCountUpgradeScaling integer
+---@field icon string
+---@field perks string[]
+---@field startingTraits string[] Trait ids applied to every unit in this squad on spawn.
+---@field cost g.ManaBundle
+---@field powerIndex number
 
 ---@param squadInfo g.SquadInfo
 local function estimateSquadPowerIndex(squadInfo)
@@ -798,18 +815,22 @@ end
 
 
 ---@param id string
----@param info g.SquadInfo|{id:nil}|{perks:nil}
+---@param info g.SquadDef
 function g.defineSquad(id, info)
-    assert(not SQUAD_DEFS[id], "Duplicate squad: " .. id)
+    if SQUAD_DEFS[id] then
+        error("Duplicate squad: " .. id)
+    end
+
     info.id = id
-    info.perks = info.perks or {}
     info.startingTraits = info.startingTraits or {}
     info.unitCount = info.unitCount or 1
-    info.name = assert(info.name)
+    info.name = loc(assert(info.name), {}, {context = info.nameContext or "Name of a squad."})
     info.rarity = assert(info.rarity)
     info.unitCountUpgradeScaling = info.unitCountUpgradeScaling or 0
     info.statUpgradeScaling = info.statUpgradeScaling or {}
     info.entityId = info.entityId or (id .. "_unit")
+    info.cost = info.cost or {}
+    info.squadOrder = info.squadOrder or 0
     assert(info.entityDef, "Missing entityDef for squad: " .. id)
 
     if not info.icon then
@@ -864,6 +885,27 @@ function g.defineSquad(id, info)
     end
     assert(info.icon)
     info.powerIndex = estimateSquadPowerIndex(info)
+
+    -- register perks
+    ---@type string[]
+    local perkIds = {}
+    if info.perks then
+        for i, pdef in ipairs(info.perks) do
+            if pdef then
+                if type(pdef) == "string" then
+                    perkIds[#perkIds+1] = pdef
+                else
+                    local pid = id.."_perk_"..i
+                    g.definePerk(pid, pdef)
+                    perkIds[#perkIds + 1] = pid
+                end
+            end
+        end
+    end
+    table.sort(perkIds)
+    info.perks = perkIds
+
+    ---@cast info g.SquadInfo
     SQUAD_DEFS[id] = info
     SQUAD_LIST[#SQUAD_LIST + 1] = id
 end
@@ -1276,18 +1318,26 @@ end
 ---   rawHandlers.onAllyHurt = function(selfEnt, ally, dmg) ... end
 --- Use rawHandlers when listening to things not happening to the entity itself.
 ---@param id string
----@param name string
----@param info g.PerkInfo|{id:nil,name:nil}
-function g.definePerk(id, name, info)
-    assert(not PERK_DEFS[id], "Duplicate perk: " .. id)
-    info.name = loc(name, {}, {
+---@param info g.PerkDef
+function g.definePerk(id, info)
+    if PERK_DEFS[id] then
+        error("Duplicate perk: " .. id)
+    end
+
+    ---@cast info g.PerkInfo
+    info.name = loc(info.name, {}, {
         context = "The name of a perk"
     })
     info.id = id
+    info.handlers = info.handlers or {}
+    info.rawHandlers = info.rawHandlers or {}
+    info.armyHandlers = info.armyHandlers or {}
     PERK_DEFS[id] = info
     PERK_LIST[#PERK_LIST + 1] = id
 end
 
+---@param id string
+---@return g.PerkInfo
 function g.getPerkInfo(id)
     return assert(PERK_DEFS[id], "Unknown perk: " .. tostring(id))
 end
@@ -2670,6 +2720,17 @@ local function lightenColor(col, val)
     return objects.Color(nr, ng, nb, a)
 end
 
+---@param tagname string
+---@param col objects.Color
+local function defineColorTag(tagname, col)
+    richtext.defineEffect(tagname, function (args, x, y, context, next)
+        local r, gg, b, a = love.graphics.getColor()
+        lg.setColor(col[1], col[2], col[3], (col[4] or 1) * a)
+        next(context.textOrDrawable, x, y)
+        lg.setColor(r, gg, b, a)
+    end)
+end
+
 ---@param id string
 ---@param name string
 ---@param color objects.Color
@@ -2677,19 +2738,6 @@ end
 local function newRarity(id, name, color)
     local lightTextEffect = id .. "_COLOR_LIGHT"
     local darkTextEffect = id .. "_COLOR_DARK"
-    richtext.defineEffect(lightTextEffect, function (args, x, y, context, next)
-        local r, gg, b, a = love.graphics.getColor()
-        love.graphics.setColor(color.r or 1, color.g or 1, color.b or 1, (color.a or 1) * a)
-        next(context.textOrDrawable, x, y)
-        love.graphics.setColor(r, gg, b, a)
-    end)
-
-    richtext.defineEffect(darkTextEffect, function (args, x, y, context, next)
-        local r, gg, b, a = love.graphics.getColor()
-        love.graphics.setColor(color.r or 1, color.g or 1, color.b or 1, (color.a or 1) * a)
-        next(context.textOrDrawable, x, y)
-        love.graphics.setColor(r, gg, b, a)
-    end)
 
     local rar = {
         id = id,
@@ -2702,6 +2750,8 @@ local function newRarity(id, name, color)
         darkColor = darkenColor(color, 0.45),
         lightColor = lightenColor(color, 0.3)
     }
+    defineColorTag(darkTextEffect, rar.darkColor)
+    defineColorTag(lightTextEffect, rar.lightColor)
 
     return rar
 end
@@ -2793,7 +2843,10 @@ local KEYWORDS = {
     }),
     ["POISON"] = loc("{POISON_COLOR}Poison{/POISON_COLOR}", {}, {
         context = "as in, a status-effect. 'Apply 2 POISON', or 'if unit has POISON, do foobar'."
-    })
+    }),
+    ["COIN"] = loc("{coin_icon}{GOLD_COLOR}Coin{/GOLD_COLOR}", {}, {
+        context = "a unit of currency"
+    }),
 }
 
 for i=1, 10 do
@@ -2805,15 +2858,29 @@ for i=1, 10 do
     })
 end
 
+---@param s string
+local function applyLoc2Replace(s)
+    local tag = s:sub(2, -2)
+    if not tag:find("^[A-Z0-9_]+$") then
+        return s
+    end
+
+    for _, sinfo in ipairs(g.getStatList()) do
+        if sinfo.shortName == tag then
+            return sinfo.richText
+        end
+    end
+
+    if KEYWORDS[tag] then
+        return KEYWORDS[tag]
+    end
+
+    error("Invalid tag: "..tag)
+end
+
 function g.loc2(text, variables, context)
     local result = loc(text, variables or {}, context)
-    for _, stat in ipairs(g.getStatList()) do
-        result = result:gsub("%(" .. stat.shortName .. "%)", stat.richText)
-    end
-    for k,v in pairs(KEYWORDS) do
-        result = result:gsub("%("..k.."%)", v)
-    end
-    return result
+    return (result:gsub("(%b())", applyLoc2Replace))
 end
 
 
@@ -2874,12 +2941,7 @@ g.COLORS = {
 }
 
 for k,v in pairs(g.COLORS) do
-    richtext.defineEffect(k .. "_COLOR", function (args, x, y, context, next)
-        local r, gg, b, a = love.graphics.getColor()
-        love.graphics.setColor(v)
-        next(context.textOrDrawable, x, y)
-        love.graphics.setColor(r, gg, b, a)
-    end)
+    defineColorTag(k.."_COLOR", v)
 end
 
 
@@ -3135,6 +3197,17 @@ function g.defineManaType(id, color)
         color = color,
     }
     table.insert(manaTypeList, id)
+
+    local idup = id:upper()
+    defineColorTag(idup .. "_MANA_COLOR", color)
+    local rt = string.format(
+        "{%s}{%s} %s Mana{/%s}",
+        idup.."_MANA_COLOR",
+        mana_small,
+        id:sub(1, 1):upper()..id:sub(2), -- Capitalize
+        idup.."_MANA_COLOR"
+    )
+    KEYWORDS[idup .. "_MANA"] = loc(rt, {}, {context = "Mana is a currency used to spawn squad and spells"})
 end
 
 

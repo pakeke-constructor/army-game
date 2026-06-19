@@ -1,7 +1,7 @@
 
 
 g.defineSquad("gremlin_technician_squad", {
-    name = loc("Gremlin Technicians"),
+    name = "Gremlin Technicians",
     rarity = g.RARITIES.COMMON,
     entityDef = {
         image = "greenskin_assassin",
@@ -21,7 +21,16 @@ g.defineSquad("gremlin_technician_squad", {
         baseStartingArmor = 1,
     },
     unitCount = 4,
-    perks = {"volatile"},
+    perks = {{
+        name = "Volatile",
+        description = loc("On-death, explodes in a large area."),
+        image = "coin_icon",
+        handlers = {
+            entityDeath = function(ent, killer)
+                g.explosion(ent.x, ent.y, 3, 80)
+            end,
+        },
+    }},
     cost = {red = 1},
 })
 
@@ -29,7 +38,7 @@ g.defineSquad("gremlin_technician_squad", {
 
 
 g.defineSquad("barbarian_squad", {
-    name = loc("Barbarians"),
+    name = "Barbarians",
     rarity = g.RARITIES.COMMON,
     entityDef = {
         image = "barbarian",
@@ -49,14 +58,25 @@ g.defineSquad("barbarian_squad", {
     },
     unitCount = 6,
     icon = "barbarian_uniticon",
-    perks = {"bloodlust"},
+    perks = {{
+        name = "Bloodlust",
+        description = loc("This unit heals for 50% of damage dealt on each attack."),
+        image = "coin_icon",
+        handlers = {
+            onAttack = function(ent, target)
+                if ent.attackDamage and g.isAlive(ent) then
+                    g.healEntity(ent, ent.attackDamage * 0.5)
+                end
+            end,
+        },
+    }},
     cost = {red = 1},
 })
 
 
 
 g.defineSquad("blade_thrower_squad", {
-    name = loc("Blade Throwers"),
+    name = "Blade Throwers",
     rarity = g.RARITIES.COMMON,
     entityDef = {
         image = "longbowman",
@@ -84,7 +104,7 @@ g.defineSquad("blade_thrower_squad", {
 
 
 g.defineSquad("brewer_squad", {
-    name = loc("Brewers"),
+    name = "Brewers",
     rarity = g.RARITIES.COMMON,
     entityDef = {
         image = "brewer",
@@ -104,14 +124,33 @@ g.defineSquad("brewer_squad", {
     },
     unitCount = 8,
     icon = "brewer_uniticon",
-    perks = {"bolstering_brew"},
+    perks = {{
+        name = "Bolstering Brew",
+        description = g.loc2("On-spawn, 2 nearby allies gain double (ASPD) for 10 seconds."),
+        image = "coin_icon",
+        handlers = {
+            entitySpawned = function(ent)
+                local buffed = 0
+                g.iteratePartition("ally", ent.x, ent.y, function(other)
+                    if buffed >= 2 then return end
+                    if other == ent then return end
+                    if not g.isAlive(other) then return end
+                    g.addCustomEffect(other, {
+                        getAttackSpeedMultiplier = function(e) return 1.5 end,
+                        getAttackDamageModifier = function(e) return 1 end,
+                    }, 10)
+                    buffed = buffed + 1
+                end, 120)
+            end,
+        },
+    }},
     cost = {red = 1},
 })
 
 
 
 g.defineSquad("tribute_squad", {
-    name = loc("Tributes"),
+    name = "Tributes",
     rarity = g.RARITIES.UNCOMMON,
     entityDef = {
         image = "peasant",
@@ -130,7 +169,19 @@ g.defineSquad("tribute_squad", {
         baseMaxHealth = 4,
     },
     unitCount = 1,
-    perks = {"his_gratitude"},
+    perks = {{
+        name = "His Gratitude",
+        description = loc("On death, deal 10 damage to a random enemy."),
+        image = "coin_icon",
+        handlers = {
+            entityDeath = function(ent, killer)
+                local enemies = g.getECS():getEnemyList()
+                if #enemies > 0 then
+                    g.dealDamage(enemies[math.random(#enemies)], 4)
+                end
+            end,
+        },
+    }},
     cost = {red = 1},
 })
 
@@ -138,7 +189,7 @@ g.defineSquad("tribute_squad", {
 
 
 g.defineSquad("executioner_squad", {
-    name = loc("Executioners"),
+    name = "Executioners",
     rarity = g.RARITIES.RARE,
     entityDef = {
         image = "barbarian",
@@ -163,7 +214,7 @@ g.defineSquad("executioner_squad", {
 
 
 g.defineSquad("berserker_squad", {
-    name = loc("Berserkers"),
+    name = "Berserkers",
     rarity = g.RARITIES.UNCOMMON,
     entityDef = {
         image = "warhog",
@@ -182,14 +233,26 @@ g.defineSquad("berserker_squad", {
         baseMaxHealth = 16,
     },
     unitCount = 6,
-    perks = {"enrage"},
+    perks = {{
+        name = "Enrage",
+        description = g.loc2("The first time this unit takes damage, it gains 1.0 (ASPD)."),
+        image = "coin_icon",
+        handlers = {
+            entityHurt = function(ent, damage, attacker)
+                if not ent._enraged then
+                    ent._enraged = true
+                    g.buffEntity(ent, "attackSpeed", 1.0)
+                end
+            end,
+        },
+    }},
     cost = {red = 2},
 })
 
 
 
 g.defineSquad("dagger_bearer_squad", {
-    name = loc("Dagger Bearers"),
+    name = "Dagger Bearers",
     rarity = g.RARITIES.RARE,
     entityDef = {
         image = "greenskin_assassin",
@@ -209,14 +272,35 @@ g.defineSquad("dagger_bearer_squad", {
     },
     unitCount = 4,
     squadOrder = 50,
-    perks = {"ritual_sacrifice"},
+    perks = {{
+        name = "Ritual Sacrifice",
+        description = g.loc2("On-spawn, kills a nearby ally to gain +4 (ATK) for the fight."),
+        image = "coin_icon",
+        handlers = {
+            entitySpawned = function(ent)
+                local victim = nil
+                g.iteratePartition("ally", ent.x, ent.y, function(other)
+                    if other == ent then return end
+                    if not g.isAlive(other) then return end
+                    if other.isCommander then return end
+                    if (not victim) or (other.health < victim.health) then
+                        victim = other
+                    end
+                end, 120)
+                if victim then
+                    g.killEntity(victim, ent)
+                    g.buffEntity(ent, "attackDamage", 4)
+                end
+            end,
+        },
+    }},
     cost = {red = 1},
 })
 
 
 
 g.defineSquad("furnace_golems_squad", {
-    name = loc("Furnace Golems"),
+    name = "Furnace Golems",
     rarity = g.RARITIES.RARE,
     entityDef = {
         image = "charredsoul",
@@ -236,13 +320,36 @@ g.defineSquad("furnace_golems_squad", {
         baseStartingArmor = 3,
     },
     unitCount = 3,
-    perks = {"conflagrate"},
+    perks = {{
+        name = "Conflagrate",
+        description = g.loc2("On-attack, a nearby ally takes 1 damage and gains +1 (ATK) for the fight."),
+        image = "coin_icon",
+        handlers = {
+            onAttack = function(ent)
+                local found = nil
+                g.iteratePartition("ally", ent.x, ent.y, function(other)
+                    if found then return end
+                    if other == ent then return end
+                    if not g.isAlive(other) then return end
+                    found = other
+                end, 120)
+                if found then
+                    g.dealDamage(found, 1)
+                    if g.isAlive(found) then
+                        g.addCustomEffect(found, {
+                            getAttackDamageModifier = function(e) return 1 end,
+                        }, 9999)
+                    end
+                end
+            end,
+        },
+    }},
     cost = {red = 1},
 })
 
 
 g.defineSquad("living_entropy_squad", {
-    name = loc("Living Entropy"),
+    name = "Living Entropy",
     rarity = g.RARITIES.RARE,
     entityDef = {
         image = "hismanifestation",
@@ -256,13 +363,20 @@ g.defineSquad("living_entropy_squad", {
         baseMaxHealth = 15,
     },
     unitCount = 2,
-    perks = {"explosive"},
+    perks = {{
+        name = "Explosive",
+        description = loc("Attacks cause explosions!"),
+        image = "coin_icon",
+        onHitDamage = function(attacker, _, target)
+            g.explosion(target.x, target.y, attacker.attackDamage or 0, 70, attacker)
+        end,
+    }},
     cost = {red = 2},
 })
 
 
 g.defineSquad("his_manifestation_squad", {
-    name = loc("His Manifestation"),
+    name = "His Manifestation",
     rarity = g.RARITIES.LEGENDARY,
     entityDef = {
         image = "hismanifestation",
@@ -276,14 +390,27 @@ g.defineSquad("his_manifestation_squad", {
         baseMaxHealth = 40,
     },
     unitCount = 1,
-    perks = {"ritual"},
+    perks = {{
+        name = "Ritual",
+        description = g.loc2("On-spawn, gains +1 (ATK) per 2 allies that have died this combat."),
+        image = "coin_icon",
+        handlers = {
+            entitySpawned = function(ent)
+                local ecs = g.getECS()
+                local amount = math.floor(ecs.allyDeathsThisBattle / 2)
+                if amount > 0 then
+                    g.buffEntity(ent, "attackDamage", amount)
+                end
+            end,
+        },
+    }},
     cost = {red = 2},
 })
 
 
 
 g.defineSquad("pain_elemental_squad", {
-    name = loc("Pain Elementals"),
+    name = "Pain Elementals",
     rarity = g.RARITIES.RARE,
     entityDef = {
         image = "gargoyle",
@@ -297,13 +424,27 @@ g.defineSquad("pain_elemental_squad", {
         baseMaxHealth = 15,
     },
     unitCount = 2,
-    perks = {"sadistic"},
+    perks = {{
+        name = "Sadistic",
+        description = g.loc2("When a nearby ally takes damage, gains 1 (ATK) for the battle."),
+        image = "coin_icon",
+        rawHandlers = {
+            entityHurt = function(self, ent)
+                if ent == self then return end
+                if ent.team ~= "ally" then return end
+                if not g.isAlive(self) then return end
+                local dx, dy = self.x - ent.x, self.y - ent.y
+                if dx*dx + dy*dy > 150*150 then return end
+                g.buffEntity(self, "attackDamage", 1)
+            end,
+        },
+    }},
     cost = {red = 1},
 })
 
 
 g.defineSquad("doom_herald_squad", {
-    name = loc("Doom Heralds"),
+    name = "Doom Heralds",
     rarity = g.RARITIES.LEGENDARY,
     entityDef = {
         image = "longbowman",
@@ -319,6 +460,22 @@ g.defineSquad("doom_herald_squad", {
         baseMaxHealth = 12,
     },
     unitCount = 2,
-    perks = {"omen"},
+    perks = {{
+        name = "Omen",
+        description = loc("Triggers ally's On-death effects without killing them."),
+        image = "coin_icon",
+        handlers = {
+            onAttack = function(ent, target)
+                if not ent.healPower then return end
+                if not target or not g.isAlive(target) then return end
+                if target.entityDeath then
+                    target.entityDeath(target, ent)
+                end
+                if target.scope then
+                    target.scope:call("entityDeath", target, ent)
+                end
+            end,
+        },
+    }},
     cost = {red = 1},
 })

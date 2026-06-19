@@ -1,12 +1,17 @@
 
+---@param id string
+---@param def ecs.Components
+local function defEnemy(id, def)
+    def.team = "enemy"
+    def.partitions = {"unit", "enemy"}
+    return g.defineEntity(id, def)
+end
 
 
-g.defineEntity("demon", {
+defEnemy("demon", {
     image = "demon",
     shadow = {},
     physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-    partitions = {"unit", "enemy"},
-    team = "enemy",
     ai = {
         target = "enemy",
         getPriority = function(selfEnt, targEnt)
@@ -27,12 +32,10 @@ g.defineEntity("demon", {
     baseMaxHealth = 10,
 })
 
-g.defineEntity("archerdemon", {
+defEnemy("archerdemon", {
     image = "archerdemon",
     shadow = {},
     physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-    partitions = {"unit", "enemy"},
-    team = "enemy",
     ai = {
         target = "enemy",
         getPriority = function(selfEnt, targEnt)
@@ -57,12 +60,10 @@ g.defineEntity("archerdemon", {
 
 -- FIXME: Balancing of this
 
-g.defineEntity("blazingbombardier", {
+defEnemy("blazingbombardier", {
     image = "blazingbombardier",
     shadow = {},
     physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-    partitions = {"unit", "enemy"},
-    team = "enemy",
     ai = {
         target = "enemy",
     },
@@ -82,12 +83,10 @@ g.defineEntity("blazingbombardier", {
     baseMaxHealth = 4,
 })
 
-g.defineEntity("brimstonecore", {
+defEnemy("brimstonecore", {
     image = "brimstonecore",
     shadow = {},
     physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-    partitions = {"unit", "enemy"},
-    team = "enemy",
     ai = {
         target = "enemy",
     },
@@ -116,12 +115,10 @@ g.defineEntity("brimstonecore", {
     end,
 })
 
-g.defineEntity("charredsoul", {
+defEnemy("charredsoul", {
     image = "charredsoul",
     shadow = {},
     physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-    partitions = {"unit", "enemy"},
-    team = "enemy",
     ai = {
         target = "enemy",
     },
@@ -147,12 +144,10 @@ g.defineEntity("charredsoul", {
     end,
 })
 
-g.defineEntity("crimsongoliath", {
+defEnemy("crimsongoliath", {
     image = "crimsongoliath_body",
     shadow = {},
     physics = { shape = "circle", radius = 32, ox = 0, oy = 0, mass = 1 },
-    partitions = {"unit", "enemy"},
-    team = "enemy",
     ai = {
         target = "enemy",
     },
@@ -177,12 +172,10 @@ g.defineEntity("crimsongoliath", {
     -- Cleave: Also hits enemies in a small area in front of the target.
 })
 
-g.defineEntity("direhound", {
+defEnemy("direhound", {
     image = "direhound",
     shadow = {},
     physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-    partitions = {"unit", "enemy"},
-    team = "enemy",
     ai = {
         target = "enemy",
     },
@@ -211,12 +204,10 @@ g.defineEntity("direhound", {
     end,
 })
 
-g.defineEntity("greatbowdemon", { -- Hellfire Greatbowmen
+defEnemy("greatbowdemon", { -- Hellfire Greatbowmen
     image = "greatbowdemon",
     shadow = {},
     physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-    partitions = {"unit", "enemy"},
-    team = "enemy",
     ai = {
         target = "enemy",
     },
@@ -236,12 +227,10 @@ g.defineEntity("greatbowdemon", { -- Hellfire Greatbowmen
     baseMaxHealth = 8,
 })
 
-g.defineEntity("hellbat", {
+defEnemy("hellbat", {
     -- TODO: Mark this as flying
     image = "hellbat",
     shadow = {},
-    physics = { shape = "circle", radius = 4, ox = 0, oy = 0, mass = 1 },
-    partitions = {"unit", "enemy"},
     team = "enemy",
     ai = {
         target = "enemy",
@@ -263,12 +252,10 @@ g.defineEntity("hellbat", {
     baseMaxHealth = 1,
 })
 
-g.defineEntity("hellbrute", {
+defEnemy("hellbrute", {
     image = "hellbrute",
     shadow = {},
     physics = { shape = "circle", radius = 10, ox = 0, oy = 0, mass = 1 },
-    partitions = {"unit", "enemy"},
-    team = "enemy",
     ai = {
         target = "enemy",
     },
@@ -286,12 +273,10 @@ g.defineEntity("hellbrute", {
     baseMaxHealth = 1,
 })
 
-g.defineEntity("hellhound", {
+defEnemy("hellhound", {
     image = "hellhound",
     shadow = {},
     physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-    partitions = {"unit", "enemy"},
-    team = "enemy",
     ai = {
         target = "enemy",
     },
@@ -319,12 +304,10 @@ g.defineEntity("hellhound", {
     end,
 })
 
-g.defineEntity("reaper", {
+defEnemy("reaper", {
     image = "reaper",
     shadow = {},
     physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-    partitions = {"unit", "enemy"},
-    team = "enemy",
     ai = {
         target = "enemy",
         getPriority = function(selfEnt, targEnt)
@@ -358,12 +341,10 @@ g.defineEntity("reaper", {
     end
 })
 
-g.defineEntity("shielddemon", {
+defEnemy("shielddemon", {
     image = "shielddemon",
     shadow = {},
     physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-    partitions = {"unit", "enemy"},
-    team = "enemy",
     ai = {
         target = "enemy",
     },
@@ -382,12 +363,10 @@ g.defineEntity("shielddemon", {
     baseStartingArmor = 6,
 })
 
-g.defineEntity("soulfirebearer", {
+defEnemy("soulfirebearer", {
     image = "soulfirebearer",
     shadow = {},
     physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-    partitions = {"unit", "enemy"},
-    team = "enemy",
     ai = {
         target = "enemy",
     },
@@ -407,12 +386,10 @@ g.defineEntity("soulfirebearer", {
     baseMaxHealth = 6,
 })
 
-g.defineEntity("speardemon", { -- Demon Spearmen
+defEnemy("speardemon", { -- Demon Spearmen
     image = "speardemon",
     shadow = {},
     physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-    partitions = {"unit", "enemy"},
-    team = "enemy",
     ai = {
         target = "enemy",
     },
