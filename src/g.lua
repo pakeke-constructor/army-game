@@ -782,7 +782,7 @@ local currentEntityId = 0
 ---@field nameContext string? context passed to `loc` function
 ---@field rarity g.Rarity
 ---@field icon string?
----@field perks (g.PerkDef|string|false)[]?
+---@field perks (g.PerkDef|string|false)[]? Perks will be given ID `id.."_perk_..i` if `g.PerkDef` is passed. Use `false` to skip IDs. Pass existing perk ID to use that instead.
 ---@field startingTraits string[]? Trait ids applied to every unit in this squad on spawn.
 ---@field cost g.ManaBundle?
 ---@field onDeploySquad (fun(squad: g.SquadInfo, entities: ecs.Entity[], x: number, y:number))?
@@ -2840,7 +2840,10 @@ local KEYWORDS = {
     }),
     ["POISON"] = loc("{POISON_COLOR}Poison{/POISON_COLOR}", {}, {
         context = "as in, a status-effect. 'Apply 2 POISON', or 'if unit has POISON, do foobar'."
-    })
+    }),
+    ["COIN"] = loc("{coin_icon}{GOLD_COLOR}Coin{/GOLD_COLOR}", {}, {
+        context = "a unit of currency"
+    }),
 }
 
 for i=1, 10 do
