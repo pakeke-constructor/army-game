@@ -1088,6 +1088,12 @@ function g.spawnSquad(squad, x, y, ...)
         g.spawnEntityWithInit(info.entityId, x + offsets[i].x, y + offsets[i].y, function(ent)
             ent.scope = squadScope
             ent.squad = squad
+            for _, stat in ipairs(g.getStatList()) do
+                -- apply squad buffs:
+                if ent[stat.baseName] then
+                    ent[stat.baseName] = ent[stat.baseName] + g.getSquadStatBuff(squad.squadId, stat.name)
+                end
+            end
             ent._timeSinceDeployed = -(((i - 1)/numUnits) * DEPLOY_ANIMATION_STEP)
             for _, traitName in ipairs(info.startingTraits) do
                 g.addTrait(ent, traitName)
@@ -2054,6 +2060,16 @@ function g.getSquadUnitCount(squadId)
         return info.unitCount + xtra + xtra2
     end
     return info.unitCount
+end
+
+
+---@param squadId string
+---@param stat string
+---@return number
+function g.getSquadStatBuff(squadId, stat)
+    local squad = g.getSquadFromArmy(squadId)
+    local buff = (squad and squad.statBuffs and squad.statBuffs[stat]) or 0
+    return buff + g.ask("getSquadStatBuffModifier", squadId, stat)
 end
 
 

@@ -12,7 +12,6 @@ luasteam.dll
 steam_api64.dll
 
 *.kra
-*.kra~
 
 
 *.pyc

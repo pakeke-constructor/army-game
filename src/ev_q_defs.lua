@@ -81,4 +81,5 @@ g.defineQuestion("getBurnDPSMultiplier", MUL, 1)
 
 g.defineQuestion("getAITargetPriorityModifier", ADD, 0)
 g.defineQuestion("getSquadUnitCountModifier", ADD, 0)
+g.defineQuestion("getSquadStatBuffModifier", ADD, 0)
 g.defineQuestion("canDeployAnywhere", OR, false)
