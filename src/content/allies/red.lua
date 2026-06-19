@@ -261,6 +261,26 @@ g.defineSquad("living_entropy_squad", {
 })
 
 
+g.defineSquad("his_manifestation_squad", {
+    name = loc("His Manifestation"),
+    rarity = g.RARITIES.LEGENDARY,
+    entityDef = {
+        image = "hismanifestation",
+        physics = { shape = "circle", radius = 10, ox = 0, oy = 0, mass = 3 },
+        attack = { attackType = "melee" },
+        weapon = { image = "1x1", type = "sword" },
+        baseAttackDamage = 6,
+        baseAttackSpeed = 0.8,
+        baseAttackRange = 22,
+        baseMoveSpeed = 45,
+        baseMaxHealth = 40,
+    },
+    unitCount = 1,
+    perks = {"ritual"},
+    cost = {red = 2},
+})
+
+
 
 g.defineSquad("pain_elemental_squad", {
     name = loc("Pain Elementals"),
@@ -302,4 +322,3 @@ g.defineSquad("doom_herald_squad", {
     perks = {"omen"},
     cost = {red = 1},
 })
-

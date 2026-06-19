@@ -58,6 +58,7 @@ local function zero(ent, c)
     return 0
 end
 
+---@param c ecs.Entity
 local function missingHealthPriority(ent, c)
     local maxHealth = c.maxHealth or c.health or 0
     local missing = maxHealth - (c.health or 0)
@@ -87,6 +88,7 @@ local function pickTarget(ent, candidates)
                 end
             end
             local prio = getPrio(ent, c)
+            prio = prio + g.ask("getAITargetPriorityModifier", ent, c)
             -- tiebreak: closer is better (subtract tiny distance factor)
             local d2 = dist2(ent, c)
             -- deterministic per-pair noise for stable tie-breaking
