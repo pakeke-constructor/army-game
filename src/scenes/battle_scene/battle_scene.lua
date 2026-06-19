@@ -99,11 +99,14 @@ function battle_scene:pollHandlers()
                 loseBattle(self)
             end
             if ent.team == "ally" then
-                self.ecs.deathAllies = self.ecs.deathAllies + 1
+                self.ecs.allyDeathsThisBattle = self.ecs.allyDeathsThisBattle + 1
             end
-            if ent.team ~= "enemy" then return end
-            if self.lastEnemyCount ~= 1 then return end
-            self.shockwave = { time = 0, x = ent.x, y = ent.y }
+            if ent.team == "enemy" then
+                self.ecs.enemyDeathsThisBattle = self.ecs.enemyDeathsThisBattle + 1
+                if self.lastEnemyCount == 1 then
+                    self.shockwave = { time = 0, x = ent.x, y = ent.y }
+                end
+            end
         end
     })
 end

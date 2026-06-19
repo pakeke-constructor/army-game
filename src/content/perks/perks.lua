@@ -340,7 +340,7 @@ g.definePerk("ritual", "Ritual", {
     handlers = {
         entitySpawned = function(ent)
             local ecs = g.getECS()
-            local amount = math.floor(ecs.deathAllies / 2)
+            local amount = math.floor(ecs.allyDeathsThisBattle / 2)
             if amount > 0 then
                 g.buffEntity(ent, "attackDamage", amount)
             end
