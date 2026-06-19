@@ -2814,6 +2814,15 @@ function g.loc2(text, variables, context)
 end
 
 
+---@param squad g.Squad
+---@param stat string
+---@param amount number
+function g.buffSquadPermanently(squad, stat, amount)
+    assert(STAT_DEFS[stat], "unknown stat: " .. tostring(stat))
+    squad.statBuffs = squad.statBuffs or {}
+    squad.statBuffs[stat] = (squad.statBuffs[stat] or 0) + amount
+end
+
 ---@param ent ecs.Entity
 ---@param stat string
 ---@param increase number

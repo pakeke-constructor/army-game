@@ -58,6 +58,10 @@ local UPGRADE = loc("UPGRADE!", {}, {
     context = "Title, denoting that there is a squad upgrade."
 })
 
+local BONUS = interp("Bonus: %{value}", {
+    context = "Tooltip line showing a stat bonus from squad buffs, e.g. 'Bonus: +5 (Health)'."
+})
+
 local UPGRADE_UNITS = interp("+%{n} Units", {
     context = "An upgrade where the units in a squad increases. e.g. More soldiers; `+5 units`."
 })
@@ -204,15 +208,18 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
                 local cw = cellW - 2
                 local ch = statCellH - 2
 
-                local value, icon, statColor, name, desc
+                local value, icon, statColor, name, desc, bonus
                 local statId = sortedStats[i]
                 local isDPS = statId == "DPS"
                 if isDPS then
                     -- its special! computed
                     local powerStat = isHealer and "healPower" or "attackDamage"
-                    local attackSpeed = (def.baseAttackSpeed or 0) + g.getSquadStatBuff(squadId, "attackSpeed")
-                    local power = (def.baseHealPower or def.baseAttackDamage or 0) + g.getSquadStatBuff(squadId, powerStat)
+                    local baseSpeed = def.baseAttackSpeed or 0
+                    local basePower = def.baseHealPower or def.baseAttackDamage or 0
+                    local attackSpeed = baseSpeed + g.getSquadStatBuff(squadId, "attackSpeed")
+                    local power = basePower + g.getSquadStatBuff(squadId, powerStat)
                     value = attackSpeed * power
+                    bonus = value - (baseSpeed * basePower)
                     icon = isHealer and "healpower" or "damage"
                     statColor = isHealer and g.COLORS.HEAL or g.COLORS.DAMAGE
                     name = isHealer and HPS_NAME or DPS_NAME
@@ -223,7 +230,8 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
                     })
                 else
                     local stat = g.getStatInfo(statId)
-                    value = (def and def[stat.baseName] or 0) + g.getSquadStatBuff(squadId, statId)
+                    bonus = g.getSquadStatBuff(squadId, statId)
+                    value = (def and def[stat.baseName] or 0) + bonus
                     icon = stat.icon
                     statColor = stat.color
                     name = stat.displayName
@@ -255,6 +263,11 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
                         local rr,gg,bb = statColor.r, statColor.g, statColor.b
                         boxx:addText(string.format("{c r=%.3f g=%.3f b=%.3f}%s", rr, gg, bb, name), fonts.title)
                         boxx:addText(desc, fonts.body)
+                        if bonus and bonus ~= 0 then
+                            boxx:addSpacing(10)
+                            local valStr = string.format("{c r=%.3f g=%.3f b=%.3f}%+g{/c}", rr, gg, bb, bonus)
+                            boxx:addText(BONUS({value = valStr}), fonts.body)
+                        end
                     end)
                 end
 
