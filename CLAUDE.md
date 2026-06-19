@@ -176,5 +176,5 @@ loc MUST be called at load-time, before the draw/update loop begins.
 - Simple code > "correct" code. No unnecessary error handling, no overengineering for the sake of "best practices".
 - No complex one-liners, no deep nesting, no clever abstractions.
 - If a feature needs >300 new lines, stop and ask how to simplify.
-- In documentation, or when editing CLAUDE.md, you MUST use extremely CLEAR phrases and SIMPLE language.
+- In documentation, or when editing CLAUDE.md, you MUST use extremely CLEAR phrases and SIMPLE language, conciseness is not as important.
 </IMPORTANT-INSTRUCTIONS>
