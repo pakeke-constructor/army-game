@@ -1,4 +1,5 @@
 
+
 .env
 .vscode
 .clinerules
@@ -32,3 +33,7 @@ _ex6/love2d-api
 .EX6_CONTEXT_DUMP.txt
 
 TEMP_NOTEPAD.md
+PLAYTESTER_NOTEPAD.md
+
+
+

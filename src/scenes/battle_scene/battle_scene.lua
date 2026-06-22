@@ -122,6 +122,7 @@ function battle_scene:enter()
     juiceService.reset()
 
     self.editingSquadLineup = true
+    self.deployPhase = true
 
     self.randomI = love.math.random(1,1000) -- random integer, doesnt really matter
 
@@ -219,12 +220,6 @@ local function buildVictoryChoices()
 end
 
 
----@param secondCount integer
-function battle_scene:perSecondUpdate(secondCount)
-    g.setCurrentECS(self.ecs)
-    g.call("perSecondUpdate", secondCount)
-end
-
 function battle_scene:update(dt)
     self.timeSinceEnteredScene = self.timeSinceEnteredScene + dt
 
@@ -239,12 +234,12 @@ function battle_scene:update(dt)
     juiceService.update(dt)
     ambienceService.update(dt, self.camera:getTransform())
     local timeScale = juiceService.consumeHitPause(dt)
-    self.ecs:update(dt * timeScale)
+    self.ecs:update(self.deployPhase and 0 or dt * timeScale)
 
     local enemyCount = countEnemies(self.ecs)
     self.lastEnemyCount = enemyCount
 
-    if self.defeated then
+    if self.defeated or self.deployPhase then
         return
     end
 
@@ -422,6 +417,9 @@ local BATTLE_START = {
     loc("Battle Begins!",{}, {context=_BATTLE_START_CTX}),
 }
 
+
+local START_BATTLE_BTN = loc("Start Battle!", {}, {context="Button the player presses to begin the battle after deploying their squads"})
+local USE_LAST_ARMY_BTM = loc("Use Last Layout", {}, {context="Button for the player to use the layout used last battle"})
 
 local CANT_AFFORD = interp("{c r=1 g=0.2 b=0.2}{o}Can't afford! (Need {c r=1 b=1 g=1}{%{manaType}}{/c})", {
     context = "Popup shown when player tries to deploy a squad but doesn't have enough mana. %{manaType} is a richtext icon for the mana type (e.g. red, blue, green, yellow)."
@@ -881,6 +879,22 @@ function battle_scene:draw()
         end
     end
     self.hud:drawUI({ battleScene = true })
+
+    if self.deployPhase then
+        local r = ui.getScreenRegion()
+        local _, row, _ = r:splitVertical(6, 1, 1)
+        local _, mid, _ = row:splitHorizontal(1,1,1)
+        local a,b = mid:splitHorizontal(1,1)
+
+        if ui.DefaultButton("{o}"..USE_LAST_ARMY_BTM, a:padRatio(0.15)) then
+            print("TODO")
+        end
+
+        if ui.DefaultButton("{o}"..START_BATTLE_BTN, b:padRatio(0.15)) then
+            self.deployPhase = false
+            g.call("battleStarted")
+        end
+    end
 
     if self.victory and (not g.isAnyPopupOpen()) then
         g.gotoScene("map_scene")

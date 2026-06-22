@@ -204,7 +204,7 @@ local shadow = {
 ---@field public _timeSinceDamaged number?
 ---@field public _timeSinceHealed number?
 ---@field public _timeSinceLostArmor number?
----@field public _timeSinceDeployed number?
+---@field public _deployTime number?
 ---@field public _timeSinceAutoAttacked number?
 ---@field public _damageLagAmount number?
 ---@field public damageJolt number?

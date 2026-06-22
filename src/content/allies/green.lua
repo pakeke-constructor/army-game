@@ -81,6 +81,7 @@ g.defineSquad("druid_squad", {
             onAttack = function(ent, target)
                 if ent.healPower and target and g.isAlive(target) then
                     g.buffEntity(target, "maxHealth", 1)
+                    target.health = target.health + 1
                 end
             end,
         },

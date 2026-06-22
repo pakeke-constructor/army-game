@@ -43,6 +43,9 @@ function ECSWorld:init(systemNames)
     self.allyDeathsThisBattle = 0
     self.enemyDeathsThisBattle = 0
 
+    self.secondTimer = 0
+    self.secondCount = 0
+
     -- Load systems (each system is a plain table of event/question handlers)
     self.systems = {}
     for _, name in ipairs(systemNames or {}) do
@@ -266,9 +269,6 @@ function ECSWorld:update(dt)
                 end
             end
         end
-        if e._timeSinceDeployed then
-            e._timeSinceDeployed = e._timeSinceDeployed + dt
-        end
         if e._timeSinceAutoAttacked then
             e._timeSinceAutoAttacked = e._timeSinceAutoAttacked + dt
         end
@@ -306,6 +306,13 @@ function ECSWorld:update(dt)
     end
     g.call("postUpdate", dt)
     self.entities:flush()
+
+    self.secondTimer = self.secondTimer + dt
+    while self.secondTimer >= 1 do
+        self.secondTimer = self.secondTimer - 1
+        self.secondCount = self.secondCount + 1
+        g.call("perSecondUpdate", self.secondCount)
+    end
 end
 
 local function getDrawY(e)

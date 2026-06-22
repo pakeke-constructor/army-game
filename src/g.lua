@@ -1144,7 +1144,7 @@ function g.spawnSquad(squad, x, y, ...)
                     ent[stat.baseName] = ent[stat.baseName] + g.getSquadStatBuff(squad.squadId, stat.name)
                 end
             end
-            ent._timeSinceDeployed = -(((i - 1)/numUnits) * DEPLOY_ANIMATION_STEP)
+            ent._deployTime = love.timer.getTime() + ((i - 1)/numUnits) * DEPLOY_ANIMATION_STEP
             for _, traitName in ipairs(info.startingTraits) do
                 g.addTrait(ent, traitName)
             end
@@ -2038,11 +2038,12 @@ DEV_SHOW_RANGE = consts.DEV_MODE and DEV_SHOW_RANGE
 function g.drawEntity(ent, x, y)
     local entScale = g.ask("getEntityScale", ent) * (ent.scale or 1)
     local sx, sy = (ent.sx or 1) * (ent.faceDir or 1) * entScale, (ent.sy or 1) * entScale
-    if ent._timeSinceDeployed then
-        if ent._timeSinceDeployed < 0 then
+    if ent._deployTime then
+        local elapsed = love.timer.getTime() - ent._deployTime
+        if elapsed < 0 then
             return
         end
-        local p = math.min(1, ent._timeSinceDeployed / DEPLOY_ANIMATION_DURATION)
+        local p = math.min(1, elapsed / DEPLOY_ANIMATION_DURATION)
         sx = sx * (0.3 + 0.7 * p)
         sy = sy * (DEPLOY_STRETCH_SY - (DEPLOY_STRETCH_SY - 1) * p)
     end
