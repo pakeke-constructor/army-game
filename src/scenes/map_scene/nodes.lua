@@ -42,7 +42,7 @@ local FEAST_TXT = loc("Feast: Obtain XP")
 
 local CAMPFIRE_TXT = loc("Campfire: Obtain XP")
 
-local PORTAL_ACTIVE_TXT = loc("Portal: Enter New Area")
+local PORTAL_ACTIVE_TXT = loc("Portal: Go to random node")
 local PORTAL_INACTIVE_TXT = loc("Portal: Inactive")
 
 local NODE_FADE_OUT = 0.35

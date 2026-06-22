@@ -1,4 +1,9 @@
 
+local sqhelper = require(".squad_helper")
+
+
+sqhelper.defineMilitiaAndArchers("red")
+
 
 g.defineSquad("gremlin_technician_squad", {
     name = "Gremlin Technicians",
@@ -248,6 +253,10 @@ g.defineSquad("berserker_squad", {
     }},
     cost = {red = 2},
 })
+
+
+
+
 
 
 

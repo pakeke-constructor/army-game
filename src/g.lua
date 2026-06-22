@@ -3112,6 +3112,30 @@ end
 ---@param manaRequirement g.ManaBundle
 ---@return g.ManaCounts?
 local function trySpendManaInternal(manaCounts, manaRequirement)
+    -- HACK: colorless. Only total count matters.
+    local totalNeed = (manaRequirement.blue or 0) + (manaRequirement.green or 0)
+        + (manaRequirement.red or 0) + (manaRequirement.yellow or 0)
+
+    if getTotalManaCount(manaCounts) < totalNeed then return nil end
+
+    local kept = {}
+    for k, v in pairs(manaCounts or {}) do
+        kept[k] = v
+    end
+
+    local needLeft = totalNeed
+    for k, v in pairs(kept) do
+        if needLeft <= 0 then break end
+        local used = math.min(v, needLeft)
+        needLeft = needLeft - used
+        kept[k] = (v - used > 0) and (v - used) or nil
+    end
+
+    return kept
+end
+
+--[[ OLD color-aware version:
+local function trySpendManaInternal(manaCounts, manaRequirement)
     local needBlue = manaRequirement.blue or 0
     local needGreen = manaRequirement.green or 0
     local needRed = manaRequirement.red or 0
@@ -3157,6 +3181,9 @@ local function trySpendManaInternal(manaCounts, manaRequirement)
 
     return kept
 end
+]]
+
+
 
 
 ---@param manaType g.ManaType

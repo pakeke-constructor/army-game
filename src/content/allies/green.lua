@@ -1,5 +1,13 @@
 
 
+local sqhelper = require(".squad_helper")
+
+
+sqhelper.defineMilitiaAndArchers("green")
+
+
+
+
 g.defineSquad("forest_sprite_squad", {
     name = "Forest Sprites",
     rarity = g.RARITIES.COMMON,
