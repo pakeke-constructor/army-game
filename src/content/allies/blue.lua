@@ -65,14 +65,14 @@ g.defineSquad("diver_squad", {
     name = "Divers",
     rarity = g.RARITIES.RARE,
     entityDef = {
-        image = "militia", -- no diver sprite; militia stand-in
+        image = "divers_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
         },
         weapon = {
-            image = "dagger",
-            type = "sword",
+            image = "divers_harpoon",
+            type = "spear",
         },
         baseAttackDamage = 1,
         baseAttackSpeed = 1,
@@ -142,14 +142,14 @@ g.defineSquad("monk_squad", {
     name = "Monks",
     rarity = g.RARITIES.COMMON,
     entityDef = {
-        image = "incense_priest",
+        image = "monks_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
         },
         weapon = {
-            image = "militia_sword",
-            type = "sword",
+            image = "monks_staff",
+            type = "staff",
         },
         baseAttackDamage = 1,
         baseAttackSpeed = 1,
@@ -234,13 +234,13 @@ g.defineSquad("orcball_player_squad", {
     name = "Orcball Players",
     rarity = g.RARITIES.COMMON,
     entityDef = {
-        image = "militia",
+        image = "orcballplayers_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
         },
         weapon = {
-            image = "militia_sword",
+            image = "orcballplayers_orcball",
             type = "sword",
         },
         baseAttackDamage = 1,
@@ -275,14 +275,14 @@ g.defineSquad("defender_squad", {
     name = "Defenders",
     rarity = g.RARITIES.COMMON,
     entityDef = {
-        image = "militia",
+        image = "defenders_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
         },
         weapon = {
-            image = "militia_sword",
-            type = "sword",
+            image = "defenders_shield",
+            type = "staff"
         },
         baseAttackDamage = 1,
         baseAttackSpeed = 1,
@@ -366,7 +366,7 @@ g.defineSquad("clay_troll_squad", {
     name = "Clay Trolls",
     rarity = g.RARITIES.RARE,
     entityDef = {
-        image = "militia",
+        image = "claytrolls_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
@@ -409,7 +409,7 @@ g.defineSquad("war_elephant_squad", {
     name = "War Elephants",
     rarity = g.RARITIES.RARE,
     entityDef = {
-        image = "warhog",
+        image = "warelephants_unit",
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 2 },
         attack = { attackType = "melee" },
         --weapon = { image = "militia_sword", type = "sword" },
@@ -467,10 +467,10 @@ g.defineSquad("magnet_elemental_squad", {
     name = "Magnet Elementals",
     rarity = g.RARITIES.RARE,
     entityDef = {
-        image = "gargoyle",
+        image = "magnetelemental_unit",
         physics = { shape = "circle", radius = 6, ox = 0, oy = 0, mass = 1 },
         attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 280 },
-        weapon = { image = "placeholder", type = "bow" },
+        -- weapon = { image = "placeholder", type = "bow" },
         baseAttackDamage = 2,
         baseAttackSpeed = 0.7,
         baseAttackRange = 120,
@@ -508,11 +508,11 @@ g.defineSquad("immortal_eye_squad", {
     name = "The Immortal Eye",
     rarity = g.RARITIES.LEGENDARY,
     entityDef = {
-        image = "militia", -- placeholder
+        image = "theimmortaleye_unit",
         isBuilding = true,
         physics = { shape = "circle", radius = 10, ox = 0, oy = 0, mass = 1, isStatic = true },
         attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 300 },
-        weapon = { image = "placeholder", type = "bow" },
+        -- weapon = { image = "placeholder", type = "bow" },
         baseAttackDamage = 1,
         baseAttackSpeed = 0.8,
         baseAttackRange = 220,
@@ -586,10 +586,11 @@ g.defineSquad("laser_gunner_squad", {
     name = "Laser Gunners",
     rarity = g.RARITIES.LEGENDARY,
     entityDef = {
-        image = "longbowman",
+        image = "lasergunners_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        -- TODO: Laser cannon attack rather than arrow?
         attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 380 },
-        weapon = { image = "placeholder", type = "bow" },
+        weapon = { image = "lasergunners_lasercannon", type = "bow" },
         baseAttackDamage = 1,
         baseAttackSpeed = 0.5,
         baseAttackRange = 120,
