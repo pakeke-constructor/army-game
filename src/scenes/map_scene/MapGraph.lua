@@ -489,7 +489,7 @@ end
 
 
 local SPECIAL_NODES = {
-    "feast", "fountain", "shrine", "shop", "portal",
+    "feast", "fountain", "shrine", "shop", "portal", "chest",
     -- "dynamic" can be either "fountain", "shrine", or "shop"
     -- the exact type will be determined once the node is seen
     -- which is handled in map_scene.lua.

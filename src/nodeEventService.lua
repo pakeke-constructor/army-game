@@ -112,6 +112,9 @@ local SACRIFICE_GOLD = 30
 local FOUNTAIN_RAGE_REDUCTION = 2
 local FEAST_XP = 4
 
+local CHEST_TXT = loc("A big chest mmmm.")
+local CHEST_OPEN = loc("Open it!")  -- load-time, like the others
+
 local function closePopup()
     nodeEventService._popup = nil
     nodeEventService._popupData = nil
@@ -195,6 +198,10 @@ end
 function nodeEventService.openPortalPopup(node)
     if not (node and node.active) then return end
     openPopup("portal", node)
+end
+---@param node MapNode.ChestNode
+function nodeEventService.openChestPopup(node)
+    openPopup("chest")
 end
 
 
@@ -310,6 +317,15 @@ local function drawPortalPopup()
 end
 
 
+local function drawChestPopup()
+    local buttonR, font = beginPopup(CHEST_TXT)  -- draws window + text, returns buttons region
+
+    if drawChoiceButton(buttonR, CHEST_OPEN, font) then
+        closePopup()
+        rewardPopupService.genericReward({ randomSquad = true, gold = 25 })
+    end
+end
+
 ---@param ev g.RandomEventPass
 local function drawRandomEvent(ev)
     local window = drawBasicWindow()
@@ -354,6 +370,7 @@ local POPUP_DRAWERS = {
     fountain = drawFountainPopup,
     feast = drawFeastPopup,
     portal = drawPortalPopup,
+    chest = drawChestPopup,
 }
 
 function nodeEventService.draw()
