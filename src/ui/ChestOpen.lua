@@ -185,8 +185,8 @@ function ChestOpen:draw()
         self.cardH = hh
 
         local widthForText = r.w * 3/5
-        richtext.printRichContained(NEW_ITEM, g.getSmallFont(48), rx - widthForText/2, ry - 140, widthForText, 60)
-        richtext.printRichContained(CLICK_TO_CLOSE, g.getSmallFont(32), rx - widthForText/2, ry + 100, widthForText, 40)
+        richtext.printRichContained(NEW_ITEM, g.getSmallFont(48), rx - widthForText/2, ry - 140, widthForText, 60, 1)
+        richtext.printRichContained(CLICK_TO_CLOSE, g.getSmallFont(32), rx - widthForText/2, ry + 100, widthForText, 40, 1)
     else
         lg.setColor(1, 1, 1)
         drawBigBlessingIcon(self.reel[reelIndex], rx, ry)
