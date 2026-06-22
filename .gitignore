@@ -11,11 +11,7 @@ _notes/.obsidian
 luasteam.dll
 steam_api64.dll
 
-*.ase
-*.aseprite
-
 *.kra
-*.kra~
 
 
 *.pyc

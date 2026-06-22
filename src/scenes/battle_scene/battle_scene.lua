@@ -29,7 +29,9 @@ local function loseBattle(self)
     self.defeated = true
     g.call("battleLost")
     -- todo: do other stuff here, like popup, etc etc
-    gameoverPopupService.show()
+    fadeToBlackService.fadeToFromBlack(1, function()
+        gameoverPopupService.show()
+    end, 1)
 end
 
 local function spawnTestNeutralObjectives(self)

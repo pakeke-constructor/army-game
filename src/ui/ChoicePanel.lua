@@ -188,10 +188,12 @@ function ChoicePanel:draw()
         g.drawImageContained(IMG, rerollR:get())
 
         local font = g.getSmallFont(16)
+        local xx,yy,ww,hh=rerollR:padRatio(0.7):get()
         richtext.printRichContained(
-            "{shop_reroll_icon} " .. REROLL_TXT({n = self.rerolls}),
+            "{shop_reroll_icon} " .. helper.wrapRichtextColor(g.COLORS.REROLL, REROLL_TXT({n = self.rerolls})),
             font,
-            rerollR:padRatio(0.6):get()
+            xx,yy,ww,hh,
+            1
         )
 
         if iml.wasJustClicked(rerollR:get()) then

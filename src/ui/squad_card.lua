@@ -7,6 +7,7 @@ local STAT_LIST = {
     "startingArmor",
     "moveSpeed",
     "attackRange",
+    "magic",
 }
 
 local STAT_FONT = nil
@@ -36,10 +37,14 @@ local function drawPerkSlot(region, perk, accentColor)
     local r,g,b = accentColor:darken(0.9):getRGBA()
     
     lg.setColor(1,1,1)
-    local colorChange = " {o r=" .. r .. " g=" .. g .. " b=" .. b .. "} "
-    local txt = "{" .. perk.image .. "}{o} " .. helper.wrapRichtextColor(accentColor, perk.name) .. "{/o}"
+    local colorChange = "{o r=" .. r .. " g=" .. g .. " b=" .. b .. "}"
+    local title = "{" .. perk.image .. "}{o}" .. helper.wrapRichtextColor(accentColor, perk.name) .. "{/o}"
     local desc = "{c r=0.85 g=0.85 b=0.9}" .. colorChange .. perk.description .. "{/o}"
-    richtext.printRichContained(txt .. "\n" .. desc, PERK_DESC_FONT, region:padUnit(6):get())
+    local titleRegion = region:splitVertical(1,2):moveRatio(0,-0.5)
+    local tx, ty, tw, th = titleRegion:get()
+    richtext.printRichContained(title, PERK_DESC_FONT, tx, ty, tw, th, 1)
+    local dx, dy, dw, dh = region:padUnit(4):get()
+    richtext.printRichContained(desc, PERK_DESC_FONT, dx, dy, dw, dh, 1)
 end
 
 
@@ -56,6 +61,10 @@ local DPS_DESC = interp("{damage} Attack Damage: {c r=0.85 g=0.25 b=0.25}%{attac
 
 local UPGRADE = loc("UPGRADE!", {}, {
     context = "Title, denoting that there is a squad upgrade."
+})
+
+local BONUS = interp("Bonus: %{value}", {
+    context = "Tooltip line showing a stat bonus from squad buffs, e.g. 'Bonus: +5 (Health)'."
 })
 
 local UPGRADE_UNITS = interp("+%{n} Units", {
@@ -85,6 +94,12 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
     local frameLightColor = manaColor:lerp(objects.Color.WHITE, 0.25)
     local panelTopColor = objects.Color(0.05, 0.05, 0.06, 0.9)
     local canUpgrade = showUpgrade and g.getSquadFromArmy(squadId)
+    local traits = info.startingTraits or {}
+    local traitInfos = {}
+    for i = 1, #traits do
+        table.insert(traitInfos, (g.getTraitInfo(traits[i])))
+    end
+    local hasAnyTraits = #traitInfos > 0
 
     local x, y, w, h = region:get()
     local uid = squadId .. "_" .. index
@@ -98,7 +113,7 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
     STAT_FONT = STAT_FONT or g.getSmallFont(16)
     TITLE_FONT = TITLE_FONT or g.getBigFont(16)
 
-    local box = ui.Box({maxWidth = w, maxHeight = h, padding = 12, spacing = 8}, function(bx, by, bw, bh)
+    local box = ui.Box({maxWidth = w, maxHeight = h, padding = 12, spacing = 0}, function(bx, by, bw, bh)
         if canUpgrade then
             helper.drawEdgeTrailAnimation(region, manaColor, 0.25, 20)
             helper.drawEdgeTrailAnimation(region, manaColor, 0.75, 20)
@@ -138,6 +153,8 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
             richtext.printRichContainedNoWrap("{o}" .. rarityText, STAT_FONT, textX, ey + 16, textW, STAT_FONT:getHeight(), "left")
         end,
     })
+
+    box:addSpacing(6)
 
     -- squad-units: Layed out in a flat horizontal line.
     local unitWidth, unitHeight = g.getUnitDrawSize(info.entityId)
@@ -188,6 +205,8 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
         end)
     end
 
+    box:addSpacing(4)
+
     local statCellH = 22
     local statRows = 2
     local statCols = 3
@@ -204,23 +223,30 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
                 local cw = cellW - 2
                 local ch = statCellH - 2
 
-                local value, icon, statColor, name, desc
+                local value, icon, statColor, name, desc, bonus
                 local statId = sortedStats[i]
                 local isDPS = statId == "DPS"
                 if isDPS then
                     -- its special! computed
-                    value = def.baseAttackSpeed * (def.baseHealPower or def.baseAttackDamage)
+                    local powerStat = isHealer and "healPower" or "attackDamage"
+                    local baseSpeed = def.baseAttackSpeed or 0
+                    local basePower = def.baseHealPower or def.baseAttackDamage or 0
+                    local attackSpeed = baseSpeed + g.getSquadStatBuff(squadId, "attackSpeed")
+                    local power = basePower + g.getSquadStatBuff(squadId, powerStat)
+                    value = attackSpeed * power
+                    bonus = value - (baseSpeed * basePower)
                     icon = isHealer and "healpower" or "damage"
                     statColor = isHealer and g.COLORS.HEAL or g.COLORS.DAMAGE
                     name = isHealer and HPS_NAME or DPS_NAME
                     desc = (isHealer and HPS_DESC or DPS_DESC)({
-                        attackSpeed = def.baseAttackSpeed,
-                        attackDamage = def.baseHealPower or def.baseAttackDamage,
+                        attackSpeed = attackSpeed,
+                        attackDamage = power,
                         dps = value
                     })
                 else
                     local stat = g.getStatInfo(statId)
-                    value = def and def[stat.baseName] or 0
+                    bonus = g.getSquadStatBuff(squadId, statId)
+                    value = (def and def[stat.baseName] or 0) + bonus
                     icon = stat.icon
                     statColor = stat.color
                     name = stat.displayName
@@ -252,6 +278,11 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
                         local rr,gg,bb = statColor.r, statColor.g, statColor.b
                         boxx:addText(string.format("{c r=%.3f g=%.3f b=%.3f}%s", rr, gg, bb, name), fonts.title)
                         boxx:addText(desc, fonts.body)
+                        if bonus and bonus ~= 0 then
+                            boxx:addSpacing(10)
+                            local valStr = string.format("{c r=%.3f g=%.3f b=%.3f}%+g{/c}", rr, gg, bb, bonus)
+                            boxx:addText(BONUS({value = valStr}), fonts.body)
+                        end
                     end)
                 end
 
@@ -272,6 +303,59 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
             end
         end,
     })
+
+    box:addSpacing(4)
+
+    -- Traits:
+    if hasAnyTraits then
+        local H = 10
+        local function drawTraitBox(traitInfo, xx, yy, ww, hh)
+            if not traitInfo then return end
+            xx,yy,ww,hh = Kirigami(xx,yy,ww,hh):padUnit(2,0,2,0):get()
+
+            local px, py = iml.getTransformedPointer()
+            local isHovered2 = px >= xx and py >= yy and px <= xx + ww and py <= yy + hh
+
+            local r, gg, b, a = g.COLORS.DARK_UI:getRGBA()
+            local pad = 1
+            local dark = isHovered2 and 0.7 or 1
+            love.graphics.setColor(r*dark, gg*dark, b*dark, isHovered2 and 0.9 or 0.75)
+            ui.drawSingleColorPanel(xx, yy, ww, hh)
+
+            love.graphics.setColor(traitInfo.color)
+            richtext.printRichContainedNoWrap(traitInfo.name, STAT_FONT, xx + pad*2, yy, ww - pad*4, hh, "center")
+
+            if isHovered2 then
+                hoverService.requestHover(function(boxx, fonts)
+                    boxx:addText(traitInfo.name, fonts.title)
+                    boxx:addText(traitInfo.description, fonts.body)
+                end)
+            end
+        end
+
+        box:add({
+            getHeight = function(w)
+                return H
+            end,
+            draw = function(xx, yy, ww, hh)
+                lg.setColor(1,1,1)
+                -- lg.circle("fill",xx,yy, 100)
+                -- print(#traits)
+                local reg = Kirigami(xx, yy, ww, hh)
+                local a, b, c = reg:padRatio(0.1):splitHorizontal(1, 1, 1)
+                if #traitInfos == 1 then
+                    drawTraitBox(traitInfos[1], b:get())
+                elseif #traitInfos == 2 then
+                    drawTraitBox(traitInfos[1], a:get())
+                    drawTraitBox(traitInfos[2], b:get())
+                else
+                    drawTraitBox(traitInfos[1], a:get())
+                    drawTraitBox(traitInfos[2], b:get())
+                    drawTraitBox(traitInfos[3], c:get())
+                end
+            end
+        })
+    end
 
     -- Perks
     local perks = info.perks or {}

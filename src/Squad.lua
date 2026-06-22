@@ -6,6 +6,7 @@ local objects = require("src.modules.objects.objects")
 ---@field level integer
 ---@field icon string
 ---@field perks string[]
+---@field statBuffs table<string, number?> {[statName] -> buffAmount}
 ---@field storage table<string, any> per-squad permanent data. Eg: "Whenever a unit in this squad kills a unit, gain +1 damage PERMANENTLY."
 ---@field formation "square"|"circle"|"horizontal"|"vertical"|"diamond"
 ---@field deployed boolean?
@@ -80,6 +81,7 @@ function Squad:init(squadId, def)
     self.squadId = squadId
     self.level = 1
     self.perks = def and {unpack(def.perks)} or {}
+    self.statBuffs = {}
     self.formation = "square"
     self.deployed = false
     self.icon = nil
@@ -117,6 +119,7 @@ function Squad:serialize()
         squadId = self.squadId,
         level = self.level,
         perks = self.perks,
+        statBuffs = self.statBuffs,
         formation = self.formation,
     }
 end
@@ -128,6 +131,7 @@ function Squad.deserialize(data)
     local sq = Squad(data.squadId)
     sq.level = data.level or 1
     sq.perks = data.perks or {}
+    sq.statBuffs = data.statBuffs or {}
     sq.formation = data.formation or "square"
     return sq
 end
