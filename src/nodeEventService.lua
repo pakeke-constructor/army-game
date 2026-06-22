@@ -1,11 +1,13 @@
 
 local EVENT_TYPES = require("src.content.events.events")
+local ChestOpen = require("src.ui.ChestOpen")
 
 
 ---@class g.nodeEventService
 ---@field _activeRandomEventPass g.RandomEventPass?
 ---@field _popup string?
 ---@field _popupData any
+---@field _chest g.ChestOpen?
 local nodeEventService = {}
 
 
@@ -84,7 +86,7 @@ end
 
 ---@return boolean
 function nodeEventService.isActive()
-    return not not (nodeEventService._activeRandomEventPass or nodeEventService._popup)
+    return not not (nodeEventService._activeRandomEventPass or nodeEventService._popup or nodeEventService._chest)
 end
 
 
@@ -111,6 +113,9 @@ local SACRIFICE_RAGE_REDUCTION = 2
 local SACRIFICE_GOLD = 30
 local FOUNTAIN_RAGE_REDUCTION = 2
 local FEAST_XP = 4
+
+local CHEST_TXT = loc("A big chest mmmm.")
+local CHEST_OPEN = loc("Open it!")  -- load-time, like the others
 
 local function closePopup()
     nodeEventService._popup = nil
@@ -195,6 +200,10 @@ end
 function nodeEventService.openPortalPopup(node)
     if not (node and node.active) then return end
     openPopup("portal", node)
+end
+---@param node MapNode.ChestNode
+function nodeEventService.openChestPopup(node)
+    openPopup("chest")
 end
 
 
@@ -310,6 +319,21 @@ local function drawPortalPopup()
 end
 
 
+local function drawChestPopup()
+    local buttonR, font = beginPopup(CHEST_TXT)  -- draws window + text, returns buttons region
+
+    if drawChoiceButton(buttonR, CHEST_OPEN, font) then
+        closePopup()
+        local owned = g.getRun().blessings
+        local pool = {}
+        for _, id in ipairs(g.getBlessingList()) do
+            if not owned[id] then pool[#pool + 1] = id end
+        end
+        if #pool == 0 then pool = g.getBlessingList() end -- all owned: fall back
+        nodeEventService._chest = ChestOpen(helper.randomChoice(pool))
+    end
+end
+
 ---@param ev g.RandomEventPass
 local function drawRandomEvent(ev)
     local window = drawBasicWindow()
@@ -354,9 +378,20 @@ local POPUP_DRAWERS = {
     fountain = drawFountainPopup,
     feast = drawFeastPopup,
     portal = drawPortalPopup,
+    chest = drawChestPopup,
 }
 
 function nodeEventService.draw()
+    local chest = nodeEventService._chest
+    if chest then
+        chest:draw()
+        if chest:isDone() then
+            nodeEventService._chest = nil
+            g.addBlessing(chest.blessingId)
+        end
+        return
+    end
+
     local ev = nodeEventService._activeRandomEventPass
     if ev then
         return drawRandomEvent(ev)

@@ -103,7 +103,7 @@ function title_scene:draw()
         end
 
         lg.setColor((i == hoveredButton) and {1,1,0.6,1} or {1,1,1,1})
-        richtext.printRichContainedNoWrap(button.name, smallFont, rx + (button.offsetX or 0), ry, rw, rh, "left")
+        richtext.printRichContainedNoWrap(button.name, smallFont, rx + (button.offsetX or 0), ry+10, rw, rh-20, "left")
     end
 end
 

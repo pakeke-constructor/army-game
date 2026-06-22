@@ -445,7 +445,7 @@ end
 local function drawSandboxUI(self)
     local r = ui.getFullScreenRegion()
     local main, right = r:splitHorizontal(5,1)
-    local regs = right:grid(1,9)
+    local regs = right:grid(1,10)
     local c = objects.Color
     local ii = 1
     local function button(txt, col)
@@ -461,6 +461,9 @@ local function drawSandboxUI(self)
     end
     if button("Blessings", c.YELLOW) then
         self.sandbox_blessingScreen = true
+    end
+    if button("Chest", c.YELLOW) then
+        nodeEventService.openChestPopup()
     end
     if button("Spawn enemies", c.RED) then
         local b = self.ecs.boundingBox

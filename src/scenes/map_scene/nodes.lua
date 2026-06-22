@@ -40,6 +40,8 @@ local SHRINE_TXT = loc("Shrine: Gain Blessings, Sacrifice Squads")
 
 local FEAST_TXT = loc("Feast: Obtain XP")
 
+local CHEST_TXT = loc("Chest: Claim a reward")
+
 local CAMPFIRE_TXT = loc("Campfire: Obtain XP")
 
 local PORTAL_ACTIVE_TXT = loc("Portal: Go to random node")
@@ -342,6 +344,30 @@ function FountainNode:buildDecor(builder, wx, wy)
 end
 
 nodes.FountainNode = FountainNode
+
+
+-------------------------------
+-- ChestNode
+-------------------------------
+---@class MapNode.ChestNode: MapNode
+local ChestNode = nodes.newClass("chest")
+
+function ChestNode:enter()
+    fadeToBlackService.fadeToFromBlack(NODE_FADE_OUT, function()
+        nodeEventService.openChestPopup(self)
+    end, NODE_FADE_IN)
+end
+
+function ChestNode:getHoverDescription()
+    return CHEST_TXT
+end
+
+function ChestNode:buildDecor(builder, wx, wy)
+    builder:addImage("node_chest", wx, wy)
+    addDemons(self, builder, wx, wy)
+end
+
+nodes.ChestNode = ChestNode
 
 
 
