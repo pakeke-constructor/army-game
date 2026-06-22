@@ -38,8 +38,8 @@ g.defineCommander("sir_horse", "Sir Horse", {
     },
 
     onStart = function(run)
-        g.addSquadToArmy("militia_squad")
-        g.addSquadToArmy("archer_squad")
+        g.addSquadToArmy("red_militia_squad")
+        g.addSquadToArmy("red_archer_squad")
     end
 })
 

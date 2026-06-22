@@ -87,10 +87,10 @@ end
 local newPicker = require("src.modules.Picker")
 
 local BLESSING_COST = {
-    COMMON = 40,
-    UNCOMMON = 60,
-    RARE = 90,
-    LEGENDARY = 130,
+    COMMON = 120,
+    UNCOMMON = 150,
+    RARE = 180,
+    LEGENDARY = 250,
 }
 
 ---@param shopNode MapNode.ShopNode
@@ -489,7 +489,7 @@ local function drawShopUI(self, freeArea)
         -- actual squad box
         local squadId = self.shopNode.squadShop[i]
         if squadId and squadId ~= false then
-            local clicked, hovered, squadCol = drawSquadBox(ur:padUnit(6,10), squadId, 90 + helper.hashInteger(i) % 20)
+            local clicked, hovered, squadCol = drawSquadBox(ur:padUnit(6,10), squadId, 50 + 5*(helper.hashInteger(i) % 5))
             if clicked then
                 self.shopNode.squadShop[i] = false
                 self.shopBoughtSince[i] = {time, squadCol}
