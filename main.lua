@@ -104,9 +104,6 @@ local subpixel = require("src.modules.subpixel")
 
 local sceneManager = require("src.scenes.sceneManager")
 
-local perSecondUpdateTimer = 0
-local secondCount = 0
-
 
 local function assertValid()
     for _, id in ipairs(g.getSquadList()) do
@@ -169,15 +166,6 @@ function love.update(dt)
     local sc = sceneManager.getCurrentScene()
     if sc and sc.update then
         sc:update(dt)
-    end
-
-    perSecondUpdateTimer = perSecondUpdateTimer + dt
-    while perSecondUpdateTimer >= 1 do
-        perSecondUpdateTimer = perSecondUpdateTimer - 1
-        secondCount = secondCount + 1
-        if sc and sc.perSecondUpdate then
-            sc:perSecondUpdate(secondCount)
-        end
     end
 end
 
