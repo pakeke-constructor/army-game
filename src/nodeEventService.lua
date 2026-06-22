@@ -1,11 +1,13 @@
 
 local EVENT_TYPES = require("src.content.events.events")
+local ChestOpen = require("src.ui.ChestOpen")
 
 
 ---@class g.nodeEventService
 ---@field _activeRandomEventPass g.RandomEventPass?
 ---@field _popup string?
 ---@field _popupData any
+---@field _chest g.ChestOpen?
 local nodeEventService = {}
 
 
@@ -84,7 +86,7 @@ end
 
 ---@return boolean
 function nodeEventService.isActive()
-    return not not (nodeEventService._activeRandomEventPass or nodeEventService._popup)
+    return not not (nodeEventService._activeRandomEventPass or nodeEventService._popup or nodeEventService._chest)
 end
 
 
@@ -322,7 +324,13 @@ local function drawChestPopup()
 
     if drawChoiceButton(buttonR, CHEST_OPEN, font) then
         closePopup()
-        rewardPopupService.genericReward({ randomSquad = true, gold = 25 })
+        local owned = g.getRun().blessings
+        local pool = {}
+        for _, id in ipairs(g.getBlessingList()) do
+            if not owned[id] then pool[#pool + 1] = id end
+        end
+        if #pool == 0 then pool = g.getBlessingList() end -- all owned: fall back
+        nodeEventService._chest = ChestOpen(helper.randomChoice(pool))
     end
 end
 
@@ -374,6 +382,16 @@ local POPUP_DRAWERS = {
 }
 
 function nodeEventService.draw()
+    local chest = nodeEventService._chest
+    if chest then
+        chest:draw()
+        if chest:isDone() then
+            nodeEventService._chest = nil
+            g.addBlessing(chest.blessingId)
+        end
+        return
+    end
+
     local ev = nodeEventService._activeRandomEventPass
     if ev then
         return drawRandomEvent(ev)

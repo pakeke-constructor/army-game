@@ -1180,12 +1180,12 @@ g.defineBlessing("black_flames", "Black Flames", {
 
 
 
-for i=1, 100 do
-    g.defineBlessing("void_flames_"..tostring(i), "Void Flames", {
-        description = loc2("Does... nothing?"),
-        image = "blessing_blackflames",
-        rarity = g.RARITIES.ALMOST_UNIQUE,
-        -- ALMOST_UNIQUE is a special rarity with 0.000000001 chance of being chosen.
-        -- if there's no more blessngs in the pool, one of these will be picked. That's why there's 500 of them
-    })
-end
+-- for i=1, 100 do
+--     g.defineBlessing("void_flames_"..tostring(i), "Void Flames", {
+--         description = loc2("Does... nothing?"),
+--         image = "blessing_blackflames",
+--         rarity = g.RARITIES.ALMOST_UNIQUE,
+--         -- ALMOST_UNIQUE is a special rarity with 0.000000001 chance of being chosen.
+--         -- if there's no more blessngs in the pool, one of these will be picked. That's why there's 500 of them
+--     })
+-- end
