@@ -839,6 +839,21 @@ function helper.quickRoundedRectangle(mode, radius, reg)
     return love.graphics.rectangle(mode, x, y, w, h, radius, radius)
 end
 
+---Draws filled rectangle that still respects batching when used with `g.drawImage(Offset)`.
+---@param x number
+---@param y number
+---@param w number
+---@param h number
+---@overload fun(reg:kirigami.Region)
+function helper.drawFilledRectangle(x, y, w, h)
+    if type(x) == "table" then
+        local reg = assert(x) --[[@as kirigami.Region]]
+        x, y, w, h = reg:get()
+    end
+    -- Draw 1x1 image
+    return g.drawImageOffset("1x1", x, y, 0, w, h, 0, 0)
+end
+
 
 
 ---@param x number Center x position
