@@ -1,5 +1,6 @@
 local particles = require("src.modules.particles.particles")
 local godrays = require("src.modules.godrays.godrays")
+local drawBlessingCard = require("src.ui.blessing_card")
 
 local lg = love.graphics
 
@@ -36,6 +37,17 @@ local function drawGodrays(rx, ry, scale, color)
 end
 
 
+local ICON_SCALE = 2.5
+
+local function drawBigBlessingIcon(blessingId, x, y)
+    lg.push()
+    lg.translate(x, y)
+    lg.scale(ICON_SCALE)
+    g.drawBlessingIcon(blessingId, 0, 0)
+    lg.pop()
+end
+
+
 local function newChestParticles()
     return particles.newParticlesWorld({
         gravity = 80,
@@ -57,6 +69,7 @@ end
 ---@field reel string[]
 ---@field spinStart number
 ---@field done boolean
+---@field cardH number? last measured blessing-card height, for vertical centering
 local ChestOpen = objects.Class("g:ChestOpen")
 
 ---@param blessingId string the reward the reel lands on
@@ -80,10 +93,10 @@ function ChestOpen:update(dt)
 end
 
 
-local NEW_ITEM = "{rainbow}{wavy}{o thickness=3}" .. loc("YOU GOT A NEW BLESSING!", {
+local NEW_ITEM = "{bob}{o thickness=3}" .. loc("YOU GOT A NEW BLESSING!", {
     context = "A popup that tells the player they got a new blessing from a chest"
 })
-local CLICK_TO_CLOSE = "{wavy}{o}{c r=0.5 g=0.7 b=1}" .. loc("Click anywhere to close", {
+local CLICK_TO_CLOSE = "{bob}{o}{c r=0.5 g=0.7 b=1}" .. loc("Click anywhere to close", {
     context = "Prompt to dismiss the chest opening popup"
 })
 
@@ -118,7 +131,7 @@ function ChestOpen:draw()
     if reelIndex < #self.reel then
         local ratio = (#self.reel - reelIndex) / #self.reel
         local sze = (r.w / 4) + ratio*r.w
-        lg.setColor(1, 0.84, 0.2, ratio * 0.5)
+        lg.setColor(0.1, 0, 0)
         local lw = lg.getLineWidth()
         lg.setLineWidth(r.h / 20)
         lg.circle("line", rx, ry, sze/1.5)
@@ -128,23 +141,17 @@ function ChestOpen:draw()
     -- expanding shockwave
     do
         local lw = lg.getLineWidth()
-        lg.setColor(1, 0.84, 0.2)
+        lg.setColor(0.1, 0, 0)
         lg.setLineWidth(r.h / 10)
         lg.circle("line", rx, ry, 20 + elapsed * 550)
         lg.setLineWidth(lw)
     end
 
-    -- on settle, lerp the icon/godrays from center to 2/5 of the screen width over 1s
-    local SETTLE_LERP = 1.0
-    local settleK = settled and math.min((t - self.settledTime) / SETTLE_LERP, 1) or 0
-    local ease = 1 - (1 - settleK)^3
-    local cx = rx + ((r.x + r.w * 0.4) - rx) * ease
-
     local currentInfo = g.getBlessingInfo(self.reel[reelIndex])
     -- local rarCol = settled and RAY_COLOR or (currentInfo.rarity or g.RARITIES.COMMON).color
-    local rarCol = objects.Color.CRIMSON
+    local rarCol = {0.2,0.05,0.05,1}
     local progress = elapsed / REEL_DURATION
-    drawGodrays(cx, ry, math.min(progress + 0.3, 1.3), rarCol)
+    drawGodrays(rx, ry, math.min(progress + 0.3, 1.3), rarCol)
 
     lg.setColor(1, 1, 1)
     -- self.particles:draw()
@@ -154,14 +161,13 @@ function ChestOpen:draw()
     --     self.particles:spawnParticle(rx, ry, math.cos(a)*mag, math.sin(a)*mag)
     -- end
 
-    local ICON = 80
     if settled then
         -- golden finalize shockwave
         local st = t - self.settledTime
         local lw = lg.getLineWidth()
-        lg.setColor(1, 0.84, 0.2)
+        lg.setColor(0.1, 0, 0)
         lg.setLineWidth(30 + st * 60)
-        lg.circle("line", cx, ry, 20 + st * 400)
+        lg.circle("line", rx, ry, 20 + st * 400)
         lg.setLineWidth(lw)
 
         if iml.wasJustClicked(r:get()) then
@@ -169,24 +175,22 @@ function ChestOpen:draw()
             return
         end
 
-        local info = g.getBlessingInfo(self.blessingId)
+        -- show the standard blessing card, vertically centered.
+        -- the card renders top-down and grows with the description, so center
+        -- off last frame's measured height (converges in one frame).
         lg.setColor(1, 1, 1)
-        g.drawImageContained(info.image, cx - ICON/2, ry - ICON/2, ICON, ICON)
-        helper.printTextOutline(info.name, g.getSmallFont(32), 2, cx, ry + 60, r.w, "center", 0, 1, 1, r.w / 2)
+        local cw = r.w * 0.3
+        local ch = self.cardH or (cw * 2/3)
+        local _, _, hh = drawBlessingCard(self.blessingId, Kirigami(rx - cw/2, ry - ch/2, cw, ch), 1)
+        self.cardH = hh
 
-        -- once shifted, pop the description in beside the icon
-        if settleK >= 1 then
-            local popT = math.min((st - SETTLE_LERP) / 0.25, 1)
-            local slide = (1 - popT) * 20
-            local descX = cx + ICON/2 + 24
-            richtext.printRichContained("{o}{c r=0.85 g=0.85 b=0.9}" .. info.description, g.getSmallFont(16), descX, ry - 50 + slide, r.w/3, 120)
-            richtext.printRichContained(CLICK_TO_CLOSE, g.getSmallFont(32), rx - r.w/2, ry + 100, r.w, 40)
-        end
-        richtext.printRichContained(NEW_ITEM, g.getSmallFont(48), rx - r.w/2, ry - 160, r.w, 60)
+        local widthForText = r.w * 3/5
+        richtext.printRichContained(NEW_ITEM, g.getSmallFont(48), rx - widthForText/2, ry - 140, widthForText, 60)
+        richtext.printRichContained(CLICK_TO_CLOSE, g.getSmallFont(32), rx - widthForText/2, ry + 100, widthForText, 40)
     else
         lg.setColor(1, 1, 1)
-        g.drawImageContained(currentInfo.image, cx - ICON/2, ry - ICON/2, ICON, ICON)
-        helper.printTextOutline(currentInfo.name, g.getSmallFont(32), 2, cx, ry + 60, r.w, "center", 0, 1, 1, r.w / 2)
+        drawBigBlessingIcon(self.reel[reelIndex], rx, ry)
+        helper.printTextOutline(currentInfo.name, g.getSmallFont(32), 2, rx, ry + 60, r.w, "center", 0, 1, 1, r.w / 2)
     end
 end
 
