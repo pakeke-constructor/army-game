@@ -7,6 +7,7 @@ local STAT_LIST = {
     "startingArmor",
     "moveSpeed",
     "attackRange",
+    "magic",
 }
 
 local STAT_FONT = nil

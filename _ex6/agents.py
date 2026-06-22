@@ -107,7 +107,7 @@ cache_manually(coder)
 
 
 
-coder = Context("c_codex", yolo=False, model=M.CODEX_LATEST.id, reasoning="high", messages=[
+Context("c_codex", yolo=False, model=M.CODEX_LATEST.id, reasoning="high", messages=[
     MAIN_SYSTEM_PROMPT,
     ENV_PROMPT,
     # CODING_STYLE_PROMPT,
@@ -115,7 +115,15 @@ coder = Context("c_codex", yolo=False, model=M.CODEX_LATEST.id, reasoning="high"
 ])
 
 
-coder = Context("c_gem", yolo=False, model=M.GEMINI_LATEST.id, reasoning="high", messages=[
+Context("c_gem", yolo=False, model=M.GEMINI_LATEST.id, reasoning="high", messages=[
+    MAIN_SYSTEM_PROMPT,
+    ENV_PROMPT,
+    # CODING_STYLE_PROMPT,
+    CLAUDE_MD,
+])
+
+
+Context("c_glm", yolo=False, model=M.GLM_LATEST.id, reasoning="high", messages=[
     MAIN_SYSTEM_PROMPT,
     ENV_PROMPT,
     # CODING_STYLE_PROMPT,

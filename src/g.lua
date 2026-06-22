@@ -2830,7 +2830,7 @@ function g.isStatImportant(statId, ent_or_etype)
     if type(ent_or_etype) == "string" then
         ent_or_etype = assert(g.getEntityDef(ent_or_etype))
     end
-    return stinfo.isImportant(ent_or_etype, statId)
+    return stinfo.isImportant(ent_or_etype, stinfo)
 end
 
 function g.getStatList()
@@ -2982,6 +2982,14 @@ g.defineStat("healPower", "baseHealPower", {
     shortName = "HEAL",
     color = objects.Color(0.3, 0.95, 0.6),
     icon = "healpower",
+    isImportant = _importantIfNonZero,
+})
+g.defineStat("magic", "baseMagic", {
+    displayName = "Magic",
+    description = "Strength of magic",
+    shortName = "MAGK",
+    color = objects.Color(0.1, 0.35, 0.9),
+    icon = "magic_icon",
     isImportant = _importantIfNonZero,
 })
 g.defineStat("attackSpeed", "baseAttackSpeed", {

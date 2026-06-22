@@ -162,6 +162,7 @@ local shadow = {
 ---@field public baseAttackDamage number?
 ---@field public baseHealPower number?
 ---@field public baseAttackSpeed number?
+---@field public baseMagic number?
 ---@field public baseLifesteal number?
 ---@field public baseAttackRange number?
 ---@field public baseMoveSpeed number?
@@ -172,6 +173,7 @@ local shadow = {
 ---@field public attackDamage number?
 ---@field public healPower number?
 ---@field public attackSpeed number?
+---@field public magic number?
 ---@field public lifesteal number?
 ---@field public attackRange number?
 ---@field public moveSpeed number?
