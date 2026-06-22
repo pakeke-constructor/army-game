@@ -489,7 +489,7 @@ function HUD:selectVisibleSlot(visibleIndex)
 end
 
 function HUD:wheelmoved(dx, dy)
-    local dir = dy > 0 and 1 or -1
+    local dir = dy > 0 and -1 or 1
     local total = #g.getSortedArmyList()
     local next = self.selectedSlot + dir
     for i=0, 8 do
