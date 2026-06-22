@@ -1,23 +1,26 @@
-# Battle deploy-phase + perSecondUpdate move
+# USE_LAST_ARMY button
 
 ## Goal
-- Battle starts in a "deploy phase" (limbo): world time frozen, entities don't move.
-- Player deploys squads, then presses a "Start" button to begin.
-- Move perSecondUpdate timer out of main.lua into ECSWorld, so it only ticks
-  when ECSWorld:update advances with real dt.
+Make "Use Last Layout" button work. Show + allow it ONLY IFF:
+- No squads currently on battlefield (player hasn't deployed any this battle)
+- Every squad in last-army layout still exists in army AND is affordable (cumulatively)
+
+## Design
+Store layout on Run (persists + serializes): run.lastArmyLayout =
+  { {squadId, dx, dy}, ... } positions relative to commander deploy base pos.
+
+Record layout when player presses "Start Battle" (capture squads deployed this battle).
+
+Track deployed squads this battle: battle_scene.deployedSquads = {{squadId,x,y},...}
+- append on each successful manual deploy
+- append on use-last-army deploy
 
 ## Changes
-1. ECSWorld: add secondTimer/secondCount; in update() accumulate dt and fire
-   g.call("perSecondUpdate", secondCount). (after team-list rebuild)
-2. main.lua: remove perSecondUpdateTimer/secondCount block + sc:perSecondUpdate call.
-3. battle_scene:
-   - remove :perSecondUpdate method.
-   - enter(): self.deployPhase = true.
-   - update(): ecsDt = deployPhase and 0 or dt*timeScale; ecs:update(ecsDt).
-     During deploy, skip win-logic/particles.
-   - draw(): when deployPhase, draw "Start" button. On click: deployPhase=false,
-     g.call("battleStarted").
-
-## Notes
-- ecs:update(0) during deploy keeps entities flushed/drawn but frozen (dt=0).
-- battleStarted event already defined + listened (juice_system) but never fired.
+1. Run.lua: add lastArmyLayout field, init nil, serialize/deserialize.
+2. battle_scene enter(): self.deployedSquads = {}
+3. manual deploy click handler: record {squadId, x=sx, y=sy} into deployedSquads.
+4. Add local canUseLastArmy(self): validity check (no deployed, all exist+affordable cumulatively via mana-copy simulation).
+5. Add local deployLastArmy(self): spawn each at commander base + dx,dy, spend mana, record.
+6. Add local saveLastArmy(self): on Start, write run.lastArmyLayout from deployedSquads (relative to commander base).
+7. Start button: call saveLastArmy.
+8. Button render: only draw when canUseLastArmy; on click deployLastArmy.

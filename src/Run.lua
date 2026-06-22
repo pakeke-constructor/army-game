@@ -17,6 +17,7 @@ local MapGraph = require("src.scenes.map_scene.MapGraph")
 ---@field day integer
 ---@field demonRage integer
 ---@field mapGraph MapGraph
+---@field lastArmyLayout {squadId:string, dx:number, dy:number}[]?
 local Run = objects.Class("g:Run")
 
 
@@ -37,6 +38,7 @@ function Run:init()
     self.demonRage = 0
     self._battleWon = false
     self.mapGraph = nil
+    self.lastArmyLayout = nil
 end
 
 
@@ -120,6 +122,7 @@ function Run:serialize()
         day = self.day,
         demonRage = self.demonRage,
         mapGraph = self.mapGraph and self.mapGraph:serialize(),
+        lastArmyLayout = self.lastArmyLayout,
     }
 end
 
@@ -148,6 +151,7 @@ function Run.deserialize(data)
     run.day = data.day or run.day
     run.demonRage = data.demonRage or run.demonRage
     run.mapGraph = data.mapGraph and MapGraph.deserialize(data.mapGraph)
+    run.lastArmyLayout = data.lastArmyLayout
     return run
 end
 

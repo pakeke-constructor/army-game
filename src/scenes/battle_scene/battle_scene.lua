@@ -123,6 +123,8 @@ function battle_scene:enter()
 
     self.editingSquadLineup = true
     self.deployPhase = true
+    ---@type {squadId:string, x:number, y:number}[]
+    self.deployedSquads = {}
 
     self.randomI = love.math.random(1,1000) -- random integer, doesnt really matter
 
@@ -765,6 +767,55 @@ local function drawCommanderTarget(self)
 end
 
 
+---@param self g.BattleScene
+---@return boolean
+local function canUseLastArmy(self)
+    if #self.deployedSquads > 0 then return false end
+    local layout = g.getRun().lastArmyLayout
+    if not layout or #layout == 0 then return false end
+
+    -- simulate spending mana, checking all squads exist + are affordable
+    local mana = {}
+    for k, v in pairs(g.getBattleManaCounts()) do mana[k] = v end
+    for _, entry in ipairs(layout) do
+        local squad = g.getSquadFromArmy(entry.squadId)
+        if not squad then return false end
+        local info = g.getSquadInfo(entry.squadId)
+        if info.cost and not g.trySpendMana(mana, info.cost) then
+            return false
+        end
+    end
+    return true
+end
+
+---@param self g.BattleScene
+local function deployLastArmy(self)
+    local commx, commy = getCommanderDeployBasePos(self)
+    for _, entry in ipairs(g.getRun().lastArmyLayout) do
+        local squad = g.getSquadFromArmy(entry.squadId)
+        if squad and not squad.deployed then
+            local info = g.getSquadInfo(entry.squadId)
+            if not info.cost or g.trySpendMana(g.getBattleManaCounts(), info.cost) then
+                local sx, sy = commx + entry.dx, commy + entry.dy
+                squad:spawn(sx, sy)
+                self.deployedSquads[#self.deployedSquads + 1] = {squadId = entry.squadId, x = sx, y = sy}
+            end
+        end
+    end
+end
+
+---@param self g.BattleScene
+local function saveLastArmy(self)
+    if #self.deployedSquads == 0 then return end
+    local commx, commy = getCommanderDeployBasePos(self)
+    local layout = {}
+    for _, d in ipairs(self.deployedSquads) do
+        layout[#layout + 1] = {squadId = d.squadId, dx = d.x - commx, dy = d.y - commy}
+    end
+    g.getRun().lastArmyLayout = layout
+end
+
+
 local function drawCommanderRadius(self)
     local commander = self.commander
     if (not commander) or (not g.isAlive(commander)) then
@@ -867,6 +918,7 @@ function battle_scene:draw()
             local info = g.getSquadInfo(entry.squadId)
             if not info.cost or g.trySpendMana(g.getBattleManaCounts(), info.cost) then
                 entry:spawn(sx, sy)
+                self.deployedSquads[#self.deployedSquads + 1] = {squadId = entry.squadId, x = sx, y = sy}
                 spawnManaIconPopups(info.cost)
             else
                 local manaType = findMissingMana(info.cost, g.getBattleManaCounts())
@@ -886,11 +938,12 @@ function battle_scene:draw()
         local _, mid, _ = row:splitHorizontal(1,1,1)
         local a,b = mid:splitHorizontal(1,1)
 
-        if ui.DefaultButton("{o}"..USE_LAST_ARMY_BTM, a:padRatio(0.15)) then
-            print("TODO")
+        if canUseLastArmy(self) and ui.DefaultButton("{o}"..USE_LAST_ARMY_BTM, a:padRatio(0.15)) then
+            deployLastArmy(self)
         end
 
         if ui.DefaultButton("{o}"..START_BATTLE_BTN, b:padRatio(0.15)) then
+            saveLastArmy(self)
             self.deployPhase = false
             g.call("battleStarted")
         end
