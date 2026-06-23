@@ -187,7 +187,7 @@ local function findNearbyTarget(ent, world, range)
     local targetTeam = getTargetTeam(ent)
     local best, bestD2 = nil, range * range
     for _, other in world:iterate("team") do
-        if other.team == targetTeam and isValid(other) then
+        if other ~= ent and other.team == targetTeam and isValid(other) then
             local d2 = dist2(ent, other)
             if d2 <= bestD2 then
                 best, bestD2 = other, d2

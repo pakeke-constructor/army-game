@@ -66,7 +66,7 @@ local function missingHealthPriority(ent, c)
 end
 
 local function nextRetargetDelay()
-    return RETARGET_MIN + love.math.random() * (RETARGET_MAX - RETARGET_MIN)
+    return helper.lerp(RETARGET_MIN, RETARGET_MAX, love.math.random())
 end
 
 -- Find the best target for `ent` from `candidates`
