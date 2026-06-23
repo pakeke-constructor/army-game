@@ -163,10 +163,6 @@ g.defineSquad("tribute_squad", {
         attack = {
             attackType = "melee",
         },
-        -- weapon = {
-        --     image = "peasant_pitchfork",
-        --     type = "sword",
-        -- },
         baseAttackDamage = 1,
         baseAttackSpeed = 0.5,
         baseAttackRange = 18,
@@ -317,10 +313,6 @@ g.defineSquad("furnace_golems_squad", {
         attack = {
             attackType = "melee",
         },
-        -- weapon = {
-        --     image = "speardemon_spear", -- placeholder
-        --     type = "sword",
-        -- },
         baseAttackDamage = 1,
         baseAttackSpeed = 1,
         baseAttackRange = 18,
@@ -364,7 +356,6 @@ g.defineSquad("living_entropy_squad", {
         image = "livingentropy_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 300 },
-        -- weapon = { image = "1x1", type = "bow" },
         baseAttackDamage = 6,
         baseAttackSpeed = 0.8,
         baseAttackRange = 150,
@@ -391,7 +382,6 @@ g.defineSquad("his_manifestation_squad", {
         image = "hismanifestation",
         physics = { shape = "circle", radius = 10, ox = 0, oy = 0, mass = 3 },
         attack = { attackType = "melee" },
-        weapon = { image = "1x1", type = "sword" },
         baseAttackDamage = 6,
         baseAttackSpeed = 0.8,
         baseAttackRange = 22,
@@ -425,7 +415,6 @@ g.defineSquad("pain_elemental_squad", {
         image = "painelementals_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = { attackType = "melee" },
-        -- weapon = { image = "militia_sword", type = "sword" },
         baseAttackDamage = 5,
         baseAttackSpeed = 1.2,
         baseAttackRange = 18,
