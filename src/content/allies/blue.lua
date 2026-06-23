@@ -27,11 +27,11 @@ g.defineSquad("crystal_golems", {
             image = "dagger",
             type = "sword",
         },
-        baseAttackDamage = 14,
-        baseAttackSpeed = 0.8,
+        baseAttackDamage = 1,
+        baseAttackSpeed = 0.4,
         baseAttackRange = 20,
         baseMoveSpeed = 45,
-        baseMaxHealth = 180,
+        baseMaxHealth = 220,
         onUpdate = function(self)
             local radius = (self.physics and self.physics.radius or 8) + 4
             local radiusSq = radius * radius
@@ -64,7 +64,7 @@ g.defineSquad("crystal_golems", {
     },
     unitCount = 2,
     icon = "gargoyles_uniticon", -- placeholder
-    cost = {blue = 1},
+    cost = {blue = 2},
 })
 
 

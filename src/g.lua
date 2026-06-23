@@ -816,15 +816,9 @@ local function estimateSquadPowerIndex(squadInfo)
     local bonus = 1
     local attack = def.baseAttackDamage or def.baseHealPower or 1
     local attackSpeed = def.baseAttackSpeed or 1
-    local maxHealth = def.baseMaxHealth or 1
     local unitCount = squadInfo.unitCount or 1
-
-    if g.isRangedUnit(squadInfo.entityId) then
-        bonus = bonus * 4 -- ranged-units will on average get 4x as many hits in
-    end
-    if def.baseHealPower then
-        bonus = bonus * 3 -- healers get 3x bonus, coz healing is stronk
-    end
+    local healthArmr = (def.baseMaxHealth or 1) + (def.baseStartingArmor or 0)
+    local timeToDealDmg = 4*healthArmr + math.max(1,((def.baseAttackRange or 1) - 20))
 
     local manaCost = 0
     for _, n in pairs(squadInfo.cost or {}) do
@@ -834,7 +828,7 @@ local function estimateSquadPowerIndex(squadInfo)
         bonus = bonus / 2.5 -- units that cost more have lower powerIndex, coz they are more expensive.
     end
 
-    return math.floor(bonus * (attack*attackSpeed*maxHealth*unitCount))
+    return math.floor(bonus * (attack*attackSpeed*timeToDealDmg*unitCount))
 end
 
 
