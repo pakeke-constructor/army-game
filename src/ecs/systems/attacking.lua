@@ -187,7 +187,7 @@ local function findNearbyTarget(ent, world, range)
     local targetTeam = getTargetTeam(ent)
     local best, bestD2 = nil, range * range
     for _, other in world:iterate("team") do
-        if other.team == targetTeam and isValid(other) then
+        if other ~= ent and other.team == targetTeam and isValid(other) then
             local d2 = dist2(ent, other)
             if d2 <= bestD2 then
                 best, bestD2 = other, d2
@@ -217,7 +217,13 @@ function atckSys.preUpdate(dt)
         -- check range
         local range = ent.attackRange or 100
         local d2 = dist2(ent, target)
-        if d2 > range * range then
+        -- FIXME: A better AI for healer.
+        -- Healer often targets other healer and they won't move.
+        -- So this check just disable the range check for healer,
+        -- ensuring the AI priority targetting checks all ally on
+        -- battlefield.
+        local isHealer = ent.ai and ent.ai.target == "ally"
+        if d2 > range * range and not isHealer then
             target = findNearbyTarget(ent, world, range)
             if target then
                 ent._aiTarget = target
