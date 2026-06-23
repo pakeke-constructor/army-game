@@ -103,12 +103,15 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
 
     local x, y, w, h = region:get()
     local uid = squadId .. "_" .. index
-    iml.panel(x, y, w, h, uid)
+    local hitX, hitY = x, y
 
     local isHovered = iml.isHovered(x,y,w,h, uid)
     if isHovered then
         frameDarkColor = frameDarkColor:lerp(manaColor, 0.10)
+        y = y - 3
+        region = region:moveUnit(0, -3)
     end
+    iml.panel(hitX, hitY, w, h, uid)
 
     STAT_FONT = STAT_FONT or g.getSmallFont(16)
     TITLE_FONT = TITLE_FONT or g.getBigFont(16)
@@ -383,7 +386,7 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
     })
 
     local ret = false
-    if iml.wasJustClicked(x, y, w, h, 1, uid) then
+    if iml.wasJustClicked(hitX, hitY, w, h, 1, uid) then
         g.playUISound("ui_click_basic", 1.4, 0.8)
         ret = true
     end

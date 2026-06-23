@@ -71,6 +71,10 @@ local function drawBlessingCard(blessingId, region, index)
     local uid = blessingId .. "_" .. index
 
     local x, y, w, h = region:get()
+    local hitX, hitY = x, y
+    if iml.isHovered(x, y, w, h, uid) then
+        y = y - 3
+    end
 
     TITLE_FONT = TITLE_FONT or g.getBigFont(16)
     DESC_FONT = DESC_FONT or g.getSmallFont(16)
@@ -128,7 +132,7 @@ local function drawBlessingCard(blessingId, region, index)
 
     local ww,hh = box:render(x, y)
 
-    if iml.wasJustClicked(x, y, w, h, 1, uid) then
+    if iml.wasJustClicked(hitX, hitY, w, h, 1, uid) then
         g.playUISound("ui_click_basic", 1.4, 0.8)
         return true, ww,hh
     end

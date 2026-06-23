@@ -20,7 +20,11 @@ local VICTORY_FADE_IN = 0.25
 local WIN_SHOCKWAVE_DURATION = 1.2
 local WIN_SHOCKWAVE_LINE_WIDTH = 98
 
+
 local COMMANDER_SCREEN_X_RATIO = 1 / 3
+-- ^^^^ TODO: make a cleaner implementation than this.
+-- this is lowkey hella hacky.
+
 
 ---@class g.BattleScene
 ---@field hud g.HUD
