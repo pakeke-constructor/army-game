@@ -807,14 +807,34 @@ local currentEntityId = 0
 ---@field cost g.ManaBundle
 ---@field powerIndex number
 
----@param squadInfo g.SquadInfo
+---@param squadInfo g.SquadDef
+---@return number
 local function estimateSquadPowerIndex(squadInfo)
+    -- squad power-index is a heuristic representation of like: "how powerful" a squad is.
+    ----- 
     local def = squadInfo.entityDef
-    local attack = def.baseAttackDamage or 0
-    local attackSpeed = def.baseAttackSpeed or 0
-    local maxHealth = def.baseMaxHealth or 0
-    local rangedMult = g.isRangedUnit(squadInfo.entityId) and 2.5 or 1
-    return attack * attackSpeed * rangedMult * maxHealth
+    local bonus = 1
+    local attack = def.baseAttackDamage or def.baseHealPower or 1
+    local attackSpeed = def.baseAttackSpeed or 1
+    local maxHealth = def.baseMaxHealth or 1
+    local unitCount = squadInfo.unitCount or 1
+
+    if g.isRangedUnit(squadInfo.entityId) then
+        bonus = bonus * 4 -- ranged-units will on average get 4x as many hits in
+    end
+    if def.baseHealPower then
+        bonus = bonus * 3 -- healers get 3x bonus, coz healing is stronk
+    end
+
+    local manaCost = 0
+    for _, n in pairs(squadInfo.cost or {}) do
+        manaCost = manaCost + (n or 0)
+    end
+    if manaCost > 1 then
+        bonus = bonus / 2.5 -- units that cost more have lower powerIndex, coz they are more expensive.
+    end
+
+    return math.floor(bonus * (attack*attackSpeed*maxHealth*unitCount))
 end
 
 

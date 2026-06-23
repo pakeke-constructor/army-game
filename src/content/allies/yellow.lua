@@ -173,7 +173,7 @@ g.defineSquad("endless_army_squad", {
         baseAttackSpeed = 1,
         baseAttackRange = 18,
         baseMoveSpeed = 50,
-        baseMaxHealth = 5,
+        baseMaxHealth = 10,
         baseStartingArmor = 1,
     },
     unitCount = 1,
