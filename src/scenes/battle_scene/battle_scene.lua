@@ -760,15 +760,14 @@ local function drawSquadDestinations(self)
     for _, squad in pairs(g.getRun().squads) do
         local leader = squad.deployed and squad._leader
         if leader and leader.destX then
-            local dx, dy = leader.destX - leader.x, leader.destY - leader.y
-            if dx * dx + dy * dy > 4 then -- still moving
-                local bx, by, bw, bh = getSquadBox(squad, leader.destX, leader.destY)
-                if bx then
-                    lg.setColor(DEST_MARKER_COLOR)
-                    lg.setLineWidth(2)
-                    lg.rectangle("line", bx, by, bw, bh)
-                    lg.setColor(1, 1, 1, 1)
-                end
+            -- always show the destination box, even once arrived: it's the
+            -- reliable place to click a squad whose units have engaged far off.
+            local bx, by, bw, bh = getSquadBox(squad, leader.destX, leader.destY)
+            if bx then
+                lg.setColor(DEST_MARKER_COLOR)
+                lg.setLineWidth(2)
+                lg.rectangle("line", bx, by, bw, bh)
+                lg.setColor(1, 1, 1, 1)
             end
         end
     end

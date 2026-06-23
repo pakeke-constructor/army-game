@@ -124,17 +124,14 @@ local LEADER_AUTO_ATTACK = false
 -- `rep` is a representative unit (for moveSpeed/attackRange).
 local function updateLeader(leader, rep, enemies, dt)
     if not LEADER_AUTO_ATTACK then
-        -- manual control: march toward the player-set destination, then hold.
-        -- units always follow the formation (never auto-engage) in this mode.
+        -- manual control: the (invisible) leader teleports to the player-set
+        -- destination; the units then walk to their formation slots there.
+        -- individual units break off on their own when an enemy enters range
+        -- (handled per-unit below), so the leader never "engages" as a group.
         leader.target = nil
         leader.engaged = false
-        if not leader.destX then return end
-        local dx, dy = leader.destX - leader.x, leader.destY - leader.y
-        local dist = (dx * dx + dy * dy) ^ 0.5
-        if dist > 1 then
-            local speed = rep.moveSpeed or 60
-            leader.x = leader.x + dx / dist * speed * dt
-            leader.y = leader.y + dy / dist * speed * dt
+        if leader.destX then
+            leader.x, leader.y = leader.destX, leader.destY
         end
         return
     end
@@ -301,11 +298,13 @@ function aiSys.preUpdate(dt)
             end
         end
 
-        -- squad units march in formation behind their leader until it reaches
-        -- the enemy; only then do they break off and attack independently.
+        -- squad units march in formation behind their leader, but each unit
+        -- breaks off on its own to chase/attack once its target is in range.
         local tauntedAway = ent.taunt and ent.taunt.ent and isValidTarget(ent.taunt.ent)
         local leader = followsLeader(ent) and ent.squad._leader
-        if leader and not leader.engaged and not tauntedAway then
+        local range = ent.attackRange * 1.5 or 100
+        local targetInRange = targ and dist2(ent, targ) <= range * range
+        if leader and not leader.engaged and not tauntedAway and not targetInRange then
             -- keep _aiTarget (the attack system fires if an enemy strays into
             -- range), but movement is dictated by the formation slot, not chase.
             local off = ent._formationOffset
