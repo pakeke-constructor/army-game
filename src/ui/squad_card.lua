@@ -294,7 +294,6 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
 
                 -- text
                 do
-                love.graphics.setFont(STAT_FONT)
                 local r,g,b,a = statColor:getRGBA()
                 love.graphics.setColor(r,g,b,a*alpha)
                 local textX = cx + ch
