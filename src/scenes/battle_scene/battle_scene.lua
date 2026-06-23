@@ -767,6 +767,7 @@ end
 -- draw a footprint showing where each moving squad will end up.
 ---@param self g.BattleScene
 local function drawSquadDestinations(self)
+    if not consts.LEADER_CONTROLS then return end
     for _, squad in pairs(g.getRun().squads) do
         local leader = squad.deployed and squad.leader
         if leader and leader.destX then
@@ -990,13 +991,13 @@ function battle_scene:draw()
         if squad and not squad.deployed then
             drawSquadHover(self, squad, wx, wy)
             lg.setColor(1, 1, 1, 1)
-        else
+        elseif consts.LEADER_CONTROLS then
             -- not placing a squad: allow hovering/selecting deployed squads
             self.hoveredSquad = updateHoveredSquad(self)
             lg.setColor(1, 1, 1, 1)
         end
         -- show which deployed squad is currently selected
-        if self.selectedSquad and self.selectedSquad.deployed then
+        if consts.LEADER_CONTROLS and self.selectedSquad and self.selectedSquad.deployed then
             local bx, by, bw, bh = getSquadBox(self.selectedSquad)
             if bx then
                 setBoxColor(self.selectedSquad, 0.7)
@@ -1051,10 +1052,10 @@ function battle_scene:draw()
                     duration = 1.5,
                 })
             end
-        elseif self.hoveredSquad then
+        elseif consts.LEADER_CONTROLS and self.hoveredSquad then
             -- click a deployed squad's box to select it
             self.selectedSquad = self.hoveredSquad
-        elseif self.selectedSquad and self.selectedSquad.deployed and self.selectedSquad.leader then
+        elseif consts.LEADER_CONTROLS and self.selectedSquad and self.selectedSquad.deployed and self.selectedSquad.leader then
             -- move command: send the selected squad's leader to the clicked point
             local leader = self.selectedSquad.leader
             leader.destX, leader.destY = wx, wy

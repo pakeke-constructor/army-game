@@ -118,7 +118,7 @@ end
 
 -- if true: squad leaders auto-march toward the nearest enemy (the OLD behavior).
 -- if false: leaders only move where the player commands them (click-to-move).
-local LEADER_AUTO_ATTACK = false
+local LEADER_AUTO_ATTACK = not consts.LEADER_CONTROLS
 
 -- Move an invisible squad leader.
 -- `rep` is a representative unit (for moveSpeed/attackRange).
