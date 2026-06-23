@@ -234,6 +234,28 @@ local function buildVictoryChoices()
 end
 
 
+local function winBattle(self)
+    if self.victory then return end
+    self.victory = true
+    self.victoryPopupTime = 0
+    rewardPopupService.battleReward({
+        gold = math.floor(helper.lerp(consts.BALANCING.BATTLE_GOLD_REWARD_MIN, consts.BALANCING.BATTLE_GOLD_REWARD_MAX, love.math.random())),
+        xp = 3,
+        randomSquad = true,
+    })
+    g.getRun():winBattle()
+    -- remove all entities except the commander
+    for _, ent in ipairs(self.ecs.entities) do
+        if not ent.isCommander then
+            self.ecs:removeEntity(ent)
+        end
+    end
+    if not self.squadChoices then
+        self.squadChoices = buildVictoryChoices()
+    end
+end
+
+
 function battle_scene:update(dt)
     self.timeSinceEnteredScene = self.timeSinceEnteredScene + dt
 
@@ -266,18 +288,7 @@ function battle_scene:update(dt)
             self.noEnemyTimer = 0
         end
         if self.noEnemyTimer >= WIN_DELAY and (not self.victory) and (not self.sandbox) then
-            self.victory = true
-            -- choicePopupService.set("blessing")
-            rewardPopupService.battleReward({
-                gold = math.floor(helper.lerp(consts.BALANCING.BATTLE_GOLD_REWARD_MIN, consts.BALANCING.BATTLE_GOLD_REWARD_MAX, love.math.random())),
-                xp = 3,
-                randomSquad = true,
-            })
-            self.victoryPopupTime = 0
-            run:winBattle()
-            if not self.squadChoices then
-                self.squadChoices = buildVictoryChoices()
-            end
+            winBattle(self)
         end
     else
         self.victoryPopupTime = self.victoryPopupTime + dt
@@ -394,11 +405,7 @@ local function killAllEnemies(self)
             g.killEntity(ent)
         end
     end
-    local run = g.getRun()
-    run:winBattle()
-    if not self.squadChoices then
-        self.squadChoices = buildVictoryChoices()
-    end
+    winBattle(self)
 end
 
 function battle_scene:keypressed(k)
