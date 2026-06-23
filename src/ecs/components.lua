@@ -195,6 +195,7 @@ local shadow = {
 ---@field public _knockVy number?
 ---@field public knockbackResistance number? -- +1 each knockback; reduces future knockback
 ---@field public _aiTarget ecs.Entity?
+---@field public _formationOffset table? {x,y} slot offset from squad leader
 ---@field public _lastTargetRefreshTime number?
 ---@field public _timeUntilRetarget number?
 ---@field public burnTime number? -- if nil, no burn

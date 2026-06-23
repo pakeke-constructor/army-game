@@ -148,6 +148,10 @@ function battle_scene:enter()
     self.squadChoices = nil
     self.timeSinceEnteredScene = 0
     self.commander = nil
+    ---@type g.Squad? squad the player has clicked to select (nil = none)
+    self.selectedSquad = nil
+    ---@type g.Squad? deployed squad currently under the cursor
+    self.hoveredSquad = nil
 
     g.pollHandlers()
 
@@ -715,6 +719,58 @@ end
 
 
 
+-- bounding box of a deployed squad, centered on its leader. nil if not deployed.
+---@param squad g.Squad
+---@return number? x
+---@return number? y
+---@return number? w
+---@return number? h
+local function getSquadBox(squad)
+    local leader = squad._leader
+    if not leader then return end
+    local info = g.getSquadInfo(squad.squadId)
+    local einfo = g.getEntityDef(info.entityId)
+    local w, h = 10, 10
+    if einfo.image then w, h = g.getImageSize(einfo.image) end
+    local offsets = squad:getFormationOffsets()
+    local minX, minY, maxX, maxY = math.huge, math.huge, -math.huge, -math.huge
+    for i = 1, #offsets do
+        minX = math.min(minX, offsets[i].x)
+        minY = math.min(minY, offsets[i].y)
+        maxX = math.max(maxX, offsets[i].x)
+        maxY = math.max(maxY, offsets[i].y)
+    end
+    return leader.x + minX - w / 2, leader.y + minY - h / 2, (maxX - minX) + w, (maxY - minY) + h
+end
+
+local SQUAD_SELECT_COLOR = g.snapToPalette(0.2, 1, 0.3, 0.7)
+local SQUAD_HOVERSELECT_COLOR = g.snapToPalette(0.5, 0.5, 0.5, 0.4)
+
+-- find the deployed squad under the cursor; draw a box around the hovered one.
+---@param self g.BattleScene
+---@return g.Squad?
+local function updateHoveredSquad(self)
+    local mx, my = love.mouse.getPosition()
+    local wx, wy = self.camera:toWorld(mx, my)
+    local hovered = nil
+    for _, squad in pairs(g.getRun().squads) do
+        if squad.deployed and self.selectedSquad ~= squad then
+            local bx, by, bw, bh = getSquadBox(squad)
+            if bx and wx >= bx and wx <= bx + bw and wy >= by and wy <= by + bh then
+                hovered = squad
+            end
+        end
+    end
+    if hovered then
+        local bx, by, bw, bh = getSquadBox(hovered)
+        lg.setColor(SQUAD_HOVERSELECT_COLOR)
+        lg.setLineWidth(2)
+        lg.rectangle("line", bx, by, bw, bh)
+    end
+    return hovered
+end
+
+
 ---@param cost g.ManaBundle
 local function spawnManaIconPopups(cost)
     local umx, umy = ui.getMouse()
@@ -887,6 +943,7 @@ function battle_scene:draw()
         return not ecs:isInsideShape(x, y)
     end)
 
+    self.hoveredSquad = nil
     if not self.victory then
         local squad = self.hud:getSelection()
         local mx, my = love.mouse.getPosition()
@@ -894,6 +951,20 @@ function battle_scene:draw()
         if squad and not squad.deployed then
             drawSquadHover(self, squad, wx, wy)
             lg.setColor(1, 1, 1, 1)
+        else
+            -- not placing a squad: allow hovering/selecting deployed squads
+            self.hoveredSquad = updateHoveredSquad(self)
+            lg.setColor(1, 1, 1, 1)
+        end
+        -- show which deployed squad is currently selected
+        if self.selectedSquad and self.selectedSquad.deployed then
+            local bx, by, bw, bh = getSquadBox(self.selectedSquad)
+            if bx then
+                lg.setColor(SQUAD_SELECT_COLOR)
+                lg.setLineWidth(2)
+                lg.rectangle("line", bx, by, bw, bh)
+                lg.setColor(1, 1, 1, 1)
+            end
         end
     end
 
@@ -928,6 +999,9 @@ function battle_scene:draw()
                     duration = 1.5,
                 })
             end
+        else
+            -- not deploying: click a deployed squad to select it (nil to deselect)
+            self.selectedSquad = self.hoveredSquad
         end
     end
     self.hud:drawUI({ battleScene = true })

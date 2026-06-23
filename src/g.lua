@@ -1132,12 +1132,15 @@ function g.spawnSquad(squad, x, y, ...)
         end
     end
     local offsets = squad:getFormationOffsets()
+    -- invisible squad "leader": the whole squad marches toward it as a group.
+    squad._leader = { x = x, y = y, target = nil, engaged = false }
     local entities = {}
     local numUnits = #offsets
     for i = 1, numUnits do
         g.spawnEntityWithInit(info.entityId, x + offsets[i].x, y + offsets[i].y, function(ent)
             ent.scope = squadScope
             ent.squad = squad
+            ent._formationOffset = offsets[i]
             for _, stat in ipairs(g.getStatList()) do
                 -- apply squad buffs:
                 if ent[stat.baseName] then

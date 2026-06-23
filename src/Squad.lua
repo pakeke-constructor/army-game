@@ -11,6 +11,7 @@ local objects = require("src.modules.objects.objects")
 ---@field formation "square"|"circle"|"horizontal"|"vertical"|"diamond"
 ---@field deployed boolean?
 ---@field canAfford boolean?
+---@field _leader table? invisible leader the squad marches toward (battle-only, transient)
 local Squad = objects.Class("g:Squad")
 
 --- Formation functions: (n, spacing) -> {{x,y}, ...}
