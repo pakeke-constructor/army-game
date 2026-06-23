@@ -92,7 +92,7 @@ end
 
 
 local SHRINE_TXT = loc("A bloodstained shrine hums. Offer a squad for coin and calmer demons, or empower your army.")
-local SHRINE_SACRIFICE = interp("Sacrifice %{squadName}.\n(-2 demon-rage, +30 gold)", {
+local SHRINE_SACRIFICE = interp("Sacrifice %{squadName}.\n(-3 demon-rage)", {
     context = "Shrine popup option text. %{squadName} is exact squad that will be removed"
 })
 local SHRINE_NO_SAC = loc("No squad to sacrifice.")
@@ -109,8 +109,7 @@ local PORTAL_TXT = loc("Mysterious Gateway\nTravel to a random node.")
 local PORTAL_ENTER = loc("Enter Portal")
 local PORTAL_LEAVE = loc("Leave")
 
-local SACRIFICE_RAGE_REDUCTION = 2
-local SACRIFICE_GOLD = 30
+local SACRIFICE_RAGE_REDUCTION = 3
 local FOUNTAIN_RAGE_REDUCTION = 2
 local FEAST_XP = 4
 
@@ -268,7 +267,6 @@ local function drawShrinePopup()
         g.removeSquadFromArmy(squad)
         reduceDemonRage(SACRIFICE_RAGE_REDUCTION)
         closePopup()
-        rewardPopupService.genericReward({ gold = SACRIFICE_GOLD })
     end
 
     if drawChoiceButton(rightR, SHRINE_UPGRADE, font) then
