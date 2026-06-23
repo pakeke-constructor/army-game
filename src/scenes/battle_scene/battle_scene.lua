@@ -150,6 +150,10 @@ function battle_scene:enter()
     self.squadChoices = nil
     self.timeSinceEnteredScene = 0
     self.commander = nil
+    ---@type g.Squad? squad the player has clicked to select (nil = none)
+    self.selectedSquad = nil
+    ---@type g.Squad? deployed squad currently under the cursor
+    self.hoveredSquad = nil
 
     g.pollHandlers()
 
@@ -349,6 +353,13 @@ function battle_scene:updateCamera(dt)
     if ent and g.isAlive(ent) then
         cam:setPos(ent.x, ent.y)
     end
+end
+
+function battle_scene:mousepressed(x, y, button)
+    -- raw flag so draw() can tell a click happened even when it lands on a UI
+    -- element (which swallows the battlefield click via iml). Reset in draw().
+    if button == 1 then self._leftClickThisFrame = true end
+    if button == 2 then self.selectedSquad = nil end
 end
 
 function battle_scene:mousemoved(x, y, dx, dy)
@@ -717,6 +728,88 @@ end
 
 
 
+-- bounding box of a deployed squad, centered on its leader. nil if not deployed.
+---@param squad g.Squad
+---@return number? x
+---@return number? y
+---@return number? w
+---@return number? h
+-- box around the squad's formation, centered on (cx,cy) (defaults to the leader).
+local function getSquadBox(squad, cx, cy)
+    local leader = squad._leader
+    if not leader then return end
+    cx, cy = cx or leader.x, cy or leader.y
+    local info = g.getSquadInfo(squad.squadId)
+    local einfo = g.getEntityDef(info.entityId)
+    local w, h = 10, 10
+    if einfo.image then w, h = g.getImageSize(einfo.image) end
+    local offsets = squad:getFormationOffsets()
+    local minX, minY, maxX, maxY = math.huge, math.huge, -math.huge, -math.huge
+    for i = 1, #offsets do
+        minX = math.min(minX, offsets[i].x)
+        minY = math.min(minY, offsets[i].y)
+        maxX = math.max(maxX, offsets[i].x)
+        maxY = math.max(maxY, offsets[i].y)
+    end
+    return cx + minX - w / 2, cy + minY - h * 0.95, (maxX - minX) + w, (maxY - minY) + h
+end
+
+-- a squad's identity color = its mana color
+local function getSquadColor(squad)
+    return g.getManaBundleColor(g.getSquadInfo(squad.squadId).cost)
+end
+
+local function setBoxColor(squad, alpha)
+    local cr, cg, cb = getSquadColor(squad):getRGBA()
+    lg.setColor(cr, cg, cb, alpha)
+end
+
+-- draw a footprint showing where each moving squad will end up.
+---@param self g.BattleScene
+local function drawSquadDestinations(self)
+    for _, squad in pairs(g.getRun().squads) do
+        local leader = squad.deployed and squad._leader
+        if leader and leader.destX then
+            -- always show the destination box, even once arrived: it's the
+            -- reliable place to click a squad whose units have engaged far off.
+            local bx, by, bw, bh = getSquadBox(squad, leader.destX, leader.destY)
+            if bx then
+                setBoxColor(squad, 0.4)
+                lg.setLineWidth(2)
+                lg.rectangle("line", bx, by, bw, bh)
+                lg.setColor(1, 1, 1, 1)
+            end
+        end
+    end
+end
+
+local SQUAD_HOVERSELECT_COLOR = g.snapToPalette(0.5, 0.5, 0.5, 0.4)
+
+-- find the deployed squad under the cursor; draw a box around the hovered one.
+---@param self g.BattleScene
+---@return g.Squad?
+local function updateHoveredSquad(self)
+    local mx, my = love.mouse.getPosition()
+    local wx, wy = self.camera:toWorld(mx, my)
+    local hovered = nil
+    for _, squad in pairs(g.getRun().squads) do
+        if squad.deployed and self.selectedSquad ~= squad then
+            local bx, by, bw, bh = getSquadBox(squad)
+            if bx and wx >= bx and wx <= bx + bw and wy >= by and wy <= by + bh then
+                hovered = squad
+            end
+        end
+    end
+    if hovered then
+        local bx, by, bw, bh = getSquadBox(hovered)
+        lg.setColor(SQUAD_HOVERSELECT_COLOR)
+        lg.setLineWidth(2)
+        lg.rectangle("line", bx, by, bw, bh)
+    end
+    return hovered
+end
+
+
 ---@param cost g.ManaBundle
 local function spawnManaIconPopups(cost)
     local umx, umy = ui.getMouse()
@@ -889,6 +982,7 @@ function battle_scene:draw()
         return not ecs:isInsideShape(x, y)
     end)
 
+    self.hoveredSquad = nil
     if not self.victory then
         local squad = self.hud:getSelection()
         local mx, my = love.mouse.getPosition()
@@ -896,10 +990,33 @@ function battle_scene:draw()
         if squad and not squad.deployed then
             drawSquadHover(self, squad, wx, wy)
             lg.setColor(1, 1, 1, 1)
+        else
+            -- not placing a squad: allow hovering/selecting deployed squads
+            self.hoveredSquad = updateHoveredSquad(self)
+            lg.setColor(1, 1, 1, 1)
+        end
+        -- show which deployed squad is currently selected
+        if self.selectedSquad and self.selectedSquad.deployed then
+            local bx, by, bw, bh = getSquadBox(self.selectedSquad)
+            if bx then
+                setBoxColor(self.selectedSquad, 0.7)
+                lg.setLineWidth(2)
+                lg.rectangle("line", bx, by, bw, bh)
+                lg.setColor(1, 1, 1, 1)
+            end
+            -- preview where it'll end up at the cursor before issuing the move
+            local pbx, pby, pbw, pbh = getSquadBox(self.selectedSquad, wx, wy)
+            if pbx then
+                setBoxColor(self.selectedSquad, 0.4)
+                lg.setLineWidth(2)
+                lg.rectangle("line", pbx, pby, pbw, pbh)
+                lg.setColor(1, 1, 1, 1)
+            end
         end
     end
 
     drawCommanderTarget(self)
+    drawSquadDestinations(self)
 
     iml.popTransform()
     self.camera:detach()
@@ -908,7 +1025,11 @@ function battle_scene:draw()
 
     ui.startUI()
 
+    -- true when this frame's left-click landed on the battlefield (not on a UI
+    -- element, which would have swallowed it via iml).
+    local clickedBattlefield = false
     if (not self.victory) and (not self.defeated) and iml.wasJustPressed(0, 0, sw, sh, 1, "deploy_click") then
+        clickedBattlefield = true
         local entry = self.hud:getSelection()
         local mx, my = love.mouse.getPosition()
         local wx, wy = self.camera:toWorld(mx, my)
@@ -930,9 +1051,25 @@ function battle_scene:draw()
                     duration = 1.5,
                 })
             end
+        elseif self.hoveredSquad then
+            -- click a deployed squad's box to select it
+            self.selectedSquad = self.hoveredSquad
+        elseif self.selectedSquad and self.selectedSquad.deployed and self.selectedSquad._leader then
+            -- move command: send the selected squad's leader to the clicked point
+            local leader = self.selectedSquad._leader
+            leader.destX, leader.destY = wx, wy
+            self.selectedSquad = nil
+        else
+            self.selectedSquad = nil
         end
     end
     self.hud:drawUI({ battleScene = true })
+
+    -- click landed on a UI element (battlefield click was swallowed): deselect
+    if self._leftClickThisFrame and not clickedBattlefield then
+        self.selectedSquad = nil
+    end
+    self._leftClickThisFrame = false
 
     if self.deployPhase then
         local r = ui.getScreenRegion()
