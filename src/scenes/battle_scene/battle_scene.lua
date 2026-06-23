@@ -736,7 +736,7 @@ end
 ---@return number? h
 -- box around the squad's formation, centered on (cx,cy) (defaults to the leader).
 local function getSquadBox(squad, cx, cy)
-    local leader = squad._leader
+    local leader = squad.leader
     if not leader then return end
     cx, cy = cx or leader.x, cy or leader.y
     local info = g.getSquadInfo(squad.squadId)
@@ -768,7 +768,7 @@ end
 ---@param self g.BattleScene
 local function drawSquadDestinations(self)
     for _, squad in pairs(g.getRun().squads) do
-        local leader = squad.deployed and squad._leader
+        local leader = squad.deployed and squad.leader
         if leader and leader.destX then
             -- always show the destination box, even once arrived: it's the
             -- reliable place to click a squad whose units have engaged far off.
@@ -1054,9 +1054,9 @@ function battle_scene:draw()
         elseif self.hoveredSquad then
             -- click a deployed squad's box to select it
             self.selectedSquad = self.hoveredSquad
-        elseif self.selectedSquad and self.selectedSquad.deployed and self.selectedSquad._leader then
+        elseif self.selectedSquad and self.selectedSquad.deployed and self.selectedSquad.leader then
             -- move command: send the selected squad's leader to the clicked point
-            local leader = self.selectedSquad._leader
+            local leader = self.selectedSquad.leader
             leader.destX, leader.destY = wx, wy
             self.selectedSquad = nil
         else

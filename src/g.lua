@@ -1147,7 +1147,7 @@ function g.spawnSquad(squad, x, y, ...)
     end
     local offsets = squad:getFormationOffsets()
     -- invisible squad "leader": the whole squad marches toward it as a group.
-    squad._leader = { x = x, y = y, target = nil, engaged = false }
+    squad.leader = { x = x, y = y, target = nil, engaged = false }
     local entities = {}
     local numUnits = #offsets
     for i = 1, numUnits do

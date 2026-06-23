@@ -1,6 +1,15 @@
 
 local objects = require("src.modules.objects.objects")
 
+--- Invisible point the squad marches toward as a group (battle-only, transient).
+---@class g.Squad.Leader
+---@field x number
+---@field y number
+---@field destX number? player-commanded move destination
+---@field destY number?
+---@field engaged boolean? true once units break off to attack independently
+---@field target ecs.Entity? nearest enemy the squad is marching toward
+
 ---@class g.Squad: objects.Class
 ---@field squadId string
 ---@field level integer
@@ -11,8 +20,9 @@ local objects = require("src.modules.objects.objects")
 ---@field formation "square"|"circle"|"horizontal"|"vertical"|"diamond"
 ---@field deployed boolean?
 ---@field canAfford boolean?
----@field _leader table? invisible leader the squad marches toward (battle-only, transient). Has {x,y,destX,destY,engaged,target}
+---@field leader g.Squad.Leader? the squad marches toward this as a group
 local Squad = objects.Class("g:Squad")
+
 
 --- Formation functions: (n, spacing) -> {{x,y}, ...}
 Squad.FORMATIONS = {}
@@ -105,7 +115,6 @@ function Squad:spawn(x, y)
     self.deployed = true
     return entities
 end
-
 ---@return table[] offsets {{x,y}, ...}
 function Squad:getFormationOffsets()
     g = g or require("src.g")

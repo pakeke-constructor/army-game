@@ -110,7 +110,7 @@ end
 
 -- true if this unit marches as part of a squad (offensive squads only)
 local function followsLeader(ent)
-    return ent.squad and ent.squad._leader
+    return ent.squad and ent.squad.leader
         and ent.team == "ally"
         and not ent.playerControlled
         and (not ent.ai or ent.ai.target ~= "ally")
@@ -122,6 +122,7 @@ local LEADER_AUTO_ATTACK = false
 
 -- Move an invisible squad leader.
 -- `rep` is a representative unit (for moveSpeed/attackRange).
+---@param leader g.Squad.Leader
 local function updateLeader(leader, rep, enemies, dt)
     if not LEADER_AUTO_ATTACK then
         -- manual control: the (invisible) leader teleports to the player-set
@@ -161,6 +162,8 @@ local function updateLeader(leader, rep, enemies, dt)
         leader.y = leader.y + dy / dist * speed * dt
     end
 end
+
+
 
 local function updatePatrol(ent, dt)
     if not ent._patrolInited then
@@ -219,9 +222,9 @@ function aiSys.preUpdate(dt)
     table_clear(_leaderSeen)
     for i = 1, #allies do
         local ent = allies[i]
-        if followsLeader(ent) and not _leaderSeen[ent.squad._leader] then
-            _leaderSeen[ent.squad._leader] = true
-            updateLeader(ent.squad._leader, ent, enemies, dt)
+        if followsLeader(ent) and not _leaderSeen[ent.squad.leader] then
+            _leaderSeen[ent.squad.leader] = true
+            updateLeader(ent.squad.leader, ent, enemies, dt)
         end
     end
 
@@ -301,7 +304,7 @@ function aiSys.preUpdate(dt)
         -- squad units march in formation behind their leader, but each unit
         -- breaks off on its own to chase/attack once its target is in range.
         local tauntedAway = ent.taunt and ent.taunt.ent and isValidTarget(ent.taunt.ent)
-        local leader = followsLeader(ent) and ent.squad._leader
+        local leader = followsLeader(ent) and ent.squad.leader
         local range = ent.attackRange * 1.5 or 100
         local targetInRange = targ and dist2(ent, targ) <= range * range
         if leader and not leader.engaged and not tauntedAway and not targetInRange then
