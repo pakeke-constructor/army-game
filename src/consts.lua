@@ -23,9 +23,6 @@ consts.DEFAULT_MELEE_KNOCKBACK = 90
 consts.DEFAULT_RANGED_KNOCKBACK = 50
 consts.KNOCKBACK_RESISTANCE_INCREMENT = 2
 
-consts.BATTLE_GOLD_REWARD_MIN = 70
-consts.BATTLE_GOLD_REWARD_MAX = 100
-
 consts.MAX_EVENT_CALLS_PER_FRAME = 20
 -- the maximum number of event calls of a certain type per frame.
 -- (avoids infinite loops in a robust way)
@@ -46,7 +43,10 @@ consts.DEFAULT_RARITY_WEIGHTS = {
 }
 
 consts.BALANCING = {
-    GLOBAL_HEALTH_MULTIPLIER = 0.7,
+    -- GLOBAL_HEALTH_MULTIPLIER = 0.7,
+
+    BATTLE_GOLD_REWARD_MIN = 40,
+    BATTLE_GOLD_REWARD_MAX = 60
 }
 
 consts.STARTING_COMMANDER = "sir_horse"

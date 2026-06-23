@@ -257,7 +257,7 @@ function battle_scene:update(dt)
             self.victory = true
             -- choicePopupService.set("blessing")
             rewardPopupService.battleReward({
-                gold = math.floor(helper.lerp(consts.BATTLE_GOLD_REWARD_MIN, consts.BATTLE_GOLD_REWARD_MAX, love.math.random())),
+                gold = math.floor(helper.lerp(consts.BALANCING.BATTLE_GOLD_REWARD_MIN, consts.BALANCING.BATTLE_GOLD_REWARD_MAX, love.math.random())),
                 xp = 3,
                 randomSquad = true,
             })
@@ -401,7 +401,7 @@ function battle_scene:keypressed(k)
                 rewardPopupService.clear()
             else
                 rewardPopupService.battleReward({
-                    gold = helper.lerp(consts.BATTLE_GOLD_REWARD_MIN, consts.BATTLE_GOLD_REWARD_MAX, love.math.random()),
+                    gold = helper.lerp(consts.BALANCING.BATTLE_GOLD_REWARD_MIN, consts.BALANCING.BATTLE_GOLD_REWARD_MAX, love.math.random()),
                     xp = 3,
                     randomSquad = true,
                 })
