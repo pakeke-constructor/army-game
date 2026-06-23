@@ -2,9 +2,7 @@
 
 
 from _ex6.models import M
-from _ex6.code_mode import make_code_mode_system_prompt
 from _ex6.tools import read_headers, read_body, glob, search, write_file, edit_file, read_file, edit_file_lines, escalate, bash, explore_agent, CLAUDE_MD, ENV_PROMPT, git_working_tree
-from _ex6.tools_checkpoints import checkpoint_list, checkpoint, condense
 from _ex6.skills import load_skill
 from _ex6.lua_coding_style import SYSTEM_PROMPT_CODING_STYLE
 from _ex6.tasks import plan_add_log, plan_done, plan_list, plan_read, plan_write
@@ -91,7 +89,6 @@ MAIN_SYSTEM_PROMPT = MAIN_SYSTEM_PROMPT.with_tools(MAIN_TOOLS)
 
 CODING_STYLE_PROMPT = ex6.Message(role="system", overview="coding-style", content=SYSTEM_PROMPT_CODING_STYLE)
 
-CODE_MODE_SYS_PROMPT = make_code_mode_system_prompt(MAIN_TOOLS)
 
 
 CLAUDE_MD = ex6.Message(role="system", content=open("CLAUDE.md","r").read(), overview="CLAUDE.md")

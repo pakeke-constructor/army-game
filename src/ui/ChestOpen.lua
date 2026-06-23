@@ -181,7 +181,11 @@ function ChestOpen:draw()
         lg.setColor(1, 1, 1)
         local cw = r.w * 0.3
         local ch = self.cardH or (cw * 2/3)
-        local _, _, hh = drawBlessingCard(self.blessingId, Kirigami(rx - cw/2, ry - ch/2, cw, ch), 1)
+        local pressed, _, hh = drawBlessingCard(self.blessingId, Kirigami(rx - cw/2, ry - ch/2, cw, ch), 1)
+        if pressed then
+            self.done = true
+            return
+        end
         self.cardH = hh
 
         local widthForText = r.w * 3/5

@@ -50,7 +50,7 @@ function sqhelper.defineMilitiaAndArchers(manaType)
             baseMoveSpeed = 55,
             baseMaxHealth = 5,
         },
-        unitCount = 8,
+        unitCount = 4,
         icon = "archer_uniticon",
         cost = {[manaType] = 1},
     })
