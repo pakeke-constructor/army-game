@@ -7,7 +7,9 @@ local juiceService = require("src.juiceService")
 local ambienceService = require("src.ambienceService")
 
 
-local CAMERA_ZOOM = 2
+local function cameraZoom()
+    return consts.BATTLE_ZOOM_FACTOR * ui.getUIScaling()
+end
 
 local INTRO_ZOOM_TEXT_FADE_TIME = 0.4
 local INTRO_ZOOM_DURATION = 1.6
@@ -135,7 +137,7 @@ function battle_scene:enter()
     })
     g.setCurrentECS(self.ecs)
 
-    self.camera = Camera(0, 0, CAMERA_ZOOM)
+    self.camera = Camera(0, 0, cameraZoom())
     self.particles = ParticleService()
     self.hud = HUD()
     self.noEnemyTimer = 0
@@ -338,9 +340,9 @@ function battle_scene:updateCamera(dt)
         local fitZoom = math.min(sw / border[3], sh / border[4])
         local t = self.timeSinceEnteredScene / INTRO_ZOOM_DURATION
         t = t * t * (3 - 2 * t)
-        cam:setZoom(fitZoom + (CAMERA_ZOOM - fitZoom) * t)
+        cam:setZoom(fitZoom + (cameraZoom() - fitZoom) * t)
     else
-        cam:setZoom(CAMERA_ZOOM)
+        cam:setZoom(cameraZoom())
     end
 
     local ent = self.commander

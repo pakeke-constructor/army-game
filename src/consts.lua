@@ -55,4 +55,8 @@ consts.MAX_SQUAD_COUNT = 10
 
 consts.BURN_DPS = 2
 
+-- Battle camera zoom is multiplied by the UI scale (ui.getUIScaling()), so the
+-- battlefield looks the same size regardless of screen resolution.
+consts.BATTLE_ZOOM_FACTOR = 0.5
+
 return consts
