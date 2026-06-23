@@ -54,7 +54,7 @@ consts.STARTING_COMMANDER = "sir_horse"
 consts.MAX_SQUAD_COUNT = 10
 
 -- Enemy armies always spawn this many units to the right of the player spawn.
-consts.ENEMY_ARMY_HORIZONTAL_SPAWN_DISTANCE = 500
+consts.ENEMY_ARMY_HORIZONTAL_SPAWN_DISTANCE = 350
 
 -- when false: squads auto-march at the nearest enemy and the player cannot
 -- click/select/move deployed squads (no LEADER controls, no related rendering).

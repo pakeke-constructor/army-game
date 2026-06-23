@@ -20,6 +20,8 @@ local VICTORY_FADE_IN = 0.25
 local WIN_SHOCKWAVE_DURATION = 1.2
 local WIN_SHOCKWAVE_LINE_WIDTH = 98
 
+local COMMANDER_SCREEN_X_RATIO = 1 / 3
+
 ---@class g.BattleScene
 ---@field hud g.HUD
 local battle_scene = {}
@@ -351,7 +353,9 @@ function battle_scene:updateCamera(dt)
 
     local ent = self.commander
     if ent and g.isAlive(ent) then
-        cam:setPos(ent.x, ent.y)
+        local sw = love.graphics.getWidth()
+        local worldOffsetX = sw * (0.5 - COMMANDER_SCREEN_X_RATIO) / cam:getZoom()
+        cam:setPos(ent.x + worldOffsetX, ent.y)
     end
 end
 
@@ -638,7 +642,7 @@ end
 
 
 
-local DEPLOY_RADIUS = 100
+local DEPLOY_RADIUS = 200
 
 ---@param self g.BattleScene
 local function getCommanderDeployBasePos(self)

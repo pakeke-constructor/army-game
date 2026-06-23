@@ -23,7 +23,6 @@ end
 local EnemySpawner = objects.Class("g:EnemySpawner")
 
 local SPACING = 25
-local ROW_SIZE = 5
 -- how far behind its chosen melee squad a ranged squad sits
 local RANGED_BACK_OFFSET = 80
 -- vertical margin so squads don't spawn right on the edge
@@ -72,14 +71,15 @@ function EnemySpawner:getRandom(min, max)
     return self._rng:random()
 end
 
---- Spawns one squad's units clumped around (cx, cy).
+--- Spawns one squad's units in a square grid centered on (cx, cy).
 function EnemySpawner:_spawnSquad(squad, cx, cy)
+    local cols, rows = helper.getBestFitDimensions(squad.count, 1, 1)
     for i = 1, squad.count do
         local idx = i - 1
-        local col = idx % ROW_SIZE
-        local row = math.floor(idx / ROW_SIZE)
-        local x = cx + (col - (ROW_SIZE - 1) / 2) * SPACING
-        local y = cy + (row - 0.5) * SPACING
+        local col = idx % cols
+        local row = math.floor(idx / cols)
+        local x = cx + (col - (cols - 1) / 2) * SPACING
+        local y = cy + (row - (rows - 1) / 2) * SPACING
         x, y = self._ecs:clampToShape(x, y)
         local ent = g.spawnEntity(squad.id, x, y)
         ent.patrolX, ent.patrolY = x, y
