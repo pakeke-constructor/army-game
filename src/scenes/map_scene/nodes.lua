@@ -49,6 +49,7 @@ local PORTAL_INACTIVE_TXT = loc("Portal: Inactive")
 
 local NODE_FADE_OUT = 0.35
 local NODE_FADE_IN = 0.2
+local VISITED_NODE_OPACITY = 0.45
 
 
 
@@ -152,6 +153,13 @@ end
 ---@param builder g.DecorBuilder
 ---@param x number
 ---@param y number
+local function nodeOpacity(node)
+    if node.visited then
+        return VISITED_NODE_OPACITY
+    end
+    return 1
+end
+
 local function addDemons(node, builder, x, y)
     if node.demonEncounter then
         local count = node.demonEncounter + 1
@@ -167,12 +175,12 @@ local function addDemons(node, builder, x, y)
             end
             local r = 20 * radiusMul
             local a = angle + angleOff
-            builder:addImage("node_combat_demon", x + math.cos(a) * r, y + math.sin(a) * r)
+            builder:addImage("node_combat_demon", x + math.cos(a) * r, y + math.sin(a) * r, 0, nil, nodeOpacity(node))
         end
 
         if node.demonEncounter >= 2 then
             -- its a "boss" encounter, add a flag.
-            builder:addImage("node_combat_flag", x-14, y-2, 0, 1)
+            builder:addImage("node_combat_flag", x-14, y-2, 0, 1, nodeOpacity(node))
         end
     end
 end
@@ -266,9 +274,9 @@ function FeastNode:update(dt)
 end
 
 function FeastNode:buildDecor(builder, wx, wy)
-    builder:addImage("node_banquet", wx, wy)
+    builder:addImage("node_banquet", wx, wy, 0, nil, nodeOpacity(self))
     local firePS = firePSes[self]
-    if firePS then
+    if firePS and not self.visited then
         builder:addDrawable(wx + 1, wy - 20, function(x, y)
             love.graphics.draw(firePS, x, y)
         end, 100)
@@ -298,10 +306,11 @@ end
 
 ---@param x number
 ---@param y number
-local function drawShrineAnimated(x, y)
+---@param opacity number
+local function drawShrineAnimated(x, y, opacity)
     local t = love.timer.getTime()
     local t1 = math.sin(t * 3) * 2
-    local col = gsman.setColor(1, 1, 1)
+    local col = gsman.setColor(1, 1, 1, opacity)
     g.drawImageOffset("node_shrine_base", x, y + 4, 0, 1, 1, 0.5, 1)
     helper.drawWings(x, y - 32, t, "node_shrine_wing", {
         scale = 1,
@@ -313,9 +322,10 @@ local function drawShrineAnimated(x, y)
     g.drawImage("node_shrine_body", x, y - 26 + t1)
     col:pop()
 end
-
 function ShrineNode:buildDecor(builder, wx, wy)
-    builder:addDrawable(wx, wy, drawShrineAnimated)
+    builder:addDrawable(wx, wy, function(x, y)
+        drawShrineAnimated(x, y, nodeOpacity(self))
+    end)
     addDemons(self, builder, wx, wy)
 end
 
@@ -339,7 +349,7 @@ function FountainNode:getHoverDescription()
 end
 
 function FountainNode:buildDecor(builder, wx, wy)
-    builder:addImage("node_fountain", wx, wy)
+    builder:addImage("node_fountain", wx, wy, 0, nil, nodeOpacity(self))
     addDemons(self, builder, wx, wy)
 end
 
@@ -363,7 +373,7 @@ function ChestNode:getHoverDescription()
 end
 
 function ChestNode:buildDecor(builder, wx, wy)
-    builder:addImage("node_chest", wx, wy)
+    builder:addImage("node_chest", wx, wy, 0, nil, nodeOpacity(self))
     addDemons(self, builder, wx, wy)
 end
 
@@ -472,7 +482,7 @@ function ShopNode:getHoverDescription()
 end
 
 function ShopNode:buildDecor(builder, wx, wy)
-    builder:addImage("node_town", wx, wy - 8)
+    builder:addImage("node_town", wx, wy - 8, 0, nil, nodeOpacity(self))
 end
 
 nodes.ShopNode = ShopNode
@@ -583,7 +593,7 @@ end
 
 function PortalNode:buildDecor(builder, wx, wy)
     if self.active then
-        builder:addImage("node_portal", wx, wy)
+        builder:addImage("node_portal", wx, wy, 0, nil, nodeOpacity(self))
         local portalPS = portalPSes[self]
         if portalPS then
             builder:addDrawable(wx, wy - 24, function(x, y)
@@ -591,7 +601,7 @@ function PortalNode:buildDecor(builder, wx, wy)
             end, 100)
         end
     else
-        builder:addImage("node_portal_deactivated", wx, wy)
+        builder:addImage("node_portal_deactivated", wx, wy, 0, nil, nodeOpacity(self))
     end
 end
 
