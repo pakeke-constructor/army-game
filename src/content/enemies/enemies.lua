@@ -53,7 +53,7 @@ defEnemy("archerdemon", {
     },
     baseAttackDamage = 0.6,
     baseAttackSpeed = 0.4,
-    baseAttackRange = 600,
+    baseAttackRange = 300,
     baseMoveSpeed = 45,
     baseMaxHealth = 5,
 })
@@ -222,7 +222,7 @@ defEnemy("greatbowdemon", { -- Hellfire Greatbowmen
     },
     baseAttackDamage = 8,
     baseAttackSpeed = 0.5,
-    baseAttackRange = 1000,
+    baseAttackRange = 700,
     baseMoveSpeed = 50,
     baseMaxHealth = 8,
 })
