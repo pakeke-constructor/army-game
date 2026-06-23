@@ -2306,10 +2306,14 @@ function g.drawEntity(ent, x, y)
         end
 
         lg.setColor(col[1], col[2], col[3], col[4] * (ent.alpha or 1))
+        if ent.weapon and ent.weapon.drawBehind then
+            drawWeapon(ent,x,y)
+        end
+
         local rot = (ent.rot or 0) + bodyRot + (ent.damageJolt or 0) + walkWobble
         g.drawImageOffset(ent.image, x + (ent.ox or 0), y + (ent.oy or 0) + walkBounce, rot, sx, sy, 0.5, 0.95, ent.kx, ent.ky)
 
-        if ent.weapon then
+        if ent.weapon and not ent.weapon.drawBehind then
             drawWeapon(ent,x,y)
         end
 
