@@ -1809,16 +1809,201 @@ local HEALTHBAR_ON_TOP = true
 -- true if healthbar on top, 
 -- false implies healthbar on bottom
 
+local USE_OLD_RENDERING = true
+-- true if uses old health rendering
+-- false to use segmented health bars
+
 local ENEMY_HEALTHBAR_COLOR = g.snapToPalette(1, 0.1, 0.1)
 local ALLY_HEALTHBAR_COLOR = g.snapToPalette(0.1, 1, 0.1)
 local NEUTRAL_HEALTHBAR_COLOR = g.snapToPalette(0.1, 0.4, 1)
+local HEALTHBAR_SIZE_MULT = 1 -- for segmented rendering only.
 
+
+---@param maxHp number
+local function getHPSegmentInfo(maxHp)
+    -- The segments count is adjusted depending on the max health
+    -- such that the segment for each health is around the specified value.
+    local MIN_HP_PER_SEGMENT = 25
+	local MAX_HP_PER_SEGMENT = 45
+	local IDEAL_HP_PER_SEGMENT = (MIN_HP_PER_SEGMENT + MAX_HP_PER_SEGMENT) / 2
+
+	if maxHp <= MIN_HP_PER_SEGMENT then
+		return 1, 1
+	end
+
+	local minSegments = math.ceil(maxHp / MAX_HP_PER_SEGMENT)
+	local maxSegments = math.floor(maxHp / MIN_HP_PER_SEGMENT)
+
+	local ideal = math.floor(maxHp / IDEAL_HP_PER_SEGMENT + 0.5)
+
+	local segments = math.max(minSegments, math.min(maxSegments, ideal))
+    return segments, 1
+end
 
 ---@param ent ecs.Entity
 ---@param x number
 ---@param y number
 local function drawHealthBar(ent, x,y)
     if not ent.maxHealth then return end
+
+    -- Ok so technical info in new rendering:
+    -- Single health segment is between certain HP range
+    -- The segments count and thickness is adjusted depending on the max health
+    -- Each segment is like 10 pixel long.
+
+    if not USE_OLD_RENDERING then
+        local SEGMENT_SPACING = 2
+        local SEGMENT_HEIGHT = 2
+        local PADDING = 2
+        local nsegments, thickness = getHPSegmentInfo(ent.maxHealth)
+        local height = SEGMENT_HEIGHT + (thickness - 1) * 2
+
+        local iw, ih = 32, 32 -- sensible default
+        if ent.image then
+            iw, ih = g.getImageSize(ent.image)
+        end
+
+        local width = math.min(iw, ih) * HEALTHBAR_SIZE_MULT
+        local segmentWidth = math.floor(width / nsegments + 0.5)
+        width = nsegments * segmentWidth + (nsegments - 1) * SEGMENT_SPACING
+
+        local hx = x - width / 2
+        local hy
+        if HEALTHBAR_ON_TOP then
+            hy = y - ih - 4 - height
+        else
+            hy = y + height + 4
+        end
+
+        -- Draw base area for health bar
+        lg.setColor(0, 0, 0)
+        helper.drawFilledRectangle(
+            hx - PADDING,
+            hy - PADDING,
+            width + 2 * PADDING,
+            height + 2 * PADDING
+        )
+
+        local hpPerSegment = ent.maxHealth / nsegments
+        local rulerCount = math.floor(math.min(hpPerSegment / 3 / thickness, segmentWidth / 3))
+        local lagHealth = helper.clamp((ent.health or 0) + (ent._damageLagAmount or 0), 0, ent.maxHealth)
+        local health = helper.clamp(ent.health or 0, 0, ent.maxHealth)
+
+        local healthColor = NEUTRAL_HEALTHBAR_COLOR
+        if ent.team == "enemy" then
+            healthColor = ENEMY_HEALTHBAR_COLOR
+        elseif ent.team == "ally" then
+            healthColor = ALLY_HEALTHBAR_COLOR
+        end
+        local healthColorStrip = healthColor:darken(0.3)
+
+        ---@param hpA number
+        ---@param hpB number
+        ---@param color objects.Color
+        local function drawHealthRange(hpA, hpB, color)
+            hpA = helper.clamp(hpA, 0, ent.maxHealth)
+            hpB = helper.clamp(hpB, 0, ent.maxHealth)
+            if hpB <= hpA then return end
+
+            lg.setColor(color)
+            for i = 1, nsegments do
+                local sx = hx + (i - 1) * (segmentWidth + SEGMENT_SPACING)
+                local segmentStart = (i - 1) * hpPerSegment
+                local segmentEnd = i * hpPerSegment
+                local a = math.max(hpA, segmentStart)
+                local b = math.min(hpB, segmentEnd)
+
+                if b > a then
+                    local fracA = (a - segmentStart) / hpPerSegment
+                    local fracB = (b - segmentStart) / hpPerSegment
+                    local x1 = sx + fracA * segmentWidth
+                    local x2 = sx + fracB * segmentWidth
+                    helper.drawFilledRectangle(x1, hy, x2 - x1, height)
+
+                    lg.setColor(color:darken(0.3))
+                    for j = 1, rulerCount do
+                        local pos = j / (rulerCount + 1)
+                        if pos > fracA and pos < fracB then
+                            local px = segmentWidth * pos
+                            helper.drawFilledRectangle(sx + px - 0.5, hy, 1, height)
+                        end
+                    end
+                    lg.setColor(color)
+                end
+            end
+        end
+
+        -- Draw the segments
+        for i = 1, nsegments do
+            local sx = hx + (i - 1) * (segmentWidth + SEGMENT_SPACING)
+            local segmentStart = (i - 1) * hpPerSegment
+            local lagFrac = helper.clamp((lagHealth - segmentStart) / hpPerSegment, 0, 1)
+            local frac = helper.clamp((health - segmentStart) / hpPerSegment, 0, 1)
+
+            if lagFrac > 0 then
+                lg.setColor(1, 1, 1)
+                helper.drawFilledRectangle(sx, hy, segmentWidth * lagFrac, height)
+            end
+
+            if frac > 0 then
+                lg.setColor(healthColor)
+                helper.drawFilledRectangle(sx, hy, segmentWidth * frac, height)
+
+                lg.setColor(healthColorStrip)
+                for j = 1, rulerCount do
+                    local pos = j / (rulerCount + 1)
+                    if pos >= frac then
+                        break
+                    end
+
+                    local px = segmentWidth * pos
+                    helper.drawFilledRectangle(sx + px - 0.5, hy, 1, height)
+                end
+            end
+        end
+
+        -- status effect tip segments (drawn right-to-left from tip)
+        local rightHp = health
+        local function drawTip(hp, color)
+            hp = math.min(hp, rightHp)
+            if hp <= 0 then return end
+            drawHealthRange(rightHp - hp, rightHp, color)
+            rightHp = rightHp - hp
+        end
+        drawTip(5 * (ent.poisonAmount or 0), g.COLORS.POISON)
+        drawTip((ent.burnTime or 0) * consts.BURN_DPS, g.COLORS.BURN)
+
+        if ent.armor then
+            local FLASH_DUR = 0.15
+            local armorFlash = math.max(0, FLASH_DUR - (ent._timeSinceLostArmor or 0xfff)) / FLASH_DUR
+            local armorH = 6
+            local armorY = hy + height
+            local ratio = math.min(1, ent.armor / 6)
+            local pad = 2
+
+            lg.setColor(0, 0, 0)
+            helper.drawFilledRectangle(hx, armorY, width * ratio, armorH)
+
+            lg.setColor(0.5, 0.5, 0.5)
+            helper.drawFilledRectangle(hx + pad, armorY + pad, ratio * (width - pad * 2), armorH - pad * 2)
+
+            if armorFlash > 0 then
+                lg.setColor(1, 1, 1, armorFlash)
+                helper.drawFilledRectangle(hx, armorY, width * ratio, armorH)
+            end
+
+            lg.setColor(1, 1, 1)
+            g.drawImage("armor_healthbar_icon", hx - 2, armorY + 2)
+            if armorFlash > 0 then
+                lg.setColor(1, 1, 1, armorFlash)
+                g.drawImage("armor_healthbar_icon_white", hx - 2, armorY + 2)
+            end
+        end
+
+        return
+    end
+
+    -- Below is old rendering
     local w, h = 16, 2
     local frac = ent.health / ent.maxHealth
 
