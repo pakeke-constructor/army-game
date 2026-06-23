@@ -103,7 +103,7 @@ local FOUNTAIN_RAGE = loc("Calm the demons.\n(Reduce demon-rage)")
 local FOUNTAIN_BLESSING = loc("Receive a blessing.")
 
 local FEAST_TXT = loc("A grand feast is laid out for your troops.")
-local FEAST_REWARD = loc("Feast.\n(+4 XP)")
+local FEAST_REWARD = loc("Feast.\n(+4 {xp_icon})")
 
 local PORTAL_TXT = loc("Mysterious Gateway\nTravel to a random node.")
 local PORTAL_ENTER = loc("Enter Portal")
@@ -271,7 +271,7 @@ local function drawShrinePopup()
 
     if drawChoiceButton(rightR, SHRINE_UPGRADE, font) then
         closePopup()
-        choicePopupService.set("squad", 0)
+        choicePopupService.set("upgsquad1", 0)
     end
 end
 
