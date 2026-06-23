@@ -5,7 +5,7 @@ local choicePopupService = {}
 
 local active = nil
 
----@param rType "squad"|"blessing"|"mana"
+---@param rType "squad"|"blessing"|"mana"|"upgrade_squad"
 ---@param rerolls integer?
 ---@param rarityWeights g.RarityWeights?
 function choicePopupService.set(rType, rerolls, rarityWeights)

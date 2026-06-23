@@ -46,12 +46,13 @@ local FAN_OUT_DURATION = 0.11
 local REROLL_TXT = interp("Reroll (%{n})")
 
 
----@param rType "squad"|"blessing"|"mana"
+---@param rType "squad"|"blessing"|"mana"|"upgrade_squad"
 ---@param rerolls integer?
 ---@param rarityWeights g.RarityWeights?
 function ChoicePanel:init(rType, rerolls, rarityWeights)
     self.rType = rType
     self.rerolls = rerolls or 0
+    ---@type string[]
     self.choices = {}
     self.rarityWeights = rarityWeights or consts.DEFAULT_RARITY_WEIGHTS
     self.createdAt = love.timer.getTime()
@@ -77,6 +78,24 @@ function ChoicePanel:_rollChoices()
             if manaType ~= g.WILDCARD_MANA then
                 self.choices[#self.choices + 1] = manaType
             end
+        end
+    elseif self.rType == "upgrade_squad" then
+        local pool = {}
+        for k in pairs(g.getRun().squads) do
+            local sqinfo = g.getSquadInfo(k)
+            if not sqinfo.entityDef.isCommander then
+                pool[#pool+1] = k
+            end
+        end
+
+        -- No need for "_pickFromPool". We want no dupes.
+        self.choices = {}
+        for _ = 1, NUM_CHOICES do
+            if #pool == 0 then
+                break
+            end
+
+            self.choices[#self.choices+1] = table.remove(pool, love.math.random(#pool))
         end
     end
 end
@@ -147,10 +166,11 @@ function ChoicePanel:draw()
         regions[i] = rr:moveUnit(dx, dy)
     end
 
-    if self.rType == "squad" then
+    if self.rType == "squad" or self.rType == "upgrade_squad" then
         for i = 1, #regions do
             local squadId = self.choices[i]
-            local clicked = ui.drawSquadCard(squadId, regions[i], i, true)
+            local isUpgrade = not not g.getSquadFromArmy(squadId)
+            local clicked = ui.drawSquadCard(squadId, regions[i], i, isUpgrade)
             if clicked then
                 g.addOrUpgradeSquad(squadId)
                 return true

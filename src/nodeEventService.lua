@@ -271,7 +271,7 @@ local function drawShrinePopup()
 
     if drawChoiceButton(rightR, SHRINE_UPGRADE, font) then
         closePopup()
-        choicePopupService.set("upgsquad1", 0)
+        choicePopupService.set("upgrade_squad", 0)
     end
 end
 
