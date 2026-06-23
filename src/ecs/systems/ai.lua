@@ -116,9 +116,30 @@ local function followsLeader(ent)
         and (not ent.ai or ent.ai.target ~= "ally")
 end
 
--- Move an invisible squad leader toward the nearest enemy.
+-- if true: squad leaders auto-march toward the nearest enemy (the OLD behavior).
+-- if false: leaders only move where the player commands them (click-to-move).
+local LEADER_AUTO_ATTACK = false
+
+-- Move an invisible squad leader.
 -- `rep` is a representative unit (for moveSpeed/attackRange).
 local function updateLeader(leader, rep, enemies, dt)
+    if not LEADER_AUTO_ATTACK then
+        -- manual control: march toward the player-set destination, then hold.
+        -- units always follow the formation (never auto-engage) in this mode.
+        leader.target = nil
+        leader.engaged = false
+        if not leader.destX then return end
+        local dx, dy = leader.destX - leader.x, leader.destY - leader.y
+        local dist = (dx * dx + dy * dy) ^ 0.5
+        if dist > 1 then
+            local speed = rep.moveSpeed or 60
+            leader.x = leader.x + dx / dist * speed * dt
+            leader.y = leader.y + dy / dist * speed * dt
+        end
+        return
+    end
+
+    -- OLD behavior: march toward the nearest enemy.
     local best, bestD = nil, math.huge
     for i = 1, #enemies do
         local e = enemies[i]
