@@ -749,10 +749,18 @@ local function getSquadBox(squad, cx, cy)
         maxX = math.max(maxX, offsets[i].x)
         maxY = math.max(maxY, offsets[i].y)
     end
-    return cx + minX - w / 2, cy + minY - h / 2, (maxX - minX) + w, (maxY - minY) + h
+    return cx + minX - w / 2, cy + minY - h * 0.95, (maxX - minX) + w, (maxY - minY) + h
 end
 
-local DEST_MARKER_COLOR = g.snapToPalette(0.2, 1, 0.3, 0.4)
+-- a squad's identity color = its mana color
+local function getSquadColor(squad)
+    return g.getManaBundleColor(g.getSquadInfo(squad.squadId).cost)
+end
+
+local function setBoxColor(squad, alpha)
+    local cr, cg, cb = getSquadColor(squad):getRGBA()
+    lg.setColor(cr, cg, cb, alpha)
+end
 
 -- draw a footprint showing where each moving squad will end up.
 ---@param self g.BattleScene
@@ -764,7 +772,7 @@ local function drawSquadDestinations(self)
             -- reliable place to click a squad whose units have engaged far off.
             local bx, by, bw, bh = getSquadBox(squad, leader.destX, leader.destY)
             if bx then
-                lg.setColor(DEST_MARKER_COLOR)
+                setBoxColor(squad, 0.4)
                 lg.setLineWidth(2)
                 lg.rectangle("line", bx, by, bw, bh)
                 lg.setColor(1, 1, 1, 1)
@@ -773,7 +781,6 @@ local function drawSquadDestinations(self)
     end
 end
 
-local SQUAD_SELECT_COLOR = g.snapToPalette(0.2, 1, 0.3, 0.7)
 local SQUAD_HOVERSELECT_COLOR = g.snapToPalette(0.5, 0.5, 0.5, 0.4)
 
 -- find the deployed squad under the cursor; draw a box around the hovered one.
@@ -990,7 +997,7 @@ function battle_scene:draw()
         if self.selectedSquad and self.selectedSquad.deployed then
             local bx, by, bw, bh = getSquadBox(self.selectedSquad)
             if bx then
-                lg.setColor(SQUAD_SELECT_COLOR)
+                setBoxColor(self.selectedSquad, 0.7)
                 lg.setLineWidth(2)
                 lg.rectangle("line", bx, by, bw, bh)
                 lg.setColor(1, 1, 1, 1)
@@ -998,7 +1005,7 @@ function battle_scene:draw()
             -- preview where it'll end up at the cursor before issuing the move
             local pbx, pby, pbw, pbh = getSquadBox(self.selectedSquad, wx, wy)
             if pbx then
-                lg.setColor(DEST_MARKER_COLOR)
+                setBoxColor(self.selectedSquad, 0.4)
                 lg.setLineWidth(2)
                 lg.rectangle("line", pbx, pby, pbw, pbh)
                 lg.setColor(1, 1, 1, 1)
