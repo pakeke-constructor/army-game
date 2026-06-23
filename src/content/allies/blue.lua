@@ -114,10 +114,6 @@ g.defineSquad("test_subjects_squad", {
         attack = {
             attackType = "melee",
         },
-        weapon = {
-            image = "dagger",
-            type = "sword",
-        },
         baseAttackDamage = 1,
         baseAttackSpeed = 1,
         baseAttackRange = 18,
@@ -327,10 +323,6 @@ g.defineSquad("clay_troll_squad", {
         attack = {
             attackType = "melee",
         },
-        weapon = {
-            image = "militia_sword", -- placeholder
-            type = "sword",
-        },
         baseAttackDamage = 1,
         baseAttackSpeed = 0.5,
         baseAttackRange = 18,
@@ -368,7 +360,6 @@ g.defineSquad("war_elephant_squad", {
         image = "warelephants_unit",
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 2 },
         attack = { attackType = "melee" },
-        --weapon = { image = "militia_sword", type = "sword" },
         baseAttackDamage = 4,
         baseAttackSpeed = 0.6,
         baseAttackRange = 22,
@@ -426,7 +417,6 @@ g.defineSquad("magnet_elemental_squad", {
         image = "magnetelemental_unit",
         physics = { shape = "circle", radius = 6, ox = 0, oy = 0, mass = 1 },
         attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 280 },
-        -- weapon = { image = "placeholder", type = "bow" },
         baseAttackDamage = 2,
         baseAttackSpeed = 0.7,
         baseAttackRange = 120,
@@ -468,7 +458,6 @@ g.defineSquad("immortal_eye_squad", {
         isBuilding = true,
         physics = { shape = "circle", radius = 10, ox = 0, oy = 0, mass = 1, isStatic = true },
         attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 300 },
-        -- weapon = { image = "placeholder", type = "bow" },
         baseAttackDamage = 1,
         baseAttackSpeed = 0.8,
         baseAttackRange = 220,
@@ -509,7 +498,6 @@ g.defineSquad("bell_creature_squad", {
         image = "bellman",
         physics = { shape = "circle", radius = 6, ox = 0, oy = 0, mass = 1 },
         attack = { attackType = "melee" },
-        weapon = { image = "militia_sword", type = "sword" },
         baseAttackDamage = 1,
         baseAttackSpeed = 0.8,
         baseAttackRange = 20,
@@ -577,7 +565,6 @@ g.defineEntity("living_mana", {
     image = "mana_blue_large",
     physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 0.3 },
     attack = { attackType = "melee" },
-    weapon = { image = "1x1", type = "object" },
     partitions = {"unit", "ally"},
     team = "ally",
     ai = { target = "enemy" },
@@ -605,7 +592,6 @@ g.defineSquad("anima_incubator_squad", {
         isBuilding = true,
         physics = { shape = "circle", isStatic = true, radius = 20, ox = 0, oy = 0, mass = 5 },
         attack = { attackType = "melee" },
-        weapon = { image = "1x1", type = "object" },
 
         baseAttackDamage = 1,
         baseAttackSpeed = 0.5,

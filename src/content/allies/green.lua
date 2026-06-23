@@ -267,7 +267,7 @@ g.defineSquad("infested_squad", {
     icon = "theinfested_uniticon",
     perks = {{
         name = "Infestation",
-        description = loc("On death, spawn a Pest."),
+        description = loc("On death, spawn a {GREEN_MANA_COLOR}Pest{/GREEN_MANA_COLOR}."),
         image = "coin_icon",
         handlers = {
             entityDeath = function(ent)
@@ -362,7 +362,6 @@ g.defineSquad("arcane_blossom_squad", {
         image = "arcaneblossom",
         physics = { shape = "circle", radius = 7, ox = 0, oy = 0, mass = 1 },
         attack = { attackType = "melee" },
-        weapon = { image = "militia_sword", type = "sword" },
         baseAttackDamage = 2,
         baseAttackSpeed = 0.8,
         baseAttackRange = 20,
@@ -455,7 +454,6 @@ g.defineSquad("hive_recycler_squad", {
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         ai = { target = "ally" },
         attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 250 },
-        weapon = { image = "placeholder", type = "bow" },
         isHealer = true,
         baseHealPower = 2,
         baseAttackSpeed = 0.6,
@@ -466,7 +464,7 @@ g.defineSquad("hive_recycler_squad", {
     unitCount = 2,
     perks = {{
         name = "Swarmsurge",
-        description = loc("Whenever any {GREEN_MANA_COLOR}Green unit{/GREEN_MANA_COLOR} dies, this unit summons a Pest."),
+        description = loc("Whenever any {GREEN_MANA_COLOR}Green unit{/GREEN_MANA_COLOR} dies, this unit summons a {GREEN_MANA_COLOR}Pest{/GREEN_MANA_COLOR}."),
         image = "coin_icon",
         rawHandlers = {
             entityDeath = function(self, ent, killer)
@@ -490,7 +488,6 @@ g.defineSquad("living_forest_squad", {
         image = "livingforest_body", -- TODO: Animate legs with `livingforest_legs`.
         physics = { shape = "circle", radius = 7, ox = 0, oy = 0, mass = 2 },
         attack = { attackType = "melee" },
-        weapon = { image = "militia_sword", type = "sword" },
         baseAttackDamage = 1,
         baseAttackSpeed = 0.8,
         baseAttackRange = 22,

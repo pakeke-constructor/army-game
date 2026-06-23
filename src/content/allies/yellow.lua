@@ -15,6 +15,7 @@ g.defineSquad("exo_soldier_squad", {
         weapon = {
             image = "exosoldiers_arm",
             type = "sword",
+            xOffset = 5
         },
         baseAttackDamage = 1,
         baseAttackSpeed = 1.5,
