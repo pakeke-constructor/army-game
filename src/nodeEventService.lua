@@ -217,7 +217,8 @@ local function drawChoiceButton(reg, txt, font)
         lg.setColor(1,1,1)
     end
     ui.drawDarkPanel(reg:get())
-    richtext.printRichContained(txt, font, reg:padRatio(0.1):get())
+    local x,y,w,h = reg:padRatio(0.1):get()
+    richtext.printRichContained(txt, font, x,y,w,h, 1)
     return iml.wasJustClicked(reg:get())
 end
 
@@ -234,7 +235,8 @@ local function drawButtonWithImage(reg, txt, image, font)
     lg.setColor(1,1,1)
     g.drawImage(image, iconR:getCenter())
 
-    richtext.printRichContained(txt, font, txtR:padRatio(0.1):get())
+    local x,y,w,h = txtR:padRatio(0.1):get()
+    richtext.printRichContained(txt, font, x,y,w,h, 1)
     return iml.wasJustClicked(reg:get())
 end
 
@@ -245,7 +247,9 @@ local function beginPopup(txt)
     local window = drawBasicWindow():padRatio(0.2)
     local font = g.getSmallFont(16)
     local txtR, buttonsR = window:splitVertical(2,1)
-    richtext.printRichContained(txt, font, txtR:padRatio(0.2):get())
+
+    local x,y,w,h = txtR:padRatio(0.2):get()
+    richtext.printRichContained(txt, font, x,y,w,h, 1)
     return buttonsR, font
 end
 
@@ -340,7 +344,8 @@ local function drawRandomEvent(ev)
 
     local font = g.getSmallFont(16)
     local txtR, buttonsR = window:splitVertical(2,1)
-    richtext.printRichContained(ev.text, font, txtR:padRatio(0.3):get())
+    local x,y,w,h = txtR:padRatio(0.3):get()
+    richtext.printRichContained(ev.text, font, x,y,w,h, 1)
 
     local N = 4
     local buttons = buttonsR:grid(1, N)
@@ -358,7 +363,8 @@ local function drawRandomEvent(ev)
             lg.setColor(1,1,1)
         end
         ui.drawDarkPanel(reg:get())
-        richtext.printRichContained(txt, font, txtReg:get())
+        local x,y,w,h = txtReg:get()
+        richtext.printRichContained(txt, font, x,y,w,h, 1)
         if iml.wasJustClicked(reg:get()) then
             func(ev)
         end
