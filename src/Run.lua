@@ -66,6 +66,8 @@ end
 function Run:resetForBattle()
     for _, squad in pairs(self.squads) do
         squad.deployed = false -- reset squads
+        squad.deployDxFromCommander = nil
+        squad.deployDyFromCommander = nil
     end
 
     -- clear temporary fight-only bench squads

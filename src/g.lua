@@ -1136,6 +1136,17 @@ local DEPLOY_ANIMATION_STEP = 0.2
 ---@param y number
 ---@return ecs.Entity[]
 function g.spawnSquad(squad, x, y, ...)
+    local scene = g.getCurrentScene()
+    local commander = scene and scene.commander
+    local commx, commy = x, y
+    if commander and g.isAlive(commander) then
+        commx = commander.x
+        commy = commander.y
+        if commander.image then
+            local _, h = g.getImageSize(commander.image)
+            commy = commy - h / 2
+        end
+    end
     local info = assert(SQUAD_DEFS[squad.squadId], "Unknown squad: " .. tostring(squad.squadId))
     local squadScope = g.newScope()
     squadScope.shared = true
@@ -1167,6 +1178,13 @@ function g.spawnSquad(squad, x, y, ...)
             end
             entities[i] = ent
         end, ...)
+    end
+    squad.deployDxFromCommander = x - commx
+    squad.deployDyFromCommander = y - commy
+    for i = 1, #entities do
+        local ent = entities[i]
+        ent.deployDxFromCommander = ent.x - commx
+        ent.deployDyFromCommander = ent.y - commy
     end
     if info.onDeploySquad then
         info.onDeploySquad(info, entities)

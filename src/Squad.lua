@@ -21,6 +21,8 @@ local objects = require("src.modules.objects.objects")
 ---@field deployed boolean?
 ---@field canAfford boolean?
 ---@field leader g.Squad.Leader? the squad marches toward this as a group
+---@field deployDxFromCommander number?
+---@field deployDyFromCommander number?
 local Squad = objects.Class("g:Squad")
 
 
@@ -95,6 +97,8 @@ function Squad:init(squadId, def)
     self.statBuffs = {}
     self.formation = "square"
     self.deployed = false
+    self.deployDxFromCommander = nil
+    self.deployDyFromCommander = nil
     self.icon = nil
 end
 
@@ -131,6 +135,8 @@ function Squad:serialize()
         perks = self.perks,
         statBuffs = self.statBuffs,
         formation = self.formation,
+        deployDxFromCommander = self.deployDxFromCommander,
+        deployDyFromCommander = self.deployDyFromCommander,
     }
 end
 
@@ -143,6 +149,8 @@ function Squad.deserialize(data)
     sq.perks = data.perks or {}
     sq.statBuffs = data.statBuffs or {}
     sq.formation = data.formation or "square"
+    sq.deployDxFromCommander = data.deployDxFromCommander
+    sq.deployDyFromCommander = data.deployDyFromCommander
     return sq
 end
 
