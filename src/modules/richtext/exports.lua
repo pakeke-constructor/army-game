@@ -196,12 +196,13 @@ end
 ---@param w number
 ---@param h number
 ---@param maxScale number? Optional cap on how large the text may be scaled up
-function text.printRichContained(txt, font, x,y,w,h, maxScale)
+---@param align love.AlignMode? (defaults to left)
+function text.printRichContained(txt, font, x,y,w,h, maxScale, align)
     local parsed = ensureParsed(txt)
     local scale, tw, th = getContainedScale(parsed, font, w, h, maxScale)
     local drawX, drawY = math.floor(x+w/2), math.floor(y+h/2)
 
-    return text.printRich(parsed, font, drawX, drawY, tw, "left", 0, scale, scale, tw / 2, th / 2)
+    return text.printRich(parsed, font, drawX, drawY, tw, align or "left", 0, scale, scale, tw / 2, th / 2)
 end
 
 
