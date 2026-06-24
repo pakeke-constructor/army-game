@@ -150,6 +150,7 @@ function map_scene:enter()
     self.dragging = false
     self.commanderFacing = 1
     self.gallop = 0
+    self.traveling = nil
 
     local run = g.getRun()
     if not run.mapGraph then
@@ -368,8 +369,16 @@ function map_scene:update(dt)
         if trav.t >= 1 then
             local graph = g.getRun().mapGraph
             graph:setPlayerPosition(trav.toNode.x, trav.toNode.y)
-            self.traveling = nil
             enterNode(trav.toNode)
+            -- Continue through intermediate nodes, unless the node we just
+            -- arrived at opened a popup / scene-transition (eg battle, shop).
+            local hasMore = trav.index + 1 < #trav.path
+            if hasMore and not fadeToBlackService.isAnimating() and not g.isAnyPopupOpen() then
+                trav.index = trav.index + 1
+                self:_startTravelLeg(graph)
+            else
+                self.traveling = nil
+            end
             return
         end
     end
@@ -403,16 +412,26 @@ function map_scene:travelTo(graph, pnode, hovered)
     if self.traveling or hovered == pnode then return end
     local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, PATH_SEARCH_DEPTH)
     if not (path and #path >= 2) then return end
-    local ax, ay = graph:getDrawPos(path[1])
-    local bx, by = graph:getDrawPos(path[2])
+    -- index = the leg currently being walked; toNode is path[index + 1].
+    self.traveling = { path = path, index = 1 }
+    self:_startTravelLeg(graph)
+end
+
+--- (Re)start the current leg of self.traveling (from path[index] to path[index+1]).
+---@param graph MapGraph
+function map_scene:_startTravelLeg(graph)
+    local trav = self.traveling
+    local fromNode = trav.path[trav.index]
+    local toNode = trav.path[trav.index + 1]
+    local ax, ay = graph:getDrawPos(fromNode)
+    local bx, by = graph:getDrawPos(toNode)
     local dist = math.sqrt((bx - ax) ^ 2 + (by - ay) ^ 2)
     if bx < ax then self.commanderFacing = -1 end
     if bx > ax then self.commanderFacing = 1 end
-    self.traveling = {
-        toNode = path[2],
-        ax = ax, ay = ay, bx = bx, by = by,
-        t = 0, speed = dist > 0 and (COMMANDER_SPEED / dist) or 1,
-    }
+    trav.toNode = toNode
+    trav.ax, trav.ay, trav.bx, trav.by = ax, ay, bx, by
+    trav.t = 0
+    trav.speed = dist > 0 and (COMMANDER_SPEED / dist) or 1
 end
 
 function map_scene:mousepressed(mx, my, button)

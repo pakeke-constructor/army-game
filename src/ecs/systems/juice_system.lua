@@ -166,7 +166,12 @@ function juice_system.entityDeath(ent, killer)
     end
 end
 
+
+
 local HEALING_TEXT = g.snapToPalette(objects.Color("FF2BC66E"))
+
+local DURATION_05 = {duration=0.3}
+
 
 ---@param unitEnt ecs.Entity
 ---@param addHealth number
@@ -185,13 +190,11 @@ function juice_system.entityHealed(unitEnt, addHealth)
     g.addWorldTextPopup(
         unitEnt.x, unitEnt.y + offy,
         healText.."{health}",
-        {duration = 1}
+        DURATION_05
     )
 end
 
 
-
-local DURATION_05 = {duration=0.5}
 
 ---@param ent ecs.Entity
 ---@param stat string
@@ -211,6 +214,7 @@ function juice_system.entityBuffed(ent, stat, increase)
         DURATION_05
     )
 end
+
 
 function juice_system.explosion(x, y, damage, radius)
     juiceService.addCameraShake(math.min(0.6, 0.2 + (radius or 60) / 300))

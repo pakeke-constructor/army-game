@@ -50,6 +50,10 @@ function fadeToBlackService.fadeToFromBlack(fadeInDur, whenDone, fadeOutDur)
     end)
 end
 
+function fadeToBlackService.isAnimating()
+    return animating
+end
+
 function fadeToBlackService.update(dt)
     if not animating then return end
 

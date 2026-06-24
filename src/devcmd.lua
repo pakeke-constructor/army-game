@@ -88,6 +88,14 @@ COMMANDS.gold = function(args)
     addLog("gold -> " .. run.money)
 end
 
+COMMANDS.xp = function(args)
+    local amt = tonumber(args[1])
+    if not amt then return addLog("usage: /xp <amount>") end
+    g.addXP(amt)
+    local run = g.getRun()
+    addLog("xp -> " .. run.xp)
+end
+
 COMMANDS.tp = function()
     local scene, name = g.getCurrentScene()
     if name ~= "map_scene" then return addLog("/tp only works in map scene") end
