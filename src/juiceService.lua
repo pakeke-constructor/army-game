@@ -12,6 +12,7 @@ local PAUSE_FATIGUE_PER_SEC = 8 -- how much fatigue 1s of pause adds
 
 local ARC_SPEED = 360 -- pixels/sec
 local ARC_HEIGHT = 0.1 -- arc lift as fraction of travel distance
+local MAX_ARCS = 40 -- cap active arcs to prevent lag
 
 local trauma = 0
 local shakeT = 0
@@ -58,6 +59,9 @@ end
 
 
 function juiceService.spawnArc(color, x, y, targetX, targetY, targetEnt, onComplete)
+    if #arcs >= MAX_ARCS then
+        return false
+    end
     arcs[#arcs + 1] = {
         color = color,
         x = x,
@@ -71,6 +75,7 @@ function juiceService.spawnArc(color, x, y, targetX, targetY, targetEnt, onCompl
         t = 0,
         rot = math.atan2(targetY - y, targetX - x),
     }
+    return true
 end
 
 

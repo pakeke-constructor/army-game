@@ -189,6 +189,10 @@ function juice_system.entityHealed(unitEnt, addHealth)
     )
 end
 
+
+
+local DURATION_05 = {duration=0.5}
+
 ---@param ent ecs.Entity
 ---@param stat string
 ---@param increase number
@@ -204,7 +208,7 @@ function juice_system.entityBuffed(ent, stat, increase)
     g.addWorldTextPopup(
         ent.x, ent.y + offy,
         text.."{"..statInfo.icon.."}",
-        {duration = 1}
+        DURATION_05
     )
 end
 

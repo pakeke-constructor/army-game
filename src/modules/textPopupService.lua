@@ -10,13 +10,16 @@ local popups = {}
 ---@field duration number?
 ---@field fadeIn number?
 
+
+local EMPTY = {}
+
 -- x,y are screen coords
 ---@param x number
 ---@param y number
 ---@param richtxt any
 ---@param args textPopupService.args?
 function textPopups.addPopup(x, y, richtxt, args)
-    args = args or {}
+    args = args or EMPTY
     popups[#popups+1] = {
         x = x,
         y = y,
