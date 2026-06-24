@@ -82,6 +82,7 @@ function EnemySpawner:_spawnSquad(squad, cx, cy)
         local y = cy + (row - (rows - 1) / 2) * SPACING
         x, y = self._ecs:clampToShape(x, y)
         local ent = g.spawnEntity(squad.id, x, y)
+        ent.faceDir = -1
         ent.patrolX, ent.patrolY = x, y
     end
 end
