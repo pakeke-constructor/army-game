@@ -64,6 +64,8 @@ local Entity = require("src.ecs.Entity")
 local bgm = require("src.sound.bgm")
 local sfx = require("src.sound.sfx")
 
+local juiceService = require("src.juiceService")
+
 
 
 local postLoadCallbacks = {}
@@ -3127,11 +3129,16 @@ end
 ---@param ent ecs.Entity
 ---@param stat string
 ---@param increase number
-function g.buffEntity(ent, stat, increase)
+---@param fromEnt ecs.Entity?
+function g.buffEntity(ent, stat, increase, fromEnt)
     assert(STAT_DEFS[stat], "unknown stat: " .. tostring(stat))
     ent.buffs = ent.buffs or {}
     ent.buffs[stat] = (ent.buffs[stat] or 0) + increase
     g.call("entityBuffed", ent, stat, increase)
+    if fromEnt and fromEnt ~= ent then
+        local color = STAT_DEFS[stat].color
+        juiceService.spawnArc(color, fromEnt.x, fromEnt.y, ent.x, ent.y, ent)
+    end
 end
 
 ---@param id string
