@@ -76,6 +76,7 @@ function ChoicePanel:_rollChoices()
     elseif self.rType == "mana" then
         for manaType in pairs(manaCells) do
             if manaType ~= g.WILDCARD_MANA then
+                -- FIXME: Sonehow limit this to 3 maybe in the future?
                 self.choices[#self.choices + 1] = manaType
             end
         end
@@ -145,7 +146,7 @@ function ChoicePanel:draw()
     if self.rType == "mana" then
         cardArea = r:padRatio(0.3, 0.35)
     end
-    local regions = cardArea:grid(#self.choices, 1)
+    local regions = cardArea:grid(NUM_CHOICES, 1)
     local elapsed = love.timer.getTime() - self.createdAt
     local t = math.min(1, math.max(0, elapsed / FAN_OUT_DURATION))
     t = t * t * (3 - 2 * t)
@@ -153,7 +154,9 @@ function ChoicePanel:draw()
     local cy = cardArea.y + cardArea.h / 2
     local scale = 0.5 + 0.5 * t
 
-    for i,rr in ipairs(regions) do
+    local ox = regions[1].w * (NUM_CHOICES - #self.choices) / 2
+    for i = 1, #self.choices do
+        local rr = regions[i]
         rr = rr:padRatio(0.15)
         if self.rType == "mana" then
             rr = rr:padRatio(0.3)
@@ -168,12 +171,11 @@ function ChoicePanel:draw()
         local dx = animCx - targetCx
         local dy = animCy - targetCy
         rr = rr:padRatio(1 - scale)
-        regions[i] = rr:moveUnit(dx, dy)
+        regions[i] = rr:moveUnit(dx + ox, dy)
     end
 
     if self.rType == "squad" or self.rType == "upgrade_squad" then
-        for i = 1, #regions do
-            local squadId = self.choices[i]
+        for i, squadId in ipairs(self.choices) do
             local isUpgrade = not not g.getSquadFromArmy(squadId)
             local clicked = ui.drawSquadCard(squadId, regions[i], i, isUpgrade)
             if clicked then
@@ -182,8 +184,7 @@ function ChoicePanel:draw()
             end
         end
     elseif self.rType == "blessing" then
-        for i = 1, #regions do
-            local blessId = self.choices[i]
+        for i, blessId in ipairs(self.choices) do
             local clicked = ui.drawBlessingCard(blessId, regions[i], i)
             if clicked then
                 g.addBlessing(blessId)
@@ -191,8 +192,7 @@ function ChoicePanel:draw()
             end
         end
     elseif self.rType == "mana" then
-        for i = 1, #regions do
-            local manaType = self.choices[i]
+        for i, manaType in ipairs(self.choices) do
             if drawManaCard(manaType, regions[i], i) then
                 g.addPermanentMana(manaType)
                 return true
