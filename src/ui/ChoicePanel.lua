@@ -46,7 +46,7 @@ local FAN_OUT_DURATION = 0.11
 local REROLL_TXT = interp("Reroll (%{n})")
 
 
----@param rType "squad"|"blessing"|"mana"|"upgrade_squad"
+---@param rType "squad"|"blessing"|"mana"|"upgrade_squad"|"mana_blessing"
 ---@param rerolls integer?
 ---@param rarityWeights g.RarityWeights?
 function ChoicePanel:init(rType, rerolls, rarityWeights)
@@ -80,6 +80,44 @@ function ChoicePanel:_rollChoices()
                 self.choices[#self.choices + 1] = manaType
             end
         end
+    elseif self.rType == "mana_blessing" then
+        local manaPool = {}
+        for manaType in pairs(manaCells) do
+            if manaType ~= g.WILDCARD_MANA then
+                manaPool[#manaPool + 1] = manaType
+            end
+        end
+
+        local seenBlessings = helper.shallowCopy(g.getRun().blessings)
+        for _ = 1, NUM_CHOICES do
+            if #manaPool == 0 then
+                break
+            end
+
+            local manaType = table.remove(manaPool, love.math.random(#manaPool))
+            local blessingPool = g.getBlessingsByMana({ [manaType] = 1 })
+            local blessingId = nil
+            if #blessingPool > 0 then
+                local blessingWeights = {}
+                for i = 1, #blessingPool do
+                    blessingWeights[i] = 1
+                end
+                local picker = newPicker(blessingPool, blessingWeights)
+                blessingId = picker:pick()
+                for _ = 1, 20 do
+                    if not seenBlessings[blessingId] then break end
+                    blessingId = picker:pick()
+                end
+            end
+
+            if blessingId and not seenBlessings[blessingId] then
+                seenBlessings[blessingId] = true
+                self.choices[#self.choices + 1] = {
+                    mana = manaType,
+                    blessing = blessingId,
+                }
+            end
+        end
     elseif self.rType == "upgrade_squad" then
         local pool = {}
         for k in pairs(g.getRun().squads) do
@@ -104,9 +142,14 @@ end
 
 ---@param pool string[]
 ---@param getInfo fun(id:string):{rarity:g.Rarity}
+---@param out string[]?
+---@param count integer?
 ---@private
-function ChoicePanel:_pickFromPool(pool, getInfo)
+function ChoicePanel:_pickFromPool(pool, getInfo, out, count)
     if #pool == 0 then return end
+    out = out or self.choices
+    count = count or NUM_CHOICES
+
     local weights = {}
     for i, id in ipairs(pool) do
         local info = getInfo(id)
@@ -115,7 +158,7 @@ function ChoicePanel:_pickFromPool(pool, getInfo)
     local picker = newPicker(pool, weights)
     ---@type table<string, true?>
     local seen = helper.shallowCopy(g.getRun().blessings)
-    for _ = 1, NUM_CHOICES do
+    for _ = 1, count do
         local pick = picker:pick()
         -- avoid duplicates; try a few times
         for _ = 1, 20 do
@@ -123,7 +166,7 @@ function ChoicePanel:_pickFromPool(pool, getInfo)
             pick = picker:pick()
         end
         seen[pick] = true
-        self.choices[#self.choices + 1] = pick
+        out[#out + 1] = pick
     end
 end
 
@@ -145,6 +188,8 @@ function ChoicePanel:draw()
     cardArea = cardArea:padRatio(0.05, 0.1)
     if self.rType == "mana" then
         cardArea = r:padRatio(0.3, 0.35)
+    elseif self.rType == "mana_blessing" then
+        cardArea = cardArea:padRatio(0.03, 0.02)
     end
     local regions = cardArea:grid(NUM_CHOICES, 1)
     local elapsed = love.timer.getTime() - self.createdAt
@@ -163,6 +208,8 @@ function ChoicePanel:draw()
             rr = rr:shrinkToAspectRatio(1,1)
         elseif self.rType == "blessing" then
             rr = rr:shrinkToAspectRatio(3, 2)
+        elseif self.rType == "mana_blessing" then
+            rr = rr:shrinkToAspectRatio(3, 4)
         end
         local targetCx = rr.x + rr.w / 2
         local targetCy = rr.y + rr.h / 2
@@ -194,6 +241,17 @@ function ChoicePanel:draw()
         for i, manaType in ipairs(self.choices) do
             if drawManaCard(manaType, regions[i], i) then
                 g.addPermanentMana(manaType)
+                return true
+            end
+        end
+    elseif self.rType == "mana_blessing" then
+        for i, pair in ipairs(self.choices) do
+            local top, botR = regions[i]:splitVertical(3, 8)
+            local clickedBlessing = ui.drawBlessingCard(pair.blessing, top:padRatio(0.02), i)
+            local clickedMana = drawManaCard(pair.mana, botR:padRatio(0.25), i)
+            if clickedBlessing or clickedMana then
+                g.addBlessing(pair.blessing)
+                g.addPermanentMana(pair.mana)
                 return true
             end
         end

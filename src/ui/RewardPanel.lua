@@ -10,6 +10,7 @@ local RewardPanel = objects.Class("g:RewardPanel")
 ---@field randomSquad boolean?
 ---@field randomBlessing boolean?
 ---@field randomMana boolean?
+---@field randomManaBlessing boolean?
 
 
 
@@ -22,13 +23,14 @@ function RewardPanel:init(typ, args)
     self.randomSquad = args.randomSquad
     self.randomBlessing = args.randomBlessing
     self.randomMana = args.randomMana
+    self.randomManaBlessing = args.randomManaBlessing
 end
 
 
 
 ---@return boolean
 function RewardPanel:hasAnyRewards()
-    return not not (self.gold or self.xp or self.randomBlessing or self.randomSquad or self.randomMana)
+    return not not (self.gold or self.xp or self.randomBlessing or self.randomSquad or self.randomMana or self.randomManaBlessing)
 end
 
 
@@ -56,6 +58,8 @@ local NEW_SQUAD =  "{recruit_icon} ".. colStr .. loc("Recruit new troops!")
 local NEW_BLESSING = "{blessing_icon} " ..colStr .. loc("Get random Blessing!")
 
 local NEW_MANA =  "{mana_colorless_large} " .. colStr .. loc("Gain a Mana crystal!")
+
+local MANA_AND_BLESSING = "{mana_colorless_large} {blessing_icon} " .. colStr .. loc("Choose Mana + Blessing!")
 
 
 
@@ -144,6 +148,13 @@ function RewardPanel:draw()
         addBar(NEW_BLESSING, function()
             choicePopupService.set("blessing")
             self.randomBlessing = nil
+        end)
+    end
+
+    if self.randomManaBlessing then
+        addBar(MANA_AND_BLESSING, function()
+            choicePopupService.set("mana_blessing")
+            self.randomManaBlessing = nil
         end)
     end
 
