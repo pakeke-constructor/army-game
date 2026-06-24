@@ -122,12 +122,15 @@ local function drawBlessingCard(blessingId, region, index)
     })
 
     -- Description
-    box:addText("{c r=0.85 g=0.85 b=0.9}" .. info.description, DESC_FONT)
-
-    -- Spacer to fill remaining height so card is always full region height.
     box:addFill({
         getHeight = function() return 0 end,
-        draw = function() end,
+        draw = function(ex, ey, ew, eh)
+            richtext.printRichContained(
+                "{c r=0.85 g=0.85 b=0.9}" .. info.description,
+                DESC_FONT,
+                ex, ey, ew, eh, 1, "center"
+            )
+        end,
     })
 
     local ww,hh = box:render(x, y)
