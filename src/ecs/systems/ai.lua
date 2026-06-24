@@ -60,12 +60,6 @@ local function zero(ent, c)
     return 0
 end
 
----@param c ecs.Entity
-local function missingHealthPriority(ent, c)
-    local maxHealth = c.maxHealth or c.health or 0
-    local missing = maxHealth - (c.health or 0)
-    return math.max(0, missing)
-end
 
 local function nextRetargetDelay()
     return helper.lerp(RETARGET_MIN, RETARGET_MAX, love.math.random())
@@ -75,20 +69,42 @@ end
 ---@param ent ecs.Entity
 ---@param candidates ecs.Entity[]
 local function pickTarget(ent, candidates)
-    local best, bestScore = nil, -math.huge
     local ai = assert(ent.ai)
+
+    -- healers: prioritize healing the frontline. Heavily weight melee allies,
+    -- and never target buildings. If anyone is hurt, target the most-hurt
+    -- (weighted to melee); otherwise target the melee ally with the most health.
+    if not ai.getPriority and (ent.healPower or 0) > 0 then
+        local MELEE_WEIGHT = 1000
+        local best, bestScore = nil, -math.huge
+        for i = 1, #candidates do
+            local c = candidates[i]
+            if isValidTarget(c) and c ~= ent and not g.isBuildingType(c:getTypename()) then
+                local maxHealth = c.maxHealth or c.health or 0
+                local missing = math.max(0, maxHealth - (c.health or 0))
+                local isMelee = not g.isRangedUnit(c:getTypename())
+                local score
+                if missing > 0 then
+                    score = missing + (isMelee and MELEE_WEIGHT or 0)
+                else
+                    -- nobody hurt: prefer beefiest melee
+                    score = (c.health or 0) - 1000 + (isMelee and MELEE_WEIGHT or 0)
+                end
+                if score > bestScore then
+                    best, bestScore = c, score
+                end
+            end
+        end
+        return best
+    end
+
+
+    local best, bestScore = nil, -math.huge
     local curTarget = ent._aiTarget
     for i = 1, #candidates do
         local c = candidates[i]
         if isValidTarget(c) and c ~= ent then
-            local getPrio = ai.getPriority
-            if not getPrio then
-                if (ent.healPower or 0) > 0 then
-                    getPrio = missingHealthPriority
-                else
-                    getPrio = zero
-                end
-            end
+            local getPrio = ai.getPriority or zero
             local prio = getPrio(ent, c)
             prio = prio + g.ask("getAITargetPriorityModifier", ent, c)
             -- tiebreak: closer is better (subtract tiny distance factor)
@@ -107,6 +123,7 @@ local function pickTarget(ent, candidates)
     end
     return best
 end
+
 
 -- true if this unit marches as part of a squad (offensive squads only)
 local function followsLeader(ent)

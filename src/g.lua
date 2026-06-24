@@ -1497,6 +1497,7 @@ function g.defineEntity(id, def)
         assert(def[k] == nil, "Entity def '" .. id .. "' cannot override base method: " .. k)
     end
     if def.isBuilding and def.physics then
+        assert((def.baseMoveSpeed or 0) <= 0)
         assert(def.physics.isStatic, "Buildings must have static physics")
     end
     def.type = id
