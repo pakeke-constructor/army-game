@@ -95,22 +95,13 @@ function ChoicePanel:_rollChoices()
             end
 
             local manaType = table.remove(manaPool, love.math.random(#manaPool))
-            local blessingPool = g.getBlessingsByMana({ [manaType] = 1 })
-            local blessingId = nil
-            if #blessingPool > 0 then
-                local blessingWeights = {}
-                for i = 1, #blessingPool do
-                    blessingWeights[i] = 1
-                end
-                local picker = newPicker(blessingPool, blessingWeights)
-                blessingId = picker:pick()
-                for _ = 1, 20 do
-                    if not seenBlessings[blessingId] then break end
-                    blessingId = picker:pick()
-                end
-            end
+            local blessingId = g.getRandomBlessingByMana(
+                { [manaType] = 1 },
+                self.rarityWeights,
+                seenBlessings
+            )
 
-            if blessingId and not seenBlessings[blessingId] then
+            if blessingId then
                 seenBlessings[blessingId] = true
                 self.choices[#self.choices + 1] = {
                     mana = manaType,

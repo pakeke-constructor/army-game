@@ -65,6 +65,7 @@ local bgm = require("src.sound.bgm")
 local sfx = require("src.sound.sfx")
 
 local juiceService = require("src.juiceService")
+local newPicker = require("src.modules.Picker")
 
 
 
@@ -1245,6 +1246,35 @@ function g.getBlessingsByMana(manaCells)
         end
     end
     return result
+end
+
+---@param manaCells g.ManaCounts
+---@param rarityWeights g.RarityWeights?
+---@param seen table<string, true?>?
+---@return string?
+function g.getRandomBlessingByMana(manaCells, rarityWeights, seen)
+    local pool = g.getBlessingsByMana(manaCells)
+    if #pool == 0 then return nil end
+
+    local run = g.getRun()
+    seen = seen or helper.shallowCopy(run and run.blessings or {})
+
+    local weights = {}
+    rarityWeights = rarityWeights or consts.DEFAULT_RARITY_WEIGHTS
+    for i, id in ipairs(pool) do
+        local info = g.getBlessingInfo(id)
+        weights[i] = rarityWeights[info.rarity.id] or 0
+    end
+
+    local picker = newPicker(pool, weights)
+    local pick = picker:pick()
+    for _ = 1, 20 do
+        if not seen[pick] then break end
+        pick = picker:pick()
+    end
+
+    if seen[pick] then return nil end
+    return pick
 end
 
 ---@param id string
