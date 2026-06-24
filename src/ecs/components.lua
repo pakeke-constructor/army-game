@@ -96,6 +96,7 @@ local physics = {
 ---@field public bowRecoil number?
 ---@field public weaponBobbing number?
 ---@field public xOffset number?
+---@field public drawBehind boolean?
 local weapon = {
     image = "militia_sword",
     type = "sword",
@@ -104,6 +105,7 @@ local weapon = {
     bowRecoil = 0.1, -- 10% recoil
     weaponBobbing = 0.1, -- 10% bobbing
     xOffset = 10,
+    drawBehind = false or true,
 }
 
 ---@class ecs.components.Shadow

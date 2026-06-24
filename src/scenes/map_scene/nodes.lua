@@ -38,7 +38,7 @@ local FOUNTAIN_TXT = loc("Fountain: Reduces Demon-Fury")
 
 local SHRINE_TXT = loc("Shrine: Sacrifice Squads to lower Demon-Fury")
 
-local FEAST_TXT = loc("Feast: Obtain XP")
+local FEAST_TXT = loc("Feast: Obtain {xp_icon}")
 
 local CHEST_TXT = loc("Chest: Claim a reward")
 
