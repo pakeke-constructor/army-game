@@ -44,6 +44,8 @@ local ChoicePanel = objects.Class("g:ChoicePanel")
 local NUM_CHOICES = 3
 local FAN_OUT_DURATION = 0.11
 local REROLL_TXT = interp("Reroll (%{n})")
+local LEVELUP_PICK_TXT = loc("Level up! Pick a reward")
+local MANA_PLUS_TXT = loc("+1")
 
 
 ---@param rType "squad"|"blessing"|"mana"|"upgrade_squad"|"mana_blessing"
@@ -180,7 +182,13 @@ function ChoicePanel:draw()
     if self.rType == "mana" then
         cardArea = r:padRatio(0.3, 0.35)
     elseif self.rType == "mana_blessing" then
+        local titleFont = g.getBigFont(16)
+        local titleR
+        titleR, cardArea = cardArea:splitVertical(1,5)
+        lg.setColor(1,1,1)
         cardArea = cardArea:padRatio(0.03, 0.02)
+        titleR = titleR:padRatio(0.4)
+        richtext.printRichContainedNoWrap("{o}{bob}" .. LEVELUP_PICK_TXT, titleFont, titleR:get())
     end
     local regions = cardArea:grid(NUM_CHOICES, 1)
     local elapsed = love.timer.getTime() - self.createdAt
@@ -212,6 +220,20 @@ function ChoicePanel:draw()
         regions[i] = rr:moveUnit(dx + ox, dy)
     end
 
+    if self.rType == "mana_blessing" then
+        lg.setColor(1, 1, 1, 0.8)
+        lg.setLineWidth(4)
+        for i = 1, #self.choices - 1 do
+            local left = regions[i]
+            local right = regions[i + 1]
+            local x = (left.x + left.w + right.x) / 2
+            local y1 = math.min(left.y, right.y)
+            local y2 = math.max(left.y + left.h, right.y + right.h)
+            lg.line(x, y1, x, y2)
+        end
+        lg.setLineWidth(1)
+    end
+
     if self.rType == "squad" or self.rType == "upgrade_squad" then
         for i, squadId in ipairs(self.choices) do
             local clicked = ui.drawSquadCard(squadId, regions[i], i, true)
@@ -237,10 +259,23 @@ function ChoicePanel:draw()
         end
     elseif self.rType == "mana_blessing" then
         for i, pair in ipairs(self.choices) do
-            local top, botR = regions[i]:splitVertical(3, 8)
-            local clickedBlessing = ui.drawBlessingCard(pair.blessing, top:padRatio(0.02), i)
-            local clickedMana = drawManaCard(pair.mana, botR:padRatio(0.25), i)
-            if clickedBlessing or clickedMana then
+            local cardR, infoR = regions[i]:splitVertical(8, 3)
+            local clickedBlessing = ui.drawBlessingCard(pair.blessing, cardR:padRatio(0.02), i)
+
+            local x, y, w, h = infoR:padRatio(0.08):get()
+            local textY = y + h * 0.15
+            local manaFont = g.getBigFont(16)
+            richtext.printRichContainedNoWrap(
+                "{o}" .. MANA_PLUS_TXT .. " {" .. pair.mana .. "}",
+                manaFont,
+                x, textY, w, h * 0.7
+            )
+
+            local clicked = clickedBlessing or iml.wasJustClicked(regions[i]:get())
+            if clicked then
+                if not clickedBlessing then
+                    g.playUISound("ui_click_basic", 1.4, 0.8)
+                end
                 g.addBlessing(pair.blessing)
                 g.addPermanentMana(pair.mana)
                 return true
