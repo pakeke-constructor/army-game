@@ -176,8 +176,7 @@ function ChoicePanel:draw()
 
     if self.rType == "squad" or self.rType == "upgrade_squad" then
         for i, squadId in ipairs(self.choices) do
-            local isUpgrade = not not g.getSquadFromArmy(squadId)
-            local clicked = ui.drawSquadCard(squadId, regions[i], i, isUpgrade)
+            local clicked = ui.drawSquadCard(squadId, regions[i], i, true)
             if clicked then
                 g.addOrUpgradeSquad(squadId)
                 return true
