@@ -163,11 +163,11 @@ end
 local function addDemons(node, builder, x, y)
     if node.demonEncounter then
         local count = node.demonEncounter + 1
-        local baseAngle = hashf(node.id) * math.pi * 2
+        local baseAngle = hashf(node.x, node.y) * math.pi * 2
         for i = 1, count do
             local angle = baseAngle + (i - 1) * (math.pi * 2 / count)
-            local angleOff = (hashf(node.id, i) - 0.5) * 0.4
-            local radiusMul = 0.85 + hashf(node.id, i, 1) * 0.3
+            local angleOff = (hashf(node.x, node.y, i) - 0.5) * 0.4
+            local radiusMul = 0.85 + hashf(node.x, node.y, i, 1) * 0.3
             if count == 1 then
                 radiusMul = radiusMul * 0.3
             elseif count == 2 then

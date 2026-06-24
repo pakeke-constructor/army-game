@@ -39,8 +39,16 @@ function DecorBuilder:addDrawable(x, y, func, drawOrder)
 end
 
 function DecorBuilder:finalize()
+    for i, it in ipairs(self.items) do
+        it._order = i
+    end
     table.sort(self.items, function(a, b)
-        return ((a.drawOrder or 0) + a.y) < ((b.drawOrder or 0) + b.y)
+        local ka = (a.drawOrder or 0) + a.y
+        local kb = (b.drawOrder or 0) + b.y
+        if ka == kb then
+            return a._order < b._order
+        end
+        return ka < kb
     end)
     for _, it in ipairs(self.items) do
         local col = gsman.setColor(1, 1, 1, it.opacity)

@@ -208,7 +208,7 @@ function ChoicePanel:draw()
         elseif self.rType == "blessing" then
             rr = rr:shrinkToAspectRatio(3, 2)
         elseif self.rType == "mana_blessing" then
-            rr = rr:shrinkToAspectRatio(3, 4)
+            rr = rr:shrinkToAspectRatio(1,1)
         end
         local targetCx = rr.x + rr.w / 2
         local targetCy = rr.y + rr.h / 2
