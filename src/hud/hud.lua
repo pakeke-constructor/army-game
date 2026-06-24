@@ -21,8 +21,8 @@ local LOC_DAYS = interp("%{n} days until {c r=1 g=0.3 b=0.3}attack", {context="H
 local LOC_ZONE = loc("Zone 1 - Forest", {}, {context="HUD top bar, current zone name. Hardcoded stub"})
 local LOC_PAUSE = loc("II", {}, {context="HUD top bar, pause button icon text"})
 
-local LOC_HOVER_RAGE = interp("+%{pct}% demon damage, +%{pct}% demon health!", {context="Tooltip when hovering demon rage in HUD"})
-local LOC_HOVER_RAGE_ZERO = loc("demon-rage increases whenever you win a battle. The higher the demon-rage, the stronger the enemies", {}, {context="Tooltip when hovering demon rage in HUD when rage is zero"})
+local LOC_HOVER_FURY = interp("+%{pct}% demon damage, +%{pct}% demon health!", {context="Tooltip when hovering Demon Fury in HUD"})
+local LOC_HOVER_FURY_ZERO = loc("Demon Fury increases whenever you win a battle. The higher the Demon Fury, the stronger the enemies", {}, {context="Tooltip when hovering Demon Fury in HUD when fury is zero"})
 local LOC_HOVER_GOLD = loc("Gold is used to buy items and upgrades at shops.", {}, {context="Tooltip when hovering gold in HUD"})
 local LOC_HOVER_DAYS = loc("Days remaining until the next Incursion!", {}, {context="Tooltip when hovering days-till-incursion in HUD. After X number of days, players will be forced to fight a 'boss'"})
 local LOC_HOVER_MANA = loc(" mana is used to deploy squads in battle.", {}, {context="Tooltip when hovering normal mana in HUD. Prefixed with hovered mana type icon/text at runtime."})
@@ -270,11 +270,11 @@ local function drawTopBar()
     local r = ui.getScreenRegion()
     local topBar, mainBar = r:splitVertical(0.1,0.9)
 
-    local xp, demonRage, gold, keys, daysTillIncursion, zoneString, pausePanel = topBar:splitHorizontal(4, 2,2,2, 4,4,1)
+    local xp, demonFury, gold, keys, daysTillIncursion, zoneString, pausePanel = topBar:splitHorizontal(4, 2,2,2, 4,4,1)
     --[[
     each of these ^^^ are panels.
 
-    demonRage: shows current demon-rage. When hovered, explains what demonRage is (use hoverService) 
+    demonFury: shows current Demon Fury. When hovered, explains what Demon Fury is (use hoverService) 
     gold: shows gold-text. When hovered, simple explanation explains what gold is (used to buy stuff)
     days till incursion: shows text. When hovered, simple explanation explains stuff about incursion (TODO; stub for now)
         - {day_icon} {white}20{/white}{gray} days until {/gray}{red}attack{/red}
@@ -306,8 +306,8 @@ local function drawTopBar()
 
     drawXpBar(xp)
 
-    local rageHover = run.demonRage <= 0 and LOC_HOVER_RAGE_ZERO or LOC_HOVER_RAGE({pct = run.demonRage * 10})
-    drawPanel(demonRage, "{demonfury_icon}{c r=0.6 g=0.1 b=0}  " .. tostring(run.demonRage), rageHover)
+    local furyHover = run.demonFury <= 0 and LOC_HOVER_FURY_ZERO or LOC_HOVER_FURY({pct = run.demonFury * 10})
+    drawPanel(demonFury, "{demonfury_icon}{c r=0.6 g=0.1 b=0}  " .. tostring(run.demonFury), furyHover)
     drawPanel(gold, "{coin_icon} {GOLD_COLOR}" .. tostring(run.money), LOC_HOVER_GOLD)
 
     local hasKeys = (run.keys or 0) > 0

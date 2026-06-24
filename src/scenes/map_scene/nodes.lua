@@ -34,9 +34,9 @@ local BATTLE_TXTS = {
 
 local EVENT_TXT = loc("Random event!")
 
-local FOUNTAIN_TXT = loc("Fountain: Reduces Demon-Fury")
+local FOUNTAIN_TXT = loc("Fountain: Reduces Demon Fury")
 
-local SHRINE_TXT = loc("Shrine: Sacrifice Squads to lower Demon-Fury")
+local SHRINE_TXT = loc("Shrine: Sacrifice Squads to lower Demon Fury")
 
 local FEAST_TXT = loc("Feast: Obtain {xp_icon}")
 

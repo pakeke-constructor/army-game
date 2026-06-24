@@ -170,12 +170,12 @@ g.defineBlessing("valuable_lesson", "Valuable Lesson", {
 })
 
 g.defineBlessing("grace", "Grace", {
-    description = loc("Reduce demon-rage by 2."),
+    description = loc("Reduce Demon Fury by 2."),
     image = "blessing_grace",
     rarity = g.RARITIES.COMMON,
     onAdd = function()
         local run = g.getRun()
-        run.demonRage = math.max(0, run.demonRage - 2)
+        run.demonFury = math.max(0, run.demonFury - 2)
     end,
 })
 

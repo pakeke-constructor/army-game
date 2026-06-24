@@ -15,7 +15,7 @@ local MapGraph = require("src.scenes.map_scene.MapGraph")
 ---@field _battleMana g.ManaCounts
 ---@field blessings {[string]: any}
 ---@field day integer
----@field demonRage integer
+---@field demonFury integer
 ---@field mapGraph MapGraph
 ---@field lastArmyLayout {squadId:string, dx:number, dy:number}[]?
 local Run = objects.Class("g:Run")
@@ -35,7 +35,7 @@ function Run:init()
     self.mana = {}
     self.blessings = {}
     self.day = 1
-    self.demonRage = 0
+    self.demonFury = 0
     self._battleWon = false
     self.mapGraph = nil
     self.lastArmyLayout = nil
@@ -101,12 +101,12 @@ function Run:winBattle()
 
     self._battleSquads = {}
     self._sortedSquads = nil
-    self.demonRage = self.demonRage + 1
+    self.demonFury = self.demonFury + 1
     g.call("battleWon")
 end
 
 
----@return {squads: table[], level: integer, xp: integer, money: number, mana: g.ManaCounts, _battleMana: g.ManaCounts, blessings: {[string]: any}, day: integer, demonRage: integer, mapGraph: table?}
+---@return {squads: table[], level: integer, xp: integer, money: number, mana: g.ManaCounts, _battleMana: g.ManaCounts, blessings: {[string]: any}, day: integer, demonFury: integer, mapGraph: table?}
 function Run:serialize()
     local squads = {}
     for id, sq in pairs(self.squads) do
@@ -122,13 +122,13 @@ function Run:serialize()
         _battleMana = self._battleMana,
         blessings = self.blessings,
         day = self.day,
-        demonRage = self.demonRage,
+        demonFury = self.demonFury,
         mapGraph = self.mapGraph and self.mapGraph:serialize(),
         lastArmyLayout = self.lastArmyLayout,
     }
 end
 
----@param data {squads: table[]?, level: integer?, xp: integer?, money: number?, mana: g.ManaCounts?, _battleMana: g.ManaCounts?, blessings: {[string]: any}?, day: integer?, demonRage: integer?, mapGraph: table?, keys:integer?, key:boolean?}?
+---@param data {squads: table[]?, level: integer?, xp: integer?, money: number?, mana: g.ManaCounts?, _battleMana: g.ManaCounts?, blessings: {[string]: any}?, day: integer?, demonFury: integer?, mapGraph: table?, keys:integer?, key:boolean?}?
 ---@return g.Run
 function Run.deserialize(data)
     local run = Run()
@@ -151,7 +151,7 @@ function Run.deserialize(data)
     run._battleMana = data._battleMana or {}
     run.blessings = data.blessings or {}
     run.day = data.day or run.day
-    run.demonRage = data.demonRage or run.demonRage
+    run.demonFury = data.demonFury or run.demonFury
     run.mapGraph = data.mapGraph and MapGraph.deserialize(data.mapGraph)
     run.lastArmyLayout = data.lastArmyLayout
     return run

@@ -83,17 +83,17 @@ function battle_scene:pollHandlers()
     self.ecs:addSystemHandlers()
     g.addBlessingAndEntityHandlers()
 
-    local rageMul = 1 + (g.getRun().demonRage or 0) * 0.1
+    local furyMul = 1 + (g.getRun().demonFury or 0) * 0.1
     g.addHandler({
         getAttackDamageMultiplier = function(ent)
             if ent and ent.team == "enemy" then
-                return rageMul
+                return furyMul
             end
             return 1
         end,
         getMaxHealthMultiplier = function(ent)
             if ent and ent.team == "enemy" then
-                return rageMul
+                return furyMul
             end
             return 1
         end,

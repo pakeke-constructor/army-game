@@ -92,14 +92,14 @@ end
 
 
 local SHRINE_TXT = loc("A bloodstained shrine hums. Offer a squad for coin and calmer demons, or empower your army.")
-local SHRINE_SACRIFICE = interp("Sacrifice %{squadName}.\n(-3 demon-rage)", {
+local SHRINE_SACRIFICE = interp("Sacrifice %{squadName}.\n(-3 Demon Fury)", {
     context = "Shrine popup option text. %{squadName} is exact squad that will be removed"
 })
 local SHRINE_NO_SAC = loc("No squad to sacrifice.")
 local SHRINE_UPGRADE = loc("Upgrade a squad.")
 
 local FOUNTAIN_TXT = loc("A serene fountain bubbles before you. Drink, and choose its gift.")
-local FOUNTAIN_RAGE = loc("Calm the demons.\n(Reduce demon-rage)")
+local FOUNTAIN_FURY = loc("Calm the demons.\n(Reduce Demon Fury)")
 local FOUNTAIN_BLESSING = loc("Receive a blessing.")
 
 local FEAST_TXT = loc("A grand feast is laid out for your troops.")
@@ -109,8 +109,8 @@ local PORTAL_TXT = loc("Mysterious Gateway\nTravel to a random node.")
 local PORTAL_ENTER = loc("Enter Portal")
 local PORTAL_LEAVE = loc("Leave")
 
-local SACRIFICE_RAGE_REDUCTION = 3
-local FOUNTAIN_RAGE_REDUCTION = 2
+local SACRIFICE_FURY_REDUCTION = 3
+local FOUNTAIN_FURY_REDUCTION = 2
 local FEAST_XP = 4
 
 local CHEST_TXT = loc("A big chest mmmm.")
@@ -121,9 +121,9 @@ local function closePopup()
     nodeEventService._popupData = nil
 end
 
-local function reduceDemonRage(amount)
+local function reduceDemonFury(amount)
     local run = g.getRun()
-    run.demonRage = math.max(0, run.demonRage - amount)
+    run.demonFury = math.max(0, run.demonFury - amount)
 end
 
 ---@return g.Squad[]
@@ -265,7 +265,7 @@ local function drawShrinePopup()
     local squadInfo = hasSquad and g.getSquadInfo(squadId) or nil
     if drawButtonWithImage(leftR, leftTxt, squadInfo and squadInfo.icon or "example_squad_icon", font) and hasSquad then
         g.removeSquadFromArmy(squad)
-        reduceDemonRage(SACRIFICE_RAGE_REDUCTION)
+        reduceDemonFury(SACRIFICE_FURY_REDUCTION)
         closePopup()
     end
 
@@ -280,8 +280,8 @@ local function drawFountainPopup()
     local buttonsR, font = beginPopup(FOUNTAIN_TXT)
 
     local leftR, rightR = buttonsR:splitHorizontal(1,1)
-    if drawChoiceButton(leftR, FOUNTAIN_RAGE, font) then
-        reduceDemonRage(FOUNTAIN_RAGE_REDUCTION)
+    if drawChoiceButton(leftR, FOUNTAIN_FURY, font) then
+        reduceDemonFury(FOUNTAIN_FURY_REDUCTION)
         closePopup()
     end
     if drawChoiceButton(rightR, FOUNTAIN_BLESSING, font) then
