@@ -476,6 +476,8 @@ function map_scene:draw()
 
     self.ecs:draw()
 
+    juiceService.draw()
+
     local run = g.getRun()
     local graph = run.mapGraph
     if graph then

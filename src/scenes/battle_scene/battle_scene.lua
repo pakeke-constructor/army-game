@@ -408,6 +408,26 @@ local function killAllEnemies(self)
     winBattle(self)
 end
 
+local ARC_TEST_COLORS = {
+    g.snapToPalette(objects.Color.RED),
+    g.snapToPalette(objects.Color.GREEN),
+    g.snapToPalette(objects.Color("#36c7de")),
+    g.snapToPalette(objects.Color("#f1f11e")),
+    g.snapToPalette(objects.Color("#c852a4")),
+}
+
+local function spawnTestArcs(self)
+    local cx, cy = self.camera:getPos()
+    local i = 0
+    for _, ent in self.ecs:iterate("team") do
+        if ent.team == "ally" and g.isAlive(ent) then
+            i = i + 1
+            local color = ARC_TEST_COLORS[(i % #ARC_TEST_COLORS) + 1]
+            juiceService.spawnArc(color, cx, cy, ent.x, ent.y, ent)
+        end
+    end
+end
+
 function battle_scene:keypressed(k)
     local n = tonumber(k)
     if n and n >= 1 and n <= 9 then
@@ -419,7 +439,7 @@ function battle_scene:keypressed(k)
             killAllEnemies(self)
         end
         if k == "m" then
-            g.gotoScene("map_scene")
+            spawnTestArcs(self)
         end
         if k == "p" then
             self.paused = not self.paused
@@ -983,6 +1003,8 @@ function battle_scene:draw()
     drawCommanderRadius(self)
 
     self.ecs:draw(self.camera:getTransform())
+
+    juiceService.draw()
 
     local sw, sh = love.graphics.getDimensions()
     local x1, y1 = self.camera:toWorld(0, 0)

@@ -125,12 +125,12 @@ g.defineBlessing("torment", "Torment", {
 })
 
 g.defineBlessing("golden_coffers", "Golden Coffers", {
-    description = loc("Gain 50% more money from all sources."),
+    description = loc("Gain 30% more money from all sources."),
     image = "blessing_goldencoffers",
     rarity = g.RARITIES.RARE,
     handlers = {
         getMoneyMultiplier = function()
-            return 1.5
+            return 1.3
         end,
     },
 })
@@ -180,11 +180,11 @@ g.defineBlessing("grace", "Grace", {
 })
 
 g.defineBlessing("lucky_sack", "Lucky Sack", {
-    description = loc("Gain between 50 and 200 gold when acquired."),
+    description = loc("Gain between 100 and 200 gold when acquired."),
     image = "blessing_luckysack",
-    rarity = g.RARITIES.UNCOMMON,
+    rarity = g.RARITIES.COMMON,
     onAdd = function()
-        g.addGold(math.random(50, 200))
+        g.addGold(math.random(100, 200))
     end,
 })
 
