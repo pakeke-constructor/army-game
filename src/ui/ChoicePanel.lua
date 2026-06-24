@@ -135,6 +135,11 @@ function ChoicePanel:draw()
         cardArea, bot = r:splitVertical(8,1)
     end
 
+    if #self.choices == 0 then
+        -- RIP in Pepperoni but safety handler must be done
+        return true
+    end
+
     iml.panel(r:get())
     cardArea = cardArea:padRatio(0.05, 0.1)
     if self.rType == "mana" then
