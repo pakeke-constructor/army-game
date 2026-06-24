@@ -192,16 +192,6 @@ defEnemy("direhound", {
     baseAttackRange = 80,
     baseMoveSpeed = 60,
     baseMaxHealth = 35,
-
-    onUpdate = function(ent, dt)
-        ent._buffedTime = math.max((ent._buffedTime or 8) - dt, 0)
-    end,
-    getAttackDamageMultiplier = function(ent)
-        return (ent._buffedTime or 0) > 0 and 2 or 1
-    end,
-    getAttackSpeedMultiplier = function(ent)
-        return (ent._buffedTime or 0) > 0 and 2 or 1
-    end,
 })
 
 defEnemy("greatbowdemon", { -- Hellfire Greatbowmen
@@ -292,16 +282,6 @@ defEnemy("hellhound", {
     baseAttackRange = 80,
     baseMoveSpeed = 100,
     baseMaxHealth = 6,
-
-    onUpdate = function(ent, dt)
-        ent._buffedTime = math.max((ent._buffedTime or 8) - dt, 0)
-    end,
-    getAttackDamageMultiplier = function(ent)
-        return (ent._buffedTime or 0) > 0 and 2 or 1
-    end,
-    getAttackSpeedMultiplier = function(ent)
-        return (ent._buffedTime or 0) > 0 and 2 or 1
-    end,
 })
 
 defEnemy("reaper", {

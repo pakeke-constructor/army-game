@@ -51,6 +51,18 @@ function juiceService.consumeHitPause(dt)
     return 1
 end
 
+
+function juiceService.spawnArc(color, x,y, targetX, targetY, targetEnt, onComplete)
+    -- spawn "arc" object.
+    -- an "arc" is essentially just a line going from
+    -- arc will move from source (x,y) to target (targX,targY)
+    -- has a color.
+    -- (if targetEnt is specified, it will go towards the entity)
+end
+
+
+
+
 function juiceService.update(dt)
     trauma = math.max(0, trauma - TRAUMA_DECAY * dt)
     pauseFatigue = math.max(0, pauseFatigue - PAUSE_FATIGUE_DECAY * dt)

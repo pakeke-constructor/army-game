@@ -193,7 +193,11 @@ local function canRerollSquad(shopNode)
 end
 
 
-local dbg = ui.debugRegion
+local dbg = function(r)
+    if false then
+        ui.debugRegion(r)
+    end
+end
 
 
 local RAR_MAP = {
