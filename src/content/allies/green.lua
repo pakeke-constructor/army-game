@@ -80,7 +80,7 @@ g.defineSquad("druid_squad", {
         handlers = {
             onAttack = function(ent, target)
                 if ent.healPower and target and g.isAlive(target) then
-                    g.buffEntity(target, "maxHealth", 1)
+                    g.buffEntity(target, "maxHealth", 1, ent)
                     target.health = target.health + 1
                 end
             end,
@@ -402,7 +402,7 @@ g.defineSquad("arcane_blossom_squad", {
                 for i = 1, math.min(3, #nearby) do
                     local idx = math.random(i, #nearby)
                     nearby[i], nearby[idx] = nearby[idx], nearby[i]
-                    g.buffEntity(nearby[i], "maxHealth", increase)
+                    g.buffEntity(nearby[i], "maxHealth", increase, ent)
                 end
             end,
         },
@@ -507,7 +507,7 @@ g.defineSquad("living_forest_squad", {
                 if amount <= 0 then return end
                 for _, other in ent:getWorld():iterate("team") do
                     if other.team == "ally" and g.isAlive(other) then
-                        g.buffEntity(other, "maxHealth", amount)
+                        g.buffEntity(other, "maxHealth", amount, ent)
                         g.healEntity(other, amount)
                     end
                 end

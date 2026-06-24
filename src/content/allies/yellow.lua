@@ -152,7 +152,7 @@ g.defineSquad("living_laboratory_squad", {
 
                 -- Buff them
                 for i = 1, math.min(#entAllies, 6) do
-                    g.buffEntity(entAllies[i][1], stat, increase)
+                    g.buffEntity(entAllies[i][1], stat, increase, ent)
                 end
             end,
         },

@@ -478,7 +478,7 @@ g.defineBlessing("group_hug", "Group Hug", {
                 local d = dx * dx + dy * dy
                 if d < bestDist then bestDist, closest = d, other end
             end, 120)
-            if closest then g.buffEntity(closest, stat, increase) end
+            if closest then g.buffEntity(closest, stat, increase, ent) end
         end,
     },
 })
@@ -744,7 +744,7 @@ g.defineBlessing("bulk_pheromones", "Bulk Pheromones", {
             if not (cost and cost.green and cost.green > 0) then return end
             for _, other in g.getECS():iterate("team") do
                 if other.team == "ally" and other.isPest and g.isAlive(other) then
-                    g.buffEntity(other, "maxHealth", 1)
+                    g.buffEntity(other, "maxHealth", 1, ent)
                 end
             end
         end,
