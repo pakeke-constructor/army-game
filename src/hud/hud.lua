@@ -576,7 +576,7 @@ function HUD:drawUI(opt)
     if hoveredSquadId then
         local main = ui.getScreenRegion()
         local _, left = main:padRatio(0.2):splitHorizontal(2, 1)
-        ui.drawSquadCard(hoveredSquadId, left:padRatio(0.1), -999)
+        ui.drawSquadCard(hoveredSquadId, left:padRatio(0.1), -999, false, true)
     end
 
     rewardPopupService.draw()

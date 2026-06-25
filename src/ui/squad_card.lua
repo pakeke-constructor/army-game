@@ -79,10 +79,11 @@ local UPGRADE_COLOR_TAG = "{UPGRADE_COLOR}"
 ---@param region kirigami.Region
 ---@param index number
 ---@param showUpgrade boolean?
+---@param showLevel? integer|boolean
 ---@return boolean
 ---@return number
 ---@return number
-local function drawSquadCard(squadId, region, index, showUpgrade)
+local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
     ui.assertUIStarted()
 
     local info = g.getSquadInfo(squadId)
@@ -134,6 +135,17 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
     -- Header: icon on left, name on right
     local iconSize = 32
     local iconGap = 10
+    local level = nil
+    if showLevel then
+        if type(showLevel) == "number" then
+            level = showLevel
+        else
+            local sq = g.getSquadFromArmy(squadId)
+            if sq then
+                level = sq.level
+            end
+        end
+    end
     box:add({
         getHeight = function(innerW)
             return math.max(iconSize, TITLE_FONT:getHeight())
@@ -141,7 +153,7 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
         draw = function(ex, ey, ew, eh)
             -- icon
             love.graphics.setColor(1, 1, 1)
-            g.drawSquadIcon(squadId, ex+16, ey+16, true)
+            g.drawSquadIcon(squadId, ex+16, ey+16, true, level)
             -- name to right of icon
             local textX = ex + iconSize + iconGap
             local textW = ew - iconSize - iconGap
