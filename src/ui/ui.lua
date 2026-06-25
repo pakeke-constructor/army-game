@@ -571,6 +571,7 @@ ui.HBox = HBox.new
 
 
 ui.drawSquadCard = require(".squad_card")
+ui.drawSpellCard = require(".spell_card")
 ui.drawBlessingCard = require(".blessing_card")
 
 
