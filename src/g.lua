@@ -515,6 +515,7 @@ function g.getManaBundleColor(bundle)
     return objects.Color.WHITE
 end
 
+local LEVEL_TEXT = interp("Lv.%{level}", {context = "Abbreviated level text"})
 
 ---@param squadId string
 ---@param x number
@@ -541,7 +542,7 @@ function g.drawSquadIcon(squadId, x, y, drawManaCost, drawLevel)
         local lvReg = Kirigami(x, y+2, size/2-4, size/2-4)
         local font = g.getSmallFont(16)
         lg.setColor(0.6,0.6,0.6,0.6)
-        richtext.printRichContainedNoWrap("Lv "..tostring(drawLevel), font, lvReg:get())
+        richtext.printRichContainedNoWrap(LEVEL_TEXT({level = tostring(drawLevel)}), font, lvReg:get())
     end
 end
 
