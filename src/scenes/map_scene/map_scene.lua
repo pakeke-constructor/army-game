@@ -218,7 +218,7 @@ function map_scene:_buildNodeState()
     end
 
     self.camera:setPos(self.camX, self.camY)
-    ambienceService.reInitialize(self.camera:getTransform(), run.mapGraph.mapType.cloudSprites)
+    ambienceService.reInitialize(self.camera:getTransform(), g.getMapType().cloudSprites)
 end
 
 function map_scene:_buildFogClearCells()

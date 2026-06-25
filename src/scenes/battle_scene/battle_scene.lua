@@ -191,7 +191,7 @@ function battle_scene:enter()
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
     self.camera:setPos(border[3] * 0.45, border[4] * 0.5)
 
-    ambienceService.reInitialize(self.camera:getTransform(), run.mapGraph.mapType.cloudSprites)
+    ambienceService.reInitialize(self.camera:getTransform(), g.getMapType().cloudSprites)
 end
 
 
@@ -1028,7 +1028,7 @@ function battle_scene:draw()
         h = math.abs(y2 - y1),
     }
     local ecs = self.ecs
-    fogService.renderFog(fogRegion, g.getRun().mapGraph.mapType.fogColor, function(x, y)
+    fogService.renderFog(fogRegion, g.getMapType().fogColor, function(x, y)
         return not ecs:isInsideShape(x, y)
     end)
 
@@ -1037,8 +1037,12 @@ function battle_scene:draw()
         local selType, squad = self.hud:getSelection()
         local mx, my = love.mouse.getPosition()
         local wx, wy = self.camera:toWorld(mx, my)
+
         if selType == "squad" and squad and not squad.deployed then
             drawSquadHover(self, squad, wx, wy)
+            lg.setColor(1, 1, 1, 1)
+        elseif selType == "spell" and squad and g.canCastSpell(wx, wy, squad) then
+            g.renderSpellCastPreview(wx, wy, squad)
             lg.setColor(1, 1, 1, 1)
         elseif consts.LEADER_CONTROLS then
             -- not placing a squad: allow hovering/selecting deployed squads
@@ -1086,11 +1090,13 @@ function battle_scene:draw()
 
         if selType == "spell" then
             local info = g.getSpellInfo(entry)
-            if not info.cost or g.trySpendMana(g.getBattleManaCounts(), info.cost) then
-                g.castSpell(entry, wx, wy)
-                spawnManaIconPopups(info.cost)
-            else
-                spawnCantAffordManaPopup(info.cost)
+            if g.canCastSpell(wx, wy, entry) then
+                if not info.cost or g.trySpendMana(g.getBattleManaCounts(), info.cost) then
+                    g.castSpell(entry, wx, wy)
+                    spawnManaIconPopups(info.cost)
+                else
+                    spawnCantAffordManaPopup(info.cost)
+                end
             end
         elseif selType == "squad" and not entry.deployed then
             local sx, sy = getSnappedDeployPosition(self, entry, wx, wy)

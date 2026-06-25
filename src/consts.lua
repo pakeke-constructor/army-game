@@ -51,6 +51,10 @@ consts.BALANCING = {
 
 consts.STARTING_COMMANDER = "sir_horse"
 
+
+consts.STARTING_MAP_TYPE = "forest"
+
+
 consts.MAX_SQUAD_COUNT = 10
 
 -- Enemy armies always spawn this many units to the right of the player spawn.

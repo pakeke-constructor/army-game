@@ -316,6 +316,19 @@ function g.getRun()
     return assert(currentRun, "run not loaded")
 end
 
+
+
+local mapTypes = require("src.scenes.map_scene.map_types")
+
+---@return MapType
+---@return string
+function g.getMapType()
+    local run = currentRun
+    local mapType = run and run.mapGraph and run.mapGraph.mapType
+    mapType = mapType or consts.STARTING_MAP_TYPE
+    return assert(mapTypes[mapType]), mapType
+end
+
 local currentECS
 ---@return ecs.ECSWorld
 function g.getECS()
@@ -557,7 +570,7 @@ function g.renderSpellIcon(spellId, x, y, drawManaCost)
     g.drawImage(info.icon, x, y)
     c:pop()
     c = gsman.mulColor(col)
-    g.drawImage("squadicon_border", x, y)
+    g.drawImage("spellicon_border", x, y)
     c:pop()
 
     local size = 32 -- hacky hardcode
@@ -1037,6 +1050,7 @@ local SPELL_LIST = {}
 ---@field icon string
 ---@field cost g.ManaBundle?
 ---@field description string?
+---@field spellRange number?
 ---@field spellArea number?
 ---@field instantCast g.SpellInstantCastDef?
 ---@field cast (fun(spellId: string, x: number, y: number))?
@@ -1092,21 +1106,66 @@ end
 ---@param info g.SpellInfo
 ---@param x number
 ---@param y number
-local function runInstantCastSpell(info, x, y)
+---@param fn fun(ent: ecs.Entity)
+---@return integer
+local function iterateSpellTargets(info, x, y, fn)
     local instant = info.instantCast
-    if not instant then return end
+    if not instant then return 0 end
 
     local maxTargets = instant.maxTargets
-    local area = info.spellArea or 500
+    local area = info.spellArea or info.spellRange or 500
     local hitCount = 0
 
     g.iteratePartition(instant.target, x, y, function(ent)
         if maxTargets and hitCount >= maxTargets then return end
         if not g.isAlive(ent) then return end
         if instant.filter and not instant.filter(ent, x, y, info.id) then return end
-        instant.apply(ent, x, y, info.id)
         hitCount = hitCount + 1
+        fn(ent)
     end, area)
+
+    return hitCount
+end
+
+---@param worldX number
+---@param worldY number
+---@param spellId string
+---@return boolean
+function g.canCastSpell(worldX, worldY, spellId)
+    local info = g.getSpellInfo(spellId)
+    local run = g.getRun()
+    local affordable = (not info.cost) or g.canAffordMana(run._battleMana, info.cost)
+    if not affordable then return false end
+    if not info.instantCast then return true end
+
+    local hitCount = iterateSpellTargets(info, worldX, worldY, function() end)
+    return hitCount > 0
+end
+
+---@param x number
+---@param y number
+---@param spellId string
+function g.renderSpellCastPreview(x, y, spellId)
+    local info = g.getSpellInfo(spellId)
+    local range = info.spellRange or info.spellArea or 500
+
+    lg.setColor(info.color)
+    lg.circle("line", x, y, range)
+
+    iterateSpellTargets(info, x, y, function(ent)
+        g.drawImageOffset("commander_target_3", ent.x, ent.y - 20, 0, 1, 1, 0.5, 0.5)
+    end)
+
+    lg.setColor(1, 1, 1, 1)
+end
+
+---@param info g.SpellInfo
+---@param x number
+---@param y number
+local function runInstantCastSpell(info, x, y)
+    iterateSpellTargets(info, x, y, function(ent)
+        info.instantCast.apply(ent, x, y, info.id)
+    end)
 end
 
 --- Cast a spell at a point.
