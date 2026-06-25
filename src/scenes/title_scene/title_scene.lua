@@ -128,10 +128,6 @@ function title_scene:draw()
     lg.setColor(0.05, 0.05, 0.07, 0.5)
     lg.rectangle("fill", 0, 0, 1000, 1000)
 
-    lg.setBlendMode("add")
-    embers:draw()
-    lg.setBlendMode("alpha")
-
     lg.setColor(1, 1, 1, 1)
 
     local _, left = main:splitHorizontal(1, 2, 5)
@@ -169,6 +165,10 @@ function title_scene:draw()
     end
 
     ui.endUI()
+
+    lg.setBlendMode("add")
+    embers:draw()
+    lg.setBlendMode("alpha")
 end
 
 return title_scene
