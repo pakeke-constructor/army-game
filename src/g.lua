@@ -129,10 +129,13 @@ local PALETTE = {
 ---@param b number blue [0..1]
 ---@param a number? alpha [0..1] (default 1)
 ---@overload fun(color:objects.Color):objects.Color
+---@overload fun(color:string):objects.Color
 ---@return objects.Color
 function g.snapToPalette(r, gg, b, a)
     if type(r) == "table" then
         r, gg, b, a = r[1], r[2], r[3], r[4]
+    elseif type(r) == "string" then
+        r, gg, b, a = objects.Color(r):getRGBA()
     end
     a = a or 1
     local best, bestDist = nil, math.huge
@@ -518,16 +521,16 @@ end
 local LEVEL_TEXT = interp("Lv.%{level}", {context = "Abbreviated level text"})
 local LEVEL_MAX_TEXT = loc("MAX", {context = "Max level reached"})
 local SQUAD_LEVEL_COLORS = {
-    objects.Color.WHITE,
-    objects.Color("#f1f11e"),
-    objects.Color("#f1f11e"),
-    objects.Color("#cd853b"),
-    objects.Color("#cd853b"),
-    objects.Color("#c5303d"),
-    objects.Color("#c5303d"),
-    objects.Color("#c852a4"),
-    objects.Color("#c852a4"),
-    objects.Color("#357dd2")
+    g.snapToPalette("#ffffff"),
+    g.snapToPalette("#f1f11e"),
+    g.snapToPalette("#f1f11e"),
+    g.snapToPalette("#cd853b"),
+    g.snapToPalette("#cd853b"),
+    g.snapToPalette("#c5303d"),
+    g.snapToPalette("#c5303d"),
+    g.snapToPalette("#c852a4"),
+    g.snapToPalette("#c852a4"),
+    g.snapToPalette("#357dd2")
 }
 
 ---@param squadId string
