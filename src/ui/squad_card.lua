@@ -62,6 +62,7 @@ local DPS_DESC = interp("{damage} Attack Damage: {c r=0.85 g=0.25 b=0.25}%{attac
 local UPGRADE = loc("UPGRADE!", {}, {
     context = "Title, denoting that there is a squad upgrade."
 })
+local LEVEL = interp("Lv.%{level}", {context = "Abbreviated level text"})
 
 local BONUS = interp("Bonus: %{value}", {
     context = "Tooltip line showing a stat bonus from squad buffs, e.g. 'Bonus: +5 (Health)'."
@@ -444,7 +445,11 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
             lg.setColor(1,1,1)
             ui.drawDarkPanel(boxReg:get())
             local font = g.getSmallFont(16)
-            richtext.printRichContainedNoWrap("{wavy amp=0.5}" .. UPGRADE_COLOR_TAG .. UPGRADE, font, title:padUnit(2,2):get())
+            richtext.printRichContainedNoWrap(
+                "{bob amp=0.5}" .. UPGRADE_COLOR_TAG ..LEVEL({level = canUpgrade.level + 1}),
+                font,
+                title:padUnit(2,2):get()
+            )
             richtext.printRichContainedNoWrap(str, font, txtReg:padUnit(4,4):get())
         end
     end
