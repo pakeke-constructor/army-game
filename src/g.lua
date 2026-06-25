@@ -546,6 +546,28 @@ function g.drawSquadIcon(squadId, x, y, drawManaCost, drawLevel)
 end
 
 
+---@param spellId string
+---@param x number
+---@param y number
+---@param drawManaCost boolean?
+function g.renderSpellIcon(spellId, x, y, drawManaCost)
+    local info = g.getSpellInfo(spellId)
+    local col = g.getManaBundleColor(info.cost)
+    local c = gsman.mulColor(1, 1, 1)
+    g.drawImage(info.icon, x, y)
+    c:pop()
+    c = gsman.mulColor(col)
+    g.drawImage("squadicon_border", x, y)
+    c:pop()
+
+    local size = 32 -- hacky hardcode
+    if drawManaCost then
+        g.drawManaCost(info.cost, x, y - size/2, size + 6)
+    end
+end
+
+
+
 
 ---@param blessingId string
 ---@param x number
@@ -989,6 +1011,120 @@ end
 ---@return g.Squad?
 function g.getSquadFromArmy(squadId)
     return g.getRun().squads[squadId]
+end
+
+
+-- ============================================================================
+-- SPELLS
+-- Spells are like squads, but played DURING battle (after battle start),
+-- whereas squads are played BEFORE battle (during the deploy/planning phase).
+-- ============================================================================
+
+local SPELL_DEFS = {}
+local SPELL_LIST = {}
+
+---@class g.SpellInstantCastDef
+---@field target "ally"|"enemy"
+---@field maxTargets integer?
+---@field filter fun(ent: ecs.Entity, castX: number, castY: number, spellId: string): boolean?
+---@field apply fun(ent: ecs.Entity, castX: number, castY: number, spellId: string)
+
+---@class g.SpellDef
+---@field name string (untranslated at definition; translated in info)
+---@field nameContext string?
+---@field color objects.Color?
+---@field rarity g.Rarity
+---@field icon string
+---@field cost g.ManaBundle?
+---@field description string?
+---@field spellArea number?
+---@field instantCast g.SpellInstantCastDef?
+---@field cast (fun(spellId: string, x: number, y: number))?
+
+---@class g.SpellInfo: g.SpellDef
+---@field id string
+---@field cost g.ManaBundle
+
+---@param id string
+---@param info g.SpellDef
+function g.defineSpell(id, info)
+    if SPELL_DEFS[id] then
+        error("Duplicate spell: " .. id)
+    end
+    info.id = id
+    info.color = g.snapToPalette(info.color or objects.Color.WHITE)
+    info.name = loc(assert(info.name), {}, {context = info.nameContext or "Name of a spell."})
+    info.rarity = assert(info.rarity)
+    info.cost = info.cost or {}
+    assert(info.icon, "Missing icon for spell: " .. id)
+    if not g.isImage(info.icon) then
+        error("Spell has invalid icon: " .. info.icon)
+    end
+    if info.instantCast then
+        local instant = info.instantCast
+        assert(instant.target == "ally" or instant.target == "enemy", "Invalid spell instantCast.target for: " .. id)
+        assert(type(instant.apply) == "function", "Missing spell instantCast.apply for: " .. id)
+    end
+    ---@cast info g.SpellInfo
+    SPELL_DEFS[id] = info
+    SPELL_LIST[#SPELL_LIST + 1] = id
+end
+
+---@param id string
+---@return g.SpellInfo
+function g.getSpellInfo(id)
+    return assert(SPELL_DEFS[id], "Unknown spell: " .. tostring(id))
+end
+
+---@param spellId string
+function g.addSpellToArmy(spellId)
+    local run = g.getRun()
+    assert(SPELL_DEFS[spellId], "Unknown spell: " .. tostring(spellId))
+    run.spells[spellId] = true
+end
+
+---@param spellId string
+---@return boolean
+function g.hasSpell(spellId)
+    return g.getRun().spells[spellId] == true
+end
+
+---@param info g.SpellInfo
+---@param x number
+---@param y number
+local function runInstantCastSpell(info, x, y)
+    local instant = info.instantCast
+    if not instant then return end
+
+    local maxTargets = instant.maxTargets
+    local area = info.spellArea or 500
+    local hitCount = 0
+
+    g.iteratePartition(instant.target, x, y, function(ent)
+        if maxTargets and hitCount >= maxTargets then return end
+        if not g.isAlive(ent) then return end
+        if instant.filter and not instant.filter(ent, x, y, info.id) then return end
+        instant.apply(ent, x, y, info.id)
+        hitCount = hitCount + 1
+    end, area)
+end
+
+--- Cast a spell at a point.
+---@param spellId string
+---@param x number
+---@param y number
+function g.castSpell(spellId, x, y)
+    local info = g.getSpellInfo(spellId)
+    g.getRun().spellsCast[spellId] = true
+
+    if info.instantCast then
+        runInstantCastSpell(info, x, y)
+        return
+    end
+
+    if info.cast then
+        info.cast(spellId, x, y)
+    end
 end
 
 

@@ -380,9 +380,9 @@ defEnemy("speardemon", { -- Demon Spearmen
     attack = {
         attackType = "melee",
     },
-    baseAttackDamage = 2,
+    baseAttackDamage = 1.5,
     baseAttackSpeed = 1,
-    baseAttackRange = 120,
+    baseAttackRange = 110,
     baseMoveSpeed = 50,
     baseMaxHealth = 6,
 })

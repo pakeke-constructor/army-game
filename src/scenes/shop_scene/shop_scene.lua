@@ -194,7 +194,7 @@ end
 
 
 local dbg = function(r)
-    if false then
+    if true then
         ui.debugRegion(r)
     end
 end
