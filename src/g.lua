@@ -59,6 +59,7 @@ local sceneManager = require("src.scenes.sceneManager")
 
 local Run = require("src.Run")
 local Squad = require("src.Squad")
+local Spell = require("src.Spell")
 local Entity = require("src.ecs.Entity")
 
 local bgm = require("src.sound.bgm")
@@ -991,6 +992,84 @@ function g.getSquadFromArmy(squadId)
     return g.getRun().squads[squadId]
 end
 
+
+-- ============================================================================
+-- SPELLS
+-- Spells are like squads, but played DURING battle (after battle start),
+-- whereas squads are played BEFORE battle (during the deploy/planning phase).
+-- ============================================================================
+
+local SPELL_DEFS = {}
+local SPELL_LIST = {}
+
+---@class g.SpellDef
+---@field name string (untranslated at definition; translated in info)
+---@field nameContext string?
+---@field rarity g.Rarity
+---@field icon string
+---@field cost g.ManaBundle?
+---@field description string?
+---@field cast (fun(spell: g.Spell, x: number, y: number))?
+
+---@class g.SpellInfo: g.SpellDef
+---@field id string
+---@field cost g.ManaBundle
+
+---@param id string
+---@param info g.SpellDef
+function g.defineSpell(id, info)
+    if SPELL_DEFS[id] then
+        error("Duplicate spell: " .. id)
+    end
+    info.id = id
+    info.name = loc(assert(info.name), {}, {context = info.nameContext or "Name of a spell."})
+    info.rarity = assert(info.rarity)
+    info.cost = info.cost or {}
+    assert(info.icon, "Missing icon for spell: " .. id)
+    if not g.isImage(info.icon) then
+        error("Spell has invalid icon: " .. info.icon)
+    end
+    ---@cast info g.SpellInfo
+    SPELL_DEFS[id] = info
+    SPELL_LIST[#SPELL_LIST + 1] = id
+end
+
+---@param id string
+---@return g.SpellInfo
+function g.getSpellInfo(id)
+    return assert(SPELL_DEFS[id], "Unknown spell: " .. tostring(id))
+end
+
+---@param spellId string
+---@return g.Spell
+function g.newSpell(spellId)
+    local def = assert(SPELL_DEFS[spellId], "Unknown spell: " .. tostring(spellId))
+    return Spell(spellId, def)
+end
+
+---@param spellId string
+function g.addSpellToArmy(spellId)
+    local run = g.getRun()
+    assert(not run.spells[spellId], "Spell already in army: " .. spellId)
+    run.spells[spellId] = g.newSpell(spellId)
+end
+
+---@param spellId string
+---@return g.Spell?
+function g.getSpellFromArmy(spellId)
+    return g.getRun().spells[spellId]
+end
+
+--- Cast a spell at a point. (Shell: just calls the def's cast fn.)
+---@param spell g.Spell
+---@param x number
+---@param y number
+function g.castSpell(spell, x, y)
+    local info = g.getSpellInfo(spell.spellId)
+    if info.cast then
+        info.cast(spell, x, y)
+    end
+end
 
 
 
