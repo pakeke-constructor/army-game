@@ -954,8 +954,8 @@ local function drawCommanderRadius(self)
     end
 
     local pop = gsman.setLineWidth(LINE_WIDTH)
-    local squad = self.hud:getSelection()
-    if squad and (not squad.deployed) then
+    local selType, squad = self.hud:getSelection()
+    if selType == "squad" and squad and (not squad.deployed) then
         local commx, commy = getCommanderDeployBasePos(self)
         local mx, my = love.mouse.getPosition()
         local wx, wy = self.camera:toWorld(mx, my)
@@ -985,6 +985,18 @@ local function drawCommanderRadius(self)
     lg.setColor(1, 1, 1, alpha)
     love.graphics.circle("line", commander.x, commander.y, commander.attackRange)
     pop:pop()
+end
+
+
+
+---@param cost g.ManaBundle
+local function spawnCantAffordManaPopup(cost)
+    local manaType = findMissingMana(cost, g.getBattleManaCounts())
+    local umx, umy = ui.getMouse()
+    g.addUITextPopup(umx, umy, CANT_AFFORD({manaType = manaType}), {
+        fadeIn = 0.15,
+        duration = 1.5,
+    })
 end
 
 
@@ -1022,10 +1034,10 @@ function battle_scene:draw()
 
     self.hoveredSquad = nil
     if not self.victory then
-        local squad = self.hud:getSelection()
+        local selType, squad = self.hud:getSelection()
         local mx, my = love.mouse.getPosition()
         local wx, wy = self.camera:toWorld(mx, my)
-        if squad and not squad.deployed then
+        if selType == "squad" and squad and not squad.deployed then
             drawSquadHover(self, squad, wx, wy)
             lg.setColor(1, 1, 1, 1)
         elseif consts.LEADER_CONTROLS then
@@ -1068,26 +1080,27 @@ function battle_scene:draw()
     local clickedBattlefield = false
     if (not self.victory) and (not self.defeated) and iml.wasJustPressed(0, 0, sw, sh, 1, "deploy_click") then
         clickedBattlefield = true
-        local entry = self.hud:getSelection()
+        local selType, entry = self.hud:getSelection()
         local mx, my = love.mouse.getPosition()
         local wx, wy = self.camera:toWorld(mx, my)
-        local sx, sy = wx, wy
-        if entry then
-            sx, sy = getSnappedDeployPosition(self, entry, wx, wy)
-        end
-        if entry and not entry.deployed then
+
+        if selType == "spell" then
+            local info = g.getSpellInfo(entry)
+            if not info.cost or g.trySpendMana(g.getBattleManaCounts(), info.cost) then
+                g.castSpell(entry, wx, wy)
+                spawnManaIconPopups(info.cost)
+            else
+                spawnCantAffordManaPopup(info.cost)
+            end
+        elseif selType == "squad" and not entry.deployed then
+            local sx, sy = getSnappedDeployPosition(self, entry, wx, wy)
             local info = g.getSquadInfo(entry.squadId)
             if not info.cost or g.trySpendMana(g.getBattleManaCounts(), info.cost) then
                 entry:spawn(sx, sy)
                 self.deployedSquads[#self.deployedSquads + 1] = {squadId = entry.squadId, x = sx, y = sy}
                 spawnManaIconPopups(info.cost)
             else
-                local manaType = findMissingMana(info.cost, g.getBattleManaCounts())
-                local umx, umy = ui.getMouse()
-                g.addUITextPopup(umx, umy, CANT_AFFORD({manaType = manaType}), {
-                    fadeIn = 0.15,
-                    duration = 1.5,
-                })
+                spawnCantAffordManaPopup(info.cost)
             end
         elseif consts.LEADER_CONTROLS and self.hoveredSquad then
             -- click a deployed squad's box to select it
@@ -1101,7 +1114,7 @@ function battle_scene:draw()
             self.selectedSquad = nil
         end
     end
-    self.hud:drawUI({ battleScene = true })
+    self.hud:drawUI({ battleScene = true, battleStarted = not self.deployPhase })
 
     -- click landed on a UI element (battlefield click was swallowed): deselect
     if self._leftClickThisFrame and not clickedBattlefield then

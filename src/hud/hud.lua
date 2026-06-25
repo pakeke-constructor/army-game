@@ -2,16 +2,21 @@
 local hoverService = require("src.hud.hoverService")
 
 ---@class g.HUD: objects.Class
----@field hoveredSquad g.Squad?
+---@field currentHover g.Squad|string|nil hovered squad object, or hovered spellId
+---@field selectedIndex integer? index into the active selection list (see getActiveList)
+---@field battleStarted boolean cached each frame; false = squads selectable, true = spells selectable
 local HUD = objects.Class("g:HUD")
 
 function HUD:init()
-    self.selectedSlot = 1
+    self.selectedIndex = 1
+    self.battleStarted = false
 end
+
 
 ---@class g.hudArgs
 ---@field battleScene boolean?
 ---@field mapScene boolean?
+---@field battleStarted boolean?
 ---@field hoverSquadId string?
 
 local SQUAD_ICON_SIZE = 32
@@ -40,43 +45,85 @@ local function isSquadVisible(sq)
     return scName ~= "battle_scene" or not sq.deployed
 end
 
----@param slot integer
----@return boolean
-local function isSlotAvailable(slot)
-    local army = g.getSortedArmyList()
-    local squad = army[slot]
-    return squad and isSquadVisible(squad) or false
+--- Whether spells (vs squads) are the active selectable pool.
+---@param self g.HUD
+local function spellsAreActive(self)
+    local _, scName = g.getCurrentScene()
+    return scName == "battle_scene" and self.battleStarted
 end
 
----@param from integer
----@return integer?
-local function getClosestAvailableSlot(from)
-    local army = g.getSortedArmyList()
-    local total = #army
-    if total == 0 then return nil end
-    from = helper.clamp(from, 1, total)
-    local fallback
-    for offset = 0, total - 1 do
-        for _, slot in ipairs({from - offset, from + offset}) do
-            if slot >= 1 and slot <= total then
-                local sq = army[slot]
-                if sq and isSquadVisible(sq) then
-                    if sq.canAfford then return slot end
-                    fallback = fallback or slot
-                end
-            end
+--- Owned spellIds, sorted for stable order.
+---@return string[]
+local function getVisibleSpells()
+    local spells = {}
+    for spellId in pairs(g.getRun().spells) do
+        spells[#spells + 1] = spellId
+    end
+    table.sort(spells)
+    return spells
+end
+
+--- The ordered list of currently-selectable items: spellIds (battle started) or
+--- visible squad objects (otherwise). Draw order matches this order, so the
+--- list index doubles as the on-screen index.
+---@param self g.HUD
+---@return (g.Squad|string)[]
+local function getActiveList(self)
+    if spellsAreActive(self) then
+        return getVisibleSpells()
+    end
+    local squads = {}
+    for _, sq in ipairs(g.getSortedArmyList()) do
+        if isSquadVisible(sq) then
+            squads[#squads + 1] = sq
         end
     end
-    return fallback
+    return squads
 end
 
+--- Is the item at the given list index usable (affordable / castable) right now?
 ---@param self g.HUD
----@return integer?
-local function getSlotIndex(self)
-    local idx = getClosestAvailableSlot(self.selectedSlot)
-    if idx then self.selectedSlot = idx end
-    return idx
+---@param item g.Squad|string
+---@return boolean
+local function isItemUsable(self, item)
+    if type(item) == "string" then
+        local run = g.getRun()
+        local info = g.getSpellInfo(item)
+        local affordable = not info.cost or g.canAffordMana(run._battleMana, info.cost)
+        return affordable and not run.spellsCast[item]
+    end
+    return item.canAfford or false
 end
+
+--- Resolves selectedIndex to a valid index into the active list, mutating
+--- self.selectedIndex. Prefers the nearest usable item; never out of range.
+---@param self g.HUD
+---@return (g.Squad|string)[] list
+---@return integer? idx valid index, or nil if list empty
+local function getValidSelection(self)
+    local list = getActiveList(self)
+    if #list == 0 then
+        self.selectedIndex = nil
+        return list, nil
+    end
+    local from = helper.clamp(self.selectedIndex or 1, 1, #list)
+    local idx = from
+    if not isItemUsable(self, list[from]) then
+        for offset = 1, #list do
+            for _, j in ipairs({from - offset, from + offset}) do
+                if j >= 1 and j <= #list and isItemUsable(self, list[j]) then
+                    idx = j
+                    break
+                end
+            end
+            if idx ~= from then break end
+        end
+    end
+    self.selectedIndex = idx
+    return list, idx
+end
+
+
 
 ---@param sq g.Squad
 ---@param x number
@@ -106,84 +153,126 @@ end
 ---@param x number
 ---@param y number
 ---@param selected boolean
-local function renderSpell(spellId, x, y, selected)
-    local _, scName = g.getCurrentScene()
-    local isBattle = scName == "battle_scene"
+---@param usable boolean spell can be cast right now (battle started + affordable)
+local function renderSpell(spellId, x, y, selected, usable)
     local size = SQUAD_ICON_SIZE
-    if isBattle and selected then
+    if selected then
         lg.setColor(1, 1, 1, 0.3)
         ui.drawSingleColorPanel(x - 2, y - 2, size + 4, size + 4)
     end
-    if isBattle and (not canAfford) then
+    if not usable then
         lg.setColor(1, 1, 1, 0.35)
     else
         lg.setColor(1, 1, 1)
     end
-    g.drawSpellIcon(spellId, x+size/2, y+size/2, true)
+    g.renderSpellIcon(spellId, x+size/2, y+size/2, true)
 end
 
 
 
 
 
----@param self g.HUD
+
+--- Lays out icons evenly across a region.
 ---@param region kirigami.Region
-local function drawSquadBar(self, region)
-    local army = g.getSortedArmyList()
-    self.hoveredSquad = nil
-    if #army <= 0 then
-        return
-    end
-
-    local currentSlot = getSlotIndex(self)
-
-    local trueArmy = {}
-    for i, sq in ipairs(army) do
-        if isSquadVisible(sq) then
-            table.insert(trueArmy, {sq = sq, idx = i})
-        end
-    end
-
-    local count = #trueArmy
+---@param count integer
+---@return number startX, number baseY, number step
+local function layoutIcons(region, count)
     local EDGE_PAD = 14
-
-    local neededH = SQUAD_ICON_SIZE + 2 * EDGE_PAD
-    if region.h < neededH then
-        region = region:set(nil, nil, nil, neededH)
-    end
-
     local inner = region:padUnit(EDGE_PAD)
-
     local step = SQUAD_ICON_SIZE + SQUAD_PADDING
     if count > 1 then
         step = math.min(step, (inner.w - SQUAD_ICON_SIZE) / (count - 1))
     end
+    return inner.x, inner.y + (inner.h - SQUAD_ICON_SIZE) / 2, step
+end
 
-    local startX = inner.x
-    local baseY = inner.y + (inner.h - SQUAD_ICON_SIZE) / 2
+
+--- Draws the visible squad icons. selIdx is the active selection (into the
+--- visible list), or nil when squads aren't the active pool.
+---@param self g.HUD
+---@param region kirigami.Region
+---@param selIdx integer?
+local function drawSquadsSection(self, region, selIdx)
+    local visible = {}
+    for _, sq in ipairs(g.getSortedArmyList()) do
+        if isSquadVisible(sq) then
+            visible[#visible + 1] = sq
+        end
+    end
+    if #visible <= 0 then return end
+
+    local startX, baseY, step = layoutIcons(region, #visible)
 
     local _, scName = g.getCurrentScene()
     local isBattle = scName == "battle_scene"
 
-    for i, entry in ipairs(trueArmy) do
-        local sq = entry.sq
-        local armyIdx = entry.idx
+    for i, sq in ipairs(visible) do
         local x = startX + (i - 1) * step
         local y = baseY
-        local selected = (armyIdx == currentSlot)
+        local selected = (i == selIdx)
         if isBattle and selected then
             y = y - 6
         end
         renderSquad(sq, x, y-4, selected)
-        if iml.wasJustClicked(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, 1, i) then
-            self.selectedSlot = armyIdx
+        if selIdx and iml.wasJustClicked(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, 1, i) then
+            self.selectedIndex = i
         end
         iml.panel(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, i)
         if iml.isHovered(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, i) then
-            self.hoveredSquad = sq
+            self.currentHover = sq
         end
     end
 end
+
+
+--- Draws the spell icons. selIdx is the active selection (into the spell list),
+--- or nil when spells aren't the active pool (pre-battle).
+---@param self g.HUD
+---@param region kirigami.Region
+---@param selIdx integer?
+local function drawSpellsSection(self, region, selIdx)
+    local spells = getVisibleSpells()
+    if #spells <= 0 then return end
+
+    local startX, baseY, step = layoutIcons(region, #spells)
+
+    for i, spellId in ipairs(spells) do
+        local usable = (selIdx ~= nil) and isItemUsable(self, spellId)
+        local x = startX + (i - 1) * step
+        local y = baseY
+        local selected = (i == selIdx)
+        if selected then
+            y = y - 6
+        end
+        renderSpell(spellId, x, y-4, selected, usable)
+        local id = "spell" .. i
+        if usable and iml.wasJustClicked(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, 1, id) then
+            self.selectedIndex = i
+        end
+        iml.panel(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, id)
+        if iml.isHovered(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, id) then
+            self.currentHover = spellId
+        end
+    end
+end
+
+
+---@param self g.HUD
+---@param region kirigami.Region
+local function drawArmyBar(self, region)
+    self.currentHover = nil
+    local _, idx = getValidSelection(self)
+    local spellsActive = spellsAreActive(self)
+
+    -- squads 65%, padding 5%, spells 30%
+    local squadRegion, _, spellRegion = region:splitHorizontal(0.65, 0.05, 0.30)
+    drawSquadsSection(self, squadRegion, (not spellsActive) and idx or nil)
+    drawSpellsSection(self, spellRegion, spellsActive and idx or nil)
+end
+
+
+
 
 
 
@@ -450,7 +539,7 @@ local function drawBottomBar(self, barHeight)
 
     -- Squad box
     ui.drawDarkPanel(squadBar:get())
-    drawSquadBar(self, squadBar:padUnit(6))
+    drawArmyBar(self, squadBar:padUnit(6))
 
     -- Blessing box
     ui.drawDarkPanel(blessingBar:get())
@@ -472,11 +561,13 @@ end
 
 ---@param opt g.hudArgs
 function HUD:drawUI(opt)
+    self.battleStarted = opt.battleStarted or false
     drawTopBar()
 
     drawBottomBar(self, SQUAD_ICON_SIZE + 30)
 
-    local hoveredSquadId = opt.hoverSquadId or (self.hoveredSquad and self.hoveredSquad.squadId)
+    local hoverSquad = (type(self.currentHover) == "table") and self.currentHover or nil
+    local hoveredSquadId = opt.hoverSquadId or (hoverSquad and hoverSquad.squadId)
     if hoveredSquadId then
         local main = ui.getScreenRegion()
         local _, left = main:padRatio(0.2):splitHorizontal(2, 1)
@@ -490,36 +581,38 @@ function HUD:drawUI(opt)
     hoverService.draw()
 end
 
----@return g.Squad? squad
+--- Returns the current selection: either a spell or a squad.
+--- ("spell", spellId) | ("squad", g.Squad) | nil
+---@return ("spell"|"squad")? type
+---@return string|g.Squad|nil selection
 function HUD:getSelection()
-    local idx = getSlotIndex(self)
+    local list, idx = getValidSelection(self)
     if not idx then return nil end
-    return g.getSortedArmyList()[idx]
+    local item = list[idx]
+    if type(item) == "string" then
+        return "spell", item
+    end
+    return "squad", item
 end
 
----@param visibleIndex integer 1..9, position among non-deployed squads as shown in HUD
+---@param visibleIndex integer 1..9, position among items shown in the active pool
 function HUD:selectVisibleSlot(visibleIndex)
-    local army = g.getSortedArmyList()
-    local seen = 0
-    for i, sq in ipairs(army) do
-        if isSquadVisible(sq) then
-            seen = seen + 1
-            if seen == visibleIndex then
-                self.selectedSlot = i
-                return
-            end
-        end
+    local list = getActiveList(self)
+    if visibleIndex >= 1 and visibleIndex <= #list then
+        self.selectedIndex = visibleIndex
     end
 end
 
 function HUD:wheelmoved(dx, dy)
     local dir = dy > 0 and -1 or 1
-    local total = #g.getSortedArmyList()
-    local next = self.selectedSlot + dir
-    for i=0, 8 do
-        local j = next + i*dir
-        if next >= 1 and next <= total and isSlotAvailable(j) then
-            self.selectedSlot = j
+    local list = getValidSelection(self)
+    local total = #list
+    if total == 0 then return end
+    local from = self.selectedIndex or 1
+    for offset = 1, total do
+        local j = from + offset * dir
+        if j >= 1 and j <= total and isItemUsable(self, list[j]) then
+            self.selectedIndex = j
             return
         end
     end
