@@ -70,7 +70,7 @@ local function drawCommanderList(icons)
 
         -- icon takes half the cell; gap shifts top->bottom as it rises
         local gap = 0.5
-        local _, iconReg = reg:splitVertical(gap*(1-t), 0.8, gap*t)
+        local _, iconReg = reg:splitVertical(gap*(1-t)+1, 4, gap*t+1)
         local x, y, rw, rh = iconReg:padRatio(0.1):get()
         -- ui.debugRegion(iconReg:padRatio(0.1))
         love.graphics.setColor(1,1,1,1)
