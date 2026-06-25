@@ -59,7 +59,6 @@ local sceneManager = require("src.scenes.sceneManager")
 
 local Run = require("src.Run")
 local Squad = require("src.Squad")
-local Spell = require("src.Spell")
 local Entity = require("src.ecs.Entity")
 
 local bgm = require("src.sound.bgm")
@@ -1009,7 +1008,7 @@ local SPELL_LIST = {}
 ---@field icon string
 ---@field cost g.ManaBundle?
 ---@field description string?
----@field cast (fun(spell: g.Spell, x: number, y: number))?
+---@field cast (fun(spellId: string, x: number, y: number))?
 
 ---@class g.SpellInfo: g.SpellDef
 ---@field id string
@@ -1041,35 +1040,30 @@ function g.getSpellInfo(id)
 end
 
 ---@param spellId string
----@return g.Spell
-function g.newSpell(spellId)
-    local def = assert(SPELL_DEFS[spellId], "Unknown spell: " .. tostring(spellId))
-    return Spell(spellId, def)
-end
-
----@param spellId string
 function g.addSpellToArmy(spellId)
     local run = g.getRun()
-    assert(not run.spells[spellId], "Spell already in army: " .. spellId)
-    run.spells[spellId] = g.newSpell(spellId)
+    assert(SPELL_DEFS[spellId], "Unknown spell: " .. tostring(spellId))
+    run.spells[spellId] = true
 end
 
 ---@param spellId string
----@return g.Spell?
-function g.getSpellFromArmy(spellId)
-    return g.getRun().spells[spellId]
+---@return boolean
+function g.hasSpell(spellId)
+    return g.getRun().spells[spellId] == true
 end
 
 --- Cast a spell at a point. (Shell: just calls the def's cast fn.)
----@param spell g.Spell
+---@param spellId string
 ---@param x number
 ---@param y number
-function g.castSpell(spell, x, y)
-    local info = g.getSpellInfo(spell.spellId)
+function g.castSpell(spellId, x, y)
+    local info = g.getSpellInfo(spellId)
+    g.getRun().spellsCast[spellId] = true
     if info.cast then
-        info.cast(spell, x, y)
+        info.cast(spellId, x, y)
     end
 end
+
 
 
 

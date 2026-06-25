@@ -1,14 +1,14 @@
 
 local objects = require("src.modules.objects.objects")
 local Squad = require("src.Squad")
-local Spell = require("src.Spell")
 local MapGraph = require("src.scenes.map_scene.MapGraph")
 
 ---@class g.Run: objects.Class
 ---@field commander string
 ---@field difficulty integer
 ---@field squads {[string]: g.Squad}
----@field spells {[string]: g.Spell}
+---@field spells {[string]: boolean}
+---@field spellsCast {[string]: boolean} which spells have been cast this battle (reset each battle)
 ---@field _sortedSquads g.Squad[]?
 ---@field _battleSquads g.Squad[] temporary squads on the bench for the current fight only
 ---@field money number
@@ -29,6 +29,7 @@ function Run:init()
 
     self.squads = {}
     self.spells = {}
+    self.spellsCast = {}
     self._sortedSquads = nil
     self._battleSquads = {}
     self.level = 1
@@ -73,6 +74,9 @@ function Run:resetForBattle()
         squad.deployDyFromCommander = nil
     end
 
+    -- reset spell-cast tracking for this battle
+    self.spellsCast = {}
+
     -- clear temporary fight-only bench squads
     self._battleSquads = {}
     self._sortedSquads = nil
@@ -116,8 +120,8 @@ function Run:serialize()
         squads[id] = sq:serialize()
     end
     local spells = {}
-    for id, sp in pairs(self.spells) do
-        spells[id] = sp:serialize()
+    for id in pairs(self.spells) do
+        spells[id] = true
     end
     return {
         squads = squads,
@@ -148,9 +152,10 @@ function Run.deserialize(data)
         run.squads[id] = Squad.deserialize(sqData)
     end
     run.spells = {}
-    for id, spData in pairs(data.spells or {}) do
-        run.spells[id] = Spell.deserialize(spData)
+    for id in pairs(data.spells or {}) do
+        run.spells[id] = true
     end
+    run.spellsCast = {}
     run.level = data.level or run.level
     run.xp = data.xp or run.xp
     run.money = data.money or run.money

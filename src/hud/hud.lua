@@ -102,6 +102,30 @@ end
 
 
 
+---@param spellId string
+---@param x number
+---@param y number
+---@param selected boolean
+local function renderSpell(spellId, x, y, selected)
+    local _, scName = g.getCurrentScene()
+    local isBattle = scName == "battle_scene"
+    local size = SQUAD_ICON_SIZE
+    if isBattle and selected then
+        lg.setColor(1, 1, 1, 0.3)
+        ui.drawSingleColorPanel(x - 2, y - 2, size + 4, size + 4)
+    end
+    if isBattle and (not canAfford) then
+        lg.setColor(1, 1, 1, 0.35)
+    else
+        lg.setColor(1, 1, 1)
+    end
+    g.drawSpellIcon(spellId, x+size/2, y+size/2, true)
+end
+
+
+
+
+
 ---@param self g.HUD
 ---@param region kirigami.Region
 local function drawSquadBar(self, region)
@@ -166,7 +190,7 @@ end
 
 
 ---@param r kirigami.Region
-local function drawLeftBlessingBar(r)
+local function drawBlessingBar(r)
     local run = g.getRun()
     lg.setColor(1,1,1)
     ui.drawDarkPanel(r:get())
@@ -430,7 +454,7 @@ local function drawBottomBar(self, barHeight)
 
     -- Blessing box
     ui.drawDarkPanel(blessingBar:get())
-    drawLeftBlessingBar(blessingBar)
+    drawBlessingBar(blessingBar)
 
     drawManaBox(self, false)
 end

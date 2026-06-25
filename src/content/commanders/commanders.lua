@@ -40,6 +40,11 @@ g.defineCommander("sir_horse", "Sir Horse", {
     onStart = function(run)
         g.addSquadToArmy("red_militia_squad")
         g.addSquadToArmy("red_archer_squad")
+
+        if consts.DEV_MODE then
+            g.addSpellToArmy("heal_spell")
+            g.addSpellToArmy("poison_spell")
+        end
     end
 })
 
