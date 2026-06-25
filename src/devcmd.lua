@@ -139,6 +139,29 @@ COMMANDS.vacuum = function()
     addLog("vacuumed all fogs")
 end
 
+COMMANDS.lua = function(args)
+    local command = table.concat(args, " ")
+    if #command == 0 then
+        return addLog("Usage: /lua <lua>")
+    end
+
+    local l, msg = loadstring(command)
+    if not l then
+        return addLog("Error: "..msg)
+    end
+
+    local ok, bt = xpcall(l, debug.traceback)
+    if not ok then
+        return addLog(bt)
+    end
+
+    if bt ~= nil then
+        return addLog(tostring(bt))
+    else
+        return addLog("Executed")
+    end
+end
+
 local function execCmd(line)
     local parts = {}
     for w in line:gmatch("%S+") do parts[#parts + 1] = w end
