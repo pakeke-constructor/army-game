@@ -10,6 +10,7 @@ local hoverService = require("src.hud.hoverService")
 local juiceService = require("src.juiceService")
 local ambienceService = require("src.ambienceService")
 local mapTypes = require("src.scenes.map_scene.map_types")
+local s = require("src.hud.settings")
 
 local CAMERA_ZOOM = 1--0.5
 local NODE_RADIUS = 4
@@ -392,6 +393,7 @@ end
 
 
 function map_scene:keypressed(k)
+    if s.keypressed(k) then return end
     if consts.DEV_MODE then
         if k == "o" then
             nodeEventService.openFountainPopup()
@@ -596,6 +598,7 @@ function map_scene:draw()
 
     ui.startUI()
     self.hud:drawUI({ mapScene = true })
+    s.draw()
     ui.endUI()
 end
 

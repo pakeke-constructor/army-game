@@ -27,6 +27,15 @@ function settingsPopupService.isActive()
     return visible
 end
 
+--- Escape toggles the settings popup. Returns true if the key was handled.
+function settingsPopupService.keypressed(k)
+    if k == "escape" then
+        visible = not visible
+        return true
+    end
+    return visible
+end
+
 ---@param r kirigami.Region
 ---@param label string
 ---@param checked boolean

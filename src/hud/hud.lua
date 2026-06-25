@@ -583,7 +583,6 @@ function HUD:drawUI(opt)
     choicePopupService.draw()
     nodeEventService.draw()
     gameoverPopupService.draw()
-    settingsPopupService.draw()
     hoverService.draw()
 end
 
