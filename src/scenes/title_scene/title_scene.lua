@@ -123,10 +123,20 @@ function title_scene:draw()
     lg.setColor(1, 1, 1, 0.7)
 
     local x,y,w,h = main:get()
-    g.drawImageContained("exampleBackgroundMap", x,y,w,h)
+
+    -- drifting zoomed-in background. zoom in, slowly pan the camera around.
+    local ZOOM = 1.03
+    local t = love.timer.getTime()*3
+    local zw, zh = w*ZOOM, h*ZOOM
+    local margX, margY = (zw-w)/2, (zh-h)/2
+    local driftX = math.sin(t*0.13) * margX
+    local driftY = math.cos(t*0.1) * margY
+    -- lg.setScissor(x, y, w, h)
+    g.drawImageContained("exampleBackgroundMap", x-margX+driftX, y-margY+driftY, zw, zh)
+    -- lg.setScissor()
 
     lg.setColor(0.05, 0.05, 0.07, 0.5)
-    lg.rectangle("fill", 0, 0, 1000, 1000)
+    lg.rectangle("fill", x, x, w, h)
 
     lg.setColor(1, 1, 1, 1)
 
