@@ -191,7 +191,7 @@ function battle_scene:enter()
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
     self.camera:setPos(border[3] * 0.45, border[4] * 0.5)
 
-    ambienceService.reInitialize(self.camera:getTransform())
+    ambienceService.reInitialize(self.camera:getTransform(), run.mapGraph.theme.cloudSprites)
 end
 
 
@@ -1016,7 +1016,7 @@ function battle_scene:draw()
         h = math.abs(y2 - y1),
     }
     local ecs = self.ecs
-    fogService.renderFog(fogRegion, function(x, y)
+    fogService.renderFog(fogRegion, g.getRun().mapGraph.theme.fogColor, function(x, y)
         return not ecs:isInsideShape(x, y)
     end)
 

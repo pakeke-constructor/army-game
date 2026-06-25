@@ -18,7 +18,6 @@ local WISP_MAX_LIFETIME = 6
 local wisps = {}
 
 local CLOUD_AMOUNT = 100
-local CLOUD_SPRITES = {"cloud1"}
 local CLOUD_SPEED = 5
 local CLOUD_MARGIN = 0.25 -- band around the view (fraction of window) clouds live in
 local CLOUD_FADE = 0.2    -- fade-in/out distance near the band edge (fraction of window)
@@ -71,8 +70,9 @@ end
 ---@field sprite string
 ---@field fade number
 
+---@param cloudSprites string[]
 ---@return ambientSetvice.randomCloud
-local function randomCloud()
+local function randomCloud(cloudSprites)
     local sizeFactor = love.math.random(120, 150)/100
     local mx, my = window.w * CLOUD_MARGIN, window.h * CLOUD_MARGIN
     return {
@@ -82,7 +82,7 @@ local function randomCloud()
         r = love.math.random() * consts.TAU,
         size = sizeFactor,
         layer = (sizeFactor+1)/2,
-        sprite = helper.randomChoice(CLOUD_SPRITES),
+        sprite = helper.randomChoice(cloudSprites),
         fade = 1,
     }
 end
@@ -148,7 +148,8 @@ end
 
 
 ---@param transform love.Transform camera transform
-function ambienceService.reInitialize(transform)
+---@param cloudSprites string[]
+function ambienceService.reInitialize(transform, cloudSprites)
     windowFromTransform(transform)
     wisps = {}
     for i = 1, WISP_COUNT do
@@ -157,7 +158,7 @@ function ambienceService.reInitialize(transform)
 
     clouds = {}
     for i=1, CLOUD_AMOUNT do
-        clouds[i] = randomCloud()
+        clouds[i] = randomCloud(cloudSprites)
     end
 end
 
