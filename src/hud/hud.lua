@@ -1,5 +1,6 @@
 
 local hoverService = require("src.hud.hoverService")
+local settingsPopupService = require("src.hud.settings")
 
 ---@class g.HUD: objects.Class
 ---@field currentHover g.Squad|string|nil hovered squad object, or hovered spellId
@@ -436,6 +437,10 @@ local function drawTopBar()
 
     drawPanel(zoneString, "{c r=0.2 g=0.5 b=0.3}{wavy freq=0.5}" .. LOC_ZONE)
     drawPanel(pausePanel, LOC_PAUSE)
+    local px, py, pw, ph = pausePanel:get()
+    if iml.wasJustClicked(px, py, pw, ph, 1, "pause_button") then
+        settingsPopupService.show()
+    end
 end
 
 
@@ -578,6 +583,7 @@ function HUD:drawUI(opt)
     choicePopupService.draw()
     nodeEventService.draw()
     gameoverPopupService.draw()
+    settingsPopupService.draw()
     hoverService.draw()
 end
 
