@@ -53,16 +53,33 @@ local function squareCells(reg, n)
     return cells
 end
 
+local riseLerps = {} -- id -> 0..1, how "risen" the icon is
+
 local function drawCommanderList(icons)
     local list = g.getCommanderList()
     local cells = squareCells(icons, #list)
+    local dt = love.timer.getDelta()
     for i, reg in ipairs(cells) do
         local id = list[i]
         local info = g.getCommanderInfo(id)
-        local x, y, rw, rh = reg:padRatio(0.1):get()
+
+        local target = (selectedCommander == id) and 1 or 0
+        local t = helper.lerp(riseLerps[id] or 0, target, dt*30)
+        riseLerps[id] = t
+        t = helper.EASINGS.linear(t)
+
+        -- icon takes half the cell; gap shifts top->bottom as it rises
+        local gap = 0.5
+        local _, iconReg = reg:splitVertical(gap*(1-t), 0.8, gap*t)
+        local x, y, rw, rh = iconReg:padRatio(0.1):get()
+        -- ui.debugRegion(iconReg:padRatio(0.1))
         love.graphics.setColor(1,1,1,1)
-        ui.drawPanel(x,y,rw,rh)
+        -- ui.drawPanel(x,y,rw,rh)
+        local alpha = (selectedCommander == id) and 0.9 or 0.4
+        local col = g.getManaBundleColor(info.squadDef.cost)
+        helper.drawGlow(x+rw/2, y+rh/2, {col.r, col.g, col.b, alpha}, 80)
         g.drawImageContained(info.image, x, y, rw, rh)
+        -- g.drawSquadIcon(id, x, y)
 
         if iml.wasJustClicked(x, y, rw, rh, 1, id) then
             selectedCommander = id
@@ -84,35 +101,39 @@ local function drawPlay(self, reg)
 end
 
 function runSelect:draw()
-    local w, h = lg.getDimensions()
+    ui.startUI()
+    local main = ui.getScreenRegion()
+    local x,y, w, h = main:get()
+    
 
     lg.clear(0.05, 0.05, 0.07, 1)
     lg.setColor(1, 1, 1, 0.7)
-    local mapw, maph = g.getImageSize("exampleBackgroundMap")
-    local sx, sy = w/mapw, h/maph
-    local midX, midY = mapw/2 * sx, maph/2 * sy
-    g.drawImage("exampleBackgroundMap", midX, midY, 0, sx, sy)
+    g.drawImageContained("exampleBackgroundMap", x,y,w,h)
     lg.setColor(0.05, 0.05, 0.07, 0.5)
     lg.rectangle("fill", 0, 0, w, h)
 
 
-    local top, bottomHeader = root:splitVertical(4, 1)
-    local icons, start = bottomHeader:splitHorizontal(8, 3)
-    drawPlay(self, start)
+    local top, _, bottomHeader = main:padRatio(0.05):splitVertical(4, 0.2, 2.2)
+    local _, icons = bottomHeader:splitHorizontal(1, 6, 1)
 
+    icons = icons:padRatio(0.2)
     drawCommanderList(icons)
+
+    local _, right = main:padRatio(0.2):splitHorizontal(4, 1)
+    local _, start = right:splitVertical(2, 1, 2)
+    -- ui.debugRegion(start)
+    if selectedCommander then
+        drawPlay(self, start)
+    end
 
     if selectedCommander then
         local squadId = g.getCommanderInfo(selectedCommander).squadId
         if squadId then
-            ui.startUI()
-                local main = ui.getScreenRegion()
-                local _, split1 = main:padRatio(0.1):splitHorizontal(2, 1)
-                local left, _ = split1:splitVertical(4, 1)
-                ui.drawSquadCard(squadId, left:padRatio(0.1), -999)
-            ui.endUI()
+            local _, left = top:splitHorizontal(1, 1, 1)
+            ui.drawSquadCard(squadId, left:padRatio(0.1), -999)
         end
     end
+    ui.endUI()
 end
 
 return runSelect
