@@ -4,6 +4,7 @@ local love = require("love")
 
 _G.lg = love.graphics
 _G.table.clear = require("table.clear")
+_G.table.new = require("table.new")
 
 
 lg.setDefaultFilter("nearest", "nearest")

@@ -1,5 +1,55 @@
+local particles = require("src.modules.particles.particles")
+
+local lg = love.graphics
+-- local root
+
+---@class g.TitleScene
 local title_scene = {}
 
+-- embers live in normalized [0,1] space so they stay resolution-independent.
+local EMBER_LIFE_MIN = 0.6
+local EMBER_LIFE_MAX = 5
+local MAX_EMBERS = 300
+local REF_H = 720 -- ember sizes are authored at this height, then scaled
+
+local embers = particles.newParticlesWorld({
+    gravity = -0.05, -- floats upward
+    extraFields = { maxLife = true }, -- each ember stores its own random lifetime
+    getParticleDuration = function(p) return p.maxLife end,
+    updateParticle = function(p, dt)
+        p.vx = math.sin(love.timer.getTime()*2 + p.id) * 0.03 -- horizontal sway
+    end,
+    drawParticle = function(p)
+        local w, h = lg.getDimensions()
+        local life = p.lifetime / p.maxLife
+        local size = (1 + (p.id % 3)) * (h / REF_H) * 3
+        local flicker = 0.7 + 0.2*math.sin(love.timer.getTime()*7 + p.id)
+        local a = (1 - life) * 0.9 * flicker
+        lg.setColor(1, 0.45*flicker, 0.1, a)
+        lg.circle("fill", p.x * w, p.y * h, size)
+    end,
+})
+
+local spawnAcc = 0 -- fractional spawn accumulator for a framerate-independent rate
+
+-- spawn one ember rising from just below the bottom edge
+local function spawnEmber()
+    local x = love.math.random()
+    embers:spawnParticle(x, 1.05, 0, -(0.05 + love.math.random()*0.06))
+    -- cube the roll so most embers are short-lived (die low) and only a few
+    -- live long enough to reach the top.
+    local r = love.math.random()
+    embers.proxy.maxLife = EMBER_LIFE_MIN + r*r * (EMBER_LIFE_MAX - EMBER_LIFE_MIN)
+end
+
+---@class TitleButton
+---@field name string
+---@field onClick fun()
+---@field skipFade boolean?
+---@field t number?
+---@field offsetX number?
+
+---@type TitleButton[]
 local buttons = {
     {name = "START", onClick = function ()
         g.gotoScene("runSelect_scene")
@@ -21,9 +71,6 @@ local buttons = {
 
 local hoveredButton
 
-local lg = love.graphics
-local spawnX = 0 -- the left x of most of the buttons
-local spawnY = 0
 local gapPerButton = 70
 local BUTTON_W = 300
 
@@ -33,18 +80,28 @@ function title_scene:init()
 end
 
 function title_scene:enter()
+    -- pre-seed a full field of embers at random heights + ages so they don't
+    -- all appear as a band at the bottom when the scene opens.
+    embers:clear()
+    for _ = 1, MAX_EMBERS do
+        spawnEmber()
+        embers.proxy.y = love.math.random()                        -- scatter up the screen
+        embers.proxy.lifetime = love.math.random()*embers.proxy.maxLife -- stagger deaths
+    end
 end
 
 function title_scene:update(dt)
     local w, h = lg.getDimensions()
-    spawnX = w * 1/6
-    spawnY = h * 1/2
+    -- root = Kirigami(0, 0, w, h)
 
-    -- one column of cells, vertically centered on the button list
-    local col = Kirigami(spawnX, spawnY - gapPerButton/2, BUTTON_W, gapPerButton*#buttons)
-    buttonCells = col:columns(#buttons)
+    embers:update(dt)
+    -- spawn at a steady rate regardless of framerate (cap clamps the total)
+    spawnAcc = spawnAcc + dt*150
+    while spawnAcc >= 1 and embers:getParticleCount() < MAX_EMBERS do
+        spawnAcc = spawnAcc - 1
+        spawnEmber()
+    end
 
-    -- hoveredButton is set in :draw (iml only runs inside the draw frame)
     for i, button in ipairs(buttons) do
         local target = (i == hoveredButton) and 1 or 0
         local rate = (i == hoveredButton) and 5 or 14
@@ -55,9 +112,8 @@ function title_scene:update(dt)
 end
 
 function title_scene:draw()
-    local w, h = lg.getDimensions()
-
-    
+    ui.startUI()
+    local main = ui.getScreenRegion()
 
     lg.clear(0.05, 0.05, 0.07, 1)
 
@@ -66,26 +122,32 @@ function title_scene:draw()
 
     lg.setColor(1, 1, 1, 0.7)
 
-    local mapw, maph = g.getImageSize("exampleBackgroundMap")
-    local sx, sy = w/mapw, h/maph
-    local x, y = mapw/2 * sx, maph/2 * sy
-    g.drawImage("exampleBackgroundMap", x, y, 0, sx, sy)
+    local x,y,w,h = main:get()
+    g.drawImageContained("exampleBackgroundMap", x,y,w,h)
 
     lg.setColor(0.05, 0.05, 0.07, 0.5)
-    lg.rectangle("fill", 0, 0, w, h)
+    lg.rectangle("fill", 0, 0, 1000, 1000)
 
-
+    lg.setBlendMode("add")
+    embers:draw()
+    lg.setBlendMode("alpha")
 
     lg.setColor(1, 1, 1, 1)
 
-    local capw, caph = g.getImageSize("logo")
-    g.drawImage("logo", spawnX+capw/2, spawnY - caph)
-    
+    local _, left = main:splitHorizontal(1, 2, 5)
+    local _, logoReg, _, bottom = left:splitVertical(1.5, 2, 0.5, 5, 1.5)
+    local buttonReg = bottom:splitHorizontal(4, 1)
+    -- ui.debugRegion(logoReg)
+    -- ui.debugRegion(buttonReg)
 
+    local x,y,w,h = logoReg:get()
+    g.drawImageContained("logo", x,y,w,h)
+    
+    buttonCells = buttonReg:columns(#buttons)
     
     hoveredButton = nil
     for i, button in ipairs(buttons) do
-        local rx, ry, rw, rh = buttonCells[i]:get()
+        local rx, ry, rw, rh = buttonCells[i]:padRatio(0.2):get()
         if iml.isHovered(rx, ry, rw, rh, button) then
             hoveredButton = i
         end
@@ -105,6 +167,8 @@ function title_scene:draw()
         lg.setColor((i == hoveredButton) and {1,1,0.6,1} or {1,1,1,1})
         richtext.printRichContainedNoWrap(button.name, smallFont, rx + (button.offsetX or 0), ry+10, rw, rh-20, "left")
     end
+
+    ui.endUI()
 end
 
 return title_scene
