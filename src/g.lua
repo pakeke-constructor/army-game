@@ -129,10 +129,13 @@ local PALETTE = {
 ---@param b number blue [0..1]
 ---@param a number? alpha [0..1] (default 1)
 ---@overload fun(color:objects.Color):objects.Color
+---@overload fun(color:string):objects.Color
 ---@return objects.Color
 function g.snapToPalette(r, gg, b, a)
     if type(r) == "table" then
         r, gg, b, a = r[1], r[2], r[3], r[4]
+    elseif type(r) == "string" then
+        r, gg, b, a = objects.Color(r):getRGBA()
     end
     a = a or 1
     local best, bestDist = nil, math.huge
@@ -515,6 +518,20 @@ function g.getManaBundleColor(bundle)
     return objects.Color.WHITE
 end
 
+local LEVEL_TEXT = interp("Lv.%{level}", {context = "Abbreviated level text"})
+local LEVEL_MAX_TEXT = loc("MAX", {context = "Max level reached"})
+local SQUAD_LEVEL_COLORS = {
+    g.snapToPalette("#ffffff"),
+    g.snapToPalette("#f1f11e"),
+    g.snapToPalette("#f1f11e"),
+    g.snapToPalette("#cd853b"),
+    g.snapToPalette("#cd853b"),
+    g.snapToPalette("#c5303d"),
+    g.snapToPalette("#c5303d"),
+    g.snapToPalette("#c852a4"),
+    g.snapToPalette("#c852a4"),
+    g.snapToPalette("#357dd2")
+}
 
 ---@param squadId string
 ---@param x number
@@ -536,12 +553,18 @@ function g.drawSquadIcon(squadId, x, y, drawManaCost, drawLevel)
     if drawManaCost then
         g.drawManaCost(info.cost, x,y-size/2, size + 6)
     end
-    if drawLevel then
+    if drawLevel and not info.entityDef.isCommander then
         -- draw level:
-        local lvReg = Kirigami(x, y+2, size/2-4, size/2-4)
         local font = g.getSmallFont(16)
-        lg.setColor(0.6,0.6,0.6,0.6)
-        richtext.printRichContainedNoWrap("Lv "..tostring(drawLevel), font, lvReg:get())
+        local co = gsman.setColor(SQUAD_LEVEL_COLORS[helper.clamp(drawLevel, 1, 10)])
+        local text
+        if drawLevel >= 10 then
+            text = "{bob amp=0.5}{o}"..LEVEL_MAX_TEXT
+        else
+            text = "{o}"..LEVEL_TEXT({level = tostring(drawLevel)})
+        end
+        richtext.printRichContainedNoWrap(text, font, x - size / 2, y+6, size, 16, "center")
+        co:pop()
     end
 end
 
@@ -966,8 +989,10 @@ end
 function g.addSquadToArmy(squadId)
     local run = g.getRun()
     assert(not run.squads[squadId], "Squad already in army: " .. squadId)
-    run.squads[squadId] = g.newSquad(squadId)
+    local sq = g.newSquad(squadId)
+    run.squads[squadId] = sq
     run._sortedSquads = nil
+    return sq
 end
 
 --- Adds a temporary squad to the bench for the current fight only.
