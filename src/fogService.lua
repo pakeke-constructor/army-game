@@ -1,19 +1,6 @@
 
-
+---@class fogService
 local fogService = {}
-
-
--- local FOG_COLOR = objects.Color("FF2F0404") -- dark red
--- local FOG_COLOR = objects.Color("FF342D2D") -- dark gray
-
-local FOG_COLOR = objects.Color("FF450606") -- dark-ish red
-
-local FOG_COLOR = objects.Color("FF1A311F") -- dark-green
-
-
-local FOG_COLOR = objects.Color("ff273718") -- forest green
--- TODO: in future, change color of fog depending on the zone
-
 
 
 local FOG_STEP = 18
@@ -112,8 +99,9 @@ local function getFogQuads()
 end
 
 ---@param r kirigami.Region -- world-space
+---@param fogColor objects.Color
 ---@param hasFog fun(x:number,y:number):boolean
-function fogService.renderFog(r, hasFog)
+function fogService.renderFog(r, fogColor, hasFog)
     local t = love.timer.getTime()
     local x1 = math.floor(r.x / FOG_STEP) * FOG_STEP - FOG_EXPAND_CELLS * FOG_STEP
     local y1 = math.floor(r.y / FOG_STEP) * FOG_STEP - FOG_EXPAND_CELLS * FOG_STEP
@@ -152,9 +140,8 @@ function fogService.renderFog(r, hasFog)
 
     -- layer FOG_LAYER_MAX -> 1 so deeper fog is added (drawn) behind edges
     for layer = FOG_LAYER_MAX, 1, -1 do
-        local col = objects.Color(FOG_COLOR)
-        local coll = col:darken((FOG_LAYER_MAX - layer) * FOG_DARKEN_PER_LAYER)
-        batch:setColor(coll[1], coll[2], coll[3], OPACITY)
+        local col = fogColor:darken((FOG_LAYER_MAX - layer) * FOG_DARKEN_PER_LAYER)
+        batch:setColor(col[1], col[2], col[3], OPACITY)
         for gx = 0, w - 1 do
             for gy = 0, h - 1 do
                 local v = a:get(gx, gy)
