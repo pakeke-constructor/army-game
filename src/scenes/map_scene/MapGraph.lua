@@ -95,11 +95,11 @@ end
 
 ---@param width integer
 ---@param height integer
----@param theme MapTheme
-function MapGraph:init(width, height, theme)
+---@param mapType MapType
+function MapGraph:init(width, height, mapType)
     self.width = width
     self.height = height
-    self.theme = theme
+    self.mapType = mapType
     self.distanceBetweenNodes = 130 -- sensible default just to silence LuaLS
     self.nodes = {}
     self.edges = {}
@@ -116,7 +116,7 @@ function MapGraph:init(width, height, theme)
     self.scaleX = 1
     self.scaleY = 0.6
 
-    for _, g in ipairs(theme.groundTextures) do
+    for _, g in ipairs(mapType.groundTextures) do
         self.groundDecorNoRotMap[g[1]] = not not g[3]
     end
 end
@@ -245,7 +245,7 @@ end
 ---@class MapGraph.GenArgs
 ---@field width integer
 ---@field height integer
----@field theme MapTheme
+---@field mapType MapType
 ---@field nodePruneChance number
 ---@field edgePruneChance number
 ---@field distanceBetweenNodes number
@@ -265,7 +265,7 @@ function MapGraph.generate(args, rng)
     local edgePrune = args.edgePruneChance
     local diagChance = args.randomDiagonalChance
 
-    local self = MapGraph(width, height, args.theme) --[[@as MapGraph]]
+    local self = MapGraph(width, height, args.mapType) --[[@as MapGraph]]
     self.distanceBetweenNodes = args.distanceBetweenNodes
     self.scaleX = args.scaleX
     self.scaleY = args.scaleY
@@ -394,7 +394,7 @@ function MapGraph.generate(args, rng)
 
 
     -- 9. Place decor in gaps using two-grid spatial check
-    local decorTypeIds = self.theme.decorTypes
+    local decorTypeIds = self.mapType.decorTypes
     if decorTypeIds and #decorTypeIds > 0 then
         local sp = args.distanceBetweenNodes
         local cellSize = sp / 8
@@ -636,10 +636,10 @@ function MapGraph:_generateGroundDecors()
         return math.floor(helper.lerp(1, max, self.rng()) + 0.5)
     end
     for _ = 1, count do
-        local col = helper.randomChoice(self.theme.groundColors, rngmax)
+        local col = helper.randomChoice(self.mapType.groundColors, rngmax)
         local r, g, b = col:getByteRGBA()
         local a = math.floor(helper.lerp(0.25, 0.4, self.rng()) * 255 + 0.5)
-        local tex = helper.pickWeighted(self.theme.groundTextures, self.rng) --[[@as string]]
+        local tex = helper.pickWeighted(self.mapType.groundTextures, self.rng) --[[@as string]]
         local wx = math.floor(helper.lerp(dMinX, dMaxX, self.rng()))
         local wy = math.floor(helper.lerp(dMinY, dMaxY, self.rng()))
         self.groundDecor[#self.groundDecor+1] = {

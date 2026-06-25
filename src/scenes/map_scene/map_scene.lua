@@ -9,7 +9,7 @@ local fogService = require("src.fogService")
 local hoverService = require("src.hud.hoverService")
 local juiceService = require("src.juiceService")
 local ambienceService = require("src.ambienceService")
-local mapThemes = require("src.scenes.map_scene.map_themes")
+local mapTypes = require("src.scenes.map_scene.map_types")
 
 local CAMERA_ZOOM = 1--0.5
 local NODE_RADIUS = 4
@@ -155,16 +155,16 @@ function map_scene:enter()
 
     local run = g.getRun()
     if not run.mapGraph then
-        -- TODO: Pick map theme based on level
+        -- TODO: Pick map type based on level
         -- Example: level 1 = forest, level 2 = snow, level 3 = hell
         self:_buildMap("forest")
     end
     return self:_buildNodeState()
 end
 
----@param theme string
+---@param mapType string
 ---@param fromPortal boolean?
-function map_scene:_buildMap(theme, fromPortal)
+function map_scene:_buildMap(mapType, fromPortal)
     local run = g.getRun()
     -- Run the proc gen algorithm until we have a valid setup.
     -- (nodeCount > 20 is valid)
@@ -178,7 +178,7 @@ function map_scene:_buildMap(theme, fromPortal)
         nodeOffsetFactor = 0.35,
         scaleX = 1,
         scaleY = 0.6,
-        theme = mapThemes[theme],
+        mapType = mapTypes[mapType],
         fromPortal = not not fromPortal,
     }) until run.mapGraph:countNodes() > 20
     return self:_buildNodeState()
@@ -218,7 +218,7 @@ function map_scene:_buildNodeState()
     end
 
     self.camera:setPos(self.camX, self.camY)
-    ambienceService.reInitialize(self.camera:getTransform(), run.mapGraph.theme.cloudSprites)
+    ambienceService.reInitialize(self.camera:getTransform(), run.mapGraph.mapType.cloudSprites)
 end
 
 function map_scene:_buildFogClearCells()
@@ -581,7 +581,7 @@ function map_scene:draw()
         builder:finalize()
 
         -- fog rendering
-        fogService.renderFog(fogRegion, graph.theme.fogColor, function(x, y)
+        fogService.renderFog(fogRegion, graph.mapType.fogColor, function(x, y)
             local cx = math.floor(x / FOG_STEP)
             local row = clearCells[cx]
             return not (row and row[math.floor(y / FOG_STEP)])

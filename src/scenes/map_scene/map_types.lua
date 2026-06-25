@@ -1,19 +1,19 @@
 local M = {}
 
----@class MapTheme.GroundTex
+---@class MapType.GroundTex
 ---@field [1] string Image name
 ---@field [2] number Weight
 ---@field [3] boolean? Disable random rotation? (default false)
 
----@class MapTheme
+---@class MapType
 ---@field public name string Must same as the field name, used by portal node.
 ---@field public decorTypes string[] As defined in decor_types.lua
----@field public groundTextures MapTheme.GroundTex[] List of possible ground textures to pick
+---@field public groundTextures MapType.GroundTex[] List of possible ground textures to pick
 ---@field public groundColors objects.Color[] List of possible ground colors to pick
 ---@field public fogColor objects.Color Fog color
 ---@field public cloudSprites string[] Image name for the cloud (random pick unweighted)
 
----@type MapTheme
+---@type MapType
 M.forest = {
     name = "forest",
     decorTypes = {
