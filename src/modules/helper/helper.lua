@@ -485,7 +485,7 @@ local circleMesh
 
 ---@param x number
 ---@param y number
----@param color [number, number, number]
+---@param color objects.Color
 ---@param size number?
 ---@param glowArgs helper.drawGlow.args?
 function helper.drawGlow(x, y, color, size, glowArgs)
