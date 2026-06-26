@@ -59,12 +59,22 @@ end
 --- Owned spellIds, sorted for stable order.
 ---@return string[]
 local function getVisibleSpells()
+    local run = g.getRun()
     local spells = {}
-    for spellId in pairs(g.getRun().spells) do
-        spells[#spells + 1] = spellId
+    for spellId in pairs(run.spells) do
+        if not run.spellsCast[spellId] then
+            spells[#spells + 1] = spellId
+        end
     end
     table.sort(spells)
     return spells
+end
+
+---@param spellId string
+---@return boolean
+local function isSpellAffordable(spellId)
+    local info = g.getSpellInfo(spellId)
+    return (not info.cost) or g.canAffordMana(g.getBattleManaCounts(), info.cost)
 end
 
 --- The ordered list of currently-selectable items: spellIds (battle started) or
@@ -158,14 +168,14 @@ end
 ---@param x number
 ---@param y number
 ---@param selected boolean
----@param usable boolean spell can be cast right now (battle started + affordable)
-local function renderSpell(spellId, x, y, selected, usable)
+---@param affordable boolean spell can be afforded right now
+local function renderSpell(spellId, x, y, selected, affordable)
     local size = SQUAD_ICON_SIZE
     if selected then
         lg.setColor(1, 1, 1, 0.3)
         ui.drawSingleColorPanel(x - 2, y - 2, size + 4, size + 4)
     end
-    if not usable then
+    if not affordable then
         lg.setColor(1, 1, 1, 0.35)
     else
         lg.setColor(1, 1, 1)
@@ -243,14 +253,15 @@ local function drawSpellsSection(self, region, selIdx)
     local startX, baseY, step = layoutIcons(region, #spells)
 
     for i, spellId in ipairs(spells) do
-        local usable = (selIdx ~= nil) and isItemUsable(self, spellId)
+        local affordable = (selIdx == nil) or isSpellAffordable(spellId)
+        local usable = (selIdx ~= nil) and affordable and isItemUsable(self, spellId)
         local x = startX + (i - 1) * step
         local y = baseY
         local selected = (i == selIdx)
         if selected then
             y = y - 6
         end
-        renderSpell(spellId, x, y-4, selected, usable)
+        renderSpell(spellId, x, y-4, selected, affordable)
         local id = "spell" .. i
         if usable and iml.wasJustClicked(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, 1, id) then
             self.selectedIndex = i

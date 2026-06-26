@@ -344,6 +344,12 @@ function g.tryGetECS()
     return currentECS
 end
 
+--- O(1) cached lookup of the live commander entity (nil if none/dead).
+---@return ecs.Entity?
+function g.getCommanderEntity()
+    return currentECS and currentECS._commander
+end
+
 ---@param ecs ecs.ECSWorld
 function g.setCurrentECS(ecs)
     currentECS = ecs
@@ -1064,7 +1070,7 @@ local SPELL_LIST = {}
 ---@class g.SpellInstantCastDef
 ---@field target "ally"|"enemy"
 ---@field maxTargets integer?
----@field filter fun(ent: ecs.Entity, castX: number, castY: number, spellId: string): boolean?
+---@field filter (fun(ent: ecs.Entity, castX: number, castY: number, spellId: string): boolean?)?
 ---@field apply fun(ent: ecs.Entity, castX: number, castY: number, spellId: string)
 
 ---@class g.SpellDef
@@ -1091,7 +1097,12 @@ function g.defineSpell(id, info)
         error("Duplicate spell: " .. id)
     end
     info.id = id
-    info.color = g.snapToPalette(info.color or objects.Color.WHITE)
+    local manaType
+    for key,v in pairs(info.cost) do
+        manaType = key; break
+    end
+    local manaCol = g.getManaInfo(manaType).color
+    info.color = g.snapToPalette(info.color or manaCol)
     info.name = loc(assert(info.name), {}, {context = info.nameContext or "Name of a spell."})
     info.rarity = assert(info.rarity)
     info.cost = info.cost or {}
@@ -1177,8 +1188,10 @@ function g.renderSpellCastPreview(x, y, spellId)
     lg.setColor(info.color)
     lg.circle("line", x, y, range)
 
+    local rot = love.timer.getTime() * 3
+
     iterateSpellTargets(info, x, y, function(ent)
-        g.drawImageOffset("commander_target_3", ent.x, ent.y - 20, 0, 1, 1, 0.5, 0.5)
+        g.drawImageOffset("commander_target_3", ent.x, ent.y - 20, rot, 1, 1, 0.5, 0.5)
     end)
 
     lg.setColor(1, 1, 1, 1)

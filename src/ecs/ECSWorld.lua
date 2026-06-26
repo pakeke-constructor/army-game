@@ -40,6 +40,9 @@ function ECSWorld:init(systemNames)
         enemy = objects.Partition(PARTITION_CHUNKSIZE)
     }
 
+    ---@type ecs.Entity? cached commander, refreshed each update
+    self._commander = nil
+
     self.allyDeathsThisBattle = 0
     self.enemyDeathsThisBattle = 0
 
@@ -240,8 +243,10 @@ function ECSWorld:update(dt)
     self:_rebuildComponentIndex()
     self:_rebuildTeamLists()
     g.call("preUpdate", dt)
+    self._commander = nil
     for i = 1, self.entities.len do
         local e = self.entities[i]
+        if e.isCommander then self._commander = e end
         if not e.physics then
             local vx, vy = g.getVel(e)
             if vx ~= 0 then e.x = e.x + vx * dt end
