@@ -218,7 +218,7 @@ end
 
 
 
-
+---@type g.Run?
 local currentRun
 
 ---@class g.LaunchOptions
@@ -326,8 +326,8 @@ local mapTypes = require("src.scenes.map_scene.map_types")
 ---@return MapType
 ---@return string
 function g.getMapType()
-    local run = currentRun
-    local mapType = run and run.mapGraph and run.mapGraph.mapType
+    local run = g.getRun()
+    local mapType = run and run.mapGraph and run.mapGraph.mapType.name
     mapType = mapType or consts.STARTING_MAP_TYPE
     return assert(mapTypes[mapType]), mapType
 end
