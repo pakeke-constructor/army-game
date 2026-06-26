@@ -335,14 +335,14 @@ function ui.Slider(key, direction, slidercol, currentsegment, segments, slidersi
     end
 
     love.graphics.setColor(curslidercol)
+    local radius = (direction == "horizontal" and h or w) / 2
+    local mainlen = direction == "horizontal" and w or h
+    local travel = mainlen - radius * 2
+    local slideroff = segments > 1 and ((s - 1) * travel / (segments - 1)) or travel / 2
     if direction == "horizontal" then
-        local sliderwidth = w * slidersize
-        local slideroff = segments > 1 and ((s - 1) * (w - sliderwidth) / (segments - 1)) or 0
-        love.graphics.rectangle("fill", x + slideroff, y, w * slidersize, h)
+        love.graphics.circle("fill", x + radius + slideroff, y + h / 2, radius)
     elseif direction == "vertical" then
-        local sliderheight = h * slidersize
-        local slideroff = segments > 1 and ((s - 1) * (h - sliderheight) / (segments - 1)) or 0
-        love.graphics.rectangle("fill", x, y + slideroff, w, sliderheight)
+        love.graphics.circle("fill", x + w / 2, y + radius + slideroff, radius)
     end
 
     return s
