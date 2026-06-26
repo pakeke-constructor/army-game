@@ -435,6 +435,13 @@ local function spawnTestArcs(self)
     end
 end
 
+---@param self g.BattleScene
+local function spawnTestLightning(self)
+    local mx, my = love.mouse.getPosition()
+    local wx, wy = self.camera:toWorld(mx, my)
+    g.lightning(wx, wy, 50, self.commander)
+end
+
 function battle_scene:keypressed(k)
     if s.keypressed(k) then return end
     local n = tonumber(k)
@@ -443,6 +450,9 @@ function battle_scene:keypressed(k)
     end
 
     if consts.DEV_MODE then
+        if k == "1" then
+            spawnTestLightning(self)
+        end
         if k == "k" then
             killAllEnemies(self)
         end
