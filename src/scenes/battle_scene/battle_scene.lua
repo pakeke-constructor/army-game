@@ -235,14 +235,20 @@ local function buildVictoryChoices()
 end
 
 
+local RANDOM_SQUAD_CHANCE = 0.75 -- 75% chance to get random squad reward
+
 local function winBattle(self)
     if self.victory then return end
     self.victory = true
     self.victoryPopupTime = 0
     rewardPopupService.battleReward({
-        gold = math.floor(helper.lerp(consts.BALANCING.BATTLE_GOLD_REWARD_MIN, consts.BALANCING.BATTLE_GOLD_REWARD_MAX, love.math.random())),
+        gold = math.floor(helper.lerp(
+            consts.BALANCING.BATTLE_GOLD_REWARD_MIN,
+            consts.BALANCING.BATTLE_GOLD_REWARD_MAX,
+            love.math.random()
+        )),
         xp = 3,
-        randomSquad = true,
+        randomSquad = love.math.random() <= RANDOM_SQUAD_CHANCE,
     })
     g.getRun():winBattle()
     -- remove all entities except the commander
@@ -429,6 +435,13 @@ local function spawnTestArcs(self)
     end
 end
 
+---@param self g.BattleScene
+local function spawnTestLightning(self)
+    local mx, my = love.mouse.getPosition()
+    local wx, wy = self.camera:toWorld(mx, my)
+    g.lightning(wx, wy, 50, self.commander)
+end
+
 function battle_scene:keypressed(k)
     if s.keypressed(k) then return end
     local n = tonumber(k)
@@ -437,6 +450,9 @@ function battle_scene:keypressed(k)
     end
 
     if consts.DEV_MODE then
+        if k == "1" then
+            spawnTestLightning(self)
+        end
         if k == "k" then
             killAllEnemies(self)
         end
