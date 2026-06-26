@@ -5,6 +5,7 @@ local ParticleService = require(".particles.ParticleService")
 local fogService = require("src.fogService")
 local juiceService = require("src.juiceService")
 local ambienceService = require("src.ambienceService")
+local s = require("src.hud.settings")
 
 
 local function cameraZoom()
@@ -429,6 +430,7 @@ local function spawnTestArcs(self)
 end
 
 function battle_scene:keypressed(k)
+    if s.keypressed(k) then return end
     local n = tonumber(k)
     if n and n >= 1 and n <= 9 then
         self.hud:selectVisibleSlot(n)
@@ -1163,6 +1165,7 @@ function battle_scene:draw()
     if self.sandbox and consts.SHOW_DEV_STUFF then
         drawSandboxUI(self)
     end
+    s.draw()
     ui.endUI()
 
     if self.shockwave and self.shockwave.time < WIN_SHOCKWAVE_DURATION then
