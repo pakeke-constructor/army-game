@@ -52,15 +52,22 @@ function settingsPopupService.draw()
     if not visible then return end
 
     -- Background overlay
-    lg.setColor(0, 0, 0, 0.7)
+    lg.setColor(0, 0, 0, 0.2)
     lg.rectangle("fill", ui.getFullScreenRegion():get())
+    -- eat the mouse so HUD/scene elements behind don't get clicked/hovered
+    iml.panel(ui.getFullScreenRegion():get())
 
     local titleFont = g.getBigFont(48)
     local smallFont = g.getSmallFont(16)
 
+    lg.setColor(0.2, 0.2, 0.2, 1)
     local r = ui.getScreenRegion():padRatio(0.25)
-    ui.drawDarkPanel(r:get())
+    ui.drawSingleColorPanel(r:get())
+    lg.setColor(0.1, 0.1, 0.1, 1)
+    ui.drawPanel(r:get())
     r = r:padUnit(20)
+
+    lg.setColor(1,1,1, 1)
 
     local titleR, _, fullscreenR, _, buttonBaseR = r:splitVerticalExact(
         titleFont:getHeight(),

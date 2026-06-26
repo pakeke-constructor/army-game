@@ -55,4 +55,9 @@ M.forest = {
     cloudSprites = {"cloud1"}
 }
 
+
+for k,v in pairs(M) do
+    assert(v.name == k)
+end
+
 return M

@@ -309,7 +309,7 @@ local function drawPortalPopup()
         local scene, name = g.getCurrentScene()
         if name == "map_scene" then
             ---@cast scene g.MapScene
-            scene:_buildMap(g.getRun().mapGraph.mapType.name, true)
+            scene:_buildMap(select(2, g.getMapType()), true)
         end
     end
     if drawChoiceButton(rightR, PORTAL_LEAVE, font) then

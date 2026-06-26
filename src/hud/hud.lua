@@ -3,7 +3,8 @@ local hoverService = require("src.hud.hoverService")
 local settingsPopupService = require("src.hud.settings")
 
 ---@class g.HUD: objects.Class
----@field currentHover g.Squad|string|nil hovered squad object, or hovered spellId
+---@field hoveredSquad g.Squad|nil hovered squad object
+---@field hoveredSpell string|nil hovered spellId
 ---@field selectedIndex integer? index into the active selection list (see getActiveList)
 ---@field battleStarted boolean cached each frame; false = squads selectable, true = spells selectable
 local HUD = objects.Class("g:HUD")
@@ -13,12 +14,15 @@ function HUD:init()
     self.battleStarted = false
 end
 
+---@class g.hudArgs.hoverSquad
+---@field id string
+---@field showUpgrade boolean?
 
 ---@class g.hudArgs
 ---@field battleScene boolean?
 ---@field mapScene boolean?
 ---@field battleStarted boolean?
----@field hoverSquadId string?
+---@field hoverSquad g.hudArgs.hoverSquad?
 
 local SQUAD_ICON_SIZE = 32
 local SQUAD_PADDING = 4
@@ -89,9 +93,10 @@ end
 local function isItemUsable(self, item)
     if type(item) == "string" then
         local run = g.getRun()
-        local info = g.getSpellInfo(item)
-        local affordable = not info.cost or g.canAffordMana(run._battleMana, info.cost)
-        return affordable and not run.spellsCast[item]
+        if run.spellsCast[item] then return false end
+        local mx, my = love.mouse.getPosition()
+        local wx, wy = g.screenToWorld(mx, my)
+        return g.canCastSpell(wx, wy, item)
     end
     return item.canAfford or false
 end
@@ -221,7 +226,7 @@ local function drawSquadsSection(self, region, selIdx)
         end
         iml.panel(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, i)
         if iml.isHovered(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, i) then
-            self.currentHover = sq
+            self.hoveredSquad = sq
         end
     end
 end
@@ -253,16 +258,19 @@ local function drawSpellsSection(self, region, selIdx)
         end
         iml.panel(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, id)
         if iml.isHovered(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, id) then
-            self.currentHover = spellId
+            self.hoveredSpell = spellId
         end
     end
 end
 
 
+
+
 ---@param self g.HUD
 ---@param region kirigami.Region
 local function drawArmyBar(self, region)
-    self.currentHover = nil
+    self.hoveredSquad = nil
+    self.hoveredSpell = nil
     local _, idx = getValidSelection(self)
     local spellsActive = spellsAreActive(self)
 
@@ -571,12 +579,16 @@ function HUD:drawUI(opt)
 
     drawBottomBar(self, SQUAD_ICON_SIZE + 30)
 
-    local hoverSquad = (type(self.currentHover) == "table") and self.currentHover or nil
-    local hoveredSquadId = opt.hoverSquadId or (hoverSquad and hoverSquad.squadId)
+    local hoveredSquadId = (opt.hoverSquad and opt.hoverSquad.id) or (self.hoveredSquad and self.hoveredSquad.squadId)
     if hoveredSquadId then
         local main = ui.getScreenRegion()
         local _, left = main:padRatio(0.2):splitHorizontal(2, 1)
-        ui.drawSquadCard(hoveredSquadId, left:padRatio(0.1), -999, false, true)
+        local showUpgrade = not not (opt.hoverSquad and opt.hoverSquad.showUpgrade)
+        ui.drawSquadCard(hoveredSquadId, left:padRatio(0.1), -999, showUpgrade, true)
+    elseif self.hoveredSpell then
+        local main = ui.getScreenRegion()
+        local _, left = main:padRatio(0.2):splitHorizontal(2, 1)
+        ui.drawSpellCard(self.hoveredSpell, left:padRatio(0.1), -999)
     end
 
     rewardPopupService.draw()
