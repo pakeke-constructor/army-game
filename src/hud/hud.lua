@@ -266,15 +266,27 @@ end
 
 
 ---@param self g.HUD
+---@param opt g.hudArgs
 ---@param region kirigami.Region
-local function drawArmyBar(self, region)
+local function drawArmyBar(self, opt, region)
     self.hoveredSquad = nil
     self.hoveredSpell = nil
     local _, idx = getValidSelection(self)
     local spellsActive = spellsAreActive(self)
 
-    -- squads 65%, padding 5%, spells 30%
-    local squadRegion, _, spellRegion = region:splitHorizontal(0.65, 0.05, 0.30)
+    local squadRegion, _, spellRegion
+
+    if opt.battleScene then
+        if opt.battleStarted then
+            -- spells should control the space
+            squadRegion, _, spellRegion = region:splitHorizontal(0.3, 0.05, 0.65)
+        else
+            -- else, should show mainly squads.
+            squadRegion, _, spellRegion = region:splitHorizontal(0.65, 0.05, 0.3)
+        end
+    else
+        squadRegion, _, spellRegion = region:splitHorizontal(0.65, 0.05, 0.3)
+    end
     drawSquadsSection(self, squadRegion, (not spellsActive) and idx or nil)
     drawSpellsSection(self, spellRegion, spellsActive and idx or nil)
 end
@@ -535,7 +547,8 @@ end
 
 
 ---@param self g.HUD
-local function drawBottomBar(self, barHeight)
+---@param opt g.hudArgs
+local function drawBottomBar(self, opt, barHeight)
     local w,h = drawManaBox(self, true)
 
     local sw, sh = ui.getScaledUIDimensions()
@@ -547,7 +560,7 @@ local function drawBottomBar(self, barHeight)
 
     -- Squad box
     ui.drawDarkPanel(squadBar:get())
-    drawArmyBar(self, squadBar:padUnit(6))
+    drawArmyBar(self, opt, squadBar:padUnit(6))
 
     -- Blessing box
     ui.drawDarkPanel(blessingBar:get())
@@ -572,7 +585,7 @@ function HUD:drawUI(opt)
     self.battleStarted = opt.battleStarted or false
     drawTopBar()
 
-    drawBottomBar(self, SQUAD_ICON_SIZE + 30)
+    drawBottomBar(self, opt, SQUAD_ICON_SIZE + 30)
 
     local hoveredSquadId = (opt.hoverSquad and opt.hoverSquad.id) or (self.hoveredSquad and self.hoveredSquad.squadId)
     if hoveredSquadId then
