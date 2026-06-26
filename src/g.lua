@@ -546,6 +546,11 @@ local SQUAD_LEVEL_COLORS = {
     g.snapToPalette("#357dd2")
 }
 
+local TRAIL_CHASER_COUNT = {
+    RARE = 2,
+    LEGENDARY = 4
+}
+
 ---@param squadId string
 ---@param x number
 ---@param y number
@@ -555,14 +560,30 @@ function g.drawSquadIcon(squadId, x, y, drawManaCost, drawLevel)
     local info = g.getSquadInfo(squadId)
     --local rarityColor = (info.rarity or g.RARITIES.COMMON).color
     local col = g.getManaBundleColor(info.cost)
-    local c = gsman.mulColor(1, 1, 1)
+    local size = 32 -- hacky hardcode
+
+    if TRAIL_CHASER_COUNT[info.rarity.id] then
+        local OUTER_PAD = 1
+        local trailCount = TRAIL_CHASER_COUNT[info.rarity.id]
+        local trailR = Kirigami(
+            x - size / 2 - OUTER_PAD,
+            y - size / 2 - OUTER_PAD,
+            size + 2 * OUTER_PAD,
+            size + 2 * OUTER_PAD
+        )
+        local c = gsman.mulColor(info.rarity.color)
+        for i = 1, trailCount do
+            helper.drawEdgeTrailAnimation(trailR, info.rarity.color, i / trailCount)
+        end
+        c:pop()
+    end
+
     g.drawImage(info.icon, x, y)
-    c:pop()
-    c = gsman.mulColor(col)
+
+    local c = gsman.mulColor(col)
     g.drawImage("squadicon_border", x, y)
     c:pop()
 
-    local size = 32 -- hacky hardcode
     if drawManaCost then
         g.drawManaCost(info.cost, x,y-size/2, size + 6)
     end
@@ -3227,7 +3248,7 @@ local function newRarity(id, name, color)
         lightTextEffect = "{" .. lightTextEffect .. "}",
         darkTextEffect = "{" .. darkTextEffect .. "}",
         name = loc(name, {}, {
-            context = "Represents a rarity with roman numerals, as in `UNCOMMON (II)` or `RARE (III)`."
+            context = "Represents a rarity."
         }),
         color = color,
         darkColor = darkenColor(color, 0.45),
