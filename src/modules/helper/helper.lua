@@ -497,7 +497,7 @@ function helper.drawGlow(x, y, color, size, glowArgs)
     local pulse = math.sin(love.timer.getTime() * freq + offset) ^ 2 * amp
 
     circleMesh = circleMesh or helper.gradientCircleMesh()
-    local col = gsman.setColor(color[1], color[2], color[3], 1)
+    local col = gsman.setColor(color[1], color[2], color[3], color[4] or 1)
     love.graphics.draw(circleMesh, x, y, 0, s + pulse, s + pulse)
     col:pop()
 end

@@ -21,6 +21,11 @@ function sfx.setVolume(vol)
     sfxVolume = helper.clamp(math.floor(vol + 0.5), 0, 100)
 end
 
+---@return integer
+function sfx.getVolume()
+    return sfxVolume
+end
+
 ---@param name string
 ---@param path string
 function sfx.defineSound(name, path)

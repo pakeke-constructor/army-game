@@ -49,6 +49,48 @@ end
 
 
 
+---@param reg kirigami.Region
+---@param args blessingCard.rotatingGlow.args?
+local function rotatingGlow(reg, args)
+    local offset = args and args.offset or 0
+    local glowScale = args and args.glowScale or 1
+    local rps = args and args.rps or math.pi / 4
+    local wobbleFreq = args and args.wobbleFreq or 0
+    local wobbleAmp = args and args.wobbleAmp or 0
+    local glowCount = args and args.count or 4
+    local color = args and args.color or {1, 1, 1}
+
+    local x,y,w,h = reg:get()
+    local cx,cy = x + w/2, y + h/2
+    local t = love.timer.getTime()
+
+    local rx = w / 2
+    local ry = h / 2
+
+    for i = 1, glowCount do
+        local phase = ((i - 1) / glowCount) * consts.TAU + offset
+        local wobble = math.sin(t * wobbleFreq + phase) * wobbleAmp
+        local angle = t * rps + phase
+
+        local px = cx + rx * math.cos(angle)
+        local py = cy + ry * math.sin(angle)
+        local tx = -rx * math.sin(angle)
+        local ty = ry * math.cos(angle)
+        local tl = helper.magnitude(tx, ty)
+
+        px = px + ty / tl * wobble
+        py = py - tx / tl * wobble
+
+        helper.drawGlow(px, py, color, glowScale, {
+            pulseFrequency = consts.TAU / 3,
+            pulseAmplitude = glowScale * 0.1,
+            pulseOffset = offset,
+        })
+    end
+end
+
+
+
 local HPS_NAME = loc("Healing per second", {}, {context = "The healing done per second for this unit"})
 local HPS_DESC = interp("{healpower} Healing power: {c r=0.78 g=0.32 b=0.64}%{attackDamage}{/c}\n{atkspeed} Attack Speed: {c r=0.9 g=0.55 b=0.2}%{attackSpeed}{/c}\n{c r=0.78 g=0.32 b=0.64}%{attackDamage}{/c}{healpower} x {c r=0.9 g=0.55 b=0.2}%{attackSpeed}{/c}{atkspeed} = {c r=1 g=1 b=1}%{dps}{/c}", {
     context = "Shows healing-per-second calculation, e.g. for a unit that heals others."
@@ -73,6 +115,11 @@ local UPGRADE_UNITS = interp("+%{n} Units", {
 })
 
 local UPGRADE_COLOR_TAG = "{UPGRADE_COLOR}"
+
+local TRAIL_COUNT = {
+    RARE = 3,
+    LEGENDARY = 6
+}
 
 
 ---Draw a single squad card in a kirigami region. Returns true if clicked.
@@ -119,6 +166,17 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
     TITLE_FONT = TITLE_FONT or g.getBigFont(16)
 
     local box = ui.Box({maxWidth = w, maxHeight = h, padding = 12, spacing = 0}, function(bx, by, bw, bh)
+        if TRAIL_COUNT[info.rarity.id] then
+            rotatingGlow(region:padRatio(0.2), {
+                count = TRAIL_COUNT[info.rarity.id],
+                offset = (index - 1) * 1.37,
+                glowScale = 100,
+                rps = 1,
+                wobbleFreq = 0.1,
+                wobbleAmp = 10,
+                color = info.rarity.color,
+            })
+        end
         if canUpgrade then
             helper.drawEdgeTrailAnimation(region, manaColor, 0.25, 20)
             helper.drawEdgeTrailAnimation(region, manaColor, 0.75, 20)

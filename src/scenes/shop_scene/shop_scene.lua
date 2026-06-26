@@ -1,5 +1,6 @@
 
 local hoverService = require("src.hud.hoverService")
+local s = require("src.hud.settings")
 
 
 
@@ -74,6 +75,7 @@ end
 ---@param scancode string
 ---@param isrep boolean
 function shop_scene:keypressed(key, scancode, isrep)
+    if s.keypressed(key) then return end
 end
 
 

@@ -310,6 +310,79 @@ function g.explosion(x, y, damage, radius, fromEntity)
 end
 
 
+do
+
+---@param x number
+---@param y number
+---@param excludeEntities objects.Set<ecs.Entity>
+local function findClosestEnemy(x, y, excludeEntities)
+    local radius = 80
+    ---@type ecs.Entity[]
+    local buffer = {}
+    g.getECS():iteratePartition("enemy", x, y, function(ent)
+        if not g.isAlive(ent) then return end
+        if excludeEntities[ent] then return end
+        buffer[#buffer+1] = ent
+    end, radius)
+
+    if #buffer == 0 then
+        return nil
+    end
+
+    return helper.randomChoice(buffer)
+end
+
+---@param x number
+---@param y number
+---@param damage number
+---@param attacker ecs.Entity?
+---@param enemyChainSize number?
+function g.lightning(x, y, damage, attacker, enemyChainSize)
+    g.playWorldSound("lightning_zap", 0.9, 0.25, 0.3, 0)
+    enemyChainSize = math.max(2, enemyChainSize or 5)
+
+    ---@type objects.Set<ecs.Entity>
+    local foundEnemies = {}
+    ---@type ecs.Entity[]
+    local enemyList = {}
+
+    local enemyEnt = findClosestEnemy(x, y, foundEnemies)
+    if not enemyEnt then return end
+
+    foundEnemies[enemyEnt] = true
+    enemyList[#enemyList + 1] = enemyEnt
+
+    for _ = 1, enemyChainSize - 1 do
+        local enemyEnt1 = findClosestEnemy(enemyEnt.x, enemyEnt.y, foundEnemies)
+        if not enemyEnt1 then break end
+        foundEnemies[enemyEnt1] = true
+        enemyList[#enemyList + 1] = enemyEnt1
+        enemyEnt = enemyEnt1
+    end
+
+    for _,ent in ipairs(enemyList)do
+        g.dealDamage(ent, damage, attacker)
+    end
+
+    if #enemyList >= 2 then
+        g.spawnEntityWithInit("lightning_chain_visual", 0,0, function(ent)
+            -- list of tokens to strike
+            ent._tokens = enemyList
+            local bestY = -100
+            for _,t in ipairs(enemyList) do
+                if t.y > bestY then
+                    ent.x = t.x
+                    ent.y = t.y
+                    bestY = t.y
+                end
+            end
+        end)
+    end
+end
+
+end
+
+
 function g.hasRun()
     return currentRun ~= nil
 end
@@ -552,6 +625,11 @@ local SQUAD_LEVEL_COLORS = {
     g.snapToPalette("#357dd2")
 }
 
+local TRAIL_CHASER_COUNT = {
+    RARE = 2,
+    LEGENDARY = 4
+}
+
 ---@param squadId string
 ---@param x number
 ---@param y number
@@ -561,14 +639,30 @@ function g.drawSquadIcon(squadId, x, y, drawManaCost, drawLevel)
     local info = g.getSquadInfo(squadId)
     --local rarityColor = (info.rarity or g.RARITIES.COMMON).color
     local col = g.getManaBundleColor(info.cost)
-    local c = gsman.mulColor(1, 1, 1)
+    local size = 32 -- hacky hardcode
+
+    if TRAIL_CHASER_COUNT[info.rarity.id] then
+        local OUTER_PAD = 1
+        local trailCount = TRAIL_CHASER_COUNT[info.rarity.id]
+        local trailR = Kirigami(
+            x - size / 2 - OUTER_PAD,
+            y - size / 2 - OUTER_PAD,
+            size + 2 * OUTER_PAD,
+            size + 2 * OUTER_PAD
+        )
+        local c = gsman.mulColor(info.rarity.color)
+        for i = 1, trailCount do
+            helper.drawEdgeTrailAnimation(trailR, info.rarity.color, i / trailCount)
+        end
+        c:pop()
+    end
+
     g.drawImage(info.icon, x, y)
-    c:pop()
-    c = gsman.mulColor(col)
+
+    local c = gsman.mulColor(col)
     g.drawImage("squadicon_border", x, y)
     c:pop()
 
-    local size = 32 -- hacky hardcode
     if drawManaCost then
         g.drawManaCost(info.cost, x,y-size/2, size + 6)
     end
@@ -3240,7 +3334,7 @@ local function newRarity(id, name, color)
         lightTextEffect = "{" .. lightTextEffect .. "}",
         darkTextEffect = "{" .. darkTextEffect .. "}",
         name = loc(name, {}, {
-            context = "Represents a rarity with roman numerals, as in `UNCOMMON (II)` or `RARE (III)`."
+            context = "Represents a rarity."
         }),
         color = color,
         darkColor = darkenColor(color, 0.45),
