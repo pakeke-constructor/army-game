@@ -40,8 +40,6 @@ g.defineSpell("poison_spell", {
 })
 
 
---[[
-
 g.defineSpell("ace_spell", {
     name = "Ace",
     rarity = g.RARITIES.COMMON,
@@ -85,5 +83,3 @@ g.defineSpell("skull_spell", {
     cost = {red = 1},
     spellRange = 100,
 })
-
-]]
