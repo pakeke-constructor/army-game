@@ -26,7 +26,7 @@ function shop_scene:init()
 end
 
 function shop_scene:enter()
-    self.hud = HUD()
+    self.hud = HUD() --[[@as g.HUD]]
     for i = 1, NUM_SQUAD_SLOTS do
         self.shopBoughtSince[i] = {0, objects.Color.WHITE}
     end
@@ -548,7 +548,11 @@ function shop_scene:draw()
     ui.startUI()
     local freeArea = self.hud:getFreeArea()
     local hoveredSquadId = drawShopUI(self, freeArea)
-    self.hud:drawUI({ shopScene = true, hoverSquadId = hoveredSquadId })
+    local hoveredSquadData = nil
+    if hoveredSquadId then
+        hoveredSquadData = {id = hoveredSquadId, showUpgrade = true}
+    end
+    self.hud:drawUI({ shopScene = true, hoverSquad = hoveredSquadData })
     ui.endUI()
 end
 
