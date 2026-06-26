@@ -70,3 +70,35 @@ g.defineEntity("treasure_chest_objective", {
 })
 
 
+
+local LIGHTNING_CHAIN_LIFETIME = 0.15
+
+g.defineEntity("lightning_chain_visual", {
+    image = "1x1",
+
+    onUpdate = function(ent, dt)
+        ent._lifetime = (ent._lifetime or LIGHTNING_CHAIN_LIFETIME) - dt
+        if ent._lifetime <= 0 then
+            g.killEntity(ent)
+        end
+    end,
+
+    onDraw = function (ent)
+        local lw=lg.getLineWidth()
+        local fade = (math.min(1, ent._lifetime / LIGHTNING_CHAIN_LIFETIME))
+
+        -- ent._tokens is set in g.lightning
+        for i = 1, #ent._tokens - 1 do
+            local tok1 = ent._tokens[i]
+            local tok2 = ent._tokens[i + 1]
+            lg.setLineWidth(10 * fade)
+            lg.setColor(0.9, 0.7, 1)
+            local r = love.math.random
+            local r1 = helper.lerp(-4,4, r())
+            local r2 = helper.lerp(-4,4, r())
+            lg.line(tok1.x, tok1.y, tok2.x + r2, tok2.y + r1)
+        end
+
+        lg.setLineWidth(lw)
+    end
+})

@@ -310,6 +310,79 @@ function g.explosion(x, y, damage, radius, fromEntity)
 end
 
 
+do
+
+---@param x number
+---@param y number
+---@param excludeEntities objects.Set<ecs.Entity>
+local function findClosestEnemy(x, y, excludeEntities)
+    local radius = 80
+    ---@type ecs.Entity[]
+    local buffer = {}
+    g.getECS():iteratePartition("enemy", x, y, function(ent)
+        if not g.isAlive(ent) then return end
+        if excludeEntities[ent] then return end
+        buffer[#buffer+1] = ent
+    end, radius)
+
+    if #buffer == 0 then
+        return nil
+    end
+
+    return helper.randomChoice(buffer)
+end
+
+---@param x number
+---@param y number
+---@param damage number
+---@param attacker ecs.Entity?
+---@param enemyChainSize number?
+function g.lightning(x, y, damage, attacker, enemyChainSize)
+    g.playWorldSound("lightning_zap", 0.9, 0.25, 0.3, 0)
+    enemyChainSize = math.max(2, enemyChainSize or 5)
+
+    ---@type objects.Set<ecs.Entity>
+    local foundEnemies = {}
+    ---@type ecs.Entity[]
+    local enemyList = {}
+
+    local enemyEnt = findClosestEnemy(x, y, foundEnemies)
+    if not enemyEnt then return end
+
+    foundEnemies[enemyEnt] = true
+    enemyList[#enemyList + 1] = enemyEnt
+
+    for _ = 1, enemyChainSize - 1 do
+        local enemyEnt1 = findClosestEnemy(enemyEnt.x, enemyEnt.y, foundEnemies)
+        if not enemyEnt1 then break end
+        foundEnemies[enemyEnt1] = true
+        enemyList[#enemyList + 1] = enemyEnt1
+        enemyEnt = enemyEnt1
+    end
+
+    for _,ent in ipairs(enemyList)do
+        g.dealDamage(ent, damage, attacker)
+    end
+
+    if #enemyList >= 2 then
+        g.spawnEntityWithInit("lightning_chain_visual", 0,0, function(ent)
+            -- list of tokens to strike
+            ent._tokens = enemyList
+            local bestY = -100
+            for _,t in ipairs(enemyList) do
+                if t.y > bestY then
+                    ent.x = t.x
+                    ent.y = t.y
+                    bestY = t.y
+                end
+            end
+        end)
+    end
+end
+
+end
+
+
 function g.hasRun()
     return currentRun ~= nil
 end
