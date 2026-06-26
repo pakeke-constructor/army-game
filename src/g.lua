@@ -218,7 +218,7 @@ end
 
 
 
-
+---@type g.Run?
 local currentRun
 
 ---@class g.LaunchOptions
@@ -326,8 +326,8 @@ local mapTypes = require("src.scenes.map_scene.map_types")
 ---@return MapType
 ---@return string
 function g.getMapType()
-    local run = currentRun
-    local mapType = run and run.mapGraph and run.mapGraph.mapType
+    local run = g.getRun()
+    local mapType = run and run.mapGraph and run.mapGraph.mapType.name
     mapType = mapType or consts.STARTING_MAP_TYPE
     return assert(mapTypes[mapType]), mapType
 end
@@ -2669,7 +2669,7 @@ end
 function g.getBigFont(size)
     assert(size % 16 == 0, "Size must by divisible by 16")
     if not bigCache[size] then
-        local f = love.graphics.newFont("assets/fonts/sburbits.ttf", size, "mono", 1)
+        local f = love.graphics.newFont("assets/fonts/sburbits.ttf", size, "mono", size / 16)
         f:setFallbacks(getFallbackFonts(size))
         bigCache[size] = f
     end
@@ -2681,7 +2681,7 @@ end
 function g.getSmallFont(size)
     assert(size % 16 == 0, "Size must by divisible by 16")
     if not smolCache[size] then
-        local f = love.graphics.newFont("assets/fonts/sburbits.ttf", size, "mono", 1)
+        local f = love.graphics.newFont("assets/fonts/sburbits.ttf", size, "mono", size / 16)
         f:setFallbacks(getFallbackFonts(size))
         smolCache[size] = f
     end

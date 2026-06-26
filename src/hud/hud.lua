@@ -13,12 +13,15 @@ function HUD:init()
     self.battleStarted = false
 end
 
+---@class g.hudArgs.hoverSquad
+---@field id string
+---@field showUpgrade boolean?
 
 ---@class g.hudArgs
 ---@field battleScene boolean?
 ---@field mapScene boolean?
 ---@field battleStarted boolean?
----@field hoverSquadId string?
+---@field hoverSquad g.hudArgs.hoverSquad?
 
 local SQUAD_ICON_SIZE = 32
 local SQUAD_PADDING = 4
@@ -571,11 +574,12 @@ function HUD:drawUI(opt)
 
     drawBottomBar(self, SQUAD_ICON_SIZE + 30)
 
-    local hoveredSquadId = opt.hoverSquadId or (self.hoveredSquad and self.hoveredSquad.squadId)
+    local hoveredSquadId = (opt.hoverSquad and opt.hoverSquad.id) or (self.hoveredSquad and self.hoveredSquad.squadId)
     if hoveredSquadId then
         local main = ui.getScreenRegion()
         local _, left = main:padRatio(0.2):splitHorizontal(2, 1)
-        ui.drawSquadCard(hoveredSquadId, left:padRatio(0.1), -999, false, true)
+        local showUpgrade = not not (opt.hoverSquad and opt.hoverSquad.showUpgrade)
+        ui.drawSquadCard(hoveredSquadId, left:padRatio(0.1), -999, showUpgrade, true)
     elseif self.hoveredSpell then
         local main = ui.getScreenRegion()
         local _, left = main:padRatio(0.2):splitHorizontal(2, 1)
