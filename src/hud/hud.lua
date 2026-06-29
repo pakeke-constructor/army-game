@@ -414,6 +414,7 @@ end
 local function drawTopBar()
     local r = ui.getScreenRegion()
     local topBar, mainBar = r:splitVertical(0.1,0.9)
+    iml.panel(topBar:get())
 
     local xp, demonFury, gold, keys, daysTillIncursion, zoneString, pausePanel = topBar:splitHorizontal(4, 2,2,2, 4,4,1)
     --[[
@@ -571,6 +572,8 @@ local function drawBottomBar(self, opt, barHeight)
     local run = g.getRun()
     local region = Kirigami(0, sh - barHeight, sw, barHeight)
 
+    iml.panel(region:get())
+
     local manaBox, rest = region:splitHorizontal(w,sw-w)
     local squadBar,blessingBar = rest:splitHorizontal(2,1)
 
@@ -612,7 +615,8 @@ function HUD:drawUI(opt)
     elseif self.hoveredSpell then
         local main = ui.getScreenRegion()
         local _, left = main:padRatio(0.2):splitHorizontal(2, 1)
-        ui.drawSpellCard(self.hoveredSpell, left:padRatio(0.1), -999)
+        local spellR = left:splitVertical(3, 2):center(left)
+        ui.drawSpellCard(self.hoveredSpell, spellR:padRatio(0.1), -999)
     end
 
     rewardPopupService.draw()
