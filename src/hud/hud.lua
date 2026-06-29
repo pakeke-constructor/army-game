@@ -615,7 +615,8 @@ function HUD:drawUI(opt)
     elseif self.hoveredSpell then
         local main = ui.getScreenRegion()
         local _, left = main:padRatio(0.2):splitHorizontal(2, 1)
-        ui.drawSpellCard(self.hoveredSpell, left:padRatio(0.1), -999)
+        local spellR = left:splitVertical(3, 2):center(left)
+        ui.drawSpellCard(self.hoveredSpell, spellR:padRatio(0.1), -999)
     end
 
     rewardPopupService.draw()
