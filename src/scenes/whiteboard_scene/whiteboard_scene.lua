@@ -1,14 +1,15 @@
-local hoverService = require("src.hud.hoverService")
-
 local lg = love.graphics
 
 ---@class g.WhiteboardScene
 local whiteboard_scene = {}
 
-local ICON = 32
-local CELL = 40   -- icon + gap
-local GROUP_GAP = 14
+local UI_SCALE = 0.5      -- whole scene drawn at half scale (doubles virtual space)
+local ICON = 32           -- native squad/blessing icon size
+local CELL = ICON + 4     -- icon + gap
+local GROUP_GAP = 12
 local LABEL_H = 18
+local PREVIEW_W = 280     -- reserved card area on the right
+
 
 -- category modes
 local RARITY_ORDER = { "COMMON", "UNCOMMON", "RARE", "LEGENDARY", "ALMOST_UNIQUE", "UNIQUE" }
@@ -20,6 +21,9 @@ function whiteboard_scene:init()
 end
 
 function whiteboard_scene:enter()
+    if not g.hasRun() then
+        g.newTestRun()
+    end
     self.scroll = 0
 end
 
@@ -116,32 +120,20 @@ function whiteboard_scene:buildGroups()
     return out
 end
 
-function whiteboard_scene:requestIconHover(id)
-    local isSquad = self.mode == "squads"
-    local info = isSquad and g.getSquadInfo(id) or g.getBlessingInfo(id)
-    hoverService.requestHover(function(box, fonts)
-        box:addText("{c r=1 g=1 b=1}" .. info.name, fonts.title)
-        box:addText("{c r=0.7 g=0.7 b=0.75}" .. id, fonts.body)
-        box:addText("{c r=0.8 g=0.7 b=0.4}" .. info.rarity.name, fonts.body)
-        local tags = info.tags
-        if tags and #tags > 0 then
-            box:addText("{c r=0.6 g=0.8 b=0.9}" .. table.concat(tags, ", "), fonts.body)
-        end
-    end)
-end
-
 function whiteboard_scene:draw()
     lg.clear(0.07, 0.07, 0.09, 1)
-    ui.startUI()
-    local screen = ui.getScreenRegion()
+    ui.startUI(UI_SCALE)
+    -- drawing at UI_SCALE doubles the virtual space, so enlarge the root region to fill it.
+    local screen = ui.getScreenRegion():scale(1 / UI_SCALE)
     local font = g.getSmallFont(16)
 
-    local sidebar, main = screen:splitHorizontalExact(120, 0)
+    local sidebar, rest = screen:splitHorizontalExact(160, 0)
+    local main, preview = rest:splitHorizontalExact(0, PREVIEW_W)
 
     -- sidebar buttons
     local sb = sidebar:padUnit(8)
-    local rows = sb:rows(8)
-    if ui.DefaultButton(self.mode == "squads" and "SQUADS" or "BLESSINGS", rows[1]) then
+    local rows = sb:columns(10)
+    if ui.DefaultButton(self.mode == "squads" and "SQUADS" or "BLESSINGS", rows[2]) then
         self.mode = self.mode == "squads" and "blessings" or "squads"
         self.scroll = 0
     end
@@ -149,7 +141,7 @@ function whiteboard_scene:draw()
     for i, c in ipairs(cats) do
         local sel = self.categorize == c
         local label = (sel and "{c r=1 g=1 b=0.5}> " or "") .. c
-        if ui.DefaultButton(label, rows[i + 2]) then
+        if ui.DefaultButton(label, rows[i + 3]) then
             self.categorize = c
             self.scroll = 0
         end
@@ -157,11 +149,15 @@ function whiteboard_scene:draw()
 
     -- main grid
     local mx, my, mw, mh = main:padUnit(8):get()
-    lg.setScissor(ui.regionToScreenspace(main))
+    -- regionToScreenspace uses the base UI transform, but we drew at UI_SCALE,
+    -- so scale the scissor rect down to match.
+    local sx, sy, sw, sh = ui.regionToScreenspace(main)
+    lg.setScissor(sx * UI_SCALE, sy * UI_SCALE, sw * UI_SCALE, sh * UI_SCALE)
 
     local groups = self:buildGroups()
     local cols = math.max(1, math.floor(mw / CELL))
     local y = my - self.scroll
+    local hoveredId = nil
 
     for _, gr in ipairs(groups) do
         lg.setColor(gr.color:getRGBA())
@@ -174,23 +170,32 @@ function whiteboard_scene:draw()
             local iy = y + row * CELL + ICON / 2
             lg.setColor(1, 1, 1)
             if self.mode == "squads" then
-                g.drawSquadIcon(id, ix, iy, false)
+                g.drawSquadIcon(id, ix, iy, true)
             else
                 g.drawBlessingIcon(id, ix, iy)
             end
             if iml.isHovered(ix - ICON / 2, iy - ICON / 2, ICON, ICON, gr.key .. id) then
-                self:requestIconHover(id)
+                hoveredId = id
             end
         end
         local usedRows = math.ceil(#gr.ids / cols)
         y = y + usedRows * CELL + GROUP_GAP
     end
 
-    self._contentH = (y + self.scroll) - my
     lg.setScissor()
 
-    hoverService.draw()
+    -- preview card on the right
+    if hoveredId then
+        local pr = preview:padUnit(6)
+        if self.mode == "squads" then
+            ui.drawSquadCard(hoveredId, pr, -999, false, true)
+        else
+            ui.drawBlessingCard(hoveredId, pr, 999)
+        end
+    end
+
     ui.endUI()
 end
+
 
 return whiteboard_scene
