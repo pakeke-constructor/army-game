@@ -156,6 +156,7 @@ defEnemy("crimsongoliath", {
         image = "crimsongoliath_axe",
         xOffset = 0,
         swordStrikeTime=0.8,
+        smashShake = 2,
     },
     attack = {
         attackType = "melee",

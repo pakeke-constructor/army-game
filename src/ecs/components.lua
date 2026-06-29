@@ -97,6 +97,7 @@ local physics = {
 ---@field public weaponBobbing number?
 ---@field public xOffset number?
 ---@field public arcRadius number? hammer: orbit radius around the body
+---@field public smashShake number? hammer: screen shake on smash
 ---@field public drawBehind boolean?
 local weapon = {
     image = "militia_sword",
@@ -214,6 +215,7 @@ local shadow = {
 ---@field public _timeSinceAutoAttacked number?
 ---@field public _damageLagAmount number?
 ---@field public damageJolt number?
+---@field public _hammerSmashed boolean?
 ---@field public _landmark boolean? marked by the Landmark blessing: the first building placed this battle
 ---@field public onUpdate fun(ent:ecs.Entity, dt:number)?
 ---@field public onDraw fun(ent:ecs.Entity, x:number, y:number)? drawn BEHIND the body
