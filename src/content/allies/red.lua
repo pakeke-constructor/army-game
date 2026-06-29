@@ -8,6 +8,8 @@ sqhelper.defineMilitiaAndArchers("red")
 g.defineSquad("gremlin_technician_squad", {
     name = "Gremlin Technicians",
     rarity = g.RARITIES.COMMON,
+    -- tags: explosion, death_trigger
+    tags = {"explosion", "death_trigger"},
     entityDef = {
         image = "gremlintechnicians_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -45,6 +47,8 @@ g.defineSquad("gremlin_technician_squad", {
 g.defineSquad("barbarian_squad", {
     name = "Barbarians",
     rarity = g.RARITIES.COMMON,
+    -- tags: lifesteal
+    tags = {"lifesteal"},
     entityDef = {
         image = "barbarian",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -83,6 +87,8 @@ g.defineSquad("barbarian_squad", {
 g.defineSquad("blade_thrower_squad", {
     name = "Blade Throwers",
     rarity = g.RARITIES.COMMON,
+    -- tags: ranged, projectile
+    tags = {"ranged", "projectile"},
     entityDef = {
         image = "bladethrowers_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -111,6 +117,8 @@ g.defineSquad("blade_thrower_squad", {
 g.defineSquad("brewer_squad", {
     name = "Brewers",
     rarity = g.RARITIES.COMMON,
+    -- tags: buffing, attack_speed
+    tags = {"buffing", "attack_speed"},
     entityDef = {
         image = "brewer",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -157,6 +165,8 @@ g.defineSquad("brewer_squad", {
 g.defineSquad("tribute_squad", {
     name = "Tributes",
     rarity = g.RARITIES.UNCOMMON,
+    -- tags: death_trigger
+    tags = {"death_trigger"},
     entityDef = {
         image = "tributes_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -192,6 +202,8 @@ g.defineSquad("tribute_squad", {
 g.defineSquad("executioner_squad", {
     name = "Executioners",
     rarity = g.RARITIES.RARE,
+    -- tags: attack_damage
+    tags = {"attack_damage"},
     entityDef = {
         image = "executioners_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -217,6 +229,8 @@ g.defineSquad("executioner_squad", {
 g.defineSquad("berserker_squad", {
     name = "Berserkers",
     rarity = g.RARITIES.UNCOMMON,
+    -- tags: attack_speed
+    tags = {"attack_speed"},
     entityDef = {
         image = "berserkers_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -259,6 +273,8 @@ g.defineSquad("berserker_squad", {
 g.defineSquad("dagger_bearer_squad", {
     name = "Dagger Bearers",
     rarity = g.RARITIES.RARE,
+    -- tags: attack_damage, death_trigger
+    tags = {"attack_damage", "death_trigger"},
     entityDef = {
         image = "daggerbearers_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -307,6 +323,8 @@ g.defineSquad("dagger_bearer_squad", {
 g.defineSquad("furnace_golems_squad", {
     name = "Furnace Golems",
     rarity = g.RARITIES.RARE,
+    -- tags: buffing, attack_damage, scaling
+    tags = {"buffing", "attack_damage", "scaling"},
     entityDef = {
         image = "furnacegolems_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -352,6 +370,8 @@ g.defineSquad("furnace_golems_squad", {
 g.defineSquad("living_entropy_squad", {
     name = "Living Entropy",
     rarity = g.RARITIES.RARE,
+    -- tags: ranged, projectile, explosion
+    tags = {"ranged", "projectile", "explosion"},
     entityDef = {
         image = "livingentropy_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -378,6 +398,8 @@ g.defineSquad("living_entropy_squad", {
 g.defineSquad("his_manifestation_squad", {
     name = "His Manifestation",
     rarity = g.RARITIES.LEGENDARY,
+    -- tags: attack_damage, death_trigger, scaling
+    tags = {"attack_damage", "death_trigger", "scaling"},
     entityDef = {
         image = "hismanifestation",
         physics = { shape = "circle", radius = 10, ox = 0, oy = 0, mass = 3 },
@@ -411,6 +433,8 @@ g.defineSquad("his_manifestation_squad", {
 g.defineSquad("pain_elemental_squad", {
     name = "Pain Elementals",
     rarity = g.RARITIES.RARE,
+    -- tags: attack_damage, scaling
+    tags = {"attack_damage", "scaling"},
     entityDef = {
         image = "painelementals_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -444,6 +468,8 @@ g.defineSquad("pain_elemental_squad", {
 g.defineSquad("doom_herald_squad", {
     name = "Doom Heralds",
     rarity = g.RARITIES.LEGENDARY,
+    -- tags: healing, death_trigger
+    tags = {"healing", "death_trigger"},
     entityDef = {
         image = "doomheralds_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },

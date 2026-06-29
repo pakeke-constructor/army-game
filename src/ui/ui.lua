@@ -539,11 +539,15 @@ end
 
 local uiPushed = false
 
-function ui.startUI()
+---@param scaleMult number?
+function ui.startUI(scaleMult)
     assert(not uiPushed, "attempt to call startUI twice")
     uiPushed = true
     lg.push()
     local t = ui.getUIScalingTransform()
+    if scaleMult then
+        t = t:clone():scale(scaleMult, scaleMult)
+    end
     lg.replaceTransform(t)
     iml.pushTransform(t)
 end

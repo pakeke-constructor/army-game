@@ -7,6 +7,8 @@ function sqhelper.defineMilitiaAndArchers(manaType)
     g.defineSquad(manaType.."_militia_squad", {
         name = "Militia",
         rarity = g.RARITIES.UNCOMMON,
+        -- tags: armor
+        tags = {"armor"},
         entityDef = {
             image = "militia",
             physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -32,6 +34,8 @@ function sqhelper.defineMilitiaAndArchers(manaType)
     g.defineSquad(manaType.."_archer_squad", {
         name = "Archers",
         rarity = g.RARITIES.COMMON,
+        -- tags: ranged, projectile
+        tags = {"ranged", "projectile"},
         entityDef = {
             image = "longbowman",
             physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },

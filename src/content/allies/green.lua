@@ -11,6 +11,8 @@ sqhelper.defineMilitiaAndArchers("green")
 g.defineSquad("forest_sprite_squad", {
     name = "Forest Sprites",
     rarity = g.RARITIES.COMMON,
+    -- tags: healing
+    tags = {"healing"},
     entityDef = {
         image = "militia", -- no forest-sprite sprite; militia stand-in
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -50,6 +52,8 @@ g.defineSquad("forest_sprite_squad", {
 g.defineSquad("druid_squad", {
     name = "Druids",
     rarity = g.RARITIES.COMMON,
+    -- tags: healing, health, ranged, projectile, buffing
+    tags = {"healing", "health", "ranged", "projectile", "buffing"},
     entityDef = {
         image = "druids",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -94,6 +98,8 @@ g.defineSquad("druid_squad", {
 g.defineSquad("cook_squad", {
     name = "Cooks",
     rarity = g.RARITIES.COMMON,
+    -- tags: healing, ranged, projectile
+    tags = {"healing", "ranged", "projectile"},
     entityDef = {
         image = "cook",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -128,6 +134,8 @@ g.defineSquad("cook_squad", {
 g.defineSquad("peasant_squad", {
     name = "Peasants",
     rarity = g.RARITIES.COMMON,
+    -- tags: swarm (cheap melee horde of 10)
+    tags = {"swarm"},
     entityDef = {
         image = "peasant",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -155,6 +163,8 @@ g.defineSquad("peasant_squad", {
 g.defineSquad("hog_squad", {
     name = "Hogs of War",
     rarity = g.RARITIES.UNCOMMON,
+    -- tags: attack_speed (fast melee, otherwise vanilla)
+    tags = {"attack_speed"},
     entityDef = {
         image = "warhog",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -176,6 +186,8 @@ g.defineSquad("hog_squad", {
 g.defineSquad("giant_toad_squad", {
     name = "Giant Toads",
     rarity = g.RARITIES.UNCOMMON,
+    -- tags: health (beefy melee)
+    tags = {"health"},
     entityDef = {
         image = "gianttoad",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -196,6 +208,8 @@ g.defineSquad("giant_toad_squad", {
 g.defineSquad("treant_squad", {
     name = "Treants",
     rarity = g.RARITIES.UNCOMMON,
+    -- tags: health, armor, color_synergy, scaling (grows from green mana)
+    tags = {"health", "armor", "color_synergy", "scaling"},
     entityDef = {
         image = "treant",
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 2 },
@@ -251,6 +265,8 @@ g.defineEntity("pest", {
 g.defineSquad("infested_squad", {
     name = "The Infested",
     rarity = g.RARITIES.UNCOMMON,
+    -- tags: pest, death_trigger
+    tags = {"pest", "death_trigger"},
     entityDef = {
         image = "the_infested",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -283,6 +299,8 @@ g.defineSquad("infested_squad", {
 g.defineSquad("friendly_giant_squad", {
     name = "Friendly Giant",
     rarity = g.RARITIES.RARE,
+    -- tags: health, attack_damage (single huge bruiser)
+    tags = {"health", "attack_damage"},
     entityDef = {
         image = "friendlygiant",
         physics = { shape = "circle", radius = 14, ox = 0, oy = 0, mass = 3 },
@@ -308,6 +326,8 @@ g.defineSquad("friendly_giant_squad", {
 g.defineSquad("forest_sentry_squad", {
     name = "Forest Sentries",
     rarity = g.RARITIES.RARE,
+    -- tags: ranged, projectile, attack_damage, health
+    tags = {"ranged", "projectile", "attack_damage", "health"},
     entityDef = {
         image = "forestsentry",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -358,6 +378,8 @@ end
 g.defineSquad("arcane_blossom_squad", {
     name = "Arcane Blossoms",
     rarity = g.RARITIES.RARE,
+    -- tags: healing, health, armor, buffing
+    tags = {"healing", "health", "armor", "buffing"},
     entityDef = {
         image = "arcaneblossom",
         physics = { shape = "circle", radius = 7, ox = 0, oy = 0, mass = 1 },
@@ -416,6 +438,8 @@ g.defineSquad("arcane_blossom_squad", {
 g.defineSquad("world_tree_squad", {
     name = "World Tree",
     rarity = g.RARITIES.LEGENDARY,
+    -- tags: building, health, armor, healing, attack_damage
+    tags = {"building", "health", "armor", "healing", "attack_damage"},
     entityDef = {
         image = "worldtree",
         isBuilding = true,
@@ -449,6 +473,8 @@ g.defineSquad("world_tree_squad", {
 g.defineSquad("hive_recycler_squad", {
     name = "Hive Recyclers",
     rarity = g.RARITIES.LEGENDARY,
+    -- tags: healing, ranged, projectile, pest, death_trigger, color_synergy
+    tags = {"healing", "ranged", "projectile", "pest", "death_trigger", "color_synergy"},
     entityDef = {
         image = "hiverecycler",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -484,6 +510,8 @@ g.defineSquad("hive_recycler_squad", {
 g.defineSquad("living_forest_squad", {
     name = "Living Forest",
     rarity = g.RARITIES.LEGENDARY,
+    -- tags: health, armor, healing, buffing, death_trigger
+    tags = {"health", "armor", "healing", "buffing", "death_trigger"},
     entityDef = {
         image = "livingforest_body", -- TODO: Animate legs with `livingforest_legs`.
         physics = { shape = "circle", radius = 7, ox = 0, oy = 0, mass = 2 },
@@ -522,6 +550,8 @@ g.defineSquad("living_forest_squad", {
 g.defineSquad("lifesmith_squad", {
     name = "Lifesmiths",
     rarity = g.RARITIES.LEGENDARY,
+    -- tags: healing, armor
+    tags = {"healing", "armor"},
     entityDef = {
         image = "lifesmith",
         physics = { shape = "circle", radius = 6, ox = 0, oy = 0, mass = 2 },
@@ -556,6 +586,8 @@ g.defineSquad("lifesmith_squad", {
 g.defineSquad("swarm_squad", {
     name = "The Swarm",
     rarity = g.RARITIES.LEGENDARY,
+    -- tags: pest, swarm (huge cheap horde of 20)
+    tags = {"pest", "swarm"},
     entityDef = {
         image = "theswarm",
         physics = { shape = "circle", radius = 4, ox = 0, oy = 0, mass = 1 },

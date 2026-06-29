@@ -17,6 +17,8 @@ local PURPLE_COLOR = objects.Color("#".."FFC339ED")
 g.defineSquad("crystal_golems", {
     name = "Crystal golems",
     rarity = g.RARITIES.RARE,
+    -- tags: projectile
+    tags = {"projectile"},
     entityDef = {
         image = "gargoyle", -- no crystal-golem sprite; gargoyle stand-in
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 2 },
@@ -73,6 +75,8 @@ g.defineSquad("crystal_golems", {
 g.defineSquad("diver_squad", {
     name = "Divers",
     rarity = g.RARITIES.RARE,
+    -- tags: attack_damage, color_synergy, armor
+    tags = {"attack_damage", "color_synergy", "armor"},
     entityDef = {
         image = "divers_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -108,6 +112,8 @@ g.defineSquad("diver_squad", {
 g.defineSquad("test_subjects_squad", {
     name = "Test Subjects",
     rarity = g.RARITIES.RARE,
+    -- tags: transform, health, attack_speed
+    tags = {"transform", "health", "attack_speed"},
     entityDef = {
         image = "testsubject",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -146,6 +152,8 @@ g.defineSquad("test_subjects_squad", {
 g.defineSquad("monk_squad", {
     name = "Monks",
     rarity = g.RARITIES.COMMON,
+    -- tags: healing, color_synergy
+    tags = {"healing", "color_synergy"},
     entityDef = {
         image = "monks_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -185,6 +193,8 @@ g.defineSquad("monk_squad", {
 g.defineSquad("orcball_player_squad", {
     name = "Orcball Players",
     rarity = g.RARITIES.COMMON,
+    -- tags: armor, attack_damage
+    tags = {"armor", "attack_damage"},
     entityDef = {
         image = "orcballplayers_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -226,6 +236,8 @@ g.defineSquad("orcball_player_squad", {
 g.defineSquad("defender_squad", {
     name = "Defenders",
     rarity = g.RARITIES.COMMON,
+    -- tags: crowd_control, armor
+    tags = {"crowd_control", "armor"},
     entityDef = {
         image = "defenders_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -263,6 +275,8 @@ g.defineSquad("defender_squad", {
 g.defineSquad("incense_holder_squad", {
     name = "Incense Holders",
     rarity = g.RARITIES.RARE,
+    -- tags: healing, ranged, projectile, buffing, attack_speed
+    tags = {"healing", "ranged", "projectile", "buffing", "attack_speed"},
     entityDef = {
         image = "incense_priest",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -317,6 +331,8 @@ g.defineSquad("incense_holder_squad", {
 g.defineSquad("clay_troll_squad", {
     name = "Clay Trolls",
     rarity = g.RARITIES.RARE,
+    -- tags: armor, buffing
+    tags = {"armor", "buffing"},
     entityDef = {
         image = "claytrolls_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -356,6 +372,8 @@ g.defineSquad("clay_troll_squad", {
 g.defineSquad("war_elephant_squad", {
     name = "War Elephants",
     rarity = g.RARITIES.RARE,
+    -- tags: armor, color_synergy, scaling
+    tags = {"armor", "color_synergy", "scaling"},
     entityDef = {
         image = "warelephants_unit",
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 2 },
@@ -413,6 +431,8 @@ g.defineSquad("war_elephant_squad", {
 g.defineSquad("magnet_elemental_squad", {
     name = "Magnet Elementals",
     rarity = g.RARITIES.RARE,
+    -- tags: ranged, projectile, armor
+    tags = {"ranged", "projectile", "armor"},
     entityDef = {
         image = "magnetelemental_unit",
         physics = { shape = "circle", radius = 6, ox = 0, oy = 0, mass = 1 },
@@ -453,6 +473,8 @@ g.defineSquad("magnet_elemental_squad", {
 g.defineSquad("immortal_eye_squad", {
     name = "The Immortal Eye",
     rarity = g.RARITIES.LEGENDARY,
+    -- tags: building, ranged, projectile, color_synergy
+    tags = {"building", "ranged", "projectile", "color_synergy"},
     entityDef = {
         image = "theimmortaleye_unit",
         isBuilding = true,
@@ -494,6 +516,8 @@ g.defineSquad("immortal_eye_squad", {
 g.defineSquad("bell_creature_squad", {
     name = "Bell Creatures",
     rarity = g.RARITIES.RARE,
+    -- tags: buffing, armor
+    tags = {"buffing", "armor"},
     entityDef = {
         image = "bellman",
         physics = { shape = "circle", radius = 6, ox = 0, oy = 0, mass = 1 },
@@ -529,6 +553,8 @@ g.defineSquad("bell_creature_squad", {
 g.defineSquad("laser_gunner_squad", {
     name = "Laser Gunners",
     rarity = g.RARITIES.LEGENDARY,
+    -- tags: ranged, projectile, attack_speed, scaling
+    tags = {"ranged", "projectile", "attack_speed", "scaling"},
     entityDef = {
         image = "lasergunners_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -586,6 +612,8 @@ g.defineEntity("living_mana", {
 g.defineSquad("anima_incubator_squad", {
     name = "Anima Incubator",
     rarity = g.RARITIES.RARE,
+    -- tags: building, mana_gain, color_synergy, pest
+    tags = {"building", "mana_gain", "color_synergy", "pest"},
     entityId = "anima_incubator",
     entityDef = {
         image = "anima_incubator",
@@ -630,6 +658,8 @@ g.defineSquad("anima_incubator_squad", {
 g.defineSquad("ice_mage_squad", {
     name = "Ice Mage",
     rarity = g.RARITIES.UNCOMMON,
+    -- tags: freeze, crowd_control, ranged, projectile
+    tags = {"freeze", "crowd_control", "ranged", "projectile"},
     entityDef = {
         image = "icemage",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },

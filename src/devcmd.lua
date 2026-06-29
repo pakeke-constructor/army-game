@@ -24,7 +24,13 @@ COMMANDS.help = function()
     addLog("/sb - reset & enter sandbox battle")
     addLog("/rb - reset battle & zoom out (map-gen test)")
     addLog("/vacuum - removes all fogs")
+    addLog("/wb - open whiteboard dev scene")
     addLog("/help - show this")
+end
+
+COMMANDS.wb = function()
+    g.gotoScene("whiteboard_scene")
+    addLog("whiteboard")
 end
 
 COMMANDS.sb = function()
