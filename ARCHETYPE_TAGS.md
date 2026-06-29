@@ -57,7 +57,7 @@ Read ARCHETYPE_TAGS.md. Then, read src/content/blessings.lua.
 Work very slowly through all [red/blue/green/yellow] squads in blessings.lua.
 Assign tags to every squad. Go through very slowly, assign "draft tags" to start with, as comments, and then do a 2nd pass, refining them.
 
-Start with red squads.
+Start with green squads.
 
 
 ## Prompt 2:
