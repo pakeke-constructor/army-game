@@ -6,6 +6,7 @@ local sfx = require("src.sound.sfx")
 local settingsPopupService = {}
 
 local visible = false
+local linesOfContent = 5
 
 local TEXT
 do
@@ -140,38 +141,39 @@ function settingsPopupService.draw()
     lg.setColor(1, 1, 1)
     local r = ui.getScreenRegion():padRatio(0.15)
     ui.drawDarkPanel(r:get())
-    r = r:padUnit(20)
+    r = r:padRatio(0.05)
 
-    local titleR, content, buttonBaseR = r:splitVertical(
-      0.8,2,0.6
+    local titleR, _, content, buttonBaseR = r:splitVertical(
+      0.4,0.1, 2,0.4
     )
 
     richtext.printRichContained(TEXT.TITLE, titleFont, titleR:get())
 
     -- Tab bar
-    local tabBarR, _, contentR = content:splitVertical(0.6, 0.1, 2)
+    local tabBarR, _, contentR = content:splitVertical(0.3, 0.05, 2)
     local tabCols = tabBarR:rows(#tabs)
     for i, tab in ipairs(tabs) do
         local active = tab.id == currentTab
         local col1 = active and objects.Color.WHITE or objects.Color.GRAY
-        if ui.DefaultButton(tab.label, tabCols[i]:padRatio(0.1)) then
+        if ui.DefaultButton(tab.label, tabCols[i]:padRatio(0.3, 0, 0.3, 0):padRatio(0.1)) then
             currentTab = tab.id
         end
     end
 
     contentR = contentR:padRatio(0, 0.2, 0, 0.2)
     local items = tabsById[currentTab].items
-    local rows = contentR:columns(#items)
+    local rows = contentR:columns(linesOfContent)
     for i, item in ipairs(items) do
+      local reg = rows[i]:padRatio(0.15, 0.1, 0.15, 0.1)
         if item.uiType == "button" then
-            drawButton(rows[i]:padRatio(0.3), item, smallFont)
+            drawButton(reg, item, smallFont)
         else
-            drawSlider(rows[i]:padRatio(0.3), item, smallFont)
+            drawSlider(reg, item, smallFont)
         end
     end
 
     -- Close button
-    local buttonR = buttonBaseR:set(nil, nil, 200, nil):center(buttonBaseR)
+    local buttonR = buttonBaseR:set(nil, nil, 100, nil):center(buttonBaseR)
     if ui.DefaultButton(TEXT.CLOSE, buttonR) then
         visible = false
     end
