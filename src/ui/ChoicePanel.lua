@@ -43,11 +43,12 @@ local ChoicePanel = objects.Class("g:ChoicePanel")
 
 local NUM_CHOICES = 3
 local FAN_OUT_DURATION = 0.11
-local REROLL_TXT = interp("Reroll (%{n})")
 local MANABLESSING_PICK_TXT = loc("Pick one blessing!")
 local MANA_PLUS_TXT = loc("+1")
 local BONUS_TEXT = interp("Bonus %{s}")
+
 local REROLL_GLOW_COL = objects.Color("#4d8c21")
+local REROLL_GLOW_HOVER_COL = objects.Color("#7cc82a")
 
 ---@param region kirigami.Region
 ---@param index integer
@@ -60,16 +61,14 @@ local function drawRerollButton(region, index, disabled)
     local x, y, w, h = rerollR:get()
     local isHovered = not disabled and iml.isHovered(x, y, w, h, uid)
 
-    if isHovered then
+    if not disabled then
         helper.rotatingGlow(rerollR:padRatio(0.2), {
             count = 6,
             offset = index * 50,
             glowScale = 30,
             rps = 0.8,
-            color = g.snapToPalette(REROLL_GLOW_COL)
+            color = g.snapToPalette(isHovered and REROLL_GLOW_HOVER_COL or REROLL_GLOW_COL)
         })
-    else
-        lg.setColor(1, 1, 1)
     end
 
     local bodyImage = "reroll_button_body"
