@@ -502,6 +502,55 @@ function helper.drawGlow(x, y, color, size, glowArgs)
     col:pop()
 end
 
+---@class helper.rotatingGlow.args
+---@field count integer?
+---@field offset number?
+---@field glowScale number?
+---@field rps number?
+---@field wobbleFreq number?
+---@field wobbleAmp number?
+---@field color [number, number, number]?
+
+---@param reg kirigami.Region
+---@param args helper.rotatingGlow.args?
+function helper.rotatingGlow(reg, args)
+    local offset = args and args.offset or 0
+    local glowScale = args and args.glowScale or 1
+    local rps = args and args.rps or math.pi / 4
+    local wobbleFreq = args and args.wobbleFreq or 0
+    local wobbleAmp = args and args.wobbleAmp or 0
+    local glowCount = args and args.count or 4
+    local color = args and args.color or {1, 1, 1}
+
+    local x,y,w,h = reg:get()
+    local cx,cy = x + w/2, y + h/2
+    local t = love.timer.getTime()
+
+    local rx = w / 2
+    local ry = h / 2
+
+    for i = 1, glowCount do
+        local phase = ((i - 1) / glowCount) * consts.TAU + offset
+        local wobble = math.sin(t * wobbleFreq + phase) * wobbleAmp
+        local angle = t * rps + phase
+
+        local px = cx + rx * math.cos(angle)
+        local py = cy + ry * math.sin(angle)
+        local tx = -rx * math.sin(angle)
+        local ty = ry * math.cos(angle)
+        local tl = helper.magnitude(tx, ty)
+
+        px = px + ty / tl * wobble
+        py = py - tx / tl * wobble
+
+        helper.drawGlow(px, py, color, glowScale, {
+            pulseFrequency = consts.TAU / 3,
+            pulseAmplitude = glowScale * 0.1,
+            pulseOffset = offset,
+        })
+    end
+end
+
 end
 
 
@@ -583,7 +632,7 @@ helper.alphaTestShader = alphaTestShader
 ---@param y number
 ---@param w number
 ---@param h number
----@param drawFunc fun()
+---@param drawFunc function
 ---@param keepStencil boolean?
 function helper.gradientRectStencil(dir, col1, col2, x,y,w,h, drawFunc, keepStencil)
     love.graphics.setStencilMode("draw", 1)
