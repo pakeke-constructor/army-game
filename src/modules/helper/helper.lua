@@ -485,7 +485,7 @@ local circleMesh
 
 ---@param x number
 ---@param y number
----@param color [number, number, number]
+---@param color objects.Color
 ---@param size number?
 ---@param glowArgs helper.drawGlow.args?
 function helper.drawGlow(x, y, color, size, glowArgs)
@@ -497,19 +497,19 @@ function helper.drawGlow(x, y, color, size, glowArgs)
     local pulse = math.sin(love.timer.getTime() * freq + offset) ^ 2 * amp
 
     circleMesh = circleMesh or helper.gradientCircleMesh()
-    local col = gsman.setColor(color[1], color[2], color[3], color[4] or 1)
+    local col = gsman.setColor(color)
     love.graphics.draw(circleMesh, x, y, 0, s + pulse, s + pulse)
     col:pop()
 end
 
 ---@class helper.rotatingGlow.args
----@field count integer?
----@field offset number?
----@field glowScale number?
----@field rps number?
----@field wobbleFreq number?
----@field wobbleAmp number?
----@field color [number, number, number]?
+---@field count integer? default is 4
+---@field offset number? default is 0
+---@field glowScale number? default is 1
+---@field rps number? default is `math.pi/4`
+---@field wobbleFreq number? default is 0
+---@field wobbleAmp number? default is 0
+---@field color objects.Color? default is white
 
 ---@param reg kirigami.Region
 ---@param args helper.rotatingGlow.args?
@@ -520,7 +520,7 @@ function helper.rotatingGlow(reg, args)
     local wobbleFreq = args and args.wobbleFreq or 0
     local wobbleAmp = args and args.wobbleAmp or 0
     local glowCount = args and args.count or 4
-    local color = args and args.color or {1, 1, 1}
+    local color = args and args.color or objects.Color.WHITE
 
     local x,y,w,h = reg:get()
     local cx,cy = x + w/2, y + h/2
