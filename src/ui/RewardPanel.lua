@@ -53,7 +53,7 @@ local colStr = ("{c r=%.2f g=%.2f b=%.2f}"):format(
     objects.Color("FFBBA7A7"):getRGBA()
 )
 
-local NEW_SQUAD =  "{recruit_icon} ".. colStr .. loc("Recruit new troops!")
+local NEW_SQUAD =  "{recruit_icon} ".. colStr .. loc("Recruit new squads!")
 
 local NEW_BLESSING = "{blessing_icon} " ..colStr .. loc("Get random Blessing!")
 
