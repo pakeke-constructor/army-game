@@ -18,6 +18,7 @@
 - buffing
 - death_trigger
 - transform
+- swarm (squads/blessings built around having LOTS of units; large unit counts, cheap weak bodies.)
 - pest (pest units are swarm-like units, like, tonnes of tiny 1/1 units.)
 - mana_gain
 - economy
@@ -57,10 +58,12 @@ Read ARCHETYPE_TAGS.md. Then, read src/content/blessings.lua.
 Work very slowly through all [red/blue/green/yellow] squads in blessings.lua.
 Assign tags to every squad. Go through very slowly, assign "draft tags" to start with, as comments, and then do a 2nd pass, refining them.
 
-Start with green squads.
+Do yellow squads.
 
 
 ## Prompt 2:
+read ARCHETYPE_TAGS.md.
+
 I want to create a 'whiteboard' scene, for development.
 A whiteboard scene allows us, the devs, to visualize and mindmap all of the blessings/squads in the game, by displaying them all into a big grid.
 
@@ -72,5 +75,4 @@ categorize buttons: what to categorize by:
     - tag: sorts squads/blessings by tag
     - mana: sorts squads/blessings by mana-type
 
-read BLESSING_TAGS.md.
 
