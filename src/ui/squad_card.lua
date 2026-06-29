@@ -176,7 +176,7 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
             local textW = ew - iconSize - iconGap
 
             love.graphics.setColor(1, 1, 1)
-            local name = "{c r=0.8 g=0.8 b=0.85}{bob amp=0.5} {o}" .. info.name
+            local name = "{c r=0.8 g=0.8 b=0.85}{bob amp=0.5}{o}"..info.name
             richtext.printRichContainedNoWrap(name, TITLE_FONT, textX, ey, textW, TITLE_FONT:getHeight(), "left")
             -- Rarity
             local rarity = info.rarity
