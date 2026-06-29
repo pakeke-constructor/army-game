@@ -2579,6 +2579,27 @@ local function drawWeapon(ent, x,y)
         local dyy = bob + offy + pully - math.floor(h/2)
         g.drawImageOffset(wep.image, x + dx + offx + pullx, y + dyy, rot, 1, 1, 0.5, 0.5)
     elseif wep.type == "object" then
+    elseif wep.type == "hammer" then
+        local face = ent.faceDir or 1
+        local dx = face * (wep.xOffset or 8)
+        local phase, t = g.getAttackPhase(ent)
+        local BACK = -2 -- raised behind the back
+        local DOWN = 1.3  -- smashed down in front
+        local SMASH = 0.45 -- fraction of swing spent spinning; rest holds down
+        local rotLogical = 0
+        if phase == "windup" then
+            rotLogical = BACK * helper.EASINGS.sineOut(t)
+        elseif phase == "swing" then
+            if t < SMASH then
+                rotLogical = helper.lerp(BACK, DOWN, helper.EASINGS.easeInCubic(t / SMASH))
+            else
+                rotLogical = DOWN -- hold down at the end
+            end
+        end
+        local dxx, dyy = helper.fromPolar(rotLogical, 9)
+        dxx = dxx * face
+        dyy = dyy - math.floor(h/5)
+        g.drawImageOffset(wep.image, x + dx + dxx, y + dyy, rotLogical * face, 1, 1, 0.5, 0.95)
     elseif wep.type == "staff" then
     end
     -- g.drawImageOffset(wep.image, )
@@ -2589,8 +2610,10 @@ local function getBodyRot(ent)
     local bodyRot = 0
     if ent.weapon then
         local typ = ent.weapon.type
-        if typ == "sword" or typ == "spear" then
-            local mul = typ == "sword" and 1 or 0.4
+        if typ == "sword" or typ == "spear" or typ == "hammer" then
+            local mul = 0.4
+            if typ == "sword" then mul = 1 end
+            if typ == "hammer" then mul = 0.5 end
             local face = ent.faceDir or 1
             local phase, t = g.getAttackPhase(ent)
             if phase == "windup" then
@@ -2672,6 +2695,10 @@ function g.drawEntity(ent, x, y)
 
         local rot = (ent.rot or 0) + bodyRot + (ent.damageJolt or 0) + walkWobble
         g.drawImageOffset(ent.image, x + (ent.ox or 0), y + (ent.oy or 0) + walkBounce, rot, sx, sy, 0.5, 0.95, ent.kx, ent.ky)
+
+        if ent.onDrawAbove then
+            ent:onDrawAbove(x, y)
+        end
 
         if ent.weapon and not ent.weapon.drawBehind then
             drawWeapon(ent,x,y)

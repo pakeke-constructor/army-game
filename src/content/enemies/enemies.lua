@@ -152,8 +152,10 @@ defEnemy("crimsongoliath", {
         target = "enemy",
     },
     weapon = {
-        type = "object",
-        image = "crimsongoliath_axe"
+        type = "hammer",
+        image = "crimsongoliath_axe",
+        xOffset = 24,
+        swordStrikeTime=0.4,
     },
     attack = {
         attackType = "melee",
@@ -164,9 +166,11 @@ defEnemy("crimsongoliath", {
     baseMoveSpeed = 20,
     baseMaxHealth = 200,
 
-    onDraw = function(ent)
-        -- FIXME: Tweak this
-        g.drawImage("crimsongoliath_heads", ent.x, ent.y - 50)
+    onDrawAbove = function(ent)
+        local _, h = g.getImageSize(ent.image)
+        local bob = math.sin(g.getWorldTime() * 3) * 2
+        local face = ent.faceDir or 1
+        g.drawImage("crimsongoliath_heads", ent.x, ent.y - h+5 + bob, 0, face, 1)
     end,
     -- TODO: This thing on the notes.
     -- Cleave: Also hits enemies in a small area in front of the target.

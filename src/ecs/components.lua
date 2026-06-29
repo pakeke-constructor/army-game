@@ -89,7 +89,7 @@ local physics = {
 
 ---@class ecs.components.Weapon
 ---@field public image string
----@field public type "sword"|"spear"|"bow"|"staff"|"object"
+---@field public type "sword"|"spear"|"bow"|"staff"|"object"|"hammer"
 ---@field public swordSwingTime number?
 ---@field public swordStrikeTime number?
 ---@field public spearStrikeTime number?
@@ -215,7 +215,8 @@ local shadow = {
 ---@field public damageJolt number?
 ---@field public _landmark boolean? marked by the Landmark blessing: the first building placed this battle
 ---@field public onUpdate fun(ent:ecs.Entity, dt:number)?
----@field public onDraw fun(ent:ecs.Entity, x:number, y:number)?
+---@field public onDraw fun(ent:ecs.Entity, x:number, y:number)? drawn BEHIND the body
+---@field public onDrawAbove fun(ent:ecs.Entity, x:number, y:number)? drawn ON TOP of the body
 ---@field public onAttack fun(ent:ecs.Entity)?
 ---@field public entitySpawned fun(ent:ecs.Entity)?
 ---@field public entityDeath fun(ent:ecs.Entity, killer:ecs.Entity?)?
