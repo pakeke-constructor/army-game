@@ -47,6 +47,44 @@ local REROLL_TXT = interp("Reroll (%{n})")
 local MANABLESSING_PICK_TXT = loc("Pick one blessing!")
 local MANA_PLUS_TXT = loc("+1")
 local BONUS_TEXT = interp("Bonus %{s}")
+local REROLL_GLOW_COL = objects.Color("#4d8c21")
+
+---@param region kirigami.Region
+---@param index integer
+---@param disabled boolean
+---@return boolean
+local function drawRerollButton(region, index, disabled)
+    local rerollR = Kirigami(0, 0, g.getImageSize("reroll_button_body"))
+        :center(region)
+    local uid = "choice_reroll_"..index
+    local x, y, w, h = rerollR:get()
+    local isHovered = not disabled and iml.isHovered(x, y, w, h, uid)
+
+    if isHovered then
+        helper.rotatingGlow(rerollR:padRatio(0.2), {
+            count = 6,
+            offset = index * 50,
+            glowScale = 30,
+            rps = 0.8,
+            color = g.snapToPalette(REROLL_GLOW_COL)
+        })
+    else
+        lg.setColor(1, 1, 1)
+    end
+
+    local bodyImage = "reroll_button_body"
+    if disabled then
+        bodyImage = "reroll_button_body_gray"
+    elseif isHovered then
+        bodyImage = "reroll_button_body_hover"
+    end
+    g.drawImageContained(bodyImage, rerollR:get())
+
+    local iconImage = disabled and "shop_reroll_icon_gray" or "shop_reroll_icon"
+    g.drawImage(iconImage, x + w / 2, y + h / 2)
+
+    return iml.wasJustClicked(x, y, w, h, 1, uid)
+end
 
 
 ---@param rType "squad"|"blessing"|"mana"|"upgrade_squad"|"mana_blessing"
@@ -54,11 +92,19 @@ local BONUS_TEXT = interp("Bonus %{s}")
 ---@param rarityWeights g.RarityWeights?
 function ChoicePanel:init(rType, rerolls, rarityWeights)
     self.rType = rType
-    self.rerolls = rerolls or 0
+    ---@type integer[]
+    self.rerolls = {}
     ---@type string[]
     self.choices = {}
+    ---@type number[]
+    self.choiceCreatedAt = {}
     self.rarityWeights = rarityWeights or consts.DEFAULT_RARITY_WEIGHTS
     self.createdAt = love.timer.getTime()
+
+    for _ = 1, NUM_CHOICES do
+        self.rerolls[#self.rerolls+1] = rerolls or 0
+        self.choiceCreatedAt[#self.choiceCreatedAt+1] = self.createdAt
+    end
 
     self:_rollChoices()
 end
@@ -136,6 +182,56 @@ end
 
 ---@param pool string[]
 ---@param getInfo fun(id:string):{rarity:g.Rarity}
+---@param seen table<string, true?>
+---@return string?
+---@private
+function ChoicePanel:_pickOneFromPool(pool, getInfo, seen)
+    if #pool == 0 then return end
+
+    local weights = {}
+    for i, id in ipairs(pool) do
+        local info = getInfo(id)
+        weights[i] = self.rarityWeights[info.rarity.id] or 0
+    end
+
+    local picker = newPicker(pool, weights)
+    local pick = picker:pick()
+    for _ = 1, 20 do
+        if not seen[pick] then
+            return pick
+        end
+        pick = picker:pick()
+    end
+    return pick
+end
+
+
+---@param index integer
+---@private
+function ChoicePanel:_rerollChoice(index)
+    if self.rType ~= "squad" then return end
+    if (self.rerolls[index] or 0) <= 0 then return end
+
+    local seen = {}
+    for _, id in ipairs(self.choices) do
+        seen[id] = true
+    end
+
+    local pick = self:_pickOneFromPool(
+        g.getSquadsByMana(g.getRun().mana),
+        g.getSquadInfo,
+        seen
+    )
+    if not pick then return end
+
+    self.rerolls[index] = self.rerolls[index] - 1
+    self.choices[index] = pick
+    self.choiceCreatedAt[index] = love.timer.getTime()
+end
+
+
+---@param pool string[]
+---@param getInfo fun(id:string):{rarity:g.Rarity}
 ---@param out string[]?
 ---@param count integer?
 ---@private
@@ -168,10 +264,7 @@ end
 
 function ChoicePanel:draw()
     local r = ui.getFullScreenRegion()
-    local bot, cardArea = r, r
-    if self.rerolls > 0 then
-        cardArea, bot = r:splitVertical(8,1)
-    end
+    local cardArea = r
 
     if #self.choices == 0 then
         -- RIP in Pepperoni but safety handler must be done
@@ -192,15 +285,15 @@ function ChoicePanel:draw()
         richtext.printRichContainedNoWrap("{o}{bob}" .. MANABLESSING_PICK_TXT, titleFont, titleR:get())
     end
     local regions = cardArea:grid(NUM_CHOICES, 1)
-    local elapsed = love.timer.getTime() - self.createdAt
-    local t = math.min(1, math.max(0, elapsed / FAN_OUT_DURATION))
-    t = t * t * (3 - 2 * t)
     local cx = cardArea.x + cardArea.w / 2
     local cy = cardArea.y + cardArea.h / 2
-    local scale = 0.5 + 0.5 * t
 
     local ox = regions[1].w * (NUM_CHOICES - #self.choices) / 2
     for i = 1, #self.choices do
+        local elapsed = love.timer.getTime() - (self.choiceCreatedAt[i] or self.createdAt)
+        local t = math.min(1, math.max(0, elapsed / FAN_OUT_DURATION))
+        t = t * t * (3 - 2 * t)
+        local scale = 0.5 + 0.5 * t
         local rr = regions[i]
         rr = rr:padRatio(0.15)
         if self.rType == "mana" then
@@ -237,8 +330,16 @@ function ChoicePanel:draw()
 
     if self.rType == "squad" or self.rType == "upgrade_squad" then
         for i, squadId in ipairs(self.choices) do
-            local clicked = ui.drawSquadCard(squadId, regions[i], i, true, true)
-            if clicked then
+            local cardR, _, rerollR = regions[i]:splitVertical(8, 1, 1)
+            local clicked = ui.drawSquadCard(squadId, cardR, i, true, true)
+            local rerollClicked = false
+            if self.rType == "squad" then
+                rerollClicked = drawRerollButton(rerollR, i, (self.rerolls[i] or 0) <= 0)
+            end
+
+            if rerollClicked then
+                self:_rerollChoice(i)
+            elseif clicked then
                 g.addOrUpgradeSquad(squadId)
                 return true
             end
@@ -289,37 +390,9 @@ function ChoicePanel:draw()
         end
     end
 
-    if self.rerolls > 0 then
-        local _, rerollR, _ = bot:splitHorizontal(2, 1, 2)
-        rerollR = rerollR:moveRatio(0, -0.3)
-        if iml.isHovered(rerollR:get()) then
-            lg.setColor(0.5,0.5,0.5)
-        else
-            lg.setColor(1,1,1)
-        end
-
-        local IMG = "reroll_button_body"
-        g.drawImageContained(IMG, rerollR:get())
-
-        local font = g.getSmallFont(16)
-        local xx,yy,ww,hh=rerollR:padRatio(0.7):get()
-        richtext.printRichContained(
-            "{shop_reroll_icon} " .. helper.wrapRichtextColor(g.COLORS.REROLL, REROLL_TXT({n = self.rerolls})),
-            font,
-            xx,yy,ww,hh,
-            1
-        )
-
-        if iml.wasJustClicked(rerollR:get()) then
-            self.rerolls = self.rerolls - 1
-            self.createdAt = love.timer.getTime()
-            self:_rollChoices()
-        end
-    end
 end
 
 
 
 
 return ChoicePanel
-
