@@ -96,6 +96,7 @@ local physics = {
 ---@field public bowRecoil number?
 ---@field public weaponBobbing number?
 ---@field public xOffset number?
+---@field public arcRadius number? hammer: orbit radius around the body
 ---@field public drawBehind boolean?
 local weapon = {
     image = "militia_sword",

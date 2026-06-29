@@ -2585,20 +2585,21 @@ local function drawWeapon(ent, x,y)
         local phase, t = g.getAttackPhase(ent)
         local BACK = -2 -- raised behind the back
         local DOWN = 1.3  -- smashed down in front
-        local SMASH = 0.45 -- fraction of swing spent spinning; rest holds down
+        local SMASH = 0.75 -- fraction of swing spent spinning; rest holds down
         local rotLogical = 0
         if phase == "windup" then
             rotLogical = BACK * helper.EASINGS.sineOut(t)
         elseif phase == "swing" then
             if t < SMASH then
-                rotLogical = helper.lerp(BACK, DOWN, helper.EASINGS.easeInCubic(t / SMASH))
+                rotLogical = helper.lerp(BACK, DOWN, (t / SMASH) ^ 7)
             else
                 rotLogical = DOWN -- hold down at the end
             end
         end
-        local dxx, dyy = helper.fromPolar(rotLogical, 9)
+        local radius = wep.arcRadius or (h * 0.6)
+        local dxx, dyy = helper.fromPolar(rotLogical, radius)
         dxx = dxx * face
-        dyy = dyy - math.floor(h/5)
+        dyy = dyy - math.floor(h/3)
         g.drawImageOffset(wep.image, x + dx + dxx, y + dyy, rotLogical * face, 1, 1, 0.5, 0.95)
     elseif wep.type == "staff" then
     end

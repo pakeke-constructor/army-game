@@ -147,15 +147,15 @@ defEnemy("charredsoul", {
 defEnemy("crimsongoliath", {
     image = "crimsongoliath_body",
     shadow = {},
-    physics = { shape = "circle", radius = 32, ox = 0, oy = 0, mass = 1 },
+    physics = { shape = "circle", radius = 32, ox = 0, oy = 0, mass = 5 },
     ai = {
         target = "enemy",
     },
     weapon = {
         type = "hammer",
         image = "crimsongoliath_axe",
-        xOffset = 24,
-        swordStrikeTime=0.4,
+        xOffset = 0,
+        swordStrikeTime=0.8,
     },
     attack = {
         attackType = "melee",
