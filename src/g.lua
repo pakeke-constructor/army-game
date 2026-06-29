@@ -66,6 +66,7 @@ local sfx = require("src.sound.sfx")
 
 local juiceService = require("src.juiceService")
 local newPicker = require("src.modules.Picker")
+local tags = require("src.tags")
 
 
 
@@ -80,6 +81,36 @@ function g._runPostLoad()
         func()
     end
     postLoadCallbacks = {}
+end
+
+function g.getTagList()
+    return tags.LIST
+end
+
+function g.isTag(tag)
+    return tags.SET[tag] == true
+end
+
+local function assertValidTags(kind, id, tagList)
+    if tagList == nil then
+        return
+    end
+
+    assert(type(tagList) == "table", kind .. " '" .. id .. "' tags must be a list")
+
+    local total = 0
+    for _ in pairs(tagList) do
+        total = total + 1
+    end
+    assert(total == #tagList, kind .. " '" .. id .. "' tags must be a dense array")
+
+    local seen = {}
+    for i, tag in ipairs(tagList) do
+        assert(type(tag) == "string", kind .. " '" .. id .. "' tag #" .. i .. " must be a string")
+        assert(tags.SET[tag], kind .. " '" .. id .. "' uses unknown tag: " .. tag)
+        assert(not seen[tag], kind .. " '" .. id .. "' has duplicate tag: " .. tag)
+        seen[tag] = true
+    end
 end
 
 
@@ -179,6 +210,7 @@ end
 ---@param info g.CommanderInfo|{id:nil}|{name:nil}
 function g.defineCommander(id, name, info)
     assert(not COMMANDERS[id], "Duplicate commander: " .. id)
+    assertValidTags("Commander", id, info.tags)
     info.name = loc(name, {}, {
         context = "The name of a commander"
     })
@@ -1000,6 +1032,7 @@ function g.defineSquad(id, info)
     if SQUAD_DEFS[id] then
         error("Duplicate squad: " .. id)
     end
+    assertValidTags("Squad", id, info.tags)
 
     info.id = id
     info.startingTraits = info.startingTraits or {}
@@ -1190,6 +1223,7 @@ function g.defineSpell(id, info)
     if SPELL_DEFS[id] then
         error("Duplicate spell: " .. id)
     end
+    assertValidTags("Spell", id, info.tags)
     info.id = id
     local manaType
     for key,v in pairs(info.cost) do
@@ -1531,6 +1565,7 @@ local BLESSING_LIST = {}
 ---@param name string
 ---@param info g.BlessingInfo|{id:nil,name:nil}
 function g.defineBlessing(id, name, info)
+    assertValidTags("Blessing", id, info.tags)
     if info.image == "placeholder" then
         log.warn("No image for blessing:",id)
     elseif not g.isImage(info.image) then
@@ -1722,6 +1757,7 @@ function g.definePerk(id, info)
     if PERK_DEFS[id] then
         error("Duplicate perk: " .. id)
     end
+    assertValidTags("Perk", id, info.tags)
 
     ---@cast info g.PerkInfo
     info.name = loc(info.name, {}, {
