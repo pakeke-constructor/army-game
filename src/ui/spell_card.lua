@@ -8,6 +8,22 @@ local RADIUS_TEXT = interp("{range}Range: {c r=0.773 g=0.188 b=0.239}%{spellRang
     context = "The range of a spell.",
 })
 local TEXT_COLOR = {0.8, 0.8, 0.85} -- Note: This is not aligned to palette
+local PANEL_TOP_COLOR = objects.Color(0.05, 0.05, 0.06, 0.9)
+
+local SPELL_BG_MESH = love.graphics.newMesh({
+    -- center
+    {0.5, 0.5, 0.5, 0.5, 1, 1, 1, 1},
+    -- Top Left
+    {0, 0, 0, 0, 1, 1, 1, 1},
+    -- Top Right
+    {1, 0, 1, 0, 1, 1, 1, 1},
+    -- Bottom Right
+    {1, 1, 1, 1, 1, 1, 1, 1},
+    -- Bottom Left
+    {0, 1, 0, 1, 1, 1, 1, 1},
+    -- Top Left (again)
+    {0, 0, 0, 0, 1, 1, 1, 1},
+}, "fan", "stream")
 
 ---@param spellId string
 ---@param region kirigami.Region
@@ -18,9 +34,7 @@ return function(spellId, region, index)
     local info = g.getSpellInfo(spellId)
     local manaColor = g.getManaBundleColor(info.cost)
     local frameDarkColor = manaColor:lerp(objects.Color.BLACK, 0.65)
-    local panelBottomColor = manaColor:lerp(objects.Color.BLACK, 0.65)
     local frameLightColor = manaColor:lerp(objects.Color.WHITE, 0.25)
-    local panelTopColor = objects.Color(0.05, 0.05, 0.06, 0.9)
 
     local x, y, w, h = region:get()
     local uid = spellId.."_"..index
@@ -50,10 +64,26 @@ return function(spellId, region, index)
             })
         end
 
+        SPELL_BG_MESH:setVertices({
+            -- center
+            {0.5, 0.5, 0.5, 0.5, frameDarkColor:getRGBA()},
+            -- Top Left
+            {0, 0, 0, 0, frameDarkColor:getRGBA()},
+            -- Top Right
+            {1, 0, 1, 0, PANEL_TOP_COLOR:getRGBA()},
+            -- Bottom Right
+            {1, 1, 1, 1, frameDarkColor:getRGBA()},
+            -- Bottom Left
+            {0, 1, 0, 1, PANEL_TOP_COLOR:getRGBA()},
+            -- Top Left (again)
+            {0, 0, 0, 0, frameDarkColor:getRGBA()},
+        })
+
         love.graphics.setColor(0,0,0)
         ui.drawPanel(x-3,y-3, w+6,h+6)
         love.graphics.setColor(1,1,1)
-        helper.gradientRect("vertical", panelTopColor, frameDarkColor, x,y,w,h)
+        --helper.gradientRect("vertical", PANEL_TOP_COLOR, frameDarkColor, x,y,w,h)
+        love.graphics.draw(SPELL_BG_MESH, x + 4, y + 4, 0, w - 8, h - 8)
         ui.drawPanel(x,y,w,h)
         helper.gradientRectStencil("vertical", frameLightColor, manaColor, x,y,w,h, function()
             ui.drawPanel(x,y,w,h)
