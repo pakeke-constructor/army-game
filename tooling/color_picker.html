@@ -76,7 +76,7 @@
             <div class="box">
                 <h4>Pick Color</h4>
                 <input type="color" id="color-picker" value="#ff0000" style="width: 80%; height: 40px;">
-                <p>Hex: <span id="picked-hex">#ff0000</span></p>
+                <p>Hex: <input id="picked-hex" value="#ff0000" style="width: 80px; font-family: monospace;"></p>
                 <p>RGB (0-1): <span id="picked-rgb">1.00, 0.00, 0.00</span></p>
             </div>
             <div class="box">
@@ -147,6 +147,17 @@
             };
         }
 
+        function normalizeHex(hex) {
+            hex = hex.trim().toLowerCase().replace(/^#/, '');
+            if (/^[0-9a-f]{3}$/.test(hex)) {
+                hex = hex.split('').map(c => c + c).join('');
+            }
+            if (!/^[0-9a-f]{6}$/.test(hex)) {
+                return null;
+            }
+            return "#" + hex;
+        }
+
         // Color snapping algorithm using redmean
         function snapToPalette(r, g, b) {
             let best = null;
@@ -197,10 +208,10 @@
         }
 
         function updateSnapping() {
-            const hex = document.getElementById("color-picker").value;
+            const hex = normalizeHex(document.getElementById("color-picker").value);
             const rgb = hexToRgb01(hex);
 
-            document.getElementById("picked-hex").textContent = hex;
+            document.getElementById("picked-hex").value = hex;
             document.getElementById("picked-rgb").textContent = `${rgb.r.toFixed(3)}, ${rgb.g.toFixed(3)}, ${rgb.b.toFixed(3)}`;
 
             const snappedHex = snapToPalette(rgb.r, rgb.g, rgb.b);
@@ -227,9 +238,21 @@
             }
         }
 
+        function updateColorPickerFromHex() {
+            const hexInput = document.getElementById("picked-hex");
+            const hex = normalizeHex(hexInput.value);
+            if (!hex) {
+                hexInput.value = document.getElementById("color-picker").value;
+                return;
+            }
+            document.getElementById("color-picker").value = hex;
+            updateSnapping();
+        }
+
         // Initialize
         document.getElementById("palette-input").value = defaultPalette.join("\n");
         document.getElementById("color-picker").addEventListener("input", updateSnapping);
+        document.getElementById("picked-hex").addEventListener("change", updateColorPickerFromHex);
 
         loadPalette();
     </script>
