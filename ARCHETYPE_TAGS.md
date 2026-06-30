@@ -27,7 +27,6 @@
 - demon_fury
 - deployment
 - building
-- squad_size (ONLY blessings that change the NUMBER of units in a squad, e.g. +50% units, double units. NOT flat stat buffs to all units.)
 - color_synergy (interacts with a specific mana color: units/squads of that color)
 - commander
 - scaling (effect ACCUMULATES or stacks over a battle/run)

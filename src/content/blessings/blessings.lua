@@ -710,8 +710,8 @@ g.defineBlessing("upscaling", "Upscaling", {
     description = loc("Max level squads gain +50% units."),
     image = "blessing_upscaling",
     rarity = g.RARITIES.COMMON,
-    -- draft tags: squad_size, scaling, swarm
-    tags = {"squad_size", "scaling", "swarm"},
+    -- draft tags: scaling, swarm
+    tags = {"scaling", "swarm"},
     handlers = {
         getSquadUnitCountModifier = function(squadId)
             local squad = g.getSquadFromArmy(squadId)
@@ -1185,8 +1185,8 @@ g.defineBlessing("soulsplit", "Soul Split", {
     --image = "blessing_soulsplit",
     image = "placeholder",
     rarity = g.RARITIES.LEGENDARY,
-    -- draft tags: squad_size, health, swarm
-    tags = {"squad_size", "health", "swarm"},
+    -- draft tags: health, swarm
+    tags = {"health", "swarm"},
     handlers = {
         -- ADD reducer: returning the base count again = double total units.
         getSquadUnitCountModifier = function(squadId)

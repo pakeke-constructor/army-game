@@ -3,7 +3,7 @@ local lg = love.graphics
 ---@class g.WhiteboardScene
 local whiteboard_scene = {}
 
-local UI_SCALE = 0.5      -- whole scene drawn at half scale (doubles virtual space)
+local UI_SCALE = 1      -- whole scene drawn at half scale (doubles virtual space)
 local ICON = 32           -- native squad/blessing icon size
 local CELL = ICON + 4     -- icon + gap
 local GROUP_GAP = 12
