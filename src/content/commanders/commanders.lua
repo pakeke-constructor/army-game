@@ -55,6 +55,57 @@ g.defineCommander("sir_horse", "Sir Horse", {
 
 
 
+g.defineCommander("druidcommander", "Druid Lady", {
+    -- TODO: If there's good description, remove the \0
+    -- the \0 at the front is used to bypass localization.
+    description = loc("\0TODO Druid Lady description"),
+
+    image = "druidcommander",
+
+    squadDef = {
+        rarity = g.RARITIES.UNIQUE,
+        unitCount = 1,
+        cost = {red = 1, green = 1},
+        statUpgradeScaling = {
+            maxHealth = 0.25,
+        },
+        entityDef = {
+            image = "druidcommander",
+            isCommander = true,
+            weapon = {
+                type = "staff",
+                image = "druidcommander_staff"
+            },
+            attack = {
+                attackType = "melee",
+            },
+            baseAttackDamage = 9,
+            baseAttackSpeed = 1,
+            baseAttackRange = 80,
+            baseMoveSpeed = 85,
+            baseMaxHealth = 100,
+        },
+        perks = {{
+            name = "Breath of Life",
+            description = g.loc2("Your squads have +10% Max (HP)."),
+            image = "coin_icon",
+            rawHandlers = {
+                ---@param ent ecs.Entity
+                getMaxHealthMultiplier = function(_, ent)
+                    return ent.team == "ally" and 1.1 or 1
+                end
+            }
+        }}
+    },
+
+    onStart = function(run)
+        g.addSquadToArmy("green_militia_squad")
+        g.addSquadToArmy("green_archer_squad")
+    end
+})
+
+
+
 g.defineCommander("sir_horse_2", "Sir Horse II", {
     description = loc("Basic commander"),
 

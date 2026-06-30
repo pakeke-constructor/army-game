@@ -194,7 +194,7 @@ end
 ---@field description string
 ---@field image string
 ---@field startMana g.ManaBundle
----@field squadDef (g.SquadInfo|{id:nil}|{name:nil}|{perks:nil})?
+---@field squadDef (g.SquadDef|{name:nil})?
 ---@field squadId string?
 ---@field onStart (fun(run: g.Run))?
 
