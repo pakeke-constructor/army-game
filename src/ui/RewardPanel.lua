@@ -64,6 +64,9 @@ local LEVEL_UP_TXT = loc("Level Up!", {}, {
     context = "As in, at title showing a reward screen after battle / level-up"
 })
 
+local OR_TEXT = loc("OR", {}, {
+    context = "A binary choice of option"})
+
 
 
 
@@ -120,40 +123,101 @@ function RewardPanel:draw()
     })
 
     local pad = 4
+
+    ---@param baseR kirigami.Region
+    ---@param txt string
+    ---@param cb function
+    local function drawButton(baseR, txt, cb)
+        lg.setColor(0, 0, 0)
+        local isHovered = iml.isHovered(baseR:get())
+        if isHovered then
+            lg.setColor(0.05,0.05,0.15)
+        end
+        ui.drawSingleColorPanel(baseR:get())
+        if not isHovered then
+            lg.setColor(1, 0.85, 0.3, 0.2)
+            -- g.drawImage("glow_lootreward", x + w/2, y + h/2, 0, w/78, h/14)
+        end
+        lg.setColor(1,1,1)
+        richtext.printRich(txt, SMALL_FONT, baseR.x, baseR.y + pad, baseR.w - pad, "center")
+        if iml.wasJustClicked(baseR:get()) then
+            cb()
+        end
+        if iml.wasJustHovered(baseR:get()) then
+            -- play sound
+            g.playUISound("ui_tick")
+        end
+    end
+
     local boxH = SMALL_FONT:getHeight() + pad*2
+    ---@param txt string
+    ---@param callback function
     local function addBar(txt, callback)
         box:add({
             getHeight = function(w)
                 return boxH
             end,
             draw = function(x, y, w, h)
-                lg.setColor(0,0,0)
-                local isHovered = iml.isHovered(x,y,w,h)
-                if isHovered then
-                    lg.setColor(0.05,0.05,0.15)
-                end
-                ui.drawSingleColorPanel(x, y, w, h)
-                if not isHovered then
-                    lg.setColor(1, 0.85, 0.3, 0.2)
-                    -- g.drawImage("glow_lootreward", x + w/2, y + h/2, 0, w/78, h/14)
-                end
-                lg.setColor(1,1,1)
-                richtext.printRich(txt, SMALL_FONT, x,y+pad, w, "center")
-                if iml.wasJustClicked(x,y,w,h) then
-                    callback()
-                end
-                if iml.wasJustHovered(x,y,w,h) then
-                    -- play sound
-                    g.playUISound("ui_tick")
-                end
+                return drawButton(Kirigami(x,y,w,h), txt, callback)
             end
         })
     end
 
     for i, v in ipairs(self.rewards) do
         if v.type == "or" then
-            -- TODO
-            error("TODO OR rewards")
+            box:add({
+                getHeight = function(w)
+                    return boxH
+                end,
+                draw = function(x, y, w, h)
+                    local OR_PADDING = 8
+                    lg.setColor(0,0,0)
+                    local baseR = Kirigami(x, y, w, h)
+                    local leftR, midR, rightR = baseR:splitHorizontalExact(
+                        0, LARGE_FONT:getWidth(OR_TEXT) + OR_PADDING * 2, 0
+                    )
+
+                    -- Draw the 'OR' text
+                    lg.setColor(BROWN_COL)
+                    richtext.printRichContainedNoWrap(OR_TEXT, LARGE_FONT, midR:padUnit(OR_PADDING, 0):get())
+                    lg.setColor(1, 1, 1)
+
+                    -- Draw left and right
+                    for _, b in ipairs({{v.a, leftR}, {v.b, rightR}}) do
+                        if b[1].type == "xp" then
+                            drawButton(b[2], "{xp_icon}{XP_COLOR} "..tostring(b[1].amount), function()
+                                g.addXP(b[1].amount)
+                                table.remove(self.rewards, i)
+                            end)
+                        elseif b[1].type == "gold" then
+                            drawButton(b[2], "{coin_icon}{GOLD_COLOR} "..tostring(b[1].amount), function()
+                                g.addGold(b[1].amount)
+                                table.remove(self.rewards, i)
+                            end)
+                        elseif b[1].type == "squad" then
+                            drawButton(b[2], NEW_SQUAD, function()
+                                choicePopupService.set("squad", b[1].rerolls or 0)
+                                table.remove(self.rewards, i)
+                            end)
+                        elseif b[1].type == "blessing" then
+                            drawButton(b[2], NEW_BLESSING, function()
+                                choicePopupService.set("blessing")
+                                table.remove(self.rewards, i)
+                            end)
+                        elseif b[1].type == "mana" then
+                            drawButton(b[2], NEW_MANA, function()
+                                choicePopupService.set("mana")
+                                table.remove(self.rewards, i)
+                            end)
+                        elseif b[1].type == "mana_blessing" then
+                            drawButton(b[2], MANA_AND_BLESSING, function()
+                                choicePopupService.set("mana_blessing")
+                                table.remove(self.rewards, i)
+                            end)
+                        end
+                    end
+                end
+            })
         elseif v.type == "xp" then
             addBar("{xp_icon}{XP_COLOR} "..tostring(v.amount), function()
                 g.addXP(v.amount)
