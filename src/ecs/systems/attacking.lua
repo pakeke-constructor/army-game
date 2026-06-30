@@ -19,6 +19,8 @@ Entities need: attack, attackDamage, attackSpeed, attackRange, team, x, y
 Projectile entities need: projectile component (damage, ownerEnt, team), vx, vy, vz, z
 ]]
 
+local juiceService = require("src.juiceService")
+
 local atckSys = {}
 
 ---@param a ecs.Entity
@@ -238,6 +240,16 @@ function atckSys.preUpdate(dt)
         if ent._attackTimer <= 0 then
             doAttack(ent, target)
             ent._attackTimer = attackCooldown
+        end
+
+        -- hammer: screen shake when the smash lands (must match SMASH in drawWeapon)
+        if ent.weapon and ent.weapon.type == "hammer" then
+            local phase, t = g.getAttackPhase(ent)
+            local smashing = phase == "swing" and t >= 0.75
+            if smashing and not ent._hammerSmashed then
+                juiceService.addCameraShake(ent.weapon.smashShake or 0.2)
+            end
+            ent._hammerSmashed = smashing
         end
 
         ::continue::

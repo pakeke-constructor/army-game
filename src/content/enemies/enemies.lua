@@ -147,13 +147,16 @@ defEnemy("charredsoul", {
 defEnemy("crimsongoliath", {
     image = "crimsongoliath_body",
     shadow = {},
-    physics = { shape = "circle", radius = 32, ox = 0, oy = 0, mass = 1 },
+    physics = { shape = "circle", radius = 32, ox = 0, oy = 0, mass = 5 },
     ai = {
         target = "enemy",
     },
     weapon = {
-        type = "object",
-        image = "crimsongoliath_axe"
+        type = "hammer",
+        image = "crimsongoliath_axe",
+        xOffset = 0,
+        swordStrikeTime=0.8,
+        smashShake = 2,
     },
     attack = {
         attackType = "melee",
@@ -164,9 +167,11 @@ defEnemy("crimsongoliath", {
     baseMoveSpeed = 20,
     baseMaxHealth = 200,
 
-    onDraw = function(ent)
-        -- FIXME: Tweak this
-        g.drawImage("crimsongoliath_heads", ent.x, ent.y - 50)
+    onDrawAbove = function(ent)
+        local _, h = g.getImageSize(ent.image)
+        local bob = math.sin(g.getWorldTime() * 3) * 2
+        local face = ent.faceDir or 1
+        g.drawImage("crimsongoliath_heads", ent.x, ent.y - h+5 + bob, 0, face, 1)
     end,
     -- TODO: This thing on the notes.
     -- Cleave: Also hits enemies in a small area in front of the target.

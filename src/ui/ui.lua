@@ -39,8 +39,12 @@ function ui.DefaultButton(richTxt, region)
 
     love.graphics.setColor(1,1,1)
     if iml.isHovered(detectPanel:get()) then
-        oy = -2
+        oy = -7 -- slight lift when hovering
         lg.setColor(0,0,0)
+    end
+
+    if iml.isClicked(detectPanel:get()) then
+        oy = -2
     end
 
     if iml.wasJustHovered(detectPanel:get()) then
