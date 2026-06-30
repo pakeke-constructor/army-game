@@ -186,15 +186,24 @@ end
 
 
 
+---@class g.SquadDefForCommander: g.SquadDef
+---@field name nil
 
+---@class g.CommanderDef
+---@field description string
+---@field image string
+---@field startMana g.ManaBundle
+---@field squadDef g.SquadDefForCommander?
+---@field squadId string?
+---@field onStart (fun(run: g.Run))?
 
----@class g.CommanderInfo
+---@class g.CommanderInfo: g.CommanderDef
 ---@field id string
 ---@field name string
 ---@field description string
 ---@field image string
 ---@field startMana g.ManaBundle
----@field squadDef (g.SquadDef|{name:nil})?
+---@field squadDef g.SquadDef?
 ---@field squadId string?
 ---@field onStart (fun(run: g.Run))?
 
@@ -207,7 +216,7 @@ end
 
 ---@param id string
 ---@param name string
----@param info g.CommanderInfo|{id:nil}|{name:nil}
+---@param info g.CommanderDef
 function g.defineCommander(id, name, info)
     assert(not COMMANDERS[id], "Duplicate commander: " .. id)
     assertValidTags("Commander", id, info.tags)
@@ -216,6 +225,9 @@ function g.defineCommander(id, name, info)
     })
     info.id = id
     assert(info.image,"commanders need images")
+    ---@cast info g.CommanderInfo
+
+    assert(info.startMana and next(info.startMana), "missing starting mana")
 
     local squadDef = info.squadDef
     if squadDef then
@@ -1183,7 +1195,10 @@ end
 ---@param squadId string
 ---@return g.Squad?
 function g.getSquadFromArmy(squadId)
-    return g.getRun().squads[squadId]
+    if g.hasRun() then
+        return g.getRun().squads[squadId]
+    end
+    return nil
 end
 
 
