@@ -56,9 +56,7 @@ g.defineCommander("sir_horse", "Sir Horse", {
 
 
 g.defineCommander("druidcommander", "Druid Lady", {
-    -- TODO: If there's good description, remove the \0
-    -- the \0 at the front is used to bypass localization.
-    description = loc("\0TODO Druid Lady description"),
+    description = loc("Master of the Great Forest"),
 
     startMana = {
         [g.WILDCARD_MANA] = 2,
@@ -107,6 +105,49 @@ g.defineCommander("druidcommander", "Druid Lady", {
     onStart = function(run)
         g.addSquadToArmy("green_militia_squad")
         g.addSquadToArmy("green_archer_squad")
+    end
+})
+
+
+
+g.defineCommander("octopuscommander", "Octopus Tank", {
+    description = loc("Aquatic Genius."),
+
+    startMana = {
+        [g.WILDCARD_MANA] = 2,
+        blue = 2,
+        yellow = 2
+    },
+
+    image = "octopuscommander",
+
+    squadDef = {
+        rarity = g.RARITIES.UNIQUE,
+        unitCount = 1,
+        cost = {blue = 1, yellow = 1},
+        statUpgradeScaling = {
+            maxHealth = 0.25,
+        },
+        entityDef = {
+            image = "octopuscommander",
+            isCommander = true,
+            physics = { shape = "circle", radius = 20, ox = 0, oy = 0, mass = 7 },
+            attack = {
+                attackType = "ranged",
+                projectileType = "arrow", -- placeholder
+                projectileSpeed = 300,
+            },
+            baseAttackDamage = 5,
+            baseAttackSpeed = 5,
+            baseAttackRange = 9999, -- unlimited range basaically
+            baseMoveSpeed = 15, -- but very slow
+            baseMaxHealth = 125,
+        }
+    },
+
+    onStart = function(run)
+        g.addSquadToArmy("blue_militia_squad")
+        g.addSquadToArmy("blue_archer_squad")
     end
 })
 
