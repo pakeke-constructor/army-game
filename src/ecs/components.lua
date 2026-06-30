@@ -96,6 +96,7 @@ local physics = {
 ---@field public bowRecoil number?
 ---@field public weaponBobbing number?
 ---@field public xOffset number?
+---@field public yOffset number?
 ---@field public arcRadius number? hammer: orbit radius around the body
 ---@field public smashShake number? hammer: screen shake on smash
 ---@field public drawBehind boolean?
@@ -107,6 +108,7 @@ local weapon = {
     bowRecoil = 0.1, -- 10% recoil
     weaponBobbing = 0.1, -- 10% bobbing
     xOffset = 10,
+    yOffset = 10,
     drawBehind = false or true,
 }
 

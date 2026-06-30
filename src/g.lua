@@ -2565,6 +2565,7 @@ local function drawWeapon(ent, x,y)
     if wep.type == "sword" then
         local face = ent.faceDir or 1
         local dx = face * (wep.xOffset or 6)
+        local dy = wep.yOffset or 0
         local phase, t = g.getAttackPhase(ent)
         local rotLogical = 0
         if phase == "windup" then
@@ -2575,7 +2576,7 @@ local function drawWeapon(ent, x,y)
         local dxx, dyy = helper.fromPolar(rotLogical, 7)
         dxx = dxx * face
         dyy = dyy - math.floor(h/5)
-        g.drawImageOffset(wep.image, x + dx + dxx, y + dyy, rotLogical * face, 1,1, 0.5, 0.95)
+        g.drawImageOffset(wep.image, x + dx + dxx, y + dy + dyy, rotLogical * face, 1,1, 0.5, 0.95)
         -- drawImageOffset(imageName, x, y, r, sx, sy, ox, oy, kx, ky)
 
     elseif wep.type == "spear" then
