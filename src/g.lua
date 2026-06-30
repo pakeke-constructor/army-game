@@ -3622,7 +3622,7 @@ g.defineStat("magic", "baseMagic", {
     description = "Strength of magic (doesn't do anything on it's own)",
     shortName = "MAGK",
     color = objects.Color(0.1, 0.35, 0.9),
-    icon = "magic_icon",
+    icon = "magic_icon2",
     isImportant = _importantIfNonZero,
 })
 g.defineStat("attackSpeed", "baseAttackSpeed", {
