@@ -235,14 +235,12 @@ local function buildVictoryChoices()
 end
 
 
-local RANDOM_SQUAD_CHANCE = 0.75 -- 75% chance to get random squad reward
 
 local function winBattle(self)
     if self.victory then return end
     self.victory = true
     self.victoryPopupTime = 0
-    ---@type g.RewardPanel.Rewards
-    local rewards = {
+    rewardPopupService.battleReward({
         {
             type = "gold",
             amount = math.floor(helper.lerp(
@@ -251,12 +249,12 @@ local function winBattle(self)
                 love.math.random()
             ))
         },
-        {type = "xp", amount = 3},
-    }
-    if love.math.random() <= RANDOM_SQUAD_CHANCE then
-        rewards[#rewards + 1] = {type = "squad", rerolls = 1}
-    end
-    rewardPopupService.battleReward(rewards)
+        {
+            type = "or",
+            a = {type = "squad", rerolls = 1},
+            b = {type = "xp", amount = 4}
+        }
+    })
     g.getRun():winBattle()
     -- remove all entities except the commander
     for _, ent in ipairs(self.ecs.entities) do
