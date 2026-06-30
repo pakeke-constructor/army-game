@@ -27,6 +27,14 @@ defineProjectile("bread", {
 })
 
 
+defineProjectile("octopus_lazer", {
+    image = "octopus_lazer"
+})
+
+
+
+
+
 defineProjectile("blazingbombardier_bomb", {
     image = "blazingbombardier_bomb",
     ---@param projEnt ecs.Entity

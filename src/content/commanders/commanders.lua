@@ -227,13 +227,13 @@ g.defineCommander("octopuscommander", "Octopus Tank", {
             physics = { shape = "circle", radius = 20, ox = 0, oy = 0, mass = 7 },
             attack = {
                 attackType = "ranged",
-                projectileType = "arrow", -- placeholder
-                projectileSpeed = 300,
+                projectileType = "octopus_lazer",
+                projectileSpeed = 800,
             },
             baseAttackDamage = 5,
-            baseAttackSpeed = 5,
-            baseAttackRange = 9999, -- unlimited range basically
-            baseMoveSpeed = 15, -- but very slow
+            baseAttackSpeed = 1,
+            baseAttackRange = 800, -- unlimited range basically
+            baseMoveSpeed = 35, -- but very slow
             baseMaxHealth = 250,
         }
     },
