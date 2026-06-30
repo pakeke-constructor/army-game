@@ -60,6 +60,12 @@ g.defineCommander("druidcommander", "Druid Lady", {
     -- the \0 at the front is used to bypass localization.
     description = loc("\0TODO Druid Lady description"),
 
+    startMana = {
+        [g.WILDCARD_MANA] = 2,
+        red = 2,
+        green = 2
+    },
+
     image = "druidcommander",
 
     squadDef = {
@@ -80,7 +86,7 @@ g.defineCommander("druidcommander", "Druid Lady", {
                 attackType = "melee",
             },
             baseAttackDamage = 9,
-            baseAttackSpeed = 1,
+            baseAttackSpeed = 1.2,
             baseAttackRange = 80,
             baseMoveSpeed = 85,
             baseMaxHealth = 100,
