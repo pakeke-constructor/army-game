@@ -235,20 +235,25 @@ local function buildVictoryChoices()
 end
 
 
-local RANDOM_SQUAD_CHANCE = 0.75 -- 75% chance to get random squad reward
 
 local function winBattle(self)
     if self.victory then return end
     self.victory = true
     self.victoryPopupTime = 0
     rewardPopupService.battleReward({
-        gold = math.floor(helper.lerp(
-            consts.BALANCING.BATTLE_GOLD_REWARD_MIN,
-            consts.BALANCING.BATTLE_GOLD_REWARD_MAX,
-            love.math.random()
-        )),
-        xp = 3,
-        randomSquad = love.math.random() <= RANDOM_SQUAD_CHANCE,
+        {
+            type = "gold",
+            amount = math.floor(helper.lerp(
+                consts.BALANCING.BATTLE_GOLD_REWARD_MIN,
+                consts.BALANCING.BATTLE_GOLD_REWARD_MAX,
+                love.math.random()
+            ))
+        },
+        {
+            type = "or",
+            a = {type = "squad", rerolls = 1},
+            b = {type = "xp", amount = 4}
+        }
     })
     g.getRun():winBattle()
     -- remove all entities except the commander
@@ -467,9 +472,9 @@ function battle_scene:keypressed(k)
                 rewardPopupService.clear()
             else
                 rewardPopupService.battleReward({
-                    gold = helper.lerp(consts.BALANCING.BATTLE_GOLD_REWARD_MIN, consts.BALANCING.BATTLE_GOLD_REWARD_MAX, love.math.random()),
-                    xp = 3,
-                    randomSquad = true,
+                    {type = "gold", amount = 3},
+                    {type = "xp",amount = 3},
+                    {type = "squad", rerolls = 1},
                 })
             end
         end
