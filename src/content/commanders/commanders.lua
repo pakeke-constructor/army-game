@@ -110,6 +110,54 @@ g.defineCommander("druidcommander", "Druid Lady", {
 
 
 
+g.defineCommander("mechcommander", "Mech Guy", {
+    description = loc("Battle-Engineer."),
+
+    startMana = {
+        [g.WILDCARD_MANA] = 2,
+        yellow = 2,
+        green = 2
+    },
+
+    image = "mechcommander",
+
+    squadDef = {
+        rarity = g.RARITIES.UNIQUE,
+        unitCount = 1,
+        cost = {yellow = 1, green = 1},
+        statUpgradeScaling = {
+            maxHealth = 0.25,
+        },
+        entityDef = {
+            image = "mechcommander",
+            isCommander = true,
+            weapon = {
+                type = "sword",
+                image = "mechcommander_arm",
+                drawBehind = true,
+                xOffset = 10,
+                yOffset = 10,
+            },
+            attack = {
+                attackType = "melee",
+            },
+            baseAttackDamage = 7,
+            baseAttackSpeed = 3,
+            baseAttackRange = 60,
+            baseMoveSpeed = 80,
+            baseMaxHealth = 150,
+        },
+        -- TODO Perk: Progress: Gain 20 gold when you upgrade a squad.
+    },
+
+    onStart = function(run)
+        g.addSquadToArmy("green_militia_squad")
+        g.addSquadToArmy("green_archer_squad")
+    end
+})
+
+
+
 g.defineCommander("lizardcommander", "Lizard Lord", {
     description = loc("King of the great lizard clan."),
 
@@ -184,9 +232,9 @@ g.defineCommander("octopuscommander", "Octopus Tank", {
             },
             baseAttackDamage = 5,
             baseAttackSpeed = 5,
-            baseAttackRange = 9999, -- unlimited range basaically
+            baseAttackRange = 9999, -- unlimited range basically
             baseMoveSpeed = 15, -- but very slow
-            baseMaxHealth = 125,
+            baseMaxHealth = 250,
         }
     },
 
