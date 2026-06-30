@@ -110,6 +110,51 @@ g.defineCommander("druidcommander", "Druid Lady", {
 
 
 
+g.defineCommander("lizardcommander", "Lizard Lord", {
+    description = loc("King of the great lizard clan."),
+
+    startMana = {
+        [g.WILDCARD_MANA] = 2,
+        red = 2,
+        blue = 2
+    },
+
+    image = "lizardcommander",
+
+    squadDef = {
+        rarity = g.RARITIES.UNIQUE,
+        unitCount = 1,
+        cost = {red = 1, blue = 1},
+        statUpgradeScaling = {
+            maxHealth = 0.25,
+        },
+        entityDef = {
+            image = "lizardcommander",
+            isCommander = true,
+            weapon = {
+                type = "sword",
+                image = "lizardcommander_axe",
+            },
+            attack = {
+                attackType = "melee",
+            },
+            baseAttackDamage = 15,
+            baseAttackSpeed = 1,
+            baseAttackRange = 80,
+            baseMoveSpeed = 90,
+            baseMaxHealth = 110,
+        },
+        -- TODO Perk: Military Force: Enemy armies are more common. +1 day when defeating a tier 3 army.
+    },
+
+    onStart = function(run)
+        g.addSquadToArmy("red_militia_squad")
+        g.addSquadToArmy("blue_archer_squad")
+    end
+})
+
+
+
 g.defineCommander("octopuscommander", "Octopus Tank", {
     description = loc("Aquatic Genius."),
 
