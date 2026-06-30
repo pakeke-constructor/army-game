@@ -25,7 +25,8 @@ Instead of deploying troops whilst the battle is running, players deploy all the
 
 The issue with this, is that a lot of old content revolved around gaining mana during battle, and deploying troops during battle. So all these blessings/perks need to be refactored/changed.
 
-- Remove all content revolving around adding/removing mana at runtime
+- Remove all content revolving around adding/removing mana during battle.
+    - NOTE: This includes units like divers, and units like monk; since these abilities primarily work with mana-changes during battle
 - Remove all on-spawn effects (stomp, beserkers, etc)
 - There are too many squads/blessings that interact with attack-speed. (ASPD)
 - There are *NOT ENOUGH* squads/blessings that interact with magic (MAGK.)

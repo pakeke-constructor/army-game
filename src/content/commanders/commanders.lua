@@ -230,8 +230,8 @@ g.defineCommander("octopuscommander", "Octopus Tank", {
                 projectileType = "octopus_lazer",
                 projectileSpeed = 800,
             },
-            baseAttackDamage = 5,
-            baseAttackSpeed = 1,
+            baseAttackDamage = 8,
+            baseAttackSpeed = 1.6,
             baseAttackRange = 800, -- unlimited range basically
             baseMoveSpeed = 35, -- but very slow
             baseMaxHealth = 250,
