@@ -28,6 +28,8 @@ local LIST = {
     "color_synergy", -- mana color synergy
     "commander", -- commander-focused
     "scaling", -- stacks over time
+    "magic", -- magic/spellpower effects
+    "lightning", -- lightning/chain effects
 }
 
 local SET = {}
