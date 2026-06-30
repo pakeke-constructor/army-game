@@ -19,8 +19,19 @@ BLUE: Armor, MAGK, Spells, Freeze.
 
 
 
-## STRAIGHT-UP IDEAS:
+## CONTENT TO REMOVE / REPLACE:
+Kapathia underwent a big refactor recently:
+Instead of deploying troops whilst the battle is running, players deploy all their troops during a "planning" phase.
 
+The issue with this, is that a lot of old content revolved around gaining mana during battle, and deploying troops during battle. So all these blessings/perks need to be refactored/changed.
+
+- Remove all content revolving around adding/removing mana at runtime
+- Remove all on-spawn effects (stomp, beserkers, etc)
+- There are too many squads/blessings that interact with attack-speed. (ASPD)
+- There are *NOT ENOUGH* squads/blessings that interact with magic (MAGK.)
+
+
+## ADDITIONAL CONTENT:
 
 SPELLS: 
 [ ] Insectify: for every ally unit in range, spawns 1 Pest
