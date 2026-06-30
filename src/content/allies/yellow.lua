@@ -171,7 +171,7 @@ g.defineSquad("living_laboratory_squad", {
 g.defineSquad("endless_army_squad", {
     name = "The Endless Army",
     rarity = g.RARITIES.LEGENDARY,
-    tags = {"swarm", "scaling", "squad_size"},
+    tags = {"swarm", "scaling"},
     entityDef = {
         image = "endlessarmy_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },

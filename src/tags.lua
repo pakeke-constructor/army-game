@@ -25,7 +25,6 @@ local LIST = {
     "demon_fury", -- demon fury effects
     "deployment", -- deploy-time effects
     "building", -- building/static units
-    "squad_size", -- changes unit count
     "color_synergy", -- mana color synergy
     "commander", -- commander-focused
     "scaling", -- stacks over time

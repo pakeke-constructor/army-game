@@ -1025,6 +1025,8 @@ local function estimateSquadPowerIndex(squadInfo)
 end
 
 
+---@type g.SquadDef.SquadTypes "TANK"|"RANGED"|"HEALER"|"BRUISER"
+
 
 ---@param id string
 ---@param info g.SquadDef
@@ -3645,10 +3647,10 @@ g.defineStat("healPower", "baseHealPower", {
 })
 g.defineStat("magic", "baseMagic", {
     displayName = "Magic",
-    description = "Strength of magic",
+    description = "Strength of magic (doesn't do anything on it's own)",
     shortName = "MAGK",
     color = objects.Color(0.1, 0.35, 0.9),
-    icon = "magic_icon",
+    icon = "magic_icon2",
     isImportant = _importantIfNonZero,
 })
 g.defineStat("attackSpeed", "baseAttackSpeed", {
@@ -3685,7 +3687,7 @@ g.defineStat("attackRange", "baseAttackRange", {
 })
 g.defineStat("startingArmor", "baseStartingArmor", {
     displayName = "Armor",
-    description = "Reduces damage taken",
+    description = "Number of hits that are blocked before losing health.",
     shortName = "ARMR",
     color = objects.Color(0.3, 0.4, 0.7),
     icon = "armor",
