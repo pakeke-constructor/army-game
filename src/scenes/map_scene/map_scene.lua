@@ -310,8 +310,8 @@ local function checkLevelUp()
     run.level = run.level + 1
 
     rewardPopupService.levelUpReward({
-        gold = 10 * run.level,
-        randomManaBlessing = true,
+        {type = "gold", amount = 10 * run.level},
+        {type = "mana_blessing"}
     })
 end
 

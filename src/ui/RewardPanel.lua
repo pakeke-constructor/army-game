@@ -3,34 +3,54 @@
 ---@class g.RewardPanel: objects.Class
 local RewardPanel = objects.Class("g:RewardPanel")
 
+---@class g.RewardPanel.XPReward
+---@field type "xp"
+---@field amount integer
 
----@class g.RewardPanel.Rewards
----@field gold integer?
----@field xp integer?
----@field randomSquad boolean?
----@field randomBlessing boolean?
----@field randomMana boolean?
----@field randomManaBlessing boolean?
+---@class g.RewardPanel.GoldReward
+---@field type "gold"
+---@field amount integer
 
+---@class g.RewardPanel.SquadReward
+---@field type "squad"
+---@field rerolls integer? (0 = no reroll)
 
+---@class g.RewardPanel.BlessingReward
+---@field type "blessing"
+
+---@class g.RewardPanel.ManaReward
+---@field type "mana"
+
+---@class g.RewardPanel.ManaBlessingReward
+---@field type "mana_blessing"
+
+---@alias g.RewardPanel.Any
+---| g.RewardPanel.XPReward
+---| g.RewardPanel.GoldReward
+---| g.RewardPanel.SquadReward
+---| g.RewardPanel.BlessingReward
+---| g.RewardPanel.ManaReward
+---| g.RewardPanel.ManaBlessingReward
+
+---@class g.RewardPanel.ORReward
+---@field type "or"
+---@field a g.RewardPanel.Any (LHS)
+---@field b g.RewardPanel.Any (RHS)
+
+---@alias g.RewardPanel.Rewards (g.RewardPanel.ORReward|g.RewardPanel.Any)[]
 
 ---@param typ "levelup"|"battle"|"other"
 ---@param args g.RewardPanel.Rewards
 function RewardPanel:init(typ, args)
     self.type = typ
-    self.gold = args.gold
-    self.xp = args.xp
-    self.randomSquad = args.randomSquad
-    self.randomBlessing = args.randomBlessing
-    self.randomMana = args.randomMana
-    self.randomManaBlessing = args.randomManaBlessing
+    self.rewards = args
 end
 
 
 
 ---@return boolean
 function RewardPanel:hasAnyRewards()
-    return not not (self.gold or self.xp or self.randomBlessing or self.randomSquad or self.randomMana or self.randomManaBlessing)
+    return #self.rewards > 0
 end
 
 
@@ -130,46 +150,43 @@ function RewardPanel:draw()
         })
     end
 
-    if self.gold and self.gold > 0 then
-        addBar("{coin_icon}{GOLD_COLOR} " .. tostring(self.gold), function()
-            g.addGold(self.gold)
-            self.gold = nil
-        end)
-    end
-
-    if self.xp and self.xp > 0 then
-        addBar("{xp_icon}{XP_COLOR} " .. tostring(self.xp), function()
-            g.addXP(self.xp)
-            self.xp = nil
-        end)
-    end
-
-    if self.randomBlessing then
-        addBar(NEW_BLESSING, function()
-            choicePopupService.set("blessing")
-            self.randomBlessing = nil
-        end)
-    end
-
-    if self.randomManaBlessing then
-        addBar(MANA_AND_BLESSING, function()
-            choicePopupService.set("mana_blessing")
-            self.randomManaBlessing = nil
-        end)
-    end
-
-    if self.randomSquad then
-        addBar(NEW_SQUAD, function()
-            choicePopupService.set("squad", 1)
-            self.randomSquad = nil
-        end)
-    end
-
-    if self.randomMana then
-        addBar(NEW_MANA, function()
-            choicePopupService.set("mana")
-            self.randomMana = nil
-        end)
+    for i, v in ipairs(self.rewards) do
+        if v.type == "or" then
+            -- TODO
+            error("TODO OR rewards")
+        elseif v.type == "xp" then
+            addBar("{xp_icon}{XP_COLOR} "..tostring(v.amount), function()
+                g.addXP(v.amount)
+                table.remove(self.rewards, i)
+            end)
+        elseif v.type == "gold" then
+            addBar("{coin_icon}{GOLD_COLOR} "..tostring(v.amount), function()
+                g.addGold(v.amount)
+                table.remove(self.rewards, i)
+            end)
+        elseif v.type == "squad" then
+            addBar(NEW_SQUAD, function()
+                choicePopupService.set("squad", v.rerolls or 0)
+                table.remove(self.rewards, i)
+            end)
+        elseif v.type == "blessing" then
+            addBar(NEW_BLESSING, function()
+                choicePopupService.set("blessing")
+                table.remove(self.rewards, i)
+            end)
+        elseif v.type == "mana" then
+            addBar(NEW_MANA, function()
+                choicePopupService.set("mana")
+                table.remove(self.rewards, i)
+            end)
+        elseif v.type == "mana_blessing" then
+            addBar(MANA_AND_BLESSING, function()
+                choicePopupService.set("mana_blessing")
+                table.remove(self.rewards, i)
+            end)
+        else
+            error("Unknown reward type: "..tostring(v.type))
+        end
     end
 
     box:render(r.x,r.y)

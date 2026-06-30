@@ -286,7 +286,7 @@ local function drawFountainPopup()
     end
     if drawChoiceButton(rightR, FOUNTAIN_BLESSING, font) then
         closePopup()
-        rewardPopupService.genericReward({ randomBlessing = true })
+        rewardPopupService.genericReward({{type = "blessing"}})
     end
 end
 

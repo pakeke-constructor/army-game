@@ -241,15 +241,22 @@ local function winBattle(self)
     if self.victory then return end
     self.victory = true
     self.victoryPopupTime = 0
-    rewardPopupService.battleReward({
-        gold = math.floor(helper.lerp(
-            consts.BALANCING.BATTLE_GOLD_REWARD_MIN,
-            consts.BALANCING.BATTLE_GOLD_REWARD_MAX,
-            love.math.random()
-        )),
-        xp = 3,
-        randomSquad = love.math.random() <= RANDOM_SQUAD_CHANCE,
-    })
+    ---@type g.RewardPanel.Rewards
+    local rewards = {
+        {
+            type = "gold",
+            amount = math.floor(helper.lerp(
+                consts.BALANCING.BATTLE_GOLD_REWARD_MIN,
+                consts.BALANCING.BATTLE_GOLD_REWARD_MAX,
+                love.math.random()
+            ))
+        },
+        {type = "xp", amount = 3},
+    }
+    if love.math.random() <= RANDOM_SQUAD_CHANCE then
+        rewards[#rewards + 1] = {type = "squad", rerolls = 1}
+    end
+    rewardPopupService.battleReward(rewards)
     g.getRun():winBattle()
     -- remove all entities except the commander
     for _, ent in ipairs(self.ecs.entities) do
@@ -467,9 +474,9 @@ function battle_scene:keypressed(k)
                 rewardPopupService.clear()
             else
                 rewardPopupService.battleReward({
-                    gold = helper.lerp(consts.BALANCING.BATTLE_GOLD_REWARD_MIN, consts.BALANCING.BATTLE_GOLD_REWARD_MAX, love.math.random()),
-                    xp = 3,
-                    randomSquad = true,
+                    {type = "gold", amount = 3},
+                    {type = "xp",amount = 3},
+                    {type = "squad", rerolls = 1},
                 })
             end
         end
