@@ -5,10 +5,10 @@ local whiteboard_scene = {}
 
 local UI_SCALE = 1      -- whole scene drawn at half scale (doubles virtual space)
 local ICON = 32           -- native squad/blessing icon size
-local CELL = ICON + 4     -- icon + gap
-local GROUP_GAP = 12
+local CELL = ICON + 2     -- icon + gap
+local GROUP_GAP = 4
 local LABEL_H = 18
-local PREVIEW_W = 280     -- reserved card area on the right
+local PREVIEW_W = 140     -- reserved card area on the right
 
 
 -- category modes
@@ -127,7 +127,7 @@ function whiteboard_scene:draw()
     local screen = ui.getScreenRegion():scale(1 / UI_SCALE)
     local font = g.getSmallFont(16)
 
-    local sidebar, rest = screen:splitHorizontalExact(160, 0)
+    local sidebar, rest = screen:splitHorizontalExact(100, 0)
     local main, preview = rest:splitHorizontalExact(0, PREVIEW_W)
 
     -- sidebar buttons
@@ -155,31 +155,38 @@ function whiteboard_scene:draw()
     lg.setScissor(sx * UI_SCALE, sy * UI_SCALE, sw * UI_SCALE, sh * UI_SCALE)
 
     local groups = self:buildGroups()
-    local cols = math.max(1, math.floor(mw / CELL))
+    local icon = self.mode == "squads" and ICON or ICON * 0.6
+    local cell = self.mode == "squads" and CELL or icon + 2
+    local cols = math.max(1, math.floor(mw / cell))
     local y = my - self.scroll
     local hoveredId = nil
+    local labels = {}
 
     for _, gr in ipairs(groups) do
-        lg.setColor(gr.color:getRGBA())
-        richtext.printRichContainedNoWrap("{o}" .. tostring(gr.label) .. " (" .. #gr.ids .. ")", font, mx, y, mw, LABEL_H, "left")
+        labels[#labels + 1] = { y = y, color = gr.color, label = gr.label, count = #gr.ids }
         y = y + LABEL_H
         for i, id in ipairs(gr.ids) do
             local col = (i - 1) % cols
             local row = math.floor((i - 1) / cols)
-            local ix = mx + col * CELL + ICON / 2
-            local iy = y + row * CELL + ICON / 2
+            local ix = mx + col * cell + icon / 2
+            local iy = y + row * cell + icon / 2
             lg.setColor(1, 1, 1)
             if self.mode == "squads" then
                 g.drawSquadIcon(id, ix, iy, true)
             else
                 g.drawBlessingIcon(id, ix, iy)
             end
-            if iml.isHovered(ix - ICON / 2, iy - ICON / 2, ICON, ICON, gr.key .. id) then
+            if iml.isHovered(ix - icon / 2, iy - icon / 2, icon, icon, gr.key .. id) then
                 hoveredId = id
             end
         end
         local usedRows = math.ceil(#gr.ids / cols)
-        y = y + usedRows * CELL + GROUP_GAP
+        y = y + usedRows * cell + GROUP_GAP
+    end
+
+    for _, lbl in ipairs(labels) do
+        lg.setColor(lbl.color:getRGBA())
+        richtext.printRichContainedNoWrap("{o}" .. tostring(lbl.label) .. " (" .. lbl.count .. ")", font, mx, lbl.y, mw, LABEL_H, "left")
     end
 
     lg.setScissor()
