@@ -1,3 +1,5 @@
+local makeFallingLeavesAmbient = require("src.scenes.map_scene.falling_leaves_ambient")
+
 local M = {}
 
 ---@class MapType.GroundTex
@@ -66,7 +68,27 @@ M.forest = {
     },
     fogColor = objects.Color("ff273718"), -- forest green
     cloudSprites = {"cloud1"},
-    additionalAmbientService = require("src.scenes.map_scene.forest_ambient"),
+    additionalAmbientService = makeFallingLeavesAmbient({
+        count = 36,
+        margin = 0.2,
+        minSpeed = 24,
+        maxSpeed = 46,
+        minDrift = -12,
+        maxDrift = 18,
+        sway = 18,
+        minScale = 1,
+        maxScale = 1,
+        minLifetime = 7,
+        maxLifetime = 12,
+        flipChance = 0.6,
+        flipMinSpeed = 3,
+        flipMaxSpeed = 7,
+        sprites = {
+            "falling_leaves_green_1",
+            "falling_leaves_green_2",
+            "falling_leaves_green_3",
+        },
+    }),
     mapPath = objects.Color("#152217"),
     mapPathHighlight = objects.Color("#213a22"),
 }
@@ -117,7 +139,27 @@ M.fall = {
     },
     fogColor = objects.Color("#361e19"),
     cloudSprites = {"cloud1"},
-    additionalAmbientService = require("src.scenes.map_scene.fall_ambient"),
+    additionalAmbientService = makeFallingLeavesAmbient({
+        count = 200,
+        margin = 0.2,
+        minSpeed = 26,
+        maxSpeed = 50,
+        minDrift = -15,
+        maxDrift = 20,
+        sway = 18,
+        minScale = 1,
+        maxScale = 1,
+        minLifetime = 5,
+        maxLifetime = 10,
+        flipChance = 0.8,
+        flipMinSpeed = 2,
+        flipMaxSpeed = 10,
+        sprites = {
+            "falling_leaves_brown_1",
+            "falling_leaves_brown_2",
+            "falling_leaves_brown_3",
+        },
+    }),
     mapPath = objects.Color("#361e19"),
     mapPathHighlight = objects.Color("#5f3927"),
 }
