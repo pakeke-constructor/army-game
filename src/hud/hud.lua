@@ -28,8 +28,6 @@ local SQUAD_ICON_SIZE = 32
 local SQUAD_PADDING = 4
 
 local LOC_DAYS = interp("%{n} days until {c r=1 g=0.3 b=0.3}attack", {context="HUD top bar, countdown to next demon incursion. 'attack' is richtext-colored red"})
-local LOC_ZONE = loc("Zone 1 - Forest", {}, {context="HUD top bar, current zone name. Hardcoded stub"})
-local LOC_PAUSE = loc("II", {}, {context="HUD top bar, pause button icon text"})
 
 local LOC_HOVER_FURY = interp("+%{pct}% demon damage, +%{pct}% demon health!", {context="Tooltip when hovering Demon Fury in HUD"})
 local LOC_HOVER_FURY_ZERO = loc("Demon Fury increases whenever you win a battle. The higher the Demon Fury, the stronger the enemies", {}, {context="Tooltip when hovering Demon Fury in HUD when fury is zero"})
@@ -467,8 +465,9 @@ local function drawTopBar()
     local dtiRegion = daysTillIncursion:padUnit(0, -extraH, 0, 0)
     drawPanel(dtiRegion, LOC_DAYS({n = run:getDaysUntilIncursion()}), LOC_HOVER_DAYS)
 
-    drawPanel(zoneString, "{c r=0.2 g=0.5 b=0.3}{wavy freq=0.5}" .. LOC_ZONE)
-    drawPanel(pausePanel, LOC_PAUSE)
+    local mapType = g.getMapType()
+    drawPanel(zoneString, "{c r=0.2 g=0.5 b=0.3}{bob freq=0.5}" .. mapType.info)
+    drawPanel(pausePanel, "II")
     local px, py, pw, ph = pausePanel:get()
     if iml.wasJustClicked(px, py, pw, ph, 1, "pause_button") then
         settingsPopupService.show()

@@ -7,6 +7,7 @@ local M = {}
 
 ---@class MapType
 ---@field public name string Must same as the field name, used by portal node.
+---@field public info string Information shown on top right
 ---@field public decorTypes string[] As defined in decor_types.lua
 ---@field public groundTextures MapType.GroundTex[] List of possible ground textures to pick
 ---@field public groundColors objects.Color[] List of possible ground colors to pick
@@ -18,6 +19,10 @@ local M = {}
 ---@type MapType
 M.forest = {
     name = "forest",
+    info = helper.wrapRichtextColor(
+        objects.Color("#236449"),
+        loc("Epoch 1 - Breach", nil, {
+        context = "current epoch/zone"})),
     decorTypes = {
         "mountain_large",
         "mountain_small_1",
@@ -62,6 +67,10 @@ M.forest = {
 ---@type MapType
 M.fall = {
     name = "fall",
+    info = helper.wrapRichtextColor(
+        objects.Color("#a6541b"),
+        loc("Epoch 2 - Invasion", nil, {
+        context = "current epoch/zone"})),
     decorTypes = {
         "mountain_large",
         "mountain_small_1",
