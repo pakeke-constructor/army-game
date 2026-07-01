@@ -130,7 +130,7 @@ g.defineCommander("mechcommander", "Mech Guy", {
         },
         entityDef = {
             onHitDamage = function(ent, damage, target)
-                g.lightning(target.x, target.y, damage * 0.5, ent, 3)
+                g.lightning(target.x, target.y, damage * 0.5, nil, 5)
             end,
             image = "mechcommander",
             isCommander = true,
@@ -144,11 +144,11 @@ g.defineCommander("mechcommander", "Mech Guy", {
             attack = {
                 attackType = "melee",
             },
-            baseAttackDamage = 7,
-            baseAttackSpeed = 3,
-            baseAttackRange = 60,
+            baseAttackDamage = 8,
+            baseAttackSpeed = 1,
+            baseAttackRange = 70,
             baseMoveSpeed = 80,
-            baseMaxHealth = 150,
+            baseMaxHealth = 100,
         },
         -- TODO Perk: Progress: Gain 20 gold when you upgrade a squad.
     },

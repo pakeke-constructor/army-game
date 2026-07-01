@@ -411,7 +411,7 @@ function g.lightning(x, y, damage, attacker, enemyChainSize)
     if #enemyList >= 2 then
         g.spawnEntityWithInit("lightning_chain_visual", 0,0, function(ent)
             -- list of tokens to strike
-            ent._tokens = enemyList
+            ent._lightningTargets = enemyList
             local bestY = -100
             for _,t in ipairs(enemyList) do
                 if t.y > bestY then

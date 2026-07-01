@@ -204,6 +204,7 @@ local shadow = {
 ---@field public _formationOffset table? {x,y} slot offset from squad leader
 ---@field public _lastTargetRefreshTime number?
 ---@field public _timeUntilRetarget number?
+---@field public lifetime number? how long the entity has left to live
 ---@field public burnTime number? -- if nil, no burn
 ---@field public frozenTime number? -- if nil, not frozen
 ---@field public poisonAmount number? -- if nil, no poison
