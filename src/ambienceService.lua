@@ -32,6 +32,11 @@ local CLOUD_ALPHA = 0.05
 -- world-space window the player is looking at; wisps spawn within it
 local window = { x = 0, y = 0, w = 100, h = 100 }
 
+local function getAdditionalAmbientService()
+    local mapType = g.getMapType()
+    return mapType and mapType.additionalAmbientService
+end
+
 ---@class ambientSetvice.randomWisp
 ---@field x number
 ---@field y number
@@ -101,6 +106,12 @@ end
 ---@param transform love.Transform camera transform
 function ambienceService.update(dt, transform)
     windowFromTransform(transform)
+
+    local additionalAmbientService = getAdditionalAmbientService()
+    if additionalAmbientService then
+        additionalAmbientService.update(dt, transform)
+    end
+
     for i, wisp in ipairs(wisps) do
         wisp.wob = wisp.wob + dt
         -- random wander: nudge velocity in a random direction each frame
@@ -151,6 +162,12 @@ end
 ---@param cloudSprites string[]
 function ambienceService.reInitialize(transform, cloudSprites)
     windowFromTransform(transform)
+
+    local additionalAmbientService = getAdditionalAmbientService()
+    if additionalAmbientService then
+        additionalAmbientService.reInitialize(transform)
+    end
+
     wisps = {}
     for i = 1, WISP_COUNT do
         wisps[i] = randomWisp()
@@ -165,6 +182,11 @@ end
 
 ---@param transform love.Transform camera transform (for pixel-perfect world-space rendering)
 function ambienceService.draw(transform)
+    local additionalAmbientService = getAdditionalAmbientService()
+    if additionalAmbientService then
+        additionalAmbientService.draw(transform)
+    end
+
     ----
     -- WISP
     ----
