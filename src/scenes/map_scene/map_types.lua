@@ -12,6 +12,8 @@ local M = {}
 ---@field public groundColors objects.Color[] List of possible ground colors to pick
 ---@field public fogColor objects.Color Fog color
 ---@field public cloudSprites string[] Image name for the cloud (random pick unweighted)
+---@field public mapPath objects.Color
+---@field public mapPathHighlight objects.Color
 
 ---@type MapType
 M.forest = {
@@ -52,9 +54,12 @@ M.forest = {
         objects.Color("FF483936"),
     },
     fogColor = objects.Color("ff273718"), -- forest green
-    cloudSprites = {"cloud1"}
+    cloudSprites = {"cloud1"},
+    mapPath = objects.Color("#152217"),
+    mapPathHighlight = objects.Color("#213a22"),
 }
 
+---@type MapType
 M.fall = {
     name = "fall",
     decorTypes = {
@@ -95,7 +100,9 @@ M.fall = {
         objects.Color("#361e19"),
     },
     fogColor = objects.Color("#361e19"),
-    cloudSprites = {"cloud1"}
+    cloudSprites = {"cloud1"},
+    mapPath = objects.Color("#361e19"),
+    mapPathHighlight = objects.Color("#5f3927"),
 }
 
 
