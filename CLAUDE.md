@@ -27,7 +27,8 @@ After 8 turns, the map is reset; and the player fights a boss.
 
 <architecture>
 main.lua: Entrypoint.
-src/g.lua: All core functions stored here, exposed via `g.*` namespace
+
+src/g.lua: The most important file - All core functions stored here, exposed via global `g.*` namespace
 
 src/scenes/*: All scenes defined here, in folders. Managed by sceneManager.lua (load/switch/transition between scenes).
 src/scenes/title_scene/*: Title-screen. Main menu with buttons (play, settings, quit).
