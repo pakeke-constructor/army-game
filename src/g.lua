@@ -1046,7 +1046,7 @@ local function estimateSquadPowerIndex(squadInfo)
 end
 
 
----@type g.SquadDef.SquadTypes "TANK"|"RANGED"|"HEALER"|"BRUISER"
+---@alias g.SquadDef.SquadTypes "TANK"|"RANGED"|"HEALER"|"BRUISER"
 
 
 ---@param id string
