@@ -129,6 +129,9 @@ g.defineCommander("mechcommander", "Mech Guy", {
             maxHealth = 0.25,
         },
         entityDef = {
+            onHitDamage = function(ent, damage, target)
+                g.lightning(target.x, target.y, damage * 0.5, ent, 3)
+            end,
             image = "mechcommander",
             isCommander = true,
             weapon = {
