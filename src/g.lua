@@ -1096,7 +1096,9 @@ function g.defineSquad(id, info)
         "Squad '" .. id .. "': baseAttackSpeed must be set iff baseAttackDamage/baseHealPower is set")
     def.team = def.team or "ally"
     def.partitions = def.partitions or {"unit", "ally"}
-    def.ai = def.ai or { target = "enemy" }
+    if not def.isBuilding then
+        def.ai = def.ai or { target = "enemy" }
+    end
     def.shadow = def.shadow or {}
     if not def.physics and def.image then
         local w = g.getImageSize(def.image)
