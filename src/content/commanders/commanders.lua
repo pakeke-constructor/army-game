@@ -129,6 +129,9 @@ g.defineCommander("mechcommander", "Mech Guy", {
             maxHealth = 0.25,
         },
         entityDef = {
+            onHitDamage = function(ent, damage, target)
+                g.lightning(target.x, target.y, damage * 0.5, nil, 5)
+            end,
             image = "mechcommander",
             isCommander = true,
             weapon = {
@@ -141,11 +144,11 @@ g.defineCommander("mechcommander", "Mech Guy", {
             attack = {
                 attackType = "melee",
             },
-            baseAttackDamage = 7,
-            baseAttackSpeed = 3,
-            baseAttackRange = 60,
+            baseAttackDamage = 8,
+            baseAttackSpeed = 1,
+            baseAttackRange = 70,
             baseMoveSpeed = 80,
-            baseMaxHealth = 150,
+            baseMaxHealth = 100,
         },
         -- TODO Perk: Progress: Gain 20 gold when you upgrade a squad.
     },
@@ -227,13 +230,13 @@ g.defineCommander("octopuscommander", "Octopus Tank", {
             physics = { shape = "circle", radius = 20, ox = 0, oy = 0, mass = 7 },
             attack = {
                 attackType = "ranged",
-                projectileType = "arrow", -- placeholder
-                projectileSpeed = 300,
+                projectileType = "octopus_lazer",
+                projectileSpeed = 800,
             },
-            baseAttackDamage = 5,
-            baseAttackSpeed = 5,
-            baseAttackRange = 9999, -- unlimited range basically
-            baseMoveSpeed = 15, -- but very slow
+            baseAttackDamage = 8,
+            baseAttackSpeed = 1.6,
+            baseAttackRange = 800, -- unlimited range basically
+            baseMoveSpeed = 35, -- but very slow
             baseMaxHealth = 250,
         }
     },

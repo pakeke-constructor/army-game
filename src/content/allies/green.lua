@@ -209,7 +209,7 @@ g.defineSquad("treant_squad", {
     name = "Treants",
     rarity = g.RARITIES.UNCOMMON,
     -- tags: health, armor, color_synergy, scaling (grows from green mana)
-    tags = {"health", "armor", "color_synergy", "scaling"},
+    tags = {"health", "armor", "scaling", "magic"},
     entityDef = {
         image = "treant",
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 2 },
@@ -220,19 +220,21 @@ g.defineSquad("treant_squad", {
         baseAttackSpeed = 0.8,
         baseAttackRange = 24,
         baseMoveSpeed = 35,
-        baseMaxHealth = 24,
+        baseMaxHealth = 34,
+        baseMagic = 2,
         baseStartingArmor = 2,
     },
     unitCount = 5,
     icon = "treants_uniticon",
     perks = {{
-        name = "Growth",
-        description = loc("Permanently gains +1 Max HP for every 4 Green mana played this fight."),
+        name = "Regrowth",
+        description = g.loc2("Every second, heal (HP) equal to (MAGK)."),
         image = "mana_green_small",
         rawHandlers = {
-            manaSpent = function(ent, manaRequirement)
-                -- TODO: Need to discuss this perk further because it
-                -- was ambiguos in certain ways.
+            perSecondUpdate = function(ent)
+                if not g.isAlive(ent) then return end
+                if ent:getTypename() ~= "treant_squad_unit" then return end
+                g.healEntity(ent, ent.magic or 0, ent)
             end,
         },
     }},

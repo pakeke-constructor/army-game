@@ -2,7 +2,7 @@
 
 
 from _ex6.models import M
-from _ex6.tools import read_headers, read_body, glob, search, write_file, edit_file, read_file, edit_file_lines, escalate, bash, explore_agent, CLAUDE_MD, ENV_PROMPT, git_working_tree
+from _ex6.tools import read_headers, read_body, glob, search, write_file, edit_file, read_file, edit_file_lines, escalate, bash, explore_agent, CLAUDE_MD, ENV_PROMPT, git_working_tree, add_tool_repetition_guard
 from _ex6.skills import load_skill
 from _ex6.lua_coding_style import SYSTEM_PROMPT_CODING_STYLE
 from _ex6.tasks import plan_add_log, plan_done, plan_list, plan_read, plan_write
@@ -112,12 +112,13 @@ Context("c_codex", yolo=False, model=M.CODEX_LATEST.id, reasoning="high", messag
 ])
 
 
-Context("c_gem", yolo=False, model=M.GEMINI_LATEST.id, reasoning="high", messages=[
+c_gem = Context("c_gem", yolo=False, model=M.GEMINI_LATEST.id, reasoning="high", messages=[
     MAIN_SYSTEM_PROMPT,
     ENV_PROMPT,
     # CODING_STYLE_PROMPT,
     CLAUDE_MD,
 ])
+add_tool_repetition_guard(c_gem)
 
 
 Context("c_glm", yolo=False, model=M.GLM_LATEST.id, reasoning="high", messages=[

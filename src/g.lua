@@ -358,22 +358,29 @@ do
 
 ---@param x number
 ---@param y number
+---@param maxDistance number
 ---@param excludeEntities objects.Set<ecs.Entity>
-local function findClosestEnemy(x, y, excludeEntities)
-    local radius = 80
-    ---@type ecs.Entity[]
-    local buffer = {}
+local function findFurthestEnemyWithinDistance(x, y, maxDistance, excludeEntities)
+    local radius = maxDistance
+    local bestEnt = nil
+    local bestDistSq = -1
+    local maxDistSq = maxDistance * maxDistance
+
     g.getECS():iteratePartition("enemy", x, y, function(ent)
         if not g.isAlive(ent) then return end
         if excludeEntities[ent] then return end
-        buffer[#buffer+1] = ent
+
+        local dx = ent.x - x
+        local dy = ent.y - y
+        local distSq = dx * dx + dy * dy
+        if distSq > maxDistSq then return end
+        if distSq <= bestDistSq then return end
+
+        bestDistSq = distSq
+        bestEnt = ent
     end, radius)
 
-    if #buffer == 0 then
-        return nil
-    end
-
-    return helper.randomChoice(buffer)
+    return bestEnt
 end
 
 ---@param x number
@@ -385,19 +392,21 @@ function g.lightning(x, y, damage, attacker, enemyChainSize)
     g.playWorldSound("lightning_zap", 0.9, 0.25, 0.3, 0)
     enemyChainSize = math.max(2, enemyChainSize or 5)
 
-    ---@type objects.Set<ecs.Entity>
+    local MAX_LIGHTNING_GAP = 130
+
+    ---@type {[ecs.Entity]: boolean?}
     local foundEnemies = {}
     ---@type ecs.Entity[]
     local enemyList = {}
 
-    local enemyEnt = findClosestEnemy(x, y, foundEnemies)
+    local enemyEnt = findFurthestEnemyWithinDistance(x, y, MAX_LIGHTNING_GAP, foundEnemies)
     if not enemyEnt then return end
 
     foundEnemies[enemyEnt] = true
     enemyList[#enemyList + 1] = enemyEnt
 
     for _ = 1, enemyChainSize - 1 do
-        local enemyEnt1 = findClosestEnemy(enemyEnt.x, enemyEnt.y, foundEnemies)
+        local enemyEnt1 = findFurthestEnemyWithinDistance(enemyEnt.x, enemyEnt.y, MAX_LIGHTNING_GAP, foundEnemies)
         if not enemyEnt1 then break end
         foundEnemies[enemyEnt1] = true
         enemyList[#enemyList + 1] = enemyEnt1
@@ -411,7 +420,7 @@ function g.lightning(x, y, damage, attacker, enemyChainSize)
     if #enemyList >= 2 then
         g.spawnEntityWithInit("lightning_chain_visual", 0,0, function(ent)
             -- list of tokens to strike
-            ent._tokens = enemyList
+            ent._lightningTargets = enemyList
             local bestY = -100
             for _,t in ipairs(enemyList) do
                 if t.y > bestY then
