@@ -49,6 +49,14 @@ consts.BALANCING = {
     BATTLE_GOLD_REWARD_MAX = 60
 }
 
+-- Default fade durations for scene transitions (seconds).
+consts.SCENE_FADE_OUT = 0.3
+consts.SCENE_FADE_IN = 0.3
+
+-- Fade when starting a run after picking a commander (long, cinematic).
+consts.RUN_START_FADE = 1.3
+consts.RUN_START_FADE_DEV = 0.1
+
 consts.STARTING_COMMANDER = "sir_horse"
 
 

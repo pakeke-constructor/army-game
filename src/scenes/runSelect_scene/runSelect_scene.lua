@@ -13,14 +13,13 @@ function runSelect:enter()
 end
 
 ---@param commanderId string
----@param sandbox boolean?
-function runSelect:start(commanderId, sandbox)
+function runSelect:start(commanderId)
     g.newRun({
         commander = commanderId,
         difficulty = 0
     })
-
-    g.gotoScene("map_scene")
+    local dur = consts.DEV_MODE and consts.RUN_START_FADE_DEV or consts.RUN_START_FADE
+    g.transitionTo("map_scene", {fadeOut = dur, fadeIn = dur})
 end
 
 ---@param dt number
@@ -72,9 +71,7 @@ local function drawPlay(self, reg)
     richtext.printRichContainedNoWrap("PLAY", font, x,y,rw,rh)
 
     if iml.wasJustClicked(x, y, rw, rh, 1, "play") then
-        fadeToBlackService.fadeToFromBlack(0.3, function()
-            self:start(self.selectedCommander)
-        end)
+        self:start(self.selectedCommander)
     end
 end
 

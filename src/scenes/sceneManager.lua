@@ -45,6 +45,23 @@ function sceneManager.gotoScene(sceneName)
     end
 end
 
+-- Faded scene switch: fade to black, swap scenes, fade back in.
+-- Runs from fadeToBlackService.update (top of love.update, before pollHandlers),
+-- so the swap is safe and leaves no gap frame.
+---@param name string
+---@param opts {fadeOut:number?, fadeIn:number?, onSwitch:fun()?}?
+function sceneManager.transitionTo(name, opts)
+    opts = opts or {}
+    local fadeOut = opts.fadeOut or consts.SCENE_FADE_OUT
+    local fadeIn = opts.fadeIn or consts.SCENE_FADE_IN
+    fadeToBlackService.fadeToBlack(fadeOut, function()
+        sceneManager.gotoScene(name)
+        if opts.onSwitch then opts.onSwitch() end
+        fadeToBlackService.fadeFromBlack(fadeIn)
+    end)
+end
+
+
 function sceneManager.gotoLastScene()
     if lastSceneName then
         return sceneManager.gotoScene(lastSceneName)

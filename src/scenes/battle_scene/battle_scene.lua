@@ -253,7 +253,8 @@ local function winBattle(self)
             type = "or",
             a = {type = "squad", rerolls = 1},
             b = {type = "xp", amount = 4}
-        }
+        },
+        {type = "demon_fury", amount = 1},
     })
     g.getRun():winBattle()
     -- remove all entities except the commander
@@ -475,6 +476,7 @@ function battle_scene:keypressed(k)
                     {type = "gold", amount = 3},
                     {type = "xp",amount = 3},
                     {type = "squad", rerolls = 1},
+                    {type = "demon_fury", amount = 1},
                 })
             end
         end
@@ -994,8 +996,9 @@ local function drawCommanderRadius(self)
         love.graphics.circle("line", commx, commy, DEPLOY_RADIUS)
     end
 
-    local timeSinceAutoAttack = commander._timeSinceAutoAttacked
-    if (not commander.attackRange) or (not timeSinceAutoAttack) or timeSinceAutoAttack >= AUTO_ATTACK_RADIUS_FADE_END then
+    local timeSinceAutoAttack = commander._timeSinceAutoAttacked or 100
+    local isRanged = commander.attack and commander.attack.attackType == "ranged"
+    if isRanged and ((not commander.attackRange) or (not timeSinceAutoAttack) or timeSinceAutoAttack >= AUTO_ATTACK_RADIUS_FADE_END) then
         return
     end
 
@@ -1005,6 +1008,7 @@ local function drawCommanderRadius(self)
         alpha = alpha * (1 - t)
     end
 
+    if not isRanged then alpha = math.max(0.18, alpha) end
     lg.setColor(1, 1, 1, alpha)
     love.graphics.circle("line", commander.x, commander.y, commander.attackRange)
     pop:pop()
@@ -1169,7 +1173,7 @@ function battle_scene:draw()
     end
 
     if self.victory and (not g.isAnyPopupOpen()) then
-        g.gotoScene("map_scene")
+        g.transitionTo("map_scene")
     end
 
     if self.timeSinceEnteredScene < INTRO_ZOOM_DURATION then

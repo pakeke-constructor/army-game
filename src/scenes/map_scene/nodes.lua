@@ -198,9 +198,7 @@ function BattleNode:init(x,y)
 end
 
 function BattleNode:enter()
-    fadeToBlackService.fadeToFromBlack(0.5, function()
-        g.gotoScene("battle_scene")
-    end, 0.3)
+    g.transitionTo("battle_scene", {fadeOut = 0.5, fadeIn = 0.3})
 end
 
 function BattleNode:getHoverDescription()
@@ -467,14 +465,17 @@ function ShopNode:init(x,y)
 end
 
 function ShopNode:enter()
-    fadeToBlackService.fadeToFromBlack(NODE_FADE_OUT, function()
-        shop_scene = shop_scene or require("src.scenes.shop_scene.shop_scene")
-        shop_scene.prefillShopNode(self)
-        g.gotoScene("shop_scene")
-        local sc = g.getCurrentScene()
-        ---@cast sc g.ShopScene
-        sc:setShop(self)
-    end, NODE_FADE_IN)
+    shop_scene = shop_scene or require("src.scenes.shop_scene.shop_scene")
+    shop_scene.prefillShopNode(self)
+    g.transitionTo("shop_scene", {
+        fadeOut = NODE_FADE_OUT,
+        fadeIn = NODE_FADE_IN,
+        onSwitch = function()
+            local sc = g.getCurrentScene()
+            ---@cast sc g.ShopScene
+            sc:setShop(self)
+        end
+    })
 end
 
 function ShopNode:getHoverDescription()

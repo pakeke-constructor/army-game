@@ -108,7 +108,6 @@ function Run:winBattle()
 
     self._battleSquads = {}
     self._sortedSquads = nil
-    self.demonFury = self.demonFury + 1
     g.call("battleWon")
 end
 
