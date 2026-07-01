@@ -996,8 +996,9 @@ local function drawCommanderRadius(self)
         love.graphics.circle("line", commx, commy, DEPLOY_RADIUS)
     end
 
-    local timeSinceAutoAttack = commander._timeSinceAutoAttacked
-    if (not commander.attackRange) or (not timeSinceAutoAttack) or timeSinceAutoAttack >= AUTO_ATTACK_RADIUS_FADE_END then
+    local timeSinceAutoAttack = commander._timeSinceAutoAttacked or 100
+    local isRanged = commander.attack and commander.attack.attackType == "ranged"
+    if isRanged and ((not commander.attackRange) or (not timeSinceAutoAttack) or timeSinceAutoAttack >= AUTO_ATTACK_RADIUS_FADE_END) then
         return
     end
 
@@ -1007,6 +1008,7 @@ local function drawCommanderRadius(self)
         alpha = alpha * (1 - t)
     end
 
+    if not isRanged then alpha = math.max(0.18, alpha) end
     lg.setColor(1, 1, 1, alpha)
     love.graphics.circle("line", commander.x, commander.y, commander.attackRange)
     pop:pop()
