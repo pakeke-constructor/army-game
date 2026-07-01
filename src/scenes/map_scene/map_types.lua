@@ -117,6 +117,7 @@ M.fall = {
     },
     fogColor = objects.Color("#361e19"),
     cloudSprites = {"cloud1"},
+    additionalAmbientService = require("src.scenes.map_scene.fall_ambient"),
     mapPath = objects.Color("#361e19"),
     mapPathHighlight = objects.Color("#5f3927"),
 }
