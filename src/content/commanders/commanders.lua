@@ -81,13 +81,15 @@ g.defineCommander("druidcommander", "Druid Lady", {
                 image = "druidcommander_staff"
             },
             attack = {
-                attackType = "melee",
+                attackType = "ranged",
+                projectileType = "druid_fire",
+                projectileSpeed = 240, -- slow-moving fire
             },
-            baseAttackDamage = 9,
-            baseAttackSpeed = 1.2,
-            baseAttackRange = 80,
+            baseAttackDamage = 1,
+            baseAttackSpeed = 1,
+            baseAttackRange = 700, -- slightly less than octopus commander
             baseMoveSpeed = 85,
-            baseMaxHealth = 100,
+            baseMaxHealth = 160,
         },
         perks = {{
             name = "Breath of Life",
@@ -110,7 +112,7 @@ g.defineCommander("druidcommander", "Druid Lady", {
 
 
 
-g.defineCommander("mechcommander", "Mech Guy", {
+g.defineCommander("mechcommander", "The Mech Goblin", {
     description = loc("Battle-Engineer."),
 
     startMana = {

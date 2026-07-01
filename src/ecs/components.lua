@@ -41,7 +41,9 @@ local attack = {
 ---@field public targetTeam "ally"|"enemy"|"neutral"
 ---@field public pierceCount number
 ---@field public homing ecs.components.Projectile.Homing?
+---@field public floatingProjectile boolean?
 local projectile = {
+    floatingProjectile = false,
     -- damage, ownerEnt, team, pierceCount are set on spawn
 }
 
@@ -146,6 +148,7 @@ local shadow = {
 ---@field public vx number?
 ---@field public vy number?
 ---@field public vz number?
+---@field public floatingProjectile boolean?
 ---@field public rot number?
 ---@field public sx number?
 ---@field public sy number?
