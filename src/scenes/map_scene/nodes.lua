@@ -499,7 +499,6 @@ local FOGS = {
     "fog_of_war_cloud2",
     "fog_of_war_cloud3",
 }
-local FOG_COLOR = objects.Color("#273718")
 
 ---@class MapNode.DynamicNode: MapNode
 local DynamicNode = nodes.newClass("dynamic")
@@ -511,7 +510,8 @@ end
 ---@param x number
 ---@param y number
 local function drawFog(x, y)
-    local col = gsman.setColor(g.snapToPalette(FOG_COLOR))
+    local fogColor = g.getMapType().fogColor
+    local col = gsman.setColor(g.snapToPalette(fogColor))
     local state = helper.hashIntegerPair(x, y) % 65536
     local t = love.timer.getTime()
     for i = 1, 6 do
