@@ -99,5 +99,24 @@ M.define("tree_large_1", { image = "tree_large_1", chance = 0.2, nodeRadius = 20
 M.define("tree_small_1", { image = "tree_small_1", chance = 0.3, nodeRadius = 12, decorRadius = 6, transformModifier = treeAnimation })
 -- M.define("tree_small_1_b", { image = "tree_small_1", chance = 0.05, nodeRadius = 8, decorRadius = 4 })
 
+M.define("brownoak_large", { image = "brownoak_large_1", chance = 0.05, nodeRadius = 20, decorRadius = 8, transformModifier = treeAnimation })
+M.define("brownoak_small", { image = "brownoak_small_1", chance = 0.06, nodeRadius = 12, decorRadius = 6, transformModifier = treeAnimation })
+M.define("brownpine_large", { image = "brownpine_large_1", chance = 0.25, nodeRadius = 20, decorRadius = 8, transformModifier = treeAnimation })
+M.define("brownpine_small", { image = "brownpine_small_1", chance = 0.35, nodeRadius = 12, decorRadius = 6, transformModifier = treeAnimation })
+
+
+---@param id integer
+local function bushSway(id)
+    local t = love.timer.getTime()
+    local offt = helper.hashInteger(id) / 65536
+    local a = (t + offt) * math.pi / 4
+    local k = math.sin(a) * math.sin(a * 2) * 0.3
+    return 0, 0, 0, 1, 1, k, 0
+end
+
+M.define("bush_medium", { image = "bush_medium_1", chance = 0.2, nodeRadius = 12, decorRadius = 6, transformModifier = bushSway })
+M.define("bush_small_1", { image = "bush_small_1", chance = 0.3, nodeRadius = 6, decorRadius = 6, transformModifier = bushSway })
+M.define("bush_small_2", { image = "bush_small_2", chance = 0.3, nodeRadius = 6, decorRadius = 6, transformModifier = bushSway })
+
 
 return M
