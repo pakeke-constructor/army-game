@@ -24,6 +24,10 @@ local RewardPanel = objects.Class("g:RewardPanel")
 ---@class g.RewardPanel.ManaBlessingReward
 ---@field type "mana_blessing"
 
+---@class g.RewardPanel.DemonRage
+---@field type "demon_fury"
+---@field amount integer
+
 ---@alias g.RewardPanel.Any
 ---| g.RewardPanel.XPReward
 ---| g.RewardPanel.GoldReward
@@ -31,6 +35,7 @@ local RewardPanel = objects.Class("g:RewardPanel")
 ---| g.RewardPanel.BlessingReward
 ---| g.RewardPanel.ManaReward
 ---| g.RewardPanel.ManaBlessingReward
+---| g.RewardPanel.DemonRage
 
 ---@class g.RewardPanel.ORReward
 ---@field type "or"
@@ -71,7 +76,7 @@ local OR_TEXT = loc("OR", {}, {
 
 
 
-local BROWN_COL = objects.Color("FF9B6F57")
+
 local colStr = ("{c r=%.2f g=%.2f b=%.2f}"):format(
     objects.Color("FFBBA7A7"):getRGBA()
 )
@@ -84,6 +89,8 @@ local NEW_MANA =  "{mana_colorless_large} " .. colStr .. loc("Gain a Mana crysta
 
 local MANA_AND_BLESSING = "{mana_colorless_large} {blessing_icon} " .. colStr .. loc("Choose Mana + Blessing!")
 
+local BROWN_COL = (objects.Color("FF9B6F57"))
+local DEMON_FURY = "{o}" .. loc("Increase {DEMON_FURY_COLOR}Demon Fury{/DEMON_FURY_COLOR} {demonfury_icon} by 1")
 
 
 function RewardPanel:draw()
@@ -127,12 +134,24 @@ function RewardPanel:draw()
     ---@param baseR kirigami.Region
     ---@param txt string
     ---@param cb function
-    local function drawButton(baseR, txt, cb)
-        lg.setColor(0, 0, 0)
+    ---@param bgColor objects.Color?
+    local function drawButton(baseR, txt, cb, bgColor)
         local isHovered = iml.isHovered(baseR:get())
-        if isHovered then
-            lg.setColor(0.05,0.05,0.15)
+
+        if bgColor then
+            local rr, gg, bb, aa = bgColor:getRGBA()
+            if isHovered then
+                lg.setColor(rr * 0.8, gg * 0.8, bb * 0.8, aa)
+            else
+                lg.setColor(rr, gg, bb, aa)
+            end
+        else
+            lg.setColor(0, 0, 0)
+            if isHovered then
+                lg.setColor(0.05,0.05,0.15)
+            end
         end
+
         ui.drawSingleColorPanel(baseR:get())
         if not isHovered then
             lg.setColor(1, 0.85, 0.3, 0.2)
@@ -150,15 +169,28 @@ function RewardPanel:draw()
     end
 
     local boxH = SMALL_FONT:getHeight() + pad*2
+    local SPACER_H = math.floor(boxH * 0.35)
+
     ---@param txt string
     ---@param callback function
-    local function addBar(txt, callback)
+    ---@param bgColor objects.Color?
+    local function addBar(txt, callback, bgColor)
         box:add({
             getHeight = function(w)
                 return boxH
             end,
             draw = function(x, y, w, h)
-                return drawButton(Kirigami(x,y,w,h), txt, callback)
+                return drawButton(Kirigami(x,y,w,h), txt, callback, bgColor)
+            end
+        })
+    end
+
+    local function addSpacer()
+        box:add({
+            getHeight = function(w)
+                return SPACER_H
+            end,
+            draw = function(x, y, w, h)
             end
         })
     end
@@ -248,6 +280,13 @@ function RewardPanel:draw()
                 choicePopupService.set("mana_blessing")
                 table.remove(self.rewards, i)
             end)
+        elseif v.type == "demon_fury" then
+            addSpacer()
+            addBar(DEMON_FURY, function()
+                local run = g.getRun()
+                run.demonFury = run.demonFury + v.amount
+                table.remove(self.rewards, i)
+            end, g.snapToPalette(objects.Color("FF361e19")))
         else
             error("Unknown reward type: "..tostring(v.type))
         end

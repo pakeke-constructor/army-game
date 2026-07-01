@@ -253,7 +253,8 @@ local function winBattle(self)
             type = "or",
             a = {type = "squad", rerolls = 1},
             b = {type = "xp", amount = 4}
-        }
+        },
+        {type = "demon_fury", amount = 1},
     })
     g.getRun():winBattle()
     -- remove all entities except the commander
@@ -475,6 +476,7 @@ function battle_scene:keypressed(k)
                     {type = "gold", amount = 3},
                     {type = "xp",amount = 3},
                     {type = "squad", rerolls = 1},
+                    {type = "demon_fury", amount = 1},
                 })
             end
         end

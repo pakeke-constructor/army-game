@@ -3640,6 +3640,7 @@ g.COLORS = {
     GOLD = objects.Color("FFD8B01F"),
     XP = objects.Color("FF2BC66E"),
     DARK_UI = objects.Color("FF0c0c19"),
+    DEMON_FURY = g.snapToPalette(objects.Color("FF991A1A")),
 }
 
 for k,v in pairs(g.COLORS) do
