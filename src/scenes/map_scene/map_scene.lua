@@ -157,7 +157,7 @@ function map_scene:enter()
     local run = g.getRun()
     if not run.mapGraph then
         -- TODO: Pick map type based on level
-        -- Example: level 1 = forest, level 2 = snow, level 3 = hell
+        -- Example: level 1 = forest, level 2 = fall, level 3 = hell
         self:_buildMap("forest")
     end
     return self:_buildNodeState()
@@ -495,6 +495,7 @@ function map_scene:draw()
     juiceService.draw()
 
     local run = g.getRun()
+    local mapType = g.getMapType()
     local graph = run.mapGraph
     if graph then
         local sw, sh = love.graphics.getDimensions()
@@ -513,7 +514,7 @@ function map_scene:draw()
         -- edges
         graph:forEachEdge(function(a, b)
             if isEdgeVisible(graph, a, b, view, CULL_PAD) then
-                renderEdge(graph, a, b, g.COLORS.MAP_EDGE:getRGBA())
+                renderEdge(graph, a, b, mapType.mapPath:getRGBA())
             end
         end)
 
@@ -560,7 +561,7 @@ function map_scene:draw()
                 local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, PATH_SEARCH_DEPTH)
                 if path and #path >= 2 then
                     -- first edge bold yellow, rest pale yellow
-                    local r, gg, b, a = g.COLORS.MAP_EDGE_HIGHLIGHT:getRGBA()
+                    local r, gg, b, a = mapType.mapPathHighlight:getRGBA()
                     renderEdge(graph, path[1], path[2], r, gg, b, a, 6)
                     renderNode(graph, path[2], r, gg, b, a, NODE_RADIUS + 1)
                     for i = 2, #path - 1 do
