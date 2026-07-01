@@ -45,25 +45,22 @@ end
 ---@class TitleButton
 ---@field name string
 ---@field onClick fun()
----@field skipFade boolean?
 ---@field t number?
 ---@field offsetX number?
 
 ---@type TitleButton[]
 local buttons = {
     {name = "START", onClick = function ()
-        g.gotoScene("runSelect_scene")
+        g.transitionTo("runSelect_scene")
     end},
     {name = "SANDBOX", onClick = function ()
         g.newRun({
             commander = "sir_horse",
             difficulty = 0
         })
-
-        local battle = require("src.scenes.battle_scene.battle_scene")
-        battle.sandbox = true
-        g.gotoScene("battle_scene")
-    end, skipFade = true},
+        require("src.scenes.battle_scene.battle_scene").sandbox = true
+        g.transitionTo("battle_scene")
+    end},
     {name = "EXIT", onClick = function ()
         love.event.quit()
     end}
@@ -161,13 +158,7 @@ function title_scene:draw()
             g.playUISound("ui_tick")
         end
         if iml.wasJustClicked(rx, ry, rw, rh, 1, button) then
-            if button.skipFade then
-                button.onClick()
-            else
-                fadeToBlackService.fadeToFromBlack(0.3, function()
-                    button.onClick()
-                end)
-            end
+            button.onClick()
         end
 
         lg.setColor((i == hoveredButton) and {1,1,0.6,1} or {1,1,1,1})

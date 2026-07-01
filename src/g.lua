@@ -2954,6 +2954,12 @@ function g.gotoScene(sceneName)
     return sceneManager.gotoScene(sceneName)
 end
 
+---@param sceneName string
+---@param opts {fadeOut:number?, fadeIn:number?, onSwitch:fun()?}?
+function g.transitionTo(sceneName, opts)
+    return sceneManager.transitionTo(sceneName, opts)
+end
+
 
 ---@return boolean
 function g.isAnyPopupOpen()

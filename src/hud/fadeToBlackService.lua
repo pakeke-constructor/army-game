@@ -74,8 +74,8 @@ function fadeToBlackService.update(dt)
         f.alpha = f.startAlpha + (f.targetAlpha - f.startAlpha) * t
 
         if t >= 1 then
-            table.remove(fades, i)
             if f.onDone then f.onDone() end
+            table.remove(fades, i)
         end
     end
 end

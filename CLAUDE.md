@@ -85,6 +85,16 @@ src/hud/gameoverPopupService.lua: The "you lost" popup shown when the run ends.
 (^^^ NOTE: SOME OF THIS ISN'T COMPLETED YET.)
 </architecture>
 
+<code_style_annotations>
+LuaLS Annotations:
+- When defining a function, use LuaLS annotations.
+- Annotating function parameter can be done with `---@param paramname type [description]`.
+- It's very important to annotate function parameters. Annotating function parameters are more important than annotating the return value.
+- For tables, feel free to use `---@type T[]` (`T` is the type) or `table<K, V>` (`K` is the table key type, `V` is the table value type) depending on the contents of the table.
+- Classes are defined using `---@class classname: base1[, base2[, base3]]` followed by `local Class = objects.Class("classname")` with `:implement(base1)` chained as necessary if it's concrete class. This is called concrete class.
+- Structured type may also be defined using `---@class classname` followed by 1 or more `---@field fieldname type [description]` but without `objects.Class` call. This is simply called "structure".
+</code_style_annotations>
+
 <gotchas>
 A bunch of common pitfalls/traps to look out for:
 

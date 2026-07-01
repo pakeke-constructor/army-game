@@ -156,6 +156,7 @@ function love.load()
 end
 
 function love.update(dt)
+    fadeToBlackService.update(dt)
     g.pollHandlers()
     agentbridge.update()
     if g.hasRun() then
@@ -164,7 +165,6 @@ function love.update(dt)
     iml.setPointer(love.mouse.getPosition())
     g.updateSfx()
     textPopupService.update(dt)
-    fadeToBlackService.update(dt)
     local sc = sceneManager.getCurrentScene()
     if sc and sc.update then
         sc:update(dt)

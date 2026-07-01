@@ -1173,7 +1173,7 @@ function battle_scene:draw()
     end
 
     if self.victory and (not g.isAnyPopupOpen()) then
-        g.gotoScene("map_scene")
+        g.transitionTo("map_scene")
     end
 
     if self.timeSinceEnteredScene < INTRO_ZOOM_DURATION then
