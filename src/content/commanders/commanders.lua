@@ -110,7 +110,7 @@ g.defineCommander("druidcommander", "Druid Lady", {
 
 
 
-g.defineCommander("mechcommander", "Mech Guy", {
+g.defineCommander("mechcommander", "The Mech Goblin", {
     description = loc("Battle-Engineer."),
 
     startMana = {

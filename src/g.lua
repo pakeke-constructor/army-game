@@ -359,7 +359,7 @@ do
 ---@param x number
 ---@param y number
 ---@param maxDistance number
----@param excludeEntities objects.Set<ecs.Entity>
+---@param excludeEntities {[ecs.Entity]:boolean?}
 local function findFurthestEnemyWithinDistance(x, y, maxDistance, excludeEntities)
     local radius = maxDistance
     local bestEnt = nil
@@ -2665,6 +2665,22 @@ local function drawWeapon(ent, x,y)
         dyy = dyy - math.floor(h/3)
         g.drawImageOffset(wep.image, x + dx + dxx, y + dyy, rotLogical * face, 1, 1, 0.5, 0.95)
     elseif wep.type == "staff" then
+        local face = ent.faceDir or 1
+        local dx = face * (wep.xOffset or 8)
+        local dy = wep.yOffset or 0
+
+        local idleBob = math.sin(g.getWorldTime() * 2.5 + (ent.id or 0)) * (wep.weaponBobbing or 1.5)
+        local phase, t = g.getAttackPhase(ent)
+        local castLift = 0
+        local castHeight = wep.staffCastHeight or 8
+        if phase == "windup" then
+            castLift = -castHeight * helper.EASINGS.sineOut(t)
+        elseif phase == "swing" then
+            castLift = -castHeight * (1 - helper.EASINGS.sineIn(t))
+        end
+
+        local dyy = dy + idleBob + castLift - math.floor(h/3)
+        g.drawImageOffset(wep.image, x + dx, y + dyy, 0, 1, 1, 0.5, 0.95)
     end
     -- g.drawImageOffset(wep.image, )
 end
