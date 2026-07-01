@@ -54,7 +54,7 @@ defineProjectile("incense_pan", {
 local FIRE_PROJECTILES_PER_SECOND = 4
 
 defineProjectile("fire_projectile", {
-    image = "1x1",
+    image = "null",
     floatingProjectile = true,
     onUpdate = function(ent, dt)
         if love.math.random() < FIRE_PROJECTILES_PER_SECOND*dt then
@@ -62,3 +62,24 @@ defineProjectile("fire_projectile", {
         end
     end,
 })
+
+
+local DRUID_FIRE_PARTICLES_PER_SECOND = 35
+
+defineProjectile("druid_fire", {
+    image = "null",
+    floatingProjectile = true,
+    onUpdate = function(ent, dt)
+        if love.math.random() < DRUID_FIRE_PARTICLES_PER_SECOND*dt then
+            g.spawnParticle("fire_particle", ent.x, ent.y - (ent.z or 0), 1)
+        end
+    end,
+    ---@param projEnt ecs.Entity
+    ---@param hitEnt ecs.Entity?
+    projectileHit = function(projEnt, hitEnt)
+        if hitEnt then
+            g.applyBurn(hitEnt, 3, projEnt.projectile.ownerEnt)
+        end
+    end,
+})
+
