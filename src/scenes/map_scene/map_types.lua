@@ -5,6 +5,11 @@ local M = {}
 ---@field [2] number Weight
 ---@field [3] boolean? Disable random rotation? (default false)
 
+---@class MapType.AmbientService
+---@field reInitialize fun(transform:love.Transform)
+---@field update fun(dt:number,transform:love.Transform)
+---@field draw fun(transform:love.Transform)
+
 ---@class MapType
 ---@field public name string Must same as the field name, used by portal node.
 ---@field public info string Information shown on top right
@@ -13,6 +18,7 @@ local M = {}
 ---@field public groundColors objects.Color[] List of possible ground colors to pick
 ---@field public fogColor objects.Color Fog color
 ---@field public cloudSprites string[] Image name for the cloud (random pick unweighted)
+---@field public additionalAmbientService MapType.AmbientService?
 ---@field public mapPath objects.Color
 ---@field public mapPathHighlight objects.Color
 
@@ -60,6 +66,7 @@ M.forest = {
     },
     fogColor = objects.Color("ff273718"), -- forest green
     cloudSprites = {"cloud1"},
+    additionalAmbientService = require("src.scenes.map_scene.forest_ambient"),
     mapPath = objects.Color("#152217"),
     mapPathHighlight = objects.Color("#213a22"),
 }
