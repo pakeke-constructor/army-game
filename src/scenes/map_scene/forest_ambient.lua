@@ -1,7 +1,6 @@
 local forestAmbient = {}
 
-local INTENSITY = 1
-local BASE_LEAF_COUNT = 36
+local LEAF_COUNT = 36
 local LEAF_MARGIN = 0.2
 local LEAF_MIN_SPEED = 24
 local LEAF_MAX_SPEED = 46
@@ -79,15 +78,11 @@ local function randomLeaf(fromTop)
     }
 end
 
-local function targetLeafCount()
-    return math.max(0, math.floor(BASE_LEAF_COUNT * INTENSITY))
-end
-
 ---@param transform love.Transform
 function forestAmbient.reInitialize(transform)
     windowFromTransform(transform)
     leaves = {}
-    for i = 1, targetLeafCount() do
+    for i = 1, LEAF_COUNT do
         leaves[i] = randomLeaf(false)
     end
 end
@@ -97,7 +92,7 @@ end
 function forestAmbient.update(dt, transform)
     windowFromTransform(transform)
 
-    local target = targetLeafCount()
+    local target = LEAF_COUNT
     for i = #leaves + 1, target do
         leaves[i] = randomLeaf(false)
     end
@@ -128,8 +123,6 @@ end
 
 ---@param transform love.Transform
 function forestAmbient.draw(transform)
-    if INTENSITY <= 0 then return end
-
     local lg = love.graphics
     lg.push("all")
     lg.applyTransform(transform)
