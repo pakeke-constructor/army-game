@@ -86,7 +86,7 @@ end
 ---@param wx number world x
 ---@param wy number world y
 function Node:drawBelow(wx, wy)
-    love.graphics.setColor(g.COLORS.MAP_EDGE:getRGBA())
+    love.graphics.setColor(g.getMapType().mapPath)
     love.graphics.ellipse("fill", wx, wy, 4, 2)
 end
 
@@ -209,7 +209,7 @@ function BattleNode:getHoverDescription()
 end
 
 function BattleNode:drawBelow(wx, wy)
-    love.graphics.setColor(g.COLORS.MAP_EDGE:getRGBA())
+    love.graphics.setColor(g.getMapType().mapPath)
     love.graphics.ellipse("fill", wx, wy, 8, 5)
     love.graphics.setColor(0.8, 0.3, 0.3, 1)
     love.graphics.ellipse("fill", wx, wy, 6, 3)
@@ -393,7 +393,7 @@ function EmptyNode:enter()
 end
 
 function EmptyNode:drawBelow(wx, wy)
-    love.graphics.setColor(g.COLORS.MAP_EDGE:getRGBA())
+    love.graphics.setColor(g.getMapType().mapPath)
     love.graphics.ellipse("fill", wx, wy, 9, 5)
     love.graphics.setColor(g.COLORS.MAP_GROUND_COLOR:getRGBA())
     love.graphics.ellipse("fill", wx, wy, 6, 3)
@@ -422,7 +422,7 @@ function EventNode:getHoverDescription()
 end
 
 function EventNode:drawBelow(wx, wy)
-    love.graphics.setColor(g.COLORS.MAP_EDGE:getRGBA())
+    love.graphics.setColor(g.getMapType().mapPath)
     love.graphics.ellipse("fill", wx, wy, 9, 5)
     love.graphics.setColor(g.COLORS.MAP_GROUND_COLOR:getRGBA())
     love.graphics.ellipse("fill", wx, wy, 6, 3)
