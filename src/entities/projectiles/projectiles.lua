@@ -58,7 +58,7 @@ defineProjectile("fire_projectile", {
     floatingProjectile = true,
     onUpdate = function(ent, dt)
         if love.math.random() < FIRE_PROJECTILES_PER_SECOND*dt then
-            g.spawnParticle("fire_particle", ent.x, ent.y - (ent.z or 0), 1)
+            g.spawnParticle("fire_particle", ent.x, ent.y - (ent.z or 0)/2, 1)
         end
     end,
 })
@@ -77,9 +77,21 @@ defineProjectile("druid_fire", {
     ---@param projEnt ecs.Entity
     ---@param hitEnt ecs.Entity?
     projectileHit = function(projEnt, hitEnt)
-        if hitEnt then
-            g.applyBurn(hitEnt, 3, projEnt.projectile.ownerEnt)
-        end
+        local range = 60
+        local rangeSq = range * range
+        local owner = projEnt.projectile.ownerEnt
+        local team = owner and owner.team
+        g.iteratePartition("unit", projEnt.x, projEnt.y, function(ent)
+            if g.isAlive(ent) then
+                if (not team) or (ent.team ~= team) then
+                    local dx = ent.x - projEnt.x
+                    local dy = ent.y - projEnt.y
+                    if dx * dx + dy * dy <= rangeSq then
+                        g.applyBurn(ent, 1, owner)
+                    end
+                end
+            end
+        end, range)
     end,
 })
 
