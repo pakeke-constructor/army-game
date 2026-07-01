@@ -83,7 +83,7 @@ g.defineCommander("druidcommander", "Druid Lady", {
             attack = {
                 attackType = "ranged",
                 projectileType = "druid_fire",
-                projectileSpeed = 180, -- slow-moving fire
+                projectileSpeed = 240, -- slow-moving fire
             },
             baseAttackDamage = 1,
             baseAttackSpeed = 1,

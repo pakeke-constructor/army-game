@@ -64,7 +64,7 @@ defineProjectile("fire_projectile", {
 })
 
 
-local DRUID_FIRE_PARTICLES_PER_SECOND = 35
+local DRUID_FIRE_PARTICLES_PER_SECOND = 65
 
 defineProjectile("druid_fire", {
     image = "null",
