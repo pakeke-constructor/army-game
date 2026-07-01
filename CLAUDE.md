@@ -28,10 +28,14 @@ After 8 turns, the map is reset; and the player fights a boss.
 <architecture>
 main.lua: Entrypoint.
 src/g.lua: All core functions stored here, exposed via `g.*` namespace
-src/scenes/*: All scenes defined here, in folders.
+
+src/scenes/*: All scenes defined here, in folders. Managed by sceneManager.lua (load/switch/transition between scenes).
+src/scenes/title_scene/*: Title-screen. Main menu with buttons (play, settings, quit).
+src/scenes/runSelect_scene/*: Pick a commander and start a new run.
 src/scenes/map_scene/*: Map-scene stuff. Has a graph of nodes for players to navigate
 src/scenes/battle_scene/*: Battle-scene stuff. Contains an ECS. Nodes on the map may trigger battles.
-src/scenes/shop_scene/*: Shop-scene. Enter via a shop-node
+src/scenes/shop_scene/*: Shop-scene. Enter via a shop-node. Buy squads/blessings with gold.
+src/scenes/whiteboard_scene/*: Dev/debug scene. Browse all content (allies, enemies, perks, etc) grouped by rarity.
 
 src/sound/bgm.lua: Background music. Plays/crossfades music tracks by priority. Higher priority wins.
 src/sound/sfx.lua: Sound effects. Define sounds, then play them with random pitch/volume variation.
