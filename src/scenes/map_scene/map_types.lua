@@ -55,6 +55,49 @@ M.forest = {
     cloudSprites = {"cloud1"}
 }
 
+M.fall = {
+    name = "fall",
+    decorTypes = {
+        "mountain_large",
+        "mountain_small_1",
+        "mountain_small_2",
+        "brownoak_large",
+        "brownoak_small",
+        "brownpine_large",
+        "brownpine_small",
+        "bush_medium",
+        "bush_small_1",
+        "bush_small_2",
+    },
+    groundTextures = {
+        {"decor_mega_1", 6},
+        {"decor_mega_2", 6},
+        {"decor_mega_3", 6},
+        {"decor_mega_4", 6},
+        {"decor_big_1", 4},
+        {"decor_big_2", 4},
+        {"decor_big_3", 4},
+        {"decor_big_4", 4},
+        {"decor_splotch_1", 3},
+        {"decor_splotch_2", 3},
+        {"decor_splotch_3", 3},
+        {"decor_splotch_4", 3},
+        {"decor_splotch_5", 3},
+        {"decor_tex_1", 2},
+        {"decor_tex_2", 2},
+        {"decor_tex_3", 2},
+        {"decor_tex_4", 2},
+        {"decor_tex_5", 2},
+    },
+    groundColors = {
+        objects.Color("#1d1b0e"),
+        objects.Color("#5f3927"),
+        objects.Color("#361e19"),
+    },
+    fogColor = objects.Color("#361e19"),
+    cloudSprites = {"cloud1"}
+}
+
 
 for k,v in pairs(M) do
     assert(v.name == k)

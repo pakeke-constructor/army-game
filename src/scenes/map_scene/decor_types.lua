@@ -99,5 +99,14 @@ M.define("tree_large_1", { image = "tree_large_1", chance = 0.2, nodeRadius = 20
 M.define("tree_small_1", { image = "tree_small_1", chance = 0.3, nodeRadius = 12, decorRadius = 6, transformModifier = treeAnimation })
 -- M.define("tree_small_1_b", { image = "tree_small_1", chance = 0.05, nodeRadius = 8, decorRadius = 4 })
 
+M.define("brownoak_large", { image = "brownoak_large_1", chance = 0.2, nodeRadius = 20, decorRadius = 8, transformModifier = treeAnimation })
+M.define("brownoak_small", { image = "brownoak_small_1", chance = 0.3, nodeRadius = 12, decorRadius = 6, transformModifier = treeAnimation })
+M.define("brownpine_large", { image = "brownpine_large_1", chance = 0.2, nodeRadius = 20, decorRadius = 8, transformModifier = treeAnimation })
+M.define("brownpine_small", { image = "brownpine_small_1", chance = 0.3, nodeRadius = 12, decorRadius = 6, transformModifier = treeAnimation })
+
+M.define("bush_medium", { image = "bush_medium_1", chance = 0.2, nodeRadius = 12, decorRadius = 6})
+M.define("bush_small_1", { image = "bush_small_1", chance = 0.3, nodeRadius = 6, decorRadius = 6})
+M.define("bush_small_2", { image = "bush_small_2", chance = 0.3, nodeRadius = 6, decorRadius = 6})
+
 
 return M
