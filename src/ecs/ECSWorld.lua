@@ -284,7 +284,7 @@ function ECSWorld:update(dt)
         else
             e._walkTime = 0
         end
-        if e.vz then
+        if e.vz and not e.floatingProjectile then
             e.vz = e.vz - consts.GRAVITY * dt
             e.z = math.max(0, (e.z or 0) + e.vz * dt)
         end

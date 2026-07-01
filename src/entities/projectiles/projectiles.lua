@@ -3,6 +3,7 @@
 ---@param id string
 local function defineProjectile(id, etype)
     etype.drawOrder = etype.drawOrder or 10
+    etype.floatingProjectile = etype.floatingProjectile or false
     etype.projectile = true-- component marker for ECS iterate
     etype.shadow = {opacity = 0.35}
     local partitions = helper.shallowCopy(etype.partitions or {})
@@ -46,4 +47,18 @@ defineProjectile("blazingbombardier_bomb", {
 
 defineProjectile("incense_pan", {
     image = "incense_pan"
+})
+
+
+
+local FIRE_PROJECTILES_PER_SECOND = 4
+
+defineProjectile("fire_projectile", {
+    image = "1x1",
+    floatingProjectile = true,
+    onUpdate = function(ent, dt)
+        if love.math.random() < FIRE_PROJECTILES_PER_SECOND*dt then
+            g.spawnParticle("fire_particle", ent.x, ent.y - (ent.z or 0), 1)
+        end
+    end,
 })
