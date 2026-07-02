@@ -369,7 +369,8 @@ local function drawRandomEvent(ev)
         end
     end
 
-    for ii,b in ipairs(ev.options) do
+    for ii = #ev.options, 1, -1 do
+        local b = ev.options[ii]
         ev._selectedOption = ii
         button(b[1],b[2])
     end
