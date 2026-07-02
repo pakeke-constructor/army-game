@@ -46,18 +46,43 @@ local function drawCommanderList(self, icons)
 
         -- icon takes half the cell; gap shifts top->bottom as it rises
         local gap = 1.7
-        local _, iconReg = reg:splitVertical(gap*(1-t)+1, 4, gap*t+1)
-        local x, y, rw, rh = iconReg:padRatio(0.1):get()
-        -- ui.debugRegion(iconReg:padRatio(0.1))
+        local _, iconRegBaseR = reg:splitVertical(gap*(1-t)+1, 4, gap*t+1)
+        local iconRegR = iconRegBaseR:padRatio(0.1)
+        local x, y, rw, rh = iconRegR:get()
+        -- ui.debugRegion(iconRegR)
         love.graphics.setColor(1,1,1,1)
         -- ui.drawPanel(x,y,rw,rh)
         local alpha = selected and 1 or 0.35
-        local col = g.getManaBundleColor(info.squadDef.cost)
+
+        -- Draw all the glows
+        ---@type objects.Color[]
+        local glows = {}
+        -- Cannot use g.getManaBundleColor here because it stops on first match.
+        -- We want ALL of the mana colors!
+        for _,mc in ipairs(g.getManaTypelist()) do
+            if info.squadDef.cost[mc] then
+                local minfo = g.getManaInfo(mc)
+                glows[#glows+1] = minfo.color
+            end
+        end
+
         local glowSize = selected and 100 or 80
-        helper.drawGlow(x+rw/2, y+rh/2, {col.r, col.g, col.b, alpha}, glowSize)
+        if #glows == 1 then
+            local col = glows[1]
+            helper.drawGlow(x+rw/2, y+rh/2, {col.r, col.g, col.b, alpha}, glowSize)
+        elseif #glows > 1 then
+            -- Draw multiple glows. Start at top left
+            local glowSepDist = math.min(iconRegR.w, iconRegR.h) * 0.4 * t
+
+            for j, col in ipairs(glows) do
+                -- offset by 105 degrees for top-left
+                local a = -math.pi * 3 / 4 + (j - 1) * consts.TAU / #glows
+                local ox = x + rw/2 + glowSepDist * math.cos(a)
+                local oy = y + rh/2 + glowSepDist * math.sin(a)
+                helper.drawGlow(ox, oy, {col.r, col.g, col.b, alpha}, glowSize)
+            end
+        end
         g.drawUnitPreview(info.squadDef.entityId, x, y, rw, rh)
-        --g.drawImageContained(info.image, x, y, rw, rh)
-        -- g.drawSquadIcon(id, x, y)
 
         if iml.wasJustClicked(x, y, rw, rh, 1, id) then
             self.selectedCommander = id
