@@ -123,4 +123,79 @@ end)
 end
 
 
+
+-- Blood Pool
+do
+--[[
+A blood red pool sits there, shimmering with demon magic.
+It seems hungry.
+
+Reach into the shallows: +1 Demon Fury. Gain a Common blessing.
+
+Send a squad in: <A random squad> is permanently removed from your army. Gain a Rare blessing.
+
+Avoid
+]]
+
+local EVENT_TXT = loc("A blood red pool sits there, shimmering with demon magic. It seems hungry.")
+local EVENT_REACH_TXT = loc("Reach into the shallows")
+local EVENT_REACH = loc("+%{demon_fury} Demon Fury. Gain a Common blessing.", {demon_fury = 1})
+local EVENT_SQUAD_TXT = loc("Send a squad in")
+local EVENT_SQUAD = interp("%{squadName} is gone from your squads. Gain a Rare blessing.")
+local EVENT_AVOID_TXT = loc("Avoid")
+local EVENT_OK_BTN = loc("Ok")
+
+defineEventType("blood_pool", EVENT_TXT, function(evPass)
+    -- Pick squad to sacrifice 😭
+    ---@type string[]
+    local pool = {}
+    for k in pairs(g.getRun().squads) do
+        local sqinfo = g.getSquadInfo(k)
+        if not (sqinfo.entityDef.isCommander or sqinfo.entityDef.isBuilding) then
+            pool[#pool+1] = k
+        end
+    end
+    local selectedSquad = nil
+    if #pool > 0 then
+        selectedSquad = g.getSquadFromArmy(helper.randomChoice(pool))
+    end
+
+    ---@type g.EventOption[]
+    local opts = {
+        {EVENT_REACH_TXT, function(evPass)
+            evPass:changeText(EVENT_REACH)
+            evPass:setOptions({{EVENT_OK_BTN, function(evPass)
+                rewardPopupService.genericReward({
+                    {type = "blessing", rarityWeights = {COMMON = 1}},
+                    {type = "demon_fury", amount = 1}
+                })
+                evPass:leave()
+            end}})
+        end}
+    }
+    if selectedSquad then
+        local squadName = g.getSquadInfo(selectedSquad.squadId).name
+
+        opts[#opts+1] = {EVENT_SQUAD_TXT, function(evPass)
+            g.removeSquadFromArmy(selectedSquad)
+            evPass:changeText(EVENT_SQUAD({squadName = squadName}))
+            evPass:setOptions({{EVENT_OK_BTN, function(evPass)
+                rewardPopupService.genericReward({
+                    {type = "blessing", rarityWeights = {RARE = 1}}
+                })
+                evPass:leave()
+            end}})
+        end}
+    end
+
+    opts[#opts+1] = {EVENT_AVOID_TXT, function(evPass)
+        evPass:leave()
+    end}
+
+    evPass:setOptions(opts)
+end)
+
+end
+
+
 return EVENT_TYPES
