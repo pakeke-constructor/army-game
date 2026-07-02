@@ -3978,10 +3978,10 @@ end
 
 local VALID_MANA_CELLS = {}
 
-g.defineManaType("red", objects.Color("FFB42430"))
-g.defineManaType("blue", objects.Color("FF1C7CB7"))
-g.defineManaType("green", objects.Color("FF52B225"))
-g.defineManaType("yellow", objects.Color("FFD0D31F"))
+g.defineManaType("red", g.snapToPalette(objects.Color("FFB42430")))
+g.defineManaType("blue", g.snapToPalette(objects.Color("FF1C7CB7")))
+g.defineManaType("green", g.snapToPalette(objects.Color("FF52B225")))
+g.defineManaType("yellow", g.snapToPalette(objects.Color("FFD0D31F")))
 
 for _, mana1 in ipairs(manaTypeList) do
     VALID_MANA_CELLS[mana1] = true
