@@ -13,6 +13,7 @@ local PREVIEW_W = 140     -- reserved card area on the right
 
 -- category modes
 local RARITY_ORDER = { "COMMON", "UNCOMMON", "RARE", "LEGENDARY", "ALMOST_UNIQUE", "UNIQUE" }
+local SQUADTYPE_ORDER = { "TANK", "BRUISER", "RANGED", "HEALER", "BUILDING", "OTHER" }
 
 function whiteboard_scene:init()
     self.mode = "squads"        -- "squads" | "blessings"
@@ -76,6 +77,17 @@ function whiteboard_scene:buildGroups()
             gr.ids[#gr.ids + 1] = id
         end
 
+    elseif self.categorize == "type" then
+        for _, t in ipairs(SQUADTYPE_ORDER) do
+            group(t, t, objects.Color.WHITE)
+        end
+        for _, id in ipairs(ids) do
+            local info = getInfo(id)
+            local key = info.squadType or "OTHER"
+            local gr = byKey[key] or group(key, key, objects.Color.WHITE)
+            gr.ids[#gr.ids + 1] = id
+        end
+
     elseif self.categorize == "mana" then
         for _, m in ipairs(g.getManaTypelist()) do
             group(m, m, g.getManaInfo(m).color)
@@ -135,9 +147,12 @@ function whiteboard_scene:draw()
     local rows = sb:columns(10)
     if ui.DefaultButton(self.mode == "squads" and "SQUADS" or "BLESSINGS", rows[2]) then
         self.mode = self.mode == "squads" and "blessings" or "squads"
+        if self.mode == "blessings" and self.categorize == "type" then
+            self.categorize = "rarity"
+        end
         self.scroll = 0
     end
-    local cats = { "rarity", "tag", "mana" }
+    local cats = self.mode == "squads" and { "rarity", "tag", "mana", "type" } or { "rarity", "tag", "mana" }
     for i, c in ipairs(cats) do
         local sel = self.categorize == c
         local label = (sel and "{c r=1 g=1 b=0.5}> " or "") .. c
