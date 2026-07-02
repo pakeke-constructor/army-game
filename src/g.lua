@@ -2880,6 +2880,56 @@ function g.getUnitDrawSize(entityId)
     return 10, 10
 end
 
+---@param def ecs.Components
+---@param x number
+---@param y number
+local function drawPreviewWeapon(def, x, y)
+    local wep = def.weapon
+    if not wep then return end
+
+    local _, h = g.getImageSize(def.image)
+    if wep.type == "sword" then
+        local dx = wep.xOffset or 6
+        local dy = wep.yOffset or 0
+        local dxx, dyy = helper.fromPolar(0, 7)
+        g.drawImageOffset(wep.image, x + dx + dxx, y + dy + dyy - math.floor(h / 5), 0, 1, 1, 0.5, 0.95)
+    elseif wep.type == "spear" then
+        local dx = wep.xOffset or 10
+        g.drawImageOffset(wep.image, x + dx, y - math.floor(h / 5), 0, 1, 1, 0.5, 0.95)
+    elseif wep.type == "bow" then
+        local dx = wep.xOffset or 8
+        local offx, offy = helper.fromPolar(0, 5)
+        g.drawImageOffset(wep.image, x + dx + offx, y + offy - math.floor(h / 2), 0, 1, 1, 0.5, 0.5)
+    elseif wep.type == "hammer" then
+        local radius = wep.arcRadius or (h * 0.6)
+        local dxx, dyy = helper.fromPolar(0, radius)
+        g.drawImageOffset(wep.image, x + (wep.xOffset or 8) + dxx, y + dyy - math.floor(h / 3), 0, 1, 1, 0.5, 0.95)
+    elseif wep.type == "staff" then
+        local bob = math.sin(g.getWorldTime() * 2.5) * (wep.weaponBobbing or 1.5)
+        g.drawImageOffset(wep.image, x + (wep.xOffset or 8), y + (wep.yOffset or 0) + bob - math.floor(h / 3), 0, 1, 1, 0.5, 0.95)
+    end
+end
+
+---@param def ecs.Components
+---@param x number
+---@param y number
+---@param scale number
+local function drawUnitPreviewScaled(def, x, y, scale)
+    love.graphics.push()
+    love.graphics.translate(x, y)
+    love.graphics.scale(scale)
+
+    if def.weapon and def.weapon.drawBehind then
+        drawPreviewWeapon(def, 0, 0)
+    end
+    g.drawImageOffset(def.image, 0, 0, 0, 1, 1, 0.5, 0.95)
+    if def.weapon and not def.weapon.drawBehind then
+        drawPreviewWeapon(def, 0, 0)
+    end
+
+    love.graphics.pop()
+end
+
 ---@param entityId string
 ---@param x number
 ---@param y number
@@ -2888,10 +2938,13 @@ end
 function g.drawUnitPreview(entityId, x, y, maxW, maxH)
     local def = g.getEntityDef(entityId)
     if not def or not def.image then return end
+    local bodyW, bodyH = g.getImageSize(def.image)
     if maxW and maxH then
-        g.drawImageContained(def.image, x, y, maxW, maxH)
+        local scale = math.min(maxW / bodyW, maxH / bodyH)
+        local top = y + (maxH - bodyH * scale) / 2
+        drawUnitPreviewScaled(def, x + maxW / 2, top + bodyH * scale * 0.95, scale)
     else
-        g.drawImage(def.image, x, y)
+        drawUnitPreviewScaled(def, x, y + bodyH * 0.45, 1)
     end
 end
 

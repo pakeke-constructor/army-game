@@ -287,7 +287,7 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
 
                 -- background
                 local important = isDPS or g.isStatImportant(statId, info.entityId)
-                local alpha = 0.2
+                local alpha = 0.4
                 if important then
                     alpha = 1
                 end
