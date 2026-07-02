@@ -27,7 +27,8 @@ do
 local EVENT_TXT = loc("There's a suspicious rock sitting on a path... what do you do?")
 
 local PICKUP = loc("Pick up the rock")
-local PICKUP_AFTER = loc("You pick up the rock, and are showered with gold! (Earn 20 gold)")
+local PICKUP_AFTER = interp("You pick up the rock, and are showered with gold! (Earn %{gold} {coin_icon})")
+local PICKUP_FAIL = loc("You pick up the rock, and there's nothing there.")
 
 local LEAVE = loc("Leave the rock.")
 
@@ -36,8 +37,13 @@ defineEventType("rock_event", EVENT_TXT, function(eventPass)
     eventPass:setOptions({
         {PICKUP, function(evPass)
             -- pick up the rock
-            g.addGold(20)
-            evPass:changeText(PICKUP_AFTER)
+            if love.math.random() < 0.5 then
+                local gold = math.floor(helper.lerp(20, 50, love.math.random()))
+                g.addGold(gold)
+                evPass:changeText(PICKUP_AFTER({gold = gold}))
+            else
+                evPass:changeText(PICKUP_FAIL)
+            end
             evPass:deleteThisOption()
         end},
         {LEAVE, function(evPass)
