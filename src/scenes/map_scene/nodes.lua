@@ -32,8 +32,6 @@ local BATTLE_TXTS = {
     },
 }
 
-local EVENT_TXT = loc("Random event!")
-
 local FOUNTAIN_TXT = loc("Fountain: Reduces Demon Fury")
 
 local SHRINE_TXT = loc("Shrine: Sacrifice Squads to lower Demon Fury")
@@ -150,9 +148,6 @@ local function hashf(...)
 end
 
 ---@param node MapNode
----@param builder g.DecorBuilder
----@param x number
----@param y number
 local function nodeOpacity(node)
     if node.visited then
         return VISITED_NODE_OPACITY
@@ -415,10 +410,6 @@ function EventNode:enter()
     end, NODE_FADE_IN)
 end
 
-function EventNode:getHoverDescription()
-    return EVENT_TXT
-end
-
 function EventNode:drawBelow(wx, wy)
     love.graphics.setColor(g.getMapType().mapPath)
     love.graphics.ellipse("fill", wx, wy, 9, 5)
@@ -426,16 +417,16 @@ function EventNode:drawBelow(wx, wy)
     love.graphics.ellipse("fill", wx, wy, 6, 3)
 end
 
-local QCOL
+local function drawDebugCircleForRandomEvent(x, y)
+    local col = gsman.setColor(1, 1, 1)
+    lg.circle("line", x, y, 6)
+    col:pop()
+end
 
 function EventNode:buildDecor(builder, wx,wy)
-    builder:addDrawable(wx,wy, function(x, y)
-        QCOL = QCOL or g.snapToPalette(objects.Color("FFED8014"))
-        local font = g.getBigFont(48)
-        local bobY = math.sin(love.timer.getTime()) * 3
-        lg.setColor(QCOL)
-        richtext.printRichCentered("{o}?", font, x, y+bobY, 100, "left")
-    end)
+    if consts.SHOW_DEV_STUFF then
+        builder:addDrawable(wx,wy, drawDebugCircleForRandomEvent)
+    end
 end
 
 nodes.EventNode = EventNode
