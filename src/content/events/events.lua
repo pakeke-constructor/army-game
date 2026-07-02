@@ -56,10 +56,10 @@ A group of rowdy gremlins invites you to play a game. You are led to a stone dia
 Bet: 50% gain 20 gold, 50% lose 20 gold.
 (Repeat with doubled numbers)
 
-PASS: “GOLD!” 
-The goblins hand you a pile of coins, but you feel as though your work isn’t done…
+PASS: "GOLD!" 
+The goblins hand you a pile of coins, but you feel as though your work isn't done...
 
-FAIL: “BLACK!”
+FAIL: "BLACK!"
 A large gremlin steps between you and the wheel. You have no choice but to give up the gold. Want to double it and try again?
 
 Leave
@@ -193,6 +193,57 @@ defineEventType("blood_pool", EVENT_TXT, function(evPass)
     end}
 
     evPass:setOptions(opts)
+end)
+
+end
+
+
+
+
+-- Clock Tower
+do
+--[[
+You notice a lonely clock tower ticking away in the middle of a large clearing. When you climb to the top, you are surprised to find an old man inside, hand-cranking the gears of the tower. He doesn't seem to notice you.
+
+Stop the Clock: +2 days
+You pull against the motion of the gears, briefly grinding them to a halt. The man finally lets go of the device, and looks at you.
+You decide it would be wise to leave.
+
+Help Him: -2 days. Gain Random Rare/Legendary blessing.
+You reach into the mechanisms of the clock and heave, helping the strange man turn the gears for a few minutes...
+
+...Or was it days?
+
+]]
+
+local EVENT_TXT = loc("You notice a lonely clock tower ticking away in the middle of a large clearing. When you climb to the top, you are surprised to find an old man inside, hand-cranking the gears of the tower. He doesn't seem to notice you.")
+
+local EVENT_STOP_TXT = loc("Stop the Clock")
+local EVENT_STOP = loc("+2 days\n\nYou pull against the motion of the gears, briefly grinding them to a halt. The man finally lets go of the device, and looks at you.\n\nYou decide it would be wise to leave.")
+
+local EVENT_HELP_TXT = loc("Help Him")
+local EVENT_HELP = loc("-2 days. Gain Random Rare/Legendary blessing.\n\nYou reach into the mechanisms of the clock and heave, helping the strange man turn the gears for a few minutes...\n\n...Or was it days?")
+
+local EVENT_OK_TXT = loc("Ok")
+
+defineEventType("clock_tower", EVENT_TXT, function(evPass)
+    evPass:setOptions({
+        {EVENT_STOP_TXT, function(evPass)
+            -- TODO: Add days before incursion
+            evPass:changeText(EVENT_STOP)
+            evPass:setOptions({{EVENT_OK_TXT, evPass.leave}})
+        end},
+        {EVENT_HELP_TXT, function(evPass)
+            -- TODO: Reduce days before incursion
+            evPass:changeText(EVENT_HELP)
+            evPass:setOptions({{EVENT_OK_TXT, function(evPass)
+                rewardPopupService.genericReward({
+                    {type = "blessing", rarityWeights = {RARE = 4, LEGENDARY = 3}}
+                })
+                evPass:leave()
+            end}})
+        end},
+    })
 end)
 
 end
