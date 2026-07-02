@@ -1005,6 +1005,7 @@ local currentEntityId = 0
 ---@field perks (g.PerkDef|string|false)[]? Perks will be given ID `id.."_perk_..i` if `g.PerkDef` is passed. Use `false` to skip IDs. Pass existing perk ID to use that instead.
 ---@field startingTraits string[]? Trait ids applied to every unit in this squad on spawn.
 ---@field cost g.ManaBundle?
+---@field squadType g.SquadType? Optional explicit category. Auto-derived from stats if omitted.
 ---@field onDeploySquad (fun(squad: g.SquadInfo, entities: ecs.Entity[], x: number, y:number))?
 ---@field drawSquadHover fun(x:number, y:number)?
 
@@ -1020,6 +1021,7 @@ local currentEntityId = 0
 ---@field startingTraits string[] Trait ids applied to every unit in this squad on spawn.
 ---@field cost g.ManaBundle
 ---@field powerIndex number
+---@field squadType g.SquadType
 
 ---@param squadInfo g.SquadDef
 ---@return number
@@ -1046,7 +1048,49 @@ local function estimateSquadPowerIndex(squadInfo)
 end
 
 
----@type g.SquadDef.SquadTypes "TANK"|"RANGED"|"HEALER"|"BRUISER"
+---@enum g.SquadType
+g.SQUAD_TYPES = objects.Enum({
+    "TANK",     -- high hp
+    "BRUISER",  -- melee, high hp, good damage
+    "RANGED",   -- ranged, damage
+    "HEALER",   -- healer
+    "BUILDING", -- building
+    "OTHER",
+})
+
+---Derive a squad's category from its stats.
+---@param info g.SquadDef
+---@return g.SquadType
+local function categorizeSquad(info)
+    local def = info.entityDef
+
+    if def.isBuilding then
+        return g.SQUAD_TYPES.BUILDING
+    end
+
+    local healPower = def.baseHealPower or 0
+    local attackDamage = def.baseAttackDamage or 0
+    if healPower > 0 and healPower >= attackDamage then
+        return g.SQUAD_TYPES.HEALER
+    end
+
+    local isRanged = def.attack and def.attack.attackType == "ranged"
+    if isRanged and healPower <= 0 then
+        return g.SQUAD_TYPES.RANGED
+    end
+
+    -- melee from here on. Compare bulk vs damage output.
+    local health = (def.baseMaxHealth or 0) + (def.baseStartingArmor or 0)
+    local dps = attackDamage * (def.baseAttackSpeed or 0)
+    if dps > 0 and health >= dps * 20 then
+        return g.SQUAD_TYPES.TANK
+    end
+    if dps > 0 and health > 0 then
+        return g.SQUAD_TYPES.BRUISER
+    end
+
+    return g.SQUAD_TYPES.OTHER
+end
 
 
 ---@param id string
@@ -1123,6 +1167,7 @@ function g.defineSquad(id, info)
     end
     assert(info.icon)
     info.powerIndex = estimateSquadPowerIndex(info)
+    info.squadType = info.squadType or categorizeSquad(info)
 
     -- register perks
     ---@type string[]
