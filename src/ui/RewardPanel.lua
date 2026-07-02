@@ -17,6 +17,7 @@ local RewardPanel = objects.Class("g:RewardPanel")
 
 ---@class g.RewardPanel.BlessingReward
 ---@field type "blessing"
+---@field rarityWeights g.RarityWeights?
 
 ---@class g.RewardPanel.ManaReward
 ---@field type "mana"
@@ -233,7 +234,7 @@ function RewardPanel:draw()
                             end)
                         elseif b[1].type == "blessing" then
                             drawButton(b[2], NEW_BLESSING, function()
-                                choicePopupService.set("blessing")
+                                choicePopupService.set("blessing", nil, b[1].rarityWeights)
                                 table.remove(self.rewards, i)
                             end)
                         elseif b[1].type == "mana" then
@@ -267,7 +268,7 @@ function RewardPanel:draw()
             end)
         elseif v.type == "blessing" then
             addBar(NEW_BLESSING, function()
-                choicePopupService.set("blessing")
+                choicePopupService.set("blessing", nil, v.rarityWeights)
                 table.remove(self.rewards, i)
             end)
         elseif v.type == "mana" then
