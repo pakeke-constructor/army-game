@@ -235,12 +235,12 @@ local EVENT_OK_TXT = loc("Ok")
 defineEventType("clock_tower", EVENT_TXT, function(evPass)
     evPass:setOptions({
         {EVENT_STOP_TXT, function(evPass)
-            -- TODO: Add days before incursion
+            g.decrementDays(2)
             evPass:changeText(EVENT_STOP)
             evPass:setOptions({{EVENT_OK_TXT, evPass.leave}})
         end},
         {EVENT_HELP_TXT, function(evPass)
-            -- TODO: Reduce days before incursion
+            g.incrementDays(2)
             evPass:changeText(EVENT_HELP)
             evPass:setOptions({{EVENT_OK_TXT, function(evPass)
                 rewardPopupService.genericReward({
