@@ -20,6 +20,9 @@ end
 
 local spawnedEnts = {}
 
+-- forest deco
+-----
+
 def("tree_decor_1", "tree_small_1", 0)
 def("tree_decor_2", "tree_large_1", 0)
 
@@ -33,6 +36,28 @@ defineBiomeDeco("forest", {
     {grid=45, spawnChance = 0.35, ent={"mountain_decor_1", "mountain_decor_2"}},
     {grid=85, spawnChance = 0.15, ent={"mountainLarge_decor_1"}},
 })
+
+
+-- fall deco
+-----
+
+def("brownoak_large_decor_1", "brownoak_large_1", 0)
+def("brownoak_small_decor_1", "brownoak_small_1", 0)
+
+def("brownpine_large_decor_1", "brownpine_large_1", 0)
+def("brownpine_small_decor_1", "brownpine_small_1", 0)
+
+
+defineBiomeDeco("fall", {
+    {grid=40, spawnChance = 0.15, ent={"brownoak_small_decor_1", "brownoak_large_decor_1"}},
+    {grid=35, spawnChance = 0.4, ent={"brownpine_small_decor_1", "brownpine_large_decor_1"}},
+    {grid=45, spawnChance = 0.35, ent={"mountain_decor_1", "mountain_decor_2"}},
+    {grid=85, spawnChance = 0.15, ent={"mountainLarge_decor_1"}},
+})
+
+
+-- hell deco
+-----
 
 for i=1, 4 do
     def("hellTree_decor_" .. i, "burnedtree_" .. i, 0)
