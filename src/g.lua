@@ -3577,7 +3577,7 @@ local function newRarity(id, name, color)
 end
 
 
----@class _g._rarities
+---@enum (key) g.ValidRarities
 g.RARITIES = {
     COMMON = newRarity("COMMON", "COMMON", objects.Color.fromByteRGBA(99,99,99)),
     UNCOMMON = newRarity("UNCOMMON", "UNCOMMON", objects.Color.fromByteRGBA(43,105,180)),
