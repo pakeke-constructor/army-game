@@ -167,14 +167,24 @@ function battle_scene:enter()
             border[3],
             border[4]
         )
-        local allyRec, _, rightR = borderR:set(nil, nil, 600, 300):splitHorizontal(1,1,1)
+        local allyRec, _, rightR = borderR:set(nil, nil, 600, nil)
+            :splitHorizontal(love.math.random(8, 12)/10, 1, love.math.random(8, 12)/10)
+
+        local allyRecHeight = love.math.random(200, 350)
+        allyRec = allyRec:set(nil, nil, nil, allyRecHeight)
+            :moveUnit(0, love.math.random(-50, 50)-allyRecHeight/2+200)
+
+        local enemyRecHeight = love.math.random(200, 350)
+        rightR = rightR:set(nil, nil, nil, enemyRecHeight)
+            :moveUnit(0, love.math.random(-50, 50)-enemyRecHeight/2+200)
+
         self.ecs:setAllyRectangle(allyRec:get())
         self.ecs:setEnemyRectangle(rightR:get())
         local nx, ny = allyRec:getCenter()
         local commanderInfo = g.getCommanderInfo(run.commander)
         local commanderSquad = g.getSquadFromArmy(commanderInfo.squadId)
         if commanderSquad then
-            self.commander = commanderSquad:spawn(nx, ny)[1]
+            self.commander = commanderSquad:spawn(nx, ny+50)[1]
             self.commander.playerControlled = true
         end
     end

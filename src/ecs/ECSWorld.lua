@@ -97,7 +97,7 @@ function ECSWorld:getBridgeRectangle()
     local midX = a.x + a.w
     local midW = e.x - midX
     if midW <= 0 then return nil end
-    local midH = (a.h + e.h) / 2
+    local midH = (a.h + e.h) / 6
     local midCY = ((a.y + a.h / 2) + (e.y + e.h / 2)) / 2
     return {x = midX, y = midCY - midH / 2, w = midW, h = midH}
 end
