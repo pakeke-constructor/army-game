@@ -31,14 +31,51 @@ The issue with this, is that a lot of old content revolved around gaining mana d
 - There are too many squads/blessings that interact with attack-speed. (ASPD)
 - There are *NOT ENOUGH* squads/blessings that interact with magic (MAGK.)
 
+## Squads to remove:
+BLUE:
+- Divers: damage scales with held blue mana
+- Monks: heals to full when blue mana spent
+- War Elephants: gains armor whenever a blue unit spawns
+- The Immortal Eye: re-triggers all allies' on-spawn effects when blue mana spent
+- Anima Incubator: spends mana during battle to spawn units
+
+GREEN:
+- Forest Sprites: on-spawn, heals nearby allies to full
+
+RED:
+- Brewers: on-spawn, buffs 2 nearby allies' ASPD
+- Dagger Bearers: on-spawn, kills a nearby ally for +ATK
+- His Manifestation: on-spawn, gains ATK based on ally deaths this battle
+
+
+## Blessings to remove:
+MANA-DURING-BATTLE:
+- Water Cycle: gains blue mana during battle (per 8 blue spent)
+- Trickster: gains blue mana during battle (on transform)
+- Meditation: refunds blue mana during battle (first squad placed)
+- Meat Grinder: gains mana during battle (after 40 ally deaths)
+- Cryomana: reacts to mana gained during battle (freezes enemies)
+
+ON-SPAWN EFFECTS:
+- Mana Shield: on-spawn, gives armor if squad cost >= 2
+- Stomp: on-spawn, AOE damage equal to 25% max HP
+- Ubergrades: on-spawn, gives armor based on squad level (also has ASPD part, only spawn part needs removing)
+- Wildfire: on-spawn, self-burn + burns random enemy
+- Arcane Appetite: on-spawn, poisons commander (mana-gain part on pickup is fine, keep that)
+- Landmark: on-spawn, flags first building for triple HP
+- Hard Carapaces: on-spawn, gives armor to green/pest units
+- etc
+
+
 
 ## ADDITIONAL CONTENT:
 
 SPELLS: 
 [ ] Insectify: for every ally unit in range, spawns 1 Pest
 [ ] Freeze: freeze every enemy in range for 5 seconds
-[ ] Enchant: gives +2 MAGK to every ally unit in range
-
+[ ] Dark ritual: Deal 2 damage to allies. Give +2 MAGK to allies that were damaged.
+[ ] Bonereap: Trigger on-death effects on all allies without killing them
+[ ] Harrier: Give +70% range to all ranged units
 
 SQUADS:
 [ ] Possessor: on death: transforms into a Peasant  (synergizes w/ transform)

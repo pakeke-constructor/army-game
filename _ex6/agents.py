@@ -94,13 +94,23 @@ CODING_STYLE_PROMPT = ex6.Message(role="system", overview="coding-style", conten
 CLAUDE_MD = ex6.Message(role="system", content=open("CLAUDE.md","r").read(), overview="CLAUDE.md")
 
 
-coder = Context("c_opus", yolo=False, model=M.OPUS_LATEST.id, reasoning="high", messages=[
+c_opus = Context("c_opus", yolo=False, model=M.OPUS_LATEST.id, reasoning="high", messages=[
     MAIN_SYSTEM_PROMPT,
     ENV_PROMPT,
     # CODING_STYLE_PROMPT,
     CLAUDE_MD,
 ])
-cache_manually(coder)
+cache_manually(c_opus)
+
+
+c_sonnet = Context("c_sonnet", yolo=False, model=M.SONNET_LATEST.id, reasoning="high", messages=[
+    MAIN_SYSTEM_PROMPT,
+    ENV_PROMPT,
+    # CODING_STYLE_PROMPT,
+    CLAUDE_MD,
+])
+cache_manually(c_sonnet)
+
 
 
 
@@ -165,6 +175,6 @@ or learning about other codebases in order to write better code in this codebase
 
 
 
-ex6.state.current = coder
+ex6.state.current = c_sonnet
 
 
