@@ -1,8 +1,9 @@
 
 local fog_decor = {}
 
+local biomeDecoDef = {}
+
 local function def(id, imageId, drawOrder)
-    local idd = id
     if g.isImage(imageId) then
         g.defineEntity(id, {
             image = imageId,
@@ -12,83 +13,56 @@ local function def(id, imageId, drawOrder)
     end
 end
 
+local function defineBiomeDeco(biomeId, t)
+    biomeDecoDef[biomeId] = t
+end
+
 local spawnedEnts = {}
 
--- local GRASS_COLOR = g.snapToPalette(objects.Color("FF2E442A"))
-
-
--- for i = 1, 5 do
---     def("decor_mega_", i, -250)
---     def("decor_big_", i, -200)
---     def("decor_splotch_", i, -120)
---     def("decor_tex_", i, -40)
-
---     def("grass_decor_", i, 0)
--- end
-
 def("tree_decor_1", "tree_small_1", 0)
+def("tree_decor_2", "tree_large_1", 0)
+
+def("mountain_decor_1", "mountain_small_1", 0)
+def("mountain_decor_2", "mountain_small_2", 0)
+
+def("mountainLarge_decor_1", "mountain_large_1", 0)
+
+defineBiomeDeco("forest", {
+    {grid=35, spawnChance = 0.5, ent={"tree_decor_1", "tree_decor_2"}},
+    {grid=45, spawnChance = 0.35, ent={"mountain_decor_1", "mountain_decor_2"}},
+    {grid=85, spawnChance = 0.15, ent={"mountainLarge_decor_1"}},
+})
 
 ---@param world ecs.ECSWorld
 local function spawnDecor(world)
     local w, h = world.boundingBox[3], world.boundingBox[4]
 
-    local function spawnRandomPatch(x, y)
-        local ent = g.spawnEntity("tree_decor_1", x, y)
+    local function spawnRandomPatch(x, y, entId)
+        local ent = g.spawnEntity(entId, x, y)
         spawnedEnts[#spawnedEnts + 1] = ent
     end
 
-    -- local function spawnBunch(cx, cy)
-    --     local count = love.math.random(6, 10)
-    --     for i = 1, count do
-    --         local bestX, bestY
-    --         local bestScore = math.huge
-    --         for _ = 1, 3 do
-    --             local a = love.math.random() * math.pi * 2
-    --             local r = love.math.random() * love.math.random() * 110
-    --             local x = cx + math.cos(a) * r
-    --             local y = cy + math.sin(a) * r
-    --             local score = world:getNumOverlappingShapes(x, y)
-    --             if score < bestScore then
-    --                 bestScore = score
-    --                 bestX = x
-    --                 bestY = y
-    --             end
-    --         end
-
-    --         if world:isInsideShape(bestX, bestY) then
-    --             local id = (love.math.random() < 0.28) and "rock" or "grass"
-    --             g.spawnEntity(id, bestX, bestY)
-    --         end
-    --     end
-    -- end
-
-    local GRID = 30
-    local SPAWN_CHANCE = 0.6
-    for gx = GRID / 2, w, GRID do
-        for gy = GRID / 2, h, GRID do
-            if love.math.random() < SPAWN_CHANCE then
-                local x = gx + love.math.random(-GRID / 2, GRID / 2)
-                local y = gy + love.math.random(-GRID / 2, GRID / 2)
-                if not world:isInsideShapeRounded(x, y, 140) then
-                    spawnRandomPatch(x, y)
+    local zone = biomeDecoDef["forest"] -- forest is placeholder, later change it to the current zone
+    for k, decoGroup in pairs(zone) do
+        local GRID = decoGroup.grid
+        local SPAWN_CHANCE = decoGroup.spawnChance
+        for gx = GRID / 2, w, GRID do
+            for gy = GRID / 2, h, GRID do
+                if love.math.random() < SPAWN_CHANCE then
+                    local x = gx + love.math.random(-GRID / 2, GRID / 2)
+                    local y = gy + love.math.random(-GRID / 2, GRID / 2)
+                    if not world:isInsideShapeRounded(x, y, 120) then
+                        local randomEnt = decoGroup.ent[love.math.random(1, #decoGroup.ent)]
+                        spawnRandomPatch(x, y, randomEnt)
+                    end
                 end
             end
         end
     end
 
-    -- local BUNCH_GRID = 220
-    -- local BUNCH_SPAWN_CHANCE = 0.42
-    -- for gx = BUNCH_GRID / 2, w, BUNCH_GRID do
-    --     for gy = BUNCH_GRID / 2, h, BUNCH_GRID do
-    --         if love.math.random() < BUNCH_SPAWN_CHANCE then
-    --             local x = gx + love.math.random(-BUNCH_GRID / 3, BUNCH_GRID / 3)
-    --             local y = gy + love.math.random(-BUNCH_GRID / 3, BUNCH_GRID / 3)
-    --             if world:isInsideShape(x, y) then
-    --                 spawnBunch(x, y)
-    --             end
-    --         end
-    --     end
-    -- end
+    table.sort(spawnedEnts, function (a, b)
+        return a.y < b.y
+    end)
 end
 
 function fog_decor.preUpdate()
