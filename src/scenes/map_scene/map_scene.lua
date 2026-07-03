@@ -284,12 +284,29 @@ end
 
 
 ---@param node MapNode
+---@return boolean delayedDayIncrement
 local function enterNode(node)
     g.call("arrivedAtNode", node.nodeType, node)
     if not node.visited then
         node.visited = true
         node:enter()
+        return nodes.getType(node) ~= "empty"
     end
+    return false
+end
+
+---@param count integer?
+function map_scene:_incrementDays(count)
+    g.incrementDays(count)
+    -- TODO: If incursion happends, spawn boss node all nearest to empty node
+end
+
+function map_scene:_incrementPendingDaysWhenReady()
+    if not self.pendingDayIncrement then return end
+    if fadeToBlackService.isAnimating() or g.isAnyPopupOpen() then return end
+
+    self:_incrementDays(self.pendingDayIncrement)
+    self.pendingDayIncrement = nil
 end
 
 
@@ -317,6 +334,7 @@ end
 
 function map_scene:update(dt)
     checkLevelUp()
+    self:_incrementPendingDaysWhenReady()
 
     -- WASD panning
     local dx, dy = 0, 0
@@ -365,7 +383,12 @@ function map_scene:update(dt)
         if trav.t >= 1 then
             local graph = g.getRun().mapGraph
             graph:setPlayerPosition(trav.toNode.x, trav.toNode.y)
-            enterNode(trav.toNode)
+            local delayedDayIncrement = enterNode(trav.toNode)
+            if delayedDayIncrement then
+                self.pendingDayIncrement = (self.pendingDayIncrement or 0) + 1
+            else
+                self:_incrementDays()
+            end
             -- Continue through intermediate nodes, unless the node we just
             -- arrived at opened a popup / scene-transition (eg battle, shop).
             local hasMore = trav.index + 1 < #trav.path
