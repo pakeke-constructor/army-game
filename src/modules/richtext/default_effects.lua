@@ -158,4 +158,22 @@ return function(text)
         next(context.textOrDrawable, x, y)
         love.graphics.setColor(cr, cg, cb, ca)
     end, {perCharacter = true})
+
+    text.defineEffect("softblink", function(args, x, y, context, next)
+        -- Parameters:
+        -- r,g,b = Target swipe color. Default is 1 for all (white)
+        -- f = Frequency of the softblink. Default to 1
+        local r, gg, b = args.r or 1, args.g or 1, args.b or 1
+        local f = args.f or 1
+        local cr, cg, cb, ca = love.graphics.getColor()
+        local t = helper.clamp(math.sin(2 * math.pi * f * love.timer.getTime()) ^ 2, 0, 1)
+        love.graphics.setColor(
+            helper.lerp(r, cr, t),
+            helper.lerp(gg, cg, t),
+            helper.lerp(b, cb, t),
+            ca
+        )
+        next(context.textOrDrawable, x, y)
+        love.graphics.setColor(cr, cg, cb, ca)
+    end)
 end
