@@ -73,8 +73,9 @@ ON-SPAWN EFFECTS:
 SPELLS: 
 [ ] Insectify: for every ally unit in range, spawns 1 Pest
 [ ] Freeze: freeze every enemy in range for 5 seconds
-[ ] Enchant: gives +2 MAGK to every ally unit in range
+[ ] Dark ritual: Deal 2 damage to allies. Give +2 MAGK to allies that were damaged.
 [ ] Bonereap: Trigger on-death effects on all allies without killing them
+[ ] Harrier: Give +70% range to all ranged units
 
 SQUADS:
 [ ] Possessor: on death: transforms into a Peasant  (synergizes w/ transform)
