@@ -103,7 +103,7 @@ c_opus = Context("c_opus", yolo=False, model=M.OPUS_LATEST.id, reasoning="high",
 cache_manually(c_opus)
 
 
-c_sonnet = Context("c_sonnet", yolo=False, model=M.OPUS_LATEST.id, reasoning="high", messages=[
+c_sonnet = Context("c_sonnet", yolo=False, model=M.SONNET_LATEST.id, reasoning="high", messages=[
     MAIN_SYSTEM_PROMPT,
     ENV_PROMPT,
     # CODING_STYLE_PROMPT,
@@ -175,6 +175,6 @@ or learning about other codebases in order to write better code in this codebase
 
 
 
-ex6.state.current = coder
+ex6.state.current = c_sonnet
 
 
