@@ -102,6 +102,7 @@ local physics = {
 ---@field public arcRadius number? hammer: orbit radius around the body
 ---@field public smashShake number? hammer: screen shake on smash
 ---@field public drawBehind boolean?
+---@field public staffCastHeight number?
 local weapon = {
     image = "militia_sword",
     type = "sword",
