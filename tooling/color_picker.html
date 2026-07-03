@@ -77,7 +77,12 @@
                 <h4>Pick Color</h4>
                 <input type="color" id="color-picker" value="#ff0000" style="width: 80%; height: 40px;">
                 <p>Hex: <input id="picked-hex" value="#ff0000" style="width: 80px; font-family: monospace;"></p>
-                <p>RGB (0-1): <span id="picked-rgb">1.00, 0.00, 0.00</span></p>
+                <p>
+                    RGB (0-1):
+                    <input id="picked-r" value="1.000" style="width: 50px; font-family: monospace;">
+                    <input id="picked-g" value="0.000" style="width: 50px; font-family: monospace;">
+                    <input id="picked-b" value="0.000" style="width: 50px; font-family: monospace;">
+                </p>
             </div>
             <div class="box">
                 <h4>Snapped Color</h4>
@@ -147,6 +152,11 @@
             };
         }
 
+        function rgb01ToHex(r, g, b) {
+            const toHex = v => Math.round(v * 255).toString(16).padStart(2, "0");
+            return "#" + toHex(r) + toHex(g) + toHex(b);
+        }
+
         function normalizeHex(hex) {
             hex = hex.trim().toLowerCase().replace(/^#/, '');
             if (/^[0-9a-f]{3}$/.test(hex)) {
@@ -212,7 +222,9 @@
             const rgb = hexToRgb01(hex);
 
             document.getElementById("picked-hex").value = hex;
-            document.getElementById("picked-rgb").textContent = `${rgb.r.toFixed(3)}, ${rgb.g.toFixed(3)}, ${rgb.b.toFixed(3)}`;
+            document.getElementById("picked-r").value = rgb.r.toFixed(3);
+            document.getElementById("picked-g").value = rgb.g.toFixed(3);
+            document.getElementById("picked-b").value = rgb.b.toFixed(3);
 
             const snappedHex = snapToPalette(rgb.r, rgb.g, rgb.b);
             const snappedPreview = document.getElementById("snapped-preview");
@@ -249,10 +261,30 @@
             updateSnapping();
         }
 
+        function updateColorPickerFromRgb() {
+            const rInput = document.getElementById("picked-r");
+            const gInput = document.getElementById("picked-g");
+            const bInput = document.getElementById("picked-b");
+            const r = Number(rInput.value);
+            const g = Number(gInput.value);
+            const b = Number(bInput.value);
+
+            if ([r, g, b].some(v => !Number.isFinite(v) || v < 0 || v > 1)) {
+                updateSnapping();
+                return;
+            }
+
+            document.getElementById("color-picker").value = rgb01ToHex(r, g, b);
+            updateSnapping();
+        }
+
         // Initialize
         document.getElementById("palette-input").value = defaultPalette.join("\n");
         document.getElementById("color-picker").addEventListener("input", updateSnapping);
         document.getElementById("picked-hex").addEventListener("change", updateColorPickerFromHex);
+        document.getElementById("picked-r").addEventListener("change", updateColorPickerFromRgb);
+        document.getElementById("picked-g").addEventListener("change", updateColorPickerFromRgb);
+        document.getElementById("picked-b").addEventListener("change", updateColorPickerFromRgb);
 
         loadPalette();
     </script>
