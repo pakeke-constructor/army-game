@@ -130,4 +130,32 @@ return function(text)
             next(context.textOrDrawable, x, y)
         end
     end)
+
+    text.defineEffect("swipe", function(args, x, y, context, next)
+        -- Parameters:
+        -- r,g,b = Target swipe color. Default is 1 for all (white)
+        -- dir = Direction (>=0 = forward, <0 = backward). Default is 1 (forward)
+        -- t = How long the color on each character should change in second? Default to 1
+        -- d = Distance between characters for a new swipe. Default is 10
+        -- subcol = Interpolated color value decrement between character.
+        --          Set to 1 to only consider first character as swipe than interpolating smoothly.
+        --          Default is 0.2
+        local r, gg, b = args.r or 1, args.g or 1, args.b or 1
+        local dir = (args.dir or 1) >= 0 and 1 or -1
+        local period = args.t or 1
+        local distance = math.floor(args.d or 10)
+        local colorLerpDecrement = helper.clamp(args.subcol or 0.2, 0, 1)
+
+        local lt = math.floor(love.timer.getTime() * dir / period)
+        local cr, cg, cb, ca = love.graphics.getColor()
+        local t = helper.clamp((lt - context.index) % distance * colorLerpDecrement, 0, 1)
+        love.graphics.setColor(
+            helper.lerp(r, cr, t),
+            helper.lerp(gg, cg, t),
+            helper.lerp(b, cb, t),
+            ca
+        )
+        next(context.textOrDrawable, x, y)
+        love.graphics.setColor(cr, cg, cb, ca)
+    end, {perCharacter = true})
 end
