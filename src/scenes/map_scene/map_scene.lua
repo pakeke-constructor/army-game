@@ -158,7 +158,7 @@ function map_scene:enter()
     if not run.mapGraph then
         -- TODO: Pick map type based on level
         -- Example: level 1 = forest, level 2 = fall, level 3 = hell
-        self:_buildMap("forest")
+        self:_buildMap("hell")
     end
     return self:_buildNodeState()
 end
