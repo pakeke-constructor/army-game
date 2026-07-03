@@ -76,10 +76,108 @@ g.defineSpell("ranged_spell", {
 })
 
 
-g.defineSpell("skull_spell", {
-    name = "Skull",
-    rarity = g.RARITIES.COMMON,
+
+
+g.defineSpell("insectify_spell", {
+    name = "Insectify",
+    rarity = g.RARITIES.UNCOMMON,
+    icon = "spell_insectify",
+    cost = {green = 1},
+    description = loc("Spawn a Pest for every ally in range!"),
+
+    spellRange = 100,
+
+    instantCast = {
+        target = "ally",
+        maxTargets = 20,
+        apply = function(ent, castX, castY, spellId)
+            g.spawnEntity("pest", ent.x, ent.y)
+        end
+    }
+})
+
+
+g.defineSpell("freeze_spell", {
+    name = "Freeze",
+    rarity = g.RARITIES.UNCOMMON,
+    icon = "freeze_spell",
+    cost = {blue = 1},
+    description = loc("Freeze enemies in range for 5s!"),
+
+    spellRange = 100,
+
+    instantCast = {
+        target = "enemy",
+        maxTargets = 20,
+        apply = function(ent, castX, castY, spellId)
+            g.applyFrozen(ent, 5, g.getCommanderEntity())
+        end
+    }
+})
+
+
+g.defineSpell("dark_ritual_spell", {
+    name = "Dark Ritual",
+    rarity = g.RARITIES.UNCOMMON,
+    icon = "dark_ritual_spell",
+    cost = {red = 1},
+    description = g.loc2("Deal 2 damage to allies. Damaged allies gain +2 (MAGK)."),
+
+    spellRange = 100,
+
+    instantCast = {
+        target = "ally",
+        maxTargets = 20,
+        apply = function(ent, castX, castY, spellId)
+            local commander = g.getCommanderEntity()
+            local healthBefore = ent.health
+            g.dealDamage(ent, 2, commander)
+            if g.isAlive(ent) and ent.health < healthBefore then
+                g.buffEntity(ent, "magic", 2, commander)
+            end
+        end
+    }
+})
+
+
+g.defineSpell("bonereap_spell", {
+    name = "Bonereap",
+    rarity = g.RARITIES.RARE,
     icon = "skull_spell",
     cost = {red = 1},
+    description = loc("Trigger on-death effects on all allies in range, without killing them."),
+
     spellRange = 100,
+
+    instantCast = {
+        target = "ally",
+        maxTargets = 20,
+        apply = function(ent, castX, castY, spellId)
+            g.call("entityDeath", ent)
+        end
+    }
+})
+
+
+g.defineSpell("harrier_spell", {
+    name = "Harrier",
+    rarity = g.RARITIES.UNCOMMON,
+    icon = "harrier_spell",
+    cost = {yellow = 1},
+    description = g.loc2("Ranged allies in range gain +70% (RANGE)."),
+
+    spellRange = 100,
+
+    instantCast = {
+        target = "ally",
+        maxTargets = 20,
+        filter = function(ent, castX, castY, spellId)
+            return ent.attack and ent.attack.attackType == "ranged"
+        end,
+        apply = function(ent, castX, castY, spellId)
+            g.addCustomEffect(ent, {
+                getAttackRangeMultiplier = function() return 1.7 end,
+            }, 15)
+        end
+    }
 })

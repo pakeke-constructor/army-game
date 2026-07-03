@@ -49,6 +49,11 @@ g.defineCommander("sir_horse", "Sir Horse", {
             g.addSpellToArmy("poison_spell")
             g.addSpellToArmy("ranged_spell")
             g.addSpellToArmy("skull_spell")
+            g.addSpellToArmy("insectify_spell")
+            g.addSpellToArmy("freeze_spell")
+            g.addSpellToArmy("dark_ritual_spell")
+            g.addSpellToArmy("bonereap_spell")
+            g.addSpellToArmy("harrier_spell")
         end
     end
 })
