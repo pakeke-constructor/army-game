@@ -38,7 +38,8 @@ function Run:init()
     self.keys = 0
     self.mana = {}
     self.blessings = {}
-    self.day = 1
+    self.day = 0
+    self.daysUntilIncursion = 20 -- the idea is that this may different depending on current zone
     self.demonFury = 0
     self._battleWon = false
     self.mapGraph = nil
@@ -61,9 +62,8 @@ end
 
 
 
-local DAYS_UNTIL_ATTACK = 20 -- todo: do this better in future
 function Run:getDaysUntilIncursion()
-    return math.max(0, DAYS_UNTIL_ATTACK - self.day)
+    return math.max(0, self.daysUntilIncursion - self.day)
 end
 
 

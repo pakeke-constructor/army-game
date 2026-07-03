@@ -447,6 +447,23 @@ end
 
 
 
+---@param count integer? default to 1
+function g.incrementDays(count)
+    local run = g.getRun()
+    run.day = math.min(run.day + (count or 1), run.daysUntilIncursion)
+end
+
+---This function won't decrement days if it's already on incursion!
+---@param count integer? default to 1
+function g.decrementDays(count)
+    local run = g.getRun()
+    if run.day ~= run.daysUntilIncursion then
+        run.day = run.day - (count or 1)
+    end
+end
+
+
+
 local mapTypes = require("src.scenes.map_scene.map_types")
 
 ---@return MapType
