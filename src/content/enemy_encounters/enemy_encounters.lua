@@ -10,7 +10,7 @@ encounters.defineEnemyEncounter(1, function(es,ecs)
     es:add("archerdemon", 5)
     es:add("demon", 5)
     es:add("demon", 5)
-    ecs:setBounds(DEFAULT_BOUNDS[1], DEFAULT_BOUNDS[2])
+    ecs:setBounds(0, 0, DEFAULT_BOUNDS[1], DEFAULT_BOUNDS[2])
 end)
 
 -- Melee only
@@ -19,7 +19,7 @@ encounters.defineEnemyEncounter(1, function(es,ecs)
     es:add("demon", 4)
     es:add("demon", 4)
     es:add("demon", 4)
-    ecs:setBounds(DEFAULT_BOUNDS[1], DEFAULT_BOUNDS[2])
+    ecs:setBounds(0, 0, DEFAULT_BOUNDS[1], DEFAULT_BOUNDS[2])
 end)
 
 -- Ranged only
@@ -29,7 +29,7 @@ encounters.defineEnemyEncounter(1, function(es,ecs)
     es:add("archerdemon", 5)
     es:add("demon", 3)
     es:add("demon", 2)
-    ecs:setBounds(DEFAULT_BOUNDS[1], DEFAULT_BOUNDS[2])
+    ecs:setBounds(0, 0, DEFAULT_BOUNDS[1], DEFAULT_BOUNDS[2])
 end)
 
 -- Spear wall
@@ -39,7 +39,7 @@ encounters.defineEnemyEncounter(1, function(es,ecs)
     es:add("speardemon", 2)
     es:add("demon", 2)
     es:add("demon", 2)
-    ecs:setBounds(DEFAULT_BOUNDS[1], DEFAULT_BOUNDS[2])
+    ecs:setBounds(0, 0, DEFAULT_BOUNDS[1], DEFAULT_BOUNDS[2])
 end)
 
 -- Shield line with archer support
@@ -49,7 +49,7 @@ encounters.defineEnemyEncounter(1, function(es,ecs)
     es:add("archerdemon", 4)
     es:add("archerdemon", 4)
     es:add("archerdemon", 4)
-    ecs:setBounds(DEFAULT_BOUNDS[1], DEFAULT_BOUNDS[2])
+    ecs:setBounds(0, 0, DEFAULT_BOUNDS[1], DEFAULT_BOUNDS[2])
 end)
 
 -- Hound rush (fast, fragile swarm)
@@ -59,7 +59,7 @@ encounters.defineEnemyEncounter(1, function(es,ecs)
     es:add("hellhound", 4)
     es:add("hellhound", 3)
     es:add("hellhound", 3)
-    ecs:setBounds(DEFAULT_BOUNDS[1], DEFAULT_BOUNDS[2])
+    ecs:setBounds(0, 0, DEFAULT_BOUNDS[1], DEFAULT_BOUNDS[2])
 end)
 
 
@@ -77,7 +77,7 @@ encounters.defineEnemyEncounter(2, function(es,ecs)
     es:add("demon", 5)
     es:add("demon", 5)
     es:add("demon", 5)
-    ecs:setBounds(1000,700)
+    ecs:setBounds(0, 0, 1000,700)
 end)
 
 -- Bombardiers behind exploding cores
@@ -86,7 +86,7 @@ encounters.defineEnemyEncounter(2, function(es,ecs)
     es:add("brimstonecore", 3)
     es:add("blazingbombardier", 4)
     es:add("blazingbombardier", 4)
-    ecs:setBounds(1000,700)
+    ecs:setBounds(0, 0, 1000,700)
 end)
 
 -- Spear company with archers
@@ -96,7 +96,7 @@ encounters.defineEnemyEncounter(2, function(es,ecs)
     es:add("speardemon", 4)
     es:add("archerdemon", 6)
     es:add("archerdemon", 6)
-    ecs:setBounds(1000,700)
+    ecs:setBounds(0, 0, 1000,700)
 end)
 
 -- Hound pack led by direhounds
@@ -106,7 +106,7 @@ encounters.defineEnemyEncounter(2, function(es,ecs)
     es:add("hellhound", 4)
     es:add("hellhound", 3)
     es:add("hellhound", 3)
-    ecs:setBounds(1000,700)
+    ecs:setBounds(0, 0, 1000,700)
 end)
 
 
@@ -123,7 +123,7 @@ encounters.defineEnemyEncounter(3, function(es,ecs)
     es:add("demon", 11)
     es:add("demon", 11)
     es:add("demon", 11)
-    ecs:setBounds(500,500)
+    ecs:setBounds(0, 0, 500,500)
 end)
 
 -- Snipers walled by shields
@@ -134,7 +134,7 @@ encounters.defineEnemyEncounter(3, function(es,ecs)
     es:add("shielddemon", 10)
     es:add("demon", 8)
     es:add("demon", 8)
-    ecs:setBounds(DEFAULT_BOUNDS[1], DEFAULT_BOUNDS[2])
+    ecs:setBounds(0, 0, DEFAULT_BOUNDS[1], DEFAULT_BOUNDS[2])
 end)
 
 -- Charred horde (ramps up over time)
@@ -144,7 +144,7 @@ encounters.defineEnemyEncounter(3, function(es,ecs)
     es:add("demon", 8)
     es:add("demon", 8)
     es:add("demon", 8)
-    ecs:setBounds(DEFAULT_BOUNDS[1], DEFAULT_BOUNDS[2])
+    ecs:setBounds(0, 0, DEFAULT_BOUNDS[1], DEFAULT_BOUNDS[2])
 end)
 
 -- Reaper guard behind a spear wall
@@ -156,7 +156,7 @@ encounters.defineEnemyEncounter(3, function(es,ecs)
     es:add("speardemon", 7)
     es:add("archerdemon", 6)
     es:add("archerdemon", 6)
-    ecs:setBounds(DEFAULT_BOUNDS[1], DEFAULT_BOUNDS[2])
+    ecs:setBounds(0, 0, DEFAULT_BOUNDS[1], DEFAULT_BOUNDS[2])
 end)
 
 

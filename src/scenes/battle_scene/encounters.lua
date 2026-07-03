@@ -27,6 +27,8 @@ local SPACING = 25
 local RANGED_BACK_OFFSET = 80
 -- vertical margin so squads don't spawn right on the edge
 local VERTICAL_MARGIN = 60
+-- horizontal inset of the enemy front line from the left edge of enemyRectangle
+local HORIZONTAL_MARGIN = 60
 
 ---@param ecs ecs.ECSWorld
 ---@param rng table
@@ -88,19 +90,19 @@ function EnemySpawner:_spawnSquad(squad, cx, cy)
 end
 
 --- Lays out all queued squads into formation and spawns them.
---- Enemies always spawn opposite the player, on a vertical line
---- ENEMY_ARMY_HORIZONTAL_SPAWN_DISTANCE units to the right of the player spawn.
+--- Enemies always spawn opposite the player, in the right two-thirds
+--- of the battlefield (see battle_scene, which puts allies in the left third).
 function EnemySpawner:finalize()
     local ecs = self._ecs
     local bx, by, w, h = ecs.boundingBox[1], ecs.boundingBox[2], ecs.boundingBox[3], ecs.boundingBox[4]
 
-    -- player spawns at left-center (see battle_scene)
-    local playerX = bx + w / 4
-    local enemyX = playerX + consts.ENEMY_ARMY_HORIZONTAL_SPAWN_DISTANCE
+    local enemyR = select(2, Kirigami(bx, by, w, h):splitHorizontal(1, 2))
+    ecs:setEnemyRectangle(enemyR:get())
 
-    -- vertical line the army lays out along
-    local lineTop = by + VERTICAL_MARGIN
-    local lineBottom = by + h - VERTICAL_MARGIN
+    -- vertical line the army lays out along, near the left edge of enemyR
+    local enemyX = enemyR.x + HORIZONTAL_MARGIN
+    local lineTop = enemyR.y + VERTICAL_MARGIN
+    local lineBottom = enemyR.y + enemyR.h - VERTICAL_MARGIN
 
     -- split squads by role
     local melee, ranged, buildings = {}, {}, {}
