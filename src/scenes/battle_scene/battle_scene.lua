@@ -43,20 +43,6 @@ local function loseBattle(self)
     end, 1)
 end
 
-local function spawnTestNeutralObjectives(self)
-    local border = self.ecs.boundingBox
-    local cx = border[1] + border[3] * 0.6
-    local cy = border[2] + border[4] * 0.5
-    local offsets = {
-        {0, 0},
-        {100, -70},
-        {100, 70},
-    }
-    for _, off in ipairs(offsets) do
-        g.spawnEntity("treasure_chest_objective", cx + off[1], cy + off[2])
-    end
-end
-
 
 function battle_scene:init()
     self.victory = false
@@ -169,7 +155,6 @@ function battle_scene:enter()
     else
         encounters.startRandomEncounter(run.day, self.ecs)
     end
-    spawnTestNeutralObjectives(self)
 
     local border = self.ecs.boundingBox
     do
