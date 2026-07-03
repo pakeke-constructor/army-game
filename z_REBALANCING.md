@@ -38,7 +38,7 @@ SPELLS:
 [ ] Insectify: for every ally unit in range, spawns 1 Pest
 [ ] Freeze: freeze every enemy in range for 5 seconds
 [ ] Enchant: gives +2 MAGK to every ally unit in range
-
+[ ] Bonereap: Trigger on-death effects on all allies without killing them
 
 SQUADS:
 [ ] Possessor: on death: transforms into a Peasant  (synergizes w/ transform)
