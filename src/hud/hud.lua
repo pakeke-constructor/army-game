@@ -463,7 +463,12 @@ local function drawTopBar()
     local _, _, _, dh = daysTillIncursion:get()
     local extraH = dh * 0.05
     local dtiRegion = daysTillIncursion:padUnit(0, -extraH, 0, 0)
-    drawPanel(dtiRegion, LOC_DAYS({n = run:getDaysUntilIncursion()}), LOC_HOVER_DAYS)
+    local daysLeft = run:getDaysUntilIncursion()
+    local locText = LOC_DAYS({n = daysLeft})
+    if daysLeft <= 7 then
+        locText = "{softblink r=1 g=0.3 b=0.3 f=0.25}"..locText
+    end
+    drawPanel(dtiRegion, locText, LOC_HOVER_DAYS)
 
     local mapType = g.getMapType()
     drawPanel(zoneString, "{c r=0.2 g=0.5 b=0.3}{bob freq=0.5}" .. mapType.info)
