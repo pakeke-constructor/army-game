@@ -412,7 +412,10 @@ function ECSWorld:draw(transform)
 
     local list = {}
     for i = 1, self.entities.len do
-        list[#list + 1] = self.entities[i]
+        local e = self.entities[i]
+        if not e.aboveFog then
+            list[#list + 1] = e
+        end
     end
     table.sort(list, sortOrder)
     for i = 1, #list do

@@ -129,7 +129,7 @@ function battle_scene:enter()
     ---@type ecs.ECSWorld
     self.ecs = ECSWorld({
         "stats", "status_effects", "ai", "attacking",
-        "physics", "shadows", "ground_decor", "juice_system", "blood_system"
+        "physics", "shadows", "ground_decor", "fog_decor", "juice_system", "blood_system"
     })
     g.setCurrentECS(self.ecs)
 
@@ -154,7 +154,7 @@ function battle_scene:enter()
     g.pollHandlers()
 
     if self.sandbox then
-        self.ecs:setBounds(-1900/2, -1100/2, 1900, 1100)
+        self.ecs:setBounds(0,0, 1900, 1100)
     else
         encounters.startRandomEncounter(run.day, self.ecs)
     end
@@ -1040,6 +1040,8 @@ function battle_scene:draw()
     fogService.renderFog(fogRegion, g.getMapType().fogColor, function(x, y)
         return not ecs:isInsideShapeRounded(x, y, FOG_MARGIN)
     end)
+    
+    g.call("drawAboveFog")
 
     self.hoveredSquad = nil
     if not self.victory then
