@@ -164,6 +164,60 @@ M.fall = {
     mapPathHighlight = objects.Color("#5f3927"),
 }
 
+---@type MapType
+M.hell = {
+    name = "hell",
+    info = helper.wrapRichtextColor(
+        objects.Color("#7c2222"),
+        loc("Epoch 3 - Infernal", nil, {
+        context = "current epoch/zone"})),
+    decorTypes = {
+        "hell_mountain_large",
+        "hell_mountain_small_1",
+        "hell_mountain_small_2",
+        "volcano",
+        "redcrystal_large_1",
+        "redcrystal_large_2",
+        "redcrystal_medium",
+        "redcrystal_small",
+        "demontree",
+        "burnedtree_1",
+        "burnedtree_2",
+        "burnedtree_3",
+        "burnedtree_4",
+    },
+    groundTextures = {
+        {"decor_mega_1", 6},
+        {"decor_mega_2", 6},
+        {"decor_mega_3", 6},
+        {"decor_mega_4", 6},
+        {"decor_big_1", 4},
+        {"decor_big_2", 4},
+        {"decor_big_3", 4},
+        {"decor_big_4", 4},
+        {"decor_splotch_1", 3},
+        {"decor_splotch_2", 3},
+        {"decor_splotch_3", 3},
+        {"decor_splotch_4", 3},
+        {"decor_splotch_5", 3},
+        {"decor_tex_1", 2},
+        {"decor_tex_2", 2},
+        {"decor_tex_3", 2},
+        {"decor_tex_4", 2},
+        {"decor_tex_5", 2},
+    },
+    groundColors = {
+        objects.Color("#140e12"),
+        objects.Color("#361e19"),
+        objects.Color("#4f2d5d"),
+    },
+    fogColor = objects.Color("#341615"),
+    cloudSprites = {"cloud1"},
+    additionalAmbientService = nil, -- TODO: fire/ash particles
+    mapPath = objects.Color("#361e19"),
+    mapPathHighlight = objects.Color("#5f3927"),
+}
+
 
 for k,v in pairs(M) do
     assert(v.name == k)
