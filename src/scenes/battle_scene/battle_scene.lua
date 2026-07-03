@@ -26,8 +26,8 @@ local COMMANDER_SCREEN_X_RATIO = 1 / 3
 -- ^^^^ TODO: make a cleaner implementation than this.
 -- this is lowkey hella hacky.
 
--- how far past the ally/enemy rectangles the fog is pushed back
-local FOG_MARGIN = 30
+-- extra radius added to each blob circle in the fog's rounded shape test
+local FOG_MARGIN = 60
 
 
 ---@class g.BattleScene
@@ -154,7 +154,7 @@ function battle_scene:enter()
     g.pollHandlers()
 
     if self.sandbox then
-        self.ecs:setBounds(0, 0, 1900, 1100)
+        self.ecs:setBounds(-1900/2, -1100/2, 1900, 1100)
     else
         encounters.startRandomEncounter(run.day, self.ecs)
     end
@@ -167,7 +167,7 @@ function battle_scene:enter()
             border[3],
             border[4]
         )
-        local allyRec, _, rightR = borderR:set(nil, nil, 600, 300):splitHorizontal(1,2,1)
+        local allyRec, _, rightR = borderR:set(nil, nil, 600, 300):splitHorizontal(1,1,1)
         self.ecs:setAllyRectangle(allyRec:get())
         self.ecs:setEnemyRectangle(rightR:get())
         local nx, ny = allyRec:getCenter()
@@ -1038,7 +1038,7 @@ function battle_scene:draw()
     }
     local ecs = self.ecs
     fogService.renderFog(fogRegion, g.getMapType().fogColor, function(x, y)
-        return not ecs:isInsideShape(x, y, FOG_MARGIN)
+        return not ecs:isInsideShapeRounded(x, y, FOG_MARGIN)
     end)
 
     self.hoveredSquad = nil

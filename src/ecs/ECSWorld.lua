@@ -88,23 +88,30 @@ function ECSWorld:setEnemyRectangle(x, y, w, h)
     self.enemyRectangle = {x = x, y = y, w = w, h = h}
 end
 
--- The world's playable area: union of allyRectangle, enemyRectangle, and a
--- bridging rect filling the horizontal gap between them (if any).
+-- Bridging rect filling the horizontal gap between allyRectangle and
+-- enemyRectangle (if any). nil if either is missing or they don't have a gap.
+---@return {x:number,y:number,w:number,h:number}?
+function ECSWorld:getBridgeRectangle()
+    local a, e = self.allyRectangle, self.enemyRectangle
+    if not (a and e) then return nil end
+    local midX = a.x + a.w
+    local midW = e.x - midX
+    if midW <= 0 then return nil end
+    local midH = (a.h + e.h) / 2
+    local midCY = ((a.y + a.h / 2) + (e.y + e.h / 2)) / 2
+    return {x = midX, y = midCY - midH / 2, w = midW, h = midH}
+end
+
+-- The world's playable area: union of allyRectangle, enemyRectangle, and the
+-- bridging rect between them.
 ---@return {x:number,y:number,w:number,h:number}[]
 function ECSWorld:getShape()
     local shape = {}
     local a, e = self.allyRectangle, self.enemyRectangle
     if a then shape[#shape + 1] = a end
     if e then shape[#shape + 1] = e end
-    if a and e then
-        local midX = a.x + a.w
-        local midW = e.x - midX
-        if midW > 0 then
-            local midH = (a.h + e.h) / 2
-            local midCY = ((a.y + a.h / 2) + (e.y + e.h / 2)) / 2
-            shape[#shape + 1] = {x = midX, y = midCY - midH / 2, w = midW, h = midH}
-        end
-    end
+    local mid = self:getBridgeRectangle()
+    if mid then shape[#shape + 1] = mid end
     return shape
 end
 
@@ -124,6 +131,61 @@ function ECSWorld:isInsideShape(x, y, margin)
     for i = 1, #shape do
         if rectContains(shape[i], x, y, margin) then return true end
     end
+    return false
+end
+
+---@param r {x:number,y:number,w:number,h:number}
+---@param margin number
+---@return number cx, number cy, number rad
+local function circleFromRect(r, margin)
+    local cx, cy = r.x + r.w / 2, r.y + r.h / 2
+    local rad = (r.w + r.h) / 4 + margin
+    return cx, cy, rad
+end
+
+local function inCircle(x, y, cx, cy, rad)
+    local dx, dy = x - cx, y - cy
+    return dx * dx + dy * dy <= rad * rad
+end
+
+-- Same as isInsideShape, but blobby: ally/enemy/bridge rects are each
+-- approximated by a circle at their center (radius = average of width/height
+-- + margin). Two extra circles sit right on the ally-bridge and
+-- bridge-enemy borders (radius = average of the two neighboring circles'
+-- radii) so those seams round off too, instead of just each rect's own
+-- center. Cheap: at most 5 dx*dx+dy*dy <= rad*rad checks, no sqrt.
+-- Purely a visual softener (eg. fog edges) -- gameplay code should keep using
+-- the sharp-cornered isInsideShape/clampToShape.
+---@param margin? number grows every circle's radius by this much
+---@return boolean
+function ECSWorld:isInsideShapeRounded(x, y, margin)
+    margin = margin or 0
+    local a, e = self.allyRectangle, self.enemyRectangle
+    if not a and not e then return true end
+
+    local acx, acy, arad
+    if a then
+        acx, acy, arad = circleFromRect(a, margin)
+        if inCircle(x, y, acx, acy, arad) then return true end
+    end
+
+    local ecx, ecy, erad
+    if e then
+        ecx, ecy, erad = circleFromRect(e, margin)
+        if inCircle(x, y, ecx, ecy, erad) then return true end
+    end
+
+    local mid = self:getBridgeRectangle()
+    if mid then
+        local mcx, mcy, mrad = circleFromRect(mid, margin)
+        if inCircle(x, y, mcx, mcy, mrad) then return true end
+
+        -- ally-bridge border: circle centered exactly on the shared edge
+        if inCircle(x, y, mid.x, (acy + mcy) / 2, (arad + mrad) / 2) then return true end
+        -- bridge-enemy border: circle centered exactly on the shared edge
+        if inCircle(x, y, mid.x + mid.w, (mcy + ecy) / 2, (mrad + erad) / 2) then return true end
+    end
+
     return false
 end
 
