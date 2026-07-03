@@ -211,9 +211,9 @@ M.hell = {
         objects.Color("#361e19"),
         objects.Color("#4f2d5d"),
     },
-    fogColor = objects.Color("#341615"),
+    fogColor = objects.Color("#290D0C"),
     cloudSprites = {"cloud1"},
-    additionalAmbientService = nil, -- TODO: fire/ash particles
+    additionalAmbientService = require("src.scenes.map_scene.fire_ash_ambient"),
     mapPath = objects.Color("#361e19"),
     mapPathHighlight = objects.Color("#5f3927"),
 }
