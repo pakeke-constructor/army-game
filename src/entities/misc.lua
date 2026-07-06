@@ -4,7 +4,7 @@ local BODY_FADETIME = 0.3
 
 -- Visual-only corpse that flies offscreen, used by juice_system on death.
 g.defineEntity("body", {
-    image = "placeholder",
+    image = "1x1",
     drawOrder = 100,
     oyOverride = 0.5,
     lifetime = BODY_LIFETIME,
@@ -56,7 +56,7 @@ g.defineEntity("nexus", {
 
 
 g.defineEntity("treasure_chest_objective", {
-    image = "placeholder",
+    image = g.leo("treasure_chest_objective"),
     isBuilding = true,
     team = "neutral",
     side = "neutral",

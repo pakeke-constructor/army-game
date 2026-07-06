@@ -158,7 +158,7 @@ g.defineSquad("aggravator_7000_squad", {
             attackType = "melee",
         },
         weapon = {
-            image = "dagger", -- placeholder
+            image = g.leo("aggravator_7000_sword", "dagger"), -- placeholder
             type = "sword",
         },
         baseAttackDamage = 2,
@@ -249,7 +249,7 @@ g.defineSquad("quartz_cannoneer_squad", {
             projectileSpeed = 350,
         },
         weapon = {
-            image = "militia", -- placeholder
+            image = g.leo("quartz_cannoneer_cannon", "militia"), -- placeholder
             type = "bow",
         },
         baseAttackDamage = 2,
