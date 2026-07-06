@@ -46,6 +46,34 @@ local function loseBattle(self)
     end, 1)
 end
 
+function battle_scene:generateAllyAndEnemyRectangles(border)
+    local borderR = Kirigami(
+        border[1],
+        border[2],
+        border[3],
+        border[4]
+    )
+
+    -- set the height and horizontal split of the rectangles
+    local allyRec, _, rightR = borderR:set(nil, nil, 600, nil)
+        :splitHorizontal(love.math.random(8, 12)/10, 1, love.math.random(8, 12)/10)
+
+    -- set the height of the ally rec and enemy rec which has randomized height and position
+    local allyRecHeight = love.math.random(200, 350)
+    allyRec = allyRec:set(nil, nil, nil, allyRecHeight)
+        :moveUnit(0, love.math.random(-50, 50)-allyRecHeight/2+200)
+
+    local enemyRecHeight = love.math.random(200, 350)
+    rightR = rightR:set(nil, nil, nil, enemyRecHeight)
+        :moveUnit(0, love.math.random(-50, 50)-enemyRecHeight/2+200)
+
+    
+    self.ecs:setAllyRectangle(allyRec:get())
+    self.ecs:setEnemyRectangle(rightR:get())
+
+    return allyRec, rightR
+end
+
 
 function battle_scene:init()
     self.victory = false
@@ -161,25 +189,7 @@ function battle_scene:enter()
 
     local border = self.ecs.boundingBox
     do
-        local borderR = Kirigami(
-            border[1],
-            border[2],
-            border[3],
-            border[4]
-        )
-        local allyRec, _, rightR = borderR:set(nil, nil, 600, nil)
-            :splitHorizontal(love.math.random(8, 12)/10, 1, love.math.random(8, 12)/10)
-
-        local allyRecHeight = love.math.random(200, 350)
-        allyRec = allyRec:set(nil, nil, nil, allyRecHeight)
-            :moveUnit(0, love.math.random(-50, 50)-allyRecHeight/2+200)
-
-        local enemyRecHeight = love.math.random(200, 350)
-        rightR = rightR:set(nil, nil, nil, enemyRecHeight)
-            :moveUnit(0, love.math.random(-50, 50)-enemyRecHeight/2+200)
-
-        self.ecs:setAllyRectangle(allyRec:get())
-        self.ecs:setEnemyRectangle(rightR:get())
+        local allyRec, enemyRec = self:generateAllyAndEnemyRectangles(border)
         local nx, ny = allyRec:getCenter()
         local commanderInfo = g.getCommanderInfo(run.commander)
         local commanderSquad = g.getSquadFromArmy(commanderInfo.squadId)
