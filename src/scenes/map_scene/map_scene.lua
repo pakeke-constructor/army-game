@@ -179,7 +179,7 @@ function map_scene:_buildMap(mapType, fromPortal)
         nodeOffsetFactor = 0.35,
         scaleX = 1,
         scaleY = 0.6,
-        mapType = mapTypes[mapType],
+        mapType = mapType,
         fromPortal = not not fromPortal,
     }) until run.mapGraph:countNodes() > 20
     return self:_buildNodeState()

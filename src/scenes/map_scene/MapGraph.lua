@@ -2,6 +2,7 @@
 local Class = require("src.modules.objects.Class")
 local nodes = require("src.scenes.map_scene.nodes")
 local decor_types = require("src.scenes.map_scene.decor_types")
+local mapTypes = require("src.scenes.map_scene.map_types")
 
 --[[
 
@@ -95,11 +96,12 @@ end
 
 ---@param width integer
 ---@param height integer
----@param mapType MapType
+---@param mapType string
 function MapGraph:init(width, height, mapType)
     self.width = width
     self.height = height
-    self.mapType = mapType
+    ---@type MapType
+    self.mapType = assert(mapTypes[mapType])
     self.distanceBetweenNodes = 130 -- sensible default just to silence LuaLS
     self.nodes = {}
     self.edges = {}
@@ -116,7 +118,7 @@ function MapGraph:init(width, height, mapType)
     self.scaleX = 1
     self.scaleY = 0.6
 
-    for _, g in ipairs(mapType.groundTextures) do
+    for _, g in ipairs(self.mapType.groundTextures) do
         self.groundDecorNoRotMap[g[1]] = not not g[3]
     end
 end
@@ -245,7 +247,7 @@ end
 ---@class MapGraph.GenArgs
 ---@field width integer
 ---@field height integer
----@field mapType MapType
+---@field mapType string
 ---@field nodePruneChance number
 ---@field edgePruneChance number
 ---@field distanceBetweenNodes number
@@ -798,13 +800,14 @@ function MapGraph:serialize()
         edges = edges,
         decor = self.decor,
         groundDecor = self.groundDecor,
-        playerPosition = self.playerPosition
+        playerPosition = self.playerPosition,
+        mapType = self.mapType.name,
     }
 end
 
 --- Deserialize from a plain table
 function MapGraph.deserialize(data)
-    local self = MapGraph(data.width, data.height)
+    local self = MapGraph(data.width, data.height, data.mapType or "forest")
     for key, nodeData in pairs(data.nodes) do
         self.nodes[key] = deserializeNode(nodeData)
     end
