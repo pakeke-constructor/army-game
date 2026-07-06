@@ -521,8 +521,9 @@ local function drawManaBox(self, noDraw, region)
     local t = 0--love.timer.getTime()
     local hoveredManaType = nil
     local function drawMana(mtype, i, manaImg)
+        local dy = math.sin(love.timer.getTime() + i) * 1
         local x = cx + (r.w/3) * math.sin(t + i*rdiff)
-        local y = cy + (r.h/4) * math.cos(t + i*rdiff)
+        local y = cy + (r.h/4) * math.cos(t + i*rdiff) + dy
         if ct <= 1 then
             -- just center it:
             x,y = cx,cy
@@ -534,13 +535,13 @@ local function drawManaBox(self, noDraw, region)
         if count <= 0 then
             lg.setColor(0.3,0.3,0.3)
         end
-        g.drawImage(manaImg, x-10,y)
+        g.drawImage(manaImg, x-6,y)
         local color = (minfo and minfo.color) or objects.Color.WHITE
         lg.setColor(color)
         if count <= 0 then
             lg.setColor(0.3,0.3,0.3)
         end
-        richtext.printRich(tostring(count), font, x+4,y-8, 100, "left")
+        richtext.printRich(tostring(count), font, x+6,y-8, 100, "left")
         if iml.isHovered(x-16, y-16, 36, 36, "hud_mana_" .. mtype) then
             hoveredManaType = mtype
         end
