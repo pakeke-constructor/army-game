@@ -180,7 +180,6 @@ end
 function love.quit()
     agentbridge.stop()
     settings.save()
-    g.saveAndInvalidateRun()
 end
 
 function love.draw()
