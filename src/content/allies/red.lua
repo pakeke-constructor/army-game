@@ -412,6 +412,7 @@ g.defineSquad("his_manifestation_squad", {
         baseMoveSpeed = 45,
         baseMaxHealth = 40,
     },
+    statUpgradeScaling = {attackDamage = 0.1},
     unitCount = 1,
     perks = {{
         name = "Ritual",
