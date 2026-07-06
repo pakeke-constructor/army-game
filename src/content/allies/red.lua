@@ -179,6 +179,7 @@ g.defineSquad("tribute_squad", {
         baseMoveSpeed = 40,
         baseMaxHealth = 4,
     },
+    statUpgradeScaling = {attackSpeed = 0.35},
     unitCount = 1,
     perks = {{
         name = "His Gratitude",
@@ -382,6 +383,7 @@ g.defineSquad("living_entropy_squad", {
         baseMoveSpeed = 50,
         baseMaxHealth = 15,
     },
+    statUpgradeScaling = {attackDamage = 0.2},
     unitCount = 2,
     perks = {{
         name = "Explosive",
@@ -445,6 +447,7 @@ g.defineSquad("pain_elemental_squad", {
         baseMoveSpeed = 55,
         baseMaxHealth = 15,
     },
+    statUpgradeScaling = {attackSpeed = 0.2},
     unitCount = 2,
     perks = {{
         name = "Sadistic",
@@ -483,6 +486,7 @@ g.defineSquad("doom_herald_squad", {
         baseMoveSpeed = 35,
         baseMaxHealth = 12,
     },
+    statUpgradeScaling = {healPower = 0.2},
     unitCount = 2,
     perks = {{
         name = "Omen",
