@@ -170,10 +170,13 @@ local function addDemons(node, builder, x, y)
             end
             local r = 20 * radiusMul
             local a = angle + angleOff
-            local bobAmount = 5
-            local bob = math.sin(hashf(node.x, node.y, i) * math.pi * 2 + love.timer.getTime()) * bobAmount
+            local phase = hashf(node.x, node.y, i) * math.pi * 2
             local sx = hashf(node.x, node.y, i, 2) < 0.5 and -1 or 1
-            builder:addImage("node_combat_demon", x + math.cos(a) * r, y + math.sin(a) * r + bob, 0, sx, nodeOpacity(node))
+            local function bobMod()
+                local sy = 1 + math.sin(phase + love.timer.getTime()) * 0.12
+                return 0, 0, 0, 1, sy, 0, 0
+            end
+            builder:addImage("node_combat_demon", x + math.cos(a) * r, y + math.sin(a) * r, 0, sx, nodeOpacity(node), bobMod)
         end
 
         if node.demonEncounter >= 2 then
