@@ -21,8 +21,9 @@ function ECSWorld:init(systemNames)
 
     self.backCanvas = PixelCanvas.new(love.graphics.getDimensions())
     self.frontCanvas = PixelCanvas.new(love.graphics.getDimensions())
-    self.boundingBox = nil -- {0, 0, w, h} or nil for no bounds
-    self.shape = nil -- list of ellipses {cx,cy,rx,ry}; world is union of them
+    self.boundingBox = nil -- {x, y, w, h} or nil for no bounds
+    self.allyRectangle = nil -- {x,y,w,h}: region allies may deploy into
+    self.enemyRectangle = nil -- {x,y,w,h}: region enemies spawn into
 
     self.componentIndex = {} -- [componentName] -> {ent, ent, ...}
     self.trackedComponents = objects.Set()
@@ -63,86 +64,181 @@ function ECSWorld:init(systemNames)
     end
 end
 
--- Generate a "world shape" as a union of scattered ellipses covering the
--- bounding box. Non-uniform blobs make it feel like a scrappy battlefield.
--- Fog is cleared inside the shape, and entities are clamped inside it.
-local function generateShape(w, h)
-    local cy = h / 2
-    local shape = {}
-    local n = love.math.random(4, 6)
-    shape[1] = {
-        cx = w/2, cy = h/2,
-        rx = w/4, ry = h/4
-    }
-    for i = 1, n do
-        local t = (i - 1) / (n - 1)
-        local rx = math.min(w, h) * (love.math.random(40, 50) / 100) * (14 / (10+n))
-        local ry = rx * love.math.random(100, 130) / 100
-        -- cap radii + clamp center so the whole oval stays inside the bounding box
-        rx = math.min(rx, w / 2)
-        ry = math.min(ry, h / 2)
-        local cx = helper.lerp(w * 0.2, w * 0.8, t) + love.math.random(-50, 50)
-        local cyy = cy + love.math.random(-h * 0.3, h * 0.3)
-        cx = helper.clamp(cx, rx, w - rx)
-        cyy = helper.clamp(cyy, ry, h - ry)
-        table.insert(shape, {
-            cx = cx,
-            cy = cyy,
-            rx = rx,
-            ry = ry,
-        })
+---@param x number
+---@param y number
+---@param w number
+---@param h number
+function ECSWorld:setBounds(x, y, w, h)
+    self.boundingBox = {x, y, w, h}
+end
+
+-- Bridging rect filling the horizontal gap between allyRectangle and
+-- enemyRectangle (if any). nil if either is missing or they don't have a gap.
+---@return {x:number,y:number,w:number,h:number}?
+function ECSWorld:recalculateBridgeRectangle()
+    local a, e = self.allyRectangle, self.enemyRectangle
+    if not (a and e) then self.bridgeRectangle = nil; return nil end
+    local midX = a.x + a.w
+    local midW = e.x - midX
+    if midW <= 0 then self.bridgeRectangle = nil; return nil end
+    local midH = (a.h + e.h) / 2
+    local midCY = ((a.y + a.h / 2) + (e.y + e.h / 2)) / 2
+    self.bridgeRectangle = {x = midX, y = midCY - midH / 2, w = midW, h = midH}
+    self._shape = nil -- invalidate cached shape
+end
+
+---@param x number
+---@param y number
+---@param w number
+---@param h number
+function ECSWorld:setAllyRectangle(x, y, w, h)
+    self.allyRectangle = {x = x, y = y, w = w, h = h}
+    self._shape = nil -- invalidate cached shape
+    self:recalculateBridgeRectangle()
+end
+
+---@param x number
+---@param y number
+---@param w number
+---@param h number
+function ECSWorld:setEnemyRectangle(x, y, w, h)
+    self.enemyRectangle = {x = x, y = y, w = w, h = h}
+    self._shape = nil -- invalidate cached shape
+    self:recalculateBridgeRectangle()
+end
+
+-- Bridging rect filling the horizontal gap between allyRectangle and
+-- enemyRectangle (if any). nil if either is missing or they don't have a gap.
+---@return {x:number,y:number,w:number,h:number}?
+function ECSWorld:getBridgeRectangle()
+    if not self.bridgeRectangle then
+        self:recalculateBridgeRectangle()
     end
+    return self.bridgeRectangle
+end
+
+-- The world's playable area: union of allyRectangle, enemyRectangle, and the
+-- bridging rect between them.
+---@return {x:number,y:number,w:number,h:number}[]
+function ECSWorld:recalculateUnionShape()
+    local shape = {}
+    local n = 0
+    local a, e = self.allyRectangle, self.enemyRectangle
+    if a then n = n + 1; shape[n] = a end
+    if e then n = n + 1; shape[n] = e end
+    local mid = self:getBridgeRectangle()
+    if mid then n = n + 1; shape[n] = mid end
+    self._shape = shape
     return shape
 end
 
-
-
-function ECSWorld:setBounds(w, h)
-    self.boundingBox = {0, 0, w, h}
-    self.shape = generateShape(w, h)
+-- The world's playable area: union of allyRectangle, enemyRectangle, and the
+-- bridging rect between them.
+---@return {x:number,y:number,w:number,h:number}[]
+function ECSWorld:getShape()
+    if self._shape == nil then
+        self:recalculateUnionShape()
+    end
+    return self._shape
 end
 
+---@param r {x:number,y:number,w:number,h:number}
+---@param margin? number grows the rect outward by this much (negative shrinks)
+local function rectContains(r, x, y, margin)
+    margin = margin or 0
+    return x >= r.x - margin and x <= r.x + r.w + margin
+        and y >= r.y - margin and y <= r.y + r.h + margin
+end
+
+---@param margin? number grows the shape outward by this much (negative shrinks)
 ---@return boolean
-function ECSWorld:isInsideShape(x, y)
-    local shape = self.shape
-    if not shape then return true end
+function ECSWorld:isInsideShape(x, y, margin)
+    local shape = self:getShape()
+    if #shape == 0 then return true end
     for i = 1, #shape do
-        local e = shape[i]
-        local dx, dy = (x - e.cx) / e.rx, (y - e.cy) / e.ry
-        if dx * dx + dy * dy <= 1 then
-            return true
-        end
+        if rectContains(shape[i], x, y, margin) then return true end
     end
+    return false
+end
+
+---@param r {x:number,y:number,w:number,h:number}
+---@param margin number
+---@return number cx, number cy, number rad
+local function circleFromRect(r, margin)
+    local cx, cy = r.x + r.w / 2, r.y + r.h / 2
+    local rad = (r.w + r.h) / 4 + margin
+    return cx, cy, rad
+end
+
+local function inCircle(x, y, cx, cy, rad)
+    local dx, dy = x - cx, y - cy
+    return dx * dx + dy * dy <= rad * rad
+end
+
+-- Same as isInsideShape, but blobby: ally/enemy/bridge rects are each
+-- approximated by a circle at their center (radius = average of width/height
+-- + margin). Two extra circles sit right on the ally-bridge and
+-- bridge-enemy borders (radius = average of the two neighboring circles'
+-- radii) so those seams round off too, instead of just each rect's own
+-- center. Cheap: at most 5 dx*dx+dy*dy <= rad*rad checks, no sqrt.
+-- Purely a visual softener (eg. fog edges) -- gameplay code should keep using
+-- the sharp-cornered isInsideShape/clampToShape.
+---@param margin? number grows every circle's radius by this much
+---@return boolean
+function ECSWorld:isInsideShapeRounded(x, y, margin)
+    margin = margin or 0
+    local a, e = self.allyRectangle, self.enemyRectangle
+    if not a and not e then return true end
+
+    local acx, acy, arad
+    if a then
+        acx, acy, arad = circleFromRect(a, margin)
+        if inCircle(x, y, acx, acy, arad) then return true end
+    end
+
+    local ecx, ecy, erad
+    if e then
+        ecx, ecy, erad = circleFromRect(e, margin)
+        if inCircle(x, y, ecx, ecy, erad) then return true end
+    end
+
+    local mid = self:getBridgeRectangle()
+    if mid then
+        local mcx, mcy, mrad = circleFromRect(mid, margin)
+        if inCircle(x, y, mcx, mcy, mrad) then return true end
+
+        -- ally-bridge border: circle centered exactly on the shared edge
+        if inCircle(x, y, mid.x, (acy + mcy) / 2, (arad + mrad) / 2) then return true end
+        -- bridge-enemy border: circle centered exactly on the shared edge
+        if inCircle(x, y, mid.x + mid.w, (mcy + ecy) / 2, (mrad + erad) / 2) then return true end
+    end
+
     return false
 end
 
 ---@return integer
 function ECSWorld:getNumOverlappingShapes(x, y)
-    local shape = self.shape
-    if not shape then return 0 end
+    local shape = self:getShape()
     local count = 0
     for i = 1, #shape do
-        local e = shape[i]
-        local dx, dy = (x - e.cx) / e.rx, (y - e.cy) / e.ry
-        if dx * dx + dy * dy <= 1 then
-            count = count + 1
-        end
+        if rectContains(shape[i], x, y) then count = count + 1 end
     end
     return count
 end
 
+-- Returns x,y clamped to the nearest point inside/on rect r.
+---@param r {x:number,y:number,w:number,h:number}
+function ECSWorld:clampToRect(r, x, y)
+    return helper.clamp(x, r.x, r.x + r.w), helper.clamp(y, r.y, r.y + r.h)
+end
+
 -- Returns x,y clamped to the nearest point inside/on the shape.
 function ECSWorld:clampToShape(x, y)
-    local shape = self.shape
-    if not shape or self:isInsideShape(x, y) then return x, y end
+    local shape = self:getShape()
+    if #shape == 0 or self:isInsideShape(x, y) then return x, y end
     local bestX, bestY, bestD
     for i = 1, #shape do
-        local e = shape[i]
-        local dx, dy = (x - e.cx) / e.rx, (y - e.cy) / e.ry
-        local d = math.sqrt(dx * dx + dy * dy)
-        if d == 0 then d = 1e-6 end
-        local px = e.cx + (dx / d) * e.rx
-        local py = e.cy + (dy / d) * e.ry
+        local px, py = self:clampToRect(shape[i], x, y)
         local dist = (px - x) * (px - x) + (py - y) * (py - y)
         if not bestD or dist < bestD then
             bestD, bestX, bestY = dist, px, py
@@ -242,6 +338,8 @@ function ECSWorld:update(dt)
     self:_rebuildPartitions()
     self:_rebuildComponentIndex()
     self:_rebuildTeamLists()
+    self:recalculateBridgeRectangle()
+    self:recalculateUnionShape()
     g.call("preUpdate", dt)
     self._commander = nil
     for i = 1, self.entities.len do
@@ -298,7 +396,7 @@ function ECSWorld:update(dt)
             end
         end
     end
-    if self.shape then
+    if self.allyRectangle or self.enemyRectangle then
         for i = 1, self.entities.len do
             local e = self.entities[i]
             if e.team then
@@ -341,10 +439,20 @@ function ECSWorld:draw(transform)
         self.backCanvas:finish()
     end
 
-    local list = {}
-    for i = 1, self.entities.len do
-        list[#list + 1] = self.entities[i]
+    local list = self._drawList
+    if not list then
+        list = {}
+        self._drawList = list
     end
+    local n = 0
+    for i = 1, self.entities.len do
+        local e = self.entities[i]
+        if not e.aboveFog then
+            n = n + 1
+            list[n] = e
+        end
+    end
+    for i = #list, n + 1, -1 do list[i] = nil end
     table.sort(list, sortOrder)
     for i = 1, #list do
         local e = list[i]
@@ -359,6 +467,16 @@ function ECSWorld:draw(transform)
         local b = self.boundingBox or {1,1,1,1}
         lg.setColor(1,1,1)
         lg.rectangle("line", b[1],b[2],b[3],b[4])
+        if self.allyRectangle then
+            local r = self.allyRectangle
+            lg.setColor(0.3,1,0.3)
+            lg.rectangle("line", r.x, r.y, r.w, r.h)
+        end
+        if self.enemyRectangle then
+            local r = self.enemyRectangle
+            lg.setColor(1,0.3,0.3)
+            lg.rectangle("line", r.x, r.y, r.w, r.h)
+        end
     end
     if transform then
         self.frontCanvas:finish()

@@ -26,6 +26,9 @@ local COMMANDER_SCREEN_X_RATIO = 1 / 3
 -- ^^^^ TODO: make a cleaner implementation than this.
 -- this is lowkey hella hacky.
 
+-- extra radius added to each blob circle in the fog's rounded shape test
+local FOG_MARGIN = 60
+
 
 ---@class g.BattleScene
 ---@field hud g.HUD
@@ -41,6 +44,34 @@ local function loseBattle(self)
     fadeToBlackService.fadeToFromBlack(1, function()
         gameoverPopupService.show()
     end, 1)
+end
+
+function battle_scene:generateAllyAndEnemyRectangles(border)
+    local borderR = Kirigami(
+        border[1],
+        border[2],
+        border[3],
+        border[4]
+    )
+
+    -- set the height and horizontal split of the rectangles
+    local allyRec, _, rightR = borderR:set(nil, nil, 600, nil)
+        :splitHorizontal(love.math.random(8, 12)/10, 1, love.math.random(8, 12)/10)
+
+    -- set the height of the ally rec and enemy rec which has randomized height and position
+    local allyRecHeight = love.math.random(200, 350)
+    allyRec = allyRec:set(nil, nil, nil, allyRecHeight)
+        :moveUnit(0, love.math.random(-50, 50)-allyRecHeight/2+200)
+
+    local enemyRecHeight = love.math.random(200, 350)
+    rightR = rightR:set(nil, nil, nil, enemyRecHeight)
+        :moveUnit(0, love.math.random(-50, 50)-enemyRecHeight/2+200)
+
+    
+    self.ecs:setAllyRectangle(allyRec:get())
+    self.ecs:setEnemyRectangle(rightR:get())
+
+    return allyRec, rightR
 end
 
 
@@ -126,7 +157,7 @@ function battle_scene:enter()
     ---@type ecs.ECSWorld
     self.ecs = ECSWorld({
         "stats", "status_effects", "ai", "attacking",
-        "physics", "shadows", "ground_decor", "juice_system", "blood_system"
+        "physics", "shadows", "ground_decor", "fog_decor", "juice_system", "blood_system"
     })
     g.setCurrentECS(self.ecs)
 
@@ -151,25 +182,19 @@ function battle_scene:enter()
     g.pollHandlers()
 
     if self.sandbox then
-        self.ecs:setBounds(1900, 1100)
+        self.ecs:setBounds(500,300, 1900, 1100)
     else
         encounters.startRandomEncounter(run.day, self.ecs)
     end
 
     local border = self.ecs.boundingBox
     do
-        local borderR = Kirigami(
-            border[1],
-            border[2],
-            border[3],
-            border[4]
-        )
-        local leftR,_,_ = borderR:splitHorizontal(1,2)
-        local nx, ny = leftR:getCenter()
+        local allyRec, enemyRec = self:generateAllyAndEnemyRectangles(border)
+        local nx, ny = allyRec:getCenter()
         local commanderInfo = g.getCommanderInfo(run.commander)
         local commanderSquad = g.getSquadFromArmy(commanderInfo.squadId)
         if commanderSquad then
-            self.commander = commanderSquad:spawn(nx, ny)[1]
+            self.commander = commanderSquad:spawn(nx, ny+50)[1]
             self.commander.playerControlled = true
         end
     end
@@ -683,8 +708,6 @@ end
 
 
 
-local DEPLOY_RADIUS = 200
-
 ---@param self g.BattleScene
 local function getCommanderDeployBasePos(self)
     if not self.commander then
@@ -711,17 +734,11 @@ local function getSnappedDeployPosition(self, squad, wx, wy)
         return wx, wy
     end
 
-    local commx, commy = getCommanderDeployBasePos(self)
-    local dx, dy = wx - commx, wy - commy
-    local dist = math.sqrt(dx * dx + dy * dy)
-    if dist <= DEPLOY_RADIUS then
+    local r = self.ecs.allyRectangle
+    if not r then
         return wx, wy
     end
-    if dist <= 0 then
-        return commx, commy
-    end
-    return commx + dx / dist * DEPLOY_RADIUS,
-        commy + dy / dist * DEPLOY_RADIUS
+    return self.ecs:clampToRect(r, wx, wy)
 end
 
 local SQUAD_HOVER_COLOR = g.snapToPalette(0.2, 1, 0.3, 0.5)
@@ -965,8 +982,8 @@ local function drawCommanderRadius(self)
 
     local pop = gsman.setLineWidth(LINE_WIDTH)
     local selType, squad = self.hud:getSelection()
-    if selType == "squad" and squad and (not squad.deployed) then
-        local commx, commy = getCommanderDeployBasePos(self)
+    local r = self.ecs.allyRectangle
+    if selType == "squad" and squad and (not squad.deployed) and r then
         local mx, my = love.mouse.getPosition()
         local wx, wy = self.camera:toWorld(mx, my)
         local snappedX, snappedY = getSnappedDeployPosition(self, squad, wx, wy)
@@ -976,9 +993,9 @@ local function drawCommanderRadius(self)
         local lr, lgc, lb, la = DEPLOY_REGION_LINE:getRGBA()
 
         lg.setColor(ir, ig, ib, ia * opacityMult)
-        love.graphics.circle("fill", commx, commy, DEPLOY_RADIUS)
+        love.graphics.rectangle("fill", r.x, r.y, r.w, r.h)
         lg.setColor(lr, lgc, lb, la * opacityMult)
-        love.graphics.circle("line", commx, commy, DEPLOY_RADIUS)
+        love.graphics.rectangle("line", r.x, r.y, r.w, r.h)
     end
 
     local timeSinceAutoAttack = commander._timeSinceAutoAttacked or 100
@@ -1041,8 +1058,10 @@ function battle_scene:draw()
     }
     local ecs = self.ecs
     fogService.renderFog(fogRegion, g.getMapType().fogColor, function(x, y)
-        return not ecs:isInsideShape(x, y)
+        return not ecs:isInsideShapeRounded(x, y, FOG_MARGIN)
     end)
+    
+    g.call("drawAboveFog")
 
     self.hoveredSquad = nil
     if not self.victory then

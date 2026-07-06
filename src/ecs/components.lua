@@ -160,6 +160,7 @@ local shadow = {
 ---@field public ky number?
 ---@field public oyOverride number? oy (offsetY) defaults to 0.95, which is 95% of image, but you can override this here.
 ---@field public drawOrder number?
+---@field public aboveFog boolean? if true, excluded from normal ecs draw sort; drawn separately on top of fog
 ---@field public scale number?
 ---@field public health number?
 ---@field public isHealer boolean? true IFF entity is a healer, and will heal with it's attacks.
