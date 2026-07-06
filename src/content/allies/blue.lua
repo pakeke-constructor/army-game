@@ -385,6 +385,7 @@ g.defineSquad("war_elephant_squad", {
         baseMaxHealth = 60,
         baseStartingArmor = 12,
     },
+    statUpgradeScaling = {startingArmor = 0.25},
     unitCount = 2,
     perks = {{
         name = "Helmheart",
@@ -444,6 +445,7 @@ g.defineSquad("magnet_elemental_squad", {
         baseMaxHealth = 20,
         baseStartingArmor = 3,
     },
+    statUpgradeScaling = {startingArmor = 0.25},
     unitCount = 2,
     perks = {{
         name = "Shrapnelmancy",
@@ -486,6 +488,7 @@ g.defineSquad("immortal_eye_squad", {
         baseMaxHealth = 80,
         baseStartingArmor = 10,
     },
+    statUpgradeScaling = {attackDamage = 0.33},
     perks = {{
         name = "Rebirth",
         description = loc("When you spend Blue mana, trigger the On-spawn effects of all allied units in a large radius around this building."),
@@ -567,6 +570,7 @@ g.defineSquad("laser_gunner_squad", {
         baseMoveSpeed = 50,
         baseMaxHealth = 8,
     },
+    statUpgradeScaling = {attackSpeed = 0.1},
     unitCount = 4,
     perks = {{
         name = "Laser Focus",
@@ -627,6 +631,7 @@ g.defineSquad("anima_incubator_squad", {
         baseMoveSpeed = 0,
         baseMaxHealth = 200,
     },
+    statUpgradeScaling = {maxHealth = 0.2},
     unitCount = 1,
     perks = {{
         name = "Manaborn Legion",
@@ -678,6 +683,7 @@ g.defineSquad("ice_mage_squad", {
         baseMoveSpeed = 50,
         baseMaxHealth = 12,
     },
+    statUpgradeScaling = {attackSpeed = 0.1},
     unitCount = 4,
     perks = {{
         name = "Ice Touch",
