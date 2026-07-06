@@ -318,9 +318,6 @@ function g.newTestRun()
     end
 
 end
-function g.delRun()
-    currentRun = nil
-end
 
 function g.hasRun()
     return currentRun ~= nil
@@ -358,6 +355,14 @@ function g.saveAndInvalidateRun()
     end
     g.saveRun()
     g.delRun()
+end
+
+---@param delsave boolean?
+function g.delRun(delsave)
+    currentRun = nil
+    if delsave and g.hasSavedRun() then
+        love.filesystem.remove(RUN_SAVE_PATH)
+    end
 end
 
 
