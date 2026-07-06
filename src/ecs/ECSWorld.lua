@@ -77,13 +77,14 @@ end
 ---@return {x:number,y:number,w:number,h:number}?
 function ECSWorld:recalculateBridgeRectangle()
     local a, e = self.allyRectangle, self.enemyRectangle
-    if not (a and e) then return nil end
+    if not (a and e) then self.bridgeRectangle = nil; return nil end
     local midX = a.x + a.w
     local midW = e.x - midX
-    if midW <= 0 then return nil end
+    if midW <= 0 then self.bridgeRectangle = nil; return nil end
     local midH = (a.h + e.h) / 2
     local midCY = ((a.y + a.h / 2) + (e.y + e.h / 2)) / 2
     self.bridgeRectangle = {x = midX, y = midCY - midH / 2, w = midW, h = midH}
+    self._shape = nil -- invalidate cached shape
 end
 
 ---@param x number
@@ -92,6 +93,7 @@ end
 ---@param h number
 function ECSWorld:setAllyRectangle(x, y, w, h)
     self.allyRectangle = {x = x, y = y, w = w, h = h}
+    self._shape = nil -- invalidate cached shape
     self:recalculateBridgeRectangle()
 end
 
@@ -101,6 +103,7 @@ end
 ---@param h number
 function ECSWorld:setEnemyRectangle(x, y, w, h)
     self.enemyRectangle = {x = x, y = y, w = w, h = h}
+    self._shape = nil -- invalidate cached shape
     self:recalculateBridgeRectangle()
 end
 
@@ -117,20 +120,26 @@ end
 -- The world's playable area: union of allyRectangle, enemyRectangle, and the
 -- bridging rect between them.
 ---@return {x:number,y:number,w:number,h:number}[]
-function ECSWorld:getShape()
-    local shape = self._shape
-    if not shape then
-        shape = {}
-        self._shape = shape
-    end
+function ECSWorld:recalculateUnionShape()
+    local shape = {}
     local n = 0
     local a, e = self.allyRectangle, self.enemyRectangle
     if a then n = n + 1; shape[n] = a end
     if e then n = n + 1; shape[n] = e end
     local mid = self:getBridgeRectangle()
     if mid then n = n + 1; shape[n] = mid end
-    for i = #shape, n + 1, -1 do shape[i] = nil end
+    self._shape = shape
     return shape
+end
+
+-- The world's playable area: union of allyRectangle, enemyRectangle, and the
+-- bridging rect between them.
+---@return {x:number,y:number,w:number,h:number}[]
+function ECSWorld:getShape()
+    if self._shape == nil then
+        self:recalculateUnionShape()
+    end
+    return self._shape
 end
 
 ---@param r {x:number,y:number,w:number,h:number}
@@ -329,6 +338,8 @@ function ECSWorld:update(dt)
     self:_rebuildPartitions()
     self:_rebuildComponentIndex()
     self:_rebuildTeamLists()
+    self:recalculateBridgeRectangle()
+    self:recalculateUnionShape()
     g.call("preUpdate", dt)
     self._commander = nil
     for i = 1, self.entities.len do
