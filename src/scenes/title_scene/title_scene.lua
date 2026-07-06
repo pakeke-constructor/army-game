@@ -45,6 +45,7 @@ end
 ---@class TitleButton
 ---@field name string
 ---@field onClick fun()
+---@field condition? fun():boolean
 ---@field t number?
 ---@field offsetX number?
 
@@ -57,10 +58,13 @@ local buttons = {
         end
     },
     {
-        name = loc("CONTINUE RUN", {}, {context="As in, continuing a run"}),
+        name = loc("CONTINUE RUN", {}, {context="As in, continuing an existing (saved) game/run"}),
+        condition = g.hasSavedRun,
         onClick = function ()
-            error("todo")
-        end},
+            g.loadRun()
+            g.transitionTo("map_scene")
+        end
+    },
     {
         name = loc("SETTINGS"),
         onClick = function ()
@@ -69,11 +73,14 @@ local buttons = {
     },
     {
         name = loc("EXIT GAME"),
-        onClick = function ()
-            love.event.quit()
-        end
+        onClick = love.event.quit
     }
 }
+
+---@param button TitleButton
+local function isButtonActive(button)
+    return button.condition == nil or (not not button.condition())
+end
 
 local hoveredButton
 
@@ -97,9 +104,6 @@ function title_scene:enter()
 end
 
 function title_scene:update(dt)
-    local w, h = lg.getDimensions()
-    -- root = Kirigami(0, 0, w, h)
-
     embers:update(dt)
     -- spawn at a steady rate regardless of framerate (cap clamps the total)
     spawnAcc = spawnAcc + dt*150
@@ -109,8 +113,9 @@ function title_scene:update(dt)
     end
 
     for i, button in ipairs(buttons) do
-        local target = (i == hoveredButton) and 1 or 0
-        local rate = (i == hoveredButton) and 5 or 14
+        local current = i == hoveredButton and isButtonActive(buttons)
+        local target = current and 1 or 0
+        local rate = current and 5 or 14
         rate = rate * 2
         button.t = helper.lerp(button.t or 0, target, dt*rate)
         button.offsetX = helper.lerp(0, 12, helper.EASINGS.easeOutBack(button.t))
@@ -156,21 +161,28 @@ function title_scene:draw()
     g.drawImageContained("logo_isolated", x,y,w,h)
     
     buttonCells = buttonReg:columns(#buttons)
-    
+
     hoveredButton = nil
     for i, button in ipairs(buttons) do
         local rx, ry, rw, rh = buttonCells[i]:padRatio(0.1):get()
-        if iml.isHovered(rx, ry, rw, rh, button) then
+        local active = isButtonActive(button)
+        if active and iml.isHovered(rx, ry, rw, rh, button) then
             hoveredButton = i
         end
-        if iml.wasJustHovered(rx, ry, rw, rh, button) then
+        if active and iml.wasJustHovered(rx, ry, rw, rh, button) then
             g.playUISound("ui_tick")
         end
-        if iml.wasJustClicked(rx, ry, rw, rh, 1, button) then
+        if active and iml.wasJustClicked(rx, ry, rw, rh, 1, button) then
             button.onClick()
         end
 
-        lg.setColor((i == hoveredButton) and {1,1,0.6,1} or {1,1,1,1})
+        if not active then
+            lg.setColor(.4, .4, .4)
+        elseif i == hoveredButton then
+            lg.setColor(1,1,0.6,1)
+        else
+            lg.setColor(1,1,1,1)
+        end
         richtext.printRichContainedNoWrap(button.name, smallFont, rx + (button.offsetX or 0), ry+10, rw, rh-20, "left")
     end
 
