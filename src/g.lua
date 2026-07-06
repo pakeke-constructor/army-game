@@ -1155,18 +1155,19 @@ function g.defineSquad(id, info)
 
     if not info.icon then
         -- Infer icon name from id
-        local infericon = id:gsub("_squad", ""):gsub("_", "").."_uniticon"
-        if g.isImage(infericon) then
-            info.icon = infericon
+        local infericon1 = id:gsub("_squad", ""):gsub("_", "").."_uniticon"
+        if g.isImage(infericon1) then
+            info.icon = infericon1
         end
 
-        infericon = id:gsub("_squad", ""):gsub("_", "").."s_uniticon"
-        if g.isImage(infericon) then
-            info.icon = infericon
+        local infericon2 = id:gsub("_squad", ""):gsub("_", "").."s_uniticon"
+        if g.isImage(infericon2) then
+            info.icon = infericon2
         end
 
         if not info.icon then
             log.error("Squad had no icon: ", id)
+            g.leo(infericon1.."/"..infericon2)
             info.icon = "example_squad_icon"
         end
     end
