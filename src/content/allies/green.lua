@@ -14,13 +14,13 @@ g.defineSquad("forest_sprite_squad", {
     -- tags: healing
     tags = {"healing"},
     entityDef = {
-        image = "militia", -- no forest-sprite sprite; militia stand-in
+        image = g.leo("forest_sprite_unit", "militia"), -- no forest-sprite sprite; militia stand-in
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
         },
         weapon = {
-            image = "militia_sword",
+            image = g.leo("forest_sprite_sword", "militia_sword"),
             type = "sword",
         },
         baseAttackDamage = 1,

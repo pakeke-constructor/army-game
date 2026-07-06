@@ -20,7 +20,7 @@ g.defineSquad("crystal_golems", {
     -- tags: projectile
     tags = {"projectile"},
     entityDef = {
-        image = "gargoyle", -- no crystal-golem sprite; gargoyle stand-in
+        image = g.leo("crystal_golems_unit", "gargoyle"), -- no crystal-golem sprite; gargoyle stand-in
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 2 },
         attack = {
             attackType = "melee",
@@ -65,7 +65,7 @@ g.defineSquad("crystal_golems", {
         end,
     },
     unitCount = 2,
-    icon = "gargoyles_uniticon", -- placeholder
+    icon = g.leo("crystal_golems_uniticon", "gargoyles_uniticon"), -- placeholder
     cost = {blue = 2},
 })
 
