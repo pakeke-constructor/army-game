@@ -158,7 +158,7 @@ function title_scene:draw()
     -- ui.debugRegion(buttonReg)
 
     local x,y,w,h = logoReg:get()
-    g.drawImageContained("logo_isolated", x,y,w,h)
+    g.drawImageContained("steam_logo_isolated", x,y,w,h)
     
     buttonCells = buttonReg:columns(#buttons)
 
