@@ -13,7 +13,7 @@ g.defineCommander("sir_horse", "Sir Horse", {
     image = "sir_horse",
 
     squadDef = {
-        rarity = g.RARITIES.UNIQUE,
+        rarity = g.RARITIES.COMMANDER,
         unitCount = 1,
         cost = {red = 1, green = 1},
         statUpgradeScaling = {
@@ -63,7 +63,7 @@ g.defineCommander("druidcommander", "Druid Lady", {
     image = "druidcommander",
 
     squadDef = {
-        rarity = g.RARITIES.UNIQUE,
+        rarity = g.RARITIES.COMMANDER,
         unitCount = 1,
         cost = {red = 1, green = 1},
         statUpgradeScaling = {
@@ -120,7 +120,7 @@ g.defineCommander("mechcommander", "The Mech Goblin", {
     image = "mechcommander",
 
     squadDef = {
-        rarity = g.RARITIES.UNIQUE,
+        rarity = g.RARITIES.COMMANDER,
         unitCount = 1,
         cost = {yellow = 1, green = 1},
         statUpgradeScaling = {
@@ -171,7 +171,7 @@ g.defineCommander("lizardcommander", "Lizard Lord", {
     image = "lizardcommander",
 
     squadDef = {
-        rarity = g.RARITIES.UNIQUE,
+        rarity = g.RARITIES.COMMANDER,
         unitCount = 1,
         cost = {red = 1, blue = 1},
         statUpgradeScaling = {
@@ -216,7 +216,7 @@ g.defineCommander("octopuscommander", "Octopus Tank", {
     image = "octopuscommander",
 
     squadDef = {
-        rarity = g.RARITIES.UNIQUE,
+        rarity = g.RARITIES.COMMANDER,
         unitCount = 1,
         cost = {blue = 1, yellow = 1},
         statUpgradeScaling = {

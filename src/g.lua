@@ -232,11 +232,11 @@ function g.defineCommander(id, name, info)
     local squadDef = info.squadDef
     if squadDef then
         assert(squadDef.entityDef, "commanders need squadDef.entityDef")
-        assert(squadDef.rarity == g.RARITIES.UNIQUE, "commander squad rarity must be UNIQUE")
+        assert(squadDef.rarity == g.RARITIES.COMMANDER, "commander squad rarity must be UNIQUE")
         assert((squadDef.unitCount or 1) == 1, "commander squad unitCount must be 1")
         assert(squadDef.cost, "commanders need squadDef.cost")
 
-        squadDef.rarity = g.RARITIES.UNIQUE
+        squadDef.rarity = g.RARITIES.COMMANDER
         squadDef.unitCount = 1
         squadDef.name = squadDef.name or info.name
         squadDef.icon = squadDef.icon or info.image
@@ -3608,6 +3608,7 @@ g.RARITIES = {
     RARE = newRarity("RARE", "RARE", objects.Color.fromByteRGBA(160,62,144)),
     LEGENDARY = newRarity("LEGENDARY", "LEGENDARY", objects.Color.fromByteRGBA(150,100,25)),
 
+    COMMANDER = newRarity("COMMANDER", "COMMANDER", objects.Color.WHITE),
     ALMOST_UNIQUE = newRarity("ALMOST_UNIQUE", "ALMOST UNIQUE", objects.Color.GRAY),
     UNIQUE = newRarity("UNIQUE", "UNIQUE", objects.Color.GRAY),
 }
