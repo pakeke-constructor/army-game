@@ -1182,8 +1182,7 @@ end
 
 g.defineBlessing("soulsplit", "Soul Split", {
     description = loc2("Your squads have double units, but -50% max (HP). Buildings unaffected."),
-    --image = "blessing_soulsplit",
-    image = "placeholder",
+    image = g.leo("blessing_soulsplit"),
     rarity = g.RARITIES.LEGENDARY,
     -- draft tags: health, swarm
     tags = {"health", "swarm"},
