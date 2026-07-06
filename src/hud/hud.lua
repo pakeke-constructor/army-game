@@ -492,15 +492,24 @@ end
 
 ---@param self g.HUD
 ---@param noDraw boolean?
-local function drawManaBox(self, noDraw)
-    local img = "hud_bottom_left_mana_box"
+---@param region kirigami.Region?
+local function drawManaBox(self, noDraw, region)
+    local img = "hud_bottom_left_mana_box_2"
     local w,h = g.getImageSize(img)
     if noDraw then
         return w,h
     end
-    local r = Kirigami(0,0,w,h)
-    local sr = ui.getFullScreenRegion()
-    r = r:attachToBottomOf(sr):clampInside(sr)
+
+    local r
+    if region then
+        local x, y, _, rh = region:get()
+        r = Kirigami(x, y + rh - h, w, h)
+    else
+        local sr = ui.getFullScreenRegion()
+        r = Kirigami(0,0,w,h)
+        r = r:attachToBottomOf(sr):clampInside(sr)
+    end
+
     lg.setColor(1,1,1)
     g.drawImage(img, r:getCenter())
 
@@ -517,8 +526,9 @@ local function drawManaBox(self, noDraw)
     local t = 0--love.timer.getTime()
     local hoveredManaType = nil
     local function drawMana(mtype, i, manaImg)
+        local dy = math.sin(love.timer.getTime() + i) * 1
         local x = cx + (r.w/3) * math.sin(t + i*rdiff)
-        local y = cy + (r.h/4) * math.cos(t + i*rdiff)
+        local y = cy + (r.h/4) * math.cos(t + i*rdiff) + dy
         if ct <= 1 then
             -- just center it:
             x,y = cx,cy
@@ -530,13 +540,13 @@ local function drawManaBox(self, noDraw)
         if count <= 0 then
             lg.setColor(0.3,0.3,0.3)
         end
-        g.drawImage(manaImg, x-10,y)
+        g.drawImage(manaImg, x-6,y)
         local color = (minfo and minfo.color) or objects.Color.WHITE
         lg.setColor(color)
         if count <= 0 then
             lg.setColor(0.3,0.3,0.3)
         end
-        richtext.printRich(tostring(count), font, x+4,y-8, 100, "left")
+        richtext.printRich(tostring(count), font, x+6,y-8, 100, "left")
         if iml.isHovered(x-16, y-16, 36, 36, "hud_mana_" .. mtype) then
             hoveredManaType = mtype
         end
@@ -570,15 +580,15 @@ end
 ---@param self g.HUD
 ---@param opt g.hudArgs
 local function drawBottomBar(self, opt, barHeight)
-    local w,h = drawManaBox(self, true)
+    local manaW = drawManaBox(self, true)
 
     local sw, sh = ui.getScaledUIDimensions()
-    local run = g.getRun()
     local region = Kirigami(0, sh - barHeight, sw, barHeight)
+    local _, mainBar, _ = region:splitHorizontal(0.08, 0.84, 0.08)
 
-    iml.panel(region:get())
+    iml.panel(mainBar:get())
 
-    local manaBox, rest = region:splitHorizontal(w,sw-w)
+    local manaBox, rest = mainBar:splitHorizontal(manaW, mainBar.w-manaW)
     local squadBar,blessingBar = rest:splitHorizontal(2,1)
 
     -- Squad box
@@ -589,7 +599,7 @@ local function drawBottomBar(self, opt, barHeight)
     ui.drawDarkPanel(blessingBar:get())
     drawBlessingBar(blessingBar)
 
-    drawManaBox(self, false)
+    drawManaBox(self, false, manaBox)
 end
 
 

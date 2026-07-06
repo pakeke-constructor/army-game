@@ -52,7 +52,7 @@ local function drawCommanderList(self, icons)
         -- ui.debugRegion(iconRegR)
         love.graphics.setColor(1,1,1,1)
         -- ui.drawPanel(x,y,rw,rh)
-        local alpha = selected and 1 or 0.35
+        local alpha = selected and 0.4 or 0.15
 
         -- Draw all the glows
         ---@type objects.Color[]
