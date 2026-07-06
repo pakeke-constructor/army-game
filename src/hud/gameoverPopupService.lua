@@ -59,7 +59,7 @@ function gameoverPopupService.draw()
     local buttonR = buttonBaseR:set(nil, nil, 200, nil)
         :center(buttonBaseR)
     if ui.DefaultButton(TEXT.ACCEPT, buttonR) then
-        g.delRun()
+        g.delRun(true)
         g.gotoScene("title_scene")
         visible = false
     end
