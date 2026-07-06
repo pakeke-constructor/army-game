@@ -50,20 +50,29 @@ end
 
 ---@type TitleButton[]
 local buttons = {
-    {name = "START", onClick = function ()
-        g.transitionTo("runSelect_scene")
-    end},
-    {name = "SANDBOX", onClick = function ()
-        g.newRun({
-            commander = "sir_horse",
-            difficulty = 0
-        })
-        require("src.scenes.battle_scene.battle_scene").sandbox = true
-        g.transitionTo("battle_scene")
-    end},
-    {name = "EXIT", onClick = function ()
-        love.event.quit()
-    end}
+    {
+        name = loc("NEW RUN", {}, {context="As in, starting the game"}),
+        onClick = function ()
+            g.transitionTo("runSelect_scene")
+        end
+    },
+    {
+        name = loc("CONTINUE RUN", {}, {context="As in, continuing a run"}),
+        onClick = function ()
+            error("todo")
+        end},
+    {
+        name = loc("SETTINGS"),
+        onClick = function ()
+            error("todo")
+        end
+    },
+    {
+        name = loc("EXIT GAME"),
+        onClick = function ()
+            love.event.quit()
+        end
+    }
 }
 
 local hoveredButton

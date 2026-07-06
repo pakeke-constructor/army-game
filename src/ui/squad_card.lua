@@ -79,6 +79,11 @@ local TRAIL_COUNT = {
     LEGENDARY = 6
 }
 
+local SWIPE = {
+    LEGENDARY = "{swipe t=0.1}",
+    UNIQUE = "{swipe r=0.208 g=0.490 b=0.824 t=0.1}"
+}
+
 
 ---Draw a single squad card in a kirigami region. Returns true if clicked.
 ---@param squadId string
@@ -181,7 +186,7 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
             -- Rarity
             local rarity = info.rarity
             love.graphics.setColor(rarity.color)
-            local rarityText = rarity.lightTextEffect..rarity.name
+            local rarityText = rarity.lightTextEffect..(SWIPE[rarity.id] or "")..rarity.name
             richtext.printRichContainedNoWrap("{o}" .. rarityText, STAT_FONT, textX, ey + 16, textW, STAT_FONT:getHeight(), "left")
         end,
     })

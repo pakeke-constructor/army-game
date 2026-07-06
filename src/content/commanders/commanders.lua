@@ -42,13 +42,9 @@ g.defineCommander("sir_horse", "Sir Horse", {
         g.addSquadToArmy("red_archer_squad")
 
         if consts.DEV_MODE then
-            g.addSpellToArmy("ace_spell")
-            g.addSpellToArmy("coin_spell")
-            g.addSpellToArmy("heal_spell")
-            g.addSpellToArmy("howl_spell")
-            g.addSpellToArmy("poison_spell")
-            g.addSpellToArmy("ranged_spell")
-            g.addSpellToArmy("skull_spell")
+            g.addSpellToArmy("dark_ritual_spell")
+            g.addSpellToArmy("bonereap_spell")
+            g.addSpellToArmy("harrier_spell")
         end
     end
 })
