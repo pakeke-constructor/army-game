@@ -487,15 +487,24 @@ end
 
 ---@param self g.HUD
 ---@param noDraw boolean?
-local function drawManaBox(self, noDraw)
-    local img = "hud_bottom_left_mana_box"
+---@param region kirigami.Region?
+local function drawManaBox(self, noDraw, region)
+    local img = "hud_bottom_left_mana_box_2"
     local w,h = g.getImageSize(img)
     if noDraw then
         return w,h
     end
-    local r = Kirigami(0,0,w,h)
-    local sr = ui.getFullScreenRegion()
-    r = r:attachToBottomOf(sr):clampInside(sr)
+
+    local r
+    if region then
+        local x, y, _, rh = region:get()
+        r = Kirigami(x, y + rh - h, w, h)
+    else
+        local sr = ui.getFullScreenRegion()
+        r = Kirigami(0,0,w,h)
+        r = r:attachToBottomOf(sr):clampInside(sr)
+    end
+
     lg.setColor(1,1,1)
     g.drawImage(img, r:getCenter())
 
@@ -565,15 +574,15 @@ end
 ---@param self g.HUD
 ---@param opt g.hudArgs
 local function drawBottomBar(self, opt, barHeight)
-    local w,h = drawManaBox(self, true)
+    local manaW = drawManaBox(self, true)
 
     local sw, sh = ui.getScaledUIDimensions()
-    local run = g.getRun()
     local region = Kirigami(0, sh - barHeight, sw, barHeight)
+    local _, mainBar, _ = region:splitHorizontal(0.08, 0.84, 0.08)
 
-    iml.panel(region:get())
+    iml.panel(mainBar:get())
 
-    local manaBox, rest = region:splitHorizontal(w,sw-w)
+    local manaBox, rest = mainBar:splitHorizontal(manaW, mainBar.w-manaW)
     local squadBar,blessingBar = rest:splitHorizontal(2,1)
 
     -- Squad box
@@ -584,7 +593,7 @@ local function drawBottomBar(self, opt, barHeight)
     ui.drawDarkPanel(blessingBar:get())
     drawBlessingBar(blessingBar)
 
-    drawManaBox(self, false)
+    drawManaBox(self, false, manaBox)
 end
 
 
