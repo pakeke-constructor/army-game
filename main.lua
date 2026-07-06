@@ -182,6 +182,8 @@ function love.quit()
     settings.save()
 end
 
+local lastGC = 0
+
 function love.draw()
     if settings.isFullscreen() ~= love.window.getFullscreen() then
         love.window.setFullscreen(settings.isFullscreen(), "desktop")
@@ -200,11 +202,12 @@ function love.draw()
     if consts.SHOW_DEV_STUFF then
         local _, sceneName = sceneManager.getCurrentScene()
         local fps = love.timer.getFPS()
+        local gc = math.floor(collectgarbage("count"))
+        local dgc = gc - lastGC
+        lastGC = gc
+        local text = (sceneName or "") .. "  FPS: " .. fps .. "\ndGC: " .. dgc .. " KB / GC: " .. gc .. " KB"
         love.graphics.setColor(1, 1, 1, 0.5)
-        love.graphics.push()
-        love.graphics.scale(2)
-        love.graphics.printf((sceneName or "") .. "  FPS: " .. fps, g.getSmallFont(16), 0, 2, love.graphics.getWidth() / 2 - 4, "right")
-        love.graphics.pop()
+        love.graphics.printf(text, g.getSmallFont(32), 2, 2, love.graphics.getWidth() - 4, "right")
         love.graphics.setColor(1, 1, 1, 1)
     end
 end
