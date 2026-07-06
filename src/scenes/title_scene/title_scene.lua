@@ -146,14 +146,14 @@ function title_scene:draw()
 
     lg.setColor(1, 1, 1, 1)
 
-    local _, left = main:splitHorizontal(1, 2, 5)
+    local _, left = main:splitHorizontal(1, 2, 4)
     local _, logoReg, _, bottom = left:splitVertical(1.5, 2, 0.5, 5, 1.5)
     local buttonReg = bottom:splitHorizontal(4, 1)
     -- ui.debugRegion(logoReg)
     -- ui.debugRegion(buttonReg)
 
     local x,y,w,h = logoReg:get()
-    g.drawImageContained("logo", x,y,w,h)
+    g.drawImageContained("logo_isolated", x,y,w,h)
     
     buttonCells = buttonReg:columns(#buttons)
     
