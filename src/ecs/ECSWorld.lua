@@ -72,12 +72,27 @@ function ECSWorld:setBounds(x, y, w, h)
     self.boundingBox = {x, y, w, h}
 end
 
+-- Bridging rect filling the horizontal gap between allyRectangle and
+-- enemyRectangle (if any). nil if either is missing or they don't have a gap.
+---@return {x:number,y:number,w:number,h:number}?
+function ECSWorld:recalculateBridgeRectangle()
+    local a, e = self.allyRectangle, self.enemyRectangle
+    if not (a and e) then return nil end
+    local midX = a.x + a.w
+    local midW = e.x - midX
+    if midW <= 0 then return nil end
+    local midH = (a.h + e.h) / 2
+    local midCY = ((a.y + a.h / 2) + (e.y + e.h / 2)) / 2
+    self.bridgeRectangle = {x = midX, y = midCY - midH / 2, w = midW, h = midH}
+end
+
 ---@param x number
 ---@param y number
 ---@param w number
 ---@param h number
 function ECSWorld:setAllyRectangle(x, y, w, h)
     self.allyRectangle = {x = x, y = y, w = w, h = h}
+    self:recalculateBridgeRectangle()
 end
 
 ---@param x number
@@ -86,32 +101,35 @@ end
 ---@param h number
 function ECSWorld:setEnemyRectangle(x, y, w, h)
     self.enemyRectangle = {x = x, y = y, w = w, h = h}
+    self:recalculateBridgeRectangle()
 end
 
 -- Bridging rect filling the horizontal gap between allyRectangle and
 -- enemyRectangle (if any). nil if either is missing or they don't have a gap.
 ---@return {x:number,y:number,w:number,h:number}?
 function ECSWorld:getBridgeRectangle()
-    local a, e = self.allyRectangle, self.enemyRectangle
-    if not (a and e) then return nil end
-    local midX = a.x + a.w
-    local midW = e.x - midX
-    if midW <= 0 then return nil end
-    local midH = (a.h + e.h) / 6
-    local midCY = ((a.y + a.h / 2) + (e.y + e.h / 2)) / 2
-    return {x = midX, y = midCY - midH / 2, w = midW, h = midH}
+    if not self.bridgeRectangle then
+        self:recalculateBridgeRectangle()
+    end
+    return self.bridgeRectangle
 end
 
 -- The world's playable area: union of allyRectangle, enemyRectangle, and the
 -- bridging rect between them.
 ---@return {x:number,y:number,w:number,h:number}[]
 function ECSWorld:getShape()
-    local shape = {}
+    local shape = self._shape
+    if not shape then
+        shape = {}
+        self._shape = shape
+    end
+    local n = 0
     local a, e = self.allyRectangle, self.enemyRectangle
-    if a then shape[#shape + 1] = a end
-    if e then shape[#shape + 1] = e end
+    if a then n = n + 1; shape[n] = a end
+    if e then n = n + 1; shape[n] = e end
     local mid = self:getBridgeRectangle()
-    if mid then shape[#shape + 1] = mid end
+    if mid then n = n + 1; shape[n] = mid end
+    for i = #shape, n + 1, -1 do shape[i] = nil end
     return shape
 end
 
@@ -410,13 +428,20 @@ function ECSWorld:draw(transform)
         self.backCanvas:finish()
     end
 
-    local list = {}
+    local list = self._drawList
+    if not list then
+        list = {}
+        self._drawList = list
+    end
+    local n = 0
     for i = 1, self.entities.len do
         local e = self.entities[i]
         if not e.aboveFog then
-            list[#list + 1] = e
+            n = n + 1
+            list[n] = e
         end
     end
+    for i = #list, n + 1, -1 do list[i] = nil end
     table.sort(list, sortOrder)
     for i = 1, #list do
         local e = list[i]
