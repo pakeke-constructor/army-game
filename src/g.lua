@@ -319,6 +319,52 @@ function g.newTestRun()
 
 end
 
+function g.hasRun()
+    return currentRun ~= nil
+end
+
+---@return g.Run
+function g.getRun()
+    return assert(currentRun, "run not loaded")
+end
+
+local RUN_SAVE_PATH = "saves/run1.json"
+
+function g.saveRun()
+    if not currentRun or not currentRun.serialize then
+        return
+    end
+    local data = currentRun:serialize()
+    local contents = json.encode(data)
+    love.filesystem.write(RUN_SAVE_PATH, contents)
+end
+
+function g.loadRun()
+    local contents = assert(love.filesystem.read(RUN_SAVE_PATH))
+    local data = json.decode(contents)
+    currentRun = Run.deserialize(data)
+end
+
+function g.hasSavedRun()
+    return not not love.filesystem.getInfo(RUN_SAVE_PATH, "file")
+end
+
+function g.saveAndInvalidateRun()
+    if not currentRun or not currentRun.serialize then
+        return
+    end
+    g.saveRun()
+    g.delRun()
+end
+
+---@param delsave boolean?
+function g.delRun(delsave)
+    currentRun = nil
+    if delsave and g.hasSavedRun() then
+        love.filesystem.remove(RUN_SAVE_PATH)
+    end
+end
+
 
 ---@param partitionId string
 ---@param x number
@@ -436,14 +482,6 @@ end
 end
 
 
-function g.hasRun()
-    return currentRun ~= nil
-end
-
----@return g.Run
-function g.getRun()
-    return assert(currentRun, "run not loaded")
-end
 
 
 
@@ -528,32 +566,6 @@ function g.addXP(amount)
     run.xp = run.xp + amount
 end
 
-function g.delRun()
-    currentRun = nil
-end
-
-function g.saveRun()
-    if not currentRun or not currentRun.serialize then
-        return
-    end
-    local data = currentRun:serialize()
-    local contents = json.encode(data)
-    love.filesystem.write("saves/run1.json", contents)
-end
-
-function g.loadRun(path)
-    local contents = assert(love.filesystem.read(path))
-    local data = json.decode(contents)
-    currentRun = Run.deserialize(data)
-end
-
-function g.saveAndInvalidateRun()
-    if not currentRun or not currentRun.serialize then
-        return
-    end
-    g.saveRun()
-    g.delRun()
-end
 
 
 ---@return love.Texture

@@ -196,7 +196,6 @@ end
 
 --- Splits a region into rows
 ---@param rows number
----@return kirigami.Region
 function Region:rows(rows)
   return self:grid(rows, 1)
 end
@@ -204,7 +203,6 @@ end
 
 --- Splits a region into columns
 ---@param columns number
----@return kirigami.Region
 function Region:columns(columns)
   return self:grid(1, columns)
 end

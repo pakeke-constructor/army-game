@@ -155,12 +155,17 @@ function map_scene:enter()
     self.traveling = nil
 
     local run = g.getRun()
-    if not run.mapGraph then
+    local firstMapEntry = not run.mapGraph
+    if firstMapEntry then
         -- TODO: Pick map type based on level
         -- Example: level 1 = forest, level 2 = fall, level 3 = hell
         self:_buildMap("forest")
+        self:_incrementDays()
     end
-    return self:_buildNodeState()
+    self:_buildNodeState()
+    if firstMapEntry then
+        g.saveRun()
+    end
 end
 
 ---@param mapType string
@@ -179,7 +184,7 @@ function map_scene:_buildMap(mapType, fromPortal)
         nodeOffsetFactor = 0.35,
         scaleX = 1,
         scaleY = 0.6,
-        mapType = mapTypes[mapType],
+        mapType = mapType,
         fromPortal = not not fromPortal,
     }) until run.mapGraph:countNodes() > 20
     return self:_buildNodeState()
@@ -299,6 +304,7 @@ end
 function map_scene:_incrementDays(count)
     g.incrementDays(count)
     -- TODO: If incursion happends, spawn boss node all nearest to empty node
+    g.saveRun()
 end
 
 function map_scene:_incrementPendingDaysWhenReady()
