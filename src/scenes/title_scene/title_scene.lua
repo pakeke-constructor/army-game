@@ -113,7 +113,7 @@ function title_scene:update(dt)
         local rate = (i == hoveredButton) and 5 or 14
         rate = rate * 2
         button.t = helper.lerp(button.t or 0, target, dt*rate)
-        button.offsetX = helper.lerp(0, 30, helper.EASINGS.easeOutBack(button.t))
+        button.offsetX = helper.lerp(0, 12, helper.EASINGS.easeOutBack(button.t))
     end
 end
 
@@ -131,8 +131,8 @@ function title_scene:draw()
     local x,y,w,h = main:get()
 
     -- drifting zoomed-in background. zoom in, slowly pan the camera around.
-    local ZOOM = 1.03
-    local t = love.timer.getTime()*3
+    local ZOOM = 1.4
+    local t = love.timer.getTime()*0.6
     local zw, zh = w*ZOOM, h*ZOOM
     local margX, margY = (zw-w)/2, (zh-h)/2
     local driftX = math.sin(t*0.13) * margX
@@ -146,20 +146,20 @@ function title_scene:draw()
 
     lg.setColor(1, 1, 1, 1)
 
-    local _, left = main:splitHorizontal(1, 2, 5)
+    local _, left = main:splitHorizontal(1, 2, 4)
     local _, logoReg, _, bottom = left:splitVertical(1.5, 2, 0.5, 5, 1.5)
     local buttonReg = bottom:splitHorizontal(4, 1)
     -- ui.debugRegion(logoReg)
     -- ui.debugRegion(buttonReg)
 
     local x,y,w,h = logoReg:get()
-    g.drawImageContained("logo", x,y,w,h)
+    g.drawImageContained("logo_isolated", x,y,w,h)
     
     buttonCells = buttonReg:columns(#buttons)
     
     hoveredButton = nil
     for i, button in ipairs(buttons) do
-        local rx, ry, rw, rh = buttonCells[i]:padRatio(0.2):get()
+        local rx, ry, rw, rh = buttonCells[i]:padRatio(0.1):get()
         if iml.isHovered(rx, ry, rw, rh, button) then
             hoveredButton = i
         end

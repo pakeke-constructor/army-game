@@ -81,7 +81,8 @@ local TRAIL_COUNT = {
 
 local SWIPE = {
     LEGENDARY = "{swipe t=0.1}",
-    UNIQUE = "{swipe r=0.208 g=0.490 b=0.824 t=0.1}"
+    UNIQUE = "{swipe r=0.208 g=0.490 b=0.824 t=0.1}",
+    COMMANDER = "{swipe r=0.208 g=0.490 b=0.824 t=0.1}"
 }
 
 
