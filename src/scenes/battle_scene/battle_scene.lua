@@ -41,9 +41,9 @@ local function loseBattle(self)
     self.defeated = true
     g.call("battleLost")
     -- todo: do other stuff here, like popup, etc etc
-    fadeToBlackService.fadeToFromBlack(1, function()
+    fadeToBlackService.fadeToFromBlack(1.8, function()
         gameoverPopupService.show()
-    end, 1)
+    end, 1.3)
 end
 
 function battle_scene:generateAllyAndEnemyRectangles(border)

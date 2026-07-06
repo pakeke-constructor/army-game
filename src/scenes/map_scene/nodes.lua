@@ -45,8 +45,8 @@ local CAMPFIRE_TXT = loc("Campfire: Obtain XP")
 local PORTAL_ACTIVE_TXT = loc("Portal: Go to random node")
 local PORTAL_INACTIVE_TXT = loc("Portal: Inactive")
 
-local NODE_FADE_OUT = 0.35
-local NODE_FADE_IN = 0.2
+local NODE_FADE_OUT = consts.NODE_FADE_OUT
+local NODE_FADE_IN = consts.NODE_FADE_IN
 local VISITED_NODE_OPACITY = 0.45
 
 
@@ -193,7 +193,7 @@ function BattleNode:init(x,y)
 end
 
 function BattleNode:enter()
-    g.transitionTo("battle_scene", {fadeOut = 0.5, fadeIn = 0.3})
+    g.transitionTo("battle_scene")
 end
 
 function BattleNode:getHoverDescription()
