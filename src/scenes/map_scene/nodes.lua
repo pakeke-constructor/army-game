@@ -155,6 +155,17 @@ local function nodeOpacity(node)
     return 1
 end
 
+local demonSprites = {
+    "direhound",
+    "hellhound",
+    "archerdemon",
+    "demon",
+    "speardemon",
+    "blazingbombardier",
+    "hellbrute",
+    "hellbat"
+}
+
 local function addDemons(node, builder, x, y)
     if node.demonEncounter then
         local count = node.demonEncounter + 1
@@ -172,11 +183,12 @@ local function addDemons(node, builder, x, y)
             local a = angle + angleOff
             local phase = hashf(node.x, node.y, i) * math.pi * 2
             local sx = hashf(node.x, node.y, i, 2) < 0.5 and -1 or 1
+            local sprite = demonSprites[math.floor(hashf(node.x, node.y, i, 3) * #demonSprites) + 1]
             local function bobMod()
                 local sy = 1 + math.sin(phase + love.timer.getTime()) * 0.12
                 return 0, 0, 0, 1, sy, 0, 0
             end
-            builder:addImage("node_combat_demon", x + math.cos(a) * r, y + math.sin(a) * r, 0, sx, nodeOpacity(node), bobMod)
+            builder:addImage(sprite, x + math.cos(a) * r, y + math.sin(a) * r, 0, sx, nodeOpacity(node), bobMod)
         end
 
         if node.demonEncounter >= 2 then
