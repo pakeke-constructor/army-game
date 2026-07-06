@@ -587,6 +587,29 @@ function g.isImage(imageName)
     return (nameToQuad[imageName] and true) or false
 end
 
+
+-- Placeholder function for our artist
+do
+
+local weNeedThis = objects.Set() --[[@as objects.Set<string>]]
+---@param image string
+---@param fallback string?
+function g.leo(image, fallback)
+    if not g.isImage(image) then
+        weNeedThis:add(image)
+        return fallback or "placeholder"
+    end
+    return image
+end
+
+function g._dumpWhatLeoNeedsToCreate()
+    return weNeedThis:totable()
+end
+
+end
+
+
+
 ---@param imageName string|love.Quad
 ---@param x number
 ---@param y number
