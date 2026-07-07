@@ -83,6 +83,7 @@ function UpgradeSquadChoicePanel:draw()
 
         if clicked then
             g.addOrUpgradeSquad(squadId)
+            statUpgradePopupService.set(squadId)
             return true
         end
     end

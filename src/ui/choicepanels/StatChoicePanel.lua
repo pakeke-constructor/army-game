@@ -4,6 +4,7 @@ local TITLE_FONT = nil
 
 local STAT_CARD_BG = objects.Color("#111111")
 local GRADIENT_CIRCLE = helper.gradientCircleMesh()
+local CHOOSE_SQUAD_UPGRADE = loc("Choose a Squad Upgrade")
 
 ---@class StatChoicePanel.Tier
 ---@field rarity g.ValidRarities
@@ -274,6 +275,19 @@ function StatChoicePanel:draw()
 
     iml.panel(r:get())
     cardArea = cardArea:padRatio(0.05, 0.1)
+
+    local headerR
+    headerR, cardArea = cardArea:splitVertical(1, 4)
+    local titleR, iconR = headerR:splitVertical(1, 1)
+
+    TITLE_FONT = TITLE_FONT or g.getBigFont(16)
+    lg.setColor(1, 1, 1)
+    richtext.printRichContainedNoWrap("{o}{bob}" .. CHOOSE_SQUAD_UPGRADE, TITLE_FONT, titleR:padRatio(0.25):get())
+
+    local squad = g.getSquadFromArmy(self.squadId)
+    local iconX, iconY = iconR:getCenter()
+    g.drawSquadIcon(self.squadId, iconX, iconY, false, squad and squad.level)
+
     local regions = self:_layoutCards(cardArea)
 
     if #self.statChoices == 0 then

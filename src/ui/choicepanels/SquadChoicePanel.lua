@@ -179,7 +179,11 @@ function SquadChoicePanel:draw()
         if rerollClicked then
             self:_rerollChoice(i)
         elseif clicked then
+            local hadSquad = g.getSquadFromArmy(squadId)
             g.addOrUpgradeSquad(squadId)
+            if hadSquad then
+                statUpgradePopupService.set(squadId)
+            end
             return true
         end
     end
