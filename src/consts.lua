@@ -50,8 +50,12 @@ consts.BALANCING = {
 }
 
 -- Default fade durations for scene transitions (seconds).
-consts.SCENE_FADE_OUT = 0.3
-consts.SCENE_FADE_IN = 0.3
+consts.SCENE_FADE_OUT = 0.9
+consts.SCENE_FADE_IN = 1
+
+consts.NODE_FADE_IN = 1
+consts.NODE_FADE_OUT = 0.9
+
 
 -- Fade when starting a run after picking a commander (long, cinematic).
 consts.RUN_START_FADE = 1.3
@@ -61,6 +65,10 @@ consts.STARTING_COMMANDER = "sir_horse"
 
 
 consts.STARTING_MAP_TYPE = "forest"
+
+
+consts.DEMON_ENCOUNTER_PLUS1_CHANCE = 0.1 -- 30% chance for harder fight (+1 demonEncounter), and bonus rewards
+consts.DEMON_ENCOUNTER_PLUS2_CHANCE = 0.1 -- 10% chance for elite-fight, (+2 demonEncounter), and bonus rewards
 
 
 consts.MAX_SQUAD_COUNT = 10

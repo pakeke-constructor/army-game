@@ -153,6 +153,12 @@ function love.load()
     end
     g._runPostLoad()
     _loadtime = false
+
+    if consts.DEV_MODE then
+        for _, v in ipairs(g._dumpWhatLeoNeedsToCreate()) do
+            log.error("Leo we need this image: "..v)
+        end
+    end
 end
 
 function love.update(dt)
@@ -174,7 +180,6 @@ end
 function love.quit()
     agentbridge.stop()
     settings.save()
-    g.saveAndInvalidateRun()
 end
 
 function love.draw()

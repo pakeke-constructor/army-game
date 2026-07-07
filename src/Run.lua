@@ -112,7 +112,6 @@ function Run:winBattle()
 end
 
 
----@return {squads: table[], level: integer, xp: integer, money: number, mana: g.ManaCounts, _battleMana: g.ManaCounts, blessings: {[string]: any}, day: integer, demonFury: integer, mapGraph: table?}
 function Run:serialize()
     local squads = {}
     for id, sq in pairs(self.squads) do
@@ -123,6 +122,8 @@ function Run:serialize()
         spells[id] = true
     end
     return {
+        commander = self.commander,
+        difficulty = self.difficulty,
         squads = squads,
         spells = spells,
         level = self.level,
@@ -130,22 +131,24 @@ function Run:serialize()
         money = self.money,
         keys = self.keys,
         mana = self.mana,
-        _battleMana = self._battleMana,
         blessings = self.blessings,
         day = self.day,
+        daysUntilIncursion = self.daysUntilIncursion,
         demonFury = self.demonFury,
         mapGraph = self.mapGraph and self.mapGraph:serialize(),
         lastArmyLayout = self.lastArmyLayout,
     }
 end
 
----@param data {squads: table[]?, level: integer?, xp: integer?, money: number?, mana: g.ManaCounts?, _battleMana: g.ManaCounts?, blessings: {[string]: any}?, day: integer?, demonFury: integer?, mapGraph: table?, keys:integer?, key:boolean?}?
+---@param data table (generic `table` type is intentional, format may change which is tedious to sync with LLS)
 ---@return g.Run
 function Run.deserialize(data)
     local run = Run()
     if not data then
         return run
     end
+    run.commander = data.commander or run.commander
+    run.difficulty = data.difficulty or run.difficulty
     run.squads = {}
     for id, sqData in pairs(data.squads or {}) do
         run.squads[id] = Squad.deserialize(sqData)
@@ -164,9 +167,9 @@ function Run.deserialize(data)
     end
     run.keys = math.min(3, math.max(0, keys))
     run.mana = data.mana or {}
-    run._battleMana = data._battleMana or {}
     run.blessings = data.blessings or {}
     run.day = data.day or run.day
+    run.daysUntilIncursion = data.daysUntilIncursion or run.daysUntilIncursion
     run.demonFury = data.demonFury or run.demonFury
     run.mapGraph = data.mapGraph and MapGraph.deserialize(data.mapGraph)
     run.lastArmyLayout = data.lastArmyLayout

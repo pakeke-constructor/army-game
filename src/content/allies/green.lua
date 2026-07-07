@@ -14,13 +14,13 @@ g.defineSquad("forest_sprite_squad", {
     -- tags: healing
     tags = {"healing"},
     entityDef = {
-        image = "militia", -- no forest-sprite sprite; militia stand-in
+        image = g.leo("forest_sprite_unit", "militia"), -- no forest-sprite sprite; militia stand-in
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
         },
         weapon = {
-            image = "militia_sword",
+            image = g.leo("forest_sprite_sword", "militia_sword"),
             type = "sword",
         },
         baseAttackDamage = 1,
@@ -76,6 +76,7 @@ g.defineSquad("druid_squad", {
         baseMoveSpeed = 50,
         baseMaxHealth = 7,
     },
+    statUpgradeScaling = {attackSpeed = 0.1},
     unitCount = 6,
     perks = {{
         name = "Vitalize",
@@ -319,6 +320,7 @@ g.defineSquad("friendly_giant_squad", {
         baseMoveSpeed = 35,
         baseMaxHealth = 300,
     },
+    statUpgradeScaling = {maxHealth = 0.20, attackDamage = 0.15},
     unitCount = 1,
     cost = {green = 2},
 })
@@ -393,6 +395,7 @@ g.defineSquad("arcane_blossom_squad", {
         baseMaxHealth = 30,
         baseStartingArmor = 3,
     },
+    statUpgradeScaling = {maxHealth = 0.15},
     unitCount = 3,
     icon = "arcaneblossom_uniticon",
     perks = {{
@@ -449,6 +452,7 @@ g.defineSquad("world_tree_squad", {
         baseMaxHealth = 300,
         baseStartingArmor = 5,
     },
+    statUpgradeScaling = {maxHealth = 0.25},
     unitCount = 1,
     perks = {{
         name = "Her Wrath",
@@ -489,6 +493,7 @@ g.defineSquad("hive_recycler_squad", {
         baseMoveSpeed = 35,
         baseMaxHealth = 7,
     },
+    statUpgradeScaling = {attackSpeed = 0.2, moveSpeed = 0.2},
     unitCount = 2,
     perks = {{
         name = "Swarmsurge",

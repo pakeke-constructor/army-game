@@ -232,11 +232,11 @@ function g.defineCommander(id, name, info)
     local squadDef = info.squadDef
     if squadDef then
         assert(squadDef.entityDef, "commanders need squadDef.entityDef")
-        assert(squadDef.rarity == g.RARITIES.UNIQUE, "commander squad rarity must be UNIQUE")
+        assert(squadDef.rarity == g.RARITIES.COMMANDER, "commander squad rarity must be UNIQUE")
         assert((squadDef.unitCount or 1) == 1, "commander squad unitCount must be 1")
         assert(squadDef.cost, "commanders need squadDef.cost")
 
-        squadDef.rarity = g.RARITIES.UNIQUE
+        squadDef.rarity = g.RARITIES.COMMANDER
         squadDef.unitCount = 1
         squadDef.name = squadDef.name or info.name
         squadDef.icon = squadDef.icon or info.image
@@ -317,6 +317,52 @@ function g.newTestRun()
         currentRun.money = 1000
     end
 
+end
+
+function g.hasRun()
+    return currentRun ~= nil
+end
+
+---@return g.Run
+function g.getRun()
+    return assert(currentRun, "run not loaded")
+end
+
+local RUN_SAVE_PATH = "saves/run1.json"
+
+function g.saveRun()
+    if not currentRun or not currentRun.serialize then
+        return
+    end
+    local data = currentRun:serialize()
+    local contents = json.encode(data)
+    love.filesystem.write(RUN_SAVE_PATH, contents)
+end
+
+function g.loadRun()
+    local contents = assert(love.filesystem.read(RUN_SAVE_PATH))
+    local data = json.decode(contents)
+    currentRun = Run.deserialize(data)
+end
+
+function g.hasSavedRun()
+    return not not love.filesystem.getInfo(RUN_SAVE_PATH, "file")
+end
+
+function g.saveAndInvalidateRun()
+    if not currentRun or not currentRun.serialize then
+        return
+    end
+    g.saveRun()
+    g.delRun()
+end
+
+---@param delsave boolean?
+function g.delRun(delsave)
+    currentRun = nil
+    if delsave and g.hasSavedRun() then
+        love.filesystem.remove(RUN_SAVE_PATH)
+    end
 end
 
 
@@ -436,14 +482,6 @@ end
 end
 
 
-function g.hasRun()
-    return currentRun ~= nil
-end
-
----@return g.Run
-function g.getRun()
-    return assert(currentRun, "run not loaded")
-end
 
 
 
@@ -528,32 +566,6 @@ function g.addXP(amount)
     run.xp = run.xp + amount
 end
 
-function g.delRun()
-    currentRun = nil
-end
-
-function g.saveRun()
-    if not currentRun or not currentRun.serialize then
-        return
-    end
-    local data = currentRun:serialize()
-    local contents = json.encode(data)
-    love.filesystem.write("saves/run1.json", contents)
-end
-
-function g.loadRun(path)
-    local contents = assert(love.filesystem.read(path))
-    local data = json.decode(contents)
-    currentRun = Run.deserialize(data)
-end
-
-function g.saveAndInvalidateRun()
-    if not currentRun or not currentRun.serialize then
-        return
-    end
-    g.saveRun()
-    g.delRun()
-end
 
 
 ---@return love.Texture
@@ -586,6 +598,29 @@ end
 function g.isImage(imageName)
     return (nameToQuad[imageName] and true) or false
 end
+
+
+-- Placeholder function for our artist
+do
+
+local weNeedThis = objects.Set() --[[@as objects.Set<string>]]
+---@param image string
+---@param fallback string?
+function g.leo(image, fallback)
+    if not g.isImage(image) then
+        weNeedThis:add(image)
+        return fallback or "placeholder"
+    end
+    return image
+end
+
+function g._dumpWhatLeoNeedsToCreate()
+    return weNeedThis:totable()
+end
+
+end
+
+
 
 ---@param imageName string|love.Quad
 ---@param x number
@@ -1132,18 +1167,19 @@ function g.defineSquad(id, info)
 
     if not info.icon then
         -- Infer icon name from id
-        local infericon = id:gsub("_squad", ""):gsub("_", "").."_uniticon"
-        if g.isImage(infericon) then
-            info.icon = infericon
+        local infericon1 = id:gsub("_squad", ""):gsub("_", "").."_uniticon"
+        if g.isImage(infericon1) then
+            info.icon = infericon1
         end
 
-        infericon = id:gsub("_squad", ""):gsub("_", "").."s_uniticon"
-        if g.isImage(infericon) then
-            info.icon = infericon
+        local infericon2 = id:gsub("_squad", ""):gsub("_", "").."s_uniticon"
+        if g.isImage(infericon2) then
+            info.icon = infericon2
         end
 
         if not info.icon then
             log.error("Squad had no icon: ", id)
+            g.leo(infericon1.."/"..infericon2)
             info.icon = "example_squad_icon"
         end
     end
@@ -3584,6 +3620,7 @@ g.RARITIES = {
     RARE = newRarity("RARE", "RARE", objects.Color.fromByteRGBA(160,62,144)),
     LEGENDARY = newRarity("LEGENDARY", "LEGENDARY", objects.Color.fromByteRGBA(150,100,25)),
 
+    COMMANDER = newRarity("COMMANDER", "COMMANDER", objects.Color.WHITE),
     ALMOST_UNIQUE = newRarity("ALMOST_UNIQUE", "ALMOST UNIQUE", objects.Color.GRAY),
     UNIQUE = newRarity("UNIQUE", "UNIQUE", objects.Color.GRAY),
 }

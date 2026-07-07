@@ -2,6 +2,7 @@
 local Class = require("src.modules.objects.Class")
 local nodes = require("src.scenes.map_scene.nodes")
 local decor_types = require("src.scenes.map_scene.decor_types")
+local mapTypes = require("src.scenes.map_scene.map_types")
 
 --[[
 
@@ -95,11 +96,12 @@ end
 
 ---@param width integer
 ---@param height integer
----@param mapType MapType
+---@param mapType string
 function MapGraph:init(width, height, mapType)
     self.width = width
     self.height = height
-    self.mapType = mapType
+    ---@type MapType
+    self.mapType = assert(mapTypes[mapType])
     self.distanceBetweenNodes = 130 -- sensible default just to silence LuaLS
     self.nodes = {}
     self.edges = {}
@@ -116,7 +118,7 @@ function MapGraph:init(width, height, mapType)
     self.scaleX = 1
     self.scaleY = 0.6
 
-    for _, g in ipairs(mapType.groundTextures) do
+    for _, g in ipairs(self.mapType.groundTextures) do
         self.groundDecorNoRotMap[g[1]] = not not g[3]
     end
 end
@@ -245,7 +247,7 @@ end
 ---@class MapGraph.GenArgs
 ---@field width integer
 ---@field height integer
----@field mapType MapType
+---@field mapType string
 ---@field nodePruneChance number
 ---@field edgePruneChance number
 ---@field distanceBetweenNodes number
@@ -507,6 +509,28 @@ local SPECIAL_NODES = {
 }
 -- TODO: add `town` in here too.
 
+--- Roll bonus rewards for a battle node, based on its difficulty.
+--- diff 0: never. diff 1: 50/50 to get one. diff 2+: guaranteed, and bigger.
+---@param difficulty integer the node's demonEncounter
+---@param rng fun():number
+---@return g.RewardPanel.Rewards
+local function rollReward(difficulty, rng)
+    if difficulty <= 0 then
+        return {}
+    end
+    if difficulty == 1 and rng() < 0.5 then
+        return {} -- 50% chance of nothing
+    end
+    -- diff 1 (that passed the coinflip) is small; diff 2+ is bigger and guaranteed
+    local min, max = 2, 3
+    if difficulty >= 2 then
+        min, max = 4, 6
+    end
+    local amount = min + math.floor(rng() * (max - min + 1))
+    local rtype = rng() < 0.5 and "gold" or "xp"
+    return {{type = rtype, amount = amount}}
+end
+
 local function isNextToNodeOfSameType(self, x, y, nodeType)
     for _, nb in ipairs(self:getNeighbors(x, y)) do
         if nb.nodeType == nodeType then
@@ -546,13 +570,15 @@ function MapGraph:_generateNodes(rng, fromPortal)
     -- 5% chance +2 difficulty, 25% chance +1 difficulty
     for _, node in pairs(self.nodes) do
         if node.demonEncounter then
-            ---@cast node MapNode
+            ---@cast node MapNode.BattleNode
             local r = rng()
-            if r < 0.05 then
+            if r < consts.DEMON_ENCOUNTER_PLUS2_CHANCE then
                 node.demonEncounter = node.demonEncounter + 2
-            elseif r < 0.30 then
+            elseif r < (consts.DEMON_ENCOUNTER_PLUS1_CHANCE + consts.DEMON_ENCOUNTER_PLUS2_CHANCE) then
                 node.demonEncounter = node.demonEncounter + 1
             end
+            -- roll bonus rewards now that final difficulty is known
+            node.rewards = rollReward(node.demonEncounter, rng)
         end
     end
 
@@ -798,13 +824,14 @@ function MapGraph:serialize()
         edges = edges,
         decor = self.decor,
         groundDecor = self.groundDecor,
-        playerPosition = self.playerPosition
+        playerPosition = self.playerPosition,
+        mapType = self.mapType.name,
     }
 end
 
 --- Deserialize from a plain table
 function MapGraph.deserialize(data)
-    local self = MapGraph(data.width, data.height)
+    local self = MapGraph(data.width, data.height, data.mapType or "forest")
     for key, nodeData in pairs(data.nodes) do
         self.nodes[key] = deserializeNode(nodeData)
     end

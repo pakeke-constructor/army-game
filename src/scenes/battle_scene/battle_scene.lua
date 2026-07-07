@@ -15,8 +15,8 @@ end
 local INTRO_ZOOM_TEXT_FADE_TIME = 0.4
 local INTRO_ZOOM_DURATION = 1.6
 
-local WIN_DELAY = 1.8
-local VICTORY_FADE_IN = 0.25
+local VICTORY_FADE_IN = 1.8
+local VICTORY_FADE_OUT = 0.25
 
 local WIN_SHOCKWAVE_DURATION = 1.2
 local WIN_SHOCKWAVE_LINE_WIDTH = 98
@@ -41,9 +41,9 @@ local function loseBattle(self)
     self.defeated = true
     g.call("battleLost")
     -- todo: do other stuff here, like popup, etc etc
-    fadeToBlackService.fadeToFromBlack(1, function()
+    fadeToBlackService.fadeToFromBlack(4.8, function()
         gameoverPopupService.show()
-    end, 1)
+    end, 1.3)
 end
 
 function battle_scene:generateAllyAndEnemyRectangles(border)
@@ -164,7 +164,6 @@ function battle_scene:enter()
     self.camera = Camera(0, 0, cameraZoom())
     self.particles = ParticleService()
     self.hud = HUD()
-    self.noEnemyTimer = 0
     self.victory = false
     self.defeated = false
     self.allyDeathsThisBattle = 0
@@ -250,6 +249,18 @@ local function winBattle(self)
     if self.victory then return end
     self.victory = true
     self.victoryPopupTime = 0
+
+    g.getRun():winBattle()
+    -- remove all entities except the commander
+    for _, ent in ipairs(self.ecs.entities) do
+        if not ent.isCommander then
+            self.ecs:removeEntity(ent)
+        end
+    end
+    if not self.squadChoices then
+        self.squadChoices = buildVictoryChoices()
+    end
+
     ---@type g.RewardPanel.Rewards
     local rewards = {
         {
@@ -275,17 +286,10 @@ local function winBattle(self)
             rewards[#rewards + 1] = r
         end
     end
-    rewardPopupService.battleReward(rewards)
-    g.getRun():winBattle()
-    -- remove all entities except the commander
-    for _, ent in ipairs(self.ecs.entities) do
-        if not ent.isCommander then
-            self.ecs:removeEntity(ent)
-        end
-    end
-    if not self.squadChoices then
-        self.squadChoices = buildVictoryChoices()
-    end
+
+    fadeToBlackService.fadeToFromBlack(VICTORY_FADE_IN, function()
+        rewardPopupService.battleReward(rewards)
+    end, VICTORY_FADE_OUT)
 end
 
 
@@ -314,13 +318,7 @@ function battle_scene:update(dt)
 
     if not self.paused then
         self.particles:update(dt)
-        -- track how long no enemies have existed
-        if enemyCount == 0 then
-            self.noEnemyTimer = self.noEnemyTimer + dt
-        else
-            self.noEnemyTimer = 0
-        end
-        if self.noEnemyTimer >= WIN_DELAY and (not self.victory) and (not self.sandbox) then
+        if enemyCount == 0 and (not self.victory) and (not self.sandbox) then
             winBattle(self)
         end
     else

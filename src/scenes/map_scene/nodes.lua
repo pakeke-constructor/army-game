@@ -45,8 +45,8 @@ local CAMPFIRE_TXT = loc("Campfire: Obtain XP")
 local PORTAL_ACTIVE_TXT = loc("Portal: Go to random node")
 local PORTAL_INACTIVE_TXT = loc("Portal: Inactive")
 
-local NODE_FADE_OUT = 0.35
-local NODE_FADE_IN = 0.2
+local NODE_FADE_OUT = consts.NODE_FADE_OUT
+local NODE_FADE_IN = consts.NODE_FADE_IN
 local VISITED_NODE_OPACITY = 0.45
 
 
@@ -213,36 +213,22 @@ local function describeReward(r)
     return ""
 end
 
---- Roll a bonus reward list for a battle node.
---- 1/3 chance bonus gold, 1/3 chance bonus xp, 1/3 chance nothing.
----@return g.RewardPanel.Rewards
-local function rollBonusRewards()
-    local roll = love.math.random(3)
-    if roll == 1 then
-        return {{type = "gold", amount = love.math.random(2, 4)}}
-    elseif roll == 2 then
-        return {{type = "xp", amount = love.math.random(2, 4)}}
-    end
-    return {}
-end
-
-
 -------------------------------
 -- BattleNode
 -------------------------------
 ---@class MapNode.BattleNode: MapNode
 ---@field demonEncounter integer
----@field rewards g.RewardPanel.Rewards bonus rewards granted on win
+---@field rewards g.RewardPanel.Rewards bonus rewards granted on win (rolled by MapGraph based on difficulty)
 local BattleNode = nodes.newClass("battle")
 
 function BattleNode:init(x,y)
     Node.init(self,x,y)
     self.demonEncounter = 0
-    self.rewards = rollBonusRewards()
+    self.rewards = {}
 end
 
 function BattleNode:enter()
-    g.transitionTo("battle_scene", {fadeOut = 0.5, fadeIn = 0.3})
+    g.transitionTo("battle_scene")
 end
 
 function BattleNode:getHoverDescription()
