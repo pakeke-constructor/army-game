@@ -167,28 +167,31 @@ end
 ---@param region kirigami.Region
 ---@private
 function StatChoicePanel:_layoutCards(region)
-    local count = math.max(ChoicePanelCommon.NUM_CHOICES, #self.statChoices)
-    local regions = region:grid(count, 1)
     local cx = region.x + region.w / 2
-    local cy = region.y + region.h / 2
+    local cy = region.y + region.h * 0.55
+    local radius = math.min(region.w, region.h) * 0.28
+    local cardW = region.w * 0.3
+    local cardH = region.h * 0.25
+    local spots = {
+        {x = cx, y = cy - radius},
+        {x = cx - radius * 1.15, y = cy + radius * 0.65},
+        {x = cx + radius * 1.15, y = cy + radius * 0.65},
+    }
+    assert(#spots == ChoicePanelCommon.NUM_CHOICES)
 
-    local ox = regions[1].w * (count - #self.statChoices) / 2
+    local regions = {}
     for i = 1, #self.statChoices do
         local elapsed = love.timer.getTime() - (self.choiceCreatedAt[i] or self.createdAt)
         local t = math.min(1, math.max(0, elapsed / ChoicePanelCommon.FAN_OUT_DURATION))
         t = t * t * (3 - 2 * t)
         local scale = 0.5 + 0.5 * t
-        local rr = regions[i]
-        rr = rr:padRatio(0.15)
 
-        local targetCx = rr.x + rr.w / 2
-        local targetCy = rr.y + rr.h / 2
+        local spot = spots[i] or spots[((i - 1) % #spots) + 1]
+        local targetCx = spot.x
+        local targetCy = spot.y
         local animCx = cx + (targetCx - cx) * t
         local animCy = cy + (targetCy - cy) * t
-        local dx = animCx - targetCx
-        local dy = animCy - targetCy
-        rr = rr:padRatio(1 - scale)
-        regions[i] = rr:moveUnit(dx + ox, dy)
+        regions[i] = Kirigami(animCx - cardW * scale / 2, animCy - cardH * scale / 2, cardW, cardH)
     end
 
     return regions
@@ -271,13 +274,11 @@ end
 
 function StatChoicePanel:draw()
     local r = ui.getFullScreenRegion()
-    local cardArea = r
 
     iml.panel(r:get())
-    cardArea = cardArea:padRatio(0.05, 0.1)
 
-    local headerR
-    headerR, cardArea = cardArea:splitVertical(1, 4)
+    local headerR, cardAreaBaseR = r:padRatio(0.05, 0.1):splitVertical(1, 5)
+    local cardAreaR, squadCardR = cardAreaBaseR:splitHorizontal(5, 2)
     local titleR, iconR = headerR:splitVertical(1, 1)
 
     TITLE_FONT = TITLE_FONT or g.getBigFont(16)
@@ -288,16 +289,17 @@ function StatChoicePanel:draw()
     local iconX, iconY = iconR:getCenter()
     g.drawSquadIcon(self.squadId, iconX, iconY, false, squad and squad.level)
 
-    local regions = self:_layoutCards(cardArea)
+    local regions = self:_layoutCards(cardAreaR)
 
     if #self.statChoices == 0 then
         -- RIP in Pepperoni
         return true
     end
 
+    ui.drawSquadCard(self.squadId, squadCardR, -999, false, true)
+
     for i, choice in ipairs(self.statChoices) do
-        if self:_drawStatCard(choice, regions[i]:shrinkToAspectRatio(3, 2), i) then
-            local squad = assert(g.getSquadFromArmy(self.squadId))
+        if self:_drawStatCard(choice, regions[i], i) and squad then
             g.buffSquadPermanently(squad, choice.positive[1], choice.positive[2])
             if choice.negative then
                 g.buffSquadPermanently(squad, choice.negative[1], choice.negative[2])
