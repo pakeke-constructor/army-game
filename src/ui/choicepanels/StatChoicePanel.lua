@@ -1,0 +1,341 @@
+local ChoicePanelCommon = require(".common")
+
+local TITLE_FONT = nil
+
+local STAT_CARD_BG = objects.Color("#111111")
+local GRADIENT_CIRCLE = helper.gradientCircleMesh()
+
+---@class StatChoicePanel.Tier
+---@field rarity g.ValidRarities
+---@field weight integer
+---@field upscaleRange [number, number]
+---@field downgradeChance number?
+---@field downgradeScale [number, number]?
+
+---@type StatChoicePanel.Tier[]
+local TIERS = {
+    {
+        rarity = "COMMON",
+        weight = 10,
+        upscaleRange = {0.05, 0.1}
+    },
+    {
+        rarity = "UNCOMMON",
+        weight = 6,
+        upscaleRange = {0.12, 0.2}
+    },
+    {
+        rarity = "RARE",
+        weight = 3,
+        upscaleRange = {0.25, 0.4},
+        downgradeChance = 0.55,
+        downgradeScale = {0.15, 0.25},
+    },
+    {
+        rarity = "LEGENDARY",
+        weight = 1,
+        upscaleRange = {0.5, 0.8},
+        downgradeChance = 0.9,
+        downgradeScale = {0.3, 0.6},
+    },
+}
+
+---@type [integer, integer][]
+local TIERS_AND_WEIGHTS = {}
+for i, v in ipairs(TIERS) do
+    TIERS_AND_WEIGHTS[#TIERS_AND_WEIGHTS+1] = {i, v.weight}
+end
+
+---@class g.StatChoicePanel.Upgrade
+---@field tierIndex integer
+---@field positive [string,number]
+---@field negative [string,number]?
+
+---@class g.StatChoicePanel: g.ChoicePanelCommon
+local StatChoicePanel = objects.Class("g:StatChoicePanel"):implement(ChoicePanelCommon)
+
+function StatChoicePanel:init()
+    ---@type string[]
+    self.squadChoices = {}
+    ---@type g.StatChoicePanel.Upgrade[]
+    self.statChoices = {}
+    ---@type number[]
+    self.choiceCreatedAt = {}
+    ---@type string?
+    self.squadId = nil
+    self.createdAt = love.timer.getTime()
+
+    for _ = 1, ChoicePanelCommon.NUM_CHOICES do
+        self.choiceCreatedAt[#self.choiceCreatedAt+1] = self.createdAt
+    end
+
+    self:_rollSquads()
+end
+
+if false then
+    ---@return g.StatChoicePanel
+    ---@diagnostic disable-next-line: cast-local-type, missing-return
+    function StatChoicePanel() end
+end
+
+---@private
+function StatChoicePanel:_resetAnim()
+    self.createdAt = love.timer.getTime()
+    self.choiceCreatedAt = {}
+    for _ = 1, ChoicePanelCommon.NUM_CHOICES do
+        self.choiceCreatedAt[#self.choiceCreatedAt+1] = self.createdAt
+    end
+end
+
+---@private
+function StatChoicePanel:_rollSquads()
+    local pool = {}
+    for k in pairs(g.getRun().squads) do
+        if next(self:_getAvailableStats(k)) then
+            pool[#pool+1] = k
+        end
+    end
+
+    self.squadChoices = {}
+    for _ = 1, ChoicePanelCommon.NUM_CHOICES do
+        if #pool == 0 then
+            break
+        end
+
+        self.squadChoices[#self.squadChoices+1] = table.remove(pool, love.math.random(#pool))
+    end
+end
+
+---@param squadId string
+---@return string[]
+---@private
+function StatChoicePanel:_getAvailableStats(squadId)
+    local info = g.getSquadInfo(squadId)
+    local stats = {}
+    for _, stat in ipairs(g.getStatList()) do
+        local base = info.entityDef[stat.baseName]
+        if base and base ~= 0 then
+            stats[#stats+1] = stat.id
+        end
+    end
+    return stats
+end
+
+---@param pool string[]
+---@param except string?
+---@private
+function StatChoicePanel:_pickStat(pool, except)
+    if #pool == 0 then return nil end
+    if #pool == 1 and pool[1] == except then return nil end
+
+    local pick = pool[love.math.random(#pool)]
+    while pick == except do
+        pick = pool[love.math.random(#pool)]
+    end
+    return pick
+end
+
+---@param statId string
+---@param scale number
+---@return number
+---@private
+function StatChoicePanel:_getScaledAmount(statId, scale)
+    local info = g.getSquadInfo(assert(self.squadId))
+    local stat = g.getStatInfo(statId)
+    local base = info.entityDef[stat.baseName] or 0
+    return base * scale
+end
+
+---@private
+function StatChoicePanel:_rollStats()
+    local pool = self:_getAvailableStats(assert(self.squadId))
+    self.statChoices = {}
+
+    ---@param except string?
+    local function roll(except)
+        if except then
+            while true do
+                local rolled = helper.randomChoice(pool)
+                if rolled ~= except then
+                    return rolled
+                end
+            end
+        end
+
+        return helper.randomChoice(pool)
+    end
+
+    for i = 1, 3 do
+        local tier = TIERS[helper.pickWeighted(TIERS_AND_WEIGHTS)]
+        local positiveStatId = roll()
+        local positiveScale = helper.lerp(tier.upscaleRange[1], tier.upscaleRange[2], love.math.random())
+        local positive = {positiveStatId, self:_getScaledAmount(positiveStatId, positiveScale)}
+        local negative = nil
+
+        if tier.downgradeChance and tier.downgradeScale and love.math.random() <= tier.downgradeChance then
+            local negativeStatId = roll(positiveStatId)
+            local negativeScale = helper.lerp(tier.downgradeScale[1], tier.downgradeScale[2], love.math.random())
+            negative = {negativeStatId, -self:_getScaledAmount(negativeStatId, negativeScale)}
+        end
+
+        self.statChoices[#self.statChoices+1] = {
+            tierIndex = i,
+            positive = positive,
+            negative = negative,
+        }
+    end
+    self:_resetAnim()
+end
+
+---@param region kirigami.Region
+---@private
+function StatChoicePanel:_layoutCards(region)
+    local count = math.max(ChoicePanelCommon.NUM_CHOICES, #self.squadChoices)
+    local regions = region:grid(count, 1)
+    local cx = region.x + region.w / 2
+    local cy = region.y + region.h / 2
+
+    local ox = regions[1].w * (count - #self.squadChoices) / 2
+    for i = 1, #self.squadChoices do
+        local elapsed = love.timer.getTime() - (self.choiceCreatedAt[i] or self.createdAt)
+        local t = math.min(1, math.max(0, elapsed / ChoicePanelCommon.FAN_OUT_DURATION))
+        t = t * t * (3 - 2 * t)
+        local scale = 0.5 + 0.5 * t
+        local rr = regions[i]
+        rr = rr:padRatio(0.15)
+
+        local targetCx = rr.x + rr.w / 2
+        local targetCy = rr.y + rr.h / 2
+        local animCx = cx + (targetCx - cx) * t
+        local animCy = cy + (targetCy - cy) * t
+        local dx = animCx - targetCx
+        local dy = animCy - targetCy
+        rr = rr:padRatio(1 - scale)
+        regions[i] = rr:moveUnit(dx + ox, dy)
+    end
+
+    return regions
+end
+
+---@param choice g.StatChoicePanel.Upgrade
+---@param region kirigami.Region
+---@param index integer
+---@private
+function StatChoicePanel:_drawStatCard(choice, region, index)
+    ui.assertUIStarted()
+
+    local tier = TIERS[choice.tierIndex]
+    local liteCol = g.RARITIES[tier.rarity].color
+    local darkCol = g.RARITIES[tier.rarity].darkColor
+    local uid = "stat_upgrade_" .. choice.tierIndex .. "_" .. index
+
+    local x, y, w, h = region:get()
+    local hitX, hitY = x, y
+    if iml.isHovered(x, y, w, h, uid) then
+        y = y - 3
+    end
+
+    TITLE_FONT = TITLE_FONT or g.getBigFont(16)
+
+    local box = ui.Box({maxWidth = w, maxHeight = h, padding = 12, spacing = 6}, function(bx, by, bw, bh)
+        helper.rotatingGlow(Kirigami(bx, by, bw, bh):padRatio(0.25), {
+            count = 3,
+            offset = (index - 1) * 1.37,
+            glowScale = 100,
+            rps = 1,
+            wobbleFreq = 0.1,
+            wobbleAmp = 10,
+            color = {liteCol[1], liteCol[2], liteCol[3]},
+        })
+
+        local isHovered = iml.isHovered(bx, by, bw, bh, uid)
+        love.graphics.setColor(isHovered and darkCol or STAT_CARD_BG)
+        love.graphics.rectangle("fill", bx, by, bw, bh)
+        love.graphics.setColor(liteCol[1], liteCol[2], liteCol[3], liteCol[4] * 0.5)
+        love.graphics.draw(GRADIENT_CIRCLE, bx + bw / 2, by + bh / 2, 0, math.min(bw, bh))
+        love.graphics.setColor(liteCol:getRGBA())
+        ui.drawPanelThin(bx-3, by-3, bw+6, bh+6)
+    end)
+
+    box:addFill({
+        getHeight = function() return 0 end,
+        draw = function(ex, ey, ew, eh)
+            lg.setColor(1, 1, 1)
+
+            local positiveStat = g.getStatInfo(choice.positive[1])
+            local parts = {
+                string.format(
+                    "{o}{c r=0.486 g=0.784 b=0.165}+%s{/c}%s{/o}",
+                    g.formatNumber(choice.positive[2]),
+                    positiveStat.richText
+                )
+            }
+            if choice.negative then
+                local negativeStat = g.getStatInfo(choice.negative[1])
+                parts[#parts+1] = string.format(
+                    "{o}{c r=0.773 g=0.188 b=0.239}%s{/c}%s{/o}",
+                    g.formatNumber(choice.negative[2]),
+                    negativeStat.richText
+                )
+                print("got negative", unpack(choice.negative))
+            end
+
+            richtext.printRichContained(table.concat(parts, "\n"), TITLE_FONT, ex, ey, ew, eh, 1, "center")
+        end,
+    })
+
+    local ww, hh = box:render(x, y)
+
+    if iml.wasJustClicked(hitX, hitY, w, h, 1, uid) then
+        g.playUISound("ui_click_basic", 1.4, 0.8)
+        return true, ww, hh
+    end
+    return false, ww, hh
+end
+
+function StatChoicePanel:draw()
+    local r = ui.getFullScreenRegion()
+    local cardArea = r
+
+    iml.panel(r:get())
+    cardArea = cardArea:padRatio(0.05, 0.1)
+    local regions = self:_layoutCards(cardArea)
+
+    if not self.squadId then
+        if #self.squadChoices == 0 then
+            return true
+        end
+
+        for i, squadId in ipairs(self.squadChoices) do
+            ---@cast squadId string
+            local cardR = regions[i]:splitVertical(8, 1, 1)
+            local clicked = ui.drawSquadCard(squadId, cardR, i, false, true)
+
+            if clicked then
+                self.squadId = squadId
+                self:_rollStats()
+            end
+        end
+        return false
+    end
+
+    if #self.statChoices == 0 then
+        -- RIP in Pepperoni
+        return true
+    end
+
+    for i, choice in ipairs(self.statChoices) do
+        if self:_drawStatCard(choice, regions[i]:shrinkToAspectRatio(3, 2), i) then
+            local squad = assert(g.getSquadFromArmy(self.squadId))
+            g.buffSquadPermanently(squad, choice.positive[1], choice.positive[2])
+            if choice.negative then
+                g.buffSquadPermanently(squad, choice.negative[1], choice.negative[2])
+            end
+            return true
+        end
+    end
+
+    return false
+end
+
+return StatChoicePanel

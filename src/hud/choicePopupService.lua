@@ -2,6 +2,7 @@ local SquadChoicePanel = require("src.ui.choicepanels.SquadChoicePanel")
 local BlessingChoicePanel = require("src.ui.choicepanels.BlessingChoicePanel")
 local ManaChoicePanel = require("src.ui.choicepanels.ManaChoicePanel")
 local UpgradeSquadChoicePanel = require("src.ui.choicepanels.UpgradeSquadChoicePanel")
+local StatChoicePanel = require("src.ui.choicepanels.StatChoicePanel")
 local ManaBlessingChoicePanel = require("src.ui.choicepanels.ManaBlessingChoicePanel")
 
 ---@class g.choicePopupService
@@ -10,7 +11,7 @@ local choicePopupService = {}
 ---@type g.ChoicePanelCommon?
 local active = nil
 
----@param rType "squad"|"blessing"|"mana"|"upgrade_squad"|"mana_blessing"
+---@param rType "squad"|"blessing"|"mana"|"upgrade_squad"|"stat"|"mana_blessing"
 ---@param rerolls integer?
 ---@param rarityWeights g.RarityWeights?
 function choicePopupService.set(rType, rerolls, rarityWeights)
@@ -22,6 +23,8 @@ function choicePopupService.set(rType, rerolls, rarityWeights)
         active = ManaChoicePanel()
     elseif rType == "upgrade_squad" then
         active = UpgradeSquadChoicePanel()
+    elseif rType == "stat" then
+        active = StatChoicePanel()
     elseif rType == "mana_blessing" then
         active = ManaBlessingChoicePanel(rarityWeights)
     else
