@@ -113,6 +113,23 @@ end
 
 
 
+---@param n number
+local function statNumFmt(n)
+    local nnum = math.abs(n)
+
+    if nnum < 3 then
+        -- round to 1dp
+        nnum = math.floor(nnum*10 + 0.5) / 10
+    else
+        -- otherwise, round it to a whole number
+        nnum = math.floor(nnum + 0.5)
+    end
+
+    return (n < 0 and "-" or "+")..tostring(nnum)
+end
+
+
+
 
 ---@class g.StatChoicePanel.Upgrade
 ---@field tierIndex integer
@@ -356,7 +373,7 @@ function StatChoicePanel:_drawStatCard(choice, region, index)
                 local leftText = string.format(
                     "{o}%s\n%s{/o}",
                     positiveStat.richText,
-                    helper.wrapRichtextColor(positiveStat.color, "+"..g.formatNumber(choice.positive[2]))
+                    helper.wrapRichtextColor(positiveStat.color, statNumFmt(choice.positive[2]))
                 )
                 local x, y, w, h = leftR:get()
                 richtext.printRichContained(leftText, font, x, y, w, h, 1, "center")
@@ -365,7 +382,7 @@ function StatChoicePanel:_drawStatCard(choice, region, index)
                 local rightText = string.format(
                     "{o}%s\n{c r=0.773 g=0.188 b=0.239}%s{/c}{/o}",
                     negativeStat.richText,
-                    g.formatNumber(choice.negative[2])
+                    statNumFmt(choice.negative[2])
                 )
                 x, y, w, h = rightR:get()
                 richtext.printRichContained(rightText, font, x, y, w, h, 1, "center")
@@ -374,7 +391,7 @@ function StatChoicePanel:_drawStatCard(choice, region, index)
                 local text = string.format(
                     "{o}%s\n%s{/o}",
                     positiveStat.richText,
-                    helper.wrapRichtextColor(positiveStat.color, "+"..g.formatNumber(choice.positive[2]))
+                    helper.wrapRichtextColor(positiveStat.color, statNumFmt(choice.positive[2]))
                 )
                 richtext.printRichContained(text, font, ex, ey, ew, eh, 1, "center")
             end
