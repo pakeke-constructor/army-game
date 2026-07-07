@@ -246,6 +246,24 @@ function Region:padUnit(left, top, right, bot)
 end
 
 
+--- Returns a new expanded region; expanded by direct numbers
+--- Opposite of padUnit.
+---@param left number
+---@param top number
+---@param right number
+---@param bot number
+---@overload fun(self:kirigami.Region, horz:number, vert:number):kirigami.Region
+---@overload fun(self:kirigami.Region, unit:number):kirigami.Region
+---@return kirigami.Region
+function Region:expandUnit(left, top, right, bot)
+    assert(type(left) == "number", "need a number for padding")
+    top = top or left
+    bot = bot or top
+    right = right or left
+    return pad(self, -top, -left, -bot, -right)
+end
+
+
 local function max1(x)
     return math.min(1, x)
 end
@@ -279,6 +297,23 @@ function Region:padRatio(left, top, right, bot)
     top, bot = top*ratioH/2, bot*ratioH/2
 
     return pad(self, top, left, bot, right)
+end
+
+
+--- Returns a new expanded region; expanded by ratio.
+--- Opposite of padRatio.
+--- For example, :expandRatio(0.1) will give 10% expansion to ALL sides.
+---@param left number
+---@param top number
+---@param right number
+---@param bot number
+---@overload fun(self:kirigami.Region,pad:number):kirigami.Region
+---@return kirigami.Region
+function Region:expandRatio(left, top, right, bot)
+    top = top or left
+    bot = bot or top
+    right = right or left
+    return self:padRatio(-left, -top, -right, -bot)
 end
 
 
