@@ -94,6 +94,7 @@ end
 --- of the battlefield (see battle_scene, which puts allies in the left third).
 function EnemySpawner:finalize()
     local ecs = self._ecs
+    if not ecs.boundingBox then ecs:setBounds(300, 200, 1300, 600) end -- encounter forgot to set bounds
     local bx, by, w, h = ecs.boundingBox[1], ecs.boundingBox[2], ecs.boundingBox[3], ecs.boundingBox[4]
 
     local enemyR = select(2, Kirigami(bx, by, w, h):splitHorizontal(1, 2))

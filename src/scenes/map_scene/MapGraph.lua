@@ -578,7 +578,7 @@ function MapGraph:_generateNodes(rng, fromPortal)
                 node.demonEncounter = node.demonEncounter + 1
             end
             -- roll bonus rewards now that final difficulty is known
-            node.rewards = rollReward(node.demonEncounter, rng)
+            -- node.rewards = rollReward(node.demonEncounter, rng)
         end
     end
 
