@@ -41,7 +41,9 @@ local attack = {
 ---@field public targetTeam "ally"|"enemy"|"neutral"
 ---@field public pierceCount number
 ---@field public homing ecs.components.Projectile.Homing?
+---@field public floatingProjectile boolean?
 local projectile = {
+    floatingProjectile = false,
     -- damage, ownerEnt, team, pierceCount are set on spawn
 }
 
@@ -89,13 +91,18 @@ local physics = {
 
 ---@class ecs.components.Weapon
 ---@field public image string
----@field public type "sword"|"spear"|"bow"|"staff"|"object"
+---@field public type "sword"|"spear"|"bow"|"staff"|"object"|"hammer"
 ---@field public swordSwingTime number?
 ---@field public swordStrikeTime number?
 ---@field public spearStrikeTime number?
 ---@field public bowRecoil number?
 ---@field public weaponBobbing number?
 ---@field public xOffset number?
+---@field public yOffset number?
+---@field public arcRadius number? hammer: orbit radius around the body
+---@field public smashShake number? hammer: screen shake on smash
+---@field public drawBehind boolean?
+---@field public staffCastHeight number?
 local weapon = {
     image = "militia_sword",
     type = "sword",
@@ -104,6 +111,8 @@ local weapon = {
     bowRecoil = 0.1, -- 10% recoil
     weaponBobbing = 0.1, -- 10% bobbing
     xOffset = 10,
+    yOffset = 10,
+    drawBehind = false or true,
 }
 
 ---@class ecs.components.Shadow
@@ -140,6 +149,7 @@ local shadow = {
 ---@field public vx number?
 ---@field public vy number?
 ---@field public vz number?
+---@field public floatingProjectile boolean?
 ---@field public rot number?
 ---@field public sx number?
 ---@field public sy number?
@@ -150,6 +160,7 @@ local shadow = {
 ---@field public ky number?
 ---@field public oyOverride number? oy (offsetY) defaults to 0.95, which is 95% of image, but you can override this here.
 ---@field public drawOrder number?
+---@field public aboveFog boolean? if true, excluded from normal ecs draw sort; drawn separately on top of fog
 ---@field public scale number?
 ---@field public health number?
 ---@field public isHealer boolean? true IFF entity is a healer, and will heal with it's attacks.
@@ -162,6 +173,7 @@ local shadow = {
 ---@field public baseAttackDamage number?
 ---@field public baseHealPower number?
 ---@field public baseAttackSpeed number?
+---@field public baseMagic number?
 ---@field public baseLifesteal number?
 ---@field public baseAttackRange number?
 ---@field public baseMoveSpeed number?
@@ -172,6 +184,7 @@ local shadow = {
 ---@field public attackDamage number?
 ---@field public healPower number?
 ---@field public attackSpeed number?
+---@field public magic number?
 ---@field public lifesteal number?
 ---@field public attackRange number?
 ---@field public moveSpeed number?
@@ -193,8 +206,10 @@ local shadow = {
 ---@field public _knockVy number?
 ---@field public knockbackResistance number? -- +1 each knockback; reduces future knockback
 ---@field public _aiTarget ecs.Entity?
+---@field public _formationOffset table? {x,y} slot offset from squad leader
 ---@field public _lastTargetRefreshTime number?
 ---@field public _timeUntilRetarget number?
+---@field public lifetime number? how long the entity has left to live
 ---@field public burnTime number? -- if nil, no burn
 ---@field public frozenTime number? -- if nil, not frozen
 ---@field public poisonAmount number? -- if nil, no poison
@@ -202,13 +217,17 @@ local shadow = {
 ---@field public _timeSinceDamaged number?
 ---@field public _timeSinceHealed number?
 ---@field public _timeSinceLostArmor number?
----@field public _timeSinceDeployed number?
+---@field public _deployTime number?
+---@field public deployDxFromCommander number?
+---@field public deployDyFromCommander number?
 ---@field public _timeSinceAutoAttacked number?
 ---@field public _damageLagAmount number?
 ---@field public damageJolt number?
+---@field public _hammerSmashed boolean?
 ---@field public _landmark boolean? marked by the Landmark blessing: the first building placed this battle
 ---@field public onUpdate fun(ent:ecs.Entity, dt:number)?
----@field public onDraw fun(ent:ecs.Entity, x:number, y:number)?
+---@field public onDraw fun(ent:ecs.Entity, x:number, y:number)? drawn BEHIND the body
+---@field public onDrawAbove fun(ent:ecs.Entity, x:number, y:number)? drawn ON TOP of the body
 ---@field public onAttack fun(ent:ecs.Entity)?
 ---@field public entitySpawned fun(ent:ecs.Entity)?
 ---@field public entityDeath fun(ent:ecs.Entity, killer:ecs.Entity?)?

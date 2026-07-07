@@ -1,5 +1,6 @@
 
 local hoverService = require("src.hud.hoverService")
+local s = require("src.hud.settings")
 
 
 
@@ -26,7 +27,7 @@ function shop_scene:init()
 end
 
 function shop_scene:enter()
-    self.hud = HUD()
+    self.hud = HUD() --[[@as g.HUD]]
     for i = 1, NUM_SQUAD_SLOTS do
         self.shopBoughtSince[i] = {0, objects.Color.WHITE}
     end
@@ -74,6 +75,7 @@ end
 ---@param scancode string
 ---@param isrep boolean
 function shop_scene:keypressed(key, scancode, isrep)
+    if s.keypressed(key) then return end
 end
 
 
@@ -87,10 +89,10 @@ end
 local newPicker = require("src.modules.Picker")
 
 local BLESSING_COST = {
-    COMMON = 40,
-    UNCOMMON = 60,
-    RARE = 90,
-    LEGENDARY = 130,
+    COMMON = 120,
+    UNCOMMON = 150,
+    RARE = 180,
+    LEGENDARY = 250,
 }
 
 ---@param shopNode MapNode.ShopNode
@@ -193,7 +195,11 @@ local function canRerollSquad(shopNode)
 end
 
 
-local dbg = ui.debugRegion
+local dbg = function(r)
+    if true then
+        ui.debugRegion(r)
+    end
+end
 
 
 local RAR_MAP = {
@@ -489,7 +495,7 @@ local function drawShopUI(self, freeArea)
         -- actual squad box
         local squadId = self.shopNode.squadShop[i]
         if squadId and squadId ~= false then
-            local clicked, hovered, squadCol = drawSquadBox(ur:padUnit(6,10), squadId, 90 + helper.hashInteger(i) % 20)
+            local clicked, hovered, squadCol = drawSquadBox(ur:padUnit(6,10), squadId, 50 + 5*(helper.hashInteger(i) % 5))
             if clicked then
                 self.shopNode.squadShop[i] = false
                 self.shopBoughtSince[i] = {time, squadCol}
@@ -544,7 +550,11 @@ function shop_scene:draw()
     ui.startUI()
     local freeArea = self.hud:getFreeArea()
     local hoveredSquadId = drawShopUI(self, freeArea)
-    self.hud:drawUI({ shopScene = true, hoverSquadId = hoveredSquadId })
+    local hoveredSquadData = nil
+    if hoveredSquadId then
+        hoveredSquadData = {id = hoveredSquadId, showUpgrade = true}
+    end
+    self.hud:drawUI({ shopScene = true, hoverSquad = hoveredSquadData })
     ui.endUI()
 end
 

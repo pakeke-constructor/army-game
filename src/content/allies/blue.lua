@@ -2,14 +2,25 @@
 
 
 
+local sqhelper = require(".squad_helper")
+
+
+sqhelper.defineMilitiaAndArchers("blue")
+
+
+
+
+
 local PURPLE_COLOR = objects.Color("#".."FFC339ED")
 
 
 g.defineSquad("crystal_golems", {
     name = "Crystal golems",
     rarity = g.RARITIES.RARE,
+    -- tags: projectile
+    tags = {"projectile"},
     entityDef = {
-        image = "gargoyle", -- no crystal-golem sprite; gargoyle stand-in
+        image = g.leo("crystal_golems_unit", "gargoyle"), -- no crystal-golem sprite; gargoyle stand-in
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 2 },
         attack = {
             attackType = "melee",
@@ -18,11 +29,11 @@ g.defineSquad("crystal_golems", {
             image = "dagger",
             type = "sword",
         },
-        baseAttackDamage = 14,
-        baseAttackSpeed = 0.8,
+        baseAttackDamage = 1,
+        baseAttackSpeed = 0.4,
         baseAttackRange = 20,
         baseMoveSpeed = 45,
-        baseMaxHealth = 180,
+        baseMaxHealth = 220,
         onUpdate = function(self)
             local radius = (self.physics and self.physics.radius or 8) + 4
             local radiusSq = radius * radius
@@ -54,8 +65,8 @@ g.defineSquad("crystal_golems", {
         end,
     },
     unitCount = 2,
-    icon = "gargoyles_uniticon", -- placeholder
-    cost = {blue = 1},
+    icon = g.leo("crystal_golems_uniticon", "gargoyles_uniticon"), -- placeholder
+    cost = {blue = 2},
 })
 
 
@@ -64,15 +75,17 @@ g.defineSquad("crystal_golems", {
 g.defineSquad("diver_squad", {
     name = "Divers",
     rarity = g.RARITIES.RARE,
+    -- tags: attack_damage, color_synergy, armor
+    tags = {"attack_damage", "color_synergy", "armor"},
     entityDef = {
-        image = "militia", -- no diver sprite; militia stand-in
+        image = "divers_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
         },
         weapon = {
-            image = "dagger",
-            type = "sword",
+            image = "divers_harpoon",
+            type = "spear",
         },
         baseAttackDamage = 1,
         baseAttackSpeed = 1,
@@ -99,15 +112,13 @@ g.defineSquad("diver_squad", {
 g.defineSquad("test_subjects_squad", {
     name = "Test Subjects",
     rarity = g.RARITIES.RARE,
+    -- tags: transform, health, attack_speed
+    tags = {"transform", "health", "attack_speed"},
     entityDef = {
         image = "testsubject",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
-        },
-        weapon = {
-            image = "dagger",
-            type = "sword",
         },
         baseAttackDamage = 1,
         baseAttackSpeed = 1,
@@ -141,15 +152,17 @@ g.defineSquad("test_subjects_squad", {
 g.defineSquad("monk_squad", {
     name = "Monks",
     rarity = g.RARITIES.COMMON,
+    -- tags: healing, color_synergy
+    tags = {"healing", "color_synergy"},
     entityDef = {
-        image = "incense_priest",
+        image = "monks_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
         },
         weapon = {
-            image = "militia_sword",
-            type = "sword",
+            image = "monks_staff",
+            type = "staff",
         },
         baseAttackDamage = 1,
         baseAttackSpeed = 1,
@@ -175,72 +188,21 @@ g.defineSquad("monk_squad", {
 
 
 
-g.defineSquad("militia_squad", {
-    name = "Militia",
-    rarity = g.RARITIES.UNCOMMON,
-    entityDef = {
-        image = "militia",
-        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-        attack = {
-            attackType = "melee",
-        },
-        weapon = {
-            image = "militia_sword",
-            type = "sword",
-        },
-        baseAttackDamage = 2,
-        baseAttackSpeed = 1,
-        baseAttackRange = 18,
-        baseMoveSpeed = 50,
-        baseMaxHealth = 10,
-        baseStartingArmor = 5,
-    },
-    unitCount = 4,
-    icon = "militia_uniticon",
-    cost = {blue = 2},
-})
-
-
-
-g.defineSquad("archer_squad", {
-    name = "Archers",
-    rarity = g.RARITIES.COMMON,
-    entityDef = {
-        image = "longbowman",
-        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-        attack = {
-            attackType = "ranged",
-            projectileType = "arrow",
-            projectileSpeed = 350,
-        },
-        weapon = {
-            image = "longbow",
-            type = "bow",
-        },
-        baseAttackDamage = 1,
-        baseAttackSpeed = 0.5,
-        baseAttackRange = 150,
-        baseMoveSpeed = 55,
-        baseMaxHealth = 5,
-    },
-    unitCount = 8,
-    icon = "archer_uniticon",
-    cost = {blue = 1},
-})
-
 
 
 g.defineSquad("orcball_player_squad", {
     name = "Orcball Players",
     rarity = g.RARITIES.COMMON,
+    -- tags: armor, attack_damage
+    tags = {"armor", "attack_damage"},
     entityDef = {
-        image = "militia",
+        image = "orcballplayers_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
         },
         weapon = {
-            image = "militia_sword",
+            image = "orcballplayers_orcball",
             type = "sword",
         },
         baseAttackDamage = 1,
@@ -274,15 +236,17 @@ g.defineSquad("orcball_player_squad", {
 g.defineSquad("defender_squad", {
     name = "Defenders",
     rarity = g.RARITIES.COMMON,
+    -- tags: crowd_control, armor
+    tags = {"crowd_control", "armor"},
     entityDef = {
-        image = "militia",
+        image = "defenders_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
         },
         weapon = {
-            image = "militia_sword",
-            type = "sword",
+            image = "defenders_shield",
+            type = "staff"
         },
         baseAttackDamage = 1,
         baseAttackSpeed = 1,
@@ -311,6 +275,8 @@ g.defineSquad("defender_squad", {
 g.defineSquad("incense_holder_squad", {
     name = "Incense Holders",
     rarity = g.RARITIES.RARE,
+    -- tags: healing, ranged, projectile, buffing, attack_speed
+    tags = {"healing", "ranged", "projectile", "buffing", "attack_speed"},
     entityDef = {
         image = "incense_priest",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -365,15 +331,13 @@ g.defineSquad("incense_holder_squad", {
 g.defineSquad("clay_troll_squad", {
     name = "Clay Trolls",
     rarity = g.RARITIES.RARE,
+    -- tags: armor, buffing
+    tags = {"armor", "buffing"},
     entityDef = {
-        image = "militia",
+        image = "claytrolls_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
-        },
-        weapon = {
-            image = "militia_sword", -- placeholder
-            type = "sword",
         },
         baseAttackDamage = 1,
         baseAttackSpeed = 0.5,
@@ -408,11 +372,12 @@ g.defineSquad("clay_troll_squad", {
 g.defineSquad("war_elephant_squad", {
     name = "War Elephants",
     rarity = g.RARITIES.RARE,
+    -- tags: armor, color_synergy, scaling
+    tags = {"armor", "color_synergy", "scaling"},
     entityDef = {
-        image = "warhog",
+        image = "warelephants_unit",
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 2 },
         attack = { attackType = "melee" },
-        --weapon = { image = "militia_sword", type = "sword" },
         baseAttackDamage = 4,
         baseAttackSpeed = 0.6,
         baseAttackRange = 22,
@@ -420,6 +385,7 @@ g.defineSquad("war_elephant_squad", {
         baseMaxHealth = 60,
         baseStartingArmor = 12,
     },
+    statUpgradeScaling = {startingArmor = 0.25},
     unitCount = 2,
     perks = {{
         name = "Helmheart",
@@ -466,11 +432,12 @@ g.defineSquad("war_elephant_squad", {
 g.defineSquad("magnet_elemental_squad", {
     name = "Magnet Elementals",
     rarity = g.RARITIES.RARE,
+    -- tags: ranged, projectile, armor
+    tags = {"ranged", "projectile", "armor"},
     entityDef = {
-        image = "gargoyle",
+        image = "magnetelemental_unit",
         physics = { shape = "circle", radius = 6, ox = 0, oy = 0, mass = 1 },
         attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 280 },
-        weapon = { image = "placeholder", type = "bow" },
         baseAttackDamage = 2,
         baseAttackSpeed = 0.7,
         baseAttackRange = 120,
@@ -478,6 +445,7 @@ g.defineSquad("magnet_elemental_squad", {
         baseMaxHealth = 20,
         baseStartingArmor = 3,
     },
+    statUpgradeScaling = {startingArmor = 0.25},
     unitCount = 2,
     perks = {{
         name = "Shrapnelmancy",
@@ -507,18 +475,20 @@ g.defineSquad("magnet_elemental_squad", {
 g.defineSquad("immortal_eye_squad", {
     name = "The Immortal Eye",
     rarity = g.RARITIES.LEGENDARY,
+    -- tags: building, ranged, projectile, color_synergy
+    tags = {"building", "ranged", "projectile", "color_synergy"},
     entityDef = {
-        image = "militia", -- placeholder
+        image = "theimmortaleye_unit",
         isBuilding = true,
         physics = { shape = "circle", radius = 10, ox = 0, oy = 0, mass = 1, isStatic = true },
         attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 300 },
-        weapon = { image = "placeholder", type = "bow" },
         baseAttackDamage = 1,
         baseAttackSpeed = 0.8,
         baseAttackRange = 220,
         baseMaxHealth = 80,
         baseStartingArmor = 10,
     },
+    statUpgradeScaling = {attackDamage = 0.33},
     perks = {{
         name = "Rebirth",
         description = loc("When you spend Blue mana, trigger the On-spawn effects of all allied units in a large radius around this building."),
@@ -549,11 +519,12 @@ g.defineSquad("immortal_eye_squad", {
 g.defineSquad("bell_creature_squad", {
     name = "Bell Creatures",
     rarity = g.RARITIES.RARE,
+    -- tags: buffing, armor
+    tags = {"buffing", "armor"},
     entityDef = {
         image = "bellman",
         physics = { shape = "circle", radius = 6, ox = 0, oy = 0, mass = 1 },
         attack = { attackType = "melee" },
-        weapon = { image = "militia_sword", type = "sword" },
         baseAttackDamage = 1,
         baseAttackSpeed = 0.8,
         baseAttackRange = 20,
@@ -585,17 +556,21 @@ g.defineSquad("bell_creature_squad", {
 g.defineSquad("laser_gunner_squad", {
     name = "Laser Gunners",
     rarity = g.RARITIES.LEGENDARY,
+    -- tags: ranged, projectile, attack_speed, scaling
+    tags = {"ranged", "projectile", "attack_speed", "scaling"},
     entityDef = {
-        image = "longbowman",
+        image = "lasergunners_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        -- TODO: Laser cannon attack rather than arrow?
         attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 380 },
-        weapon = { image = "placeholder", type = "bow" },
+        weapon = { image = "lasergunners_lasercannon", type = "bow" },
         baseAttackDamage = 1,
         baseAttackSpeed = 0.5,
         baseAttackRange = 120,
         baseMoveSpeed = 50,
         baseMaxHealth = 8,
     },
+    statUpgradeScaling = {attackSpeed = 0.1},
     unitCount = 4,
     perks = {{
         name = "Laser Focus",
@@ -620,7 +595,6 @@ g.defineEntity("living_mana", {
     image = "mana_blue_large",
     physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 0.3 },
     attack = { attackType = "melee" },
-    weapon = { image = "1x1", type = "object" },
     partitions = {"unit", "ally"},
     team = "ally",
     ai = { target = "enemy" },
@@ -642,13 +616,14 @@ g.defineEntity("living_mana", {
 g.defineSquad("anima_incubator_squad", {
     name = "Anima Incubator",
     rarity = g.RARITIES.RARE,
+    -- tags: building, mana_gain, color_synergy, pest
+    tags = {"building", "mana_gain", "color_synergy", "pest"},
     entityId = "anima_incubator",
     entityDef = {
         image = "anima_incubator",
         isBuilding = true,
         physics = { shape = "circle", isStatic = true, radius = 20, ox = 0, oy = 0, mass = 5 },
         attack = { attackType = "melee" },
-        weapon = { image = "1x1", type = "object" },
 
         baseAttackDamage = 1,
         baseAttackSpeed = 0.5,
@@ -656,6 +631,7 @@ g.defineSquad("anima_incubator_squad", {
         baseMoveSpeed = 0,
         baseMaxHealth = 200,
     },
+    statUpgradeScaling = {maxHealth = 0.2},
     unitCount = 1,
     perks = {{
         name = "Manaborn Legion",
@@ -687,6 +663,8 @@ g.defineSquad("anima_incubator_squad", {
 g.defineSquad("ice_mage_squad", {
     name = "Ice Mage",
     rarity = g.RARITIES.UNCOMMON,
+    -- tags: freeze, crowd_control, ranged, projectile
+    tags = {"freeze", "crowd_control", "ranged", "projectile"},
     entityDef = {
         image = "icemage",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -705,6 +683,7 @@ g.defineSquad("ice_mage_squad", {
         baseMoveSpeed = 50,
         baseMaxHealth = 12,
     },
+    statUpgradeScaling = {attackSpeed = 0.1},
     unitCount = 4,
     perks = {{
         name = "Ice Touch",

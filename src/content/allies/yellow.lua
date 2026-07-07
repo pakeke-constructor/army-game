@@ -6,6 +6,7 @@
 g.defineSquad("exo_soldier_squad", {
     name = "Exo-Soldiers",
     rarity = g.RARITIES.UNCOMMON,
+    tags = {"swarm"},
     entityDef = {
         image = "exosoldiers_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -15,6 +16,8 @@ g.defineSquad("exo_soldier_squad", {
         weapon = {
             image = "exosoldiers_arm",
             type = "sword",
+            xOffset = 5,
+            drawBehind = true
         },
         baseAttackDamage = 1,
         baseAttackSpeed = 1.5,
@@ -32,6 +35,7 @@ g.defineSquad("exo_soldier_squad", {
 g.defineSquad("prospector_squad", {
     name = "Prospectors",
     rarity = g.RARITIES.UNCOMMON,
+    tags = {"economy", "armor"},
     entityDef = {
         image = "prospectors_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -68,12 +72,14 @@ g.defineSquad("prospector_squad", {
 g.defineSquad("the_great_factory_squad", {
     name = "The Great Factory",
     rarity = g.RARITIES.LEGENDARY,
+    tags = {"building", "deployment"},
     entityDef = {
         image = "greatfactory_unit",
         isBuilding = true,
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 1, isStatic = true },
         baseMaxHealth = 40,
     },
+    statUpgradeScaling = {maxHealth = 0.2},
     unitCount = 1,
     icon = "greatfactory_uniticon",
     perks = {{
@@ -94,12 +100,14 @@ g.defineSquad("the_great_factory_squad", {
 g.defineSquad("gold_mine_squad", {
     name = "Gold Mine",
     rarity = g.RARITIES.UNCOMMON,
+    tags = {"building", "economy", "death_trigger"},
     entityDef = {
         image = "goldmine_unit",
         isBuilding = true,
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 1, isStatic = true },
         baseMaxHealth = 16,
     },
+    statUpgradeScaling = {maxHealth = 0.15},
     unitCount = 1,
     perks = {{
         name = "Extraction",
@@ -121,6 +129,7 @@ g.defineSquad("gold_mine_squad", {
 g.defineSquad("living_laboratory_squad", {
     name = "Living Laboratory",
     rarity = g.RARITIES.RARE,
+    tags = {"building", "buffing"},
     entityDef = {
         image = "livinglaboratory",
         isBuilding = true,
@@ -128,6 +137,7 @@ g.defineSquad("living_laboratory_squad", {
         baseMaxHealth = 120,
         baseStartingArmor = 4,
     },
+    statUpgradeScaling = {startingArmor = 0.2, maxHealth = 0.1},
     unitCount = 1,
     perks = {{
         name = "Eureka",
@@ -150,7 +160,7 @@ g.defineSquad("living_laboratory_squad", {
 
                 -- Buff them
                 for i = 1, math.min(#entAllies, 6) do
-                    g.buffEntity(entAllies[i][1], stat, increase)
+                    g.buffEntity(entAllies[i][1], stat, increase, ent)
                 end
             end,
         },
@@ -164,6 +174,7 @@ g.defineSquad("living_laboratory_squad", {
 g.defineSquad("endless_army_squad", {
     name = "The Endless Army",
     rarity = g.RARITIES.LEGENDARY,
+    tags = {"swarm", "scaling"},
     entityDef = {
         image = "endlessarmy_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -173,9 +184,10 @@ g.defineSquad("endless_army_squad", {
         baseAttackSpeed = 1,
         baseAttackRange = 18,
         baseMoveSpeed = 50,
-        baseMaxHealth = 5,
+        baseMaxHealth = 10,
         baseStartingArmor = 1,
     },
+    statUpgradeScaling = {maxHealth = 0.2},
     unitCount = 1,
     perks = {{
         name = "Mass-Production",
@@ -199,6 +211,7 @@ g.defineSquad("endless_army_squad", {
 g.defineSquad("wealth_elemental_squad", {
     name = "Wealth Elementals",
     rarity = g.RARITIES.LEGENDARY,
+    tags = {"economy", "armor", "scaling"},
     entityDef = {
         image = "wealthelementals_unit",
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 2 },
@@ -211,6 +224,7 @@ g.defineSquad("wealth_elemental_squad", {
         baseMaxHealth = 80,
         baseStartingArmor = 8,
     },
+    statUpgradeScaling = {maxHealth = 0.2},
     unitCount = 2,
     perks = {{
         name = "Golden Bulk",

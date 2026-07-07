@@ -1,28 +1,36 @@
 
 local hoverService = require("src.hud.hoverService")
+local settingsPopupService = require("src.hud.settings")
 
 ---@class g.HUD: objects.Class
----@field hoveredSquad g.Squad?
+---@field hoveredSquad g.Squad|nil hovered squad object
+---@field hoveredSpell string|nil hovered spellId
+---@field selectedIndex integer? index into the active selection list (see getActiveList)
+---@field battleStarted boolean cached each frame; false = squads selectable, true = spells selectable
 local HUD = objects.Class("g:HUD")
 
 function HUD:init()
-    self.selectedSlot = 1
+    self.selectedIndex = 1
+    self.battleStarted = false
 end
+
+---@class g.hudArgs.hoverSquad
+---@field id string
+---@field showUpgrade boolean?
 
 ---@class g.hudArgs
 ---@field battleScene boolean?
 ---@field mapScene boolean?
----@field hoverSquadId string?
+---@field battleStarted boolean?
+---@field hoverSquad g.hudArgs.hoverSquad?
 
 local SQUAD_ICON_SIZE = 32
 local SQUAD_PADDING = 4
 
 local LOC_DAYS = interp("%{n} days until {c r=1 g=0.3 b=0.3}attack", {context="HUD top bar, countdown to next demon incursion. 'attack' is richtext-colored red"})
-local LOC_ZONE = loc("Zone 1 - Forest", {}, {context="HUD top bar, current zone name. Hardcoded stub"})
-local LOC_PAUSE = loc("II", {}, {context="HUD top bar, pause button icon text"})
 
-local LOC_HOVER_RAGE = interp("+%{pct}% demon damage, +%{pct}% demon health!", {context="Tooltip when hovering demon rage in HUD"})
-local LOC_HOVER_RAGE_ZERO = loc("demon-rage increases whenever you win a battle. The higher the demon-rage, the stronger the enemies", {}, {context="Tooltip when hovering demon rage in HUD when rage is zero"})
+local LOC_HOVER_FURY = interp("+%{pct}% demon damage, +%{pct}% demon health!", {context="Tooltip when hovering Demon Fury in HUD"})
+local LOC_HOVER_FURY_ZERO = loc("Demon Fury increases whenever you win a battle. The higher the Demon Fury, the stronger the enemies", {}, {context="Tooltip when hovering Demon Fury in HUD when fury is zero"})
 local LOC_HOVER_GOLD = loc("Gold is used to buy items and upgrades at shops.", {}, {context="Tooltip when hovering gold in HUD"})
 local LOC_HOVER_DAYS = loc("Days remaining until the next Incursion!", {}, {context="Tooltip when hovering days-till-incursion in HUD. After X number of days, players will be forced to fight a 'boss'"})
 local LOC_HOVER_MANA = loc(" mana is used to deploy squads in battle.", {}, {context="Tooltip when hovering normal mana in HUD. Prefixed with hovered mana type icon/text at runtime."})
@@ -40,43 +48,96 @@ local function isSquadVisible(sq)
     return scName ~= "battle_scene" or not sq.deployed
 end
 
----@param slot integer
----@return boolean
-local function isSlotAvailable(slot)
-    local army = g.getSortedArmyList()
-    local squad = army[slot]
-    return squad and isSquadVisible(squad) or false
+--- Whether spells (vs squads) are the active selectable pool.
+---@param self g.HUD
+local function spellsAreActive(self)
+    local _, scName = g.getCurrentScene()
+    return scName == "battle_scene" and self.battleStarted
 end
 
----@param from integer
----@return integer?
-local function getClosestAvailableSlot(from)
-    local army = g.getSortedArmyList()
-    local total = #army
-    if total == 0 then return nil end
-    from = helper.clamp(from, 1, total)
-    local fallback
-    for offset = 0, total - 1 do
-        for _, slot in ipairs({from - offset, from + offset}) do
-            if slot >= 1 and slot <= total then
-                local sq = army[slot]
-                if sq and isSquadVisible(sq) then
-                    if sq.canAfford then return slot end
-                    fallback = fallback or slot
-                end
-            end
+--- Owned spellIds, sorted for stable order.
+---@return string[]
+local function getVisibleSpells()
+    local run = g.getRun()
+    local spells = {}
+    for spellId in pairs(run.spells) do
+        if not run.spellsCast[spellId] then
+            spells[#spells + 1] = spellId
         end
     end
-    return fallback
+    table.sort(spells)
+    return spells
 end
 
----@param self g.HUD
----@return integer?
-local function getSlotIndex(self)
-    local idx = getClosestAvailableSlot(self.selectedSlot)
-    if idx then self.selectedSlot = idx end
-    return idx
+---@param spellId string
+---@return boolean
+local function isSpellAffordable(spellId)
+    local info = g.getSpellInfo(spellId)
+    return (not info.cost) or g.canAffordMana(g.getBattleManaCounts(), info.cost)
 end
+
+--- The ordered list of currently-selectable items: spellIds (battle started) or
+--- visible squad objects (otherwise). Draw order matches this order, so the
+--- list index doubles as the on-screen index.
+---@param self g.HUD
+---@return (g.Squad|string)[]
+local function getActiveList(self)
+    if spellsAreActive(self) then
+        return getVisibleSpells()
+    end
+    local squads = {}
+    for _, sq in ipairs(g.getSortedArmyList()) do
+        if isSquadVisible(sq) then
+            squads[#squads + 1] = sq
+        end
+    end
+    return squads
+end
+
+--- Is the item at the given list index usable (affordable / castable) right now?
+---@param self g.HUD
+---@param item g.Squad|string
+---@return boolean
+local function isItemUsable(self, item)
+    if type(item) == "string" then
+        local run = g.getRun()
+        if run.spellsCast[item] then return false end
+        local mx, my = love.mouse.getPosition()
+        local wx, wy = g.screenToWorld(mx, my)
+        return g.canCastSpell(wx, wy, item)
+    end
+    return item.canAfford or false
+end
+
+--- Resolves selectedIndex to a valid index into the active list, mutating
+--- self.selectedIndex. Prefers the nearest usable item; never out of range.
+---@param self g.HUD
+---@return (g.Squad|string)[] list
+---@return integer? idx valid index, or nil if list empty
+local function getValidSelection(self)
+    local list = getActiveList(self)
+    if #list == 0 then
+        self.selectedIndex = nil
+        return list, nil
+    end
+    local from = helper.clamp(self.selectedIndex or 1, 1, #list)
+    local idx = from
+    if not isItemUsable(self, list[from]) then
+        for offset = 1, #list do
+            for _, j in ipairs({from - offset, from + offset}) do
+                if j >= 1 and j <= #list and isItemUsable(self, list[j]) then
+                    idx = j
+                    break
+                end
+            end
+            if idx ~= from then break end
+        end
+    end
+    self.selectedIndex = idx
+    return list, idx
+end
+
+
 
 ---@param sq g.Squad
 ---@param x number
@@ -102,57 +163,74 @@ end
 
 
 
----@param self g.HUD
+---@param spellId string
+---@param x number
+---@param y number
+---@param selected boolean
+---@param affordable boolean spell can be afforded right now
+local function renderSpell(spellId, x, y, selected, affordable)
+    local size = SQUAD_ICON_SIZE
+    if selected then
+        lg.setColor(1, 1, 1, 0.3)
+        ui.drawSingleColorPanel(x - 2, y - 2, size + 4, size + 4)
+    end
+    if not affordable then
+        lg.setColor(1, 1, 1, 0.35)
+    else
+        lg.setColor(1, 1, 1)
+    end
+    g.renderSpellIcon(spellId, x+size/2, y+size/2, true)
+end
+
+
+
+
+
+
+--- Lays out icons evenly across a region.
 ---@param region kirigami.Region
-local function drawSquadBar(self, region)
-    local army = g.getSortedArmyList()
-    self.hoveredSquad = nil
-    if #army <= 0 then
-        return
-    end
-
-    local currentSlot = getSlotIndex(self)
-
-    local trueArmy = {}
-    for i, sq in ipairs(army) do
-        if isSquadVisible(sq) then
-            table.insert(trueArmy, {sq = sq, idx = i})
-        end
-    end
-
-    local count = #trueArmy
+---@param count integer
+---@return number startX, number baseY, number step
+local function layoutIcons(region, count)
     local EDGE_PAD = 14
-
-    local neededH = SQUAD_ICON_SIZE + 2 * EDGE_PAD
-    if region.h < neededH then
-        region = region:set(nil, nil, nil, neededH)
-    end
-
     local inner = region:padUnit(EDGE_PAD)
-
     local step = SQUAD_ICON_SIZE + SQUAD_PADDING
     if count > 1 then
         step = math.min(step, (inner.w - SQUAD_ICON_SIZE) / (count - 1))
     end
+    return inner.x, inner.y + (inner.h - SQUAD_ICON_SIZE) / 2, step
+end
 
-    local startX = inner.x
-    local baseY = inner.y + (inner.h - SQUAD_ICON_SIZE) / 2
+
+--- Draws the visible squad icons. selIdx is the active selection (into the
+--- visible list), or nil when squads aren't the active pool.
+---@param self g.HUD
+---@param region kirigami.Region
+---@param selIdx integer?
+local function drawSquadsSection(self, region, selIdx)
+    local visible = {}
+    for _, sq in ipairs(g.getSortedArmyList()) do
+        if isSquadVisible(sq) then
+            visible[#visible + 1] = sq
+        end
+    end
+    if #visible <= 0 then return end
+
+    local startX, baseY, step = layoutIcons(region, #visible)
 
     local _, scName = g.getCurrentScene()
     local isBattle = scName == "battle_scene"
 
-    for i, entry in ipairs(trueArmy) do
-        local sq = entry.sq
-        local armyIdx = entry.idx
+    for i, sq in ipairs(visible) do
         local x = startX + (i - 1) * step
         local y = baseY
-        local selected = (armyIdx == currentSlot)
+        local selected = (i == selIdx)
         if isBattle and selected then
             y = y - 6
         end
         renderSquad(sq, x, y-4, selected)
-        if iml.wasJustClicked(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, 1, i) then
-            self.selectedSlot = armyIdx
+        if selIdx and iml.wasJustClicked(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, 1, i) then
+            self.selectedIndex = i
         end
         iml.panel(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, i)
         if iml.isHovered(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, i) then
@@ -162,11 +240,76 @@ local function drawSquadBar(self, region)
 end
 
 
+--- Draws the spell icons. selIdx is the active selection (into the spell list),
+--- or nil when spells aren't the active pool (pre-battle).
+---@param self g.HUD
+---@param region kirigami.Region
+---@param selIdx integer?
+local function drawSpellsSection(self, region, selIdx)
+    local spells = getVisibleSpells()
+    if #spells <= 0 then return end
+
+    local startX, baseY, step = layoutIcons(region, #spells)
+
+    for i, spellId in ipairs(spells) do
+        local affordable = (selIdx == nil) or isSpellAffordable(spellId)
+        local usable = (selIdx ~= nil) and affordable and isItemUsable(self, spellId)
+        local x = startX + (i - 1) * step
+        local y = baseY
+        local selected = (i == selIdx)
+        if selected then
+            y = y - 6
+        end
+        renderSpell(spellId, x, y-4, selected, affordable)
+        local id = "spell" .. i
+        if usable and iml.wasJustClicked(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, 1, id) then
+            self.selectedIndex = i
+        end
+        iml.panel(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, id)
+        if iml.isHovered(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, id) then
+            self.hoveredSpell = spellId
+        end
+    end
+end
+
+
+
+
+---@param self g.HUD
+---@param opt g.hudArgs
+---@param region kirigami.Region
+local function drawArmyBar(self, opt, region)
+    self.hoveredSquad = nil
+    self.hoveredSpell = nil
+    local _, idx = getValidSelection(self)
+    local spellsActive = spellsAreActive(self)
+
+    local squadRegion, _, spellRegion
+
+    if opt.battleScene then
+        if opt.battleStarted then
+            -- spells should control the space
+            squadRegion, _, spellRegion = region:splitHorizontal(0.3, 0.05, 0.65)
+        else
+            -- else, should show mainly squads.
+            squadRegion, _, spellRegion = region:splitHorizontal(0.65, 0.05, 0.3)
+        end
+    else
+        squadRegion, _, spellRegion = region:splitHorizontal(0.65, 0.05, 0.3)
+    end
+    drawSquadsSection(self, squadRegion, (not spellsActive) and idx or nil)
+    drawSpellsSection(self, spellRegion, spellsActive and idx or nil)
+end
+
+
+
+
+
 
 
 
 ---@param r kirigami.Region
-local function drawLeftBlessingBar(r)
+local function drawBlessingBar(r)
     local run = g.getRun()
     lg.setColor(1,1,1)
     ui.drawDarkPanel(r:get())
@@ -269,12 +412,13 @@ end
 local function drawTopBar()
     local r = ui.getScreenRegion()
     local topBar, mainBar = r:splitVertical(0.1,0.9)
+    iml.panel(topBar:get())
 
-    local xp, demonRage, gold, keys, daysTillIncursion, zoneString, pausePanel = topBar:splitHorizontal(4, 2,2,2, 4,4,1)
+    local xp, demonFury, gold, keys, daysTillIncursion, zoneString, pausePanel = topBar:splitHorizontal(4, 2,2,2, 4,4,1)
     --[[
     each of these ^^^ are panels.
 
-    demonRage: shows current demon-rage. When hovered, explains what demonRage is (use hoverService) 
+    demonFury: shows current Demon Fury. When hovered, explains what Demon Fury is (use hoverService) 
     gold: shows gold-text. When hovered, simple explanation explains what gold is (used to buy stuff)
     days till incursion: shows text. When hovered, simple explanation explains stuff about incursion (TODO; stub for now)
         - {day_icon} {white}20{/white}{gray} days until {/gray}{red}attack{/red}
@@ -306,8 +450,8 @@ local function drawTopBar()
 
     drawXpBar(xp)
 
-    local rageHover = run.demonRage <= 0 and LOC_HOVER_RAGE_ZERO or LOC_HOVER_RAGE({pct = run.demonRage * 10})
-    drawPanel(demonRage, "{demonfury_icon}{c r=0.6 g=0.1 b=0}  " .. tostring(run.demonRage), rageHover)
+    local furyHover = run.demonFury <= 0 and LOC_HOVER_FURY_ZERO or LOC_HOVER_FURY({pct = run.demonFury * 10})
+    drawPanel(demonFury, "{demonfury_icon}{c r=0.6 g=0.1 b=0}  " .. tostring(run.demonFury), furyHover)
     drawPanel(gold, "{coin_icon} {GOLD_COLOR}" .. tostring(run.money), LOC_HOVER_GOLD)
 
     local hasKeys = (run.keys or 0) > 0
@@ -319,10 +463,20 @@ local function drawTopBar()
     local _, _, _, dh = daysTillIncursion:get()
     local extraH = dh * 0.05
     local dtiRegion = daysTillIncursion:padUnit(0, -extraH, 0, 0)
-    drawPanel(dtiRegion, LOC_DAYS({n = run:getDaysUntilIncursion()}), LOC_HOVER_DAYS)
+    local daysLeft = run:getDaysUntilIncursion()
+    local locText = LOC_DAYS({n = daysLeft})
+    if daysLeft <= 7 then
+        locText = "{softblink r=1 g=0.3 b=0.3 f=0.25}"..locText
+    end
+    drawPanel(dtiRegion, locText, LOC_HOVER_DAYS)
 
-    drawPanel(zoneString, "{c r=0.2 g=0.5 b=0.3}{wavy freq=0.5}" .. LOC_ZONE)
-    drawPanel(pausePanel, LOC_PAUSE)
+    local mapType = g.getMapType()
+    drawPanel(zoneString, "{c r=0.2 g=0.5 b=0.3}{bob freq=0.5}" .. mapType.info)
+    drawPanel(pausePanel, "II")
+    local px, py, pw, ph = pausePanel:get()
+    if iml.wasJustClicked(px, py, pw, ph, 1, "pause_button") then
+        settingsPopupService.show()
+    end
 end
 
 
@@ -338,15 +492,24 @@ end
 
 ---@param self g.HUD
 ---@param noDraw boolean?
-local function drawManaBox(self, noDraw)
-    local img = "hud_bottom_left_mana_box"
+---@param region kirigami.Region?
+local function drawManaBox(self, noDraw, region)
+    local img = "hud_bottom_left_mana_box_2"
     local w,h = g.getImageSize(img)
     if noDraw then
         return w,h
     end
-    local r = Kirigami(0,0,w,h)
-    local sr = ui.getFullScreenRegion()
-    r = r:attachToBottomOf(sr):clampInside(sr)
+
+    local r
+    if region then
+        local x, y, _, rh = region:get()
+        r = Kirigami(x, y + rh - h, w, h)
+    else
+        local sr = ui.getFullScreenRegion()
+        r = Kirigami(0,0,w,h)
+        r = r:attachToBottomOf(sr):clampInside(sr)
+    end
+
     lg.setColor(1,1,1)
     g.drawImage(img, r:getCenter())
 
@@ -363,8 +526,9 @@ local function drawManaBox(self, noDraw)
     local t = 0--love.timer.getTime()
     local hoveredManaType = nil
     local function drawMana(mtype, i, manaImg)
+        local dy = math.sin(love.timer.getTime() + i) * 1
         local x = cx + (r.w/3) * math.sin(t + i*rdiff)
-        local y = cy + (r.h/4) * math.cos(t + i*rdiff)
+        local y = cy + (r.h/4) * math.cos(t + i*rdiff) + dy
         if ct <= 1 then
             -- just center it:
             x,y = cx,cy
@@ -376,13 +540,13 @@ local function drawManaBox(self, noDraw)
         if count <= 0 then
             lg.setColor(0.3,0.3,0.3)
         end
-        g.drawImage(manaImg, x-10,y)
+        g.drawImage(manaImg, x-6,y)
         local color = (minfo and minfo.color) or objects.Color.WHITE
         lg.setColor(color)
         if count <= 0 then
             lg.setColor(0.3,0.3,0.3)
         end
-        richtext.printRich(tostring(count), font, x+4,y-8, 100, "left")
+        richtext.printRich(tostring(count), font, x+6,y-8, 100, "left")
         if iml.isHovered(x-16, y-16, 36, 36, "hud_mana_" .. mtype) then
             hoveredManaType = mtype
         end
@@ -414,25 +578,28 @@ end
 
 
 ---@param self g.HUD
-local function drawBottomBar(self, barHeight)
-    local w,h = drawManaBox(self, true)
+---@param opt g.hudArgs
+local function drawBottomBar(self, opt, barHeight)
+    local manaW = drawManaBox(self, true)
 
     local sw, sh = ui.getScaledUIDimensions()
-    local run = g.getRun()
     local region = Kirigami(0, sh - barHeight, sw, barHeight)
+    local _, mainBar, _ = region:splitHorizontal(0.08, 0.84, 0.08)
 
-    local manaBox, rest = region:splitHorizontal(w,sw-w)
+    iml.panel(mainBar:get())
+
+    local manaBox, rest = mainBar:splitHorizontal(manaW, mainBar.w-manaW)
     local squadBar,blessingBar = rest:splitHorizontal(2,1)
 
     -- Squad box
     ui.drawDarkPanel(squadBar:get())
-    drawSquadBar(self, squadBar:padUnit(6))
+    drawArmyBar(self, opt, squadBar:padUnit(6))
 
     -- Blessing box
     ui.drawDarkPanel(blessingBar:get())
-    drawLeftBlessingBar(blessingBar)
+    drawBlessingBar(blessingBar)
 
-    drawManaBox(self, false)
+    drawManaBox(self, false, manaBox)
 end
 
 
@@ -448,15 +615,22 @@ end
 
 ---@param opt g.hudArgs
 function HUD:drawUI(opt)
+    self.battleStarted = opt.battleStarted or false
     drawTopBar()
 
-    drawBottomBar(self, SQUAD_ICON_SIZE + 30)
+    drawBottomBar(self, opt, SQUAD_ICON_SIZE + 30)
 
-    local hoveredSquadId = opt.hoverSquadId or (self.hoveredSquad and self.hoveredSquad.squadId)
+    local hoveredSquadId = (opt.hoverSquad and opt.hoverSquad.id) or (self.hoveredSquad and self.hoveredSquad.squadId)
     if hoveredSquadId then
         local main = ui.getScreenRegion()
         local _, left = main:padRatio(0.2):splitHorizontal(2, 1)
-        ui.drawSquadCard(hoveredSquadId, left:padRatio(0.1), -999)
+        local showUpgrade = not not (opt.hoverSquad and opt.hoverSquad.showUpgrade)
+        ui.drawSquadCard(hoveredSquadId, left:padRatio(0.1), -999, showUpgrade, true)
+    elseif self.hoveredSpell then
+        local main = ui.getScreenRegion()
+        local _, left = main:padRatio(0.2):splitHorizontal(2, 1)
+        local spellR = left:splitVertical(3, 2):center(left)
+        ui.drawSpellCard(self.hoveredSpell, spellR:padRatio(0.1), -999)
     end
 
     rewardPopupService.draw()
@@ -466,36 +640,38 @@ function HUD:drawUI(opt)
     hoverService.draw()
 end
 
----@return g.Squad? squad
+--- Returns the current selection: either a spell or a squad.
+--- ("spell", spellId) | ("squad", g.Squad) | nil
+---@return ("spell"|"squad")? type
+---@return string|g.Squad|nil selection
 function HUD:getSelection()
-    local idx = getSlotIndex(self)
+    local list, idx = getValidSelection(self)
     if not idx then return nil end
-    return g.getSortedArmyList()[idx]
+    local item = list[idx]
+    if type(item) == "string" then
+        return "spell", item
+    end
+    return "squad", item
 end
 
----@param visibleIndex integer 1..9, position among non-deployed squads as shown in HUD
+---@param visibleIndex integer 1..9, position among items shown in the active pool
 function HUD:selectVisibleSlot(visibleIndex)
-    local army = g.getSortedArmyList()
-    local seen = 0
-    for i, sq in ipairs(army) do
-        if isSquadVisible(sq) then
-            seen = seen + 1
-            if seen == visibleIndex then
-                self.selectedSlot = i
-                return
-            end
-        end
+    local list = getActiveList(self)
+    if visibleIndex >= 1 and visibleIndex <= #list then
+        self.selectedIndex = visibleIndex
     end
 end
 
 function HUD:wheelmoved(dx, dy)
-    local dir = dy > 0 and 1 or -1
-    local total = #g.getSortedArmyList()
-    local next = self.selectedSlot + dir
-    for i=0, 8 do
-        local j = next + i*dir
-        if next >= 1 and next <= total and isSlotAvailable(j) then
-            self.selectedSlot = j
+    local dir = dy > 0 and -1 or 1
+    local list = getValidSelection(self)
+    local total = #list
+    if total == 0 then return end
+    local from = self.selectedIndex or 1
+    for offset = 1, total do
+        local j = from + offset * dir
+        if j >= 1 and j <= total and isItemUsable(self, list[j]) then
+            self.selectedIndex = j
             return
         end
     end

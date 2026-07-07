@@ -10,17 +10,20 @@ local popups = {}
 ---@field duration number?
 ---@field fadeIn number?
 
+
+local EMPTY = {}
+
 -- x,y are screen coords
 ---@param x number
 ---@param y number
 ---@param richtxt any
 ---@param args textPopupService.args?
 function textPopups.addPopup(x, y, richtxt, args)
-    args = args or {}
+    args = args or EMPTY
     popups[#popups+1] = {
         x = x,
         y = y,
-        font = args.font or love.graphics.getFont(),
+        font = args.font or g.getSmallFont(16),
         vely = args.vely or -10,
         velDamping = args.velDamping or 0,
         duration = args.duration or 3,

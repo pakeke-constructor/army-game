@@ -14,15 +14,17 @@ local WISP_MAX_SIZE = 3
 local WISP_MIN_LIFETIME = 3
 local WISP_MAX_LIFETIME = 6
 
-
+---@type ambientSetvice.randomWisp[]
 local wisps = {}
 
 local CLOUD_AMOUNT = 100
-local CLOUD_SPRITES = {"cloud1"}
 local CLOUD_SPEED = 5
 local CLOUD_MARGIN = 0.25 -- band around the view (fraction of window) clouds live in
 local CLOUD_FADE = 0.2    -- fade-in/out distance near the band edge (fraction of window)
+local CLOUD_SCREEN_FADE_X = 0.3 -- fade-out distance near the left/right screen edge (fraction of screen width)
+local CLOUD_SCREEN_FADE_Y = 0.4 -- fade-out distance near the top/bottom screen edge (fraction of screen height)
 
+---@type ambientSetvice.randomCloud[]
 local clouds = {}
 
 local canvas = nil
@@ -32,6 +34,23 @@ local CLOUD_ALPHA = 0.05
 -- world-space window the player is looking at; wisps spawn within it
 local window = { x = 0, y = 0, w = 100, h = 100 }
 
+local function getAdditionalAmbientService()
+    local mapType = g.getMapType()
+    return mapType and mapType.additionalAmbientService
+end
+
+---@class ambientSetvice.randomWisp
+---@field x number
+---@field y number
+---@field vx number
+---@field vy number
+---@field maxLifetime number
+---@field size number
+---@field alpha number
+---@field wob number
+---@field lifetime number
+
+---@return ambientSetvice.randomWisp
 local function randomWisp()
     local angle = -math.pi * 0.25 + (love.math.random() - 0.5) * 0.6
     local speed = WISP_MIN_SPEED + love.math.random() * (WISP_MAX_SPEED - WISP_MIN_SPEED)
@@ -42,23 +61,35 @@ local function randomWisp()
         vy = math.sin(angle) * speed,
         maxLifetime = WISP_MIN_LIFETIME + love.math.random()*(WISP_MAX_LIFETIME-WISP_MIN_LIFETIME),
         size = WISP_MIN_SIZE + love.math.random() * (WISP_MAX_SIZE - WISP_MIN_SIZE),
-        alpha = 0.45 + love.math.random() * 0.2,
-        wob = love.math.random() * math.pi * 2,
+        alpha = helper.lerp(0.45, 0.65, love.math.random()),
+        wob = love.math.random() * consts.TAU,
         lifetime = 0,
     }
 end
 
-local function randomCloud()
+---@class ambientSetvice.randomCloud
+---@field x number
+---@field y number
+---@field alpha number
+---@field r number
+---@field size number
+---@field layer number
+---@field sprite string
+---@field fade number
+
+---@param cloudSprites string[]
+---@return ambientSetvice.randomCloud
+local function randomCloud(cloudSprites)
     local sizeFactor = love.math.random(120, 150)/100
     local mx, my = window.w * CLOUD_MARGIN, window.h * CLOUD_MARGIN
     return {
-        x = window.x - mx + love.math.random() * (window.w + 2*mx),
-        y = window.y - my + love.math.random() * (window.h + 2*my),
-        alpha = 0.45 + love.math.random() * 0.2,
-        r = love.math.random() * math.pi * 2,
+        x = helper.lerp(window.x - mx, window.x + window.w + mx, love.math.random()),
+        y = helper.lerp(window.y - my, window.y + window.h + my, love.math.random()),
+        alpha = helper.lerp(0.35, 0.55, love.math.random()),
+        r = love.math.random() * consts.TAU,
         size = sizeFactor,
         layer = (sizeFactor+1)/2,
-        sprite = CLOUD_SPRITES[love.math.random(1, #CLOUD_SPRITES)],
+        sprite = helper.randomChoice(cloudSprites),
         fade = 1,
     }
 end
@@ -77,6 +108,12 @@ end
 ---@param transform love.Transform camera transform
 function ambienceService.update(dt, transform)
     windowFromTransform(transform)
+
+    local additionalAmbientService = getAdditionalAmbientService()
+    if additionalAmbientService then
+        additionalAmbientService.update(dt, transform)
+    end
+
     for i, wisp in ipairs(wisps) do
         wisp.wob = wisp.wob + dt
         -- random wander: nudge velocity in a random direction each frame
@@ -124,8 +161,15 @@ end
 
 
 ---@param transform love.Transform camera transform
-function ambienceService.reInitialize(transform)
+---@param cloudSprites string[]
+function ambienceService.reInitialize(transform, cloudSprites)
     windowFromTransform(transform)
+
+    local additionalAmbientService = getAdditionalAmbientService()
+    if additionalAmbientService then
+        additionalAmbientService.reInitialize(transform)
+    end
+
     wisps = {}
     for i = 1, WISP_COUNT do
         wisps[i] = randomWisp()
@@ -133,13 +177,18 @@ function ambienceService.reInitialize(transform)
 
     clouds = {}
     for i=1, CLOUD_AMOUNT do
-        clouds[i] = randomCloud()
+        clouds[i] = randomCloud(cloudSprites)
     end
 end
 
 
 ---@param transform love.Transform camera transform (for pixel-perfect world-space rendering)
 function ambienceService.draw(transform)
+    local additionalAmbientService = getAdditionalAmbientService()
+    if additionalAmbientService then
+        additionalAmbientService.draw(transform)
+    end
+
     ----
     -- WISP
     ----
@@ -176,7 +225,12 @@ function ambienceService.draw(transform)
     for _, cloud in ipairs(clouds) do
         local px = cloud.x + camX * (1 - cloud.layer)
         local py = cloud.y + camY * (1 - cloud.layer)
-        lg.setColor(1, 1, 1, cloud.fade)
+        local sx, sy = transform:transformPoint(px, py)
+        local edgeDistX = math.min(sx, sw - sx)
+        local edgeDistY = math.min(sy, sh - sy)
+        local nearEdgeCoefficient = math.max(0, math.min(edgeDistX / (sw * CLOUD_SCREEN_FADE_X), edgeDistY / (sh * CLOUD_SCREEN_FADE_Y), 1))
+        local alpha = cloud.fade * nearEdgeCoefficient
+        lg.setColor(1, 1, 1, alpha)
         g.drawImage(cloud.sprite, px, py, cloud.r, cloud.size*2, cloud.size*2)
     end
     lg.pop()

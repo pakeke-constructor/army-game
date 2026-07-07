@@ -5,18 +5,30 @@ local ParticleService = require(".particles.ParticleService")
 local fogService = require("src.fogService")
 local juiceService = require("src.juiceService")
 local ambienceService = require("src.ambienceService")
+local s = require("src.hud.settings")
 
 
-local CAMERA_ZOOM = 2
+local function cameraZoom()
+    return consts.BATTLE_ZOOM_FACTOR * ui.getUIScaling()
+end
 
 local INTRO_ZOOM_TEXT_FADE_TIME = 0.4
 local INTRO_ZOOM_DURATION = 1.6
 
-local WIN_DELAY = 1.8
-local VICTORY_FADE_IN = 0.25
+local VICTORY_FADE_IN = 1.8
+local VICTORY_FADE_OUT = 0.25
 
 local WIN_SHOCKWAVE_DURATION = 1.2
 local WIN_SHOCKWAVE_LINE_WIDTH = 98
+
+
+local COMMANDER_SCREEN_X_RATIO = 1 / 3
+-- ^^^^ TODO: make a cleaner implementation than this.
+-- this is lowkey hella hacky.
+
+-- extra radius added to each blob circle in the fog's rounded shape test
+local FOG_MARGIN = 60
+
 
 ---@class g.BattleScene
 ---@field hud g.HUD
@@ -29,23 +41,37 @@ local function loseBattle(self)
     self.defeated = true
     g.call("battleLost")
     -- todo: do other stuff here, like popup, etc etc
-    fadeToBlackService.fadeToFromBlack(1, function()
+    fadeToBlackService.fadeToFromBlack(4.8, function()
         gameoverPopupService.show()
-    end, 1)
+    end, 1.3)
 end
 
-local function spawnTestNeutralObjectives(self)
-    local border = self.ecs.boundingBox
-    local cx = border[1] + border[3] * 0.6
-    local cy = border[2] + border[4] * 0.5
-    local offsets = {
-        {0, 0},
-        {100, -70},
-        {100, 70},
-    }
-    for _, off in ipairs(offsets) do
-        g.spawnEntity("treasure_chest_objective", cx + off[1], cy + off[2])
-    end
+function battle_scene:generateAllyAndEnemyRectangles(border)
+    local borderR = Kirigami(
+        border[1],
+        border[2],
+        border[3],
+        border[4]
+    )
+
+    -- set the height and horizontal split of the rectangles
+    local allyRec, _, rightR = borderR:set(nil, nil, 600, nil)
+        :splitHorizontal(love.math.random(8, 12)/10, 1, love.math.random(8, 12)/10)
+
+    -- set the height of the ally rec and enemy rec which has randomized height and position
+    local allyRecHeight = love.math.random(200, 350)
+    allyRec = allyRec:set(nil, nil, nil, allyRecHeight)
+        :moveUnit(0, love.math.random(-50, 50)-allyRecHeight/2+200)
+
+    local enemyRecHeight = love.math.random(200, 350)
+    rightR = rightR:set(nil, nil, nil, enemyRecHeight)
+        :moveUnit(0, love.math.random(-50, 50)-enemyRecHeight/2+200)
+
+    
+    self.ecs:setAllyRectangle(allyRec:get())
+    self.ecs:setEnemyRectangle(rightR:get())
+
+    return allyRec, rightR
 end
 
 
@@ -75,17 +101,17 @@ function battle_scene:pollHandlers()
     self.ecs:addSystemHandlers()
     g.addBlessingAndEntityHandlers()
 
-    local rageMul = 1 + (g.getRun().demonRage or 0) * 0.1
+    local furyMul = 1 + (g.getRun().demonFury or 0) * 0.1
     g.addHandler({
         getAttackDamageMultiplier = function(ent)
             if ent and ent.team == "enemy" then
-                return rageMul
+                return furyMul
             end
             return 1
         end,
         getMaxHealthMultiplier = function(ent)
             if ent and ent.team == "enemy" then
-                return rageMul
+                return furyMul
             end
             return 1
         end,
@@ -122,20 +148,22 @@ function battle_scene:enter()
     juiceService.reset()
 
     self.editingSquadLineup = true
+    self.deployPhase = true
+    ---@type {squadId:string, x:number, y:number}[]
+    self.deployedSquads = {}
 
     self.randomI = love.math.random(1,1000) -- random integer, doesnt really matter
 
     ---@type ecs.ECSWorld
     self.ecs = ECSWorld({
         "stats", "status_effects", "ai", "attacking",
-        "physics", "shadows", "ground_decor", "juice_system", "blood_system"
+        "physics", "shadows", "ground_decor", "fog_decor", "juice_system", "blood_system"
     })
     g.setCurrentECS(self.ecs)
 
-    self.camera = Camera(0, 0, CAMERA_ZOOM)
+    self.camera = Camera(0, 0, cameraZoom())
     self.particles = ParticleService()
     self.hud = HUD()
-    self.noEnemyTimer = 0
     self.victory = false
     self.defeated = false
     self.allyDeathsThisBattle = 0
@@ -145,30 +173,27 @@ function battle_scene:enter()
     self.squadChoices = nil
     self.timeSinceEnteredScene = 0
     self.commander = nil
+    ---@type g.Squad? squad the player has clicked to select (nil = none)
+    self.selectedSquad = nil
+    ---@type g.Squad? deployed squad currently under the cursor
+    self.hoveredSquad = nil
 
     g.pollHandlers()
 
     if self.sandbox then
-        self.ecs:setBounds(1900, 1100)
+        self.ecs:setBounds(500,300, 1900, 1100)
     else
         encounters.startRandomEncounter(run.day, self.ecs)
     end
-    spawnTestNeutralObjectives(self)
 
     local border = self.ecs.boundingBox
     do
-        local borderR = Kirigami(
-            border[1],
-            border[2],
-            border[3],
-            border[4]
-        )
-        local leftR,_,_ = borderR:splitHorizontal(1,2)
-        local nx, ny = leftR:getCenter()
+        local allyRec, enemyRec = self:generateAllyAndEnemyRectangles(border)
+        local nx, ny = allyRec:getCenter()
         local commanderInfo = g.getCommanderInfo(run.commander)
         local commanderSquad = g.getSquadFromArmy(commanderInfo.squadId)
         if commanderSquad then
-            self.commander = commanderSquad:spawn(nx, ny)[1]
+            self.commander = commanderSquad:spawn(nx, ny+50)[1]
             self.commander.playerControlled = true
         end
     end
@@ -176,7 +201,7 @@ function battle_scene:enter()
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
     self.camera:setPos(border[3] * 0.45, border[4] * 0.5)
 
-    ambienceService.reInitialize(self.camera:getTransform())
+    ambienceService.reInitialize(self.camera:getTransform(), g.getMapType().cloudSprites)
 end
 
 
@@ -219,11 +244,42 @@ local function buildVictoryChoices()
 end
 
 
----@param secondCount integer
-function battle_scene:perSecondUpdate(secondCount)
-    g.setCurrentECS(self.ecs)
-    g.call("perSecondUpdate", secondCount)
+
+local function winBattle(self)
+    if self.victory then return end
+    self.victory = true
+    self.victoryPopupTime = 0
+    g.getRun():winBattle()
+    -- remove all entities except the commander
+    for _, ent in ipairs(self.ecs.entities) do
+        if not ent.isCommander then
+            self.ecs:removeEntity(ent)
+        end
+    end
+    if not self.squadChoices then
+        self.squadChoices = buildVictoryChoices()
+    end
+
+    fadeToBlackService.fadeToFromBlack(VICTORY_FADE_IN, function()
+        rewardPopupService.battleReward({
+            {
+                type = "gold",
+                amount = math.floor(helper.lerp(
+                    consts.BALANCING.BATTLE_GOLD_REWARD_MIN,
+                    consts.BALANCING.BATTLE_GOLD_REWARD_MAX,
+                    love.math.random()
+                ))
+            },
+            {
+                type = "or",
+                a = {type = "squad", rerolls = 1},
+                b = {type = "xp", amount = 4}
+            },
+            {type = "demon_fury", amount = 1},
+        })
+    end, VICTORY_FADE_OUT)
 end
+
 
 function battle_scene:update(dt)
     self.timeSinceEnteredScene = self.timeSinceEnteredScene + dt
@@ -239,39 +295,19 @@ function battle_scene:update(dt)
     juiceService.update(dt)
     ambienceService.update(dt, self.camera:getTransform())
     local timeScale = juiceService.consumeHitPause(dt)
-    self.ecs:update(dt * timeScale)
+    self.ecs:update(self.deployPhase and 0 or dt * timeScale)
 
     local enemyCount = countEnemies(self.ecs)
     self.lastEnemyCount = enemyCount
 
-    if self.defeated then
+    if self.defeated or self.deployPhase then
         return
     end
 
     if not self.paused then
         self.particles:update(dt)
-        -- track how long no enemies have existed
-        if enemyCount == 0 then
-            self.noEnemyTimer = self.noEnemyTimer + dt
-        else
-            self.noEnemyTimer = 0
-        end
-        if self.noEnemyTimer >= WIN_DELAY and (not self.victory) and (not self.sandbox) then
-            self.victory = true
-            -- choicePopupService.set("blessing")
-            rewardPopupService.battleReward({
-                gold = 100,
-                randomSquad = true,
-
-                randomBlessing = true,
-                randomMana = true
-                -- todo: remove this, blessings are obtained via other means
-            })
-            self.victoryPopupTime = 0
-            run:winBattle()
-            if not self.squadChoices then
-                self.squadChoices = buildVictoryChoices()
-            end
+        if enemyCount == 0 and (not self.victory) and (not self.sandbox) then
+            winBattle(self)
         end
     else
         self.victoryPopupTime = self.victoryPopupTime + dt
@@ -344,15 +380,24 @@ function battle_scene:updateCamera(dt)
         local fitZoom = math.min(sw / border[3], sh / border[4])
         local t = self.timeSinceEnteredScene / INTRO_ZOOM_DURATION
         t = t * t * (3 - 2 * t)
-        cam:setZoom(fitZoom + (CAMERA_ZOOM - fitZoom) * t)
+        cam:setZoom(fitZoom + (cameraZoom() - fitZoom) * t)
     else
-        cam:setZoom(CAMERA_ZOOM)
+        cam:setZoom(cameraZoom())
     end
 
     local ent = self.commander
     if ent and g.isAlive(ent) then
-        cam:setPos(ent.x, ent.y)
+        local sw = love.graphics.getWidth()
+        local worldOffsetX = sw * (0.5 - COMMANDER_SCREEN_X_RATIO) / cam:getZoom()
+        cam:setPos(ent.x + worldOffsetX, ent.y)
     end
+end
+
+function battle_scene:mousepressed(x, y, button)
+    -- raw flag so draw() can tell a click happened even when it lands on a UI
+    -- element (which swallows the battlefield click via iml). Reset in draw().
+    if button == 1 then self._leftClickThisFrame = true end
+    if button == 2 then self.selectedSquad = nil end
 end
 
 function battle_scene:mousemoved(x, y, dx, dy)
@@ -379,25 +424,52 @@ local function killAllEnemies(self)
             g.killEntity(ent)
         end
     end
-    local run = g.getRun()
-    run:winBattle()
-    if not self.squadChoices then
-        self.squadChoices = buildVictoryChoices()
+    winBattle(self)
+end
+
+local ARC_TEST_COLORS = {
+    g.snapToPalette(objects.Color.RED),
+    g.snapToPalette(objects.Color.GREEN),
+    g.snapToPalette(objects.Color("#36c7de")),
+    g.snapToPalette(objects.Color("#f1f11e")),
+    g.snapToPalette(objects.Color("#c852a4")),
+}
+
+local function spawnTestArcs(self)
+    local cx, cy = self.camera:getPos()
+    local i = 0
+    for _, ent in self.ecs:iterate("team") do
+        if ent.team == "ally" and g.isAlive(ent) then
+            i = i + 1
+            local color = ARC_TEST_COLORS[(i % #ARC_TEST_COLORS) + 1]
+            juiceService.spawnArc(color, cx, cy, ent.x, ent.y, ent)
+        end
     end
 end
 
+---@param self g.BattleScene
+local function spawnTestLightning(self)
+    local mx, my = love.mouse.getPosition()
+    local wx, wy = self.camera:toWorld(mx, my)
+    g.lightning(wx, wy, 50, self.commander)
+end
+
 function battle_scene:keypressed(k)
+    if s.keypressed(k) then return end
     local n = tonumber(k)
     if n and n >= 1 and n <= 9 then
         self.hud:selectVisibleSlot(n)
     end
 
     if consts.DEV_MODE then
+        if k == "1" then
+            spawnTestLightning(self)
+        end
         if k == "k" then
             killAllEnemies(self)
         end
         if k == "m" then
-            g.gotoScene("map_scene")
+            spawnTestArcs(self)
         end
         if k == "p" then
             self.paused = not self.paused
@@ -407,11 +479,10 @@ function battle_scene:keypressed(k)
                 rewardPopupService.clear()
             else
                 rewardPopupService.battleReward({
-                    gold = 123,
-                    xp = 45,
-                    randomBlessing = true,
-                    randomSquad = true,
-                    randomMana = true,
+                    {type = "gold", amount = 3},
+                    {type = "xp",amount = 3},
+                    {type = "squad", rerolls = 1},
+                    {type = "demon_fury", amount = 1},
                 })
             end
         end
@@ -427,6 +498,9 @@ local BATTLE_START = {
     loc("Battle Begins!",{}, {context=_BATTLE_START_CTX}),
 }
 
+
+local START_BATTLE_BTN = loc("Start Battle!", {}, {context="Button the player presses to begin the battle after deploying their squads"})
+local USE_LAST_ARMY_BTM = loc("Use Last Layout", {}, {context="Button for the player to use the layout used last battle"})
 
 local CANT_AFFORD = interp("{c r=1 g=0.2 b=0.2}{o}Can't afford! (Need {c r=1 b=1 g=1}{%{manaType}}{/c})", {
     context = "Popup shown when player tries to deploy a squad but doesn't have enough mana. %{manaType} is a richtext icon for the mana type (e.g. red, blue, green, yellow)."
@@ -452,7 +526,7 @@ end
 local function drawSandboxUI(self)
     local r = ui.getFullScreenRegion()
     local main, right = r:splitHorizontal(5,1)
-    local regs = right:grid(1,9)
+    local regs = right:grid(1,10)
     local c = objects.Color
     local ii = 1
     local function button(txt, col)
@@ -468,6 +542,9 @@ local function drawSandboxUI(self)
     end
     if button("Blessings", c.YELLOW) then
         self.sandbox_blessingScreen = true
+    end
+    if button("Chest", c.YELLOW) then
+        nodeEventService.openChestPopup()
     end
     if button("Spawn enemies", c.RED) then
         local b = self.ecs.boundingBox
@@ -627,8 +704,6 @@ end
 
 
 
-local DEPLOY_RADIUS = 100
-
 ---@param self g.BattleScene
 local function getCommanderDeployBasePos(self)
     if not self.commander then
@@ -655,17 +730,11 @@ local function getSnappedDeployPosition(self, squad, wx, wy)
         return wx, wy
     end
 
-    local commx, commy = getCommanderDeployBasePos(self)
-    local dx, dy = wx - commx, wy - commy
-    local dist = math.sqrt(dx * dx + dy * dy)
-    if dist <= DEPLOY_RADIUS then
+    local r = self.ecs.allyRectangle
+    if not r then
         return wx, wy
     end
-    if dist <= 0 then
-        return commx, commy
-    end
-    return commx + dx / dist * DEPLOY_RADIUS,
-        commy + dy / dist * DEPLOY_RADIUS
+    return self.ecs:clampToRect(r, wx, wy)
 end
 
 local SQUAD_HOVER_COLOR = g.snapToPalette(0.2, 1, 0.3, 0.5)
@@ -715,6 +784,89 @@ local function drawSquadHover(self, squad, wx, wy)
     richtext.printRichCentered("{bob}{o}"..info.name, smallFont, sx, sy+minY+yof2, 1000, "left")
 end
 
+
+
+-- bounding box of a deployed squad, centered on its leader. nil if not deployed.
+---@param squad g.Squad
+---@return number? x
+---@return number? y
+---@return number? w
+---@return number? h
+-- box around the squad's formation, centered on (cx,cy) (defaults to the leader).
+local function getSquadBox(squad, cx, cy)
+    local leader = squad.leader
+    if not leader then return end
+    cx, cy = cx or leader.x, cy or leader.y
+    local info = g.getSquadInfo(squad.squadId)
+    local einfo = g.getEntityDef(info.entityId)
+    local w, h = 10, 10
+    if einfo.image then w, h = g.getImageSize(einfo.image) end
+    local offsets = squad:getFormationOffsets()
+    local minX, minY, maxX, maxY = math.huge, math.huge, -math.huge, -math.huge
+    for i = 1, #offsets do
+        minX = math.min(minX, offsets[i].x)
+        minY = math.min(minY, offsets[i].y)
+        maxX = math.max(maxX, offsets[i].x)
+        maxY = math.max(maxY, offsets[i].y)
+    end
+    return cx + minX - w / 2, cy + minY - h * 0.95, (maxX - minX) + w, (maxY - minY) + h
+end
+
+-- a squad's identity color = its mana color
+local function getSquadColor(squad)
+    return g.getManaBundleColor(g.getSquadInfo(squad.squadId).cost)
+end
+
+local function setBoxColor(squad, alpha)
+    local cr, cg, cb = getSquadColor(squad):getRGBA()
+    lg.setColor(cr, cg, cb, alpha)
+end
+
+-- draw a footprint showing where each moving squad will end up.
+---@param self g.BattleScene
+local function drawSquadDestinations(self)
+    if not consts.LEADER_CONTROLS then return end
+    for _, squad in pairs(g.getRun().squads) do
+        local leader = squad.deployed and squad.leader
+        if leader and leader.destX then
+            -- always show the destination box, even once arrived: it's the
+            -- reliable place to click a squad whose units have engaged far off.
+            local bx, by, bw, bh = getSquadBox(squad, leader.destX, leader.destY)
+            if bx then
+                setBoxColor(squad, 0.4)
+                lg.setLineWidth(2)
+                lg.rectangle("line", bx, by, bw, bh)
+                lg.setColor(1, 1, 1, 1)
+            end
+        end
+    end
+end
+
+local SQUAD_HOVERSELECT_COLOR = g.snapToPalette(0.5, 0.5, 0.5, 0.4)
+
+-- find the deployed squad under the cursor; draw a box around the hovered one.
+---@param self g.BattleScene
+---@return g.Squad?
+local function updateHoveredSquad(self)
+    local mx, my = love.mouse.getPosition()
+    local wx, wy = self.camera:toWorld(mx, my)
+    local hovered = nil
+    for _, squad in pairs(g.getRun().squads) do
+        if squad.deployed and self.selectedSquad ~= squad then
+            local bx, by, bw, bh = getSquadBox(squad)
+            if bx and wx >= bx and wx <= bx + bw and wy >= by and wy <= by + bh then
+                hovered = squad
+            end
+        end
+    end
+    if hovered then
+        local bx, by, bw, bh = getSquadBox(hovered)
+        lg.setColor(SQUAD_HOVERSELECT_COLOR)
+        lg.setLineWidth(2)
+        lg.rectangle("line", bx, by, bw, bh)
+    end
+    return hovered
+end
 
 
 ---@param cost g.ManaBundle
@@ -769,6 +921,55 @@ local function drawCommanderTarget(self)
 end
 
 
+---@param self g.BattleScene
+---@return boolean
+local function canUseLastArmy(self)
+    if #self.deployedSquads > 0 then return false end
+    local layout = g.getRun().lastArmyLayout
+    if not layout or #layout == 0 then return false end
+
+    -- simulate spending mana, checking all squads exist + are affordable
+    local mana = {}
+    for k, v in pairs(g.getBattleManaCounts()) do mana[k] = v end
+    for _, entry in ipairs(layout) do
+        local squad = g.getSquadFromArmy(entry.squadId)
+        if not squad then return false end
+        local info = g.getSquadInfo(entry.squadId)
+        if info.cost and not g.trySpendMana(mana, info.cost) then
+            return false
+        end
+    end
+    return true
+end
+
+---@param self g.BattleScene
+local function deployLastArmy(self)
+    local commx, commy = getCommanderDeployBasePos(self)
+    for _, entry in ipairs(g.getRun().lastArmyLayout) do
+        local squad = g.getSquadFromArmy(entry.squadId)
+        if squad and not squad.deployed then
+            local info = g.getSquadInfo(entry.squadId)
+            if not info.cost or g.trySpendMana(g.getBattleManaCounts(), info.cost) then
+                local sx, sy = commx + entry.dx, commy + entry.dy
+                squad:spawn(sx, sy)
+                self.deployedSquads[#self.deployedSquads + 1] = {squadId = entry.squadId, x = sx, y = sy}
+            end
+        end
+    end
+end
+
+---@param self g.BattleScene
+local function saveLastArmy(self)
+    if #self.deployedSquads == 0 then return end
+    local commx, commy = getCommanderDeployBasePos(self)
+    local layout = {}
+    for _, d in ipairs(self.deployedSquads) do
+        layout[#layout + 1] = {squadId = d.squadId, dx = d.x - commx, dy = d.y - commy}
+    end
+    g.getRun().lastArmyLayout = layout
+end
+
+
 local function drawCommanderRadius(self)
     local commander = self.commander
     if (not commander) or (not g.isAlive(commander)) then
@@ -776,9 +977,9 @@ local function drawCommanderRadius(self)
     end
 
     local pop = gsman.setLineWidth(LINE_WIDTH)
-    local squad = self.hud:getSelection()
-    if squad and (not squad.deployed) then
-        local commx, commy = getCommanderDeployBasePos(self)
+    local selType, squad = self.hud:getSelection()
+    local r = self.ecs.allyRectangle
+    if selType == "squad" and squad and (not squad.deployed) and r then
         local mx, my = love.mouse.getPosition()
         local wx, wy = self.camera:toWorld(mx, my)
         local snappedX, snappedY = getSnappedDeployPosition(self, squad, wx, wy)
@@ -788,13 +989,14 @@ local function drawCommanderRadius(self)
         local lr, lgc, lb, la = DEPLOY_REGION_LINE:getRGBA()
 
         lg.setColor(ir, ig, ib, ia * opacityMult)
-        love.graphics.circle("fill", commx, commy, DEPLOY_RADIUS)
+        love.graphics.rectangle("fill", r.x, r.y, r.w, r.h)
         lg.setColor(lr, lgc, lb, la * opacityMult)
-        love.graphics.circle("line", commx, commy, DEPLOY_RADIUS)
+        love.graphics.rectangle("line", r.x, r.y, r.w, r.h)
     end
 
-    local timeSinceAutoAttack = commander._timeSinceAutoAttacked
-    if (not commander.attackRange) or (not timeSinceAutoAttack) or timeSinceAutoAttack >= AUTO_ATTACK_RADIUS_FADE_END then
+    local timeSinceAutoAttack = commander._timeSinceAutoAttacked or 100
+    local isRanged = commander.attack and commander.attack.attackType == "ranged"
+    if isRanged and ((not commander.attackRange) or (not timeSinceAutoAttack) or timeSinceAutoAttack >= AUTO_ATTACK_RADIUS_FADE_END) then
         return
     end
 
@@ -804,9 +1006,22 @@ local function drawCommanderRadius(self)
         alpha = alpha * (1 - t)
     end
 
+    if not isRanged then alpha = math.max(0.18, alpha) end
     lg.setColor(1, 1, 1, alpha)
     love.graphics.circle("line", commander.x, commander.y, commander.attackRange)
     pop:pop()
+end
+
+
+
+---@param cost g.ManaBundle
+local function spawnCantAffordManaPopup(cost)
+    local manaType = findMissingMana(cost, g.getBattleManaCounts())
+    local umx, umy = ui.getMouse()
+    g.addUITextPopup(umx, umy, CANT_AFFORD({manaType = manaType}), {
+        fadeIn = 0.15,
+        duration = 1.5,
+    })
 end
 
 
@@ -826,6 +1041,8 @@ function battle_scene:draw()
 
     self.ecs:draw(self.camera:getTransform())
 
+    juiceService.draw()
+
     local sw, sh = love.graphics.getDimensions()
     local x1, y1 = self.camera:toWorld(0, 0)
     local x2, y2 = self.camera:toWorld(sw, sh)
@@ -836,21 +1053,51 @@ function battle_scene:draw()
         h = math.abs(y2 - y1),
     }
     local ecs = self.ecs
-    fogService.renderFog(fogRegion, function(x, y)
-        return not ecs:isInsideShape(x, y)
+    fogService.renderFog(fogRegion, g.getMapType().fogColor, function(x, y)
+        return not ecs:isInsideShapeRounded(x, y, FOG_MARGIN)
     end)
+    
+    g.call("drawAboveFog")
 
+    self.hoveredSquad = nil
     if not self.victory then
-        local squad = self.hud:getSelection()
+        local selType, squad = self.hud:getSelection()
         local mx, my = love.mouse.getPosition()
         local wx, wy = self.camera:toWorld(mx, my)
-        if squad and not squad.deployed then
+
+        if selType == "squad" and squad and not squad.deployed then
             drawSquadHover(self, squad, wx, wy)
             lg.setColor(1, 1, 1, 1)
+        elseif selType == "spell" and squad and g.canCastSpell(wx, wy, squad) then
+            g.renderSpellCastPreview(wx, wy, squad)
+            lg.setColor(1, 1, 1, 1)
+        elseif consts.LEADER_CONTROLS then
+            -- not placing a squad: allow hovering/selecting deployed squads
+            self.hoveredSquad = updateHoveredSquad(self)
+            lg.setColor(1, 1, 1, 1)
+        end
+        -- show which deployed squad is currently selected
+        if consts.LEADER_CONTROLS and self.selectedSquad and self.selectedSquad.deployed then
+            local bx, by, bw, bh = getSquadBox(self.selectedSquad)
+            if bx then
+                setBoxColor(self.selectedSquad, 0.7)
+                lg.setLineWidth(2)
+                lg.rectangle("line", bx, by, bw, bh)
+                lg.setColor(1, 1, 1, 1)
+            end
+            -- preview where it'll end up at the cursor before issuing the move
+            local pbx, pby, pbw, pbh = getSquadBox(self.selectedSquad, wx, wy)
+            if pbx then
+                setBoxColor(self.selectedSquad, 0.4)
+                lg.setLineWidth(2)
+                lg.rectangle("line", pbx, pby, pbw, pbh)
+                lg.setColor(1, 1, 1, 1)
+            end
         end
     end
 
     drawCommanderTarget(self)
+    drawSquadDestinations(self)
 
     iml.popTransform()
     self.camera:detach()
@@ -859,33 +1106,74 @@ function battle_scene:draw()
 
     ui.startUI()
 
+    -- true when this frame's left-click landed on the battlefield (not on a UI
+    -- element, which would have swallowed it via iml).
+    local clickedBattlefield = false
     if (not self.victory) and (not self.defeated) and iml.wasJustPressed(0, 0, sw, sh, 1, "deploy_click") then
-        local entry = self.hud:getSelection()
+        clickedBattlefield = true
+        local selType, entry = self.hud:getSelection()
         local mx, my = love.mouse.getPosition()
         local wx, wy = self.camera:toWorld(mx, my)
-        local sx, sy = wx, wy
-        if entry then
-            sx, sy = getSnappedDeployPosition(self, entry, wx, wy)
-        end
-        if entry and not entry.deployed then
+
+        if selType == "spell" then
+            local info = g.getSpellInfo(entry)
+            if g.canCastSpell(wx, wy, entry) then
+                if not info.cost or g.trySpendMana(g.getBattleManaCounts(), info.cost) then
+                    g.castSpell(entry, wx, wy)
+                    spawnManaIconPopups(info.cost)
+                else
+                    spawnCantAffordManaPopup(info.cost)
+                end
+            end
+        elseif selType == "squad" and not entry.deployed then
+            local sx, sy = getSnappedDeployPosition(self, entry, wx, wy)
             local info = g.getSquadInfo(entry.squadId)
             if not info.cost or g.trySpendMana(g.getBattleManaCounts(), info.cost) then
                 entry:spawn(sx, sy)
+                self.deployedSquads[#self.deployedSquads + 1] = {squadId = entry.squadId, x = sx, y = sy}
                 spawnManaIconPopups(info.cost)
             else
-                local manaType = findMissingMana(info.cost, g.getBattleManaCounts())
-                local umx, umy = ui.getMouse()
-                g.addUITextPopup(umx, umy, CANT_AFFORD({manaType = manaType}), {
-                    fadeIn = 0.15,
-                    duration = 1.5,
-                })
+                spawnCantAffordManaPopup(info.cost)
             end
+        elseif consts.LEADER_CONTROLS and self.hoveredSquad then
+            -- click a deployed squad's box to select it
+            self.selectedSquad = self.hoveredSquad
+        elseif consts.LEADER_CONTROLS and self.selectedSquad and self.selectedSquad.deployed and self.selectedSquad.leader then
+            -- move command: send the selected squad's leader to the clicked point
+            local leader = self.selectedSquad.leader
+            leader.destX, leader.destY = wx, wy
+            self.selectedSquad = nil
+        else
+            self.selectedSquad = nil
         end
     end
-    self.hud:drawUI({ battleScene = true })
+    self.hud:drawUI({ battleScene = true, battleStarted = not self.deployPhase })
+
+    -- click landed on a UI element (battlefield click was swallowed): deselect
+    if self._leftClickThisFrame and not clickedBattlefield then
+        self.selectedSquad = nil
+    end
+    self._leftClickThisFrame = false
+
+    if self.deployPhase then
+        local r = ui.getScreenRegion()
+        local _, row, _ = r:splitVertical(6, 1, 1)
+        local _, mid, _ = row:splitHorizontal(1,1,1)
+        local a,b = mid:splitHorizontal(1,1)
+
+        if canUseLastArmy(self) and ui.DefaultButton("{o}"..USE_LAST_ARMY_BTM, a:padRatio(0.15)) then
+            deployLastArmy(self)
+        end
+
+        if ui.DefaultButton("{o}"..START_BATTLE_BTN, b:padRatio(0.15)) then
+            saveLastArmy(self)
+            self.deployPhase = false
+            g.call("battleStarted")
+        end
+    end
 
     if self.victory and (not g.isAnyPopupOpen()) then
-        g.gotoScene("map_scene")
+        g.transitionTo("map_scene")
     end
 
     if self.timeSinceEnteredScene < INTRO_ZOOM_DURATION then
@@ -902,6 +1190,7 @@ function battle_scene:draw()
     if self.sandbox and consts.SHOW_DEV_STUFF then
         drawSandboxUI(self)
     end
+    s.draw()
     ui.endUI()
 
     if self.shockwave and self.shockwave.time < WIN_SHOCKWAVE_DURATION then

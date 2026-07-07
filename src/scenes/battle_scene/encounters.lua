@@ -23,29 +23,35 @@ end
 local EnemySpawner = objects.Class("g:EnemySpawner")
 
 local SPACING = 25
-local ROW_SIZE = 6
+-- how far behind its chosen melee squad a ranged squad sits
+local RANGED_BACK_OFFSET = 80
+-- vertical margin so squads don't spawn right on the edge
+local VERTICAL_MARGIN = 60
+-- horizontal inset of the enemy front line from the left edge of enemyRectangle
+local HORIZONTAL_MARGIN = 60
 
 ---@param ecs ecs.ECSWorld
 ---@param rng table
 function EnemySpawner:init(ecs, rng)
     self._ecs = ecs
     self._rng = rng
-    self._entries = {}
-    -- spawn origin and facing direction
-    self._x = nil
-    self._y = nil
-    self._dx = -1
-    self._dy = 0
+    ---@type {id:string, count:integer, kind:string}[]
+    self._squads = {}
 end
 
 
+--- Queues a squad of `count` enemies of type `id`.
 ---@param id string entity type id
 ---@param count? number default 1
 function EnemySpawner:add(id, count)
     count = count or 1
-    for i = 1, count do
-        self._entries[#self._entries + 1] = id
+    local def = g.getEntityDef(id)
+    local kind = "melee"
+    if def and def.attack and def.attack.attackType == "ranged" then
+        kind = "ranged"
     end
+    -- TODO: detect buildings and set kind = "building"
+    self._squads[#self._squads + 1] = {id = id, count = count, kind = kind}
 end
 
 function EnemySpawner:getECS()
@@ -67,66 +73,76 @@ function EnemySpawner:getRandom(min, max)
     return self._rng:random()
 end
 
-function EnemySpawner:getSpawnPosition()
-    return self._x, self._y
-end
-
-function EnemySpawner:getFaceDirection()
-    return self._dx, self._dy
-end
-
---- Spawns all queued enemies in formation.
---- Melee in front rows, ranged in back rows.
----@param ecs ecs.ECSWorld
-function EnemySpawner:finalize(ecs)
-    -- separate melee and ranged
-    local melee, ranged = {}, {}
-    for _, id in ipairs(self._entries) do
-        local def = g.getEntityDef(id)
-        if def and def.attack and def.attack.attackType == "ranged" then
-            ranged[#ranged + 1] = id
-        else
-            melee[#melee + 1] = id
-        end
-    end
-
-    -- melee first (closer to player), then ranged behind
-    local ordered = {}
-    for _, id in ipairs(melee) do ordered[#ordered + 1] = id end
-    for _, id in ipairs(ranged) do ordered[#ordered + 1] = id end
-
-    -- lay out in rows centered on spawn position. Sample random points inside
-    -- the fog shape and pick the one furthest from the player's spawn (left-center).
-    if not (self._x and self._y) then
-        local bx, by, w, h = ecs.boundingBox[1], ecs.boundingBox[2], ecs.boundingBox[3], ecs.boundingBox[4]
-        local playerX, playerY = bx + w / 4, by + h / 2
-        local bestX, bestY, bestD
-        for i = 1, 200 do
-            local x = self._rng:random() * w + bx
-            local y = self._rng:random() * h + by
-            if ecs:isInsideShape(x, y) then
-                local dx, dy = x - playerX, y - playerY
-                local d = dx * dx + dy * dy
-                if not bestD or d > bestD then
-                    bestD, bestX, bestY = d, x, y
-                end
-            end
-        end
-        self._x = bestX or (bx + w * (2 / 3))
-        self._y = bestY or (by + h * (2 / 5))
-    end
-    local ox, oy = self._x, self._y
-    for i, id in ipairs(ordered) do
+--- Spawns one squad's units in a square grid centered on (cx, cy).
+function EnemySpawner:_spawnSquad(squad, cx, cy)
+    local cols, rows = helper.getBestFitDimensions(squad.count, 1, 1)
+    for i = 1, squad.count do
         local idx = i - 1
-        local col = idx % ROW_SIZE
-        local row = math.floor(idx / ROW_SIZE)
-        local x = ox + (col - (ROW_SIZE - 1) / 2) * SPACING
-        local y = oy + row * SPACING
-        local ent = g.spawnEntity(id, x, y)
+        local col = idx % cols
+        local row = math.floor(idx / cols)
+        local x = cx + (col - (cols - 1) / 2) * SPACING
+        local y = cy + (row - (rows - 1) / 2) * SPACING
+        x, y = self._ecs:clampToShape(x, y)
+        local ent = g.spawnEntity(squad.id, x, y)
+        ent.faceDir = -1
         ent.patrolX, ent.patrolY = x, y
     end
+end
 
-    self._entries = {}
+--- Lays out all queued squads into formation and spawns them.
+--- Enemies always spawn opposite the player, in the right two-thirds
+--- of the battlefield (see battle_scene, which puts allies in the left third).
+function EnemySpawner:finalize()
+    local ecs = self._ecs
+    local bx, by, w, h = ecs.boundingBox[1], ecs.boundingBox[2], ecs.boundingBox[3], ecs.boundingBox[4]
+
+    local enemyR = select(2, Kirigami(bx, by, w, h):splitHorizontal(1, 2))
+    ecs:setEnemyRectangle(enemyR:get())
+
+    -- vertical line the army lays out along, near the left edge of enemyR
+    local enemyX = enemyR.x + HORIZONTAL_MARGIN
+    local lineTop = enemyR.y + VERTICAL_MARGIN
+    local lineBottom = enemyR.y + enemyR.h - VERTICAL_MARGIN
+
+    -- split squads by role
+    local melee, ranged, buildings = {}, {}, {}
+    for _, sq in ipairs(self._squads) do
+        if sq.kind == "ranged" then
+            ranged[#ranged + 1] = sq
+        elseif sq.kind == "building" then
+            buildings[#buildings + 1] = sq
+        else
+            melee[#melee + 1] = sq
+        end
+    end
+
+    -- melee squads: each gets a random spot on the vertical line
+    for _, sq in ipairs(melee) do
+        sq.x = enemyX
+        sq.y = lineTop + self._rng:random() * (lineBottom - lineTop)
+        self:_spawnSquad(sq, sq.x, sq.y)
+    end
+
+    -- ranged squads: sit behind a random melee squad (further from player)
+    for _, sq in ipairs(ranged) do
+        local cx, cy
+        if #melee > 0 then
+            local host = melee[self._rng:random(1, #melee)]
+            cx = host.x + RANGED_BACK_OFFSET
+            cy = host.y
+        else
+            cx = enemyX
+            cy = lineTop + self._rng:random() * (lineBottom - lineTop)
+        end
+        self:_spawnSquad(sq, cx, cy)
+    end
+
+    -- TODO: place buildings at the very back of the formation
+    for _, sq in ipairs(buildings) do
+        self:_spawnSquad(sq, enemyX + RANGED_BACK_OFFSET * 2, lineTop + self._rng:random() * (lineBottom - lineTop))
+    end
+
+    self._squads = {}
 end
 
 
@@ -142,9 +158,10 @@ function encounters.startRandomEncounter(difficulty, ecs)
     local spawn = arr[rng:random(1, #arr)]
     local es = EnemySpawner(ecs, rng)
     spawn(es, ecs)
-    es:finalize(ecs)
+    es:finalize()
 end
 
 return encounters
+
 
 

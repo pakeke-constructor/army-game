@@ -7,6 +7,7 @@ local STAT_LIST = {
     "startingArmor",
     "moveSpeed",
     "attackRange",
+    "magic",
 }
 
 local STAT_FONT = nil
@@ -34,7 +35,7 @@ local function drawPerkSlot(region, perk, accentColor)
     -- ui.drawSingleColorPanel(x, y, w, h)
 
     local r,g,b = accentColor:darken(0.9):getRGBA()
-    
+
     lg.setColor(1,1,1)
     local colorChange = "{o r=" .. r .. " g=" .. g .. " b=" .. b .. "}"
     local title = "{" .. perk.image .. "}{o}" .. helper.wrapRichtextColor(accentColor, perk.name) .. "{/o}"
@@ -61,6 +62,7 @@ local DPS_DESC = interp("{damage} Attack Damage: {c r=0.85 g=0.25 b=0.25}%{attac
 local UPGRADE = loc("UPGRADE!", {}, {
     context = "Title, denoting that there is a squad upgrade."
 })
+local LEVEL = interp("Lv.%{level}", {context = "Abbreviated level text"})
 
 local BONUS = interp("Bonus: %{value}", {
     context = "Tooltip line showing a stat bonus from squad buffs, e.g. 'Bonus: +5 (Health)'."
@@ -72,16 +74,28 @@ local UPGRADE_UNITS = interp("+%{n} Units", {
 
 local UPGRADE_COLOR_TAG = "{UPGRADE_COLOR}"
 
+local TRAIL_COUNT = {
+    RARE = 3,
+    LEGENDARY = 6
+}
+
+local SWIPE = {
+    LEGENDARY = "{swipe t=0.1}",
+    UNIQUE = "{swipe r=0.208 g=0.490 b=0.824 t=0.1}",
+    COMMANDER = "{swipe r=0.208 g=0.490 b=0.824 t=0.1}"
+}
+
 
 ---Draw a single squad card in a kirigami region. Returns true if clicked.
 ---@param squadId string
 ---@param region kirigami.Region
 ---@param index number
 ---@param showUpgrade boolean?
+---@param showLevel? integer|boolean
 ---@return boolean
 ---@return number
 ---@return number
-local function drawSquadCard(squadId, region, index, showUpgrade)
+local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
     ui.assertUIStarted()
 
     local info = g.getSquadInfo(squadId)
@@ -102,17 +116,31 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
 
     local x, y, w, h = region:get()
     local uid = squadId .. "_" .. index
-    iml.panel(x, y, w, h, uid)
+    local hitX, hitY = x, y
 
     local isHovered = iml.isHovered(x,y,w,h, uid)
     if isHovered then
         frameDarkColor = frameDarkColor:lerp(manaColor, 0.10)
+        y = y - 3
+        region = region:moveUnit(0, -3)
     end
+    iml.panel(hitX, hitY, w, h, uid)
 
     STAT_FONT = STAT_FONT or g.getSmallFont(16)
     TITLE_FONT = TITLE_FONT or g.getBigFont(16)
 
     local box = ui.Box({maxWidth = w, maxHeight = h, padding = 12, spacing = 0}, function(bx, by, bw, bh)
+        if TRAIL_COUNT[info.rarity.id] then
+            helper.rotatingGlow(region:padRatio(0.2), {
+                count = TRAIL_COUNT[info.rarity.id],
+                offset = (index - 1) * 1.37,
+                glowScale = 100,
+                rps = 1,
+                wobbleFreq = 0.1,
+                wobbleAmp = 10,
+                color = info.rarity.color,
+            })
+        end
         if canUpgrade then
             helper.drawEdgeTrailAnimation(region, manaColor, 0.25, 20)
             helper.drawEdgeTrailAnimation(region, manaColor, 0.75, 20)
@@ -130,6 +158,17 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
     -- Header: icon on left, name on right
     local iconSize = 32
     local iconGap = 10
+    local level = nil
+    if showLevel then
+        if type(showLevel) == "number" then
+            level = showLevel
+        else
+            local sq = g.getSquadFromArmy(squadId)
+            if sq then
+                level = sq.level
+            end
+        end
+    end
     box:add({
         getHeight = function(innerW)
             return math.max(iconSize, TITLE_FONT:getHeight())
@@ -137,18 +176,18 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
         draw = function(ex, ey, ew, eh)
             -- icon
             love.graphics.setColor(1, 1, 1)
-            g.drawSquadIcon(squadId, ex+16, ey+16, true)
+            g.drawSquadIcon(squadId, ex+16, ey+16, true, level)
             -- name to right of icon
             local textX = ex + iconSize + iconGap
             local textW = ew - iconSize - iconGap
 
             love.graphics.setColor(1, 1, 1)
-            local name = "{c r=0.8 g=0.8 b=0.85}{bob amp=0.5} {o}" .. info.name
+            local name = "{c r=0.8 g=0.8 b=0.85}{bob amp=0.5}{o}"..info.name
             richtext.printRichContainedNoWrap(name, TITLE_FONT, textX, ey, textW, TITLE_FONT:getHeight(), "left")
             -- Rarity
             local rarity = info.rarity
             love.graphics.setColor(rarity.color)
-            local rarityText = rarity.lightTextEffect..rarity.name
+            local rarityText = rarity.lightTextEffect..(SWIPE[rarity.id] or "")..rarity.name
             richtext.printRichContainedNoWrap("{o}" .. rarityText, STAT_FONT, textX, ey + 16, textW, STAT_FONT:getHeight(), "left")
         end,
     })
@@ -254,7 +293,7 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
 
                 -- background
                 local important = isDPS or g.isStatImportant(statId, info.entityId)
-                local alpha = 0.2
+                local alpha = 0.4
                 if important then
                     alpha = 1
                 end
@@ -293,7 +332,6 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
 
                 -- text
                 do
-                love.graphics.setFont(STAT_FONT)
                 local r,g,b,a = statColor:getRGBA()
                 love.graphics.setColor(r,g,b,a*alpha)
                 local textX = cx + ch
@@ -383,7 +421,7 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
     })
 
     local ret = false
-    if iml.wasJustClicked(x, y, w, h, 1, uid) then
+    if iml.wasJustClicked(hitX, hitY, w, h, 1, uid) then
         g.playUISound("ui_click_basic", 1.4, 0.8)
         ret = true
     end
@@ -429,7 +467,11 @@ local function drawSquadCard(squadId, region, index, showUpgrade)
             lg.setColor(1,1,1)
             ui.drawDarkPanel(boxReg:get())
             local font = g.getSmallFont(16)
-            richtext.printRichContainedNoWrap("{wavy amp=0.5}" .. UPGRADE_COLOR_TAG .. UPGRADE, font, title:padUnit(2,2):get())
+            richtext.printRichContainedNoWrap(
+                "{bob amp=0.5}" .. UPGRADE_COLOR_TAG ..LEVEL({level = canUpgrade.level + 1}),
+                font,
+                title:padUnit(2,2):get()
+            )
             richtext.printRichContainedNoWrap(str, font, txtReg:padUnit(4,4):get())
         end
     end

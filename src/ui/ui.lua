@@ -39,8 +39,12 @@ function ui.DefaultButton(richTxt, region)
 
     love.graphics.setColor(1,1,1)
     if iml.isHovered(detectPanel:get()) then
-        oy = -2
+        oy = -7 -- slight lift when hovering
         lg.setColor(0,0,0)
+    end
+
+    if iml.isClicked(detectPanel:get()) then
+        oy = -2
     end
 
     if iml.wasJustHovered(detectPanel:get()) then
@@ -335,14 +339,14 @@ function ui.Slider(key, direction, slidercol, currentsegment, segments, slidersi
     end
 
     love.graphics.setColor(curslidercol)
+    local radius = (direction == "horizontal" and h or w) / 2
+    local mainlen = direction == "horizontal" and w or h
+    local travel = mainlen - radius * 2
+    local slideroff = segments > 1 and ((s - 1) * travel / (segments - 1)) or travel / 2
     if direction == "horizontal" then
-        local sliderwidth = w * slidersize
-        local slideroff = segments > 1 and ((s - 1) * (w - sliderwidth) / (segments - 1)) or 0
-        love.graphics.rectangle("fill", x + slideroff, y, w * slidersize, h)
+        love.graphics.circle("fill", x + radius + slideroff, y + h / 2, radius)
     elseif direction == "vertical" then
-        local sliderheight = h * slidersize
-        local slideroff = segments > 1 and ((s - 1) * (h - sliderheight) / (segments - 1)) or 0
-        love.graphics.rectangle("fill", x, y + slideroff, w, sliderheight)
+        love.graphics.circle("fill", x + w / 2, y + radius + slideroff, radius)
     end
 
     return s
@@ -539,11 +543,15 @@ end
 
 local uiPushed = false
 
-function ui.startUI()
+---@param scaleMult number?
+function ui.startUI(scaleMult)
     assert(not uiPushed, "attempt to call startUI twice")
     uiPushed = true
     lg.push()
     local t = ui.getUIScalingTransform()
+    if scaleMult then
+        t = t:clone():scale(scaleMult, scaleMult)
+    end
     lg.replaceTransform(t)
     iml.pushTransform(t)
 end
@@ -571,6 +579,7 @@ ui.HBox = HBox.new
 
 
 ui.drawSquadCard = require(".squad_card")
+ui.drawSpellCard = require(".spell_card")
 ui.drawBlessingCard = require(".blessing_card")
 
 

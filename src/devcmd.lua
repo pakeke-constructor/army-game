@@ -24,7 +24,13 @@ COMMANDS.help = function()
     addLog("/sb - reset & enter sandbox battle")
     addLog("/rb - reset battle & zoom out (map-gen test)")
     addLog("/vacuum - removes all fogs")
+    addLog("/wb - open whiteboard dev scene")
     addLog("/help - show this")
+end
+
+COMMANDS.wb = function()
+    g.gotoScene("whiteboard_scene")
+    addLog("whiteboard")
 end
 
 COMMANDS.sb = function()
@@ -88,6 +94,14 @@ COMMANDS.gold = function(args)
     addLog("gold -> " .. run.money)
 end
 
+COMMANDS.xp = function(args)
+    local amt = tonumber(args[1])
+    if not amt then return addLog("usage: /xp <amount>") end
+    g.addXP(amt)
+    local run = g.getRun()
+    addLog("xp -> " .. run.xp)
+end
+
 COMMANDS.tp = function()
     local scene, name = g.getCurrentScene()
     if name ~= "map_scene" then return addLog("/tp only works in map scene") end
@@ -129,6 +143,29 @@ COMMANDS.vacuum = function()
         node.seen = true
     end
     addLog("vacuumed all fogs")
+end
+
+COMMANDS.lua = function(args)
+    local command = table.concat(args, " ")
+    if #command == 0 then
+        return addLog("Usage: /lua <lua>")
+    end
+
+    local l, msg = loadstring(command)
+    if not l then
+        return addLog("Error: "..msg)
+    end
+
+    local ok, bt = xpcall(l, debug.traceback)
+    if not ok then
+        return addLog(bt)
+    end
+
+    if bt ~= nil then
+        return addLog(tostring(bt))
+    else
+        return addLog("Executed")
+    end
 end
 
 local function execCmd(line)

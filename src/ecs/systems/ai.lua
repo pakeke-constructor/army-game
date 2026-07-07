@@ -33,6 +33,8 @@ local PATROL_ARRIVE_DIST = 4
 -- reused across frames
 ---@type ecs.Entity[]
 local _sortBuf = {}
+-- which squad leaders we've already updated this frame
+local _leaderSeen = {}
 
 -- returns squared distance
 local function dist2(a, b)
@@ -58,35 +60,51 @@ local function zero(ent, c)
     return 0
 end
 
----@param c ecs.Entity
-local function missingHealthPriority(ent, c)
-    local maxHealth = c.maxHealth or c.health or 0
-    local missing = maxHealth - (c.health or 0)
-    return math.max(0, missing)
-end
 
 local function nextRetargetDelay()
-    return RETARGET_MIN + love.math.random() * (RETARGET_MAX - RETARGET_MIN)
+    return helper.lerp(RETARGET_MIN, RETARGET_MAX, love.math.random())
 end
 
 -- Find the best target for `ent` from `candidates`
 ---@param ent ecs.Entity
 ---@param candidates ecs.Entity[]
 local function pickTarget(ent, candidates)
-    local best, bestScore = nil, -math.huge
     local ai = assert(ent.ai)
+
+    -- healers: prioritize healing the frontline. Heavily weight melee allies,
+    -- and never target buildings. If anyone is hurt, target the most-hurt
+    -- (weighted to melee); otherwise target the melee ally with the most health.
+    if not ai.getPriority and (ent.healPower or 0) > 0 then
+        local MELEE_WEIGHT = 1000
+        local best, bestScore = nil, -math.huge
+        for i = 1, #candidates do
+            local c = candidates[i]
+            if isValidTarget(c) and c ~= ent and not g.isBuildingType(c:getTypename()) then
+                local maxHealth = c.maxHealth or c.health or 0
+                local missing = math.max(0, maxHealth - (c.health or 0))
+                local isMelee = not g.isRangedUnit(c:getTypename())
+                local score
+                if missing > 0 then
+                    score = missing + (isMelee and MELEE_WEIGHT or 0)
+                else
+                    -- nobody hurt: prefer beefiest melee
+                    score = (c.health or 0) - 1000 + (isMelee and MELEE_WEIGHT or 0)
+                end
+                if score > bestScore then
+                    best, bestScore = c, score
+                end
+            end
+        end
+        return best
+    end
+
+
+    local best, bestScore = nil, -math.huge
     local curTarget = ent._aiTarget
     for i = 1, #candidates do
         local c = candidates[i]
         if isValidTarget(c) and c ~= ent then
-            local getPrio = ai.getPriority
-            if not getPrio then
-                if (ent.healPower or 0) > 0 then
-                    getPrio = missingHealthPriority
-                else
-                    getPrio = zero
-                end
-            end
+            local getPrio = ai.getPriority or zero
             local prio = getPrio(ent, c)
             prio = prio + g.ask("getAITargetPriorityModifier", ent, c)
             -- tiebreak: closer is better (subtract tiny distance factor)
@@ -105,6 +123,64 @@ local function pickTarget(ent, candidates)
     end
     return best
 end
+
+
+-- true if this unit marches as part of a squad (offensive squads only)
+local function followsLeader(ent)
+    return ent.squad and ent.squad.leader
+        and ent.team == "ally"
+        and not ent.playerControlled
+        and (not ent.ai or ent.ai.target ~= "ally")
+end
+
+-- if true: squad leaders auto-march toward the nearest enemy (the OLD behavior).
+-- if false: leaders only move where the player commands them (click-to-move).
+local LEADER_AUTO_ATTACK = not consts.LEADER_CONTROLS
+
+-- Move an invisible squad leader.
+-- `rep` is a representative unit (for moveSpeed/attackRange).
+---@param leader g.Squad.Leader
+local function updateLeader(leader, rep, enemies, dt)
+    if not LEADER_AUTO_ATTACK then
+        -- manual control: the (invisible) leader teleports to the player-set
+        -- destination; the units then walk to their formation slots there.
+        -- individual units break off on their own when an enemy enters range
+        -- (handled per-unit below), so the leader never "engages" as a group.
+        leader.target = nil
+        leader.engaged = false
+        if leader.destX then
+            leader.x, leader.y = leader.destX, leader.destY
+        end
+        return
+    end
+
+    -- OLD behavior: march toward the nearest enemy.
+    local best, bestD = nil, math.huge
+    for i = 1, #enemies do
+        local e = enemies[i]
+        if isValidTarget(e) then
+            local d = dist2(leader, e)
+            if d < bestD then best, bestD = e, d end
+        end
+    end
+    leader.target = best
+    if not best then
+        leader.engaged = false
+        return
+    end
+    local dx, dy = best.x - leader.x, best.y - leader.y
+    local dist = (dx * dx + dy * dy) ^ 0.5
+    -- engaged once the leader is within the squad's attack range: units break
+    -- off and attack independently. Otherwise the leader marches forward.
+    leader.engaged = dist <= (rep.attackRange or 100)
+    if not leader.engaged and dist > 1 then
+        local speed = rep.moveSpeed or 60
+        leader.x = leader.x + dx / dist * speed * dt
+        leader.y = leader.y + dy / dist * speed * dt
+    end
+end
+
+
 
 local function updatePatrol(ent, dt)
     if not ent._patrolInited then
@@ -156,6 +232,16 @@ function aiSys.preUpdate(dt)
             else
                 enemies[#enemies + 1] = ent
             end
+        end
+    end
+
+    -- move each squad leader once per frame (the squad marches as a group)
+    table_clear(_leaderSeen)
+    for i = 1, #allies do
+        local ent = allies[i]
+        if followsLeader(ent) and not _leaderSeen[ent.squad.leader] then
+            _leaderSeen[ent.squad.leader] = true
+            updateLeader(ent.squad.leader, ent, enemies, dt)
         end
     end
 
@@ -230,6 +316,31 @@ function aiSys.preUpdate(dt)
                 end
                 goto continue
             end
+        end
+
+        -- squad units march in formation behind their leader, but each unit
+        -- breaks off on its own to chase/attack once its target is in range.
+        local tauntedAway = ent.taunt and ent.taunt.ent and isValidTarget(ent.taunt.ent)
+        local leader = followsLeader(ent) and ent.squad.leader
+        local range = ent.attackRange * 1.5 or 100
+        local targetInRange = targ and dist2(ent, targ) <= range * range
+        if leader and not leader.engaged and not tauntedAway and not targetInRange then
+            -- keep _aiTarget (the attack system fires if an enemy strays into
+            -- range), but movement is dictated by the formation slot, not chase.
+            local off = ent._formationOffset
+            local fx = leader.x + (off and off.x or 0)
+            local fy = leader.y + (off and off.y or 0)
+            local dx, dy = fx - ent.x, fy - ent.y
+            local dist = (dx * dx + dy * dy) ^ 0.5
+            if dist > PATROL_ARRIVE_DIST then
+                local speed = ent.moveSpeed or 60
+                ent.vx, ent.vy = dx / dist * speed, dy / dist * speed
+                ent._isMoving = true
+            else
+                ent.vx, ent.vy = 0, 0
+                ent._isMoving = false
+            end
+            goto continue
         end
 
         if not targ then

@@ -4,6 +4,8 @@ g.defineBlessing("anger", "Anger", {
     description = loc2("+1 (ATK) to allied units with at least 3 (ATK)."),
     image = "blessing_anger",
     rarity = g.RARITIES.COMMON,
+    -- draft tags: attack_damage, buffing
+    tags = {"attack_damage", "buffing"},
     handlers = {
         getAttackDamageModifier = function(ent)
             if ent.team == "ally" and (ent.attackDamage or 0) >= 3 then
@@ -17,6 +19,8 @@ g.defineBlessing("heart", "Heart", {
     description = loc2("+1 max (HP) to allied squads."),
     image = "blessing_hearty",
     rarity = g.RARITIES.COMMON,
+    -- tags: health, buffing
+    tags = {"health", "buffing"},
     handlers = {
         getMaxHealthModifier = function(ent)
             if ent.squad and ent.team == "ally" then
@@ -30,6 +34,8 @@ g.defineBlessing("naturalist", "Naturalist", {
     description = loc2("+4 max (HP) to allied squads."),
     image = "blessing_naturalist",
     rarity = g.RARITIES.UNCOMMON,
+    -- tags: health, buffing
+    tags = {"health", "buffing"},
     handlers = {
         getMaxHealthModifier = function(ent)
             if ent.squad and ent.team == "ally" then
@@ -43,6 +49,8 @@ g.defineBlessing("helpfulness", "Helpfulness", {
     description = loc2("+1 (HEAL) to allied squads."),
     image = "blessing_helpfulness",
     rarity = g.RARITIES.UNCOMMON,
+    -- tags: healing, buffing
+    tags = {"healing", "buffing"},
     handlers = {
         getHealPowerModifier = function(ent)
             if ent.squad and ent.team == "ally" then
@@ -56,6 +64,8 @@ g.defineBlessing("luxury", "Luxury", {
     description = loc2("Squads that are at least level 3 gain +10% (ASPD)."),
     image = "blessing_luxury",
     rarity = g.RARITIES.COMMON,
+    -- tags: attack_speed, buffing
+    tags = {"attack_speed", "buffing"},
     handlers = {
         getAttackSpeedMultiplier = function(ent)
             if ent.squad and (ent.squad.level or 1) >= 3 then
@@ -69,6 +79,8 @@ g.defineBlessing("overclock", "Overclock", {
     description = loc2("Your squads gain +50% (ASPD) but lose 2 max (HP)."),
     image = "blessing_overclock",
     rarity = g.RARITIES.COMMON,
+    -- tags: attack_speed, health
+    tags = {"attack_speed", "health", "buffing"},
     handlers = {
         getAttackSpeedMultiplier = function(ent)
             if ent.squad then return 1.5 end
@@ -83,6 +95,8 @@ g.defineBlessing("haste", "Haste", {
     description = loc2("+0.2 (ASPD) to allied squads."),
     image = "blessing_haste",
     rarity = g.RARITIES.COMMON,
+    -- tags: attack_speed, buffing
+    tags = {"attack_speed", "buffing"},
     handlers = {
         getAttackSpeedModifier = function(ent)
             if ent.squad then return 0.2 end
@@ -94,6 +108,8 @@ g.defineBlessing("mana_shield", "Mana Shield", {
     description = loc2("+2 (ARMR) to squads that cost at least 2 mana."),
     image = "blessing_manashield",
     rarity = g.RARITIES.COMMON,
+    -- draft tags: armor
+    tags = {"armor", "buffing"},
     handlers = {
         entitySpawned = function(ent)
             local squad = ent.squad
@@ -114,6 +130,8 @@ g.defineBlessing("torment", "Torment", {
     description = loc2("On-hurt, enemies have a 10% chance to take 1 additional damage."),
     image = "blessing_torment",
     rarity = g.RARITIES.COMMON,
+    -- draft tags: attack_damage
+    tags = {"attack_damage"},
     handlers = {
         entityHurt = function(ent, damage, attacker)
             if ent.team ~= "enemy" then return end
@@ -125,12 +143,14 @@ g.defineBlessing("torment", "Torment", {
 })
 
 g.defineBlessing("golden_coffers", "Golden Coffers", {
-    description = loc("Gain 50% more money from all sources."),
+    description = loc("Gain 30% more money from all sources."),
     image = "blessing_goldencoffers",
     rarity = g.RARITIES.RARE,
+    -- draft tags: economy
+    tags = {"economy"},
     handlers = {
         getMoneyMultiplier = function()
-            return 1.5
+            return 1.3
         end,
     },
 })
@@ -139,6 +159,8 @@ g.defineBlessing("blood_tithe", "Blood Tithe", {
     description = loc("Gain 5 gold after winning a battle."),
     image = "blessing_bloodtithe",
     rarity = g.RARITIES.UNCOMMON,
+    -- draft tags: economy
+    tags = {"economy"},
     handlers = {
         battleWon = function()
             local run = g.getRun()
@@ -151,6 +173,8 @@ g.defineBlessing("scavenge", "Scavenge", {
     description = loc("Gain 5 gold when travelling to empty nodes."),
     image = "blessing_scavenge",
     rarity = g.RARITIES.COMMON,
+    -- draft tags: economy
+    tags = {"economy"},
     handlers = {
         arrivedAtNode = function(nodeType, node)
             if nodeType ~= "empty" or node.visited then return end
@@ -164,27 +188,33 @@ g.defineBlessing("valuable_lesson", "Valuable Lesson", {
     description = loc("Gain 3 XP."),
     image = "blessing_valuablelesson",
     rarity = g.RARITIES.COMMON,
+    -- draft tags: xp
+    tags = {"xp"},
     onAdd = function()
         g.addXP(3)
     end,
 })
 
 g.defineBlessing("grace", "Grace", {
-    description = loc("Reduce demon-rage by 2."),
+    description = loc("Reduce Demon Fury by 2."),
     image = "blessing_grace",
     rarity = g.RARITIES.COMMON,
+    -- draft tags: demon_fury
+    tags = {"demon_fury"},
     onAdd = function()
         local run = g.getRun()
-        run.demonRage = math.max(0, run.demonRage - 2)
+        run.demonFury = math.max(0, run.demonFury - 2)
     end,
 })
 
 g.defineBlessing("lucky_sack", "Lucky Sack", {
-    description = loc("Gain between 50 and 200 gold when acquired."),
+    description = loc("Gain between 100 and 200 gold when acquired."),
     image = "blessing_luckysack",
-    rarity = g.RARITIES.UNCOMMON,
+    rarity = g.RARITIES.COMMON,
+    -- draft tags: economy
+    tags = {"economy"},
     onAdd = function()
-        g.addGold(math.random(50, 200))
+        g.addGold(math.random(100, 200))
     end,
 })
 
@@ -192,6 +222,8 @@ g.defineBlessing("barrage", "Barrage", {
     description = loc("20% chance for ranged units to fire 1 extra projectile."),
     image = "blessing_barrage",
     rarity = g.RARITIES.UNCOMMON,
+    -- draft tags: ranged, projectile
+    tags = {"ranged", "projectile", "buffing"},
     handlers = {
         getProjectileCountModifier = function()
             if love.math.random() <= 0.2 then
@@ -214,6 +246,8 @@ g.defineBlessing("golden_gamble", "Golden Gamble", {
     description = loc("When you enter a shop, your gold is randomized between 1 and 777."),
     image = "blessing_goldengamble",
     rarity = g.RARITIES.LEGENDARY,
+    -- draft tags: economy, shop
+    tags = {"economy", "shop"},
     mana = "yellow",
     handlers = {
         shopEntered = function()
@@ -227,6 +261,8 @@ g.defineBlessing("fuel", "Fuel", {
     description = loc("When applying burn to an enemy for the first time, apply 2 extra burn."),
     image = "blessing_fuel",
     rarity = g.RARITIES.UNCOMMON,
+    -- draft tags: burn, status_effect
+    tags = {"burn", "status_effect", "buffing"},
     mana = "red",
     handlers = {
         statusEffectApplied = function(ent, effectType, duration, source)
@@ -240,6 +276,8 @@ g.defineBlessing("corrosive_compounds", "Corrosive Compounds", {
     description = loc("When an enemy receives burn, apply 1 extra burn per unique debuff on the target."),
     image = "blessing_corrosive_compounds",
     rarity = g.RARITIES.LEGENDARY,
+    -- draft tags: burn, status_effect, scaling
+    tags = {"burn", "status_effect", "scaling"},
     mana = "red",
     handlers = {
         statusEffectApplied = function(ent, effectType, duration, source)
@@ -259,6 +297,8 @@ g.defineBlessing("injection", "Injection", {
     description = loc("Every 2 seconds, apply 1 poison to a random enemy."),
     image = "blessing_injection",
     rarity = g.RARITIES.COMMON,
+    -- draft tags: poison, status_effect
+    tags = {"poison", "status_effect"},
     mana = "green",
     handlers = {
         perSecondUpdate = function(secondCount)
@@ -274,6 +314,8 @@ g.defineBlessing("firestarter", "Firestarter", {
     description = loc("Every 2 seconds, apply 4 burn to a random enemy."),
     image = "blessing_firestarter",
     rarity = g.RARITIES.COMMON,
+    -- draft tags: burn, status_effect
+    tags = {"burn", "status_effect"},
     mana = "red",
     handlers = {
         perSecondUpdate = function(secondCount)
@@ -290,6 +332,8 @@ g.defineBlessing("misfortune", "Misfortune", {
     description = loc("Every 2 seconds, deal 3 damage to a random enemy."),
     image = "blessing_misfortune",
     rarity = g.RARITIES.COMMON,
+    -- draft tags: attack_damage
+    tags = {"attack_damage"},
     handlers = {
         perSecondUpdate = function(secondCount)
             if secondCount % 2 == 0 then
@@ -304,6 +348,8 @@ g.defineBlessing("chill", "Chill", {
     description = loc("Every 2 seconds, apply 1 freeze to a random enemy."),
     image = "blessing_chill",
     rarity = g.RARITIES.COMMON,
+    -- draft tags: freeze, crowd_control, status_effect
+    tags = {"freeze", "crowd_control", "status_effect"},
     mana = "blue",
     handlers = {
         perSecondUpdate = function(secondCount)
@@ -320,6 +366,8 @@ g.defineBlessing("infection", "Infection", {
     description = loc("Poison spreads to one nearby enemy when applied."),
     image = "blessing_plague",
     rarity = g.RARITIES.RARE,
+    -- draft tags: poison, status_effect, scaling
+    tags = {"poison", "status_effect", "scaling"},
     mana = "green",
     handlers = {
         statusEffectApplied = function(ent, effectType, duration, source)
@@ -347,6 +395,8 @@ g.defineBlessing("wither", "Wither", {
     description = loc2("Poisoned enemies have -40% (ASPD)."),
     image = "blessing_wither",
     rarity = g.RARITIES.UNCOMMON,
+    -- draft tags: poison, status_effect, attack_speed, crowd_control
+    tags = {"poison", "status_effect", "attack_speed", "crowd_control"},
     mana = "green",
     handlers = {
         getAttackSpeedMultiplier = function(ent)
@@ -361,6 +411,8 @@ g.defineBlessing("volley", "Volley", {
     description = loc2("Ranged units have +25% (RANGE)."),
     image = "blessing_volley",
     rarity = g.RARITIES.UNCOMMON,
+    -- draft tags: ranged, buffing
+    tags = {"ranged", "buffing"},
     handlers = {
         getAttackRangeMultiplier = function(ent)
             if ent.attack and ent.attack.attackType == "ranged" then
@@ -374,6 +426,8 @@ g.defineBlessing("gunpowder_mules", "Gunpowder Mules", {
     description = loc("Your explosions gain +50% size."),
     image = "blessing_gunpowdermules",
     rarity = g.RARITIES.UNCOMMON,
+    -- draft tags: explosion, buffing
+    tags = {"explosion", "buffing"},
     mana = "red",
     handlers = {
         getExplosionSizeMultiplier = function(ent)
@@ -388,6 +442,8 @@ g.defineBlessing("disintegration", "Disintegration", {
     description = loc("Burning enemies take 1 extra damage from unit attacks."),
     image = "blessing_disintegration",
     rarity = g.RARITIES.UNCOMMON,
+    -- draft tags: burn, status_effect, attack_damage
+    tags = {"burn", "status_effect", "attack_damage"},
     mana = "red",
     handlers = {
         -- onHitDamage only fires for unit attacks (attacker present), never for
@@ -405,6 +461,8 @@ g.defineBlessing("electrocute", "Electrocute", {
     description = loc("On-hit, your units have a 25% chance to deal 3 extra damage."),
     image = "blessing_electrocute",
     rarity = g.RARITIES.UNCOMMON,
+    -- draft tags: attack_damage
+    tags = {"attack_damage"},
     mana = "blue",
     handlers = {
         -- nil attacker on the bonus hit so it doesn't re-trigger onHitDamage.
@@ -421,6 +479,8 @@ g.defineBlessing("alchemy_license", "Alchemy License", {
     description = loc("When applying burn or poison, 50% chance to apply again."),
     image = "blessing_alchemylicense",
     rarity = g.RARITIES.UNCOMMON,
+    -- draft tags: burn, poison, status_effect, scaling
+    tags = {"burn", "poison", "status_effect", "scaling"},
     handlers = {
         statusEffectApplied = function(ent, effectType, x, source)
             if ent.team == "ally" then return end
@@ -438,6 +498,8 @@ g.defineBlessing("compress", "Compress", {
     description = loc2("On-hurt, allies have a 10% chance to gain 1 (ARMR)."),
     image = "blessing_compress",
     rarity = g.RARITIES.UNCOMMON,
+    -- draft tags: armor, buffing
+    tags = {"armor", "buffing"},
     handlers = {
         entityHurt = function(ent, damage, attacker)
             if ent.team ~= "ally" then return end
@@ -452,6 +514,8 @@ g.defineBlessing("bloodbath", "Bloodbath", {
     description = loc2("Your units have +25% (LIFESTEAL) when below half (HP)."),
     image = "blessing_bloodbath",
     rarity = g.RARITIES.UNCOMMON,
+    -- draft tags: lifesteal, health
+    tags = {"lifesteal", "health", "buffing"},
     handlers = {
         getLifestealModifier = function(ent)
             if ent.team == "ally" and ent.health and ent.maxHealth
@@ -466,6 +530,8 @@ g.defineBlessing("group_hug", "Group Hug", {
     description = loc("Buffs have 20% chance to spread to nearest ally, recursively."),
     image = "blessing_grouphug",
     rarity = g.RARITIES.RARE,
+    -- draft tags: buffing, scaling
+    tags = {"buffing", "scaling"},
     handlers = {
         -- Re-buffing fires entityBuffed again, so spreading is naturally recursive.
         entityBuffed = function(ent, stat, increase)
@@ -478,7 +544,7 @@ g.defineBlessing("group_hug", "Group Hug", {
                 local d = dx * dx + dy * dy
                 if d < bestDist then bestDist, closest = d, other end
             end, 120)
-            if closest then g.buffEntity(closest, stat, increase) end
+            if closest then g.buffEntity(closest, stat, increase, ent) end
         end,
     },
 })
@@ -487,6 +553,8 @@ g.defineBlessing("water_cycle", "Water Cycle", {
     description = loc("Each battle, for every 8 blue mana you spend, gain 1 blue mana."),
     image = "blessing_watercycle",
     rarity = g.RARITIES.UNCOMMON,
+    -- tags: mana_gain, scaling
+    tags = {"mana_gain", "scaling"},
     mana = "blue",
     startingData = 0,            -- tracks blue mana spent this battle
     resetDataOnBattleStart = true,
@@ -508,6 +576,8 @@ g.defineBlessing("overpower", "Overpower", {
     description = loc2("Your units deal +25% damage to enemies with less max (HP) than them."),
     image = "blessing_overpower",
     rarity = g.RARITIES.UNCOMMON,
+    -- tags: attack_damage, health, buffing
+    tags = {"attack_damage", "health", "buffing"},
     handlers = {
         -- Dispatched as g.ask("getDamageTakenMultiplier", target, attacker).
         getDamageTakenMultiplier = function(target, attacker)
@@ -521,6 +591,8 @@ g.defineBlessing("trickster", "Trickster", {
     description = loc("The first time you Transform a unit each combat, gain 2 blue mana."),
     image = "blessing_trickster",
     rarity = g.RARITIES.UNCOMMON,
+    -- tags: transform, mana_gain
+    tags = {"transform", "mana_gain"},
     mana = "blue",
     startingData = false,        -- have we triggered this combat?
     resetDataOnBattleStart = true,
@@ -538,6 +610,8 @@ g.defineBlessing("profits", "Profits", {
     description = loc("Gain 5 gold per Yellow squad when entering a market."),
     image = "blessing_profits",
     rarity = g.RARITIES.UNCOMMON,
+    -- draft tags: economy, shop, color_synergy
+    tags = {"economy", "shop", "color_synergy"},
     mana = "yellow",
     handlers = {
         shopEntered = function()
@@ -556,6 +630,8 @@ g.defineBlessing("bodybuilding", "Bodybuilding", {
     description = loc2("When your units Heal, they also gain 1 max (HP) for the battle."),
     image = "blessing_bodybuilding",
     rarity = g.RARITIES.RARE,
+    -- draft tags: healing, health, buffing, scaling
+    tags = {"healing", "health", "buffing", "scaling"},
     handlers = {
         entityHealed = function(ent, amount, healer)
             if ent.team ~= "ally" then return end
@@ -568,6 +644,8 @@ g.defineBlessing("pestilence", "Pestilence", {
     description = loc2("Pests have +1 (ASPD) and +1 (ATK)."),
     image = "blessing_pestilence",
     rarity = g.RARITIES.RARE,
+    -- draft tags: pest, attack_speed, attack_damage, buffing
+    tags = {"pest", "attack_speed", "attack_damage", "buffing"},
     mana = "green",
     handlers = {
         getAttackSpeedModifier = function(ent)
@@ -583,6 +661,8 @@ g.defineBlessing("fortify", "Fortify", {
     description = loc2("50% chance to double (ARMR) gained during battle."),
     image = "blessing_fortify",
     rarity = g.RARITIES.RARE,
+    -- draft tags: armor, buffing, scaling
+    tags = {"armor", "buffing", "scaling"},
     handlers = {
         -- Bump ent.armor directly (not g.addArmor) so we don't re-fire
         -- armorIncreased and double again recursively.
@@ -599,6 +679,8 @@ g.defineBlessing("fireball", "Fireball", {
     description = loc("When applying burn, create a medium explosion for 4 damage."),
     image = "blessing_fireball",
     rarity = g.RARITIES.RARE,
+    -- draft tags: burn, status_effect, explosion, attack_damage
+    tags = {"burn", "status_effect", "explosion", "attack_damage"},
     mana = "red",
     handlers = {
         statusEffectApplied = function(ent, effectType, duration, source)
@@ -614,6 +696,8 @@ g.defineBlessing("stomp", "Stomp", {
     description = loc2("On-spawn, your units deal area damage equal to 25% max (HP)."),
     image = "blessing_stomp",
     rarity = g.RARITIES.RARE,
+    -- draft tags: explosion, attack_damage, health
+    tags = {"explosion", "attack_damage", "health"},
     handlers = {
         entitySpawned = function(ent)
             if ent.team ~= "ally" or not ent.squad then return end
@@ -626,6 +710,8 @@ g.defineBlessing("upscaling", "Upscaling", {
     description = loc("Max level squads gain +50% units."),
     image = "blessing_upscaling",
     rarity = g.RARITIES.COMMON,
+    -- draft tags: scaling, swarm
+    tags = {"scaling", "swarm"},
     handlers = {
         getSquadUnitCountModifier = function(squadId)
             local squad = g.getSquadFromArmy(squadId)
@@ -640,6 +726,8 @@ g.defineBlessing("ubergrades", "Ubergrades", {
     description = loc2("Squads gain +0.1 (ASPD) and +1 (ARMR) each time they're upgraded."),
     image = "blessing_ubergrades",
     rarity = g.RARITIES.UNCOMMON,
+    -- draft tags: attack_speed, armor, buffing, scaling
+    tags = {"attack_speed", "armor", "buffing", "scaling"},
     handlers = {
         -- level 1 = no upgrades; each level past 1 is one upgrade.
         getAttackSpeedModifier = function(ent)
@@ -658,6 +746,8 @@ g.defineBlessing("cursed_banquet", "Cursed Banquet", {
     description = loc("Gain 2 XP the first time you kill a friendly unit each battle."),
     image = "blessing_cursedbanquet",
     rarity = g.RARITIES.UNCOMMON,
+    -- draft tags: xp, death_trigger
+    tags = {"xp", "death_trigger"},
     startingData = false,        -- triggered this battle?
     resetDataOnBattleStart = true,
     handlers = {
@@ -674,6 +764,8 @@ g.defineBlessing("wildfire", "Wildfire", {
     description = loc("On-spawn, your units gain 5 burn and apply 10 burn to a random enemy."),
     image = "blessing_wildfire",
     rarity = g.RARITIES.RARE,
+    -- draft tags: burn, status_effect
+    tags = {"burn", "status_effect"},
     mana = "red",
     handlers = {
         entitySpawned = function(ent)
@@ -689,6 +781,8 @@ g.defineBlessing("goliath", "Goliath", {
     description = loc2("Your units have +1 (ATK) per 10 max (HP)."),
     image = "blessing_goliath",
     rarity = g.RARITIES.UNCOMMON,
+    -- draft tags: attack_damage, health, scaling
+    tags = {"attack_damage", "health", "scaling"},
     handlers = {
         getAttackDamageModifier = function(ent)
             if ent.team == "ally" then
@@ -702,6 +796,8 @@ g.defineBlessing("evolution", "Evolution", {
     description = loc2("When Transformed, your units gain 5 max (HP) for the battle, stackable."),
     image = "blessing_evolution",
     rarity = g.RARITIES.UNCOMMON,
+    -- draft tags: transform, health, buffing, scaling
+    tags = {"transform", "health", "buffing", "scaling"},
     mana = "blue",
     handlers = {
         entityTransformed = function(oldEnt, newEnt)
@@ -715,6 +811,8 @@ g.defineBlessing("burning_restoration", "Burning Restoration", {
     description = loc2("When any burning unit dies, the nearest ally heals 5 (HP)."),
     image = "blessing_cauterize",
     rarity = g.RARITIES.RARE,
+    -- draft tags: burn, status_effect, death_trigger, healing
+    tags = {"burn", "status_effect", "death_trigger", "healing"},
     mana = "red",
     handlers = {
         entityDeath = function(ent, killer)
@@ -736,6 +834,8 @@ g.defineBlessing("bulk_pheromones", "Bulk Pheromones", {
     description = loc2("When a Green unit dies, ALL pests gain +1 max (HP)."),
     image = "blessing_bulkpheremones",
     rarity = g.RARITIES.RARE,
+    -- draft tags: pest, health, buffing, death_trigger, color_synergy
+    tags = {"pest", "health", "buffing", "death_trigger", "color_synergy"},
     mana = "green",
     handlers = {
         entityDeath = function(ent, killer)
@@ -744,7 +844,7 @@ g.defineBlessing("bulk_pheromones", "Bulk Pheromones", {
             if not (cost and cost.green and cost.green > 0) then return end
             for _, other in g.getECS():iterate("team") do
                 if other.team == "ally" and other.isPest and g.isAlive(other) then
-                    g.buffEntity(other, "maxHealth", 1)
+                    g.buffEntity(other, "maxHealth", 1, ent)
                 end
             end
         end,
@@ -756,6 +856,8 @@ g.defineBlessing("arcane_appetite", "Arcane Appetite", {
     description = loc("Gain +2 blue mana. Your commander starts the battle poisoned."),
     image = "blessing_arcaneappetite",
     rarity = g.RARITIES.UNCOMMON,
+    -- draft tags: mana_gain, poison, status_effect, commander
+    tags = {"mana_gain", "poison", "status_effect", "commander"},
     mana = "blue",
     onAdd = function()
         g.addPermanentMana("blue")
@@ -776,6 +878,8 @@ g.defineBlessing("meditation", "Meditation", {
     description = loc("The first time you place a squad each battle, regain blue mana equal to its cost."),
     image = "blessing_meditation",
     rarity = g.RARITIES.UNCOMMON,
+    -- tags: mana_gain, deployment
+    tags = {"mana_gain", "deployment"},
     mana = "blue",
     startingData = false,        -- have we refunded this battle?
     resetDataOnBattleStart = true,
@@ -795,6 +899,8 @@ g.defineBlessing("demonic_steed", "Demonic Steed", {
     description = loc2("Your commander gains +5 (ATK), and fears enemies on-hit."),
     image = "blessing_demonicsteed",
     rarity = g.RARITIES.UNCOMMON,
+    -- draft tags: commander, attack_damage, crowd_control
+    tags = {"commander", "attack_damage", "crowd_control"},
     handlers = {
         getAttackDamageModifier = function(ent)
             if ent.isCommander then return 5 end
@@ -812,6 +918,8 @@ g.defineBlessing("radiant_gift", "Radiant Gift", {
     description = loc("Gain 1 Wildcard Mana!"),
     image = "blessing_radiantgift",
     rarity = g.RARITIES.RARE,
+    -- draft tags: mana_gain
+    tags = {"mana_gain"},
     onAdd = function()
         g.addPermanentMana(g.WILDCARD_MANA)
     end,
@@ -821,6 +929,8 @@ g.defineBlessing("one_man_army", "One Man Army", {
     description = loc2("If only one of your units is alive, it gains double (ATK) and (ASPD)."),
     image = "blessing_onemanarmy",
     rarity = g.RARITIES.RARE,
+    -- tags: attack_damage, attack_speed
+    tags = {"attack_damage", "attack_speed"},
     startingData = false,        -- is exactly one ally unit alive?
     resetDataOnBattleStart = true,
     handlers = {
@@ -855,6 +965,8 @@ g.defineBlessing("infiltration", "Infiltration", {
     description = loc("Red squads can be deployed anywhere, even behind enemy lines."),
     image = "blessing_infiltration",
     rarity = g.RARITIES.RARE,
+    -- draft tags: deployment, color_synergy
+    tags = {"deployment", "color_synergy"},
     mana = "red",
     handlers = {
         -- Asked with the squad as 1st arg when working out deploy placement.
@@ -870,6 +982,8 @@ g.defineBlessing("landmark", "Landmark", {
     description = loc2("The first building you place each fight has triple max (HP)."),
     image = "blessing_landmark",
     rarity = g.RARITIES.RARE,
+    -- draft tags: building, health, deployment
+    tags = {"building", "health", "deployment"},
     startingData = false,        -- have we marked this battle's landmark yet?
     resetDataOnBattleStart = true,
     handlers = {
@@ -889,6 +1003,8 @@ g.defineBlessing("crystallize", "Crystallize", {
     description = loc2("When an ally is healed to full (HP), it gains 2 (ARMR)."),
     image = "blessing_crystallize",
     rarity = g.RARITIES.RARE,
+    -- draft tags: healing, armor, buffing
+    tags = {"healing", "armor", "buffing"},
     handlers = {
         -- entityHealed only fires when real healing happened; ending at max HP
         -- means the heal topped the ally off, i.e. "healed to full".
@@ -905,6 +1021,8 @@ g.defineBlessing("iron_exosuits", "Iron Exosuits", {
     description = loc2("For every (ARMR) your units have, they gain +8% (ASPD)."),
     image = "blessing_ironexosuits",
     rarity = g.RARITIES.RARE,
+    -- draft tags: armor, attack_speed, scaling
+    tags = {"armor", "attack_speed", "scaling"},
     handlers = {
         getAttackSpeedMultiplier = function(ent)
             if ent.team == "ally" and ent.armor and ent.armor > 0 then
@@ -918,6 +1036,8 @@ g.defineBlessing("grand_finale", "Grand Finale", {
     description = loc("Your explosions have +20% area. This increases by 2% for the fight whenever an explosion is triggered."),
     image = "blessing_grandfinale",
     rarity = g.RARITIES.LEGENDARY,
+    -- draft tags: explosion, scaling, buffing
+    tags = {"explosion", "scaling", "buffing"},
     mana = "red",
     startingData = 0,            -- explosions triggered this fight
     resetDataOnBattleStart = true,
@@ -937,6 +1057,8 @@ g.defineBlessing("hard_carapaces", "Hard Carapaces", {
     description = loc2("Green units and Pests have +2 (ARMR)."),
     image = "blessing_hardcarapace",
     rarity = g.RARITIES.LEGENDARY,
+    -- draft tags: armor, pest, buffing, color_synergy
+    tags = {"armor", "pest", "buffing", "color_synergy"},
     mana = "green",
     handlers = {
         entitySpawned = function(ent)
@@ -957,6 +1079,8 @@ g.defineBlessing("dark_inspiration", "Dark Inspiration", {
     description = loc2("After 10 friendly units die, your units gain 100% (LIFESTEAL) for the rest of the battle."),
     image = "blessing_darkinspiration",
     rarity = g.RARITIES.LEGENDARY,
+    -- draft tags: lifesteal, death_trigger, scaling, buffing
+    tags = {"lifesteal", "death_trigger", "scaling", "buffing"},
     startingData = 0,            -- friendly deaths this battle
     resetDataOnBattleStart = true,
     handlers = {
@@ -977,6 +1101,8 @@ g.defineBlessing("meat_grinder", "Meat Grinder", {
     description = loc("Gain 4 colorless mana after 40 allied units die."),
     image = "blessing_meatgrinder",
     rarity = g.RARITIES.LEGENDARY,
+    -- draft tags: mana_gain, death_trigger, scaling
+    tags = {"mana_gain", "death_trigger", "scaling"},
     startingData = 0,            -- allied deaths this battle
     resetDataOnBattleStart = true,
     handlers = {
@@ -995,6 +1121,8 @@ g.defineBlessing("unbreakable", "Unbreakable", {
     description = loc2("When units gain (ARMR) in battle, gain an equal amount of max (HP) for the fight."),
     image = "blessing_unbreakable",
     rarity = g.RARITIES.LEGENDARY,
+    -- draft tags: armor, health, buffing, scaling
+    tags = {"armor", "health", "buffing", "scaling"},
     handlers = {
         -- armorIncreased fires from g.addArmor. buffEntity(maxHealth) doesn't add
         -- armor, so no recursion.
@@ -1054,9 +1182,10 @@ end
 
 g.defineBlessing("soulsplit", "Soul Split", {
     description = loc2("Your squads have double units, but -50% max (HP). Buildings unaffected."),
-    --image = "blessing_soulsplit",
-    image = "placeholder",
+    image = g.leo("blessing_soulsplit"),
     rarity = g.RARITIES.LEGENDARY,
+    -- draft tags: health, swarm
+    tags = {"health", "swarm"},
     handlers = {
         -- ADD reducer: returning the base count again = double total units.
         getSquadUnitCountModifier = function(squadId)
@@ -1076,6 +1205,8 @@ g.defineBlessing("explosive_mutation", "Explosive Mutation", {
     description = loc2("Your Pests cause a devastating explosion on-death."),
     image = "blessing_explosivemutation",
     rarity = g.RARITIES.LEGENDARY,
+    -- draft tags: pest, explosion, death_trigger
+    tags = {"pest", "explosion", "death_trigger"},
     mana = "green",
     handlers = {
         entityDeath = function(ent, killer)
@@ -1089,6 +1220,8 @@ g.defineBlessing("cryomana", "Cryomana", {
     description = loc2("Whenever you gain mana during combat, freeze 10 random enemies for 5s."),
     image = "blessing_cryomana",
     rarity = g.RARITIES.LEGENDARY,
+    -- tags: freeze, crowd_control, status_effect
+    tags = {"freeze", "crowd_control", "status_effect"},
     mana = "blue",
     handlers = {
         -- freezing doesn't add mana, so no recursion. Guard on ECS = "in combat".
@@ -1105,6 +1238,8 @@ g.defineBlessing("vengeance", "Vengeance", {
     description = loc2("Your units gain +1 (ATK) for 5s when an allied unit of the same color dies."),
     image = "blessing_vengeance",
     rarity = g.RARITIES.LEGENDARY,
+    -- draft tags: attack_damage, buffing, death_trigger, color_synergy
+    tags = {"attack_damage", "buffing", "death_trigger", "color_synergy"},
     handlers = {
         entityDeath = function(ent, killer)
             if ent.team ~= "ally" or not ent.squad then return end
@@ -1126,6 +1261,8 @@ g.defineBlessing("wrathful_souls", "Wrathful Souls", {
     description = loc2("When an ally dies, deal 2x it's (ATK) to a nearby enemy."),
     image = "blessing_wrathfulsouls",
     rarity = g.RARITIES.LEGENDARY,
+    -- tags: death_trigger, attack_damage
+    tags = {"death_trigger", "attack_damage"},
     handlers = {
         entityDeath = function(ent, killer)
             if ent.team ~= "ally" then return end
@@ -1147,6 +1284,8 @@ g.defineBlessing("overload", "Overload", {
     description = loc2("When an enemy gains more burn than its max HP, instantly kill it and apply 20% of the burn to nearby enemies."),
     image = "blessing_overload",
     rarity = g.RARITIES.LEGENDARY,
+    -- draft tags: burn, status_effect, death_trigger, scaling
+    tags = {"burn", "status_effect", "death_trigger", "scaling"},
     mana = "red",
     handlers = {
         -- Checked once per second (off the per-frame hot path). Burn "amount" is
@@ -1170,6 +1309,8 @@ g.defineBlessing("black_flames", "Black Flames", {
     description = loc2("Burn deals double damage to enemies."),
     image = "blessing_blackflames",
     rarity = g.RARITIES.LEGENDARY,
+    -- tags: burn, status_effect, attack_damage
+    tags = {"burn", "status_effect", "attack_damage"},
     mana = "red",
     handlers = {
         getBurnDPSMultiplier = function(ent)
@@ -1180,12 +1321,12 @@ g.defineBlessing("black_flames", "Black Flames", {
 
 
 
-for i=1, 100 do
-    g.defineBlessing("void_flames_"..tostring(i), "Void Flames", {
-        description = loc2("Does... nothing?"),
-        image = "blessing_blackflames",
-        rarity = g.RARITIES.ALMOST_UNIQUE,
-        -- ALMOST_UNIQUE is a special rarity with 0.000000001 chance of being chosen.
-        -- if there's no more blessngs in the pool, one of these will be picked. That's why there's 500 of them
-    })
-end
+-- for i=1, 100 do
+--     g.defineBlessing("void_flames_"..tostring(i), "Void Flames", {
+--         description = loc2("Does... nothing?"),
+--         image = "blessing_blackflames",
+--         rarity = g.RARITIES.ALMOST_UNIQUE,
+--         -- ALMOST_UNIQUE is a special rarity with 0.000000001 chance of being chosen.
+--         -- if there's no more blessngs in the pool, one of these will be picked. That's why there's 500 of them
+--     })
+-- end

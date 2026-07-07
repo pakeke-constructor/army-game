@@ -9,6 +9,8 @@ local fogService = require("src.fogService")
 local hoverService = require("src.hud.hoverService")
 local juiceService = require("src.juiceService")
 local ambienceService = require("src.ambienceService")
+local mapTypes = require("src.scenes.map_scene.map_types")
+local s = require("src.hud.settings")
 
 local CAMERA_ZOOM = 1--0.5
 local NODE_RADIUS = 4
@@ -150,16 +152,25 @@ function map_scene:enter()
     self.dragging = false
     self.commanderFacing = 1
     self.gallop = 0
+    self.traveling = nil
 
     local run = g.getRun()
-    if not run.mapGraph then
-        self:_buildMap()
+    local firstMapEntry = not run.mapGraph
+    if firstMapEntry then
+        -- TODO: Pick map type based on level
+        -- Example: level 1 = forest, level 2 = fall, level 3 = hell
+        self:_buildMap("forest")
+        self:_incrementDays()
     end
-    return self:_buildNodeState()
+    self:_buildNodeState()
+    if firstMapEntry then
+        g.saveRun()
+    end
 end
 
+---@param mapType string
 ---@param fromPortal boolean?
-function map_scene:_buildMap(fromPortal)
+function map_scene:_buildMap(mapType, fromPortal)
     local run = g.getRun()
     -- Run the proc gen algorithm until we have a valid setup.
     -- (nodeCount > 20 is valid)
@@ -173,16 +184,7 @@ function map_scene:_buildMap(fromPortal)
         nodeOffsetFactor = 0.35,
         scaleX = 1,
         scaleY = 0.6,
-        decorTypes = {
-            "mountain_large",
-            "mountain_small_1",
-            "mountain_small_2",
-            "tree_large_1",
-            "tree_small_1",
-            "grass_1",
-            "grass_2",
-            "grass_3"
-        },
+        mapType = mapType,
         fromPortal = not not fromPortal,
     }) until run.mapGraph:countNodes() > 20
     return self:_buildNodeState()
@@ -222,7 +224,7 @@ function map_scene:_buildNodeState()
     end
 
     self.camera:setPos(self.camX, self.camY)
-    ambienceService.reInitialize(self.camera:getTransform())
+    ambienceService.reInitialize(self.camera:getTransform(), g.getMapType().cloudSprites)
 end
 
 function map_scene:_buildFogClearCells()
@@ -287,12 +289,30 @@ end
 
 
 ---@param node MapNode
+---@return boolean delayedDayIncrement
 local function enterNode(node)
     g.call("arrivedAtNode", node.nodeType, node)
     if not node.visited then
         node.visited = true
         node:enter()
+        return nodes.getType(node) ~= "empty"
     end
+    return false
+end
+
+---@param count integer?
+function map_scene:_incrementDays(count)
+    g.incrementDays(count)
+    -- TODO: If incursion happends, spawn boss node all nearest to empty node
+    g.saveRun()
+end
+
+function map_scene:_incrementPendingDaysWhenReady()
+    if not self.pendingDayIncrement then return end
+    if fadeToBlackService.isAnimating() or g.isAnyPopupOpen() then return end
+
+    self:_incrementDays(self.pendingDayIncrement)
+    self.pendingDayIncrement = nil
 end
 
 
@@ -313,13 +333,14 @@ local function checkLevelUp()
     run.level = run.level + 1
 
     rewardPopupService.levelUpReward({
-        gold = 10 * run.level,
-        randomMana = true,
+        {type = "gold", amount = 10 * run.level},
+        {type = "mana_blessing"}
     })
 end
 
 function map_scene:update(dt)
     checkLevelUp()
+    self:_incrementPendingDaysWhenReady()
 
     -- WASD panning
     local dx, dy = 0, 0
@@ -368,8 +389,21 @@ function map_scene:update(dt)
         if trav.t >= 1 then
             local graph = g.getRun().mapGraph
             graph:setPlayerPosition(trav.toNode.x, trav.toNode.y)
-            self.traveling = nil
-            enterNode(trav.toNode)
+            local delayedDayIncrement = enterNode(trav.toNode)
+            if delayedDayIncrement then
+                self.pendingDayIncrement = (self.pendingDayIncrement or 0) + 1
+            else
+                self:_incrementDays()
+            end
+            -- Continue through intermediate nodes, unless the node we just
+            -- arrived at opened a popup / scene-transition (eg battle, shop).
+            local hasMore = trav.index + 1 < #trav.path
+            if hasMore and not fadeToBlackService.isAnimating() and not g.isAnyPopupOpen() then
+                trav.index = trav.index + 1
+                self:_startTravelLeg(graph)
+            else
+                self.traveling = nil
+            end
             return
         end
     end
@@ -388,6 +422,7 @@ end
 
 
 function map_scene:keypressed(k)
+    if s.keypressed(k) then return end
     if consts.DEV_MODE then
         if k == "o" then
             nodeEventService.openFountainPopup()
@@ -403,16 +438,26 @@ function map_scene:travelTo(graph, pnode, hovered)
     if self.traveling or hovered == pnode then return end
     local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, PATH_SEARCH_DEPTH)
     if not (path and #path >= 2) then return end
-    local ax, ay = graph:getDrawPos(path[1])
-    local bx, by = graph:getDrawPos(path[2])
+    -- index = the leg currently being walked; toNode is path[index + 1].
+    self.traveling = { path = path, index = 1 }
+    self:_startTravelLeg(graph)
+end
+
+--- (Re)start the current leg of self.traveling (from path[index] to path[index+1]).
+---@param graph MapGraph
+function map_scene:_startTravelLeg(graph)
+    local trav = self.traveling
+    local fromNode = trav.path[trav.index]
+    local toNode = trav.path[trav.index + 1]
+    local ax, ay = graph:getDrawPos(fromNode)
+    local bx, by = graph:getDrawPos(toNode)
     local dist = math.sqrt((bx - ax) ^ 2 + (by - ay) ^ 2)
     if bx < ax then self.commanderFacing = -1 end
     if bx > ax then self.commanderFacing = 1 end
-    self.traveling = {
-        toNode = path[2],
-        ax = ax, ay = ay, bx = bx, by = by,
-        t = 0, speed = dist > 0 and (COMMANDER_SPEED / dist) or 1,
-    }
+    trav.toNode = toNode
+    trav.ax, trav.ay, trav.bx, trav.by = ax, ay, bx, by
+    trav.t = 0
+    trav.speed = dist > 0 and (COMMANDER_SPEED / dist) or 1
 end
 
 function map_scene:mousepressed(mx, my, button)
@@ -476,7 +521,10 @@ function map_scene:draw()
 
     self.ecs:draw()
 
+    juiceService.draw()
+
     local run = g.getRun()
+    local mapType = g.getMapType()
     local graph = run.mapGraph
     if graph then
         local sw, sh = love.graphics.getDimensions()
@@ -495,7 +543,7 @@ function map_scene:draw()
         -- edges
         graph:forEachEdge(function(a, b)
             if isEdgeVisible(graph, a, b, view, CULL_PAD) then
-                renderEdge(graph, a, b, g.COLORS.MAP_EDGE:getRGBA())
+                renderEdge(graph, a, b, mapType.mapPath:getRGBA())
             end
         end)
 
@@ -542,7 +590,7 @@ function map_scene:draw()
                 local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, PATH_SEARCH_DEPTH)
                 if path and #path >= 2 then
                     -- first edge bold yellow, rest pale yellow
-                    local r, gg, b, a = g.COLORS.MAP_EDGE_HIGHLIGHT:getRGBA()
+                    local r, gg, b, a = mapType.mapPathHighlight:getRGBA()
                     renderEdge(graph, path[1], path[2], r, gg, b, a, 6)
                     renderNode(graph, path[2], r, gg, b, a, NODE_RADIUS + 1)
                     for i = 2, #path - 1 do
@@ -565,7 +613,7 @@ function map_scene:draw()
         builder:finalize()
 
         -- fog rendering
-        fogService.renderFog(fogRegion, function(x, y)
+        fogService.renderFog(fogRegion, graph.mapType.fogColor, function(x, y)
             local cx = math.floor(x / FOG_STEP)
             local row = clearCells[cx]
             return not (row and row[math.floor(y / FOG_STEP)])
@@ -580,6 +628,7 @@ function map_scene:draw()
 
     ui.startUI()
     self.hud:drawUI({ mapScene = true })
+    s.draw()
     ui.endUI()
 end
 

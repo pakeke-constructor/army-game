@@ -102,6 +102,18 @@ local bgmPrevTargetPriority = nil
 ---@class _bgm
 local bgm = {}
 
+local musicVolume = 100
+
+---@param vol integer
+function bgm.setVolume(vol)
+    musicVolume = helper.clamp(math.floor(vol + 0.5), 0, 100)
+end
+
+---@return integer
+function bgm.getVolume()
+    return musicVolume
+end
+
 ---@param priority integer
 ---@param sources string[]
 ---@param isAmbient boolean?
@@ -133,6 +145,7 @@ end
 ---@param dt number
 ---@param volume number
 function bgm.update(dt, volume)
+    volume = volume * (musicVolume / 100)
     for _, group in pairs(bgmGroups) do
         group:update(dt, volume)
     end

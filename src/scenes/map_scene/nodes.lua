@@ -32,21 +32,22 @@ local BATTLE_TXTS = {
     },
 }
 
-local EVENT_TXT = loc("Random event!")
+local FOUNTAIN_TXT = loc("Fountain: Reduces Demon Fury")
 
-local FOUNTAIN_TXT = loc("Fountain: Reduces Demon-Fury")
+local SHRINE_TXT = loc("Shrine: Sacrifice Squads to lower Demon Fury")
 
-local SHRINE_TXT = loc("Shrine: Gain Blessings, Sacrifice Squads")
+local FEAST_TXT = loc("Feast: Obtain {xp_icon}")
 
-local FEAST_TXT = loc("Feast: Obtain XP")
+local CHEST_TXT = loc("Chest: Claim a reward")
 
 local CAMPFIRE_TXT = loc("Campfire: Obtain XP")
 
-local PORTAL_ACTIVE_TXT = loc("Portal: Enter New Area")
+local PORTAL_ACTIVE_TXT = loc("Portal: Go to random node")
 local PORTAL_INACTIVE_TXT = loc("Portal: Inactive")
 
-local NODE_FADE_OUT = 0.35
-local NODE_FADE_IN = 0.2
+local NODE_FADE_OUT = consts.NODE_FADE_OUT
+local NODE_FADE_IN = consts.NODE_FADE_IN
+local VISITED_NODE_OPACITY = 0.45
 
 
 
@@ -83,7 +84,7 @@ end
 ---@param wx number world x
 ---@param wy number world y
 function Node:drawBelow(wx, wy)
-    love.graphics.setColor(g.COLORS.MAP_EDGE:getRGBA())
+    love.graphics.setColor(g.getMapType().mapPath)
     love.graphics.ellipse("fill", wx, wy, 4, 2)
 end
 
@@ -147,17 +148,21 @@ local function hashf(...)
 end
 
 ---@param node MapNode
----@param builder g.DecorBuilder
----@param x number
----@param y number
+local function nodeOpacity(node)
+    if node.visited then
+        return VISITED_NODE_OPACITY
+    end
+    return 1
+end
+
 local function addDemons(node, builder, x, y)
     if node.demonEncounter then
         local count = node.demonEncounter + 1
-        local baseAngle = hashf(node.id) * math.pi * 2
+        local baseAngle = hashf(node.x, node.y) * math.pi * 2
         for i = 1, count do
             local angle = baseAngle + (i - 1) * (math.pi * 2 / count)
-            local angleOff = (hashf(node.id, i) - 0.5) * 0.4
-            local radiusMul = 0.85 + hashf(node.id, i, 1) * 0.3
+            local angleOff = (hashf(node.x, node.y, i) - 0.5) * 0.4
+            local radiusMul = 0.85 + hashf(node.x, node.y, i, 1) * 0.3
             if count == 1 then
                 radiusMul = radiusMul * 0.3
             elseif count == 2 then
@@ -165,12 +170,12 @@ local function addDemons(node, builder, x, y)
             end
             local r = 20 * radiusMul
             local a = angle + angleOff
-            builder:addImage("node_combat_demon", x + math.cos(a) * r, y + math.sin(a) * r)
+            builder:addImage("node_combat_demon", x + math.cos(a) * r, y + math.sin(a) * r, 0, nil, nodeOpacity(node))
         end
 
         if node.demonEncounter >= 2 then
             -- its a "boss" encounter, add a flag.
-            builder:addImage("node_combat_flag", x-14, y-2, 0, 1)
+            builder:addImage("node_combat_flag", x-14, y-2, 0, 1, nodeOpacity(node))
         end
     end
 end
@@ -188,9 +193,7 @@ function BattleNode:init(x,y)
 end
 
 function BattleNode:enter()
-    fadeToBlackService.fadeToFromBlack(0.5, function()
-        g.gotoScene("battle_scene")
-    end, 0.3)
+    g.transitionTo("battle_scene")
 end
 
 function BattleNode:getHoverDescription()
@@ -199,7 +202,7 @@ function BattleNode:getHoverDescription()
 end
 
 function BattleNode:drawBelow(wx, wy)
-    love.graphics.setColor(g.COLORS.MAP_EDGE:getRGBA())
+    love.graphics.setColor(g.getMapType().mapPath)
     love.graphics.ellipse("fill", wx, wy, 8, 5)
     love.graphics.setColor(0.8, 0.3, 0.3, 1)
     love.graphics.ellipse("fill", wx, wy, 6, 3)
@@ -264,9 +267,9 @@ function FeastNode:update(dt)
 end
 
 function FeastNode:buildDecor(builder, wx, wy)
-    builder:addImage("node_banquet", wx, wy)
+    builder:addImage("node_banquet", wx, wy, 0, nil, nodeOpacity(self))
     local firePS = firePSes[self]
-    if firePS then
+    if firePS and not self.visited then
         builder:addDrawable(wx + 1, wy - 20, function(x, y)
             love.graphics.draw(firePS, x, y)
         end, 100)
@@ -296,10 +299,11 @@ end
 
 ---@param x number
 ---@param y number
-local function drawShrineAnimated(x, y)
+---@param opacity number
+local function drawShrineAnimated(x, y, opacity)
     local t = love.timer.getTime()
     local t1 = math.sin(t * 3) * 2
-    local col = gsman.setColor(1, 1, 1)
+    local col = gsman.setColor(1, 1, 1, opacity)
     g.drawImageOffset("node_shrine_base", x, y + 4, 0, 1, 1, 0.5, 1)
     helper.drawWings(x, y - 32, t, "node_shrine_wing", {
         scale = 1,
@@ -311,9 +315,10 @@ local function drawShrineAnimated(x, y)
     g.drawImage("node_shrine_body", x, y - 26 + t1)
     col:pop()
 end
-
 function ShrineNode:buildDecor(builder, wx, wy)
-    builder:addDrawable(wx, wy, drawShrineAnimated)
+    builder:addDrawable(wx, wy, function(x, y)
+        drawShrineAnimated(x, y, nodeOpacity(self))
+    end)
     addDemons(self, builder, wx, wy)
 end
 
@@ -337,11 +342,35 @@ function FountainNode:getHoverDescription()
 end
 
 function FountainNode:buildDecor(builder, wx, wy)
-    builder:addImage("node_fountain", wx, wy)
+    builder:addImage("node_fountain", wx, wy, 0, nil, nodeOpacity(self))
     addDemons(self, builder, wx, wy)
 end
 
 nodes.FountainNode = FountainNode
+
+
+-------------------------------
+-- ChestNode
+-------------------------------
+---@class MapNode.ChestNode: MapNode
+local ChestNode = nodes.newClass("chest")
+
+function ChestNode:enter()
+    fadeToBlackService.fadeToFromBlack(NODE_FADE_OUT, function()
+        nodeEventService.openChestPopup(self)
+    end, NODE_FADE_IN)
+end
+
+function ChestNode:getHoverDescription()
+    return CHEST_TXT
+end
+
+function ChestNode:buildDecor(builder, wx, wy)
+    builder:addImage("node_chest", wx, wy, 0, nil, nodeOpacity(self))
+    addDemons(self, builder, wx, wy)
+end
+
+nodes.ChestNode = ChestNode
 
 
 
@@ -357,7 +386,7 @@ function EmptyNode:enter()
 end
 
 function EmptyNode:drawBelow(wx, wy)
-    love.graphics.setColor(g.COLORS.MAP_EDGE:getRGBA())
+    love.graphics.setColor(g.getMapType().mapPath)
     love.graphics.ellipse("fill", wx, wy, 9, 5)
     love.graphics.setColor(g.COLORS.MAP_GROUND_COLOR:getRGBA())
     love.graphics.ellipse("fill", wx, wy, 6, 3)
@@ -381,27 +410,23 @@ function EventNode:enter()
     end, NODE_FADE_IN)
 end
 
-function EventNode:getHoverDescription()
-    return EVENT_TXT
-end
-
 function EventNode:drawBelow(wx, wy)
-    love.graphics.setColor(g.COLORS.MAP_EDGE:getRGBA())
+    love.graphics.setColor(g.getMapType().mapPath)
     love.graphics.ellipse("fill", wx, wy, 9, 5)
     love.graphics.setColor(g.COLORS.MAP_GROUND_COLOR:getRGBA())
     love.graphics.ellipse("fill", wx, wy, 6, 3)
 end
 
-local QCOL
+local function drawDebugCircleForRandomEvent(x, y)
+    local col = gsman.setColor(1, 1, 1)
+    lg.circle("line", x, y, 6)
+    col:pop()
+end
 
 function EventNode:buildDecor(builder, wx,wy)
-    builder:addDrawable(wx,wy, function(x, y)
-        QCOL = QCOL or g.snapToPalette(objects.Color("FFED8014"))
-        local font = g.getBigFont(48)
-        local bobY = math.sin(love.timer.getTime()) * 3
-        lg.setColor(QCOL)
-        richtext.printRichCentered("{o}?", font, x, y+bobY, 100, "left")
-    end)
+    if consts.SHOW_DEV_STUFF then
+        builder:addDrawable(wx,wy, drawDebugCircleForRandomEvent)
+    end
 end
 
 nodes.EventNode = EventNode
@@ -431,14 +456,17 @@ function ShopNode:init(x,y)
 end
 
 function ShopNode:enter()
-    fadeToBlackService.fadeToFromBlack(NODE_FADE_OUT, function()
-        shop_scene = shop_scene or require("src.scenes.shop_scene.shop_scene")
-        shop_scene.prefillShopNode(self)
-        g.gotoScene("shop_scene")
-        local sc = g.getCurrentScene()
-        ---@cast sc g.ShopScene
-        sc:setShop(self)
-    end, NODE_FADE_IN)
+    shop_scene = shop_scene or require("src.scenes.shop_scene.shop_scene")
+    shop_scene.prefillShopNode(self)
+    g.transitionTo("shop_scene", {
+        fadeOut = NODE_FADE_OUT,
+        fadeIn = NODE_FADE_IN,
+        onSwitch = function()
+            local sc = g.getCurrentScene()
+            ---@cast sc g.ShopScene
+            sc:setShop(self)
+        end
+    })
 end
 
 function ShopNode:getHoverDescription()
@@ -446,7 +474,7 @@ function ShopNode:getHoverDescription()
 end
 
 function ShopNode:buildDecor(builder, wx, wy)
-    builder:addImage("node_town", wx, wy - 8)
+    builder:addImage("node_town", wx, wy - 8, 0, nil, nodeOpacity(self))
 end
 
 nodes.ShopNode = ShopNode
@@ -463,7 +491,6 @@ local FOGS = {
     "fog_of_war_cloud2",
     "fog_of_war_cloud3",
 }
-local FOG_COLOR = objects.Color("#273718")
 
 ---@class MapNode.DynamicNode: MapNode
 local DynamicNode = nodes.newClass("dynamic")
@@ -475,7 +502,8 @@ end
 ---@param x number
 ---@param y number
 local function drawFog(x, y)
-    local col = gsman.setColor(g.snapToPalette(FOG_COLOR))
+    local fogColor = g.getMapType().fogColor
+    local col = gsman.setColor(g.snapToPalette(fogColor))
     local state = helper.hashIntegerPair(x, y) % 65536
     local t = love.timer.getTime()
     for i = 1, 6 do
@@ -557,7 +585,7 @@ end
 
 function PortalNode:buildDecor(builder, wx, wy)
     if self.active then
-        builder:addImage("node_portal", wx, wy)
+        builder:addImage("node_portal", wx, wy, 0, nil, nodeOpacity(self))
         local portalPS = portalPSes[self]
         if portalPS then
             builder:addDrawable(wx, wy - 24, function(x, y)
@@ -565,7 +593,7 @@ function PortalNode:buildDecor(builder, wx, wy)
             end, 100)
         end
     else
-        builder:addImage("node_portal_deactivated", wx, wy)
+        builder:addImage("node_portal_deactivated", wx, wy, 0, nil, nodeOpacity(self))
     end
 end
 

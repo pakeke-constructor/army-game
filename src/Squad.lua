@@ -1,6 +1,15 @@
 
 local objects = require("src.modules.objects.objects")
 
+--- Invisible point the squad marches toward as a group (battle-only, transient).
+---@class g.Squad.Leader
+---@field x number
+---@field y number
+---@field destX number? player-commanded move destination
+---@field destY number?
+---@field engaged boolean? true once units break off to attack independently
+---@field target ecs.Entity? nearest enemy the squad is marching toward
+
 ---@class g.Squad: objects.Class
 ---@field squadId string
 ---@field level integer
@@ -11,7 +20,11 @@ local objects = require("src.modules.objects.objects")
 ---@field formation "square"|"circle"|"horizontal"|"vertical"|"diamond"
 ---@field deployed boolean?
 ---@field canAfford boolean?
+---@field leader g.Squad.Leader? the squad marches toward this as a group
+---@field deployDxFromCommander number?
+---@field deployDyFromCommander number?
 local Squad = objects.Class("g:Squad")
+
 
 --- Formation functions: (n, spacing) -> {{x,y}, ...}
 Squad.FORMATIONS = {}
@@ -84,6 +97,8 @@ function Squad:init(squadId, def)
     self.statBuffs = {}
     self.formation = "square"
     self.deployed = false
+    self.deployDxFromCommander = nil
+    self.deployDyFromCommander = nil
     self.icon = nil
 end
 
@@ -104,7 +119,6 @@ function Squad:spawn(x, y)
     self.deployed = true
     return entities
 end
-
 ---@return table[] offsets {{x,y}, ...}
 function Squad:getFormationOffsets()
     g = g or require("src.g")
@@ -121,6 +135,8 @@ function Squad:serialize()
         perks = self.perks,
         statBuffs = self.statBuffs,
         formation = self.formation,
+        deployDxFromCommander = self.deployDxFromCommander,
+        deployDyFromCommander = self.deployDyFromCommander,
     }
 end
 
@@ -133,6 +149,8 @@ function Squad.deserialize(data)
     sq.perks = data.perks or {}
     sq.statBuffs = data.statBuffs or {}
     sq.formation = data.formation or "square"
+    sq.deployDxFromCommander = data.deployDxFromCommander
+    sq.deployDyFromCommander = data.deployDyFromCommander
     return sq
 end
 

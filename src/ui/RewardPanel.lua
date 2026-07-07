@@ -3,32 +3,60 @@
 ---@class g.RewardPanel: objects.Class
 local RewardPanel = objects.Class("g:RewardPanel")
 
+---@class g.RewardPanel.XPReward
+---@field type "xp"
+---@field amount integer
 
----@class g.RewardPanel.Rewards
----@field gold integer?
----@field xp integer?
----@field randomSquad boolean?
----@field randomBlessing boolean?
----@field randomMana boolean?
+---@class g.RewardPanel.GoldReward
+---@field type "gold"
+---@field amount integer
 
+---@class g.RewardPanel.SquadReward
+---@field type "squad"
+---@field rerolls integer? (0 = no reroll)
 
+---@class g.RewardPanel.BlessingReward
+---@field type "blessing"
+---@field rarityWeights g.RarityWeights?
+
+---@class g.RewardPanel.ManaReward
+---@field type "mana"
+
+---@class g.RewardPanel.ManaBlessingReward
+---@field type "mana_blessing"
+
+---@class g.RewardPanel.DemonRage
+---@field type "demon_fury"
+---@field amount integer
+
+---@alias g.RewardPanel.Any
+---| g.RewardPanel.XPReward
+---| g.RewardPanel.GoldReward
+---| g.RewardPanel.SquadReward
+---| g.RewardPanel.BlessingReward
+---| g.RewardPanel.ManaReward
+---| g.RewardPanel.ManaBlessingReward
+---| g.RewardPanel.DemonRage
+
+---@class g.RewardPanel.ORReward
+---@field type "or"
+---@field a g.RewardPanel.Any (LHS)
+---@field b g.RewardPanel.Any (RHS)
+
+---@alias g.RewardPanel.Rewards (g.RewardPanel.ORReward|g.RewardPanel.Any)[]
 
 ---@param typ "levelup"|"battle"|"other"
 ---@param args g.RewardPanel.Rewards
 function RewardPanel:init(typ, args)
     self.type = typ
-    self.gold = args.gold
-    self.xp = args.xp
-    self.randomSquad = args.randomSquad
-    self.randomBlessing = args.randomBlessing
-    self.randomMana = args.randomMana
+    self.rewards = args
 end
 
 
 
 ---@return boolean
 function RewardPanel:hasAnyRewards()
-    return not not (self.gold or self.xp or self.randomBlessing or self.randomSquad or self.randomMana)
+    return #self.rewards > 0
 end
 
 
@@ -42,21 +70,28 @@ local LEVEL_UP_TXT = loc("Level Up!", {}, {
     context = "As in, at title showing a reward screen after battle / level-up"
 })
 
+local OR_TEXT = loc("OR", {}, {
+    context = "A binary choice of option"})
 
 
 
 
-local BROWN_COL = objects.Color("FF9B6F57")
+
+
 local colStr = ("{c r=%.2f g=%.2f b=%.2f}"):format(
     objects.Color("FFBBA7A7"):getRGBA()
 )
 
-local NEW_SQUAD =  "{recruit_icon} ".. colStr .. loc("Recruit new troops!")
+local NEW_SQUAD =  "{recruit_icon} ".. colStr .. loc("Recruit new squads!")
 
 local NEW_BLESSING = "{blessing_icon} " ..colStr .. loc("Get random Blessing!")
 
 local NEW_MANA =  "{mana_colorless_large} " .. colStr .. loc("Gain a Mana crystal!")
 
+local MANA_AND_BLESSING = "{mana_colorless_large} {blessing_icon} " .. colStr .. loc("Choose Mana + Blessing!")
+
+local BROWN_COL = (objects.Color("FF9B6F57"))
+local DEMON_FURY = "{o}" .. loc("Increase {DEMON_FURY_COLOR}Demon Fury{/DEMON_FURY_COLOR} {demonfury_icon} by 1")
 
 
 function RewardPanel:draw()
@@ -96,69 +131,166 @@ function RewardPanel:draw()
     })
 
     local pad = 4
+
+    ---@param baseR kirigami.Region
+    ---@param txt string
+    ---@param cb function
+    ---@param bgColor objects.Color?
+    local function drawButton(baseR, txt, cb, bgColor)
+        local isHovered = iml.isHovered(baseR:get())
+
+        if bgColor then
+            local rr, gg, bb, aa = bgColor:getRGBA()
+            if isHovered then
+                lg.setColor(rr * 0.8, gg * 0.8, bb * 0.8, aa)
+            else
+                lg.setColor(rr, gg, bb, aa)
+            end
+        else
+            lg.setColor(0, 0, 0)
+            if isHovered then
+                lg.setColor(0.05,0.05,0.15)
+            end
+        end
+
+        ui.drawSingleColorPanel(baseR:get())
+        if not isHovered then
+            lg.setColor(1, 0.85, 0.3, 0.2)
+            -- g.drawImage("glow_lootreward", x + w/2, y + h/2, 0, w/78, h/14)
+        end
+        lg.setColor(1,1,1)
+        richtext.printRich(txt, SMALL_FONT, baseR.x, baseR.y + pad, baseR.w - pad, "center")
+        if iml.wasJustClicked(baseR:get()) then
+            cb()
+        end
+        if iml.wasJustHovered(baseR:get()) then
+            -- play sound
+            g.playUISound("ui_tick")
+        end
+    end
+
     local boxH = SMALL_FONT:getHeight() + pad*2
-    local function addBar(txt, callback)
+    local SPACER_H = math.floor(boxH * 0.35)
+
+    ---@param txt string
+    ---@param callback function
+    ---@param bgColor objects.Color?
+    local function addBar(txt, callback, bgColor)
         box:add({
             getHeight = function(w)
                 return boxH
             end,
             draw = function(x, y, w, h)
-                lg.setColor(0,0,0)
-                local isHovered = iml.isHovered(x,y,w,h)
-                if isHovered then
-                    lg.setColor(0.05,0.05,0.15)
-                end
-                ui.drawSingleColorPanel(x, y, w, h)
-                if not isHovered then
-                    lg.setColor(1, 0.85, 0.3, 0.2)
-                    -- g.drawImage("glow_lootreward", x + w/2, y + h/2, 0, w/78, h/14)
-                end
-                lg.setColor(1,1,1)
-                richtext.printRich(txt, SMALL_FONT, x,y+pad, w, "center")
-                if iml.wasJustClicked(x,y,w,h) then
-                    callback()
-                end
-                if iml.wasJustHovered(x,y,w,h) then
-                    -- play sound
-                    g.playUISound("ui_tick")
-                end
+                return drawButton(Kirigami(x,y,w,h), txt, callback, bgColor)
             end
         })
     end
 
-    if self.gold and self.gold > 0 then
-        addBar("{coin_icon}{GOLD_COLOR} " .. tostring(self.gold), function()
-            g.addGold(self.gold)
-            self.gold = nil
-        end)
+    local function addSpacer()
+        box:add({
+            getHeight = function(w)
+                return SPACER_H
+            end,
+            draw = function(x, y, w, h)
+            end
+        })
     end
 
-    if self.xp and self.xp > 0 then
-        addBar("{xp_icon}{XP_COLOR} " .. tostring(self.xp), function()
-            g.addXP(self.xp)
-            self.xp = nil
-        end)
-    end
+    for i, v in ipairs(self.rewards) do
+        if v.type == "or" then
+            box:add({
+                getHeight = function(w)
+                    return boxH
+                end,
+                draw = function(x, y, w, h)
+                    local OR_PADDING = 8
+                    lg.setColor(0,0,0)
+                    local baseR = Kirigami(x, y, w, h)
+                    local leftR, midR, rightR = baseR:splitHorizontalExact(
+                        0, LARGE_FONT:getWidth(OR_TEXT) + OR_PADDING * 2, 0
+                    )
 
-    if self.randomBlessing then
-        addBar(NEW_BLESSING, function()
-            choicePopupService.set("blessing")
-            self.randomBlessing = nil
-        end)
-    end
+                    -- Draw the 'OR' text
+                    lg.setColor(BROWN_COL)
+                    richtext.printRichContainedNoWrap(OR_TEXT, LARGE_FONT, midR:padUnit(OR_PADDING, 0):get())
+                    lg.setColor(1, 1, 1)
 
-    if self.randomSquad then
-        addBar(NEW_SQUAD, function()
-            choicePopupService.set("squad", 2)
-            self.randomSquad = nil
-        end)
-    end
-
-    if self.randomMana then
-        addBar(NEW_MANA, function()
-            choicePopupService.set("mana")
-            self.randomMana = nil
-        end)
+                    -- Draw left and right
+                    for _, b in ipairs({{v.a, leftR}, {v.b, rightR}}) do
+                        if b[1].type == "xp" then
+                            drawButton(b[2], "{xp_icon}{XP_COLOR} "..tostring(b[1].amount), function()
+                                g.addXP(b[1].amount)
+                                table.remove(self.rewards, i)
+                            end)
+                        elseif b[1].type == "gold" then
+                            drawButton(b[2], "{coin_icon}{GOLD_COLOR} "..tostring(b[1].amount), function()
+                                g.addGold(b[1].amount)
+                                table.remove(self.rewards, i)
+                            end)
+                        elseif b[1].type == "squad" then
+                            drawButton(b[2], NEW_SQUAD, function()
+                                choicePopupService.set("squad", b[1].rerolls or 0)
+                                table.remove(self.rewards, i)
+                            end)
+                        elseif b[1].type == "blessing" then
+                            drawButton(b[2], NEW_BLESSING, function()
+                                choicePopupService.set("blessing", nil, b[1].rarityWeights)
+                                table.remove(self.rewards, i)
+                            end)
+                        elseif b[1].type == "mana" then
+                            drawButton(b[2], NEW_MANA, function()
+                                choicePopupService.set("mana")
+                                table.remove(self.rewards, i)
+                            end)
+                        elseif b[1].type == "mana_blessing" then
+                            drawButton(b[2], MANA_AND_BLESSING, function()
+                                choicePopupService.set("mana_blessing")
+                                table.remove(self.rewards, i)
+                            end)
+                        end
+                    end
+                end
+            })
+        elseif v.type == "xp" then
+            addBar("{xp_icon}{XP_COLOR} "..tostring(v.amount), function()
+                g.addXP(v.amount)
+                table.remove(self.rewards, i)
+            end)
+        elseif v.type == "gold" then
+            addBar("{coin_icon}{GOLD_COLOR} "..tostring(v.amount), function()
+                g.addGold(v.amount)
+                table.remove(self.rewards, i)
+            end)
+        elseif v.type == "squad" then
+            addBar(NEW_SQUAD, function()
+                choicePopupService.set("squad", v.rerolls or 0)
+                table.remove(self.rewards, i)
+            end)
+        elseif v.type == "blessing" then
+            addBar(NEW_BLESSING, function()
+                choicePopupService.set("blessing", nil, v.rarityWeights)
+                table.remove(self.rewards, i)
+            end)
+        elseif v.type == "mana" then
+            addBar(NEW_MANA, function()
+                choicePopupService.set("mana")
+                table.remove(self.rewards, i)
+            end)
+        elseif v.type == "mana_blessing" then
+            addBar(MANA_AND_BLESSING, function()
+                choicePopupService.set("mana_blessing")
+                table.remove(self.rewards, i)
+            end)
+        elseif v.type == "demon_fury" then
+            addSpacer()
+            addBar(DEMON_FURY, function()
+                local run = g.getRun()
+                run.demonFury = run.demonFury + v.amount
+                table.remove(self.rewards, i)
+            end, g.snapToPalette(objects.Color("FF361e19")))
+        else
+            error("Unknown reward type: "..tostring(v.type))
+        end
     end
 
     box:render(r.x,r.y)

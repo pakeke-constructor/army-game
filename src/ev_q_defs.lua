@@ -8,6 +8,7 @@ g.defineEvent("postUpdate")
 g.defineEvent("perSecondUpdate")
 g.defineEvent("preDraw")
 g.defineEvent("postDraw")
+g.defineEvent("drawAboveFog") -- fired after fog is rendered, so decor can draw on top of it
 
 
 -- Battle events

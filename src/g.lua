@@ -64,6 +64,10 @@ local Entity = require("src.ecs.Entity")
 local bgm = require("src.sound.bgm")
 local sfx = require("src.sound.sfx")
 
+local juiceService = require("src.juiceService")
+local newPicker = require("src.modules.Picker")
+local tags = require("src.tags")
+
 
 
 local postLoadCallbacks = {}
@@ -77,6 +81,36 @@ function g._runPostLoad()
         func()
     end
     postLoadCallbacks = {}
+end
+
+function g.getTagList()
+    return tags.LIST
+end
+
+function g.isTag(tag)
+    return tags.SET[tag] == true
+end
+
+local function assertValidTags(kind, id, tagList)
+    if tagList == nil then
+        return
+    end
+
+    assert(type(tagList) == "table", kind .. " '" .. id .. "' tags must be a list")
+
+    local total = 0
+    for _ in pairs(tagList) do
+        total = total + 1
+    end
+    assert(total == #tagList, kind .. " '" .. id .. "' tags must be a dense array")
+
+    local seen = {}
+    for i, tag in ipairs(tagList) do
+        assert(type(tag) == "string", kind .. " '" .. id .. "' tag #" .. i .. " must be a string")
+        assert(tags.SET[tag], kind .. " '" .. id .. "' uses unknown tag: " .. tag)
+        assert(not seen[tag], kind .. " '" .. id .. "' has duplicate tag: " .. tag)
+        seen[tag] = true
+    end
 end
 
 
@@ -126,10 +160,13 @@ local PALETTE = {
 ---@param b number blue [0..1]
 ---@param a number? alpha [0..1] (default 1)
 ---@overload fun(color:objects.Color):objects.Color
+---@overload fun(color:string):objects.Color
 ---@return objects.Color
 function g.snapToPalette(r, gg, b, a)
     if type(r) == "table" then
         r, gg, b, a = r[1], r[2], r[3], r[4]
+    elseif type(r) == "string" then
+        r, gg, b, a = objects.Color(r):getRGBA()
     end
     a = a or 1
     local best, bestDist = nil, math.huge
@@ -149,15 +186,24 @@ end
 
 
 
+---@class g.SquadDefForCommander: g.SquadDef
+---@field name nil
 
+---@class g.CommanderDef
+---@field description string
+---@field image string
+---@field startMana g.ManaBundle
+---@field squadDef g.SquadDefForCommander?
+---@field squadId string?
+---@field onStart (fun(run: g.Run))?
 
----@class g.CommanderInfo
+---@class g.CommanderInfo: g.CommanderDef
 ---@field id string
 ---@field name string
 ---@field description string
 ---@field image string
 ---@field startMana g.ManaBundle
----@field squadDef (g.SquadInfo|{id:nil}|{name:nil}|{perks:nil})?
+---@field squadDef g.SquadDef?
 ---@field squadId string?
 ---@field onStart (fun(run: g.Run))?
 
@@ -170,23 +216,27 @@ end
 
 ---@param id string
 ---@param name string
----@param info g.CommanderInfo|{id:nil}|{name:nil}
+---@param info g.CommanderDef
 function g.defineCommander(id, name, info)
     assert(not COMMANDERS[id], "Duplicate commander: " .. id)
+    assertValidTags("Commander", id, info.tags)
     info.name = loc(name, {}, {
         context = "The name of a commander"
     })
     info.id = id
     assert(info.image,"commanders need images")
+    ---@cast info g.CommanderInfo
+
+    assert(info.startMana and next(info.startMana), "missing starting mana")
 
     local squadDef = info.squadDef
     if squadDef then
         assert(squadDef.entityDef, "commanders need squadDef.entityDef")
-        assert(squadDef.rarity == g.RARITIES.UNIQUE, "commander squad rarity must be UNIQUE")
+        assert(squadDef.rarity == g.RARITIES.COMMANDER, "commander squad rarity must be UNIQUE")
         assert((squadDef.unitCount or 1) == 1, "commander squad unitCount must be 1")
         assert(squadDef.cost, "commanders need squadDef.cost")
 
-        squadDef.rarity = g.RARITIES.UNIQUE
+        squadDef.rarity = g.RARITIES.COMMANDER
         squadDef.unitCount = 1
         squadDef.name = squadDef.name or info.name
         squadDef.icon = squadDef.icon or info.image
@@ -212,7 +262,7 @@ end
 
 
 
-
+---@type g.Run?
 local currentRun
 
 ---@class g.LaunchOptions
@@ -269,6 +319,52 @@ function g.newTestRun()
 
 end
 
+function g.hasRun()
+    return currentRun ~= nil
+end
+
+---@return g.Run
+function g.getRun()
+    return assert(currentRun, "run not loaded")
+end
+
+local RUN_SAVE_PATH = "saves/run1.json"
+
+function g.saveRun()
+    if not currentRun or not currentRun.serialize then
+        return
+    end
+    local data = currentRun:serialize()
+    local contents = json.encode(data)
+    love.filesystem.write(RUN_SAVE_PATH, contents)
+end
+
+function g.loadRun()
+    local contents = assert(love.filesystem.read(RUN_SAVE_PATH))
+    local data = json.decode(contents)
+    currentRun = Run.deserialize(data)
+end
+
+function g.hasSavedRun()
+    return not not love.filesystem.getInfo(RUN_SAVE_PATH, "file")
+end
+
+function g.saveAndInvalidateRun()
+    if not currentRun or not currentRun.serialize then
+        return
+    end
+    g.saveRun()
+    g.delRun()
+end
+
+---@param delsave boolean?
+function g.delRun(delsave)
+    currentRun = nil
+    if delsave and g.hasSavedRun() then
+        love.filesystem.remove(RUN_SAVE_PATH)
+    end
+end
+
 
 ---@param partitionId string
 ---@param x number
@@ -304,13 +400,117 @@ function g.explosion(x, y, damage, radius, fromEntity)
 end
 
 
-function g.hasRun()
-    return currentRun ~= nil
+do
+
+---@param x number
+---@param y number
+---@param maxDistance number
+---@param excludeEntities {[ecs.Entity]:boolean?}
+local function findFurthestEnemyWithinDistance(x, y, maxDistance, excludeEntities)
+    local radius = maxDistance
+    local bestEnt = nil
+    local bestDistSq = -1
+    local maxDistSq = maxDistance * maxDistance
+
+    g.getECS():iteratePartition("enemy", x, y, function(ent)
+        if not g.isAlive(ent) then return end
+        if excludeEntities[ent] then return end
+
+        local dx = ent.x - x
+        local dy = ent.y - y
+        local distSq = dx * dx + dy * dy
+        if distSq > maxDistSq then return end
+        if distSq <= bestDistSq then return end
+
+        bestDistSq = distSq
+        bestEnt = ent
+    end, radius)
+
+    return bestEnt
 end
 
----@return g.Run
-function g.getRun()
-    return assert(currentRun, "run not loaded")
+---@param x number
+---@param y number
+---@param damage number
+---@param attacker ecs.Entity?
+---@param enemyChainSize number?
+function g.lightning(x, y, damage, attacker, enemyChainSize)
+    g.playWorldSound("lightning_zap", 0.9, 0.25, 0.3, 0)
+    enemyChainSize = math.max(2, enemyChainSize or 5)
+
+    local MAX_LIGHTNING_GAP = 130
+
+    ---@type {[ecs.Entity]: boolean?}
+    local foundEnemies = {}
+    ---@type ecs.Entity[]
+    local enemyList = {}
+
+    local enemyEnt = findFurthestEnemyWithinDistance(x, y, MAX_LIGHTNING_GAP, foundEnemies)
+    if not enemyEnt then return end
+
+    foundEnemies[enemyEnt] = true
+    enemyList[#enemyList + 1] = enemyEnt
+
+    for _ = 1, enemyChainSize - 1 do
+        local enemyEnt1 = findFurthestEnemyWithinDistance(enemyEnt.x, enemyEnt.y, MAX_LIGHTNING_GAP, foundEnemies)
+        if not enemyEnt1 then break end
+        foundEnemies[enemyEnt1] = true
+        enemyList[#enemyList + 1] = enemyEnt1
+        enemyEnt = enemyEnt1
+    end
+
+    for _,ent in ipairs(enemyList)do
+        g.dealDamage(ent, damage, attacker)
+    end
+
+    if #enemyList >= 2 then
+        g.spawnEntityWithInit("lightning_chain_visual", 0,0, function(ent)
+            -- list of tokens to strike
+            ent._lightningTargets = enemyList
+            local bestY = -100
+            for _,t in ipairs(enemyList) do
+                if t.y > bestY then
+                    ent.x = t.x
+                    ent.y = t.y
+                    bestY = t.y
+                end
+            end
+        end)
+    end
+end
+
+end
+
+
+
+
+
+---@param count integer? default to 1
+function g.incrementDays(count)
+    local run = g.getRun()
+    run.day = math.min(run.day + (count or 1), run.daysUntilIncursion)
+end
+
+---This function won't decrement days if it's already on incursion!
+---@param count integer? default to 1
+function g.decrementDays(count)
+    local run = g.getRun()
+    if run.day ~= run.daysUntilIncursion then
+        run.day = run.day - (count or 1)
+    end
+end
+
+
+
+local mapTypes = require("src.scenes.map_scene.map_types")
+
+---@return MapType
+---@return string
+function g.getMapType()
+    local run = g.getRun()
+    local mapType = run and run.mapGraph and run.mapGraph.mapType.name
+    mapType = mapType or consts.STARTING_MAP_TYPE
+    return assert(mapTypes[mapType]), mapType
 end
 
 local currentECS
@@ -323,6 +523,12 @@ end
 ---@return ecs.ECSWorld?
 function g.tryGetECS()
     return currentECS
+end
+
+--- O(1) cached lookup of the live commander entity (nil if none/dead).
+---@return ecs.Entity?
+function g.getCommanderEntity()
+    return currentECS and currentECS._commander
 end
 
 ---@param ecs ecs.ECSWorld
@@ -360,32 +566,6 @@ function g.addXP(amount)
     run.xp = run.xp + amount
 end
 
-function g.delRun()
-    currentRun = nil
-end
-
-function g.saveRun()
-    if not currentRun or not currentRun.serialize then
-        return
-    end
-    local data = currentRun:serialize()
-    local contents = json.encode(data)
-    love.filesystem.write("saves/run1.json", contents)
-end
-
-function g.loadRun(path)
-    local contents = assert(love.filesystem.read(path))
-    local data = json.decode(contents)
-    currentRun = Run.deserialize(data)
-end
-
-function g.saveAndInvalidateRun()
-    if not currentRun or not currentRun.serialize then
-        return
-    end
-    g.saveRun()
-    g.delRun()
-end
 
 
 ---@return love.Texture
@@ -418,6 +598,29 @@ end
 function g.isImage(imageName)
     return (nameToQuad[imageName] and true) or false
 end
+
+
+-- Placeholder function for our artist
+do
+
+local weNeedThis = objects.Set() --[[@as objects.Set<string>]]
+---@param image string
+---@param fallback string?
+function g.leo(image, fallback)
+    if not g.isImage(image) then
+        weNeedThis:add(image)
+        return fallback or "placeholder"
+    end
+    return image
+end
+
+function g._dumpWhatLeoNeedsToCreate()
+    return weNeedThis:totable()
+end
+
+end
+
+
 
 ---@param imageName string|love.Quad
 ---@param x number
@@ -512,6 +715,25 @@ function g.getManaBundleColor(bundle)
     return objects.Color.WHITE
 end
 
+local LEVEL_TEXT = interp("Lv.%{level}", {context = "Abbreviated level text"})
+local LEVEL_MAX_TEXT = loc("MAX", {context = "Max level reached"})
+local SQUAD_LEVEL_COLORS = {
+    g.snapToPalette("#ffffff"),
+    g.snapToPalette("#f1f11e"),
+    g.snapToPalette("#f1f11e"),
+    g.snapToPalette("#cd853b"),
+    g.snapToPalette("#cd853b"),
+    g.snapToPalette("#c5303d"),
+    g.snapToPalette("#c5303d"),
+    g.snapToPalette("#c852a4"),
+    g.snapToPalette("#c852a4"),
+    g.snapToPalette("#357dd2")
+}
+
+local TRAIL_CHASER_COUNT = {
+    RARE = 2,
+    LEGENDARY = 4
+}
 
 ---@param squadId string
 ---@param x number
@@ -522,25 +744,69 @@ function g.drawSquadIcon(squadId, x, y, drawManaCost, drawLevel)
     local info = g.getSquadInfo(squadId)
     --local rarityColor = (info.rarity or g.RARITIES.COMMON).color
     local col = g.getManaBundleColor(info.cost)
+    local size = 32 -- hacky hardcode
+
+    if TRAIL_CHASER_COUNT[info.rarity.id] then
+        local OUTER_PAD = 1
+        local trailCount = TRAIL_CHASER_COUNT[info.rarity.id]
+        local trailR = Kirigami(
+            x - size / 2 - OUTER_PAD,
+            y - size / 2 - OUTER_PAD,
+            size + 2 * OUTER_PAD,
+            size + 2 * OUTER_PAD
+        )
+        local c = gsman.mulColor(info.rarity.color)
+        for i = 1, trailCount do
+            helper.drawEdgeTrailAnimation(trailR, info.rarity.color, i / trailCount)
+        end
+        c:pop()
+    end
+
+    g.drawImage(info.icon, x, y)
+
+    local c = gsman.mulColor(col)
+    g.drawImage("squadicon_border", x, y)
+    c:pop()
+
+    if drawManaCost then
+        g.drawManaCost(info.cost, x,y-size/2, size + 6)
+    end
+    if drawLevel and not info.entityDef.isCommander then
+        -- draw level:
+        local font = g.getSmallFont(16)
+        local co = gsman.setColor(SQUAD_LEVEL_COLORS[helper.clamp(drawLevel, 1, 10)])
+        local text
+        if drawLevel >= 10 then
+            text = "{bob amp=0.5}{o}"..LEVEL_MAX_TEXT
+        else
+            text = "{o}"..LEVEL_TEXT({level = tostring(drawLevel)})
+        end
+        richtext.printRichContainedNoWrap(text, font, x - size / 2, y+6, size, 16, "center")
+        co:pop()
+    end
+end
+
+
+---@param spellId string
+---@param x number
+---@param y number
+---@param drawManaCost boolean?
+function g.renderSpellIcon(spellId, x, y, drawManaCost)
+    local info = g.getSpellInfo(spellId)
+    local col = g.getManaBundleColor(info.cost)
     local c = gsman.mulColor(1, 1, 1)
     g.drawImage(info.icon, x, y)
     c:pop()
     c = gsman.mulColor(col)
-    g.drawImage("squadicon_border", x, y)
+    g.drawImage("spellicon_border", x, y)
     c:pop()
 
     local size = 32 -- hacky hardcode
     if drawManaCost then
-        g.drawManaCost(info.cost, x,y-size/2, size + 6)
-    end
-    if drawLevel then
-        -- draw level:
-        local lvReg = Kirigami(x, y+2, size/2-4, size/2-4)
-        local font = g.getSmallFont(16)
-        lg.setColor(0.6,0.6,0.6,0.6)
-        richtext.printRichContainedNoWrap("Lv "..tostring(drawLevel), font, lvReg:get())
+        g.drawManaCost(info.cost, x, y - size/2, size + 6)
     end
 end
+
 
 
 
@@ -658,6 +924,11 @@ end
 ---@param volumeVar number? (volume variance, default 0)
 function g.playUISound(soundname, pitch, volume, pitchVar, volumeVar)
     return sfx.play(soundname, pitch, volume, pitchVar, volumeVar)
+end
+
+
+function g.updateSfx()
+    sfx.update()
 end
 
 
@@ -786,6 +1057,7 @@ local currentEntityId = 0
 ---@field perks (g.PerkDef|string|false)[]? Perks will be given ID `id.."_perk_..i` if `g.PerkDef` is passed. Use `false` to skip IDs. Pass existing perk ID to use that instead.
 ---@field startingTraits string[]? Trait ids applied to every unit in this squad on spawn.
 ---@field cost g.ManaBundle?
+---@field squadType g.SquadType? Optional explicit category. Auto-derived from stats if omitted.
 ---@field onDeploySquad (fun(squad: g.SquadInfo, entities: ecs.Entity[], x: number, y:number))?
 ---@field drawSquadHover fun(x:number, y:number)?
 
@@ -801,17 +1073,76 @@ local currentEntityId = 0
 ---@field startingTraits string[] Trait ids applied to every unit in this squad on spawn.
 ---@field cost g.ManaBundle
 ---@field powerIndex number
+---@field squadType g.SquadType
 
----@param squadInfo g.SquadInfo
+---@param squadInfo g.SquadDef
+---@return number
 local function estimateSquadPowerIndex(squadInfo)
+    -- squad power-index is a heuristic representation of like: "how powerful" a squad is.
+    ----- 
     local def = squadInfo.entityDef
-    local attack = def.baseAttackDamage or 0
-    local attackSpeed = def.baseAttackSpeed or 0
-    local maxHealth = def.baseMaxHealth or 0
-    local rangedMult = g.isRangedUnit(squadInfo.entityId) and 2.5 or 1
-    return attack * attackSpeed * rangedMult * maxHealth
+    local bonus = 1
+    local attack = def.baseAttackDamage or def.baseHealPower or 1
+    local attackSpeed = def.baseAttackSpeed or 1
+    local unitCount = squadInfo.unitCount or 1
+    local healthArmr = (def.baseMaxHealth or 1) + (def.baseStartingArmor or 0)
+    local timeToDealDmg = 4*healthArmr + math.max(1,((def.baseAttackRange or 1) - 20))
+
+    local manaCost = 0
+    for _, n in pairs(squadInfo.cost or {}) do
+        manaCost = manaCost + (n or 0)
+    end
+    if manaCost > 1 then
+        bonus = bonus / 2.5 -- units that cost more have lower powerIndex, coz they are more expensive.
+    end
+
+    return math.floor(bonus * (attack*attackSpeed*timeToDealDmg*unitCount))
 end
 
+
+---@enum g.SquadType
+g.SQUAD_TYPES = objects.Enum({
+    "TANK",     -- high hp
+    "BRUISER",  -- melee, high hp, good damage
+    "RANGED",   -- ranged, damage
+    "HEALER",   -- healer
+    "BUILDING", -- building
+    "OTHER",
+})
+
+---Derive a squad's category from its stats.
+---@param info g.SquadDef
+---@return g.SquadType
+local function categorizeSquad(info)
+    local def = info.entityDef
+
+    if def.isBuilding then
+        return g.SQUAD_TYPES.BUILDING
+    end
+
+    local healPower = def.baseHealPower or 0
+    local attackDamage = def.baseAttackDamage or 0
+    if healPower > 0 and healPower >= attackDamage then
+        return g.SQUAD_TYPES.HEALER
+    end
+
+    local isRanged = def.attack and def.attack.attackType == "ranged"
+    if isRanged and healPower <= 0 then
+        return g.SQUAD_TYPES.RANGED
+    end
+
+    -- melee from here on. Compare bulk vs damage output.
+    local health = (def.baseMaxHealth or 0) + (def.baseStartingArmor or 0)
+    local dps = attackDamage * (def.baseAttackSpeed or 0)
+    if dps > 0 and health >= dps * 20 then
+        return g.SQUAD_TYPES.TANK
+    end
+    if dps > 0 and health > 0 then
+        return g.SQUAD_TYPES.BRUISER
+    end
+
+    return g.SQUAD_TYPES.OTHER
+end
 
 
 ---@param id string
@@ -820,6 +1151,7 @@ function g.defineSquad(id, info)
     if SQUAD_DEFS[id] then
         error("Duplicate squad: " .. id)
     end
+    assertValidTags("Squad", id, info.tags)
 
     info.id = id
     info.startingTraits = info.startingTraits or {}
@@ -835,18 +1167,19 @@ function g.defineSquad(id, info)
 
     if not info.icon then
         -- Infer icon name from id
-        local infericon = id:gsub("_squad", ""):gsub("_", "").."_uniticon"
-        if g.isImage(infericon) then
-            info.icon = infericon
+        local infericon1 = id:gsub("_squad", ""):gsub("_", "").."_uniticon"
+        if g.isImage(infericon1) then
+            info.icon = infericon1
         end
 
-        infericon = id:gsub("_squad", ""):gsub("_", "").."s_uniticon"
-        if g.isImage(infericon) then
-            info.icon = infericon
+        local infericon2 = id:gsub("_squad", ""):gsub("_", "").."s_uniticon"
+        if g.isImage(infericon2) then
+            info.icon = infericon2
         end
 
         if not info.icon then
             log.error("Squad had no icon: ", id)
+            g.leo(infericon1.."/"..infericon2)
             info.icon = "example_squad_icon"
         end
     end
@@ -860,7 +1193,9 @@ function g.defineSquad(id, info)
         "Squad '" .. id .. "': baseAttackSpeed must be set iff baseAttackDamage/baseHealPower is set")
     def.team = def.team or "ally"
     def.partitions = def.partitions or {"unit", "ally"}
-    def.ai = def.ai or { target = "enemy" }
+    if not def.isBuilding then
+        def.ai = def.ai or { target = "enemy" }
+    end
     def.shadow = def.shadow or {}
     if not def.physics and def.image then
         local w = g.getImageSize(def.image)
@@ -885,6 +1220,7 @@ function g.defineSquad(id, info)
     end
     assert(info.icon)
     info.powerIndex = estimateSquadPowerIndex(info)
+    info.squadType = info.squadType or categorizeSquad(info)
 
     -- register perks
     ---@type string[]
@@ -922,8 +1258,10 @@ end
 function g.addSquadToArmy(squadId)
     local run = g.getRun()
     assert(not run.squads[squadId], "Squad already in army: " .. squadId)
-    run.squads[squadId] = g.newSquad(squadId)
+    local sq = g.newSquad(squadId)
+    run.squads[squadId] = sq
     run._sortedSquads = nil
+    return sq
 end
 
 --- Adds a temporary squad to the bench for the current fight only.
@@ -966,7 +1304,178 @@ end
 ---@param squadId string
 ---@return g.Squad?
 function g.getSquadFromArmy(squadId)
-    return g.getRun().squads[squadId]
+    if g.hasRun() then
+        return g.getRun().squads[squadId]
+    end
+    return nil
+end
+
+
+-- ============================================================================
+-- SPELLS
+-- Spells are like squads, but played DURING battle (after battle start),
+-- whereas squads are played BEFORE battle (during the deploy/planning phase).
+-- ============================================================================
+
+local SPELL_DEFS = {}
+local SPELL_LIST = {}
+
+---@class g.SpellInstantCastDef
+---@field target "ally"|"enemy"
+---@field maxTargets integer?
+---@field filter (fun(ent: ecs.Entity, castX: number, castY: number, spellId: string): boolean?)?
+---@field apply fun(ent: ecs.Entity, castX: number, castY: number, spellId: string)
+
+---@class g.SpellDef
+---@field name string (untranslated at definition; translated in info)
+---@field nameContext string?
+---@field color objects.Color?
+---@field rarity g.Rarity
+---@field icon string
+---@field cost g.ManaBundle?
+---@field description string?
+---@field spellRange number?
+---@field spellArea number?
+---@field instantCast g.SpellInstantCastDef?
+---@field cast (fun(spellId: string, x: number, y: number))?
+
+---@class g.SpellInfo: g.SpellDef
+---@field id string
+---@field cost g.ManaBundle
+
+---@param id string
+---@param info g.SpellDef
+function g.defineSpell(id, info)
+    if SPELL_DEFS[id] then
+        error("Duplicate spell: " .. id)
+    end
+    assertValidTags("Spell", id, info.tags)
+    info.id = id
+    local manaType
+    for key,v in pairs(info.cost) do
+        manaType = key; break
+    end
+    local manaCol = g.getManaInfo(manaType).color
+    info.color = g.snapToPalette(info.color or manaCol)
+    info.name = loc(assert(info.name), {}, {context = info.nameContext or "Name of a spell."})
+    info.rarity = assert(info.rarity)
+    info.cost = info.cost or {}
+    assert(info.icon, "Missing icon for spell: " .. id)
+    if not g.isImage(info.icon) then
+        error("Spell has invalid icon: " .. info.icon)
+    end
+    if info.instantCast then
+        local instant = info.instantCast
+        assert(instant.target == "ally" or instant.target == "enemy", "Invalid spell instantCast.target for: " .. id)
+        assert(type(instant.apply) == "function", "Missing spell instantCast.apply for: " .. id)
+    end
+    ---@cast info g.SpellInfo
+    SPELL_DEFS[id] = info
+    SPELL_LIST[#SPELL_LIST + 1] = id
+end
+
+---@param id string
+---@return g.SpellInfo
+function g.getSpellInfo(id)
+    return assert(SPELL_DEFS[id], "Unknown spell: " .. tostring(id))
+end
+
+---@param spellId string
+function g.addSpellToArmy(spellId)
+    local run = g.getRun()
+    assert(SPELL_DEFS[spellId], "Unknown spell: " .. tostring(spellId))
+    run.spells[spellId] = true
+end
+
+---@param spellId string
+---@return boolean
+function g.hasSpell(spellId)
+    return g.getRun().spells[spellId] == true
+end
+
+---@param info g.SpellInfo
+---@param x number
+---@param y number
+---@param fn fun(ent: ecs.Entity)
+---@return integer
+local function iterateSpellTargets(info, x, y, fn)
+    local instant = info.instantCast
+    if not instant then return 0 end
+
+    local maxTargets = instant.maxTargets
+    local area = info.spellArea or info.spellRange or 500
+    local hitCount = 0
+
+    g.iteratePartition(instant.target, x, y, function(ent)
+        if maxTargets and hitCount >= maxTargets then return end
+        if not g.isAlive(ent) then return end
+        if instant.filter and not instant.filter(ent, x, y, info.id) then return end
+        hitCount = hitCount + 1
+        fn(ent)
+    end, area)
+
+    return hitCount
+end
+
+---@param worldX number
+---@param worldY number
+---@param spellId string
+---@return boolean
+function g.canCastSpell(worldX, worldY, spellId)
+    local info = g.getSpellInfo(spellId)
+    local run = g.getRun()
+    local affordable = (not info.cost) or g.canAffordMana(run._battleMana, info.cost)
+    if not affordable then return false end
+    if not info.instantCast then return true end
+
+    local hitCount = iterateSpellTargets(info, worldX, worldY, function() end)
+    return hitCount > 0
+end
+
+---@param x number
+---@param y number
+---@param spellId string
+function g.renderSpellCastPreview(x, y, spellId)
+    local info = g.getSpellInfo(spellId)
+    local range = info.spellRange or info.spellArea or 500
+
+    lg.setColor(info.color)
+    lg.circle("line", x, y, range)
+
+    local rot = love.timer.getTime() * 3
+
+    iterateSpellTargets(info, x, y, function(ent)
+        g.drawImageOffset("commander_target_3", ent.x, ent.y - 20, rot, 1, 1, 0.5, 0.5)
+    end)
+
+    lg.setColor(1, 1, 1, 1)
+end
+
+---@param info g.SpellInfo
+---@param x number
+---@param y number
+local function runInstantCastSpell(info, x, y)
+    iterateSpellTargets(info, x, y, function(ent)
+        info.instantCast.apply(ent, x, y, info.id)
+    end)
+end
+
+--- Cast a spell at a point.
+---@param spellId string
+---@param x number
+---@param y number
+function g.castSpell(spellId, x, y)
+    local info = g.getSpellInfo(spellId)
+    g.getRun().spellsCast[spellId] = true
+
+    if info.instantCast then
+        runInstantCastSpell(info, x, y)
+        return
+    end
+
+    if info.cast then
+        info.cast(spellId, x, y)
+    end
 end
 
 
@@ -1117,6 +1626,17 @@ local DEPLOY_ANIMATION_STEP = 0.2
 ---@param y number
 ---@return ecs.Entity[]
 function g.spawnSquad(squad, x, y, ...)
+    local scene = g.getCurrentScene()
+    local commander = scene and scene.commander
+    local commx, commy = x, y
+    if commander and g.isAlive(commander) then
+        commx = commander.x
+        commy = commander.y
+        if commander.image then
+            local _, h = g.getImageSize(commander.image)
+            commy = commy - h / 2
+        end
+    end
     local info = assert(SQUAD_DEFS[squad.squadId], "Unknown squad: " .. tostring(squad.squadId))
     local squadScope = g.newScope()
     squadScope.shared = true
@@ -1127,24 +1647,34 @@ function g.spawnSquad(squad, x, y, ...)
         end
     end
     local offsets = squad:getFormationOffsets()
+    -- invisible squad "leader": the whole squad marches toward it as a group.
+    squad.leader = { x = x, y = y, target = nil, engaged = false }
     local entities = {}
     local numUnits = #offsets
     for i = 1, numUnits do
         g.spawnEntityWithInit(info.entityId, x + offsets[i].x, y + offsets[i].y, function(ent)
             ent.scope = squadScope
             ent.squad = squad
+            ent._formationOffset = offsets[i]
             for _, stat in ipairs(g.getStatList()) do
                 -- apply squad buffs:
                 if ent[stat.baseName] then
                     ent[stat.baseName] = ent[stat.baseName] + g.getSquadStatBuff(squad.squadId, stat.name)
                 end
             end
-            ent._timeSinceDeployed = -(((i - 1)/numUnits) * DEPLOY_ANIMATION_STEP)
+            ent._deployTime = love.timer.getTime() + ((i - 1)/numUnits) * DEPLOY_ANIMATION_STEP
             for _, traitName in ipairs(info.startingTraits) do
                 g.addTrait(ent, traitName)
             end
             entities[i] = ent
         end, ...)
+    end
+    squad.deployDxFromCommander = x - commx
+    squad.deployDyFromCommander = y - commy
+    for i = 1, #entities do
+        local ent = entities[i]
+        ent.deployDxFromCommander = ent.x - commx
+        ent.deployDyFromCommander = ent.y - commy
     end
     if info.onDeploySquad then
         info.onDeploySquad(info, entities)
@@ -1161,6 +1691,7 @@ local BLESSING_LIST = {}
 ---@param name string
 ---@param info g.BlessingInfo|{id:nil,name:nil}
 function g.defineBlessing(id, name, info)
+    assertValidTags("Blessing", id, info.tags)
     if info.image == "placeholder" then
         log.warn("No image for blessing:",id)
     elseif not g.isImage(info.image) then
@@ -1203,6 +1734,35 @@ function g.getBlessingsByMana(manaCells)
         end
     end
     return result
+end
+
+---@param manaCells g.ManaCounts
+---@param rarityWeights g.RarityWeights?
+---@param seen table<string, true?>?
+---@return string?
+function g.getRandomBlessingByMana(manaCells, rarityWeights, seen)
+    local pool = g.getBlessingsByMana(manaCells)
+    if #pool == 0 then return nil end
+
+    local run = g.getRun()
+    seen = seen or helper.shallowCopy(run and run.blessings or {})
+
+    local weights = {}
+    rarityWeights = rarityWeights or consts.DEFAULT_RARITY_WEIGHTS
+    for i, id in ipairs(pool) do
+        local info = g.getBlessingInfo(id)
+        weights[i] = rarityWeights[info.rarity.id] or 0
+    end
+
+    local picker = newPicker(pool, weights)
+    local pick = picker:pick()
+    for _ = 1, 20 do
+        if not seen[pick] then break end
+        pick = picker:pick()
+    end
+
+    if seen[pick] then return nil end
+    return pick
 end
 
 ---@param id string
@@ -1323,6 +1883,7 @@ function g.definePerk(id, info)
     if PERK_DEFS[id] then
         error("Duplicate perk: " .. id)
     end
+    assertValidTags("Perk", id, info.tags)
 
     ---@cast info g.PerkInfo
     info.name = loc(info.name, {}, {
@@ -1457,6 +2018,7 @@ function g.defineEntity(id, def)
         assert(def[k] == nil, "Entity def '" .. id .. "' cannot override base method: " .. k)
     end
     if def.isBuilding and def.physics then
+        assert((def.baseMoveSpeed or 0) <= 0)
         assert(def.physics.isStatic, "Buildings must have static physics")
     end
     def.type = id
@@ -1804,16 +2366,201 @@ local HEALTHBAR_ON_TOP = true
 -- true if healthbar on top, 
 -- false implies healthbar on bottom
 
+local USE_OLD_RENDERING = true
+-- true if uses old health rendering
+-- false to use segmented health bars
+
 local ENEMY_HEALTHBAR_COLOR = g.snapToPalette(1, 0.1, 0.1)
 local ALLY_HEALTHBAR_COLOR = g.snapToPalette(0.1, 1, 0.1)
 local NEUTRAL_HEALTHBAR_COLOR = g.snapToPalette(0.1, 0.4, 1)
+local HEALTHBAR_SIZE_MULT = 1 -- for segmented rendering only.
 
+
+---@param maxHp number
+local function getHPSegmentInfo(maxHp)
+    -- The segments count is adjusted depending on the max health
+    -- such that the segment for each health is around the specified value.
+    local MIN_HP_PER_SEGMENT = 25
+	local MAX_HP_PER_SEGMENT = 45
+	local IDEAL_HP_PER_SEGMENT = (MIN_HP_PER_SEGMENT + MAX_HP_PER_SEGMENT) / 2
+
+	if maxHp <= MIN_HP_PER_SEGMENT then
+		return 1, 1
+	end
+
+	local minSegments = math.ceil(maxHp / MAX_HP_PER_SEGMENT)
+	local maxSegments = math.floor(maxHp / MIN_HP_PER_SEGMENT)
+
+	local ideal = math.floor(maxHp / IDEAL_HP_PER_SEGMENT + 0.5)
+
+	local segments = math.max(minSegments, math.min(maxSegments, ideal))
+    return segments, 1
+end
 
 ---@param ent ecs.Entity
 ---@param x number
 ---@param y number
 local function drawHealthBar(ent, x,y)
     if not ent.maxHealth then return end
+
+    -- Ok so technical info in new rendering:
+    -- Single health segment is between certain HP range
+    -- The segments count and thickness is adjusted depending on the max health
+    -- Each segment is like 10 pixel long.
+
+    if not USE_OLD_RENDERING then
+        local SEGMENT_SPACING = 2
+        local SEGMENT_HEIGHT = 2
+        local PADDING = 2
+        local nsegments, thickness = getHPSegmentInfo(ent.maxHealth)
+        local height = SEGMENT_HEIGHT + (thickness - 1) * 2
+
+        local iw, ih = 32, 32 -- sensible default
+        if ent.image then
+            iw, ih = g.getImageSize(ent.image)
+        end
+
+        local width = math.min(iw, ih) * HEALTHBAR_SIZE_MULT
+        local segmentWidth = math.floor(width / nsegments + 0.5)
+        width = nsegments * segmentWidth + (nsegments - 1) * SEGMENT_SPACING
+
+        local hx = x - width / 2
+        local hy
+        if HEALTHBAR_ON_TOP then
+            hy = y - ih - 4 - height
+        else
+            hy = y + height + 4
+        end
+
+        -- Draw base area for health bar
+        lg.setColor(0, 0, 0)
+        helper.drawFilledRectangle(
+            hx - PADDING,
+            hy - PADDING,
+            width + 2 * PADDING,
+            height + 2 * PADDING
+        )
+
+        local hpPerSegment = ent.maxHealth / nsegments
+        local rulerCount = math.floor(math.min(hpPerSegment / 3 / thickness, segmentWidth / 3))
+        local lagHealth = helper.clamp((ent.health or 0) + (ent._damageLagAmount or 0), 0, ent.maxHealth)
+        local health = helper.clamp(ent.health or 0, 0, ent.maxHealth)
+
+        local healthColor = NEUTRAL_HEALTHBAR_COLOR
+        if ent.team == "enemy" then
+            healthColor = ENEMY_HEALTHBAR_COLOR
+        elseif ent.team == "ally" then
+            healthColor = ALLY_HEALTHBAR_COLOR
+        end
+        local healthColorStrip = healthColor:darken(0.3)
+
+        ---@param hpA number
+        ---@param hpB number
+        ---@param color objects.Color
+        local function drawHealthRange(hpA, hpB, color)
+            hpA = helper.clamp(hpA, 0, ent.maxHealth)
+            hpB = helper.clamp(hpB, 0, ent.maxHealth)
+            if hpB <= hpA then return end
+
+            lg.setColor(color)
+            for i = 1, nsegments do
+                local sx = hx + (i - 1) * (segmentWidth + SEGMENT_SPACING)
+                local segmentStart = (i - 1) * hpPerSegment
+                local segmentEnd = i * hpPerSegment
+                local a = math.max(hpA, segmentStart)
+                local b = math.min(hpB, segmentEnd)
+
+                if b > a then
+                    local fracA = (a - segmentStart) / hpPerSegment
+                    local fracB = (b - segmentStart) / hpPerSegment
+                    local x1 = sx + fracA * segmentWidth
+                    local x2 = sx + fracB * segmentWidth
+                    helper.drawFilledRectangle(x1, hy, x2 - x1, height)
+
+                    lg.setColor(color:darken(0.3))
+                    for j = 1, rulerCount do
+                        local pos = j / (rulerCount + 1)
+                        if pos > fracA and pos < fracB then
+                            local px = segmentWidth * pos
+                            helper.drawFilledRectangle(sx + px - 0.5, hy, 1, height)
+                        end
+                    end
+                    lg.setColor(color)
+                end
+            end
+        end
+
+        -- Draw the segments
+        for i = 1, nsegments do
+            local sx = hx + (i - 1) * (segmentWidth + SEGMENT_SPACING)
+            local segmentStart = (i - 1) * hpPerSegment
+            local lagFrac = helper.clamp((lagHealth - segmentStart) / hpPerSegment, 0, 1)
+            local frac = helper.clamp((health - segmentStart) / hpPerSegment, 0, 1)
+
+            if lagFrac > 0 then
+                lg.setColor(1, 1, 1)
+                helper.drawFilledRectangle(sx, hy, segmentWidth * lagFrac, height)
+            end
+
+            if frac > 0 then
+                lg.setColor(healthColor)
+                helper.drawFilledRectangle(sx, hy, segmentWidth * frac, height)
+
+                lg.setColor(healthColorStrip)
+                for j = 1, rulerCount do
+                    local pos = j / (rulerCount + 1)
+                    if pos >= frac then
+                        break
+                    end
+
+                    local px = segmentWidth * pos
+                    helper.drawFilledRectangle(sx + px - 0.5, hy, 1, height)
+                end
+            end
+        end
+
+        -- status effect tip segments (drawn right-to-left from tip)
+        local rightHp = health
+        local function drawTip(hp, color)
+            hp = math.min(hp, rightHp)
+            if hp <= 0 then return end
+            drawHealthRange(rightHp - hp, rightHp, color)
+            rightHp = rightHp - hp
+        end
+        drawTip(5 * (ent.poisonAmount or 0), g.COLORS.POISON)
+        drawTip((ent.burnTime or 0) * consts.BURN_DPS, g.COLORS.BURN)
+
+        if ent.armor then
+            local FLASH_DUR = 0.15
+            local armorFlash = math.max(0, FLASH_DUR - (ent._timeSinceLostArmor or 0xfff)) / FLASH_DUR
+            local armorH = 6
+            local armorY = hy + height
+            local ratio = math.min(1, ent.armor / 6)
+            local pad = 2
+
+            lg.setColor(0, 0, 0)
+            helper.drawFilledRectangle(hx, armorY, width * ratio, armorH)
+
+            lg.setColor(0.5, 0.5, 0.5)
+            helper.drawFilledRectangle(hx + pad, armorY + pad, ratio * (width - pad * 2), armorH - pad * 2)
+
+            if armorFlash > 0 then
+                lg.setColor(1, 1, 1, armorFlash)
+                helper.drawFilledRectangle(hx, armorY, width * ratio, armorH)
+            end
+
+            lg.setColor(1, 1, 1)
+            g.drawImage("armor_healthbar_icon", hx - 2, armorY + 2)
+            if armorFlash > 0 then
+                lg.setColor(1, 1, 1, armorFlash)
+                g.drawImage("armor_healthbar_icon_white", hx - 2, armorY + 2)
+            end
+        end
+
+        return
+    end
+
+    -- Below is old rendering
     local w, h = 16, 2
     local frac = ent.health / ent.maxHealth
 
@@ -1927,6 +2674,7 @@ local function drawWeapon(ent, x,y)
     if wep.type == "sword" then
         local face = ent.faceDir or 1
         local dx = face * (wep.xOffset or 6)
+        local dy = wep.yOffset or 0
         local phase, t = g.getAttackPhase(ent)
         local rotLogical = 0
         if phase == "windup" then
@@ -1937,7 +2685,7 @@ local function drawWeapon(ent, x,y)
         local dxx, dyy = helper.fromPolar(rotLogical, 7)
         dxx = dxx * face
         dyy = dyy - math.floor(h/5)
-        g.drawImageOffset(wep.image, x + dx + dxx, y + dyy, rotLogical * face, 1,1, 0.5, 0.95)
+        g.drawImageOffset(wep.image, x + dx + dxx, y + dy + dyy, rotLogical * face, 1,1, 0.5, 0.95)
         -- drawImageOffset(imageName, x, y, r, sx, sy, ox, oy, kx, ky)
 
     elseif wep.type == "spear" then
@@ -1994,7 +2742,45 @@ local function drawWeapon(ent, x,y)
         local dyy = bob + offy + pully - math.floor(h/2)
         g.drawImageOffset(wep.image, x + dx + offx + pullx, y + dyy, rot, 1, 1, 0.5, 0.5)
     elseif wep.type == "object" then
+    elseif wep.type == "hammer" then
+        local face = ent.faceDir or 1
+        local dx = face * (wep.xOffset or 8)
+        local phase, t = g.getAttackPhase(ent)
+        local BACK = -2 -- raised behind the back
+        local DOWN = 1.3  -- smashed down in front
+        local SMASH = 0.75 -- fraction of swing spent spinning; rest holds down
+        local rotLogical = 0
+        if phase == "windup" then
+            rotLogical = BACK * helper.EASINGS.sineOut(t)
+        elseif phase == "swing" then
+            if t < SMASH then
+                rotLogical = helper.lerp(BACK, DOWN, (t / SMASH) ^ 7)
+            else
+                rotLogical = DOWN -- hold down at the end
+            end
+        end
+        local radius = wep.arcRadius or (h * 0.6)
+        local dxx, dyy = helper.fromPolar(rotLogical, radius)
+        dxx = dxx * face
+        dyy = dyy - math.floor(h/3)
+        g.drawImageOffset(wep.image, x + dx + dxx, y + dyy, rotLogical * face, 1, 1, 0.5, 0.95)
     elseif wep.type == "staff" then
+        local face = ent.faceDir or 1
+        local dx = face * (wep.xOffset or 8)
+        local dy = wep.yOffset or 0
+
+        local idleBob = math.sin(g.getWorldTime() * 2.5 + (ent.id or 0)) * (wep.weaponBobbing or 1.5)
+        local phase, t = g.getAttackPhase(ent)
+        local castLift = 0
+        local castHeight = wep.staffCastHeight or 8
+        if phase == "windup" then
+            castLift = -castHeight * helper.EASINGS.sineOut(t)
+        elseif phase == "swing" then
+            castLift = -castHeight * (1 - helper.EASINGS.sineIn(t))
+        end
+
+        local dyy = dy + idleBob + castLift - math.floor(h/3)
+        g.drawImageOffset(wep.image, x + dx, y + dyy, 0, 1, 1, 0.5, 0.95)
     end
     -- g.drawImageOffset(wep.image, )
 end
@@ -2004,8 +2790,10 @@ local function getBodyRot(ent)
     local bodyRot = 0
     if ent.weapon then
         local typ = ent.weapon.type
-        if typ == "sword" or typ == "spear" then
-            local mul = typ == "sword" and 1 or 0.4
+        if typ == "sword" or typ == "spear" or typ == "hammer" then
+            local mul = 0.4
+            if typ == "sword" then mul = 1 end
+            if typ == "hammer" then mul = 0.5 end
             local face = ent.faceDir or 1
             local phase, t = g.getAttackPhase(ent)
             if phase == "windup" then
@@ -2033,11 +2821,12 @@ DEV_SHOW_RANGE = consts.DEV_MODE and DEV_SHOW_RANGE
 function g.drawEntity(ent, x, y)
     local entScale = g.ask("getEntityScale", ent) * (ent.scale or 1)
     local sx, sy = (ent.sx or 1) * (ent.faceDir or 1) * entScale, (ent.sy or 1) * entScale
-    if ent._timeSinceDeployed then
-        if ent._timeSinceDeployed < 0 then
+    if ent._deployTime then
+        local elapsed = love.timer.getTime() - ent._deployTime
+        if elapsed < 0 then
             return
         end
-        local p = math.min(1, ent._timeSinceDeployed / DEPLOY_ANIMATION_DURATION)
+        local p = math.min(1, elapsed / DEPLOY_ANIMATION_DURATION)
         sx = sx * (0.3 + 0.7 * p)
         sy = sy * (DEPLOY_STRETCH_SY - (DEPLOY_STRETCH_SY - 1) * p)
     end
@@ -2080,10 +2869,18 @@ function g.drawEntity(ent, x, y)
         end
 
         lg.setColor(col[1], col[2], col[3], col[4] * (ent.alpha or 1))
+        if ent.weapon and ent.weapon.drawBehind then
+            drawWeapon(ent,x,y)
+        end
+
         local rot = (ent.rot or 0) + bodyRot + (ent.damageJolt or 0) + walkWobble
         g.drawImageOffset(ent.image, x + (ent.ox or 0), y + (ent.oy or 0) + walkBounce, rot, sx, sy, 0.5, 0.95, ent.kx, ent.ky)
 
-        if ent.weapon then
+        if ent.onDrawAbove then
+            ent:onDrawAbove(x, y)
+        end
+
+        if ent.weapon and not ent.weapon.drawBehind then
             drawWeapon(ent,x,y)
         end
 
@@ -2136,6 +2933,56 @@ function g.getUnitDrawSize(entityId)
     return 10, 10
 end
 
+---@param def ecs.Components
+---@param x number
+---@param y number
+local function drawPreviewWeapon(def, x, y)
+    local wep = def.weapon
+    if not wep then return end
+
+    local _, h = g.getImageSize(def.image)
+    if wep.type == "sword" then
+        local dx = wep.xOffset or 6
+        local dy = wep.yOffset or 0
+        local dxx, dyy = helper.fromPolar(0, 7)
+        g.drawImageOffset(wep.image, x + dx + dxx, y + dy + dyy - math.floor(h / 5), 0, 1, 1, 0.5, 0.95)
+    elseif wep.type == "spear" then
+        local dx = wep.xOffset or 10
+        g.drawImageOffset(wep.image, x + dx, y - math.floor(h / 5), 0, 1, 1, 0.5, 0.95)
+    elseif wep.type == "bow" then
+        local dx = wep.xOffset or 8
+        local offx, offy = helper.fromPolar(0, 5)
+        g.drawImageOffset(wep.image, x + dx + offx, y + offy - math.floor(h / 2), 0, 1, 1, 0.5, 0.5)
+    elseif wep.type == "hammer" then
+        local radius = wep.arcRadius or (h * 0.6)
+        local dxx, dyy = helper.fromPolar(0, radius)
+        g.drawImageOffset(wep.image, x + (wep.xOffset or 8) + dxx, y + dyy - math.floor(h / 3), 0, 1, 1, 0.5, 0.95)
+    elseif wep.type == "staff" then
+        local bob = math.sin(g.getWorldTime() * 2.5) * (wep.weaponBobbing or 1.5)
+        g.drawImageOffset(wep.image, x + (wep.xOffset or 8), y + (wep.yOffset or 0) + bob - math.floor(h / 3), 0, 1, 1, 0.5, 0.95)
+    end
+end
+
+---@param def ecs.Components
+---@param x number
+---@param y number
+---@param scale number
+local function drawUnitPreviewScaled(def, x, y, scale)
+    love.graphics.push()
+    love.graphics.translate(x, y)
+    love.graphics.scale(scale)
+
+    if def.weapon and def.weapon.drawBehind then
+        drawPreviewWeapon(def, 0, 0)
+    end
+    g.drawImageOffset(def.image, 0, 0, 0, 1, 1, 0.5, 0.95)
+    if def.weapon and not def.weapon.drawBehind then
+        drawPreviewWeapon(def, 0, 0)
+    end
+
+    love.graphics.pop()
+end
+
 ---@param entityId string
 ---@param x number
 ---@param y number
@@ -2144,10 +2991,13 @@ end
 function g.drawUnitPreview(entityId, x, y, maxW, maxH)
     local def = g.getEntityDef(entityId)
     if not def or not def.image then return end
+    local bodyW, bodyH = g.getImageSize(def.image)
     if maxW and maxH then
-        g.drawImageContained(def.image, x, y, maxW, maxH)
+        local scale = math.min(maxW / bodyW, maxH / bodyH)
+        local top = y + (maxH - bodyH * scale) / 2
+        drawUnitPreviewScaled(def, x + maxW / 2, top + bodyH * scale * 0.95, scale)
     else
-        g.drawImage(def.image, x, y)
+        drawUnitPreviewScaled(def, x, y + bodyH * 0.45, 1)
     end
 end
 
@@ -2186,7 +3036,7 @@ end
 function g.getBigFont(size)
     assert(size % 16 == 0, "Size must by divisible by 16")
     if not bigCache[size] then
-        local f = love.graphics.newFont("assets/fonts/sburbits.ttf", size, "mono", 1)
+        local f = love.graphics.newFont("assets/fonts/sburbits.ttf", size, "mono", size / 16)
         f:setFallbacks(getFallbackFonts(size))
         bigCache[size] = f
     end
@@ -2198,7 +3048,7 @@ end
 function g.getSmallFont(size)
     assert(size % 16 == 0, "Size must by divisible by 16")
     if not smolCache[size] then
-        local f = love.graphics.newFont("assets/fonts/sburbits.ttf", size, "mono", 1)
+        local f = love.graphics.newFont("assets/fonts/sburbits.ttf", size, "mono", size / 16)
         f:setFallbacks(getFallbackFonts(size))
         smolCache[size] = f
     end
@@ -2253,6 +3103,12 @@ end
 
 function g.gotoScene(sceneName)
     return sceneManager.gotoScene(sceneName)
+end
+
+---@param sceneName string
+---@param opts {fadeOut:number?, fadeIn:number?, onSwitch:fun()?}?
+function g.transitionTo(sceneName, opts)
+    return sceneManager.transitionTo(sceneName, opts)
 end
 
 
@@ -2744,7 +3600,7 @@ local function newRarity(id, name, color)
         lightTextEffect = "{" .. lightTextEffect .. "}",
         darkTextEffect = "{" .. darkTextEffect .. "}",
         name = loc(name, {}, {
-            context = "Represents a rarity with roman numerals, as in `UNCOMMON (II)` or `RARE (III)`."
+            context = "Represents a rarity."
         }),
         color = color,
         darkColor = darkenColor(color, 0.45),
@@ -2757,13 +3613,14 @@ local function newRarity(id, name, color)
 end
 
 
----@class _g._rarities
+---@enum (key) g.ValidRarities
 g.RARITIES = {
     COMMON = newRarity("COMMON", "COMMON", objects.Color.fromByteRGBA(99,99,99)),
     UNCOMMON = newRarity("UNCOMMON", "UNCOMMON", objects.Color.fromByteRGBA(43,105,180)),
     RARE = newRarity("RARE", "RARE", objects.Color.fromByteRGBA(160,62,144)),
     LEGENDARY = newRarity("LEGENDARY", "LEGENDARY", objects.Color.fromByteRGBA(150,100,25)),
 
+    COMMANDER = newRarity("COMMANDER", "COMMANDER", objects.Color.WHITE),
     ALMOST_UNIQUE = newRarity("ALMOST_UNIQUE", "ALMOST UNIQUE", objects.Color.GRAY),
     UNIQUE = newRarity("UNIQUE", "UNIQUE", objects.Color.GRAY),
 }
@@ -2830,7 +3687,7 @@ function g.isStatImportant(statId, ent_or_etype)
     if type(ent_or_etype) == "string" then
         ent_or_etype = assert(g.getEntityDef(ent_or_etype))
     end
-    return stinfo.isImportant(ent_or_etype, statId)
+    return stinfo.isImportant(ent_or_etype, stinfo)
 end
 
 function g.getStatList()
@@ -2896,11 +3753,16 @@ end
 ---@param ent ecs.Entity
 ---@param stat string
 ---@param increase number
-function g.buffEntity(ent, stat, increase)
+---@param fromEnt ecs.Entity?
+function g.buffEntity(ent, stat, increase, fromEnt)
     assert(STAT_DEFS[stat], "unknown stat: " .. tostring(stat))
     ent.buffs = ent.buffs or {}
     ent.buffs[stat] = (ent.buffs[stat] or 0) + increase
-    g.call("entityBuffed", ent, stat, increase)
+    g.call("entityBuffed", ent, stat, increase, fromEnt)
+    if fromEnt and fromEnt ~= ent then
+        local color = STAT_DEFS[stat].color
+        juiceService.spawnArc(color, fromEnt.x, fromEnt.y, ent.x, ent.y, ent)
+    end
 end
 
 ---@param id string
@@ -2927,8 +3789,6 @@ g.COLORS = {
     POISON = objects.Color("FF530C63"),
     HEALTH = objects.Color("FF397634"),
     ATTACK = objects.Color("FFA2741E"),
-    MAP_EDGE = objects.Color("#152217"),
-    MAP_EDGE_HIGHLIGHT = objects.Color("#213a22"),
 
     MAP_GROUND_COLOR = objects.Color("FF0B0C0B"),
     BATTLE_GROUND_COLOR = objects.Color("FF2C2929"),
@@ -2938,6 +3798,7 @@ g.COLORS = {
     GOLD = objects.Color("FFD8B01F"),
     XP = objects.Color("FF2BC66E"),
     DARK_UI = objects.Color("FF0c0c19"),
+    DEMON_FURY = g.snapToPalette(objects.Color("FF991A1A")),
 }
 
 for k,v in pairs(g.COLORS) do
@@ -2984,6 +3845,14 @@ g.defineStat("healPower", "baseHealPower", {
     icon = "healpower",
     isImportant = _importantIfNonZero,
 })
+g.defineStat("magic", "baseMagic", {
+    displayName = "Magic",
+    description = "Strength of magic (doesn't do anything on it's own)",
+    shortName = "MAGK",
+    color = objects.Color(0.1, 0.35, 0.9),
+    icon = "magic_icon2",
+    isImportant = _importantIfNonZero,
+})
 g.defineStat("attackSpeed", "baseAttackSpeed", {
     displayName = "Attack Speed",
     description = "Attacks per second",
@@ -3018,7 +3887,7 @@ g.defineStat("attackRange", "baseAttackRange", {
 })
 g.defineStat("startingArmor", "baseStartingArmor", {
     displayName = "Armor",
-    description = "Reduces damage taken",
+    description = "Number of hits that are blocked before losing health.",
     shortName = "ARMR",
     color = objects.Color(0.3, 0.4, 0.7),
     icon = "armor",
@@ -3099,6 +3968,30 @@ end
 ---@param manaRequirement g.ManaBundle
 ---@return g.ManaCounts?
 local function trySpendManaInternal(manaCounts, manaRequirement)
+    -- HACK: colorless. Only total count matters.
+    local totalNeed = (manaRequirement.blue or 0) + (manaRequirement.green or 0)
+        + (manaRequirement.red or 0) + (manaRequirement.yellow or 0)
+
+    if getTotalManaCount(manaCounts) < totalNeed then return nil end
+
+    local kept = {}
+    for k, v in pairs(manaCounts or {}) do
+        kept[k] = v
+    end
+
+    local needLeft = totalNeed
+    for k, v in pairs(kept) do
+        if needLeft <= 0 then break end
+        local used = math.min(v, needLeft)
+        needLeft = needLeft - used
+        kept[k] = (v - used > 0) and (v - used) or nil
+    end
+
+    return kept
+end
+
+--[[ OLD color-aware version:
+local function trySpendManaInternal(manaCounts, manaRequirement)
     local needBlue = manaRequirement.blue or 0
     local needGreen = manaRequirement.green or 0
     local needRed = manaRequirement.red or 0
@@ -3144,6 +4037,9 @@ local function trySpendManaInternal(manaCounts, manaRequirement)
 
     return kept
 end
+]]
+
+
 
 
 ---@param manaType g.ManaType
@@ -3234,10 +4130,10 @@ end
 
 local VALID_MANA_CELLS = {}
 
-g.defineManaType("red", objects.Color("FFB42430"))
-g.defineManaType("blue", objects.Color("FF1C7CB7"))
-g.defineManaType("green", objects.Color("FF52B225"))
-g.defineManaType("yellow", objects.Color("FFD0D31F"))
+g.defineManaType("red", g.snapToPalette(objects.Color("FFB42430")))
+g.defineManaType("blue", g.snapToPalette(objects.Color("FF1C7CB7")))
+g.defineManaType("green", g.snapToPalette(objects.Color("FF52B225")))
+g.defineManaType("yellow", g.snapToPalette(objects.Color("FFD0D31F")))
 
 for _, mana1 in ipairs(manaTypeList) do
     VALID_MANA_CELLS[mana1] = true

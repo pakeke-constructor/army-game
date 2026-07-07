@@ -4,7 +4,7 @@ local BODY_FADETIME = 0.3
 
 -- Visual-only corpse that flies offscreen, used by juice_system on death.
 g.defineEntity("body", {
-    image = "placeholder",
+    image = "1x1",
     drawOrder = 100,
     oyOverride = 0.5,
     lifetime = BODY_LIFETIME,
@@ -56,7 +56,7 @@ g.defineEntity("nexus", {
 
 
 g.defineEntity("treasure_chest_objective", {
-    image = "placeholder",
+    image = g.leo("treasure_chest_objective"),
     isBuilding = true,
     team = "neutral",
     side = "neutral",
@@ -70,3 +70,38 @@ g.defineEntity("treasure_chest_objective", {
 })
 
 
+
+local LIGHTNING_CHAIN_LIFETIME = 0.25
+local LIGHTNING_WIDTH = 12
+
+g.defineEntity("lightning_chain_visual", {
+    image = "1x1",
+
+    onUpdate = function(ent, dt)
+        ent._lifetime = (ent._lifetime or LIGHTNING_CHAIN_LIFETIME) - dt
+        if ent._lifetime <= 0 then
+            g.killEntity(ent)
+        end
+    end,
+
+    onDraw = function (ent)
+        local lw=lg.getLineWidth()
+        ent.lifetime = (ent.lifetime or LIGHTNING_CHAIN_LIFETIME)
+
+        local fade = (math.min(1, ent.lifetime / LIGHTNING_CHAIN_LIFETIME))
+
+        -- ent._lightningTargets is set in g.lightning
+        for i = 1, #ent._lightningTargets - 1 do
+            local tok1 = ent._lightningTargets[i]
+            local tok2 = ent._lightningTargets[i + 1]
+            lg.setLineWidth(LIGHTNING_WIDTH * fade)
+            lg.setColor(0.9, 0.7, 1)
+            local r = love.math.random
+            local r1 = helper.lerp(-4,4, r())
+            local r2 = helper.lerp(-4,4, r())
+            lg.line(tok1.x, tok1.y, tok2.x + r2, tok2.y + r1)
+        end
+
+        lg.setLineWidth(lw)
+    end
+})

@@ -42,10 +42,41 @@ consts.DEFAULT_RARITY_WEIGHTS = {
     ALMOST_UNIQUE = 0.000000001,
 }
 
+consts.BALANCING = {
+    -- GLOBAL_HEALTH_MULTIPLIER = 0.7,
+
+    BATTLE_GOLD_REWARD_MIN = 40,
+    BATTLE_GOLD_REWARD_MAX = 60
+}
+
+-- Default fade durations for scene transitions (seconds).
+consts.SCENE_FADE_OUT = 0.9
+consts.SCENE_FADE_IN = 1
+
+consts.NODE_FADE_IN = 1
+consts.NODE_FADE_OUT = 0.9
+
+
+-- Fade when starting a run after picking a commander (long, cinematic).
+consts.RUN_START_FADE = 1.3
+consts.RUN_START_FADE_DEV = 0.1
+
 consts.STARTING_COMMANDER = "sir_horse"
+
+
+consts.STARTING_MAP_TYPE = "forest"
+
 
 consts.MAX_SQUAD_COUNT = 10
 
+-- when false: squads auto-march at the nearest enemy and the player cannot
+-- click/select/move deployed squads (no LEADER controls, no related rendering).
+consts.LEADER_CONTROLS = false
+
 consts.BURN_DPS = 2
+
+-- Battle camera zoom is multiplied by the UI scale (ui.getUIScaling()), so the
+-- battlefield looks the same size regardless of screen resolution.
+consts.BATTLE_ZOOM_FACTOR = 0.5
 
 return consts

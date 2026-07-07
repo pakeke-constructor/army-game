@@ -2,9 +2,7 @@
 
 
 from _ex6.models import M
-from _ex6.code_mode import make_code_mode_system_prompt
-from _ex6.tools import read_headers, read_body, glob, search, write_file, edit_file, read_file, edit_file_lines, escalate, bash, explore_agent, CLAUDE_MD, ENV_PROMPT, git_working_tree
-from _ex6.tools_checkpoints import checkpoint_list, checkpoint, condense
+from _ex6.tools import read_headers, read_body, glob, search, write_file, edit_file, read_file, edit_file_lines, escalate, bash, explore_agent, CLAUDE_MD, ENV_PROMPT, git_working_tree, add_tool_repetition_guard
 from _ex6.skills import load_skill
 from _ex6.lua_coding_style import SYSTEM_PROMPT_CODING_STYLE
 from _ex6.tasks import plan_add_log, plan_done, plan_list, plan_read, plan_write
@@ -91,23 +89,32 @@ MAIN_SYSTEM_PROMPT = MAIN_SYSTEM_PROMPT.with_tools(MAIN_TOOLS)
 
 CODING_STYLE_PROMPT = ex6.Message(role="system", overview="coding-style", content=SYSTEM_PROMPT_CODING_STYLE)
 
-CODE_MODE_SYS_PROMPT = make_code_mode_system_prompt(MAIN_TOOLS)
 
 
 CLAUDE_MD = ex6.Message(role="system", content=open("CLAUDE.md","r").read(), overview="CLAUDE.md")
 
 
-coder = Context("c_opus", yolo=False, model=M.OPUS_LATEST.id, reasoning="high", messages=[
+c_opus = Context("c_opus", yolo=False, model=M.OPUS_LATEST.id, reasoning="high", messages=[
     MAIN_SYSTEM_PROMPT,
     ENV_PROMPT,
     # CODING_STYLE_PROMPT,
     CLAUDE_MD,
 ])
-cache_manually(coder)
+cache_manually(c_opus)
+
+
+c_sonnet = Context("c_sonnet", yolo=False, model=M.SONNET_LATEST.id, reasoning="high", messages=[
+    MAIN_SYSTEM_PROMPT,
+    ENV_PROMPT,
+    # CODING_STYLE_PROMPT,
+    CLAUDE_MD,
+])
+cache_manually(c_sonnet)
 
 
 
-coder = Context("c_codex", yolo=False, model=M.CODEX_LATEST.id, reasoning="high", messages=[
+
+Context("c_codex", yolo=False, model=M.CODEX_LATEST.id, reasoning="high", messages=[
     MAIN_SYSTEM_PROMPT,
     ENV_PROMPT,
     # CODING_STYLE_PROMPT,
@@ -115,7 +122,16 @@ coder = Context("c_codex", yolo=False, model=M.CODEX_LATEST.id, reasoning="high"
 ])
 
 
-coder = Context("c_gem", yolo=False, model=M.GEMINI_LATEST.id, reasoning="high", messages=[
+c_gem = Context("c_gem", yolo=False, model=M.GEMINI_LATEST.id, reasoning="high", messages=[
+    MAIN_SYSTEM_PROMPT,
+    ENV_PROMPT,
+    # CODING_STYLE_PROMPT,
+    CLAUDE_MD,
+])
+add_tool_repetition_guard(c_gem)
+
+
+Context("c_glm", yolo=False, model=M.GLM_LATEST.id, reasoning="high", messages=[
     MAIN_SYSTEM_PROMPT,
     ENV_PROMPT,
     # CODING_STYLE_PROMPT,
@@ -159,6 +175,6 @@ or learning about other codebases in order to write better code in this codebase
 
 
 
-ex6.state.current = coder
+ex6.state.current = c_sonnet
 
 

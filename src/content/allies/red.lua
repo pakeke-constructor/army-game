@@ -1,16 +1,23 @@
 
+local sqhelper = require(".squad_helper")
+
+
+sqhelper.defineMilitiaAndArchers("red")
+
 
 g.defineSquad("gremlin_technician_squad", {
     name = "Gremlin Technicians",
     rarity = g.RARITIES.COMMON,
+    -- tags: explosion, death_trigger
+    tags = {"explosion", "death_trigger"},
     entityDef = {
-        image = "greenskin_assassin",
+        image = "gremlintechnicians_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
         },
         weapon = {
-            image = "dagger",
+            image = "gremlintechnicians_wrench",
             type = "sword",
         },
         baseAttackDamage = 3,
@@ -40,6 +47,8 @@ g.defineSquad("gremlin_technician_squad", {
 g.defineSquad("barbarian_squad", {
     name = "Barbarians",
     rarity = g.RARITIES.COMMON,
+    -- tags: lifesteal
+    tags = {"lifesteal"},
     entityDef = {
         image = "barbarian",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -78,16 +87,18 @@ g.defineSquad("barbarian_squad", {
 g.defineSquad("blade_thrower_squad", {
     name = "Blade Throwers",
     rarity = g.RARITIES.COMMON,
+    -- tags: ranged, projectile
+    tags = {"ranged", "projectile"},
     entityDef = {
-        image = "longbowman",
+        image = "bladethrowers_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "ranged",
-            projectileType = "arrow",
+            projectileType = "arrow", -- placeholder
             projectileSpeed = 300,
         },
         weapon = {
-            image = "dagger",
+            image = "bladethrowers_ringblade",
             type = "bow",
         },
         baseAttackDamage = 3,
@@ -106,6 +117,8 @@ g.defineSquad("blade_thrower_squad", {
 g.defineSquad("brewer_squad", {
     name = "Brewers",
     rarity = g.RARITIES.COMMON,
+    -- tags: buffing, attack_speed
+    tags = {"buffing", "attack_speed"},
     entityDef = {
         image = "brewer",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -152,15 +165,13 @@ g.defineSquad("brewer_squad", {
 g.defineSquad("tribute_squad", {
     name = "Tributes",
     rarity = g.RARITIES.UNCOMMON,
+    -- tags: death_trigger
+    tags = {"death_trigger"},
     entityDef = {
-        image = "peasant",
+        image = "tributes_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
-        },
-        weapon = {
-            image = "peasant_pitchfork",
-            type = "sword",
         },
         baseAttackDamage = 1,
         baseAttackSpeed = 0.5,
@@ -168,6 +179,7 @@ g.defineSquad("tribute_squad", {
         baseMoveSpeed = 40,
         baseMaxHealth = 4,
     },
+    statUpgradeScaling = {attackSpeed = 0.35},
     unitCount = 1,
     perks = {{
         name = "His Gratitude",
@@ -191,14 +203,16 @@ g.defineSquad("tribute_squad", {
 g.defineSquad("executioner_squad", {
     name = "Executioners",
     rarity = g.RARITIES.RARE,
+    -- tags: attack_damage
+    tags = {"attack_damage"},
     entityDef = {
-        image = "barbarian",
+        image = "executioners_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
         },
         weapon = {
-            image = "orc_battleaxe",
+            image = "executioners_axe",
             type = "sword",
         },
         baseAttackDamage = 6,
@@ -216,14 +230,16 @@ g.defineSquad("executioner_squad", {
 g.defineSquad("berserker_squad", {
     name = "Berserkers",
     rarity = g.RARITIES.UNCOMMON,
+    -- tags: attack_speed
+    tags = {"attack_speed"},
     entityDef = {
-        image = "warhog",
+        image = "berserkers_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
         },
         weapon = {
-            image = "orc_battleaxe",
+            image = "berserkers_sword",
             type = "sword",
         },
         baseAttackDamage = 2,
@@ -251,17 +267,23 @@ g.defineSquad("berserker_squad", {
 
 
 
+
+
+
+
 g.defineSquad("dagger_bearer_squad", {
     name = "Dagger Bearers",
     rarity = g.RARITIES.RARE,
+    -- tags: attack_damage, death_trigger
+    tags = {"attack_damage", "death_trigger"},
     entityDef = {
-        image = "greenskin_assassin",
+        image = "daggerbearers_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
         },
         weapon = {
-            image = "dagger",
+            image = "daggerbearers_dagger",
             type = "sword",
         },
         baseAttackDamage = 3,
@@ -302,15 +324,13 @@ g.defineSquad("dagger_bearer_squad", {
 g.defineSquad("furnace_golems_squad", {
     name = "Furnace Golems",
     rarity = g.RARITIES.RARE,
+    -- tags: buffing, attack_damage, scaling
+    tags = {"buffing", "attack_damage", "scaling"},
     entityDef = {
-        image = "charredsoul",
+        image = "furnacegolems_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
-        },
-        weapon = {
-            image = "speardemon_spear", -- placeholder
-            type = "sword",
         },
         baseAttackDamage = 1,
         baseAttackSpeed = 1,
@@ -351,17 +371,19 @@ g.defineSquad("furnace_golems_squad", {
 g.defineSquad("living_entropy_squad", {
     name = "Living Entropy",
     rarity = g.RARITIES.RARE,
+    -- tags: ranged, projectile, explosion
+    tags = {"ranged", "projectile", "explosion"},
     entityDef = {
-        image = "hismanifestation",
+        image = "livingentropy_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 300 },
-        weapon = { image = "placeholder", type = "bow" },
         baseAttackDamage = 6,
         baseAttackSpeed = 0.8,
         baseAttackRange = 150,
         baseMoveSpeed = 50,
         baseMaxHealth = 15,
     },
+    statUpgradeScaling = {attackDamage = 0.2},
     unitCount = 2,
     perks = {{
         name = "Explosive",
@@ -378,17 +400,19 @@ g.defineSquad("living_entropy_squad", {
 g.defineSquad("his_manifestation_squad", {
     name = "His Manifestation",
     rarity = g.RARITIES.LEGENDARY,
+    -- tags: attack_damage, death_trigger, scaling
+    tags = {"attack_damage", "death_trigger", "scaling"},
     entityDef = {
         image = "hismanifestation",
         physics = { shape = "circle", radius = 10, ox = 0, oy = 0, mass = 3 },
         attack = { attackType = "melee" },
-        weapon = { image = "1x1", type = "sword" },
         baseAttackDamage = 6,
         baseAttackSpeed = 0.8,
         baseAttackRange = 22,
         baseMoveSpeed = 45,
         baseMaxHealth = 40,
     },
+    statUpgradeScaling = {attackDamage = 0.1},
     unitCount = 1,
     perks = {{
         name = "Ritual",
@@ -412,17 +436,19 @@ g.defineSquad("his_manifestation_squad", {
 g.defineSquad("pain_elemental_squad", {
     name = "Pain Elementals",
     rarity = g.RARITIES.RARE,
+    -- tags: attack_damage, scaling
+    tags = {"attack_damage", "scaling"},
     entityDef = {
-        image = "gargoyle",
+        image = "painelementals_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = { attackType = "melee" },
-        weapon = { image = "militia_sword", type = "sword" },
         baseAttackDamage = 5,
         baseAttackSpeed = 1.2,
         baseAttackRange = 18,
         baseMoveSpeed = 55,
         baseMaxHealth = 15,
     },
+    statUpgradeScaling = {attackSpeed = 0.2},
     unitCount = 2,
     perks = {{
         name = "Sadistic",
@@ -446,12 +472,14 @@ g.defineSquad("pain_elemental_squad", {
 g.defineSquad("doom_herald_squad", {
     name = "Doom Heralds",
     rarity = g.RARITIES.LEGENDARY,
+    -- tags: healing, death_trigger
+    tags = {"healing", "death_trigger"},
     entityDef = {
-        image = "longbowman",
+        image = "doomheralds_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         ai = { target = "ally" },
         attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 250 },
-        weapon = { image = "placeholder", type = "bow" },
+        weapon = { image = "doomheralds_tome", type = "bow" },
         isHealer = true,
         baseHealPower = 3,
         baseAttackSpeed = 0.4,
@@ -459,6 +487,7 @@ g.defineSquad("doom_herald_squad", {
         baseMoveSpeed = 35,
         baseMaxHealth = 12,
     },
+    statUpgradeScaling = {healPower = 0.2},
     unitCount = 2,
     perks = {{
         name = "Omen",

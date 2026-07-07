@@ -38,7 +38,7 @@ Gain 5 gold when travelling to empty nodes.
 Gain 3 XP when you acquire this blessing
 
 ==== Grace *
-Reduce demon fury by 2 when you acquire this blessing.
+Reduce Demon Fury by 2 when you acquire this blessing.
 
 === Anger
 +1 DMG to allied units with at least 3 DMG.
@@ -277,5 +277,5 @@ When an enemy gains more burn than max HP, instantly kill the enemy and apply 20
 Burn deals double damage to ALL entities
 
 (NYI) Pandaemonium
-Increase demon fury by an additional 2 after each combat. When you acquire a squad, it gains a random Perk.
+Increase Demon Fury by an additional 2 after each combat. When you acquire a squad, it gains a random Perk.
 

@@ -6,9 +6,9 @@
 # COMPLETED:
 
 - Make map-scene render nicely (trees, mountains, demons, etc)
-- Add demon-rage system
+- Add Demon Fury system
 - Add enemy-encounter system
-- Add top UI (xp, demon-rage, gold, day-cycle, days-until-incursion)
+- Add top UI (xp, Demon Fury, gold, day-cycle, days-until-incursion)
 - Add bottom UI (squads, mana-bar, spells, blessings)
 - Add example enemy-encounter
 - Add spell ui hover
@@ -92,7 +92,7 @@
 - earn gold when killing enemies
 - txt popup after killing enemies
 - Xp / level up system
-- Explain demon-fury when hovering it.  "+10% demon damage, +10% demon health!"
+- Explain Demon Fury when hovering it.  "+10% demon damage, +10% demon health!"
 - Wire up stuff in New Content.txt
 - Add reroll to squad-select in ChoicePanel
 - Juice for spending mana: Should pop up above the units as you spend them
@@ -109,8 +109,8 @@
 - fix health-increase overflow (cap it)
 - fix max hp increase upgrades
 - fix shop UI
-- Shrine nodes UI:  [sacrifice a squad, reducing demon-rage + gold, **OR** upgrade a squad]
-- Fountain nodes UI:  [Choose to reduce demon-rage **OR** choose a blessing]
+- Shrine nodes UI:  [sacrifice a squad, reducing Demon Fury + gold, **OR** upgrade a squad]
+- Fountain nodes UI:  [Choose to reduce Demon Fury **OR** choose a blessing]
 - Feast node UI:  +4 XP
 - BUG: Clicking on popup ui (nodeEventService) causes map-clicks underneath
 - Add "wisps", move across screen (like smoke debris) for map/battle-scene

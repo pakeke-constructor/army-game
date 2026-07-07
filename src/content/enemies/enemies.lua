@@ -53,7 +53,7 @@ defEnemy("archerdemon", {
     },
     baseAttackDamage = 0.6,
     baseAttackSpeed = 0.4,
-    baseAttackRange = 600,
+    baseAttackRange = 300,
     baseMoveSpeed = 45,
     baseMaxHealth = 5,
 })
@@ -147,13 +147,16 @@ defEnemy("charredsoul", {
 defEnemy("crimsongoliath", {
     image = "crimsongoliath_body",
     shadow = {},
-    physics = { shape = "circle", radius = 32, ox = 0, oy = 0, mass = 1 },
+    physics = { shape = "circle", radius = 32, ox = 0, oy = 0, mass = 5 },
     ai = {
         target = "enemy",
     },
     weapon = {
-        type = "object",
-        image = "crimsongoliath_axe"
+        type = "hammer",
+        image = "crimsongoliath_axe",
+        xOffset = 0,
+        swordStrikeTime=0.8,
+        smashShake = 2,
     },
     attack = {
         attackType = "melee",
@@ -164,9 +167,11 @@ defEnemy("crimsongoliath", {
     baseMoveSpeed = 20,
     baseMaxHealth = 200,
 
-    onDraw = function(ent)
-        -- FIXME: Tweak this
-        g.drawImage("crimsongoliath_heads", ent.x, ent.y - 50)
+    onDrawAbove = function(ent)
+        local _, h = g.getImageSize(ent.image)
+        local bob = math.sin(g.getWorldTime() * 3) * 2
+        local face = ent.faceDir or 1
+        g.drawImage("crimsongoliath_heads", ent.x, ent.y - h+5 + bob, 0, face, 1)
     end,
     -- TODO: This thing on the notes.
     -- Cleave: Also hits enemies in a small area in front of the target.
@@ -192,16 +197,6 @@ defEnemy("direhound", {
     baseAttackRange = 80,
     baseMoveSpeed = 60,
     baseMaxHealth = 35,
-
-    onUpdate = function(ent, dt)
-        ent._buffedTime = math.max((ent._buffedTime or 8) - dt, 0)
-    end,
-    getAttackDamageMultiplier = function(ent)
-        return (ent._buffedTime or 0) > 0 and 2 or 1
-    end,
-    getAttackSpeedMultiplier = function(ent)
-        return (ent._buffedTime or 0) > 0 and 2 or 1
-    end,
 })
 
 defEnemy("greatbowdemon", { -- Hellfire Greatbowmen
@@ -222,7 +217,7 @@ defEnemy("greatbowdemon", { -- Hellfire Greatbowmen
     },
     baseAttackDamage = 8,
     baseAttackSpeed = 0.5,
-    baseAttackRange = 1000,
+    baseAttackRange = 700,
     baseMoveSpeed = 50,
     baseMaxHealth = 8,
 })
@@ -292,16 +287,6 @@ defEnemy("hellhound", {
     baseAttackRange = 80,
     baseMoveSpeed = 100,
     baseMaxHealth = 6,
-
-    onUpdate = function(ent, dt)
-        ent._buffedTime = math.max((ent._buffedTime or 8) - dt, 0)
-    end,
-    getAttackDamageMultiplier = function(ent)
-        return (ent._buffedTime or 0) > 0 and 2 or 1
-    end,
-    getAttackSpeedMultiplier = function(ent)
-        return (ent._buffedTime or 0) > 0 and 2 or 1
-    end,
 })
 
 defEnemy("reaper", {
@@ -400,9 +385,9 @@ defEnemy("speardemon", { -- Demon Spearmen
     attack = {
         attackType = "melee",
     },
-    baseAttackDamage = 2,
+    baseAttackDamage = 1.5,
     baseAttackSpeed = 1,
-    baseAttackRange = 120,
+    baseAttackRange = 110,
     baseMoveSpeed = 50,
     baseMaxHealth = 6,
 })

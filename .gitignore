@@ -1,4 +1,5 @@
 
+
 .env
 .vscode
 .clinerules
@@ -12,6 +13,7 @@ luasteam.dll
 steam_api64.dll
 
 *.kra
+*.kra~
 
 
 *.pyc
@@ -32,3 +34,8 @@ _ex6/love2d-api
 .EX6_CONTEXT_DUMP.txt
 
 TEMP_NOTEPAD.md
+PLAYTESTER_NOTEPAD.md
+
+assets/_assetpacks
+
+

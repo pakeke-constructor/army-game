@@ -5,55 +5,6 @@ local DESC_FONT = nil
 local BLESSING_CARD_BG = objects.Color("#111111")
 local GRADIENT_CIRCLE = helper.gradientCircleMesh()
 
----@class blessingCard.rotatingGlow.args
----@field count integer?
----@field offset number?
----@field glowScale number?
----@field rps number?
----@field wobbleFreq number?
----@field wobbleAmp number?
----@field color [number, number, number]?
-
----@param reg kirigami.Region
----@param args blessingCard.rotatingGlow.args?
-local function rotatingGlow(reg, args)
-    local offset = args and args.offset or 0
-    local glowScale = args and args.glowScale or 1
-    local rps = args and args.rps or math.pi / 4
-    local wobbleFreq = args and args.wobbleFreq or 0
-    local wobbleAmp = args and args.wobbleAmp or 0
-    local glowCount = args and args.count or 4
-    local color = args and args.color or {1, 1, 1}
-
-    local x,y,w,h = reg:get()
-    local cx,cy = x + w/2, y + h/2
-    local t = love.timer.getTime()
-
-    local rx = w / 2
-    local ry = h / 2
-
-    for i = 1, glowCount do
-        local phase = ((i - 1) / glowCount) * consts.TAU + offset
-        local wobble = math.sin(t * wobbleFreq + phase) * wobbleAmp
-        local angle = t * rps * (0.6 + offset * 0.1) + phase
-
-        local px = cx + rx * math.cos(angle)
-        local py = cy + ry * math.sin(angle)
-        local tx = -rx * math.sin(angle)
-        local ty = ry * math.cos(angle)
-        local tl = helper.magnitude(tx, ty)
-
-        px = px + ty / tl * wobble
-        py = py - tx / tl * wobble
-
-        helper.drawGlow(px, py, color, glowScale, {
-            pulseFrequency = consts.TAU / 3,
-            pulseAmplitude = glowScale * 0.1,
-            pulseOffset = offset,
-        })
-    end
-end
-
 ---Draw a blessing card in a kirigami region. Returns true if clicked.
 ---@param blessingId string
 ---@param region kirigami.Region
@@ -71,6 +22,10 @@ local function drawBlessingCard(blessingId, region, index)
     local uid = blessingId .. "_" .. index
 
     local x, y, w, h = region:get()
+    local hitX, hitY = x, y
+    if iml.isHovered(x, y, w, h, uid) then
+        y = y - 3
+    end
 
     TITLE_FONT = TITLE_FONT or g.getBigFont(16)
     DESC_FONT = DESC_FONT or g.getSmallFont(16)
@@ -79,7 +34,7 @@ local function drawBlessingCard(blessingId, region, index)
     local box = ui.Box({maxWidth = w, maxHeight = h, padding = 12, spacing = 6}, function(bx, by, bw, bh)
         --iml.panel(bx,by,bw,bh, uid)
         local rc = rarity.color
-        rotatingGlow(Kirigami(bx, by, bw, bh):padRatio(0.25), {
+        helper.rotatingGlow(Kirigami(bx, by, bw, bh):padRatio(0.25), {
             count = 3,
             offset = (index - 1) * 1.37,
             glowScale = 100,
@@ -118,17 +73,20 @@ local function drawBlessingCard(blessingId, region, index)
     })
 
     -- Description
-    box:addText("{c r=0.85 g=0.85 b=0.9}" .. info.description, DESC_FONT)
-
-    -- Spacer to fill remaining height so card is always full region height.
     box:addFill({
         getHeight = function() return 0 end,
-        draw = function() end,
+        draw = function(ex, ey, ew, eh)
+            richtext.printRichContained(
+                "{c r=0.85 g=0.85 b=0.9}" .. info.description,
+                DESC_FONT,
+                ex, ey, ew, eh, 1, "center"
+            )
+        end,
     })
 
     local ww,hh = box:render(x, y)
 
-    if iml.wasJustClicked(x, y, w, h, 1, uid) then
+    if iml.wasJustClicked(hitX, hitY, w, h, 1, uid) then
         g.playUISound("ui_click_basic", 1.4, 0.8)
         return true, ww,hh
     end

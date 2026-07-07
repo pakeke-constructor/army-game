@@ -2,7 +2,6 @@
 
 
 from _ex6.models import M
-from _ex6.code_mode import make_code_mode_system_prompt
 from _ex6.tools import read_headers, read_body, glob, search, write_file, edit_file, read_file, edit_file_lines, escalate, bash, explore_agent, CLAUDE_MD, ENV_PROMPT
 from _ex6.skills import load_skill
 from _ex6.lua_coding_style import SYSTEM_PROMPT_CODING_STYLE
@@ -65,7 +64,7 @@ IF YOU ARE WRITING CODE FOR TASK UNRELATED TO DEFINITIONS, YOU ARE LIKELY ON THE
 
 
 
-CODE_MODE_SYS_PROMPT = make_code_mode_system_prompt([
+TOOLS = ([
     read_file, glob, search, read_headers, read_body,
     write_file, edit_file, edit_file_lines,
     explore_agent, load_skill
@@ -76,8 +75,7 @@ ADD_LEO_AGENTS = False
 
 if ADD_LEO_AGENTS:
     coder = Context("leo_smart", yolo=False, model=M.GPT53_CODEX.id, reasoning="medium", messages=[
-        MAIN_SYSTEM_PROMPT,
-        CODE_MODE_SYS_PROMPT,
+        MAIN_SYSTEM_PROMPT.with_tools(TOOLS),
         ENV_PROMPT,
         # CODING_STYLE_PROMPT,
         CLAUDE_MD,
@@ -85,8 +83,7 @@ if ADD_LEO_AGENTS:
 
 
     coder = Context("leo_normal", yolo=False, model=M.GEMMA_4.id, reasoning="medium", messages=[
-        MAIN_SYSTEM_PROMPT,
-        CODE_MODE_SYS_PROMPT,
+        MAIN_SYSTEM_PROMPT.with_tools(TOOLS),
         ENV_PROMPT,
         # CODING_STYLE_PROMPT,
         CLAUDE_MD,

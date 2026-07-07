@@ -2,6 +2,7 @@
 local Class = require("src.modules.objects.Class")
 local nodes = require("src.scenes.map_scene.nodes")
 local decor_types = require("src.scenes.map_scene.decor_types")
+local mapTypes = require("src.scenes.map_scene.map_types")
 
 --[[
 
@@ -93,9 +94,14 @@ end
 ---@field package x number
 ---@field package y number
 
-function MapGraph:init(width, height)
+---@param width integer
+---@param height integer
+---@param mapType string
+function MapGraph:init(width, height, mapType)
     self.width = width
     self.height = height
+    ---@type MapType
+    self.mapType = assert(mapTypes[mapType])
     self.distanceBetweenNodes = 130 -- sensible default just to silence LuaLS
     self.nodes = {}
     self.edges = {}
@@ -103,12 +109,18 @@ function MapGraph:init(width, height)
     self.decor = {}
     ---@type MapGraph.GroundDecor[]
     self.groundDecor = {}
+    ---@type table<string, boolean>
+    self.groundDecorNoRotMap = {}
     ---@type objects.Partition<MapGraph.GroundDecor>
     self.groundDecorPart = objects.Partition(32)
     self.playerPosition = nil -- node key string, e.g. "2,0"
     self.rng = love.math.random
     self.scaleX = 1
     self.scaleY = 0.6
+
+    for _, g in ipairs(self.mapType.groundTextures) do
+        self.groundDecorNoRotMap[g[1]] = not not g[3]
+    end
 end
 
 ---@param node MapNode
@@ -235,6 +247,7 @@ end
 ---@class MapGraph.GenArgs
 ---@field width integer
 ---@field height integer
+---@field mapType string
 ---@field nodePruneChance number
 ---@field edgePruneChance number
 ---@field distanceBetweenNodes number
@@ -242,7 +255,6 @@ end
 ---@field nodeOffsetFactor number
 ---@field scaleX number
 ---@field scaleY number
----@field decorTypes? string[] list of decor type ids
 ---@field fromPortal boolean? If true, new player position will be deactivated portal node.
 
 --- Generate a map procedurally.
@@ -255,7 +267,7 @@ function MapGraph.generate(args, rng)
     local edgePrune = args.edgePruneChance
     local diagChance = args.randomDiagonalChance
 
-    local self = MapGraph(width, height) --[[@as MapGraph]]
+    local self = MapGraph(width, height, args.mapType) --[[@as MapGraph]]
     self.distanceBetweenNodes = args.distanceBetweenNodes
     self.scaleX = args.scaleX
     self.scaleY = args.scaleY
@@ -384,7 +396,7 @@ function MapGraph.generate(args, rng)
 
 
     -- 9. Place decor in gaps using two-grid spatial check
-    local decorTypeIds = args.decorTypes
+    local decorTypeIds = self.mapType.decorTypes
     if decorTypeIds and #decorTypeIds > 0 then
         local sp = args.distanceBetweenNodes
         local cellSize = sp / 8
@@ -489,7 +501,7 @@ end
 
 
 local SPECIAL_NODES = {
-    "feast", "fountain", "shrine", "shop", "portal",
+    "feast", "fountain", "shrine", "shop", "portal", "chest",
     -- "dynamic" can be either "fountain", "shrine", or "shop"
     -- the exact type will be determined once the node is seen
     -- which is handled in map_scene.lua.
@@ -595,45 +607,6 @@ end
 
 
 
----@type [string,integer][]
-local GROUND_TEXTURE = {
-    {"decor_mega_1", 6},
-    {"decor_mega_2", 6},
-    {"decor_mega_3", 6},
-    {"decor_mega_4", 6},
-    {"decor_big_1", 4},
-    {"decor_big_2", 4},
-    {"decor_big_3", 4},
-    {"decor_big_4", 4},
-    {"decor_splotch_1", 3},
-    {"decor_splotch_2", 3},
-    {"decor_splotch_3", 3},
-    {"decor_splotch_4", 3},
-    {"decor_splotch_5", 3},
-    {"decor_tex_1", 2},
-    {"decor_tex_2", 2},
-    {"decor_tex_3", 2},
-    {"decor_tex_4", 2},
-    {"decor_tex_5", 2},
-    -- {"grass_decor_1", 5},
-    -- {"grass_decor_2", 5},
-    -- {"grass_decor_3", 5},
-    -- {"grass_decor_4", 5},
-}
-
-local NO_RANDOM_ROT_GD = {
-    grass_decor_1 = true,
-    grass_decor_2 = true,
-    grass_decor_3 = true,
-    grass_decor_4 = true,
-}
-
-local GROUND_TEXTURE_COLORS = {
-    objects.Color("FF3B432A"),
-    objects.Color("FF384B28"),
-    objects.Color("FF483936"),
-}
-
 local GROUND_DECOR_LEIGHTWAY = 250
 local GROUND_DECOR_DENSITY_DIVIDER = 3072 -- more number = more sparse
 
@@ -665,10 +638,10 @@ function MapGraph:_generateGroundDecors()
         return math.floor(helper.lerp(1, max, self.rng()) + 0.5)
     end
     for _ = 1, count do
-        local col = helper.randomChoice(GROUND_TEXTURE_COLORS, rngmax)
+        local col = helper.randomChoice(self.mapType.groundColors, rngmax)
         local r, g, b = col:getByteRGBA()
         local a = math.floor(helper.lerp(0.25, 0.4, self.rng()) * 255 + 0.5)
-        local tex = helper.pickWeighted(GROUND_TEXTURE, self.rng)
+        local tex = helper.pickWeighted(self.mapType.groundTextures, self.rng) --[[@as string]]
         local wx = math.floor(helper.lerp(dMinX, dMaxX, self.rng()))
         local wy = math.floor(helper.lerp(dMinY, dMaxY, self.rng()))
         self.groundDecor[#self.groundDecor+1] = {
@@ -778,7 +751,7 @@ function MapGraph:drawGroundDecors(view)
             end
             local col = gsman.setColor(r * a, gg * a, b * a, 1)
             local rot = 0
-            if not NO_RANDOM_ROT_GD[gd.image] then
+            if not self.groundDecorNoRotMap[gd.image] then
                 rot = helper.hashIntegerPair(gd.x, gd.y) / 65536 * consts.TAU
             end
             g.drawImage(gd.image, gd.x, gd.y, rot)
@@ -827,13 +800,14 @@ function MapGraph:serialize()
         edges = edges,
         decor = self.decor,
         groundDecor = self.groundDecor,
-        playerPosition = self.playerPosition
+        playerPosition = self.playerPosition,
+        mapType = self.mapType.name,
     }
 end
 
 --- Deserialize from a plain table
 function MapGraph.deserialize(data)
-    local self = MapGraph(data.width, data.height)
+    local self = MapGraph(data.width, data.height, data.mapType or "forest")
     for key, nodeData in pairs(data.nodes) do
         self.nodes[key] = deserializeNode(nodeData)
     end

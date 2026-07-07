@@ -1,11 +1,13 @@
 
 local EVENT_TYPES = require("src.content.events.events")
+local ChestOpen = require("src.ui.ChestOpen")
 
 
 ---@class g.nodeEventService
 ---@field _activeRandomEventPass g.RandomEventPass?
 ---@field _popup string?
 ---@field _popupData any
+---@field _chest g.ChestOpen?
 local nodeEventService = {}
 
 
@@ -84,42 +86,44 @@ end
 
 ---@return boolean
 function nodeEventService.isActive()
-    return not not (nodeEventService._activeRandomEventPass or nodeEventService._popup)
+    return not not (nodeEventService._activeRandomEventPass or nodeEventService._popup or nodeEventService._chest)
 end
 
 
 
 local SHRINE_TXT = loc("A bloodstained shrine hums. Offer a squad for coin and calmer demons, or empower your army.")
-local SHRINE_SACRIFICE = interp("Sacrifice %{squadName}.\n(-2 demon-rage, +30 gold)", {
+local SHRINE_SACRIFICE = interp("Sacrifice %{squadName}.\n(-3 Demon Fury)", {
     context = "Shrine popup option text. %{squadName} is exact squad that will be removed"
 })
 local SHRINE_NO_SAC = loc("No squad to sacrifice.")
 local SHRINE_UPGRADE = loc("Upgrade a squad.")
 
 local FOUNTAIN_TXT = loc("A serene fountain bubbles before you. Drink, and choose its gift.")
-local FOUNTAIN_RAGE = loc("Calm the demons.\n(Reduce demon-rage)")
+local FOUNTAIN_FURY = loc("Calm the demons.\n(Reduce Demon Fury)")
 local FOUNTAIN_BLESSING = loc("Receive a blessing.")
 
-local FEAST_TXT = loc("A grand feast is laid out for your troops.")
-local FEAST_REWARD = loc("Feast.\n(+4 XP)")
+local FEAST_TXT = loc("A grand feast is laid out for your squads.")
+local FEAST_REWARD = loc("Feast.\n(+4 {xp_icon})")
 
 local PORTAL_TXT = loc("Mysterious Gateway\nTravel to a random node.")
 local PORTAL_ENTER = loc("Enter Portal")
 local PORTAL_LEAVE = loc("Leave")
 
-local SACRIFICE_RAGE_REDUCTION = 2
-local SACRIFICE_GOLD = 30
-local FOUNTAIN_RAGE_REDUCTION = 2
+local SACRIFICE_FURY_REDUCTION = 3
+local FOUNTAIN_FURY_REDUCTION = 2
 local FEAST_XP = 4
+
+local CHEST_TXT = loc("A big chest mmmm.")
+local CHEST_OPEN = loc("Open it!")  -- load-time, like the others
 
 local function closePopup()
     nodeEventService._popup = nil
     nodeEventService._popupData = nil
 end
 
-local function reduceDemonRage(amount)
+local function reduceDemonFury(amount)
     local run = g.getRun()
-    run.demonRage = math.max(0, run.demonRage - amount)
+    run.demonFury = math.max(0, run.demonFury - amount)
 end
 
 ---@return g.Squad[]
@@ -196,6 +200,10 @@ function nodeEventService.openPortalPopup(node)
     if not (node and node.active) then return end
     openPopup("portal", node)
 end
+---@param node MapNode.ChestNode
+function nodeEventService.openChestPopup(node)
+    openPopup("chest")
+end
 
 
 
@@ -208,7 +216,8 @@ local function drawChoiceButton(reg, txt, font)
         lg.setColor(1,1,1)
     end
     ui.drawDarkPanel(reg:get())
-    richtext.printRichContained(txt, font, reg:padRatio(0.1):get())
+    local x,y,w,h = reg:padRatio(0.1):get()
+    richtext.printRichContained(txt, font, x,y,w,h, 1)
     return iml.wasJustClicked(reg:get())
 end
 
@@ -225,7 +234,8 @@ local function drawButtonWithImage(reg, txt, image, font)
     lg.setColor(1,1,1)
     g.drawImage(image, iconR:getCenter())
 
-    richtext.printRichContained(txt, font, txtR:padRatio(0.1):get())
+    local x,y,w,h = txtR:padRatio(0.1):get()
+    richtext.printRichContained(txt, font, x,y,w,h, 1)
     return iml.wasJustClicked(reg:get())
 end
 
@@ -236,7 +246,9 @@ local function beginPopup(txt)
     local window = drawBasicWindow():padRatio(0.2)
     local font = g.getSmallFont(16)
     local txtR, buttonsR = window:splitVertical(2,1)
-    richtext.printRichContained(txt, font, txtR:padRatio(0.2):get())
+
+    local x,y,w,h = txtR:padRatio(0.2):get()
+    richtext.printRichContained(txt, font, x,y,w,h, 1)
     return buttonsR, font
 end
 
@@ -253,14 +265,13 @@ local function drawShrinePopup()
     local squadInfo = hasSquad and g.getSquadInfo(squadId) or nil
     if drawButtonWithImage(leftR, leftTxt, squadInfo and squadInfo.icon or "example_squad_icon", font) and hasSquad then
         g.removeSquadFromArmy(squad)
-        reduceDemonRage(SACRIFICE_RAGE_REDUCTION)
+        reduceDemonFury(SACRIFICE_FURY_REDUCTION)
         closePopup()
-        rewardPopupService.genericReward({ gold = SACRIFICE_GOLD })
     end
 
     if drawChoiceButton(rightR, SHRINE_UPGRADE, font) then
         closePopup()
-        choicePopupService.set("squad", 0)
+        choicePopupService.set("upgrade_squad", 0)
     end
 end
 
@@ -269,13 +280,13 @@ local function drawFountainPopup()
     local buttonsR, font = beginPopup(FOUNTAIN_TXT)
 
     local leftR, rightR = buttonsR:splitHorizontal(1,1)
-    if drawChoiceButton(leftR, FOUNTAIN_RAGE, font) then
-        reduceDemonRage(FOUNTAIN_RAGE_REDUCTION)
+    if drawChoiceButton(leftR, FOUNTAIN_FURY, font) then
+        reduceDemonFury(FOUNTAIN_FURY_REDUCTION)
         closePopup()
     end
     if drawChoiceButton(rightR, FOUNTAIN_BLESSING, font) then
         closePopup()
-        rewardPopupService.genericReward({ randomBlessing = true })
+        rewardPopupService.genericReward({{type = "blessing"}})
     end
 end
 
@@ -297,7 +308,8 @@ local function drawPortalPopup()
         closePopup()
         local scene, name = g.getCurrentScene()
         if name == "map_scene" then
-            scene:_buildMap(true)
+            ---@cast scene g.MapScene
+            scene:_buildMap(select(2, g.getMapType()), true)
         end
     end
     if drawChoiceButton(rightR, PORTAL_LEAVE, font) then
@@ -310,13 +322,29 @@ local function drawPortalPopup()
 end
 
 
+local function drawChestPopup()
+    local buttonR, font = beginPopup(CHEST_TXT)  -- draws window + text, returns buttons region
+
+    if drawChoiceButton(buttonR, CHEST_OPEN, font) then
+        closePopup()
+        local owned = g.getRun().blessings
+        local pool = {}
+        for _, id in ipairs(g.getBlessingList()) do
+            if not owned[id] then pool[#pool + 1] = id end
+        end
+        if #pool == 0 then pool = g.getBlessingList() end -- all owned: fall back
+        nodeEventService._chest = ChestOpen(helper.randomChoice(pool))
+    end
+end
+
 ---@param ev g.RandomEventPass
 local function drawRandomEvent(ev)
     local window = drawBasicWindow()
 
     local font = g.getSmallFont(16)
     local txtR, buttonsR = window:splitVertical(2,1)
-    richtext.printRichContained(ev.text, font, txtR:padRatio(0.3):get())
+    local x,y,w,h = txtR:padRatio(0.3):get()
+    richtext.printRichContained(ev.text, font, x,y,w,h, 1)
 
     local N = 4
     local buttons = buttonsR:grid(1, N)
@@ -334,13 +362,15 @@ local function drawRandomEvent(ev)
             lg.setColor(1,1,1)
         end
         ui.drawDarkPanel(reg:get())
-        richtext.printRichContained(txt, font, txtReg:get())
+        local x,y,w,h = txtReg:get()
+        richtext.printRichContained(txt, font, x,y,w,h, 1)
         if iml.wasJustClicked(reg:get()) then
             func(ev)
         end
     end
 
-    for ii,b in ipairs(ev.options) do
+    for ii = #ev.options, 1, -1 do
+        local b = ev.options[ii]
         ev._selectedOption = ii
         button(b[1],b[2])
     end
@@ -354,9 +384,20 @@ local POPUP_DRAWERS = {
     fountain = drawFountainPopup,
     feast = drawFeastPopup,
     portal = drawPortalPopup,
+    chest = drawChestPopup,
 }
 
 function nodeEventService.draw()
+    local chest = nodeEventService._chest
+    if chest then
+        chest:draw()
+        if chest:isDone() then
+            nodeEventService._chest = nil
+            g.addBlessing(chest.blessingId)
+        end
+        return
+    end
+
     local ev = nodeEventService._activeRandomEventPass
     if ev then
         return drawRandomEvent(ev)

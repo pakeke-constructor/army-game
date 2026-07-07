@@ -4,6 +4,7 @@ local love = require("love")
 
 _G.lg = love.graphics
 _G.table.clear = require("table.clear")
+_G.table.new = require("table.new")
 
 
 lg.setDefaultFilter("nearest", "nearest")
@@ -104,9 +105,6 @@ local subpixel = require("src.modules.subpixel")
 
 local sceneManager = require("src.scenes.sceneManager")
 
-local perSecondUpdateTimer = 0
-local secondCount = 0
-
 
 local function assertValid()
     for _, id in ipairs(g.getSquadList()) do
@@ -155,36 +153,33 @@ function love.load()
     end
     g._runPostLoad()
     _loadtime = false
+
+    if consts.DEV_MODE then
+        for _, v in ipairs(g._dumpWhatLeoNeedsToCreate()) do
+            log.error("Leo we need this image: "..v)
+        end
+    end
 end
 
 function love.update(dt)
+    fadeToBlackService.update(dt)
     g.pollHandlers()
     agentbridge.update()
     if g.hasRun() then
         g.getRun():update(dt)
     end
     iml.setPointer(love.mouse.getPosition())
+    g.updateSfx()
     textPopupService.update(dt)
-    fadeToBlackService.update(dt)
     local sc = sceneManager.getCurrentScene()
     if sc and sc.update then
         sc:update(dt)
-    end
-
-    perSecondUpdateTimer = perSecondUpdateTimer + dt
-    while perSecondUpdateTimer >= 1 do
-        perSecondUpdateTimer = perSecondUpdateTimer - 1
-        secondCount = secondCount + 1
-        if sc and sc.perSecondUpdate then
-            sc:perSecondUpdate(secondCount)
-        end
     end
 end
 
 function love.quit()
     agentbridge.stop()
     settings.save()
-    g.saveAndInvalidateRun()
 end
 
 function love.draw()
@@ -202,13 +197,13 @@ function love.draw()
         fadeToBlackService.draw()
     end
     devcmd.draw()
-    if consts.DEV_MODE then
+    if consts.SHOW_DEV_STUFF then
         local _, sceneName = sceneManager.getCurrentScene()
         local fps = love.timer.getFPS()
         love.graphics.setColor(1, 1, 1, 0.5)
         love.graphics.push()
         love.graphics.scale(2)
-        love.graphics.printf((sceneName or "") .. "  FPS: " .. fps, 0, 2, love.graphics.getWidth() / 2 - 4, "right")
+        love.graphics.printf((sceneName or "") .. "  FPS: " .. fps, g.getSmallFont(16), 0, 2, love.graphics.getWidth() / 2 - 4, "right")
         love.graphics.pop()
         love.graphics.setColor(1, 1, 1, 1)
     end
