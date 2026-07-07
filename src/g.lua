@@ -1692,6 +1692,10 @@ local BLESSING_LIST = {}
 ---@param info g.BlessingInfo|{id:nil,name:nil}
 function g.defineBlessing(id, name, info)
     assertValidTags("Blessing", id, info.tags)
+    if not info.image or info.image == "placeholder" then
+        info.image = g.leo("blessing_"..id)
+    end
+
     if info.image == "placeholder" then
         log.warn("No image for blessing:",id)
     elseif not g.isImage(info.image) then
