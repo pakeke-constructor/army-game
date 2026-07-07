@@ -3121,6 +3121,7 @@ function g.isAnyPopupOpen()
     return not not (
         rewardPopupService.getActive()
         or choicePopupService.getActive()
+        or statUpgradePopupService.getActive()
         or nodeEventService.isActive()
         or gameoverPopupService.isActive()
     )

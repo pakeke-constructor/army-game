@@ -54,28 +54,28 @@ end
 ---@class g.StatChoicePanel: g.ChoicePanelCommon
 local StatChoicePanel = objects.Class("g:StatChoicePanel"):implement(ChoicePanelCommon)
 
-function StatChoicePanel:init()
-    ---@type string[]
-    self.squadChoices = {}
+---@param squadId string
+function StatChoicePanel:init(squadId)
     ---@type g.StatChoicePanel.Upgrade[]
     self.statChoices = {}
     ---@type number[]
     self.choiceCreatedAt = {}
-    ---@type string?
-    self.squadId = nil
+    ---@type string
+    self.squadId = assert(squadId)
     self.createdAt = love.timer.getTime()
 
     for _ = 1, ChoicePanelCommon.NUM_CHOICES do
         self.choiceCreatedAt[#self.choiceCreatedAt+1] = self.createdAt
     end
 
-    self:_rollSquads()
+    self:_rollStats()
 end
 
 if false then
+    ---@param squadId string
     ---@return g.StatChoicePanel
     ---@diagnostic disable-next-line: cast-local-type, missing-return
-    function StatChoicePanel() end
+    function StatChoicePanel(squadId) end
 end
 
 ---@private
@@ -84,25 +84,6 @@ function StatChoicePanel:_resetAnim()
     self.choiceCreatedAt = {}
     for _ = 1, ChoicePanelCommon.NUM_CHOICES do
         self.choiceCreatedAt[#self.choiceCreatedAt+1] = self.createdAt
-    end
-end
-
----@private
-function StatChoicePanel:_rollSquads()
-    local pool = {}
-    for k in pairs(g.getRun().squads) do
-        if next(self:_getAvailableStats(k)) then
-            pool[#pool+1] = k
-        end
-    end
-
-    self.squadChoices = {}
-    for _ = 1, ChoicePanelCommon.NUM_CHOICES do
-        if #pool == 0 then
-            break
-        end
-
-        self.squadChoices[#self.squadChoices+1] = table.remove(pool, love.math.random(#pool))
     end
 end
 
@@ -121,20 +102,6 @@ function StatChoicePanel:_getAvailableStats(squadId)
     return stats
 end
 
----@param pool string[]
----@param except string?
----@private
-function StatChoicePanel:_pickStat(pool, except)
-    if #pool == 0 then return nil end
-    if #pool == 1 and pool[1] == except then return nil end
-
-    local pick = pool[love.math.random(#pool)]
-    while pick == except do
-        pick = pool[love.math.random(#pool)]
-    end
-    return pick
-end
-
 ---@param statId string
 ---@param scale number
 ---@return number
@@ -150,23 +117,30 @@ end
 function StatChoicePanel:_rollStats()
     local pool = self:_getAvailableStats(assert(self.squadId))
     self.statChoices = {}
+    if #pool == 0 then
+        self:_resetAnim()
+        return
+    end
 
     ---@param except string?
     local function roll(except)
-        if except then
-            while true do
-                local rolled = helper.randomChoice(pool)
-                if rolled ~= except then
-                    return rolled
-                end
-            end
+        if not except then
+            return helper.randomChoice(pool)
+        end
+        if #pool <= 1 then
+            return nil
         end
 
-        return helper.randomChoice(pool)
+        local rolled = helper.randomChoice(pool)
+        while rolled == except do
+            rolled = helper.randomChoice(pool)
+        end
+        return rolled
     end
 
     for i = 1, 3 do
-        local tier = TIERS[helper.pickWeighted(TIERS_AND_WEIGHTS)]
+        local tierIndex = helper.pickWeighted(TIERS_AND_WEIGHTS)
+        local tier = TIERS[tierIndex]
         local positiveStatId = roll()
         local positiveScale = helper.lerp(tier.upscaleRange[1], tier.upscaleRange[2], love.math.random())
         local positive = {positiveStatId, self:_getScaledAmount(positiveStatId, positiveScale)}
@@ -174,12 +148,14 @@ function StatChoicePanel:_rollStats()
 
         if tier.downgradeChance and tier.downgradeScale and love.math.random() <= tier.downgradeChance then
             local negativeStatId = roll(positiveStatId)
-            local negativeScale = helper.lerp(tier.downgradeScale[1], tier.downgradeScale[2], love.math.random())
-            negative = {negativeStatId, -self:_getScaledAmount(negativeStatId, negativeScale)}
+            if negativeStatId then
+                local negativeScale = helper.lerp(tier.downgradeScale[1], tier.downgradeScale[2], love.math.random())
+                negative = {negativeStatId, -self:_getScaledAmount(negativeStatId, negativeScale)}
+            end
         end
 
         self.statChoices[#self.statChoices+1] = {
-            tierIndex = i,
+            tierIndex = tierIndex,
             positive = positive,
             negative = negative,
         }
@@ -190,13 +166,13 @@ end
 ---@param region kirigami.Region
 ---@private
 function StatChoicePanel:_layoutCards(region)
-    local count = math.max(ChoicePanelCommon.NUM_CHOICES, #self.squadChoices)
+    local count = math.max(ChoicePanelCommon.NUM_CHOICES, #self.statChoices)
     local regions = region:grid(count, 1)
     local cx = region.x + region.w / 2
     local cy = region.y + region.h / 2
 
-    local ox = regions[1].w * (count - #self.squadChoices) / 2
-    for i = 1, #self.squadChoices do
+    local ox = regions[1].w * (count - #self.statChoices) / 2
+    for i = 1, #self.statChoices do
         local elapsed = love.timer.getTime() - (self.choiceCreatedAt[i] or self.createdAt)
         local t = math.min(1, math.max(0, elapsed / ChoicePanelCommon.FAN_OUT_DURATION))
         t = t * t * (3 - 2 * t)
@@ -277,7 +253,6 @@ function StatChoicePanel:_drawStatCard(choice, region, index)
                     g.formatNumber(choice.negative[2]),
                     negativeStat.richText
                 )
-                print("got negative", unpack(choice.negative))
             end
 
             richtext.printRichContained(table.concat(parts, "\n"), TITLE_FONT, ex, ey, ew, eh, 1, "center")
@@ -300,24 +275,6 @@ function StatChoicePanel:draw()
     iml.panel(r:get())
     cardArea = cardArea:padRatio(0.05, 0.1)
     local regions = self:_layoutCards(cardArea)
-
-    if not self.squadId then
-        if #self.squadChoices == 0 then
-            return true
-        end
-
-        for i, squadId in ipairs(self.squadChoices) do
-            ---@cast squadId string
-            local cardR = regions[i]:splitVertical(8, 1, 1)
-            local clicked = ui.drawSquadCard(squadId, cardR, i, false, true)
-
-            if clicked then
-                self.squadId = squadId
-                self:_rollStats()
-            end
-        end
-        return false
-    end
 
     if #self.statChoices == 0 then
         -- RIP in Pepperoni
