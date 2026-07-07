@@ -550,9 +550,9 @@ function MapGraph:_generateNodes(rng, fromPortal)
         if node.demonEncounter then
             ---@cast node MapNode
             local r = rng()
-            if r < 0.05 then
+            if r < consts.DEMON_ENCOUNTER_PLUS2_CHANCE then
                 node.demonEncounter = node.demonEncounter + 2
-            elseif r < 0.30 then
+            elseif r < (consts.DEMON_ENCOUNTER_PLUS1_CHANCE + consts.DEMON_ENCOUNTER_PLUS2_CHANCE) then
                 node.demonEncounter = node.demonEncounter + 1
             end
         end
