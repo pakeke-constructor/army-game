@@ -250,7 +250,8 @@ local function winBattle(self)
     if self.victory then return end
     self.victory = true
     self.victoryPopupTime = 0
-    rewardPopupService.battleReward({
+    ---@type g.RewardPanel.Rewards
+    local rewards = {
         {
             type = "gold",
             amount = math.floor(helper.lerp(
@@ -265,7 +266,16 @@ local function winBattle(self)
             b = {type = "xp", amount = 4}
         },
         {type = "demon_fury", amount = 1},
-    })
+    }
+    -- append the battle node's bonus rewards, if any
+    local node = g.getRun().mapGraph:getPlayerNode()
+    ---@cast node MapNode.BattleNode
+    if node and node.rewards then
+        for _, r in ipairs(node.rewards) do
+            rewards[#rewards + 1] = r
+        end
+    end
+    rewardPopupService.battleReward(rewards)
     g.getRun():winBattle()
     -- remove all entities except the commander
     for _, ent in ipairs(self.ecs.entities) do

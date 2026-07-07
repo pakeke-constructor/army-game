@@ -199,15 +199,46 @@ local function addDemons(node, builder, x, y)
 end
 
 -------------------------------
+-- Bonus rewards (shown on hover, granted on battle win)
+-------------------------------
+--- Turn a reward descriptor into a richtext line for the hover tooltip.
+---@param r g.RewardPanel.ORReward|g.RewardPanel.Any
+---@return string
+local function describeReward(r)
+    if r.type == "gold" then
+        return "{GOLD_COLOR}Bonus rewards:{/GOLD_COLOR} {coin_icon}{GOLD_COLOR} +" .. r.amount
+    elseif r.type == "xp" then
+        return "{XP_COLOR}Bonus rewards:{/XP_COLOR} {xp_icon}{XP_COLOR} +" .. r.amount
+    end
+    return ""
+end
+
+--- Roll a bonus reward list for a battle node.
+--- 1/3 chance bonus gold, 1/3 chance bonus xp, 1/3 chance nothing.
+---@return g.RewardPanel.Rewards
+local function rollBonusRewards()
+    local roll = love.math.random(3)
+    if roll == 1 then
+        return {{type = "gold", amount = love.math.random(2, 4)}}
+    elseif roll == 2 then
+        return {{type = "xp", amount = love.math.random(2, 4)}}
+    end
+    return {}
+end
+
+
+-------------------------------
 -- BattleNode
 -------------------------------
 ---@class MapNode.BattleNode: MapNode
 ---@field demonEncounter integer
+---@field rewards g.RewardPanel.Rewards bonus rewards granted on win
 local BattleNode = nodes.newClass("battle")
 
 function BattleNode:init(x,y)
     Node.init(self,x,y)
     self.demonEncounter = 0
+    self.rewards = rollBonusRewards()
 end
 
 function BattleNode:enter()
@@ -216,7 +247,11 @@ end
 
 function BattleNode:getHoverDescription()
     local pool = BATTLE_TXTS[self.demonEncounter] or BATTLE_TXTS[0]
-    return pool[hash(self.id) % #pool + 1]
+    local desc = pool[hash(self.id) % #pool + 1]
+    for _, r in ipairs(self.rewards) do
+        desc = desc .. "\n" .. describeReward(r)
+    end
+    return desc
 end
 
 function BattleNode:drawBelow(wx, wy)
