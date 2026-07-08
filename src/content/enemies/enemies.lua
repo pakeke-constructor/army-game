@@ -136,14 +136,6 @@ defEnemy("charredsoul", {
     baseMoveSpeed = 50,
     baseMaxHealth = 6,
 
-    entityUpdate = function(ent, dt)
-        ent._nextBuffTime = (ent._nextBuffTime or 0) + dt
-        while ent._nextBuffTime >= 3 do
-            g.buffEntity(ent, "attackSpeed", 0.2)
-            ent._nextBuffTime = ent._nextBuffTime - 3
-        end
-    end,
-
     onHitDamage = function(ent, damage, target)
         g.applyBurn(target, 2, ent)
     end,
