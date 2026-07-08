@@ -110,20 +110,36 @@ end
 ---@return boolean
 function ManaBlessingChoicePanel:_drawChoices(regions)
     local t = love.timer.getTime()
-    for i, pair in ipairs(self.choices) do
-        ---@diagnostic disable-next-line: cast-type-mismatch
-        ---@cast pair {mana:string,blessing:string}
-        local choiceR = getChoiceRegion(regions[i], i)
 
-        if self.selected then
-            local t1 = (t - self.selected[2]) / ChoicePanelCommon.SELECT_ANIM_DURATION
-            local func = self.selected[1] == i and cardJuiceService.drawSelected or cardJuiceService.drawUnselected
-            func(t1, choiceR, i, function(r)
-                return self:_drawChoice(pair, r, i)
-            end)
-        elseif self:_drawChoice(pair, choiceR, i) then
-            g.playUISound("ui_click_basic", 1.4, 0.8)
-            self.selected = {i, t}
+    if self.selected then
+        local selectedIndex = self.selected[1]
+        local t1 = (t - self.selected[2]) / ChoicePanelCommon.SELECT_ANIM_DURATION
+
+        for i, pair in ipairs(self.choices) do
+            ---@diagnostic disable-next-line: cast-type-mismatch
+            ---@cast pair {mana:string,blessing:string}
+            if i ~= selectedIndex then
+                local choiceR = getChoiceRegion(regions[i], i)
+                cardJuiceService.drawUnselected(t1, choiceR, i, function(r)
+                    return self:_drawChoice(pair, r, i)
+                end)
+            end
+        end
+
+        local pair = self.choices[selectedIndex]
+        local choiceR = getChoiceRegion(regions[selectedIndex], selectedIndex)
+        cardJuiceService.drawSelected(t1, choiceR, selectedIndex, function(r)
+            return self:_drawChoice(pair, r, selectedIndex)
+        end)
+    else
+        for i, pair in ipairs(self.choices) do
+            ---@diagnostic disable-next-line: cast-type-mismatch
+            ---@cast pair {mana:string,blessing:string}
+            local choiceR = getChoiceRegion(regions[i], i)
+            if self:_drawChoice(pair, choiceR, i) then
+                g.playUISound("ui_click_basic", 1.4, 0.8)
+                self.selected = {i, t}
+            end
         end
     end
 

@@ -50,26 +50,36 @@ end
 ---@return boolean
 function UpgradeSquadChoicePanel:_drawCards(regions)
     local t = love.timer.getTime()
-    for i, squadId in ipairs(self.choices) do
-        local cardR = regions[i]:splitVertical(8, 1, 1)
 
-        if self.selected then
-            local t1 = (t - self.selected[2]) / ChoicePanelCommon.SELECT_ANIM_DURATION
+    if self.selected then
+        local selectedIndex = self.selected[1]
+        local t1 = (t - self.selected[2]) / ChoicePanelCommon.SELECT_ANIM_DURATION
+
+        for i, squadId in ipairs(self.choices) do
+            if i ~= selectedIndex then
+                local cardR = regions[i]:splitVertical(8, 1, 1)
+                cardJuiceService.drawUnselected(t1, cardR, i, function(r)
+                    return ui.drawSquadCard(squadId, r, i, true, true)
+                end)
+            end
+        end
+
+        local squadId = self.choices[selectedIndex]
+        local cardR = regions[selectedIndex]:splitVertical(8, 1, 1)
+        local r = ui.getFullScreenRegion()
+        local _, cardAreaBaseR = r:padRatio(0.05, 0.1):splitVertical(1, 5)
+        local _, squadCardR = cardAreaBaseR:splitHorizontal(5, 2)
+        cardJuiceService.drawSelected(t1, cardR, selectedIndex, function(r)
+            return ui.drawSquadCard(squadId, r, selectedIndex, true, true)
+        end, squadCardR)
+    else
+        for i, squadId in ipairs(self.choices) do
+            local cardR = regions[i]:splitVertical(8, 1, 1)
             local function draw(r)
                 return ui.drawSquadCard(squadId, r, i, true, true)
             end
 
-            if self.selected[1] == i then
-                -- Copied from stat choice panel
-                local r = ui.getFullScreenRegion()
-                local _, cardAreaBaseR = r:padRatio(0.05, 0.1):splitVertical(1, 5)
-                local _, squadCardR = cardAreaBaseR:splitHorizontal(5, 2)
-                cardJuiceService.drawSelected(t1, cardR, i, draw, squadCardR)
-            else
-                cardJuiceService.drawUnselected(t1, cardR, i, draw)
-            end
-        else
-            local clicked = ui.drawSquadCard(squadId, cardR, i, true, true)
+            local clicked = draw(cardR)
 
             if clicked then
                 -- Delayed select

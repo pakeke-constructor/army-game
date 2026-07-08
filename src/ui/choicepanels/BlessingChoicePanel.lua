@@ -66,23 +66,35 @@ end
 
 ---@param regions kirigami.Region[]
 function BlessingChoicePanel:_drawCards(regions)
-    for i, blessId in ipairs(self.choices) do
-        if self.selected then
-            local t1 = (love.timer.getTime() - self.selected[2]) / ChoicePanelCommon.SELECT_ANIM_DURATION
-            local func = self.selected[1] == i and cardJuiceService.drawSelected or cardJuiceService.drawUnselected
-            func(t1, regions[i], i, function(r)
-                return ui.drawBlessingCard(blessId, r, i)
-            end)
-        else
+    local t = love.timer.getTime()
+
+    if self.selected then
+        local selectedIndex = self.selected[1]
+        local t1 = (t - self.selected[2]) / ChoicePanelCommon.SELECT_ANIM_DURATION
+
+        for i, blessId in ipairs(self.choices) do
+            if i ~= selectedIndex then
+                cardJuiceService.drawUnselected(t1, regions[i], i, function(r)
+                    return ui.drawBlessingCard(blessId, r, i)
+                end)
+            end
+        end
+
+        local blessId = self.choices[selectedIndex]
+        cardJuiceService.drawSelected(t1, regions[selectedIndex], selectedIndex, function(r)
+            return ui.drawBlessingCard(blessId, r, selectedIndex)
+        end)
+    else
+        for i, blessId in ipairs(self.choices) do
             local clicked = ui.drawBlessingCard(blessId, regions[i], i)
             if clicked then
                 -- Delayed select
-                self.selected = {i, love.timer.getTime()}
+                self.selected = {i, t}
             end
         end
     end
 
-    if self.selected and (love.timer.getTime() - self.selected[2]) >= ChoicePanelCommon.SELECT_ANIM_DURATION then
+    if self.selected and (t - self.selected[2]) >= ChoicePanelCommon.SELECT_ANIM_DURATION then
         -- Actually apply
         local blessId = self.choices[self.selected[1]]
         g.addBlessing(blessId)

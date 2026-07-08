@@ -143,29 +143,36 @@ end
 ---@return boolean
 function SquadChoicePanel:_drawCards(regions)
     local t = love.timer.getTime()
-    for i, squadId in ipairs(self.choices) do
-        local cardR, _, rerollR = regions[i]:splitVertical(8, 1, 1)
 
-        if self.selected then
-            local t1 = (t - self.selected[2]) / ChoicePanelCommon.SELECT_ANIM_DURATION
-            local function draw(r)
-                return ui.drawSquadCard(squadId, r, i, true, true)
-            end
+    if self.selected then
+        local selectedIndex = self.selected[1]
+        local t1 = (t - self.selected[2]) / ChoicePanelCommon.SELECT_ANIM_DURATION
 
-            if self.selected[1] == i then
-                local targetR = nil
-                if g.getSquadFromArmy(squadId) then
-                    -- Copied from stat choice panel
-                    local r = ui.getFullScreenRegion()
-                    local _, cardAreaBaseR = r:padRatio(0.05, 0.1):splitVertical(1, 5)
-                    local _, squadCardR = cardAreaBaseR:splitHorizontal(5, 2)
-                    targetR = squadCardR
-                end
-                cardJuiceService.drawSelected(t1, cardR, i, draw, targetR)
-            else
-                cardJuiceService.drawUnselected(t1, cardR, i, draw)
+        for i, squadId in ipairs(self.choices) do
+            if i ~= selectedIndex then
+                local cardR = regions[i]:splitVertical(8, 1, 1)
+                cardJuiceService.drawUnselected(t1, cardR, i, function(r)
+                    return ui.drawSquadCard(squadId, r, i, true, true)
+                end)
             end
-        else
+        end
+
+        local squadId = self.choices[selectedIndex]
+        local cardR = regions[selectedIndex]:splitVertical(8, 1, 1)
+        local targetR = nil
+        if g.getSquadFromArmy(squadId) then
+            -- Copied from stat choice panel
+            local r = ui.getFullScreenRegion()
+            local _, cardAreaBaseR = r:padRatio(0.05, 0.1):splitVertical(1, 5)
+            local _, squadCardR = cardAreaBaseR:splitHorizontal(5, 2)
+            targetR = squadCardR
+        end
+        cardJuiceService.drawSelected(t1, cardR, selectedIndex, function(r)
+            return ui.drawSquadCard(squadId, r, selectedIndex, true, true)
+        end, targetR)
+    else
+        for i, squadId in ipairs(self.choices) do
+            local cardR, _, rerollR = regions[i]:splitVertical(8, 1, 1)
             local clicked = ui.drawSquadCard(squadId, cardR, i, true, true)
             local rerollClicked = drawRerollButton(rerollR, i, (self.rerolls[i] or 0) <= 0)
 
