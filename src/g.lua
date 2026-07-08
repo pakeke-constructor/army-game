@@ -2153,7 +2153,7 @@ end
 ---@param source ecs.Entity?
 ---@return boolean applied
 function g.applyBurn(ent, duration, source)
-    if g.hasTrait(ent, "fireproof") then return false end
+    if g.hasTrait(ent, "fireproof") or g.hasTrait("fishfolk") then return false end
     local wasActive = ent.burnTime and ent.burnTime > 0
     ent.burnTime = (ent.burnTime or 0) + duration
     if not wasActive then
@@ -3951,6 +3951,28 @@ g.defineTrait("loyal", "Loyal", {
     description = loc("A loyal unit."),
     color = g.snapToPalette(0,1,0),
 })
+
+g.defineTrait("fishfolk", "Fishfolk", {
+    description = loc("Immune to burning."),
+    handlers = {
+        getBurnDPSMultiplier = function(ent)
+            return 0
+        end,
+    },
+    color = g.snapToPalette(0.2,0.2,1),
+})
+
+g.defineTrait("human", "Human", {
+    description = loc("A human unit"),
+    color = g.snapToPalette(0,1,0),
+})
+
+g.defineTrait("bot", "Bot", {
+    description = loc("A robot unit"),
+    color = g.snapToPalette(0,1,0),
+})
+
+
 
 
 

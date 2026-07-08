@@ -8,46 +8,6 @@ sqhelper.defineMilitiaAndArchers("green")
 
 
 
-g.defineSquad("forest_sprite_squad", {
-    name = "Forest Sprites",
-    rarity = g.RARITIES.COMMON,
-    -- tags: healing
-    tags = {"healing"},
-    entityDef = {
-        image = g.leo("forest_sprite_unit", "militia"), -- no forest-sprite sprite; militia stand-in
-        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-        attack = {
-            attackType = "melee",
-        },
-        weapon = {
-            image = g.leo("forest_sprite_sword", "militia_sword"),
-            type = "sword",
-        },
-        baseAttackDamage = 1,
-        baseAttackSpeed = 1,
-        baseAttackRange = 18,
-        baseMoveSpeed = 55,
-        baseMaxHealth = 5,
-    },
-    unitCount = 6,
-    perks = {{
-        name = "Restore",
-        description = g.loc2("On-spawn, nearby allies are healed to full (HP)."),
-        image = "coin_icon",
-        handlers = {
-            entitySpawned = function(ent)
-                g.iteratePartition("ally", ent.x, ent.y, function(other)
-                    if other == ent then return end
-                    if not g.isAlive(other) then return end
-                    g.healEntity(other, other.maxHealth or 999)
-                end, 150)
-            end,
-        },
-    }},
-    cost = {green = 1},
-})
-
-
 
 g.defineSquad("druid_squad", {
     name = "Druids",

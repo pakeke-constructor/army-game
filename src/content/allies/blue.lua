@@ -369,13 +369,13 @@ g.defineSquad("clay_troll_squad", {
 
 
 
-g.defineSquad("war_elephant_squad", {
-    name = "War Elephants",
+g.defineSquad("ice_elephant_squad", {
+    name = "Ice Elephants",
     rarity = g.RARITIES.RARE,
     -- tags: armor, color_synergy, scaling
     tags = {"armor", "color_synergy", "scaling"},
     entityDef = {
-        image = "warelephants_unit",
+        image = "iceelephants_unit",
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 2 },
         attack = { attackType = "melee" },
         baseAttackDamage = 4,
@@ -388,6 +388,12 @@ g.defineSquad("war_elephant_squad", {
     statUpgradeScaling = {startingArmor = 0.25},
     unitCount = 2,
     perks = {{
+        --[[
+        TODO:
+        change this: 
+        
+        whenmever this unit takes damage, 10% chance to freeze the attacker for 3 seconds.
+        ]]
         name = "Helmheart",
         description = g.loc2("Whenever a Blue unit spawns, gains 1 (ARMR)."),
         image = "coin_icon",

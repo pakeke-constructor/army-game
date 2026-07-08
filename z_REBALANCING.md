@@ -29,7 +29,7 @@ The issue with this, is that a lot of old content revolved around gaining mana d
 - There are too many squads/blessings that interact with attack-speed. (ASPD)
 - There are *NOT ENOUGH* squads/blessings that interact with magic (MAGK.)
 
-## Squads to remove:
+## Squads to remove: (the OLD effects are listed here; these squads will be refactored, but we will reuse their art.)
 BLUE:
 - Divers: damage scales with held blue mana
 - Monks: heals to full when blue mana spent
@@ -37,8 +37,8 @@ BLUE:
 - The Immortal Eye: re-triggers all allies' on-spawn effects when blue mana spent
 - Anima Incubator: spends mana during battle to spawn units
 
-GREEN:
-- Forest Sprites: on-spawn, heals nearby allies to full
+GREEN: (none)
+YELLOW: (none)
 
 RED:
 - Brewers: on-spawn, buffs 2 nearby allies' ASPD
@@ -66,14 +66,27 @@ ON-SPAWN EFFECTS:
 
 
 
-## ADDITIONAL CONTENT:
 
+## REFACTORED/REUSED CONTENT:
+BLUE SQUADS:
+- Divers x 3: Start of battle: Give a random `fishfolk` unit +4 damage
+- Monks x 4: Deals bonus damage equal to MAGK. (Monk starts with 1 magic, and has high ASPD)
+- War Elephants x 2: When hit, 10% chance to freeze the attacker
+- The Immortal Eye: Every second, apply 1 poison to ALL frozen enemies
+- Anima Incubator: BUILDING: Spawns anima-units.
+RED SQUADS:
+- Brewers x 2: on-death, double the ASPD of 2 random allies
+- Dagger Bearers x 4: Has triple damage for the first 10 seconds of the fight
+- His Manifestation: When an ally dies, gains +1 ATK
+
+
+## ADDITIONAL CONTENT: (Don't have art yet, use g.lua)
 SPELLS: 
-[ ] Insectify: for every ally unit in range, spawns 1 Pest
-[ ] Freeze: freeze every enemy in range for 5 seconds
-[ ] Dark ritual: Deal 2 damage to allies. Give +2 MAGK to allies that were damaged.
-[ ] Bonereap: Trigger on-death effects on all allies without killing them
-[ ] Harrier: Give +70% range to all ranged units
+[x] Insectify: for every ally unit in range, spawns 1 Pest
+[x] Freeze: freeze every enemy in range for 5 seconds
+[x] Dark ritual: Deal 2 damage to allies. Give +2 MAGK to allies that were damaged.
+[x] Bonereap: Trigger on-death effects on all allies without killing them
+[x] Harrier: Give +70% range to all ranged units
 
 SQUADS:
 [ ] Possessor: on death: transforms into a Peasant  (synergizes w/ transform)
@@ -84,18 +97,18 @@ SQUADS:
 [ ] Fire archers: Ranged, Apply 2 burn on hit
 [ ] Inferno beast: Hits deal AOE damage, setting enemies ablaze (+1 burn)
 [ ] Lightning-wizard: Emit lightning on attack, dealing damage equal to MAGK
+[ ] Mini ice golems: When killed, freeze all enemies in a radius
 [ ] Frost mage: When a spell is cast, freeze the nearest 4 enemies for 4 seconds.
-[ ] Ice golem: When hit, 5% chance to freeze the attacker
 [ ] Vikings: Deal 3x damage to frozen enemies
 [ ] Ethereal archers: Deal bonus damage equal to MAGK
 [ ] Spark-bots: When killed, emit lightning, dealing damage equal to it's current level.
-[ ] Engineer: If there are at least 2 buildings, this unit gains triple speed and triple damage
+[ ] Engineers: If there's 2 buildings alive, this unit gains triple speed and damage
 [ ] Clanker factory: Produces 1 bot per second (2hp / 2atk)
 [X] Treant: Every second, heal (HP) equal to (MAGK)
 
 RARE SQUADS:
-[ ] Muffinplants: When killed, heal ALL allies equal to this unit's MAGK
-[ ] Enchantress: Every second, give the ally with the lowest MAGK +1 MAGK
+[ ] Muffinplants: (4x tanky melee) When killed, heal ALL allies equal to this unit's MAGK
+[ ] Enchantress: (1-unit healer) Every second, give the ally with the lowest MAGK +1 MAGK
 
 
 
@@ -113,7 +126,7 @@ The idea is that each mana-color will have 1 class of each: tank, damage, and ra
 Within the class, there should be good thematic cohesion.
 
 <basic_units>
-Green units are humans:
+Green units are humans: (has `human` trait)
 - Human knights (tank)
 - Human spearmen (damage, high range, lower hp)
 - Human archers (ranged)
@@ -123,13 +136,13 @@ Red units are gremlins:
 - Gremlin beserkers (melee dmg, low range)
 - Gremline slingers (range)
 
-Blue units are fish-folk:
+Blue units are fish-folk: (has `fishfolk` trait)
 (ie guys with fish-heads maybe? This could be super cool. I'm envisioning it working well with the octopus guy. I'll send a picture below to explain further what I mean)
 - Shield-fish  (tank)
 - Spear-fish (melee dmg, higher range)
 - Arrow-fish ()
 
-Yellow units are robots:
+Yellow units are robots: (has `bot` trait)
 - Protect-bot (tanky)
 - Angry-bot (bruiser, decent hp and decent dmg)
 - Gun-bot (ranged)
