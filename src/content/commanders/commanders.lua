@@ -29,10 +29,10 @@ g.defineCommander("sir_horse", "Sir Horse", {
             attack = {
                 attackType = "melee",
             },
-            baseAttackDamage = 10,
-            baseAttackSpeed = 0.8,
+            baseAttackDamage = 5,
+            baseAttackSpeed = 1.4,
             baseAttackRange = 85,
-            baseMoveSpeed = 75,
+            baseMoveSpeed = 120,
             baseMaxHealth = 120,
         },
     },
@@ -89,12 +89,12 @@ g.defineCommander("druidcommander", "Druid Lady", {
         },
         perks = {{
             name = "Breath of Life",
-            description = g.loc2("Your squads have +10% Max (HP)."),
+            description = g.loc2("Your squads have +25% Max (HP)."),
             image = "coin_icon",
             rawHandlers = {
                 ---@param ent ecs.Entity
                 getMaxHealthMultiplier = function(_, ent)
-                    return ent.team == "ally" and 1.1 or 1
+                    return ent.team == "ally" and 1.25 or 1
                 end
             }
         }}
@@ -142,8 +142,8 @@ g.defineCommander("mechcommander", "The Mech Goblin", {
             attack = {
                 attackType = "melee",
             },
-            baseAttackDamage = 8,
-            baseAttackSpeed = 1,
+            baseAttackDamage = 12,
+            baseAttackSpeed = 0.5,
             baseAttackRange = 70,
             baseMoveSpeed = 80,
             baseMaxHealth = 100,
@@ -188,10 +188,10 @@ g.defineCommander("lizardcommander", "Lizard Lord", {
                 attackType = "melee",
             },
             baseAttackDamage = 15,
-            baseAttackSpeed = 1,
+            baseAttackSpeed = 0.85,
             baseAttackRange = 80,
             baseMoveSpeed = 90,
-            baseMaxHealth = 110,
+            baseMaxHealth = 100,
         },
         -- TODO Perk: Military Force: Enemy armies are more common. +1 day when defeating a tier 3 army.
     },
@@ -231,8 +231,8 @@ g.defineCommander("octopuscommander", "Octopus Tank", {
                 projectileType = "octopus_lazer",
                 projectileSpeed = 800,
             },
-            baseAttackDamage = 8,
-            baseAttackSpeed = 1.6,
+            baseAttackDamage = 5,
+            baseAttackSpeed = 1.2,
             baseAttackRange = 800, -- unlimited range basically
             baseMoveSpeed = 35, -- but very slow
             baseMaxHealth = 250,
