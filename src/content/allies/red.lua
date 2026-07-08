@@ -357,6 +357,71 @@ g.defineSquad("furnace_golems_squad", {
 })
 
 
+
+g.defineSquad("fire_golem_squad", {
+    name = "Fire Golems",
+    rarity = g.RARITIES.UNCOMMON,
+    -- tags: armor, burn
+    tags = {"armor", "burn"},
+    entityDef = {
+        image = g.leo("firegolems_unit", "furnacegolems_unit"), -- no art yet
+        physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 2 },
+        attack = { attackType = "melee" },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 0.7,
+        baseAttackRange = 22,
+        baseMoveSpeed = 40,
+        baseMaxHealth = 95,
+        baseStartingArmor = 3,
+    },
+    unitCount = 2,
+    perks = {{
+        name = "Molten Skin",
+        description = loc("When hit, apply 1 Burn to the attacker."),
+        image = "coin_icon",
+        handlers = {
+            entityHurt = function(ent, damage, attacker)
+                if attacker and g.isAlive(attacker) then
+                    g.applyBurn(attacker, 1, ent)
+                end
+            end,
+        },
+    }},
+    cost = {red = 2},
+})
+
+
+g.defineSquad("fire_archer_squad", {
+    name = "Fire Archers",
+    rarity = g.RARITIES.UNCOMMON,
+    -- tags: ranged, projectile, burn
+    tags = {"ranged", "projectile", "burn"},
+    entityDef = {
+        image = g.leo("firearchers_unit", "bladethrowers_unit"), -- no art yet
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 300 },
+        weapon = { image = g.leo("firearchers_bow", "bow"), type = "bow" },
+        baseAttackDamage = 3,
+        baseAttackSpeed = 1,
+        baseAttackRange = 70,
+        baseMoveSpeed = 55,
+        baseMaxHealth = 6,
+    },
+    unitCount = 4,
+    perks = {{
+        name = "Flaming Arrows",
+        description = loc("Apply 2 Burn on hit."),
+        image = "coin_icon",
+        handlers = {
+            onHitDamage = function(ent, damage, target)
+                g.applyBurn(target, 2, ent)
+            end,
+        },
+    }},
+    cost = {red = 1},
+})
+
+
 g.defineSquad("living_entropy_squad", {
     name = "Living Entropy",
     rarity = g.RARITIES.RARE,

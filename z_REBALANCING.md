@@ -93,8 +93,8 @@ SQUADS:
 [ ] Dart spitters x 4: Ranged, Apply 1 poison on hit
 [x] Giant toads x 2: Tanky, Takes 50% less damage from poisoned enemies
 [x] Mini toads x 4: Apply 1 poison on hit
-[ ] Fire golems x 2: When hit, apply 1 burn to the attacker
-[ ] Fire archers x 4: Ranged, Apply 2 burn on hit
+[x] Fire golems x 2: When hit, apply 1 burn to the attacker
+[x] Fire archers x 4: Ranged, Apply 2 burn on hit
 [ ] Hunter x 1: Medium Range, (Crossbow,) Very fast fire-rate, good damage. (use crossbow as weapon, under `bow` weapon type)
 [ ] Inferno beast: Hits deal AOE damage, setting enemies ablaze (+1 burn)
 [ ] Lightning-wizard: Emit lightning on attack, dealing damage equal to MAGK
