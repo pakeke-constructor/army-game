@@ -14,8 +14,9 @@ function BlessingChoicePanel:init(rarityWeights)
     self.choiceCreatedAt = {}
     self.rarityWeights = rarityWeights or consts.DEFAULT_RARITY_WEIGHTS
     self.createdAt = love.timer.getTime()
-    ---@type [integer,number]|nil
+    ---@type integer|nil
     self.selected = nil
+    self.cj = cardJuiceService.CardJuiceInstance()
 
     for _ = 1, ChoicePanelCommon.NUM_CHOICES do
         self.choiceCreatedAt[#self.choiceCreatedAt+1] = self.createdAt
@@ -66,37 +67,31 @@ end
 
 ---@param regions kirigami.Region[]
 function BlessingChoicePanel:_drawCards(regions)
-    local t = love.timer.getTime()
-
-    if self.selected then
-        local selectedIndex = self.selected[1]
-        local t1 = (t - self.selected[2]) / ChoicePanelCommon.SELECT_ANIM_DURATION
-
-        for i, blessId in ipairs(self.choices) do
-            if i ~= selectedIndex then
-                cardJuiceService.drawUnselected(t1, regions[i], i, function(r)
-                    return ui.drawBlessingCard(blessId, r, i)
-                end)
-            end
-        end
-
-        local blessId = self.choices[selectedIndex]
-        cardJuiceService.drawSelected(t1, regions[selectedIndex], selectedIndex, function(r)
-            return ui.drawBlessingCard(blessId, r, selectedIndex)
-        end)
-    else
+    if not self.cj:hasAnimationBegun() then
         for i, blessId in ipairs(self.choices) do
             local clicked = ui.drawBlessingCard(blessId, regions[i], i)
             if clicked then
                 -- Delayed select
-                self.selected = {i, t}
+                self.selected = i
+
+                -- Spawn cards
+                for j, otherBlessId in ipairs(self.choices) do
+                    if i ~= j then
+                        self.cj:spawnCardUnselected(regions[j], j, function(r)
+                            return ui.drawBlessingCard(otherBlessId, r, j)
+                        end)
+                    end
+                end
+                self.cj:spawnCardSelected(regions[i], i, function(r)
+                    return ui.drawBlessingCard(blessId, r, i)
+                end)
             end
         end
     end
 
-    if self.selected and (t - self.selected[2]) >= ChoicePanelCommon.SELECT_ANIM_DURATION then
+    if self.cj:draw() then
         -- Actually apply
-        local blessId = self.choices[self.selected[1]]
+        local blessId = self.choices[self.selected]
         g.addBlessing(blessId)
         return true
     end
