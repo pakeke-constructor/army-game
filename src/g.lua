@@ -3963,7 +3963,7 @@ g.defineTrait("human", "Human", {
 
 g.defineTrait("bot", "Bot", {
     description = loc("A robot unit"),
-    color = g.snapToPalette(0,1,0),
+    color = g.snapToPalette(1,1,0),
 })
 
 

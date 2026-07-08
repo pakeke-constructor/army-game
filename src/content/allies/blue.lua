@@ -8,7 +8,90 @@ local sqhelper = require(".squad_helper")
 sqhelper.defineMilitiaAndArchers("blue")
 
 
+-- ============================================================
+-- BASIC UNITS: Fish-folk (blue)
+-- ============================================================
 
+g.defineSquad("shield_fish_squad", {
+    name = "Shield-Fish",
+    rarity = g.RARITIES.COMMON,
+    -- tags: armor (basic tank)
+    tags = {"armor"},
+    entityDef = {
+        image = g.leo("shieldfish_unit", "defenders_unit"),
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "melee",
+        },
+        weapon = {
+            image = g.leo("shieldfish_shield", "defenders_shield"),
+            type = "shield",
+        },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 1,
+        baseAttackRange = 18,
+        baseMoveSpeed = 50,
+        baseMaxHealth = 14,
+        baseStartingArmor = 3,
+    },
+    unitCount = 4,
+    startingTraits = {"fishfolk"},
+    cost = {blue = 1},
+})
+
+g.defineSquad("spear_fish_squad", {
+    name = "Spear-Fish",
+    rarity = g.RARITIES.COMMON,
+    -- tags: attack_damage (long-reach melee dmg)
+    tags = {"attack_damage"},
+    entityDef = {
+        image = g.leo("spearfish_unit", "divers_unit"),
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "melee",
+        },
+        weapon = {
+            image = g.leo("spearfish_spear", "divers_harpoon"),
+            type = "spear",
+        },
+        baseAttackDamage = 2,
+        baseAttackSpeed = 1,
+        baseAttackRange = 32,
+        baseMoveSpeed = 55,
+        baseMaxHealth = 6,
+    },
+    unitCount = 4,
+    startingTraits = {"fishfolk"},
+    cost = {blue = 1},
+})
+
+g.defineSquad("arrow_fish_squad", {
+    name = "Arrow-Fish",
+    rarity = g.RARITIES.COMMON,
+    -- tags: ranged, projectile (basic ranged)
+    tags = {"ranged", "projectile"},
+    entityDef = {
+        image = g.leo("arrowfish_unit", "longbowman"),
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "ranged",
+            projectileType = "arrow",
+            projectileSpeed = 350,
+        },
+        weapon = {
+            image = g.leo("arrowfish_bow", "longbow"),
+            type = "bow",
+        },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 0.6,
+        baseAttackRange = 130,
+        baseMoveSpeed = 55,
+        baseMaxHealth = 5,
+    },
+    unitCount = 4,
+    startingTraits = {"fishfolk"},
+    cost = {blue = 1},
+})
 
 
 local PURPLE_COLOR = objects.Color("#".."FFC339ED")

@@ -135,8 +135,8 @@ Within the class, there should be good thematic cohesion.
 
 <basic_units>
 Green units are humans: (has `human` trait)
-- Human knights (tank)
-- Human spearmen (damage, high range, lower hp)
+- Human protector (human w/ wooden shield)
+- Human lumberjack (damage + hp)
 - Human archers (ranged)
 
 Red units are gremlins:

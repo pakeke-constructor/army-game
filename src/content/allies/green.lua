@@ -6,7 +6,90 @@ local sqhelper = require(".squad_helper")
 sqhelper.defineMilitiaAndArchers("green")
 
 
+-- ============================================================
+-- BASIC UNITS: Humans (green)
+-- ============================================================
 
+g.defineSquad("human_protector_squad", {
+    name = "Human Protectors",
+    rarity = g.RARITIES.COMMON,
+    -- tags: armor (basic tank)
+    tags = {"armor"},
+    entityDef = {
+        image = g.leo("human_protector_unit", "militia"),
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "melee",
+        },
+        weapon = {
+            image = g.leo("human_wooden_shield", "defenders_shield"),
+            type = "shield",
+        },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 1,
+        baseAttackRange = 18,
+        baseMoveSpeed = 50,
+        baseMaxHealth = 14,
+        baseStartingArmor = 3,
+    },
+    unitCount = 4,
+    startingTraits = {"human"},
+    cost = {green = 1},
+})
+
+g.defineSquad("human_lumberjack_squad", {
+    name = "Human Lumberjacks",
+    rarity = g.RARITIES.COMMON,
+    -- tags: attack_damage, health (basic bruiser)
+    tags = {"attack_damage", "health"},
+    entityDef = {
+        image = g.leo("human_lumberjack_unit", "barbarian"),
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "melee",
+        },
+        weapon = {
+            image = g.leo("human_axe", "orc_battleaxe"),
+            type = "sword",
+        },
+        baseAttackDamage = 2,
+        baseAttackSpeed = 1,
+        baseAttackRange = 18,
+        baseMoveSpeed = 55,
+        baseMaxHealth = 12,
+    },
+    unitCount = 4,
+    startingTraits = {"human"},
+    cost = {green = 1},
+})
+
+g.defineSquad("human_archer_squad", {
+    name = "Human Archers",
+    rarity = g.RARITIES.COMMON,
+    -- tags: ranged, projectile (basic ranged)
+    tags = {"ranged", "projectile"},
+    entityDef = {
+        image = g.leo("human_archer_unit", "longbowman"),
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "ranged",
+            projectileType = "arrow",
+            projectileSpeed = 350,
+        },
+        weapon = {
+            image = "longbow",
+            type = "bow",
+        },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 0.6,
+        baseAttackRange = 130,
+        baseMoveSpeed = 55,
+        baseMaxHealth = 5,
+    },
+    unitCount = 4,
+    startingTraits = {"human"},
+    cost = {green = 1},
+})
 
 
 g.defineSquad("druid_squad", {

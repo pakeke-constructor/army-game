@@ -156,9 +156,11 @@ function love.load()
     _loadtime = false
 
     if consts.DEV_MODE then
+        print("<MR LEO, WE NEED THESE IMAGES>")
         for _, v in ipairs(g._dumpWhatLeoNeedsToCreate()) do
-            log.error("Leo we need this image: "..v)
+            print(v)
         end
+        print("</MR LEO, WE NEED THESE IMAGES>")
     end
 end
 

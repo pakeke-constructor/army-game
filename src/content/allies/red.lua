@@ -5,6 +5,89 @@ local sqhelper = require(".squad_helper")
 sqhelper.defineMilitiaAndArchers("red")
 
 
+-- ============================================================
+-- BASIC UNITS: Gremlins (red)
+-- ============================================================
+
+g.defineSquad("gremlin_brute_squad", {
+    name = "Gremlin Brutes",
+    rarity = g.RARITIES.COMMON,
+    -- tags: armor (basic tank)
+    tags = {"armor"},
+    entityDef = {
+        image = g.leo("gremlin_brute_unit", "barbarian"),
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "melee",
+        },
+        weapon = {
+            image = g.leo("gremlin_club", "orc_battleaxe"),
+            type = "sword",
+        },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 1,
+        baseAttackRange = 18,
+        baseMoveSpeed = 50,
+        baseMaxHealth = 14,
+        baseStartingArmor = 3,
+    },
+    unitCount = 4,
+    cost = {red = 1},
+})
+
+g.defineSquad("gremlin_berserker_squad", {
+    name = "Gremlin Berserkers",
+    rarity = g.RARITIES.COMMON,
+    -- tags: attack_damage (short-range melee dmg)
+    tags = {"attack_damage"},
+    entityDef = {
+        image = g.leo("gremlin_berserker_unit", "berserkers_unit"),
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "melee",
+        },
+        weapon = {
+            image = g.leo("gremlin_dagger", "daggerbearers_dagger"),
+            type = "sword",
+        },
+        baseAttackDamage = 2,
+        baseAttackSpeed = 1,
+        baseAttackRange = 16,
+        baseMoveSpeed = 65,
+        baseMaxHealth = 6,
+    },
+    unitCount = 4,
+    cost = {red = 1},
+})
+
+g.defineSquad("gremlin_slinger_squad", {
+    name = "Gremlin Slingers",
+    rarity = g.RARITIES.COMMON,
+    -- tags: ranged, projectile (basic ranged)
+    tags = {"ranged", "projectile"},
+    entityDef = {
+        image = g.leo("gremlin_slinger_unit", "bladethrowers_unit"),
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "ranged",
+            projectileType = "arrow",
+            projectileSpeed = 300,
+        },
+        weapon = {
+            image = g.leo("gremlin_sling", "longbow"),
+            type = "bow",
+        },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 0.6,
+        baseAttackRange = 130,
+        baseMoveSpeed = 55,
+        baseMaxHealth = 5,
+    },
+    unitCount = 4,
+    cost = {red = 1},
+})
+
+
 g.defineSquad("gremlin_technician_squad", {
     name = "Gremlin Technicians",
     rarity = g.RARITIES.COMMON,
