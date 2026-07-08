@@ -285,10 +285,9 @@ local function drawSquadBox(r, squadId, cost)
 
     if wasJustClicked then
         if g.trySpendGold(cost) then
+            g.addOrUpgradeSquad(squadId)
             if squad then
-                squad.level = squad.level + 1
-            else
-                g.addSquadToArmy(squadId)
+                statUpgradePopupService.set(squadId)
             end
             return true, isHovered, squadCol
         end

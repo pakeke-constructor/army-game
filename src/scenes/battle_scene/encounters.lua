@@ -94,10 +94,14 @@ end
 --- of the battlefield (see battle_scene, which puts allies in the left third).
 function EnemySpawner:finalize()
     local ecs = self._ecs
+    if not ecs.boundingBox then ecs:setBounds(300, 200, 1300, 600) end -- encounter forgot to set bounds
     local bx, by, w, h = ecs.boundingBox[1], ecs.boundingBox[2], ecs.boundingBox[3], ecs.boundingBox[4]
 
-    local enemyR = select(2, Kirigami(bx, by, w, h):splitHorizontal(1, 2))
-    ecs:setEnemyRectangle(enemyR:get())
+    -- lay enemies out into the enemy rectangle battle_scene set up.
+    local enemyR = ecs.enemyRectangle
+    if not enemyR then
+        error("Enemy rectangle not set before encounter starts")
+    end
 
     -- vertical line the army lays out along, near the left edge of enemyR
     local enemyX = enemyR.x + HORIZONTAL_MARGIN
@@ -149,7 +153,8 @@ end
 
 ---@param difficulty integer
 ---@param ecs ecs.ECSWorld
-function encounters.startRandomEncounter(difficulty, ecs)
+---@param setupRectangles? fun(border:number[]) called after bounds are set, before enemies spawn
+function encounters.startRandomEncounter(difficulty, ecs, setupRectangles)
     local arr = enemyPool[difficulty]
     if not arr or #arr == 0 then
         arr = enemyPool[1]
@@ -157,8 +162,9 @@ function encounters.startRandomEncounter(difficulty, ecs)
     local rng = love.math.newRandomGenerator(os.time())
     local spawn = arr[rng:random(1, #arr)]
     local es = EnemySpawner(ecs, rng)
-    spawn(es, ecs)
-    es:finalize()
+    spawn(es, ecs) -- sets bounds + queues squads (no spawning yet)
+    if setupRectangles then setupRectangles(ecs.boundingBox) end
+    es:finalize() -- lays enemies out into ecs.enemyRectangle
 end
 
 return encounters

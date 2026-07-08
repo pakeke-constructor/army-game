@@ -182,14 +182,17 @@ function battle_scene:enter()
 
     if self.sandbox then
         self.ecs:setBounds(500,300, 1900, 1100)
+        self:generateAllyAndEnemyRectangles(self.ecs.boundingBox)
     else
-        encounters.startRandomEncounter(run.day, self.ecs)
+        encounters.startRandomEncounter(run.day, self.ecs, function(border)
+            self:generateAllyAndEnemyRectangles(border)
+        end)
     end
 
     local border = self.ecs.boundingBox
     do
-        local allyRec, enemyRec = self:generateAllyAndEnemyRectangles(border)
-        local nx, ny = allyRec:getCenter()
+        local allyRec = self.ecs.allyRectangle
+        local nx, ny = allyRec.x + allyRec.w / 2, allyRec.y + allyRec.h / 2
         local commanderInfo = g.getCommanderInfo(run.commander)
         local commanderSquad = g.getSquadFromArmy(commanderInfo.squadId)
         if commanderSquad then
@@ -249,6 +252,7 @@ local function winBattle(self)
     if self.victory then return end
     self.victory = true
     self.victoryPopupTime = 0
+
     g.getRun():winBattle()
     -- remove all entities except the commander
     for _, ent in ipairs(self.ecs.entities) do
@@ -260,23 +264,34 @@ local function winBattle(self)
         self.squadChoices = buildVictoryChoices()
     end
 
+    ---@type g.RewardPanel.Rewards
+    local rewards = {
+        {
+            type = "gold",
+            amount = math.floor(helper.lerp(
+                consts.BALANCING.BATTLE_GOLD_REWARD_MIN,
+                consts.BALANCING.BATTLE_GOLD_REWARD_MAX,
+                love.math.random()
+            ))
+        },
+        {
+            type = "or",
+            a = {type = "squad", rerolls = 1},
+            b = {type = "xp", amount = 4}
+        },
+        {type = "demon_fury", amount = 1},
+    }
+    -- append the battle node's bonus rewards, if any
+    local node = g.getRun().mapGraph:getPlayerNode()
+    ---@cast node MapNode.BattleNode
+    if node and node.rewards then
+        for _, r in ipairs(node.rewards) do
+            rewards[#rewards + 1] = r
+        end
+    end
+
     fadeToBlackService.fadeToFromBlack(VICTORY_FADE_IN, function()
-        rewardPopupService.battleReward({
-            {
-                type = "gold",
-                amount = math.floor(helper.lerp(
-                    consts.BALANCING.BATTLE_GOLD_REWARD_MIN,
-                    consts.BALANCING.BATTLE_GOLD_REWARD_MAX,
-                    love.math.random()
-                ))
-            },
-            {
-                type = "or",
-                a = {type = "squad", rerolls = 1},
-                b = {type = "xp", amount = 4}
-            },
-            {type = "demon_fury", amount = 1},
-        })
+        rewardPopupService.battleReward(rewards)
     end, VICTORY_FADE_OUT)
 end
 

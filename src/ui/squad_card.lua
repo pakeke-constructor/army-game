@@ -277,9 +277,9 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
                     statColor = isHealer and g.COLORS.HEAL or g.COLORS.DAMAGE
                     name = isHealer and HPS_NAME or DPS_NAME
                     desc = (isHealer and HPS_DESC or DPS_DESC)({
-                        attackSpeed = attackSpeed,
-                        attackDamage = power,
-                        dps = value
+                        attackSpeed = g.formatNumber(attackSpeed),
+                        attackDamage = g.formatNumber(power),
+                        dps = g.formatNumber(value)
                     })
                 else
                     local stat = g.getStatInfo(statId)
@@ -318,7 +318,7 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
                         boxx:addText(desc, fonts.body)
                         if bonus and bonus ~= 0 then
                             boxx:addSpacing(10)
-                            local valStr = string.format("{c r=%.3f g=%.3f b=%.3f}%+g{/c}", rr, gg, bb, bonus)
+                            local valStr = string.format("{c r=%.3f g=%.3f b=%.3f}%s{/c}", rr, gg, bb, g.formatNumber(bonus))
                             boxx:addText(BONUS({value = valStr}), fonts.body)
                         end
                     end)
@@ -332,10 +332,10 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
 
                 -- text
                 do
-                local r,g,b,a = statColor:getRGBA()
-                love.graphics.setColor(r,g,b,a*alpha)
+                local r,gg,b,a = statColor:getRGBA()
+                love.graphics.setColor(r,gg,b,a*alpha)
                 local textX = cx + ch
-                richtext.printRich("{o}" .. tostring(value), STAT_FONT, textX, cy + ch / 2 - STAT_FONT:getHeight() / 2, cw - ch, "left")
+                richtext.printRich("{o}" .. g.formatNumber(value), STAT_FONT, textX, cy + ch / 2 - STAT_FONT:getHeight() / 2, cw - ch, "left")
                 end
             end
         end,
