@@ -91,7 +91,7 @@ local physics = {
 
 ---@class ecs.components.Weapon
 ---@field public image string
----@field public type "sword"|"spear"|"bow"|"staff"|"object"|"hammer"
+---@field public type "sword"|"spear"|"bow"|"staff"|"object"|"hammer"|"shield"
 ---@field public swordSwingTime number?
 ---@field public swordStrikeTime number?
 ---@field public spearStrikeTime number?
@@ -103,6 +103,7 @@ local physics = {
 ---@field public smashShake number? hammer: screen shake on smash
 ---@field public drawBehind boolean?
 ---@field public staffCastHeight number?
+---@field public shieldBashDistance number?
 local weapon = {
     image = "militia_sword",
     type = "sword",

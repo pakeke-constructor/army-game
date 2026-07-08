@@ -1692,6 +1692,10 @@ local BLESSING_LIST = {}
 ---@param info g.BlessingInfo|{id:nil,name:nil}
 function g.defineBlessing(id, name, info)
     assertValidTags("Blessing", id, info.tags)
+    if not info.image or info.image == "placeholder" then
+        info.image = g.leo("blessing_"..id)
+    end
+
     if info.image == "placeholder" then
         log.warn("No image for blessing:",id)
     elseif not g.isImage(info.image) then
@@ -2781,6 +2785,23 @@ local function drawWeapon(ent, x,y)
 
         local dyy = dy + idleBob + castLift - math.floor(h/3)
         g.drawImageOffset(wep.image, x + dx, y + dyy, 0, 1, 1, 0.5, 0.95)
+    elseif wep.type == "shield" then
+        local face = ent.faceDir or 1
+        local dx = face * (wep.xOffset or 12)
+        local dy = wep.yOffset or 0
+
+        local idleBob = math.sin(g.getWorldTime() * 2.2 + (ent.id or 0)) * (wep.weaponBobbing or 1.0)
+        local phase, t = g.getAttackPhase(ent)
+        local bash = wep.shieldBashDistance or 3
+        local attackDx = 0
+        if phase == "windup" then
+            attackDx = -bash * 0.25 * helper.EASINGS.sineOut(t)
+        elseif phase == "swing" then
+            attackDx = bash * helper.EASINGS.sineIn(t)
+        end
+
+        local dyy = dy + idleBob
+        g.drawImageOffset(wep.image, x + dx + (attackDx * face), y + dyy, 0, 1, 1, 0.5, 0.95)
     end
     -- g.drawImageOffset(wep.image, )
 end
@@ -3117,6 +3138,7 @@ function g.isAnyPopupOpen()
     return not not (
         rewardPopupService.getActive()
         or choicePopupService.getActive()
+        or statUpgradePopupService.getActive()
         or nodeEventService.isActive()
         or gameoverPopupService.isActive()
     )

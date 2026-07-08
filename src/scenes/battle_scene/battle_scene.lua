@@ -123,7 +123,7 @@ function battle_scene:pollHandlers()
             self.particles:draw()
         end,
         entityDeath = function(ent)
-            if ent == self.commander then
+            if (ent == self.commander) and (ent.health < 0) then
                 loseBattle(self)
             end
             if ent.team == "ally" then
@@ -504,6 +504,7 @@ function battle_scene:keypressed(k)
                     {type = "xp",amount = 3},
                     {type = "squad", rerolls = 1},
                     {type = "demon_fury", amount = 1},
+                    {type = "blessing"},
                 })
             end
         end
