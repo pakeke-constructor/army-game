@@ -123,7 +123,7 @@ encounters.defineEnemyEncounter(3, function(es,ecs)
     es:add("demon", 11)
     es:add("demon", 11)
     es:add("demon", 11)
-    ecs:setBounds(300, 200, 500,500)
+    ecs:setBounds(300, 200, 1000,700)
 end)
 
 -- Snipers walled by shields
@@ -173,6 +173,7 @@ encounters.defineEnemyEncounter(4, function(es,ecs)
     es:add("demon", 13)
     es:add("demon", 12)
     es:add("demon", 13)
+    ecs:setBounds(300, 200, 1600, 1000)
 end)
 
 -- Goliath with an escort
@@ -182,6 +183,7 @@ encounters.defineEnemyEncounter(4, function(es,ecs)
     es:add("demon", 13)
     es:add("archerdemon", 9)
     es:add("archerdemon", 9)
+    ecs:setBounds(300, 200, 1600, 1000)
 end)
 
 -- Bomber barrage with direhound vanguard
@@ -192,6 +194,7 @@ encounters.defineEnemyEncounter(4, function(es,ecs)
     es:add("brimstonecore", 8)
     es:add("direhound", 3)
     es:add("direhound", 2)
+    ecs:setBounds(300, 200, 1600, 1000)
 end)
 
 -- Full legion (everything at once)
@@ -202,4 +205,5 @@ encounters.defineEnemyEncounter(4, function(es,ecs)
     es:add("charredsoul", 10)
     es:add("hellhound", 9)
     es:add("hellhound", 9)
+    ecs:setBounds(300, 200, 1600, 1000)
 end)

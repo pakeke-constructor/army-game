@@ -508,6 +508,48 @@ local SPECIAL_NODES = {
     "dynamic", "dynamic", "dynamic", "dynamic"
 }
 -- TODO: add `town` in here too.
+local rewardAmount = {
+    default = {
+        gold = {30, 30},
+        xp = {2, 2}
+    },
+    [1] = {
+        gold = {20, 30},
+        xp = {1, 2}
+    },
+    [2] = {
+        gold = {50, 70},
+        xp = {3, 4}
+    }
+}
+
+--- Roll bonus rewards for a battle node, based on its difficulty.
+--- diff 0: nothing. diff 1: gold or xp. diff 2+: bigger, and can be a blessing.
+---@param difficulty integer the node's demonEncounter
+---@param rng fun():number
+---@return g.RewardPanel.Rewards
+local function rollReward(difficulty, rng)
+    if difficulty <= 0 then
+        return {} -- only diff 0 gives nothing
+    end
+    local big = difficulty >= 2 -- diff 2+ is bigger yield
+    ---@param min integer
+    ---@param max integer
+    local function amt(min, max)
+        return min + math.floor(rng() * (max - min + 1))
+    end
+
+    local t = rewardAmount[difficulty] or rewardAmount.default
+
+    local rewardLists = {}
+    table.insert(rewardLists, {{type = "gold", amount = amt(t.gold[1], t.gold[2])}})
+    table.insert(rewardLists, {{type = "xp", amount = amt(t.xp[1], t.xp[2])}})
+    if big then
+        table.insert(rewardLists, {{type = "blessing"}})
+    end
+    -- pick one of the candidate reward-lists at random
+    return rewardLists[math.floor(rng() * #rewardLists) + 1]
+end
 
 local function isNextToNodeOfSameType(self, x, y, nodeType)
     for _, nb in ipairs(self:getNeighbors(x, y)) do
@@ -548,13 +590,15 @@ function MapGraph:_generateNodes(rng, fromPortal)
     -- 5% chance +2 difficulty, 25% chance +1 difficulty
     for _, node in pairs(self.nodes) do
         if node.demonEncounter then
-            ---@cast node MapNode
+            ---@cast node MapNode.BattleNode
             local r = rng()
             if r < consts.DEMON_ENCOUNTER_PLUS2_CHANCE then
                 node.demonEncounter = node.demonEncounter + 2
             elseif r < (consts.DEMON_ENCOUNTER_PLUS1_CHANCE + consts.DEMON_ENCOUNTER_PLUS2_CHANCE) then
                 node.demonEncounter = node.demonEncounter + 1
             end
+            -- roll bonus rewards now that final difficulty is known
+            node.rewards = rollReward(node.demonEncounter, rng)
         end
     end
 

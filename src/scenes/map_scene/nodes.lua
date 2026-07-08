@@ -7,28 +7,28 @@ local SHOP_TXT = loc("Shop: Spend money, upgrade squads")
 local BATTLE_TXTS = {
     -- demonEncounter difficulty => pool of flavor names
     [0] = {
-        loc("Battle: Demon Scouts (I)"),
-        loc("Battle: Demon Stragglers (I)"),
-        loc("Battle: Demon Whelps (I)"),
-        loc("Battle: Imp Rabble (I)"),
-        loc("Battle: Hellspawn Scouts (I)"),
-        loc("Battle: Cursed Vagrants (I)"),
+        loc("Demon Scouts (I)"),
+        loc("Demon Stragglers (I)"),
+        loc("Demon Whelps (I)"),
+        loc("Imp Rabble (I)"),
+        loc("Hellspawn Scouts (I)"),
+        loc("Cursed Vagrants (I)"),
     },
     [1] = {
-        loc("Battle: Demon Squad (II)"),
-        loc("Battle: Demon Warband (II)"),
-        loc("Battle: Infernal Patrol (II)"),
-        loc("Battle: Brimstone Raiders (II)"),
-        loc("Battle: Hellhound Pack (II)"),
-        loc("Battle: Demon Marauders (II)"),
+        loc("Demon Squad (II)"),
+        loc("Demon Warband (II)"),
+        loc("Infernal Patrol (II)"),
+        loc("Brimstone Raiders (II)"),
+        loc("Hellhound Pack (II)"),
+        loc("Demon Marauders (II)"),
     },
     [2] = {
-        loc("Battle: Demon Army (III)"),
-        loc("Battle: Demon Legion (III)"),
-        loc("Battle: Infernal Host (III)"),
-        loc("Battle: Hellfire Horde (III)"),
-        loc("Battle: Abyssal Vanguard (III)"),
-        loc("Battle: Doom Battalion (III)"),
+        loc("Demon Army (III)"),
+        loc("Demon Legion (III)"),
+        loc("Infernal Host (III)"),
+        loc("Hellfire Horde (III)"),
+        loc("Abyssal Vanguard (III)"),
+        loc("Doom Battalion (III)"),
     },
 }
 
@@ -155,6 +155,17 @@ local function nodeOpacity(node)
     return 1
 end
 
+local demonSprites = {
+    "direhound",
+    "hellhound",
+    "archerdemon",
+    "demon",
+    "speardemon",
+    "blazingbombardier",
+    "hellbrute",
+    "hellbat"
+}
+
 local function addDemons(node, builder, x, y)
     if node.demonEncounter then
         local count = node.demonEncounter + 1
@@ -170,7 +181,14 @@ local function addDemons(node, builder, x, y)
             end
             local r = 20 * radiusMul
             local a = angle + angleOff
-            builder:addImage("node_combat_demon", x + math.cos(a) * r, y + math.sin(a) * r, 0, nil, nodeOpacity(node))
+            local phase = hashf(node.x, node.y, i) * math.pi * 2
+            local sx = hashf(node.x, node.y, i, 2) < 0.5 and -1 or 1
+            local sprite = demonSprites[math.floor(hashf(node.x, node.y, i, 3) * #demonSprites) + 1]
+            local function bobMod()
+                local sy = 1 + math.sin(phase + love.timer.getTime()) * 0.12
+                return 0, 0, 0, 1, sy, 0, 0
+            end
+            builder:addImage(sprite, x + math.cos(a) * r, y + math.sin(a) * r, 0, sx, nodeOpacity(node), bobMod)
         end
 
         if node.demonEncounter >= 2 then
@@ -181,15 +199,34 @@ local function addDemons(node, builder, x, y)
 end
 
 -------------------------------
+-- Bonus rewards (shown on hover, granted on battle win)
+-------------------------------
+--- Turn a reward descriptor into a richtext line for the hover tooltip.
+---@param r g.RewardPanel.ORReward|g.RewardPanel.Any
+---@return string
+local function describeReward(r)
+    if r.type == "gold" then
+        return "{GOLD_COLOR}Bonus rewards:{/GOLD_COLOR} {coin_icon}{GOLD_COLOR} +" .. r.amount
+    elseif r.type == "xp" then
+        return "{XP_COLOR}Bonus rewards:{/XP_COLOR} {xp_icon}{XP_COLOR} +" .. r.amount
+    elseif r.type == "blessing" then
+        return "Bonus rewards:\nRandom Blessing {blessing_icon}"
+    end
+    return ""
+end
+
+-------------------------------
 -- BattleNode
 -------------------------------
 ---@class MapNode.BattleNode: MapNode
 ---@field demonEncounter integer
+---@field rewards g.RewardPanel.Rewards bonus rewards granted on win (rolled by MapGraph based on difficulty)
 local BattleNode = nodes.newClass("battle")
 
 function BattleNode:init(x,y)
     Node.init(self,x,y)
     self.demonEncounter = 0
+    self.rewards = {}
 end
 
 function BattleNode:enter()
@@ -198,7 +235,11 @@ end
 
 function BattleNode:getHoverDescription()
     local pool = BATTLE_TXTS[self.demonEncounter] or BATTLE_TXTS[0]
-    return pool[hash(self.id) % #pool + 1]
+    local desc = pool[hash(self.id) % #pool + 1]
+    for _, r in ipairs(self.rewards) do
+        desc = desc .. "\n" .. describeReward(r)
+    end
+    return desc
 end
 
 function BattleNode:drawBelow(wx, wy)
