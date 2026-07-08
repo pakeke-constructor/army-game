@@ -334,7 +334,7 @@ defEnemy("shielddemon", {
         target = "enemy",
     },
     weapon = {
-        type = "staff",
+        type = "shield",
         image = "shielddemon_shield"
     },
     attack = {

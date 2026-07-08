@@ -246,7 +246,7 @@ g.defineSquad("defender_squad", {
         },
         weapon = {
             image = "defenders_shield",
-            type = "staff"
+            type = "shield"
         },
         baseAttackDamage = 1,
         baseAttackSpeed = 1,
