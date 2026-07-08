@@ -150,8 +150,9 @@ function StatChoicePanel:init(squadId)
     ---@type string
     self.squadId = assert(squadId)
     self.createdAt = love.timer.getTime()
-    ---@type [integer,number]|nil
+    ---@type integer|nil
     self.selected = nil
+    self.cj = cardJuiceService.CardJuiceInstance()
 
     for _ = 1, ChoicePanelCommon.NUM_CHOICES do
         self.choiceCreatedAt[#self.choiceCreatedAt+1] = self.createdAt
@@ -171,6 +172,8 @@ end
 function StatChoicePanel:_resetAnim()
     self.createdAt = love.timer.getTime()
     self.choiceCreatedAt = {}
+    self.selected = nil
+    self.cj = cardJuiceService.CardJuiceInstance()
     for _ = 1, ChoicePanelCommon.NUM_CHOICES do
         self.choiceCreatedAt[#self.choiceCreatedAt+1] = self.createdAt
     end
@@ -429,51 +432,43 @@ end
 ---@return boolean
 ---@private
 function StatChoicePanel:_drawCards(regions, cardAreaR, squadCardR)
-    local t = love.timer.getTime()
-
-    if self.selected then
-        local selectedIndex = self.selected[1]
-        local t1 = (t - self.selected[2]) / ChoicePanelCommon.SELECT_ANIM_DURATION
-
+    if not self.cj:hasAnimationBegun() then
         for i, choice in ipairs(self.statChoices) do
-            if i ~= selectedIndex then
-                cardJuiceService.drawUnselected(t1, regions[i], i, function(r)
-                    return self:_drawStatCard(choice, r, i)
-                end)
-            end
-        end
+            if self:_drawStatCard(choice, regions[i], i) then
+                g.playUISound("ui_click_basic", 1.4, 0.8)
+                self.selected = i
 
-        ui.drawSquadCard(self.squadId, squadCardR, -999, false, true)
-
-        local choice = self.statChoices[selectedIndex]
-        local targetR = _getSelectedTarget(regions[selectedIndex], cardAreaR)
-        cardJuiceService.drawSelected(t1, regions[selectedIndex], selectedIndex, function(r)
-            return self:_drawStatCard(choice, r, selectedIndex)
-        end, targetR)
-
-        if (t - self.selected[2]) >= ChoicePanelCommon.SELECT_ANIM_DURATION then
-            local squad = g.getSquadFromArmy(self.squadId)
-            if squad then
-                g.buffSquadPermanently(squad, choice.positive[1], choice.positive[2])
-                if choice.negative then
-                    g.buffSquadPermanently(squad, choice.negative[1], choice.negative[2])
+                -- Spawn cards
+                for j, otherChoice in ipairs(self.statChoices) do
+                    if i ~= j then
+                        self.cj:spawnCardUnselected(regions[j], j, function(r)
+                            return self:_drawStatCard(otherChoice, r, j)
+                        end)
+                    end
                 end
+
+                local targetR = _getSelectedTarget(regions[i], cardAreaR)
+                self.cj:spawnCardSelected(regions[i], i, function(r)
+                    return self:_drawStatCard(choice, r, i)
+                end, targetR)
             end
-
-            return true
-        end
-
-        return false
-    end
-
-    for i, choice in ipairs(self.statChoices) do
-        if self:_drawStatCard(choice, regions[i], i) then
-            g.playUISound("ui_click_basic", 1.4, 0.8)
-            self.selected = {i, t}
         end
     end
 
     ui.drawSquadCard(self.squadId, squadCardR, -999, false, true)
+
+    if self.cj:draw() then
+        local choice = self.statChoices[self.selected]
+        local squad = g.getSquadFromArmy(self.squadId)
+        if squad then
+            g.buffSquadPermanently(squad, choice.positive[1], choice.positive[2])
+            if choice.negative then
+                g.buffSquadPermanently(squad, choice.negative[1], choice.negative[2])
+            end
+        end
+
+        return true
+    end
 
     return false
 end
