@@ -90,11 +90,11 @@ SPELLS:
 
 SQUADS:
 [ ] Possessor: on death: transforms into a Peasant  (synergizes w/ transform)
-[ ] Dart spitter: Ranged, Apply 1 poison on hit
-[ ] Giant toad: Tanky, Takes 50% less damage from poisoned enemies
-[ ] Mini toad: Apply 1 poison on hit
-[ ] Fire golem: When hit, apply 1 burn to the attacker
-[ ] Fire archers: Ranged, Apply 2 burn on hit
+[ ] Dart spitters x 4: Ranged, Apply 1 poison on hit
+[ ] Giant toads x 2: Tanky, Takes 50% less damage from poisoned enemies
+[ ] Mini toads x 4: Apply 1 poison on hit
+[ ] Fire golems x 2: When hit, apply 1 burn to the attacker
+[ ] Fire archers x 4: Ranged, Apply 2 burn on hit
 [ ] Inferno beast: Hits deal AOE damage, setting enemies ablaze (+1 burn)
 [ ] Lightning-wizard: Emit lightning on attack, dealing damage equal to MAGK
 [ ] Mini ice golems: When killed, freeze all enemies in a radius
