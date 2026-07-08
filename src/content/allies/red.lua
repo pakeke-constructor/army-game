@@ -5,6 +5,89 @@ local sqhelper = require(".squad_helper")
 sqhelper.defineMilitiaAndArchers("red")
 
 
+-- ============================================================
+-- BASIC UNITS: Gremlins (red)
+-- ============================================================
+
+g.defineSquad("gremlin_brute_squad", {
+    name = "Gremlin Brutes",
+    rarity = g.RARITIES.COMMON,
+    -- tags: armor (basic tank)
+    tags = {"armor"},
+    entityDef = {
+        image = g.leo("gremlin_brute_unit", "barbarian"),
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "melee",
+        },
+        weapon = {
+            image = g.leo("gremlin_club", "orc_battleaxe"),
+            type = "sword",
+        },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 1,
+        baseAttackRange = 18,
+        baseMoveSpeed = 50,
+        baseMaxHealth = 14,
+        baseStartingArmor = 3,
+    },
+    unitCount = 4,
+    cost = {red = 1},
+})
+
+g.defineSquad("gremlin_berserker_squad", {
+    name = "Gremlin Berserkers",
+    rarity = g.RARITIES.COMMON,
+    -- tags: attack_damage (short-range melee dmg)
+    tags = {"attack_damage"},
+    entityDef = {
+        image = g.leo("gremlin_berserker_unit", "berserkers_unit"),
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "melee",
+        },
+        weapon = {
+            image = g.leo("gremlin_dagger", "daggerbearers_dagger"),
+            type = "sword",
+        },
+        baseAttackDamage = 2,
+        baseAttackSpeed = 1,
+        baseAttackRange = 16,
+        baseMoveSpeed = 65,
+        baseMaxHealth = 6,
+    },
+    unitCount = 4,
+    cost = {red = 1},
+})
+
+g.defineSquad("gremlin_slinger_squad", {
+    name = "Gremlin Slingers",
+    rarity = g.RARITIES.COMMON,
+    -- tags: ranged, projectile (basic ranged)
+    tags = {"ranged", "projectile"},
+    entityDef = {
+        image = g.leo("gremlin_slinger_unit", "bladethrowers_unit"),
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "ranged",
+            projectileType = "arrow",
+            projectileSpeed = 300,
+        },
+        weapon = {
+            image = g.leo("gremlin_sling", "longbow"),
+            type = "bow",
+        },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 0.6,
+        baseAttackRange = 130,
+        baseMoveSpeed = 55,
+        baseMaxHealth = 5,
+    },
+    unitCount = 4,
+    cost = {red = 1},
+})
+
+
 g.defineSquad("gremlin_technician_squad", {
     name = "Gremlin Technicians",
     rarity = g.RARITIES.COMMON,
@@ -117,8 +200,8 @@ g.defineSquad("blade_thrower_squad", {
 g.defineSquad("brewer_squad", {
     name = "Brewers",
     rarity = g.RARITIES.COMMON,
-    -- tags: buffing, attack_speed
-    tags = {"buffing", "attack_speed"},
+    -- tags: buffing, attack_speed, death_trigger
+    tags = {"buffing", "attack_speed", "death_trigger"},
     entityDef = {
         image = "brewer",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -135,25 +218,24 @@ g.defineSquad("brewer_squad", {
         baseMoveSpeed = 55,
         baseMaxHealth = 5,
     },
-    unitCount = 8,
+    unitCount = 2,
     icon = "brewer_uniticon",
     perks = {{
-        name = "Bolstering Brew",
-        description = g.loc2("On-spawn, 2 nearby allies gain double (ASPD) for 10 seconds."),
+        name = "Last Brew",
+        description = g.loc2("On-death, double the (ASPD) of 2 random allies."),
         image = "coin_icon",
         handlers = {
-            entitySpawned = function(ent)
+            entityDeath = function(ent)
                 local buffed = 0
-                g.iteratePartition("ally", ent.x, ent.y, function(other)
-                    if buffed >= 2 then return end
-                    if other == ent then return end
-                    if not g.isAlive(other) then return end
-                    g.addCustomEffect(other, {
-                        getAttackSpeedMultiplier = function(e) return 1.5 end,
-                        getAttackDamageModifier = function(e) return 1 end,
-                    }, 10)
-                    buffed = buffed + 1
-                end, 120)
+                for _, other in ipairs(g.getAllyList()) do
+                    if buffed >= 2 then break end
+                    if other ~= ent and g.isAlive(other) then
+                        g.addCustomEffect(other, {
+                            getAttackSpeedMultiplier = function(e) return 2 end,
+                        }, 9999)
+                        buffed = buffed + 1
+                    end
+                end
             end,
         },
     }},
@@ -293,25 +375,15 @@ g.defineSquad("dagger_bearer_squad", {
         baseMaxHealth = 12,
     },
     unitCount = 4,
-    squadOrder = 50,
     perks = {{
-        name = "Ritual Sacrifice",
-        description = g.loc2("On-spawn, kills a nearby ally to gain +4 (ATK) for the fight."),
+        name = "Frenzied Start",
+        description = g.loc2("Has triple (ATK) for the first 10 seconds of the fight."),
         image = "coin_icon",
         handlers = {
-            entitySpawned = function(ent)
-                local victim = nil
-                g.iteratePartition("ally", ent.x, ent.y, function(other)
-                    if other == ent then return end
-                    if not g.isAlive(other) then return end
-                    if other.isCommander then return end
-                    if (not victim) or (other.health < victim.health) then
-                        victim = other
-                    end
-                end, 120)
-                if victim then
-                    g.killEntity(victim, ent)
-                    g.buffEntity(ent, "attackDamage", 4)
+            getAttackDamageMultiplier = function(ent)
+                local ecs = g.tryGetECS()
+                if ecs and ecs.secondCount < 10 then
+                    return 3
                 end
             end,
         },
@@ -368,6 +440,71 @@ g.defineSquad("furnace_golems_squad", {
 })
 
 
+
+g.defineSquad("fire_golem_squad", {
+    name = "Fire Golems",
+    rarity = g.RARITIES.UNCOMMON,
+    -- tags: armor, burn
+    tags = {"armor", "burn"},
+    entityDef = {
+        image = g.leo("firegolems_unit", "furnacegolems_unit"), -- no art yet
+        physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 2 },
+        attack = { attackType = "melee" },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 0.7,
+        baseAttackRange = 22,
+        baseMoveSpeed = 40,
+        baseMaxHealth = 95,
+        baseStartingArmor = 3,
+    },
+    unitCount = 2,
+    perks = {{
+        name = "Molten Skin",
+        description = loc("When hit, apply 1 Burn to the attacker."),
+        image = "coin_icon",
+        handlers = {
+            entityHurt = function(ent, damage, attacker)
+                if attacker and g.isAlive(attacker) then
+                    g.applyBurn(attacker, 1, ent)
+                end
+            end,
+        },
+    }},
+    cost = {red = 2},
+})
+
+
+g.defineSquad("fire_archer_squad", {
+    name = "Fire Archers",
+    rarity = g.RARITIES.UNCOMMON,
+    -- tags: ranged, projectile, burn
+    tags = {"ranged", "projectile", "burn"},
+    entityDef = {
+        image = g.leo("firearchers_unit", "bladethrowers_unit"), -- no art yet
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 300 },
+        weapon = { image = g.leo("firearchers_bow", "bow"), type = "bow" },
+        baseAttackDamage = 3,
+        baseAttackSpeed = 1,
+        baseAttackRange = 70,
+        baseMoveSpeed = 55,
+        baseMaxHealth = 6,
+    },
+    unitCount = 4,
+    perks = {{
+        name = "Flaming Arrows",
+        description = loc("Apply 2 Burn on hit."),
+        image = "coin_icon",
+        handlers = {
+            onHitDamage = function(ent, damage, target)
+                g.applyBurn(target, 2, ent)
+            end,
+        },
+    }},
+    cost = {red = 1},
+})
+
+
 g.defineSquad("living_entropy_squad", {
     name = "Living Entropy",
     rarity = g.RARITIES.RARE,
@@ -415,16 +552,15 @@ g.defineSquad("his_manifestation_squad", {
     statUpgradeScaling = {attackDamage = 0.1},
     unitCount = 1,
     perks = {{
-        name = "Ritual",
-        description = g.loc2("On-spawn, gains +1 (ATK) per 2 allies that have died this combat."),
+        name = "Feed on Death",
+        description = g.loc2("When an ally dies, gains +1 (ATK)."),
         image = "coin_icon",
-        handlers = {
-            entitySpawned = function(ent)
-                local ecs = g.getECS()
-                local amount = math.floor(ecs.allyDeathsThisBattle / 2)
-                if amount > 0 then
-                    g.buffEntity(ent, "attackDamage", amount)
-                end
+        rawHandlers = {
+            entityDeath = function(self, ent)
+                if ent == self then return end
+                if ent.team ~= "ally" then return end
+                if not g.isAlive(self) then return end
+                g.buffEntity(self, "attackDamage", 1)
             end,
         },
     }},

@@ -58,7 +58,7 @@ consts.NODE_FADE_OUT = 0.9
 
 
 -- Fade when starting a run after picking a commander (long, cinematic).
-consts.RUN_START_FADE = 1.3
+consts.RUN_START_FADE = 1.9
 consts.RUN_START_FADE_DEV = 0.1
 
 consts.STARTING_COMMANDER = "sir_horse"

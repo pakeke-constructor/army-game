@@ -32,7 +32,7 @@ function sqhelper.defineMilitiaAndArchers(manaType)
     })
 
     g.defineSquad(manaType.."_archer_squad", {
-        name = "Archers",
+        name = "Stoneskin Archers",
         rarity = g.RARITIES.COMMON,
         -- tags: ranged, projectile
         tags = {"ranged", "projectile"},
