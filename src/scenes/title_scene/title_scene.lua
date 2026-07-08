@@ -22,7 +22,7 @@ local embers = particles.newParticlesWorld({
     drawParticle = function(p)
         local w, h = lg.getDimensions()
         local life = p.lifetime / p.maxLife
-        local size = (1 + (p.id % 3)) * (h / REF_H) * 3
+        local size = (1 + (p.id % 3)) * (h / REF_H) * 1
         local flicker = 0.7 + 0.2*math.sin(love.timer.getTime()*7 + p.id)
         local a = (1 - life) * 0.9 * flicker
         lg.setColor(1, 0.45*flicker, 0.1, a)

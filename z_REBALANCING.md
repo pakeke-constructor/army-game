@@ -2,12 +2,10 @@
 
 # Rebalancing + adding more content
 
-Leo:  "A lot of blessings / perks use ASPD, because its so easy to add in small increments"
-
-
 
 ## GOALS:
-We are doing a massive overhaul of existing squads/blessings.
+Kapathia underwent a big change to core systems recently.
+As such, we are doing a massive overhaul of existing squads/blessings.
 
 
 ## MANA COLOR ARCHETYPES:
@@ -80,8 +78,8 @@ SPELLS:
 SQUADS:
 [ ] Possessor: on death: transforms into a Peasant  (synergizes w/ transform)
 [ ] Dart spitter: Ranged, Apply 1 poison on hit
-[ ] Giant frog: Tanky, Takes 50% less damage from poisoned enemies
-[ ] Mini frog: Apply 1 poison on hit
+[ ] Giant toad: Tanky, Takes 50% less damage from poisoned enemies
+[ ] Mini toad: Apply 1 poison on hit
 [ ] Fire golem: When hit, apply 1 burn to the attacker
 [ ] Fire archers: Ranged, Apply 2 burn on hit
 [ ] Inferno beast: Hits deal AOE damage, setting enemies ablaze (+1 burn)
@@ -108,4 +106,38 @@ BLESSINGS:
 
 
 
+BASIC UNITS:
+We want some "stock standard", basic units.
+This pads out the unit-pool a bit, and makes the game slightly more grounded
+The idea is that each mana-color will have 1 class of each: tank, damage, and ranged.
+Within the class, there should be good thematic cohesion.
+
+<basic_units>
+Green units are humans:
+- Human knights (tank)
+- Human spearmen (damage, high range, lower hp)
+- Human archers (ranged)
+
+Red units are gremlins:
+- Gremlin brutes (tank)
+- Gremlin beserkers (melee dmg, low range)
+- Gremline slingers (range)
+
+Blue units are fish-folk:
+(ie guys with fish-heads maybe? This could be super cool. I'm envisioning it working well with the octopus guy. I'll send a picture below to explain further what I mean)
+- Shield-fish  (tank)
+- Spear-fish (melee dmg, higher range)
+- Arrow-fish ()
+
+Yellow units are robots:
+- Protect-bot (tanky)
+- Angry-bot (bruiser, decent hp and decent dmg)
+- Gun-bot (ranged)
+</basic_units>
+
+
+
+IMPORTANT NOTE FOR IMAGES:
+you should wrap EVERY image in `image = g.leo("image_name")`.
+g.leo is a function that we use to alert our artist if an image is unavailable. (If the image is undefined, falls back to a placeholder.)
 
