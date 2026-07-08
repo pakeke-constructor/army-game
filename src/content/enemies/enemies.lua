@@ -143,6 +143,10 @@ defEnemy("charredsoul", {
             ent._nextBuffTime = ent._nextBuffTime - 3
         end
     end,
+
+    onHitDamage = function(ent, damage, target)
+        g.applyBurn(target, 2, ent)
+    end,
 })
 
 defEnemy("crimsongoliath", {
@@ -312,19 +316,6 @@ defEnemy("reaper", {
     baseAttackRange = 80,
     baseMoveSpeed = 50,
     baseMaxHealth = 40,
-
-    -- FIXME: The way this "Death Touch" is implemented is ugly.
-    entityHurt = function(ent, damage, attacker)
-        -- Need that _dmgThroughDT to prevent infinite loop in EV-bus
-        if attacker and not ent._dmgThroughDT then
-            local mh = attacker.maxHealth or attacker.baseMaxHealth or 0
-            if mh > 0 then
-                ent._dmgThroughDT = true
-                g.dealDamage(ent, mh, attacker)
-                ent._dmgThroughDT = nil
-            end
-        end
-    end
 })
 
 defEnemy("shielddemon", {
