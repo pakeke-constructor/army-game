@@ -10,8 +10,9 @@ function UpgradeSquadChoicePanel:init()
     ---@type number[]
     self.choiceCreatedAt = {}
     self.createdAt = love.timer.getTime()
-    ---@type [integer,number]|nil
+    ---@type integer|nil
     self.selected = nil
+    self.cj = cardJuiceService.CardJuiceInstance()
 
     for _ = 1, ChoicePanelCommon.NUM_CHOICES do
         self.choiceCreatedAt[#self.choiceCreatedAt+1] = self.createdAt
@@ -51,28 +52,7 @@ end
 function UpgradeSquadChoicePanel:_drawCards(regions)
     local t = love.timer.getTime()
 
-    if self.selected then
-        local selectedIndex = self.selected[1]
-        local t1 = (t - self.selected[2]) / ChoicePanelCommon.SELECT_ANIM_DURATION
-
-        for i, squadId in ipairs(self.choices) do
-            if i ~= selectedIndex then
-                local cardR = regions[i]:splitVertical(8, 1, 1)
-                cardJuiceService.drawUnselected(t1, cardR, i, function(r)
-                    return ui.drawSquadCard(squadId, r, i, true, true)
-                end)
-            end
-        end
-
-        local squadId = self.choices[selectedIndex]
-        local cardR = regions[selectedIndex]:splitVertical(8, 1, 1)
-        local r = ui.getFullScreenRegion()
-        local _, cardAreaBaseR = r:padRatio(0.05, 0.1):splitVertical(1, 5)
-        local _, squadCardR = cardAreaBaseR:splitHorizontal(5, 2)
-        cardJuiceService.drawSelected(t1, cardR, selectedIndex, function(r)
-            return ui.drawSquadCard(squadId, r, selectedIndex, true, true)
-        end, squadCardR)
-    else
+    if not self.cj:hasAnimationBegun() then
         for i, squadId in ipairs(self.choices) do
             local cardR = regions[i]:splitVertical(8, 1, 1)
             local function draw(r)
@@ -83,14 +63,30 @@ function UpgradeSquadChoicePanel:_drawCards(regions)
 
             if clicked then
                 -- Delayed select
-                self.selected = {i, t}
+                self.selected = i
+
+                -- Spawn cards
+                for j, sqId in ipairs(self.choices) do
+                    if i ~= j then
+                        self.cj:spawnCardUnselected(regions[j], j, function(r)
+                            return ui.drawSquadCard(sqId, r, j, true, true)
+                        end)
+                    end
+                end
+                -- This duplicates stat choice layouting
+                local baseR = ui.getFullScreenRegion()
+                local _, cardAreaBaseR = baseR:padRatio(0.05, 0.1):splitVertical(1, 5)
+                local _, squadCardR = cardAreaBaseR:splitHorizontal(5, 2)
+                self.cj:spawnCardSelected(regions[i], i, function(r)
+                    return ui.drawSquadCard(squadId, r, i, true, true)
+                end, squadCardR)
             end
         end
     end
 
-    if self.selected and (t - self.selected[2]) >= ChoicePanelCommon.SELECT_ANIM_DURATION then
+    if self.cj:draw() then
         -- Actually apply
-        local squadId = self.choices[self.selected[1]]
+        local squadId = self.choices[self.selected]
         g.addOrUpgradeSquad(squadId)
         statUpgradePopupService.set(squadId)
         return true
