@@ -286,7 +286,7 @@ defEnemy("hellhound", {
     baseAttackSpeed = 1.5,
     baseAttackRange = 80,
     baseMoveSpeed = 100,
-    baseMaxHealth = 6,
+    baseMaxHealth = 3,
 })
 
 defEnemy("reaper", {

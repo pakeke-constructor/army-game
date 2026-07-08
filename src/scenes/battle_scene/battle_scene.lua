@@ -180,7 +180,13 @@ function battle_scene:enter()
 
     g.pollHandlers()
 
-    if self.sandbox then
+    if self.forcedEncounter then
+        local fe = self.forcedEncounter
+        self.forcedEncounter = nil
+        encounters.startEncounterAt(fe.difficulty, fe.index, self.ecs, function(border)
+            self:generateAllyAndEnemyRectangles(border)
+        end)
+    elseif self.sandbox then
         self.ecs:setBounds(500,300, 1900, 1100)
         self:generateAllyAndEnemyRectangles(self.ecs.boundingBox)
     else

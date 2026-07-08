@@ -22,6 +22,7 @@ COMMANDS.help = function()
     addLog("/gold <amount> - add gold")
     addLog("/tp - teleport to cursor (map)")
     addLog("/sb - reset & enter sandbox battle")
+    addLog("/enc <diff> <idx> - spawn specific encounter")
     addLog("/rb - reset battle & zoom out (map-gen test)")
     addLog("/vacuum - removes all fogs")
     addLog("/wb - open whiteboard dev scene")
@@ -53,6 +54,20 @@ COMMANDS.rb = function()
     g.gotoScene("battle_scene")
     battle.devZoomOut = true
     addLog("reset battle (zoomed out)")
+end
+
+COMMANDS.enc = function(args)
+    local diff = tonumber(args[1])
+    local idx = tonumber(args[2])
+    if not diff or not idx then return addLog("usage: /enc <difficulty> <index>") end
+    if not g.hasRun() then
+        g.newRun({ commander = consts.STARTING_COMMANDER, difficulty = 0 })
+    end
+    local battle = require("src.scenes.battle_scene.battle_scene")
+    battle.sandbox = false
+    battle.forcedEncounter = { difficulty = diff, index = idx }
+    g.gotoScene("battle_scene")
+    addLog("encounter " .. diff .. "." .. idx)
 end
 
 COMMANDS.get = function(args)
