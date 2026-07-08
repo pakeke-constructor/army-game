@@ -146,11 +146,8 @@ function shop_scene.rerollShopNodeInplace(shopNode)
     end
     local squadPicker = newPicker(pool, weights)
 
-    for i,entry in ipairs(shopNode.squadShop) do
-        if entry ~= false then
-            local newEntry = squadPicker:pickAndRemove()
-            shopNode.squadShop[i] = newEntry
-        end
+    for i = 1, NUM_SQUAD_SLOTS do
+        shopNode.squadShop[i] = squadPicker:pickAndRemove()
     end
 end
 
