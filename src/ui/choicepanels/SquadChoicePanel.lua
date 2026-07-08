@@ -17,8 +17,9 @@ function SquadChoicePanel:init(rerolls, rarityWeights)
     self.choiceCreatedAt = {}
     self.rarityWeights = rarityWeights or consts.DEFAULT_RARITY_WEIGHTS
     self.createdAt = love.timer.getTime()
-    ---@type [integer,number]|nil
+    ---@type integer|nil
     self.selected = nil
+    self.cj = cardJuiceService.CardJuiceInstance()
 
     for _ = 1, ChoicePanelCommon.NUM_CHOICES do
         self.rerolls[#self.rerolls+1] = rerolls or 0
@@ -142,52 +143,50 @@ end
 ---@param regions kirigami.Region[]
 ---@return boolean
 function SquadChoicePanel:_drawCards(regions)
-    local t = love.timer.getTime()
-
-    if self.selected then
-        local selectedIndex = self.selected[1]
-        local t1 = (t - self.selected[2]) / ChoicePanelCommon.SELECT_ANIM_DURATION
-
-        for i, squadId in ipairs(self.choices) do
-            if i ~= selectedIndex then
-                local cardR = regions[i]:splitVertical(8, 1, 1)
-                cardJuiceService.drawUnselected(t1, cardR, i, function(r)
-                    return ui.drawSquadCard(squadId, r, i, true, true)
-                end)
-            end
-        end
-
-        local squadId = self.choices[selectedIndex]
-        local cardR = regions[selectedIndex]:splitVertical(8, 1, 1)
-        local targetR = nil
-        if g.getSquadFromArmy(squadId) then
-            -- Copied from stat choice panel
-            local r = ui.getFullScreenRegion()
-            local _, cardAreaBaseR = r:padRatio(0.05, 0.1):splitVertical(1, 5)
-            local _, squadCardR = cardAreaBaseR:splitHorizontal(5, 2)
-            targetR = squadCardR
-        end
-        cardJuiceService.drawSelected(t1, cardR, selectedIndex, function(r)
-            return ui.drawSquadCard(squadId, r, selectedIndex, true, true)
-        end, targetR)
-    else
+    if not self.cj:hasAnimationBegun() then
         for i, squadId in ipairs(self.choices) do
             local cardR, _, rerollR = regions[i]:splitVertical(8, 1, 1)
-            local clicked = ui.drawSquadCard(squadId, cardR, i, true, true)
+            local function draw(r)
+                return ui.drawSquadCard(squadId, r, i, true, true)
+            end
+
+            local clicked = draw(cardR)
             local rerollClicked = drawRerollButton(rerollR, i, (self.rerolls[i] or 0) <= 0)
 
             if rerollClicked then
                 self:_rerollChoice(i)
             elseif clicked then
                 -- Delayed select
-                self.selected = {i, t}
+                self.selected = i
+
+                -- Spawn cards
+                for j, sqId in ipairs(self.choices) do
+                    if i ~= j then
+                        local otherCardR = regions[j]:splitVertical(8, 1, 1)
+                        self.cj:spawnCardUnselected(otherCardR, j, function(r)
+                            return ui.drawSquadCard(sqId, r, j, true, true)
+                        end)
+                    end
+                end
+
+                local targetR = nil
+                if g.getSquadFromArmy(squadId) then
+                    -- This duplicates stat choice layouting
+                    local baseR = ui.getFullScreenRegion()
+                    local _, cardAreaBaseR = baseR:padRatio(0.05, 0.1):splitVertical(1, 5)
+                    local _, squadCardR = cardAreaBaseR:splitHorizontal(5, 2)
+                    targetR = squadCardR
+                end
+                self.cj:spawnCardSelected(cardR, i, function(r)
+                    return ui.drawSquadCard(squadId, r, i, true, true)
+                end, targetR)
             end
         end
     end
 
-    if self.selected and (t - self.selected[2]) >= ChoicePanelCommon.SELECT_ANIM_DURATION then
+    if self.cj:draw() then
         -- Actually apply
-        local squadId = self.choices[self.selected[1]]
+        local squadId = self.choices[self.selected]
         local hadSquad = g.getSquadFromArmy(squadId)
         g.addOrUpgradeSquad(squadId)
         if hadSquad then
