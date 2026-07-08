@@ -108,6 +108,7 @@ defEnemy("brimstonecore", {
         local t = love.timer.getTime()
         local rot = (dir * consts.TAU * t / 5) % consts.TAU
         local _, h = g.getImageSize(ent.image)
+        lg.setColor(1,1,1)
         g.drawImage("brimstonecore_shards", ent.x, ent.y - h / 2, rot)
     end,
     entityDeath = function(ent)
@@ -300,7 +301,7 @@ defEnemy("reaper", {
         end,
     },
     weapon = {
-        type = "object",
+        type = "sword",
         image = "reaper_scythe"
     },
     attack = {
