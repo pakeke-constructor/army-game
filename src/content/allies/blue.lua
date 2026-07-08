@@ -104,12 +104,11 @@ g.defineSquad("diver_squad", {
             battleStarted = function(self)
                 if not g.isAlive(self) then return end
                 local fishfolk = {}
-                g.iteratePartition("ally", self.x, self.y, function(other)
-                    if not g.isAlive(other) then return end
-                    if g.hasTrait(other, "fishfolk") then
+                for _, other in ipairs(g.getAllyList()) do
+                    if g.isAlive(other) and g.hasTrait(other, "fishfolk") then
                         fishfolk[#fishfolk + 1] = other
                     end
-                end, 9999)
+                end
                 if #fishfolk > 0 then
                     g.buffEntity(fishfolk[math.random(#fishfolk)], "attackDamage", 4)
                 end
@@ -503,12 +502,11 @@ g.defineSquad("immortal_eye_squad", {
         rawHandlers = {
             perSecondUpdate = function(self)
                 if not g.isAlive(self) then return end
-                g.iteratePartition("enemy", self.x, self.y, function(other)
-                    if not g.isAlive(other) then return end
-                    if (other.frozenTime or 0) > 0 then
+                for _, other in ipairs(g.getEnemyList()) do
+                    if g.isAlive(other) and (other.frozenTime or 0) > 0 then
                         g.applyPoison(other, 1, self)
                     end
-                end, 9999)
+                end
             end,
         },
     }},

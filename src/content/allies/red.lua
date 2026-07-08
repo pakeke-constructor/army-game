@@ -144,15 +144,15 @@ g.defineSquad("brewer_squad", {
         handlers = {
             entityDeath = function(ent)
                 local buffed = 0
-                g.iteratePartition("ally", ent.x, ent.y, function(other)
-                    if buffed >= 2 then return end
-                    if other == ent then return end
-                    if not g.isAlive(other) then return end
-                    g.addCustomEffect(other, {
-                        getAttackSpeedMultiplier = function(e) return 2 end,
-                    }, 9999)
-                    buffed = buffed + 1
-                end, 9999)
+                for _, other in ipairs(g.getAllyList()) do
+                    if buffed >= 2 then break end
+                    if other ~= ent and g.isAlive(other) then
+                        g.addCustomEffect(other, {
+                            getAttackSpeedMultiplier = function(e) return 2 end,
+                        }, 9999)
+                        buffed = buffed + 1
+                    end
+                end
             end,
         },
     }},
