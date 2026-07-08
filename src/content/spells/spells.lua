@@ -153,7 +153,10 @@ g.defineSpell("bonereap_spell", {
         target = "ally",
         maxTargets = 20,
         apply = function(ent, castX, castY, spellId)
-            g.call("entityDeath", ent)
+            if not ent.isCommander then
+                -- dont call entityDeath on commander; since that'll end the game
+                g.call("entityDeath", ent)
+            end
         end
     }
 })

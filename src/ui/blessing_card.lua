@@ -50,7 +50,7 @@ local function drawBlessingCard(blessingId, region, index)
         love.graphics.setColor(liteCol[1], liteCol[2], liteCol[3], liteCol[4] * 0.5)
         love.graphics.draw(GRADIENT_CIRCLE, bx + bw / 2, by + bh / 2, 0, math.min(bw, bh))
         love.graphics.setColor(liteCol:getRGBA())
-        ui.drawPanelThin(bx-3, by-3, bw+6, bh+6)
+        ui.drawPanel(bx-3, by-3, bw+6, bh+6)
     end)
 
     -- Header: icon on left, name on right

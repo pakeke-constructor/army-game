@@ -2785,6 +2785,23 @@ local function drawWeapon(ent, x,y)
 
         local dyy = dy + idleBob + castLift - math.floor(h/3)
         g.drawImageOffset(wep.image, x + dx, y + dyy, 0, 1, 1, 0.5, 0.95)
+    elseif wep.type == "shield" then
+        local face = ent.faceDir or 1
+        local dx = face * (wep.xOffset or 12)
+        local dy = wep.yOffset or 0
+
+        local idleBob = math.sin(g.getWorldTime() * 2.2 + (ent.id or 0)) * (wep.weaponBobbing or 1.0)
+        local phase, t = g.getAttackPhase(ent)
+        local bash = wep.shieldBashDistance or 3
+        local attackDx = 0
+        if phase == "windup" then
+            attackDx = -bash * 0.25 * helper.EASINGS.sineOut(t)
+        elseif phase == "swing" then
+            attackDx = bash * helper.EASINGS.sineIn(t)
+        end
+
+        local dyy = dy + idleBob
+        g.drawImageOffset(wep.image, x + dx + (attackDx * face), y + dyy, 0, 1, 1, 0.5, 0.95)
     end
     -- g.drawImageOffset(wep.image, )
 end

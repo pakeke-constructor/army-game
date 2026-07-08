@@ -228,6 +228,9 @@ local function drawSquadBox(r, squadId, cost)
     local isHovered = iml.isHovered(r:get())
     local wasJustClicked = iml.wasJustClicked(r:get())
 
+    local oy = isHovered and -2 or 0
+    r=r:moveUnit(0,oy)
+
     -- find existing squad
     ---@type g.Squad?
     local squad = g.getSquadFromArmy(squadId)
@@ -250,7 +253,7 @@ local function drawSquadBox(r, squadId, cost)
     do
     local x,y,w,h = r:get()
     helper.gradientRectStencil("vertical", squadCol:lerp(objects.Color.BLACK, 0.2), squadCol:lerp(objects.Color.WHITE, 0.3), x,y,w,h, function ()
-        ui.drawPanelThin(r:get())
+        ui.drawPanel(x,y,w,h)
     end)
     end
 
@@ -268,8 +271,7 @@ local function drawSquadBox(r, squadId, cost)
 
     -- squad-icon, manaCost
     local x,y,w,h = topmid:getCenter()
-    local oy = isHovered and -2 or 0
-    g.drawSquadIcon(squadId, x, y + oy, true)
+    g.drawSquadIcon(squadId, x, y, true)
 
     -- unit name
     local txt = "{o}" .. sinfo.name
