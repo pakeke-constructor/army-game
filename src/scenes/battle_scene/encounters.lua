@@ -98,7 +98,6 @@ function EnemySpawner:finalize()
     local bx, by, w, h = ecs.boundingBox[1], ecs.boundingBox[2], ecs.boundingBox[3], ecs.boundingBox[4]
 
     -- lay enemies out into the enemy rectangle battle_scene set up.
-    -- fall back to the right two-thirds if it wasn't set.
     local enemyR = ecs.enemyRectangle
     if not enemyR then
         error("Enemy rectangle not set before encounter starts")
