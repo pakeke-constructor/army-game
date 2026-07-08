@@ -14,8 +14,9 @@ function ManaBlessingChoicePanel:init(rarityWeights)
     self.choiceCreatedAt = {}
     self.rarityWeights = rarityWeights or consts.DEFAULT_RARITY_WEIGHTS
     self.createdAt = love.timer.getTime()
-    ---@type [integer,number]|nil
+    ---@type integer|nil
     self.selected = nil
+    self.cj = cardJuiceService.CardJuiceInstance()
 
     for _ = 1, ChoicePanelCommon.NUM_CHOICES do
         self.choiceCreatedAt[#self.choiceCreatedAt+1] = self.createdAt
@@ -109,42 +110,35 @@ end
 ---@param regions kirigami.Region[]
 ---@return boolean
 function ManaBlessingChoicePanel:_drawChoices(regions)
-    local t = love.timer.getTime()
-
-    if self.selected then
-        local selectedIndex = self.selected[1]
-        local t1 = (t - self.selected[2]) / ChoicePanelCommon.SELECT_ANIM_DURATION
-
-        for i, pair in ipairs(self.choices) do
-            ---@diagnostic disable-next-line: cast-type-mismatch
-            ---@cast pair {mana:string,blessing:string}
-            if i ~= selectedIndex then
-                local choiceR = getChoiceRegion(regions[i], i)
-                cardJuiceService.drawUnselected(t1, choiceR, i, function(r)
-                    return self:_drawChoice(pair, r, i)
-                end)
-            end
-        end
-
-        local pair = self.choices[selectedIndex]
-        local choiceR = getChoiceRegion(regions[selectedIndex], selectedIndex)
-        cardJuiceService.drawSelected(t1, choiceR, selectedIndex, function(r)
-            return self:_drawChoice(pair, r, selectedIndex)
-        end)
-    else
+    if not self.cj:hasAnimationBegun() then
         for i, pair in ipairs(self.choices) do
             ---@diagnostic disable-next-line: cast-type-mismatch
             ---@cast pair {mana:string,blessing:string}
             local choiceR = getChoiceRegion(regions[i], i)
             if self:_drawChoice(pair, choiceR, i) then
                 g.playUISound("ui_click_basic", 1.4, 0.8)
-                self.selected = {i, t}
+                self.selected = i
+
+                -- Spawn cards
+                for j, otherPair in ipairs(self.choices) do
+                    ---@diagnostic disable-next-line: cast-type-mismatch
+                    ---@cast otherPair {mana:string,blessing:string}
+                    local otherChoiceR = getChoiceRegion(regions[j], j)
+                    if i ~= j then
+                        self.cj:spawnCardUnselected(otherChoiceR, j, function(r)
+                            return self:_drawChoice(otherPair, r, j)
+                        end)
+                    end
+                end
+                self.cj:spawnCardSelected(choiceR, i, function(r)
+                    return self:_drawChoice(pair, r, i)
+                end)
             end
         end
     end
 
-    if self.selected and (t - self.selected[2]) >= ChoicePanelCommon.SELECT_ANIM_DURATION then
-        local pair = self.choices[self.selected[1]]
+    if self.cj:draw() then
+        local pair = self.choices[self.selected]
         g.addBlessing(pair.blessing)
         g.addPermanentMana(pair.mana)
         return true
