@@ -104,14 +104,14 @@ function ManaBlessingChoicePanel:draw()
         local scale = 0.5 + 0.5 * t
         local rr = regions[i]
         rr = rr:padRatio(0.15):shrinkToAspectRatio(1,1)
-        local targetCx = rr.x + rr.w / 2
+        local targetCx = rr.x + rr.w / 2 + ox
         local targetCy = rr.y + rr.h / 2
         local animCx = cx + (targetCx - cx) * t
         local animCy = cy + (targetCy - cy) * t
-        local dx = animCx - targetCx
+        local dx = animCx - (rr.x + rr.w / 2)
         local dy = animCy - targetCy
         rr = rr:padRatio(1 - scale)
-        regions[i] = rr:moveUnit(dx + ox, dy)
+        regions[i] = rr:moveUnit(dx, dy)
     end
 
     lg.setColor(1, 1, 1, 0.8)
