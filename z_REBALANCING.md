@@ -69,15 +69,15 @@ ON-SPAWN EFFECTS:
 
 ## REFACTORED/REUSED CONTENT:
 BLUE SQUADS:
-- Divers x 3: Start of battle: Give a random `fishfolk` unit +4 damage
-- Monks x 4: Deals bonus damage equal to MAGK. (Monk starts with 1 magic, and has high ASPD)
-- War Elephants x 2: When hit, 10% chance to freeze the attacker
-- The Immortal Eye: Every second, apply 1 poison to ALL frozen enemies
-- Anima Incubator: BUILDING: Spawns anima-units.
+- [x] Divers x 3: Start of battle: Give a random `fishfolk` unit +4 damage
+- [x] Monks x 4: Deals bonus damage equal to MAGK. (Monk starts with 1 MAGK, and has high ASPD)
+- [x] Ice Elephants x 2: When hit, 10% chance to freeze the attacker
+- [x] The Immortal Eye: Every second, apply 1 poison to ALL frozen enemies
+- [x] Anima Incubator: BUILDING: Spawns anima-units.
 RED SQUADS:
-- Brewers x 2: on-death, double the ASPD of 2 random allies
-- Dagger Bearers x 4: Has triple damage for the first 10 seconds of the fight
-- His Manifestation: When an ally dies, gains +1 ATK
+- [x] Brewers x 2: on-death, double the ASPD of 2 random allies
+- [x] Dagger Bearers x 4: Has triple damage for the first 10 seconds of the fight
+- [x] His Manifestation: When an ally dies, gains +1 ATK
 
 
 ## ADDITIONAL CONTENT: (Don't have art yet, use g.lua)

@@ -376,6 +376,25 @@ function g.iteratePartition(partitionId, x, y, fn, range)
     ecs:iteratePartition(partitionId, x, y, fn, range)
 end
 
+
+--- List is cached, so this function is efficient to call, is O(1).
+--- doesn't rebuild list each time.
+---@return ecs.Entity[]
+function g.getAllyList()
+    local ecs = g.getECS()
+    return ecs:getAllyList()
+end
+
+--- List is cached, so this function is efficient to call, is O(1).
+--- doesn't rebuild list each time.
+---@return ecs.Entity[]
+function g.getEnemyList(fn)
+    local ecs = g.getECS()
+    return ecs:getEnemyList()
+end
+
+
+
 ---@param x number
 ---@param y number
 ---@param damage number

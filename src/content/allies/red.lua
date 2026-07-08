@@ -117,8 +117,8 @@ g.defineSquad("blade_thrower_squad", {
 g.defineSquad("brewer_squad", {
     name = "Brewers",
     rarity = g.RARITIES.COMMON,
-    -- tags: buffing, attack_speed
-    tags = {"buffing", "attack_speed"},
+    -- tags: buffing, attack_speed, death_trigger
+    tags = {"buffing", "attack_speed", "death_trigger"},
     entityDef = {
         image = "brewer",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -135,25 +135,24 @@ g.defineSquad("brewer_squad", {
         baseMoveSpeed = 55,
         baseMaxHealth = 5,
     },
-    unitCount = 8,
+    unitCount = 2,
     icon = "brewer_uniticon",
     perks = {{
-        name = "Bolstering Brew",
-        description = g.loc2("On-spawn, 2 nearby allies gain double (ASPD) for 10 seconds."),
+        name = "Last Brew",
+        description = g.loc2("On-death, double the (ASPD) of 2 random allies."),
         image = "coin_icon",
         handlers = {
-            entitySpawned = function(ent)
+            entityDeath = function(ent)
                 local buffed = 0
                 g.iteratePartition("ally", ent.x, ent.y, function(other)
                     if buffed >= 2 then return end
                     if other == ent then return end
                     if not g.isAlive(other) then return end
                     g.addCustomEffect(other, {
-                        getAttackSpeedMultiplier = function(e) return 1.5 end,
-                        getAttackDamageModifier = function(e) return 1 end,
-                    }, 10)
+                        getAttackSpeedMultiplier = function(e) return 2 end,
+                    }, 9999)
                     buffed = buffed + 1
-                end, 120)
+                end, 9999)
             end,
         },
     }},
@@ -293,25 +292,15 @@ g.defineSquad("dagger_bearer_squad", {
         baseMaxHealth = 12,
     },
     unitCount = 4,
-    squadOrder = 50,
     perks = {{
-        name = "Ritual Sacrifice",
-        description = g.loc2("On-spawn, kills a nearby ally to gain +4 (ATK) for the fight."),
+        name = "Frenzied Start",
+        description = g.loc2("Has triple (ATK) for the first 10 seconds of the fight."),
         image = "coin_icon",
         handlers = {
-            entitySpawned = function(ent)
-                local victim = nil
-                g.iteratePartition("ally", ent.x, ent.y, function(other)
-                    if other == ent then return end
-                    if not g.isAlive(other) then return end
-                    if other.isCommander then return end
-                    if (not victim) or (other.health < victim.health) then
-                        victim = other
-                    end
-                end, 120)
-                if victim then
-                    g.killEntity(victim, ent)
-                    g.buffEntity(ent, "attackDamage", 4)
+            getAttackDamageMultiplier = function(ent)
+                local ecs = g.tryGetECS()
+                if ecs and ecs.secondCount < 10 then
+                    return 3
                 end
             end,
         },
@@ -415,16 +404,15 @@ g.defineSquad("his_manifestation_squad", {
     statUpgradeScaling = {attackDamage = 0.1},
     unitCount = 1,
     perks = {{
-        name = "Ritual",
-        description = g.loc2("On-spawn, gains +1 (ATK) per 2 allies that have died this combat."),
+        name = "Feed on Death",
+        description = g.loc2("When an ally dies, gains +1 (ATK)."),
         image = "coin_icon",
-        handlers = {
-            entitySpawned = function(ent)
-                local ecs = g.getECS()
-                local amount = math.floor(ecs.allyDeathsThisBattle / 2)
-                if amount > 0 then
-                    g.buffEntity(ent, "attackDamage", amount)
-                end
+        rawHandlers = {
+            entityDeath = function(self, ent)
+                if ent == self then return end
+                if ent.team ~= "ally" then return end
+                if not g.isAlive(self) then return end
+                g.buffEntity(self, "attackDamage", 1)
             end,
         },
     }},
