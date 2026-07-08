@@ -130,8 +130,8 @@ defEnemy("charredsoul", {
     attack = {
         attackType = "melee",
     },
-    baseAttackDamage = 2,
-    baseAttackSpeed = 0.5,
+    baseAttackDamage = 1,
+    baseAttackSpeed = 0.8,
     baseAttackRange = 80,
     baseMoveSpeed = 50,
     baseMaxHealth = 6,
