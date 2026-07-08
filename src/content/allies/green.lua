@@ -147,8 +147,8 @@ g.defineSquad("hog_squad", {
 g.defineSquad("giant_toad_squad", {
     name = "Giant Toads",
     rarity = g.RARITIES.UNCOMMON,
-    -- tags: health (beefy melee)
-    tags = {"health"},
+    -- tags: health, poison (beefy melee)
+    tags = {"health", "poison"},
     entityDef = {
         image = "gianttoad",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -162,6 +162,50 @@ g.defineSquad("giant_toad_squad", {
         baseMaxHealth = 20,
     },
     unitCount = 4,
+    perks = {{
+        name = "Thick Skin",
+        description = loc("Takes 60% less damage from poisoned enemies."),
+        image = "coin_icon",
+        handlers = {
+            getDamageTakenMultiplier = function(ent, attacker)
+                if attacker and (attacker.poisonAmount or 0) > 0 then
+                    return 0.4
+                end
+            end,
+        },
+    }},
+    cost = {green = 1},
+})
+
+
+g.defineSquad("mini_toad_squad", {
+    name = "Mini Toads",
+    rarity = g.RARITIES.UNCOMMON,
+    -- tags: poison
+    tags = {"poison"},
+    entityDef = {
+        image = "minitoad",
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "melee",
+        },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 1,
+        baseAttackRange = 18,
+        baseMoveSpeed = 55,
+        baseMaxHealth = 7,
+    },
+    unitCount = 6,
+    perks = {{
+        name = "Toxic Skin",
+        description = loc("Apply 1 poison on hit."),
+        image = "coin_icon",
+        handlers = {
+            onHitDamage = function(ent, damage, target)
+                g.applyPoison(target, 1, ent)
+            end,
+        },
+    }},
     cost = {green = 1},
 })
 

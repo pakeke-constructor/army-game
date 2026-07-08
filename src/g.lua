@@ -2045,7 +2045,12 @@ function g.defineEntity(id, def)
         assert(def.physics.isStatic, "Buildings must have static physics")
     end
     def.type = id
+
     def.image = def.image or id
+    if def.image and (not g.isImage(def.image)) then
+        def.image = g.leo(def.image)
+    end
+
     for k, v in pairs(Entity) do
         def[k] = v
     end
