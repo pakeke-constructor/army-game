@@ -10,7 +10,7 @@ function UpgradeSquadChoicePanel:init()
     ---@type number[]
     self.choiceCreatedAt = {}
     self.createdAt = love.timer.getTime()
-    ---@type [string,number]|nil
+    ---@type [integer,number]|nil
     self.selected = nil
 
     for _ = 1, ChoicePanelCommon.NUM_CHOICES do
@@ -59,7 +59,7 @@ function UpgradeSquadChoicePanel:_drawCards(regions)
                 return ui.drawSquadCard(squadId, r, i, true, true)
             end
 
-            if self.selected[1] == squadId then
+            if self.selected[1] == i then
                 -- Copied from stat choice panel
                 local r = ui.getFullScreenRegion()
                 local _, cardAreaBaseR = r:padRatio(0.05, 0.1):splitVertical(1, 5)
@@ -73,15 +73,16 @@ function UpgradeSquadChoicePanel:_drawCards(regions)
 
             if clicked then
                 -- Delayed select
-                self.selected = {squadId, t}
+                self.selected = {i, t}
             end
         end
     end
 
     if self.selected and (t - self.selected[2]) >= ChoicePanelCommon.SELECT_ANIM_DURATION then
         -- Actually apply
-        g.addOrUpgradeSquad(self.selected[1])
-        statUpgradePopupService.set(self.selected[1])
+        local squadId = self.choices[self.selected[1]]
+        g.addOrUpgradeSquad(squadId)
+        statUpgradePopupService.set(squadId)
         return true
     end
 

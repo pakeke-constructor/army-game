@@ -1,4 +1,5 @@
 local Picker = require("src.modules.Picker")
+local cardJuiceService = require("src.cardJuiceService")
 
 local ChoicePanelCommon = require(".common")
 
@@ -13,6 +14,8 @@ function BlessingChoicePanel:init(rarityWeights)
     self.choiceCreatedAt = {}
     self.rarityWeights = rarityWeights or consts.DEFAULT_RARITY_WEIGHTS
     self.createdAt = love.timer.getTime()
+    ---@type [integer,number]|nil
+    self.selected = nil
 
     for _ = 1, ChoicePanelCommon.NUM_CHOICES do
         self.choiceCreatedAt[#self.choiceCreatedAt+1] = self.createdAt
@@ -61,6 +64,34 @@ function BlessingChoicePanel:_pickFromPool(pool, out, count)
     end
 end
 
+---@param regions kirigami.Region[]
+function BlessingChoicePanel:_drawCards(regions)
+    for i, blessId in ipairs(self.choices) do
+        if self.selected then
+            local t1 = (love.timer.getTime() - self.selected[2]) / ChoicePanelCommon.SELECT_ANIM_DURATION
+            local func = self.selected[1] == i and cardJuiceService.drawSelected or cardJuiceService.drawUnselected
+            func(t1, regions[i], i, function(r)
+                return ui.drawBlessingCard(blessId, r, i)
+            end)
+        else
+            local clicked = ui.drawBlessingCard(blessId, regions[i], i)
+            if clicked then
+                -- Delayed select
+                self.selected = {i, love.timer.getTime()}
+            end
+        end
+    end
+
+    if self.selected and (love.timer.getTime() - self.selected[2]) >= ChoicePanelCommon.SELECT_ANIM_DURATION then
+        -- Actually apply
+        local blessId = self.choices[self.selected[1]]
+        g.addBlessing(blessId)
+        return true
+    end
+
+    return false
+end
+
 function BlessingChoicePanel:draw()
     local r = ui.getFullScreenRegion()
     local cardArea = r
@@ -95,15 +126,7 @@ function BlessingChoicePanel:draw()
         regions[i] = rr:moveUnit(dx + ox, dy)
     end
 
-    for i, blessId in ipairs(self.choices) do
-        local clicked = ui.drawBlessingCard(blessId, regions[i], i)
-        if clicked then
-            g.addBlessing(blessId)
-            return true
-        end
-    end
-
-    return false
+    return self:_drawCards(regions)
 end
 
 return BlessingChoicePanel
