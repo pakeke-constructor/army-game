@@ -54,8 +54,8 @@ end)
 
 -- Hound rush (fast, fragile swarm)
 encounters.defineEnemyEncounter(1, function(es,ecs)
-    es:add("hellhound", 3)
     es:add("hellhound", 4)
+    es:add("hellhound", 5)
     es:add("hellhound", 5)
     es:add("hellhound", 5)
     ecs:setBounds(300, 200, DEFAULT_BOUNDS[1], DEFAULT_BOUNDS[2])
@@ -113,26 +113,39 @@ end)
 
 
 
--- GIANTS
+--
 encounters.defineEnemyEncounter(3, function(es,ecs)
-    es:add("direhound", 6)
+    es:add("hellbrute", 5)
+    ecs:setBounds(300, 200, 1600, 1000)
+end)
+
+
+
+
+
+
+
+
+-- GIANTS
+encounters.defineEnemyEncounter(5, function(es,ecs)
+    es:add("direhound", 2)
+    es:add("hellbrute", 2)
     es:add("crimsongoliath", 3)
     ecs:setBounds(300, 200, 1000,700)
 end)
 
--- Snipers walled by shields
-encounters.defineEnemyEncounter(3, function(es,ecs)
+-- Snipers walled by shields and brutes
+encounters.defineEnemyEncounter(7, function(es,ecs)
     es:add("greatbowdemon", 3)
     es:add("greatbowdemon", 3)
     es:add("shielddemon", 10)
     es:add("shielddemon", 10)
-    es:add("demon", 8)
-    es:add("demon", 8)
+    es:add("hellbrute", 2)
     ecs:setBounds(300, 200, DEFAULT_BOUNDS[1], DEFAULT_BOUNDS[2])
 end)
 
 -- Charred horde (ramps up over time)
-encounters.defineEnemyEncounter(3, function(es,ecs)
+encounters.defineEnemyEncounter(7, function(es,ecs)
     es:add("charredsoul", 12)
     es:add("charredsoul", 13)
     es:add("demon", 8)
@@ -142,7 +155,7 @@ encounters.defineEnemyEncounter(3, function(es,ecs)
 end)
 
 -- Reaper guard behind a spear and direhound wall
-encounters.defineEnemyEncounter(3, function(es,ecs)
+encounters.defineEnemyEncounter(6, function(es,ecs)
     es:add("reaper", 3)
     es:add("reaper", 2)
     es:add("direhound", 2)
@@ -160,7 +173,7 @@ end)
 
 
 -- FUCKING HUGE ARMY
-encounters.defineEnemyEncounter(4, function(es,ecs)
+encounters.defineEnemyEncounter(6, function(es,ecs)
     es:add("archerdemon", 12)
     es:add("archerdemon", 13)
     es:add("demon", 12)
@@ -171,7 +184,7 @@ encounters.defineEnemyEncounter(4, function(es,ecs)
 end)
 
 -- Goliath with an escort
-encounters.defineEnemyEncounter(4, function(es,ecs)
+encounters.defineEnemyEncounter(6, function(es,ecs)
     es:add("crimsongoliath", 1)
     es:add("demon", 12)
     es:add("demon", 13)
@@ -181,7 +194,7 @@ encounters.defineEnemyEncounter(4, function(es,ecs)
 end)
 
 -- Bomber barrage with direhound vanguard
-encounters.defineEnemyEncounter(4, function(es,ecs)
+encounters.defineEnemyEncounter(7, function(es,ecs)
     es:add("blazingbombardier", 7)
     es:add("blazingbombardier", 8)
     es:add("brimstonecore", 7)
@@ -199,5 +212,14 @@ encounters.defineEnemyEncounter(4, function(es,ecs)
     es:add("charredsoul", 10)
     es:add("hellhound", 9)
     es:add("hellhound", 9)
+    ecs:setBounds(300, 200, 1600, 1000)
+end)
+
+
+
+
+-- JUST FOR TESTING
+encounters.defineEnemyEncounter(9, function(es,ecs)
+    es:add("hellbrute", 5)
     ecs:setBounds(300, 200, 1600, 1000)
 end)

@@ -30,7 +30,7 @@ g.defineCommander("sir_horse", "Sir Horse", {
                 attackType = "melee",
             },
             baseAttackDamage = 6,
-            baseAttackSpeed = 1.4,
+            baseAttackSpeed = 2,
             baseAttackRange = 85,
             baseMoveSpeed = 120,
             baseMaxHealth = 120,
@@ -231,11 +231,11 @@ g.defineCommander("octopuscommander", "Octopus Tank", {
                 projectileType = "octopus_lazer",
                 projectileSpeed = 800,
             },
-            baseAttackDamage = 5,
-            baseAttackSpeed = 1.2,
+            baseAttackDamage = 3,
+            baseAttackSpeed = 2,
             baseAttackRange = 800, -- unlimited range basically
             baseMoveSpeed = 35, -- but very slow
-            baseMaxHealth = 250,
+            baseMaxHealth = 200,
         }
     },
 

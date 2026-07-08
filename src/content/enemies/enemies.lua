@@ -160,6 +160,7 @@ defEnemy("crimsongoliath", {
     },
     attack = {
         attackType = "melee",
+        aoeRadius = 30
     },
     baseAttackDamage = 6,
     baseAttackSpeed = 0.5,
@@ -250,22 +251,26 @@ defEnemy("hellbat", {
 defEnemy("hellbrute", {
     image = "hellbrute",
     shadow = {},
-    physics = { shape = "circle", radius = 10, ox = 0, oy = 0, mass = 1 },
+    physics = { shape = "circle", radius = 10, ox = 0, oy = 0, mass = 2 },
     ai = {
         target = "enemy",
     },
     weapon = {
-        type = "object",
-        image = "hellbrute_mace"
+        type = "hammer",
+        image = "hellbrute_mace",
+        xOffset = -3,
+        swordStrikeTime=0.4,
+        smashShake = 1,
     },
     attack = {
         attackType = "melee",
+        aoeRadius = 20
     },
-    baseAttackDamage = 1,
-    baseAttackSpeed = 1.5,
+    baseAttackDamage = 5,
+    baseAttackSpeed = 0.3,
     baseAttackRange = 80,
-    baseMoveSpeed = 75,
-    baseMaxHealth = 1,
+    baseMoveSpeed = 50,
+    baseMaxHealth = 45
 })
 
 defEnemy("hellhound", {
