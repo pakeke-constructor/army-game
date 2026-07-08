@@ -2137,36 +2137,6 @@ end
 
 
 
----@param oldEnt ecs.Entity
----@param newEntType string
----@return ecs.Entity
-function g.transformEntity(oldEnt, newEntType)
-    local newEnt = g.spawnEntity(newEntType, oldEnt.x, oldEnt.y)
-
-    if oldEnt.scope then
-        newEnt.scope = oldEnt.scope
-    end
-    if oldEnt.squad then
-        newEnt.squad = oldEnt.squad
-    end
-
-    if oldEnt.buffs then
-        newEnt.buffs = {}
-        for stat, amount in pairs(oldEnt.buffs) do
-            newEnt.buffs[stat] = amount
-        end
-    end
-
-    newEnt.burnTime = oldEnt.burnTime
-    newEnt.poisonAmount = oldEnt.poisonAmount
-    newEnt.frozenTime = oldEnt.frozenTime
-
-    g.call("entityTransformed", oldEnt, newEnt)
-    oldEnt:getWorld():removeEntity(oldEnt)
-
-    return newEnt
-end
-
 function g.isAlive(ent)
     -- todo: check if inside ECS too
     return not ent.___removed

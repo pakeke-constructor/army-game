@@ -89,12 +89,13 @@ SPELLS:
 [x] Harrier: Give +70% range to all ranged units
 
 SQUADS:
-[ ] Possessor: on death: transforms into a Peasant  (synergizes w/ transform)
+[ ] Possessor: Healer, slow moving, tanky health. Every 3 seconds: Spawn an infested human. (infested entity)
 [ ] Dart spitters x 4: Ranged, Apply 1 poison on hit
-[ ] Giant toads x 2: Tanky, Takes 50% less damage from poisoned enemies
-[ ] Mini toads x 4: Apply 1 poison on hit
+[x] Giant toads x 2: Tanky, Takes 50% less damage from poisoned enemies
+[x] Mini toads x 4: Apply 1 poison on hit
 [ ] Fire golems x 2: When hit, apply 1 burn to the attacker
 [ ] Fire archers x 4: Ranged, Apply 2 burn on hit
+[ ] Hunter x 1: Medium Range, (Crossbow,) Very fast fire-rate, good damage. (use crossbow as weapon, under `bow` weapon type)
 [ ] Inferno beast: Hits deal AOE damage, setting enemies ablaze (+1 burn)
 [ ] Lightning-wizard: Emit lightning on attack, dealing damage equal to MAGK
 [ ] Mini ice golems: When killed, freeze all enemies in a radius
@@ -140,7 +141,7 @@ Blue units are fish-folk: (has `fishfolk` trait)
 (ie guys with fish-heads maybe? This could be super cool. I'm envisioning it working well with the octopus guy. I'll send a picture below to explain further what I mean)
 - Shield-fish  (tank)
 - Spear-fish (melee dmg, higher range)
-- Arrow-fish ()
+- Arrow-fish (ranged unit)
 
 Yellow units are robots: (has `bot` trait)
 - Protect-bot (tanky)

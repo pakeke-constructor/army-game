@@ -597,12 +597,13 @@ g.defineBlessing("trickster", "Trickster", {
     startingData = false,        -- have we triggered this combat?
     resetDataOnBattleStart = true,
     handlers = {
-        entityTransformed = function(oldEnt, newEnt)
-            if oldEnt.team ~= "ally" then return end
-            if g.getBlessingData("trickster") then return end
-            g.setBlessingData("trickster", true)
-            g.addMana("blue", 2)
-        end,
+        --[[
+            
+            TODO: SUPER IMPORTANT:
+            the transform system has been removed,
+            and this needs refactoring!
+            
+        ]]
     },
 })
 
@@ -800,10 +801,13 @@ g.defineBlessing("evolution", "Evolution", {
     tags = {"transform", "health", "buffing", "scaling"},
     mana = "blue",
     handlers = {
-        entityTransformed = function(oldEnt, newEnt)
-            if newEnt.team ~= "ally" then return end
-            g.buffEntity(newEnt, "maxHealth", 5)
-        end,
+        --[[
+        
+        TODO: SUPER IMPORTANT:
+        the transform system has been removed,
+        and this blessing needs refactoring!
+        
+        ]]
     },
 })
 
