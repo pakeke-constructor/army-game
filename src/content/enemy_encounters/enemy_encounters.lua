@@ -18,7 +18,7 @@ encounters.defineEnemyEncounter(1, function(es,ecs)
     es:add("demon", 4)
     es:add("demon", 4)
     es:add("demon", 4)
-    es:add("demon", 4)
+    es:add("demon", 3)
     ecs:setBounds(300, 200, DEFAULT_BOUNDS[1], DEFAULT_BOUNDS[2])
 end)
 
@@ -34,10 +34,10 @@ end)
 
 -- Spear wall
 encounters.defineEnemyEncounter(1, function(es,ecs)
-    es:add("speardemon", 2)
+    es:add("speardemon", 4)
     es:add("speardemon", 3)
-    es:add("speardemon", 2)
-    es:add("demon", 2)
+    es:add("speardemon", 4)
+    es:add("demon", 1)
     es:add("demon", 2)
     ecs:setBounds(300, 200, DEFAULT_BOUNDS[1], DEFAULT_BOUNDS[2])
 end)
@@ -54,10 +54,10 @@ end)
 
 -- Hound rush (fast, fragile swarm)
 encounters.defineEnemyEncounter(1, function(es,ecs)
+    es:add("hellhound", 3)
     es:add("hellhound", 4)
-    es:add("hellhound", 4)
-    es:add("hellhound", 4)
-    es:add("hellhound", 4)
+    es:add("hellhound", 5)
+    es:add("hellhound", 5)
     ecs:setBounds(300, 200, DEFAULT_BOUNDS[1], DEFAULT_BOUNDS[2])
 end)
 
@@ -68,14 +68,14 @@ end)
 
 
 
--- Front to back
+-- Small legion
 encounters.defineEnemyEncounter(2, function(es,ecs)
-    es:add("archerdemon", 5)
-    es:add("archerdemon", 5)
-    es:add("archerdemon", 5)
-    es:add("demon", 5)
-    es:add("demon", 5)
-    es:add("demon", 5)
+    es:add("archerdemon", 4)
+    es:add("archerdemon", 4)
+    es:add("greatbowdemon", 1)
+    es:add("demon", 3)
+    es:add("demon", 3)
+    es:add("shielddemon", 6)
     ecs:setBounds(300, 200, 1000,700)
 end)
 
@@ -88,20 +88,18 @@ encounters.defineEnemyEncounter(2, function(es,ecs)
     ecs:setBounds(300, 200, 1000,700)
 end)
 
--- Spear company with archers
+-- Archer + damage soak
 encounters.defineEnemyEncounter(2, function(es,ecs)
-    es:add("speardemon", 4)
-    es:add("speardemon", 4)
-    es:add("speardemon", 4)
-    es:add("archerdemon", 6)
-    es:add("archerdemon", 6)
+    es:add("crimsongoliath", 1)
+    es:add("archerdemon", 8)
+    es:add("archerdemon", 8)
     ecs:setBounds(300, 200, 1000,700)
 end)
 
 -- Hound pack led by direhounds
 encounters.defineEnemyEncounter(2, function(es,ecs)
     es:add("direhound", 3)
-    es:add("direhound", 2)
+    es:add("direhound", 1)
     es:add("hellhound", 4)
     es:add("hellhound", 3)
     es:add("hellhound", 3)
@@ -115,13 +113,10 @@ end)
 
 
 
--- MELEE PIT
+-- GIANTS
 encounters.defineEnemyEncounter(3, function(es,ecs)
-    es:add("demon", 11)
-    es:add("demon", 11)
-    es:add("demon", 11)
-    es:add("demon", 11)
-    es:add("demon", 11)
+    es:add("direhound", 6)
+    es:add("crimsongoliath", 3)
     ecs:setBounds(300, 200, 1000,700)
 end)
 
@@ -146,15 +141,15 @@ encounters.defineEnemyEncounter(3, function(es,ecs)
     ecs:setBounds(300, 200, DEFAULT_BOUNDS[1], DEFAULT_BOUNDS[2])
 end)
 
--- Reaper guard behind a spear wall
+-- Reaper guard behind a spear and direhound wall
 encounters.defineEnemyEncounter(3, function(es,ecs)
     es:add("reaper", 3)
     es:add("reaper", 2)
-    es:add("speardemon", 7)
-    es:add("speardemon", 7)
-    es:add("speardemon", 7)
-    es:add("archerdemon", 6)
-    es:add("archerdemon", 6)
+    es:add("direhound", 2)
+    es:add("speardemon", 4)
+    es:add("speardemon", 5)
+    es:add("archerdemon", 7)
+    es:add("archerdemon", 8)
     ecs:setBounds(300, 200, DEFAULT_BOUNDS[1], DEFAULT_BOUNDS[2])
 end)
 

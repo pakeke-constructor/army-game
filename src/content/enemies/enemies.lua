@@ -192,11 +192,11 @@ defEnemy("direhound", {
     attack = {
         attackType = "melee",
     },
-    baseAttackDamage = 3,
+    baseAttackDamage = 2,
     baseAttackSpeed = 1.5,
     baseAttackRange = 80,
     baseMoveSpeed = 60,
-    baseMaxHealth = 35,
+    baseMaxHealth = 30,
 })
 
 defEnemy("greatbowdemon", { -- Hellfire Greatbowmen
@@ -283,9 +283,9 @@ defEnemy("hellhound", {
         attackType = "melee",
     },
     baseAttackDamage = 1,
-    baseAttackSpeed = 1.5,
+    baseAttackSpeed = 2,
     baseAttackRange = 80,
-    baseMoveSpeed = 100,
+    baseMoveSpeed = 150,
     baseMaxHealth = 3,
 })
 
