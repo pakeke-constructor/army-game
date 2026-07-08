@@ -4,6 +4,7 @@ local ChoicePanelCommon = objects.Class("g:ChoicePanelCommon")
 
 ChoicePanelCommon.NUM_CHOICES = 3
 ChoicePanelCommon.FAN_OUT_DURATION = 0.11
+ChoicePanelCommon.SELECT_ANIM_DURATION = 0.5
 
 ---@return boolean
 function ChoicePanelCommon:draw()

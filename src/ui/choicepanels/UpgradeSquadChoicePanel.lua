@@ -1,4 +1,5 @@
 local ChoicePanelCommon = require(".common")
+local cardJuiceService = require("src.cardJuiceService")
 
 ---@class g.UpgradeSquadChoicePanel: g.ChoicePanelCommon
 local UpgradeSquadChoicePanel = objects.Class("g:UpgradeSquadChoicePanel"):implement(ChoicePanelCommon)
@@ -9,6 +10,8 @@ function UpgradeSquadChoicePanel:init()
     ---@type number[]
     self.choiceCreatedAt = {}
     self.createdAt = love.timer.getTime()
+    ---@type [string,number]|nil
+    self.selected = nil
 
     for _ = 1, ChoicePanelCommon.NUM_CHOICES do
         self.choiceCreatedAt[#self.choiceCreatedAt+1] = self.createdAt
@@ -43,9 +46,50 @@ function UpgradeSquadChoicePanel:_rollChoices()
     end
 end
 
+---@param regions kirigami.Region[]
+---@return boolean
+function UpgradeSquadChoicePanel:_drawCards(regions)
+    local t = love.timer.getTime()
+    for i, squadId in ipairs(self.choices) do
+        local cardR = regions[i]:splitVertical(8, 1, 1)
+
+        if self.selected then
+            local t1 = (t - self.selected[2]) / ChoicePanelCommon.SELECT_ANIM_DURATION
+            local function draw(r)
+                return ui.drawSquadCard(squadId, r, i, true, true)
+            end
+
+            if self.selected[1] == squadId then
+                -- Copied from stat choice panel
+                local r = ui.getFullScreenRegion()
+                local _, cardAreaBaseR = r:padRatio(0.05, 0.1):splitVertical(1, 5)
+                local _, squadCardR = cardAreaBaseR:splitHorizontal(5, 2)
+                cardJuiceService.drawSelected(t1, cardR, i, draw, squadCardR)
+            else
+                cardJuiceService.drawUnselected(t1, cardR, i, draw)
+            end
+        else
+            local clicked = ui.drawSquadCard(squadId, cardR, i, true, true)
+
+            if clicked then
+                -- Delayed select
+                self.selected = {squadId, t}
+            end
+        end
+    end
+
+    if self.selected and (t - self.selected[2]) >= ChoicePanelCommon.SELECT_ANIM_DURATION then
+        -- Actually apply
+        g.addOrUpgradeSquad(self.selected[1])
+        statUpgradePopupService.set(self.selected[1])
+        return true
+    end
+
+    return false
+end
+
 function UpgradeSquadChoicePanel:draw()
     local r = ui.getFullScreenRegion()
-    local cardArea = r
 
     if #self.choices == 0 then
         -- RIP in Pepperoni but safety handler must be done
@@ -53,10 +97,10 @@ function UpgradeSquadChoicePanel:draw()
     end
 
     iml.panel(r:get())
-    cardArea = cardArea:padRatio(0.05, 0.1)
-    local regions = cardArea:grid(ChoicePanelCommon.NUM_CHOICES, 1)
-    local cx = cardArea.x + cardArea.w / 2
-    local cy = cardArea.y + cardArea.h / 2
+    r = r:padRatio(0.05, 0.1)
+    local regions = r:grid(ChoicePanelCommon.NUM_CHOICES, 1)
+    local cx = r.x + r.w / 2
+    local cy = r.y + r.h / 2
 
     local ox = regions[1].w * (ChoicePanelCommon.NUM_CHOICES - #self.choices) / 2
     for i = 1, #self.choices do
@@ -77,18 +121,7 @@ function UpgradeSquadChoicePanel:draw()
         regions[i] = rr:moveUnit(dx + ox, dy)
     end
 
-    for i, squadId in ipairs(self.choices) do
-        local cardR = regions[i]:splitVertical(8, 1, 1)
-        local clicked = ui.drawSquadCard(squadId, cardR, i, true, true)
-
-        if clicked then
-            g.addOrUpgradeSquad(squadId)
-            statUpgradePopupService.set(squadId)
-            return true
-        end
-    end
-
-    return false
+    return self:_drawCards(regions)
 end
 
 return UpgradeSquadChoicePanel

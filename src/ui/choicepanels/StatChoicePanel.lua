@@ -414,7 +414,7 @@ function StatChoicePanel:draw()
 
     local headerR, cardAreaBaseR = r:padRatio(0.05, 0.1):splitVertical(1, 5)
     local cardAreaR, squadCardR = cardAreaBaseR:splitHorizontal(5, 2)
-    local titleR, iconR = headerR:splitVertical(1, 1)
+    local titleR = headerR:splitVertical(1, 1)
 
     TITLE_FONT = TITLE_FONT or g.getBigFont(16)
     lg.setColor(1, 1, 1)
