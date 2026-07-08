@@ -426,12 +426,26 @@ local function _getSelectedTarget(cardR, cardAreaR)
     return Kirigami(cx - cardR.w / 2, cy - cardR.h / 2, cardR.w, cardR.h)
 end
 
----@param regions kirigami.Region[]
----@param cardAreaR kirigami.Region
----@param squadCardR kirigami.Region
----@return boolean
----@private
-function StatChoicePanel:_drawCards(regions, cardAreaR, squadCardR)
+function StatChoicePanel:draw()
+    local r = ui.getFullScreenRegion()
+
+    iml.panel(r:get())
+
+    local headerR, cardAreaBaseR = r:padRatio(0.05, 0.1):splitVertical(1, 5)
+    local cardAreaR, squadCardR = cardAreaBaseR:splitHorizontal(5, 2)
+    local titleR = headerR:splitVertical(1, 1)
+
+    TITLE_FONT = TITLE_FONT or g.getBigFont(16)
+    lg.setColor(1, 1, 1)
+    richtext.printRichContainedNoWrap("{o}{bob}" .. CHOOSE_SQUAD_UPGRADE, TITLE_FONT, titleR:padRatio(0.25):get())
+
+    local regions = self:_layoutCards(cardAreaR)
+
+    if #self.statChoices == 0 then
+        -- RIP in Pepperoni
+        return true
+    end
+
     if not self.cj:hasAnimationBegun() then
         for i, choice in ipairs(self.statChoices) do
             if self:_drawStatCard(choice, regions[i], i) then
@@ -455,9 +469,10 @@ function StatChoicePanel:_drawCards(regions, cardAreaR, squadCardR)
         end
     end
 
+    local cardJuiceFinished = self.cj:draw()
     ui.drawSquadCard(self.squadId, squadCardR, -999, false, true)
 
-    if self.cj:draw() then
+    if cardJuiceFinished then
         local choice = self.statChoices[self.selected]
         local squad = g.getSquadFromArmy(self.squadId)
         if squad then
@@ -471,29 +486,6 @@ function StatChoicePanel:_drawCards(regions, cardAreaR, squadCardR)
     end
 
     return false
-end
-
-function StatChoicePanel:draw()
-    local r = ui.getFullScreenRegion()
-
-    iml.panel(r:get())
-
-    local headerR, cardAreaBaseR = r:padRatio(0.05, 0.1):splitVertical(1, 5)
-    local cardAreaR, squadCardR = cardAreaBaseR:splitHorizontal(5, 2)
-    local titleR = headerR:splitVertical(1, 1)
-
-    TITLE_FONT = TITLE_FONT or g.getBigFont(16)
-    lg.setColor(1, 1, 1)
-    richtext.printRichContainedNoWrap("{o}{bob}" .. CHOOSE_SQUAD_UPGRADE, TITLE_FONT, titleR:padRatio(0.25):get())
-
-    local regions = self:_layoutCards(cardAreaR)
-
-    if #self.statChoices == 0 then
-        -- RIP in Pepperoni
-        return true
-    end
-
-    return self:_drawCards(regions, cardAreaR, squadCardR)
 end
 
 return StatChoicePanel

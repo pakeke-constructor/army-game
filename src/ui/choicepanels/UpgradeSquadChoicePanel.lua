@@ -47,10 +47,38 @@ function UpgradeSquadChoicePanel:_rollChoices()
     end
 end
 
----@param regions kirigami.Region[]
----@return boolean
-function UpgradeSquadChoicePanel:_drawCards(regions)
-    local t = love.timer.getTime()
+function UpgradeSquadChoicePanel:draw()
+    local r = ui.getFullScreenRegion()
+
+    if #self.choices == 0 then
+        -- RIP in Pepperoni but safety handler must be done
+        return true
+    end
+
+    iml.panel(r:get())
+    r = r:padRatio(0.05, 0.1)
+    local regions = r:grid(ChoicePanelCommon.NUM_CHOICES, 1)
+    local cx = r.x + r.w / 2
+    local cy = r.y + r.h / 2
+
+    local ox = regions[1].w * (ChoicePanelCommon.NUM_CHOICES - #self.choices) / 2
+    for i = 1, #self.choices do
+        local elapsed = love.timer.getTime() - (self.choiceCreatedAt[i] or self.createdAt)
+        local t = math.min(1, math.max(0, elapsed / ChoicePanelCommon.FAN_OUT_DURATION))
+        t = t * t * (3 - 2 * t)
+        local scale = 0.5 + 0.5 * t
+        local rr = regions[i]
+        rr = rr:padRatio(0.15)
+
+        local targetCx = rr.x + rr.w / 2 + ox
+        local targetCy = rr.y + rr.h / 2
+        local animCx = cx + (targetCx - cx) * t
+        local animCy = cy + (targetCy - cy) * t
+        local dx = animCx - (rr.x + rr.w / 2)
+        local dy = animCy - targetCy
+        rr = rr:padRatio(1 - scale)
+        regions[i] = rr:moveUnit(dx, dy)
+    end
 
     if not self.cj:hasAnimationBegun() then
         for i, squadId in ipairs(self.choices) do
@@ -93,42 +121,6 @@ function UpgradeSquadChoicePanel:_drawCards(regions)
     end
 
     return false
-end
-
-function UpgradeSquadChoicePanel:draw()
-    local r = ui.getFullScreenRegion()
-
-    if #self.choices == 0 then
-        -- RIP in Pepperoni but safety handler must be done
-        return true
-    end
-
-    iml.panel(r:get())
-    r = r:padRatio(0.05, 0.1)
-    local regions = r:grid(ChoicePanelCommon.NUM_CHOICES, 1)
-    local cx = r.x + r.w / 2
-    local cy = r.y + r.h / 2
-
-    local ox = regions[1].w * (ChoicePanelCommon.NUM_CHOICES - #self.choices) / 2
-    for i = 1, #self.choices do
-        local elapsed = love.timer.getTime() - (self.choiceCreatedAt[i] or self.createdAt)
-        local t = math.min(1, math.max(0, elapsed / ChoicePanelCommon.FAN_OUT_DURATION))
-        t = t * t * (3 - 2 * t)
-        local scale = 0.5 + 0.5 * t
-        local rr = regions[i]
-        rr = rr:padRatio(0.15)
-
-        local targetCx = rr.x + rr.w / 2 + ox
-        local targetCy = rr.y + rr.h / 2
-        local animCx = cx + (targetCx - cx) * t
-        local animCy = cy + (targetCy - cy) * t
-        local dx = animCx - (rr.x + rr.w / 2)
-        local dy = animCy - targetCy
-        rr = rr:padRatio(1 - scale)
-        regions[i] = rr:moveUnit(dx, dy)
-    end
-
-    return self:_drawCards(regions)
 end
 
 return UpgradeSquadChoicePanel

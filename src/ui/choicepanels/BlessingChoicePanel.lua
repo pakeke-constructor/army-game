@@ -65,40 +65,6 @@ function BlessingChoicePanel:_pickFromPool(pool, out, count)
     end
 end
 
----@param regions kirigami.Region[]
-function BlessingChoicePanel:_drawCards(regions)
-    if not self.cj:hasAnimationBegun() then
-        for i, blessId in ipairs(self.choices) do
-            local clicked = ui.drawBlessingCard(blessId, regions[i], i)
-            if clicked then
-                -- Delayed select
-                self.selected = i
-
-                -- Spawn cards
-                for j, otherBlessId in ipairs(self.choices) do
-                    if i ~= j then
-                        self.cj:spawnCardUnselected(regions[j], j, function(r)
-                            return ui.drawBlessingCard(otherBlessId, r, j)
-                        end)
-                    end
-                end
-                self.cj:spawnCardSelected(regions[i], i, function(r)
-                    return ui.drawBlessingCard(blessId, r, i)
-                end)
-            end
-        end
-    end
-
-    if self.cj:draw() then
-        -- Actually apply
-        local blessId = self.choices[self.selected]
-        g.addBlessing(blessId)
-        return true
-    end
-
-    return false
-end
-
 function BlessingChoicePanel:draw()
     local r = ui.getFullScreenRegion()
     local cardArea = r
@@ -133,7 +99,36 @@ function BlessingChoicePanel:draw()
         regions[i] = rr:moveUnit(dx + ox, dy)
     end
 
-    return self:_drawCards(regions)
+    if not self.cj:hasAnimationBegun() then
+        for i, blessId in ipairs(self.choices) do
+            local clicked = ui.drawBlessingCard(blessId, regions[i], i)
+            if clicked then
+                -- Delayed select
+                self.selected = i
+
+                -- Spawn cards
+                for j, otherBlessId in ipairs(self.choices) do
+                    if i ~= j then
+                        self.cj:spawnCardUnselected(regions[j], j, function(r)
+                            return ui.drawBlessingCard(otherBlessId, r, j)
+                        end)
+                    end
+                end
+                self.cj:spawnCardSelected(regions[i], i, function(r)
+                    return ui.drawBlessingCard(blessId, r, i)
+                end)
+            end
+        end
+    end
+
+    if self.cj:draw() then
+        -- Actually apply
+        local blessId = self.choices[self.selected]
+        g.addBlessing(blessId)
+        return true
+    end
+
+    return false
 end
 
 return BlessingChoicePanel

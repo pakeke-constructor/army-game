@@ -107,46 +107,6 @@ function ManaBlessingChoicePanel:_drawChoice(pair, reg, i)
     return clicked or clickedBlessing
 end
 
----@param regions kirigami.Region[]
----@return boolean
-function ManaBlessingChoicePanel:_drawChoices(regions)
-    if not self.cj:hasAnimationBegun() then
-        for i, pair in ipairs(self.choices) do
-            ---@diagnostic disable-next-line: cast-type-mismatch
-            ---@cast pair {mana:string,blessing:string}
-            local choiceR = getChoiceRegion(regions[i], i)
-            if self:_drawChoice(pair, choiceR, i) then
-                g.playUISound("ui_click_basic", 1.4, 0.8)
-                self.selected = i
-
-                -- Spawn cards
-                for j, otherPair in ipairs(self.choices) do
-                    ---@diagnostic disable-next-line: cast-type-mismatch
-                    ---@cast otherPair {mana:string,blessing:string}
-                    local otherChoiceR = getChoiceRegion(regions[j], j)
-                    if i ~= j then
-                        self.cj:spawnCardUnselected(otherChoiceR, j, function(r)
-                            return self:_drawChoice(otherPair, r, j)
-                        end)
-                    end
-                end
-                self.cj:spawnCardSelected(choiceR, i, function(r)
-                    return self:_drawChoice(pair, r, i)
-                end)
-            end
-        end
-    end
-
-    if self.cj:draw() then
-        local pair = self.choices[self.selected]
-        g.addBlessing(pair.blessing)
-        g.addPermanentMana(pair.mana)
-        return true
-    end
-
-    return false
-end
-
 function ManaBlessingChoicePanel:draw()
     local r = ui.getFullScreenRegion()
     local cardArea = r
@@ -204,7 +164,41 @@ function ManaBlessingChoicePanel:draw()
         lw:pop()
     end
 
-    return self:_drawChoices(regions)
+    if not self.cj:hasAnimationBegun() then
+        for i, pair in ipairs(self.choices) do
+            ---@diagnostic disable-next-line: cast-type-mismatch
+            ---@cast pair {mana:string,blessing:string}
+            local choiceR = getChoiceRegion(regions[i], i)
+            if self:_drawChoice(pair, choiceR, i) then
+                g.playUISound("ui_click_basic", 1.4, 0.8)
+                self.selected = i
+
+                -- Spawn cards
+                for j, otherPair in ipairs(self.choices) do
+                    ---@diagnostic disable-next-line: cast-type-mismatch
+                    ---@cast otherPair {mana:string,blessing:string}
+                    local otherChoiceR = getChoiceRegion(regions[j], j)
+                    if i ~= j then
+                        self.cj:spawnCardUnselected(otherChoiceR, j, function(r)
+                            return self:_drawChoice(otherPair, r, j)
+                        end)
+                    end
+                end
+                self.cj:spawnCardSelected(choiceR, i, function(r)
+                    return self:_drawChoice(pair, r, i)
+                end)
+            end
+        end
+    end
+
+    if self.cj:draw() then
+        local pair = self.choices[self.selected]
+        g.addBlessing(pair.blessing)
+        g.addPermanentMana(pair.mana)
+        return true
+    end
+
+    return false
 end
 
 return ManaBlessingChoicePanel

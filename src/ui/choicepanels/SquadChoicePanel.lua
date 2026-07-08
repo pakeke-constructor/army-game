@@ -140,9 +140,40 @@ local function drawRerollButton(region, index, disabled)
     return iml.wasJustClicked(x, y, w, h, 1, uid)
 end
 
----@param regions kirigami.Region[]
----@return boolean
-function SquadChoicePanel:_drawCards(regions)
+function SquadChoicePanel:draw()
+    local r = ui.getFullScreenRegion()
+    local cardArea = r
+
+    if #self.choices == 0 then
+        -- RIP in Pepperoni but safety handler must be done
+        return true
+    end
+
+    iml.panel(r:get())
+    cardArea = cardArea:padRatio(0.05, 0.1)
+    local regions = cardArea:grid(ChoicePanelCommon.NUM_CHOICES, 1)
+    local cx = cardArea.x + cardArea.w / 2
+    local cy = cardArea.y + cardArea.h / 2
+
+    local ox = regions[1].w * (ChoicePanelCommon.NUM_CHOICES - #self.choices) / 2
+    for i = 1, #self.choices do
+        local elapsed = love.timer.getTime() - (self.choiceCreatedAt[i] or self.createdAt)
+        local t = math.min(1, math.max(0, elapsed / ChoicePanelCommon.FAN_OUT_DURATION))
+        t = t * t * (3 - 2 * t)
+        local scale = 0.5 + 0.5 * t
+        local rr = regions[i]
+        rr = rr:padRatio(0.15)
+
+        local targetCx = rr.x + rr.w / 2
+        local targetCy = rr.y + rr.h / 2
+        local animCx = cx + (targetCx - cx) * t
+        local animCy = cy + (targetCy - cy) * t
+        local dx = animCx - targetCx
+        local dy = animCy - targetCy
+        rr = rr:padRatio(1 - scale)
+        regions[i] = rr:moveUnit(dx + ox, dy)
+    end
+
     if not self.cj:hasAnimationBegun() then
         for i, squadId in ipairs(self.choices) do
             local cardR, _, rerollR = regions[i]:splitVertical(8, 1, 1)
@@ -196,44 +227,6 @@ function SquadChoicePanel:_drawCards(regions)
     end
 
     return false
-end
-
-
-function SquadChoicePanel:draw()
-    local r = ui.getFullScreenRegion()
-    local cardArea = r
-
-    if #self.choices == 0 then
-        -- RIP in Pepperoni but safety handler must be done
-        return true
-    end
-
-    iml.panel(r:get())
-    cardArea = cardArea:padRatio(0.05, 0.1)
-    local regions = cardArea:grid(ChoicePanelCommon.NUM_CHOICES, 1)
-    local cx = cardArea.x + cardArea.w / 2
-    local cy = cardArea.y + cardArea.h / 2
-
-    local ox = regions[1].w * (ChoicePanelCommon.NUM_CHOICES - #self.choices) / 2
-    for i = 1, #self.choices do
-        local elapsed = love.timer.getTime() - (self.choiceCreatedAt[i] or self.createdAt)
-        local t = math.min(1, math.max(0, elapsed / ChoicePanelCommon.FAN_OUT_DURATION))
-        t = t * t * (3 - 2 * t)
-        local scale = 0.5 + 0.5 * t
-        local rr = regions[i]
-        rr = rr:padRatio(0.15)
-
-        local targetCx = rr.x + rr.w / 2
-        local targetCy = rr.y + rr.h / 2
-        local animCx = cx + (targetCx - cx) * t
-        local animCy = cy + (targetCy - cy) * t
-        local dx = animCx - targetCx
-        local dy = animCy - targetCy
-        rr = rr:padRatio(1 - scale)
-        regions[i] = rr:moveUnit(dx + ox, dy)
-    end
-
-    return self:_drawCards(regions)
 end
 
 return SquadChoicePanel
