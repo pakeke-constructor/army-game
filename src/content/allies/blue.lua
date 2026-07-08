@@ -650,6 +650,42 @@ g.defineSquad("anima_incubator_squad", {
     cost = {blue = 1},
 })
 
+g.defineSquad("mini_ice_golem_squad", {
+    name = "Mini Ice Golems",
+    rarity = g.RARITIES.UNCOMMON,
+    tags = {"freeze", "crowd_control", "death_trigger", "health"},
+    entityDef = {
+        image = g.leo("miniicegolems_unit", "iceelephants_unit"),
+        physics = { shape = "circle", radius = 6, ox = 0, oy = 0, mass = 2 },
+        attack = {
+            attackType = "melee",
+        },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 0.6,
+        baseAttackRange = 20,
+        baseMoveSpeed = 40,
+        baseMaxHealth = 26,
+        baseStartingArmor = 4,
+    },
+    unitCount = 4,
+    perks = {{
+        name = "Shatter",
+        description = g.loc2("When killed, Freeze nearby enemies for 4s."),
+        image = "coin_icon",
+        handlers = {
+            entityDeath = function(ent)
+                g.iteratePartition("enemy", ent.x, ent.y, function(other)
+                    if g.isAlive(other) then
+                        g.applyFrozen(other, 4, ent)
+                    end
+                end, 100)
+            end,
+        },
+    }},
+    cost = {blue = 1},
+})
+
+
 g.defineSquad("ice_mage_squad", {
     name = "Ice Mage",
     rarity = g.RARITIES.UNCOMMON,

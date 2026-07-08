@@ -32,6 +32,39 @@ g.defineSquad("exo_soldier_squad", {
 
 
 
+g.defineSquad("spark_bot_squad", {
+    name = "Spark-Bots",
+    rarity = g.RARITIES.UNCOMMON,
+    tags = {"lightning", "death_trigger"},
+    entityDef = {
+        image = g.leo("sparkbots_unit", "exosoldiers_unit"),
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "melee",
+        },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 1,
+        baseAttackRange = 18,
+        baseMoveSpeed = 60,
+        baseMaxHealth = 8,
+    },
+    unitCount = 6,
+    startingTraits = {"bot"},
+    perks = {{
+        name = "Overload",
+        description = g.loc2("On-death, emit lightning dealing damage equal to level."),
+        image = "coin_icon",
+        handlers = {
+            entityDeath = function(ent)
+                local level = (ent.squad and ent.squad.level) or 1
+                g.lightning(ent.x, ent.y, level, ent)
+            end,
+        },
+    }},
+    cost = {yellow = 1},
+})
+
+
 g.defineSquad("prospector_squad", {
     name = "Prospectors",
     rarity = g.RARITIES.UNCOMMON,

@@ -178,6 +178,44 @@ g.defineSquad("giant_toad_squad", {
 })
 
 
+g.defineSquad("dart_spitter_squad", {
+    name = "Dart Spitters",
+    rarity = g.RARITIES.UNCOMMON,
+    -- tags: ranged, projectile, poison
+    tags = {"ranged", "projectile", "poison"},
+    entityDef = {
+        image = g.leo("dartspitters_unit", "peasant"),
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "ranged",
+            projectileType = "arrow",
+            projectileSpeed = 300,
+        },
+        weapon = {
+            image = g.leo("dart_pipe", "longbow"),
+            type = "bow",
+        },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 0.7,
+        baseAttackRange = 130,
+        baseMoveSpeed = 55,
+        baseMaxHealth = 5,
+    },
+    unitCount = 4,
+    perks = {{
+        name = "Toxic Darts",
+        description = loc("Apply 1 poison on hit."),
+        image = "coin_icon",
+        handlers = {
+            onHitDamage = function(ent, damage, target)
+                g.applyPoison(target, 1, ent)
+            end,
+        },
+    }},
+    cost = {green = 1},
+})
+
+
 g.defineSquad("mini_toad_squad", {
     name = "Mini Toads",
     rarity = g.RARITIES.UNCOMMON,

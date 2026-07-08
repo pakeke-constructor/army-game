@@ -10,9 +10,16 @@ As such, we are doing a massive overhaul of existing squads/blessings.
 
 ## MANA COLOR ARCHETYPES:
 RED: Aggressive, damage-focused, unit sacrifice, Burn.
+Red theme: Gremlins, fire, demons.
+
 GOLD: Economy, squad-upgrades, buildings, spawners, buffs, Lightning.
+Gold theme: Robots, electricity, buildings, metal
+
 GREEN: Healing, max-health, swarms, stat conversion, Poison.
+Green theme: Nature, trees, humans
+
 BLUE: Armor, MAGK, Spells, Freeze.
+Blue theme: Fish, magic, ice, wizardry
 
 
 
@@ -90,7 +97,7 @@ SPELLS:
 
 SQUADS:
 [ ] Possessor: Healer, slow moving, tanky health. Every 3 seconds: Spawn an infested human. (infested entity)
-[ ] Dart spitters x 4: Ranged, Apply 1 poison on hit
+[x] Dart spitters x 4: Ranged, Apply 1 poison on hit
 [x] Giant toads x 2: Tanky, Takes 50% less damage from poisoned enemies
 [x] Mini toads x 4: Apply 1 poison on hit
 [x] Fire golems x 2: When hit, apply 1 burn to the attacker
@@ -98,11 +105,11 @@ SQUADS:
 [ ] Hunter x 1: Medium Range, (Crossbow,) Very fast fire-rate, good damage. (use crossbow as weapon, under `bow` weapon type)
 [ ] Inferno beast: Hits deal AOE damage, setting enemies ablaze (+1 burn)
 [ ] Lightning-wizard: Emit lightning on attack, dealing damage equal to MAGK
-[ ] Mini ice golems: When killed, freeze all enemies in a radius
+[x] Mini ice golems: When killed, freeze all enemies in a radius
 [ ] Frost mage: When a spell is cast, freeze the nearest 4 enemies for 4 seconds.
 [ ] Vikings: Deal 3x damage to frozen enemies
 [ ] Ethereal archers: Deal bonus damage equal to MAGK
-[ ] Spark-bots: When killed, emit lightning, dealing damage equal to it's current level.
+[x] Spark-bots: When killed, emit lightning, dealing damage equal to it's current level.
 [ ] Engineers: If there's 2 buildings alive, this unit gains triple speed and damage
 [ ] Clanker factory: Produces 1 bot per second (2hp / 2atk)
 [X] Treant: Every second, heal (HP) equal to (MAGK)
