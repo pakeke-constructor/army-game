@@ -129,6 +129,11 @@ local shadow = {
 ---@field public rotationAmount number
 ---@field public speed number
 
+---@class ecs.components.CommanderWalk overrides for the auto-generated walk animation
+---@field public bounceHeight number? how high the unit bounces while walking
+---@field public bounceRotation number? how much the unit rocks side to side
+---@field public speed number? walk cycle speed
+
 ---@class ecs.Components
 ---@field public ai ecs.components.AI?
 ---@field public attack ecs.components.Attack?
@@ -136,6 +141,7 @@ local shadow = {
 ---@field public weapon ecs.components.Weapon?
 ---@field public shadow ecs.components.Shadow?
 ---@field public walkAnimation ecs.components.WalkAnimation?
+---@field public commanderWalk ecs.components.CommanderWalk?
 ---@field public _walkTime number?
 ---@field public _isMoving boolean? true while the entity is actively moving toward its target (drives walk animation)
 ---@field public faceDir integer?

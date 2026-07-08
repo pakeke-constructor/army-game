@@ -2086,10 +2086,11 @@ function g.spawnEntityWithInit(id, x, y, initFunc, ...)
         end
         -- normal units ~30 tall = scale 1; bigger = heavier
         local scale = math.max(1, h / 30)
+        local cw = ent.commanderWalk or {}
         ent.walkAnimation = {
-            bounceHeight = 2.5 / scale,
-            rotationAmount = 0.12 / scale,
-            speed = 11 / scale,
+            bounceHeight = cw.bounceHeight or (2.5 / scale),
+            rotationAmount = cw.bounceRotation or (0.12 / scale),
+            speed = cw.speed or (11 / scale),
         }
     end
     ecs:addEntity(ent)

@@ -72,6 +72,7 @@ g.defineCommander("druidcommander", "Druid Lady", {
         entityDef = {
             image = "druidcommander",
             isCommander = true,
+            commanderWalk = { bounceHeight = 1.8, bounceRotation = 0.09 },
             weapon = {
                 type = "staff",
                 image = "druidcommander_staff"
@@ -132,6 +133,7 @@ g.defineCommander("mechcommander", "The Mech Goblin", {
             end,
             image = "mechcommander",
             isCommander = true,
+            commanderWalk = { bounceHeight = 1, bounceRotation = 0.05 },
             weapon = {
                 type = "sword",
                 image = "mechcommander_arm",
@@ -180,6 +182,7 @@ g.defineCommander("lizardcommander", "Lizard Lord", {
         entityDef = {
             image = "lizardcommander",
             isCommander = true,
+            commanderWalk = { bounceHeight = 2, bounceRotation = 0.10 },
             weapon = {
                 type = "sword",
                 image = "lizardcommander_axe",
@@ -225,6 +228,8 @@ g.defineCommander("octopuscommander", "Octopus Tank", {
         entityDef = {
             image = "octopuscommander",
             isCommander = true,
+            -- heavy: barely bounces while walking
+            commanderWalk = { bounceHeight = 0.8, bounceRotation = 0.03 },
             physics = { shape = "circle", radius = 20, ox = 0, oy = 0, mass = 7 },
             attack = {
                 attackType = "ranged",
