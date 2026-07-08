@@ -7,28 +7,28 @@ local SHOP_TXT = loc("Shop: Spend money, upgrade squads")
 local BATTLE_TXTS = {
     -- demonEncounter difficulty => pool of flavor names
     [0] = {
-        loc("Battle: Demon Scouts (I)"),
-        loc("Battle: Demon Stragglers (I)"),
-        loc("Battle: Demon Whelps (I)"),
-        loc("Battle: Imp Rabble (I)"),
-        loc("Battle: Hellspawn Scouts (I)"),
-        loc("Battle: Cursed Vagrants (I)"),
+        loc("Demon Scouts (I)"),
+        loc("Demon Stragglers (I)"),
+        loc("Demon Whelps (I)"),
+        loc("Imp Rabble (I)"),
+        loc("Hellspawn Scouts (I)"),
+        loc("Cursed Vagrants (I)"),
     },
     [1] = {
-        loc("Battle: Demon Squad (II)"),
-        loc("Battle: Demon Warband (II)"),
-        loc("Battle: Infernal Patrol (II)"),
-        loc("Battle: Brimstone Raiders (II)"),
-        loc("Battle: Hellhound Pack (II)"),
-        loc("Battle: Demon Marauders (II)"),
+        loc("Demon Squad (II)"),
+        loc("Demon Warband (II)"),
+        loc("Infernal Patrol (II)"),
+        loc("Brimstone Raiders (II)"),
+        loc("Hellhound Pack (II)"),
+        loc("Demon Marauders (II)"),
     },
     [2] = {
-        loc("Battle: Demon Army (III)"),
-        loc("Battle: Demon Legion (III)"),
-        loc("Battle: Infernal Host (III)"),
-        loc("Battle: Hellfire Horde (III)"),
-        loc("Battle: Abyssal Vanguard (III)"),
-        loc("Battle: Doom Battalion (III)"),
+        loc("Demon Army (III)"),
+        loc("Demon Legion (III)"),
+        loc("Infernal Host (III)"),
+        loc("Hellfire Horde (III)"),
+        loc("Abyssal Vanguard (III)"),
+        loc("Doom Battalion (III)"),
     },
 }
 
@@ -209,6 +209,8 @@ local function describeReward(r)
         return "{GOLD_COLOR}Bonus rewards:{/GOLD_COLOR} {coin_icon}{GOLD_COLOR} +" .. r.amount
     elseif r.type == "xp" then
         return "{XP_COLOR}Bonus rewards:{/XP_COLOR} {xp_icon}{XP_COLOR} +" .. r.amount
+    elseif r.type == "blessing" then
+        return "Bonus rewards:\nRandom Blessing {blessing_icon}"
     end
     return ""
 end

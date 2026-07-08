@@ -182,14 +182,17 @@ function battle_scene:enter()
 
     if self.sandbox then
         self.ecs:setBounds(500,300, 1900, 1100)
+        self:generateAllyAndEnemyRectangles(self.ecs.boundingBox)
     else
-        encounters.startRandomEncounter(run.day, self.ecs)
+        encounters.startRandomEncounter(run.day, self.ecs, function(border)
+            self:generateAllyAndEnemyRectangles(border)
+        end)
     end
 
     local border = self.ecs.boundingBox
     do
-        local allyRec, enemyRec = self:generateAllyAndEnemyRectangles(border)
-        local nx, ny = allyRec:getCenter()
+        local allyRec = self.ecs.allyRectangle
+        local nx, ny = allyRec.x + allyRec.w / 2, allyRec.y + allyRec.h / 2
         local commanderInfo = g.getCommanderInfo(run.commander)
         local commanderSquad = g.getSquadFromArmy(commanderInfo.squadId)
         if commanderSquad then
