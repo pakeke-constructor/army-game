@@ -122,6 +122,15 @@ Context("c_codex", yolo=False, model=M.CODEX_LATEST.id, reasoning="high", messag
 ])
 
 
+Context("c_gpt", yolo=False, model=M.GPT_LATEST.id, reasoning="high", messages=[
+    MAIN_SYSTEM_PROMPT,
+    ENV_PROMPT,
+    # CODING_STYLE_PROMPT,
+    CLAUDE_MD,
+])
+
+
+
 c_gem = Context("c_gem", yolo=False, model=M.GEMINI_LATEST.id, reasoning="high", messages=[
     MAIN_SYSTEM_PROMPT,
     ENV_PROMPT,
