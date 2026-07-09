@@ -56,6 +56,21 @@ function UpgradeSquadChoicePanel:draw()
     end
 
     iml.panel(r:get())
+
+    if self.cj:hasAnimationBegun() then
+        self.cj:draw()
+
+        if self.cj:isAnimationFinished() then
+            -- Actually apply
+            local squadId = self.choices[self.selected]
+            g.addOrUpgradeSquad(squadId)
+            statUpgradePopupService.set(squadId)
+            return true
+        end
+
+        return false
+    end
+
     r = r:padRatio(0.05, 0.1)
     local regions = r:grid(ChoicePanelCommon.NUM_CHOICES, 1)
     local cx = r.x + r.w / 2
@@ -80,44 +95,34 @@ function UpgradeSquadChoicePanel:draw()
         regions[i] = rr:moveUnit(dx, dy)
     end
 
-    if not self.cj:hasAnimationBegun() then
-        for i, squadId in ipairs(self.choices) do
-            local cardR = regions[i]:splitVertical(8, 1, 1)
-            local function draw(r)
-                return ui.drawSquadCard(squadId, r, i, true, true)
-            end
-
-            local clicked = draw(cardR)
-
-            if clicked then
-                -- Delayed select
-                self.selected = i
-
-                -- Spawn cards
-                for j, sqId in ipairs(self.choices) do
-                    if i ~= j then
-                        self.cj:spawnCardUnselected(regions[j], j, function(r)
-                            return ui.drawSquadCard(sqId, r, j, true, true)
-                        end)
-                    end
-                end
-                -- This duplicates stat choice layouting
-                local baseR = ui.getFullScreenRegion()
-                local _, cardAreaBaseR = baseR:padRatio(0.05, 0.1):splitVertical(1, 5)
-                local _, squadCardR = cardAreaBaseR:splitHorizontal(5, 2)
-                self.cj:spawnCardSelected(regions[i], i, function(r)
-                    return ui.drawSquadCard(squadId, r, i, true, true)
-                end, squadCardR)
-            end
+    for i, squadId in ipairs(self.choices) do
+        local cardR = regions[i]:splitVertical(8, 1, 1)
+        local function draw(r)
+            return ui.drawSquadCard(squadId, r, i, true, true)
         end
-    end
 
-    if self.cj:draw() then
-        -- Actually apply
-        local squadId = self.choices[self.selected]
-        g.addOrUpgradeSquad(squadId)
-        statUpgradePopupService.set(squadId)
-        return true
+        local clicked = draw(cardR)
+
+        if clicked then
+            -- Delayed select
+            self.selected = i
+
+            -- Spawn cards
+            for j, sqId in ipairs(self.choices) do
+                if i ~= j then
+                    self.cj:spawnCardUnselected(regions[j], j, function(r)
+                        return ui.drawSquadCard(sqId, r, j, true, true)
+                    end)
+                end
+            end
+            -- This duplicates stat choice layouting
+            local baseR = ui.getFullScreenRegion()
+            local _, cardAreaBaseR = baseR:padRatio(0.05, 0.1):splitVertical(1, 5)
+            local _, squadCardR = cardAreaBaseR:splitHorizontal(5, 2)
+            self.cj:spawnCardSelected(regions[i], i, function(r)
+                return ui.drawSquadCard(squadId, r, i, true, true)
+            end, squadCardR)
+        end
     end
 
     return false

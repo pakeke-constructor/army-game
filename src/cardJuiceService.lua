@@ -66,13 +66,21 @@ function CardJuiceInstance:hasAnimationBegun()
     return not not self.begin
 end
 
-function CardJuiceInstance:draw()
+function CardJuiceInstance:isAnimationFinished()
     if not self.begin then
         return false
     end
+
+    return love.timer.getTime() - self.begin >= SELECT_ANIM_DURATION
+end
+
+function CardJuiceInstance:draw()
+    if not self.begin then return end
     local t = helper.clamp((love.timer.getTime() - self.begin) / SELECT_ANIM_DURATION, 0, 1)
 
     for _, card in ipairs(self.cards) do
+        local col = gsman.setColor(1, 1, 1)
+
         if card.selected then
             local t0 = helper.clamp(t * 1.5, 0, 1)
             local t1 = helper.EASINGS.easeOutCubic(helper.clamp(t0, 0, 1))
@@ -113,9 +121,9 @@ function CardJuiceInstance:draw()
             card.draw(centeredR)
             lg.pop()
         end
-    end
 
-    return t >= 1
+        col:pop()
+    end
 end
 
 cardJuiceService.CardJuiceInstance = CardJuiceInstance

@@ -142,7 +142,6 @@ end
 
 function SquadChoicePanel:draw()
     local r = ui.getFullScreenRegion()
-    local cardArea = r
 
     if #self.choices == 0 then
         -- RIP in Pepperoni but safety handler must be done
@@ -150,7 +149,25 @@ function SquadChoicePanel:draw()
     end
 
     iml.panel(r:get())
-    cardArea = cardArea:padRatio(0.05, 0.1)
+
+    if self.cj:hasAnimationBegun() then
+        self.cj:draw()
+
+        if self.cj:isAnimationFinished() then
+            -- Actually apply
+            local squadId = self.choices[self.selected]
+            local hadSquad = g.getSquadFromArmy(squadId)
+            g.addOrUpgradeSquad(squadId)
+            if hadSquad then
+                statUpgradePopupService.set(squadId)
+            end
+            return true
+        end
+
+        return false
+    end
+
+    local cardArea = r:padRatio(0.05, 0.1)
     local regions = cardArea:grid(ChoicePanelCommon.NUM_CHOICES, 1)
     local cx = cardArea.x + cardArea.w / 2
     local cy = cardArea.y + cardArea.h / 2
@@ -174,56 +191,43 @@ function SquadChoicePanel:draw()
         regions[i] = rr:moveUnit(dx + ox, dy)
     end
 
-    if not self.cj:hasAnimationBegun() then
-        for i, squadId in ipairs(self.choices) do
-            local cardR, _, rerollR = regions[i]:splitVertical(8, 1, 1)
-            local function draw(r)
+    for i, squadId in ipairs(self.choices) do
+        local cardR, _, rerollR = regions[i]:splitVertical(8, 1, 1)
+        local function draw(r)
+            return ui.drawSquadCard(squadId, r, i, true, true)
+        end
+
+        local clicked = draw(cardR)
+        local rerollClicked = drawRerollButton(rerollR, i, (self.rerolls[i] or 0) <= 0)
+
+        if rerollClicked then
+            self:_rerollChoice(i)
+        elseif clicked then
+            -- Delayed select
+            self.selected = i
+
+            -- Spawn cards
+            for j, sqId in ipairs(self.choices) do
+                if i ~= j then
+                    local otherCardR = regions[j]:splitVertical(8, 1, 1)
+                    self.cj:spawnCardUnselected(otherCardR, j, function(r)
+                        return ui.drawSquadCard(sqId, r, j, true, true)
+                    end)
+                end
+            end
+
+            local targetR = nil
+            if g.getSquadFromArmy(squadId) then
+                -- This duplicates stat choice layouting
+                local baseR = ui.getFullScreenRegion()
+                local _, cardAreaBaseR = baseR:padRatio(0.05, 0.1):splitVertical(1, 5)
+                local _, squadCardR = cardAreaBaseR:splitHorizontal(5, 2)
+                targetR = squadCardR
+            end
+            self.cj:spawnCardSelected(cardR, i, function(r)
                 return ui.drawSquadCard(squadId, r, i, true, true)
-            end
-
-            local clicked = draw(cardR)
-            local rerollClicked = drawRerollButton(rerollR, i, (self.rerolls[i] or 0) <= 0)
-
-            if rerollClicked then
-                self:_rerollChoice(i)
-            elseif clicked then
-                -- Delayed select
-                self.selected = i
-
-                -- Spawn cards
-                for j, sqId in ipairs(self.choices) do
-                    if i ~= j then
-                        local otherCardR = regions[j]:splitVertical(8, 1, 1)
-                        self.cj:spawnCardUnselected(otherCardR, j, function(r)
-                            return ui.drawSquadCard(sqId, r, j, true, true)
-                        end)
-                    end
-                end
-
-                local targetR = nil
-                if g.getSquadFromArmy(squadId) then
-                    -- This duplicates stat choice layouting
-                    local baseR = ui.getFullScreenRegion()
-                    local _, cardAreaBaseR = baseR:padRatio(0.05, 0.1):splitVertical(1, 5)
-                    local _, squadCardR = cardAreaBaseR:splitHorizontal(5, 2)
-                    targetR = squadCardR
-                end
-                self.cj:spawnCardSelected(cardR, i, function(r)
-                    return ui.drawSquadCard(squadId, r, i, true, true)
-                end, targetR)
-            end
+            end, targetR)
         end
-    end
-
-    if self.cj:draw() then
-        -- Actually apply
-        local squadId = self.choices[self.selected]
-        local hadSquad = g.getSquadFromArmy(squadId)
-        g.addOrUpgradeSquad(squadId)
-        if hadSquad then
-            statUpgradePopupService.set(squadId)
-        end
-        return true
     end
 
     return false

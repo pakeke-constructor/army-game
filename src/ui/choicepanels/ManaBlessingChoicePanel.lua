@@ -109,7 +109,6 @@ end
 
 function ManaBlessingChoicePanel:draw()
     local r = ui.getFullScreenRegion()
-    local cardArea = r
 
     if #self.choices == 0 then
         -- RIP in Pepperoni but safety handler must be done
@@ -117,7 +116,7 @@ function ManaBlessingChoicePanel:draw()
     end
 
     iml.panel(r:get())
-    cardArea = cardArea:padRatio(0.05, 0.1)
+    local cardArea = r:padRatio(0.05, 0.1)
 
     -- Top text
     local titleFont = g.getBigFont(16)
@@ -127,6 +126,19 @@ function ManaBlessingChoicePanel:draw()
     cardArea = cardArea:padRatio(0.03, 0.02)
     titleR = titleR:padRatio(0.4)
     richtext.printRichContainedNoWrap("{o}{bob}" .. MANABLESSING_PICK_TXT, titleFont, titleR:get())
+
+    if self.cj:hasAnimationBegun() then
+        self.cj:draw()
+
+        if self.cj:isAnimationFinished() then
+            local pair = self.choices[self.selected]
+            g.addBlessing(pair.blessing)
+            g.addPermanentMana(pair.mana)
+            return true
+        end
+
+        return false
+    end
 
     local regions = cardArea:grid(ChoicePanelCommon.NUM_CHOICES, 1)
     local cx = cardArea.x + cardArea.w / 2
@@ -150,52 +162,41 @@ function ManaBlessingChoicePanel:draw()
         regions[i] = rr:moveUnit(dx, dy)
     end
 
-    if not self.selected then
-        lg.setColor(1, 1, 1, 0.8)
-        local lw = gsman.setLineWidth(4)
-        for i = 1, #self.choices - 1 do
-            local left = regions[i]
-            local right = regions[i + 1]
-            local x = (left.x + left.w + right.x) / 2
-            local y1 = math.min(left.y, right.y)
-            local y2 = math.max(left.y + left.h, right.y + right.h)
-            lg.line(x, y1 - 30, x, y2 + 10)
-        end
-        lw:pop()
+    lg.setColor(1, 1, 1, 0.8)
+    local lw = gsman.setLineWidth(4)
+    for i = 1, #self.choices - 1 do
+        local left = regions[i]
+        local right = regions[i + 1]
+        local x = (left.x + left.w + right.x) / 2
+        local y1 = math.min(left.y, right.y)
+        local y2 = math.max(left.y + left.h, right.y + right.h)
+        lg.line(x, y1 - 30, x, y2 + 10)
     end
+    lw:pop()
 
-    if not self.cj:hasAnimationBegun() then
-        for i, pair in ipairs(self.choices) do
-            ---@diagnostic disable-next-line: cast-type-mismatch
-            ---@cast pair {mana:string,blessing:string}
-            local choiceR = getChoiceRegion(regions[i], i)
-            if self:_drawChoice(pair, choiceR, i) then
-                g.playUISound("ui_click_basic", 1.4, 0.8)
-                self.selected = i
+    for i, pair in ipairs(self.choices) do
+        ---@diagnostic disable-next-line: cast-type-mismatch
+        ---@cast pair {mana:string,blessing:string}
+        local choiceR = getChoiceRegion(regions[i], i)
+        if self:_drawChoice(pair, choiceR, i) then
+            g.playUISound("ui_click_basic", 1.4, 0.8)
+            self.selected = i
 
-                -- Spawn cards
-                for j, otherPair in ipairs(self.choices) do
-                    ---@diagnostic disable-next-line: cast-type-mismatch
-                    ---@cast otherPair {mana:string,blessing:string}
-                    local otherChoiceR = getChoiceRegion(regions[j], j)
-                    if i ~= j then
-                        self.cj:spawnCardUnselected(otherChoiceR, j, function(r)
-                            return self:_drawChoice(otherPair, r, j)
-                        end)
-                    end
+            -- Spawn cards
+            for j, otherPair in ipairs(self.choices) do
+                ---@diagnostic disable-next-line: cast-type-mismatch
+                ---@cast otherPair {mana:string,blessing:string}
+                local otherChoiceR = getChoiceRegion(regions[j], j)
+                if i ~= j then
+                    self.cj:spawnCardUnselected(otherChoiceR, j, function(r)
+                        return self:_drawChoice(otherPair, r, j)
+                    end)
                 end
-                self.cj:spawnCardSelected(choiceR, i, function(r)
-                    return self:_drawChoice(pair, r, i)
-                end)
             end
+            self.cj:spawnCardSelected(choiceR, i, function(r)
+                return self:_drawChoice(pair, r, i)
+            end)
         end
-    end
-
-    if self.cj:draw() then
-        local pair = self.choices[self.selected]
-        g.addBlessing(pair.blessing)
-        g.addPermanentMana(pair.mana)
-        return true
     end
 
     return false

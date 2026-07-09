@@ -431,9 +431,34 @@ function StatChoicePanel:draw()
 
     iml.panel(r:get())
 
+    if #self.statChoices == 0 then
+        -- RIP in Pepperoni
+        return true
+    end
+
     local headerR, cardAreaBaseR = r:padRatio(0.05, 0.1):splitVertical(1, 5)
     local cardAreaR, squadCardR = cardAreaBaseR:splitHorizontal(5, 2)
     local titleR = headerR:splitVertical(1, 1)
+
+    if self.cj:hasAnimationBegun() then
+        self.cj:draw()
+        ui.drawSquadCard(self.squadId, squadCardR, -999, false, true)
+
+        if self.cj:isAnimationFinished() then
+            local choice = self.statChoices[self.selected]
+            local squad = g.getSquadFromArmy(self.squadId)
+            if squad then
+                g.buffSquadPermanently(squad, choice.positive[1], choice.positive[2])
+                if choice.negative then
+                    g.buffSquadPermanently(squad, choice.negative[1], choice.negative[2])
+                end
+            end
+
+            return true
+        end
+
+        return false
+    end
 
     TITLE_FONT = TITLE_FONT or g.getBigFont(16)
     lg.setColor(1, 1, 1)
@@ -441,49 +466,28 @@ function StatChoicePanel:draw()
 
     local regions = self:_layoutCards(cardAreaR)
 
-    if #self.statChoices == 0 then
-        -- RIP in Pepperoni
-        return true
-    end
+    for i, choice in ipairs(self.statChoices) do
+        if self:_drawStatCard(choice, regions[i], i) then
+            g.playUISound("ui_click_basic", 1.4, 0.8)
+            self.selected = i
 
-    if not self.cj:hasAnimationBegun() then
-        for i, choice in ipairs(self.statChoices) do
-            if self:_drawStatCard(choice, regions[i], i) then
-                g.playUISound("ui_click_basic", 1.4, 0.8)
-                self.selected = i
-
-                -- Spawn cards
-                for j, otherChoice in ipairs(self.statChoices) do
-                    if i ~= j then
-                        self.cj:spawnCardUnselected(regions[j], j, function(r)
-                            return self:_drawStatCard(otherChoice, r, j)
-                        end)
-                    end
+            -- Spawn cards
+            for j, otherChoice in ipairs(self.statChoices) do
+                if i ~= j then
+                    self.cj:spawnCardUnselected(regions[j], j, function(r)
+                        return self:_drawStatCard(otherChoice, r, j)
+                    end)
                 end
-
-                local targetR = _getSelectedTarget(regions[i], cardAreaR)
-                self.cj:spawnCardSelected(regions[i], i, function(r)
-                    return self:_drawStatCard(choice, r, i)
-                end, targetR)
             end
+
+            local targetR = _getSelectedTarget(regions[i], cardAreaR)
+            self.cj:spawnCardSelected(regions[i], i, function(r)
+                return self:_drawStatCard(choice, r, i)
+            end, targetR)
         end
     end
 
-    local cardJuiceFinished = self.cj:draw()
     ui.drawSquadCard(self.squadId, squadCardR, -999, false, true)
-
-    if cardJuiceFinished then
-        local choice = self.statChoices[self.selected]
-        local squad = g.getSquadFromArmy(self.squadId)
-        if squad then
-            g.buffSquadPermanently(squad, choice.positive[1], choice.positive[2])
-            if choice.negative then
-                g.buffSquadPermanently(squad, choice.negative[1], choice.negative[2])
-            end
-        end
-
-        return true
-    end
 
     return false
 end

@@ -67,7 +67,6 @@ end
 
 function BlessingChoicePanel:draw()
     local r = ui.getFullScreenRegion()
-    local cardArea = r
 
     if #self.choices == 0 then
         -- RIP in Pepperoni but safety handler must be done
@@ -75,7 +74,21 @@ function BlessingChoicePanel:draw()
     end
 
     iml.panel(r:get())
-    cardArea = cardArea:padRatio(0.05, 0.1)
+
+    if self.cj:hasAnimationBegun() then
+        self.cj:draw()
+
+        if self.cj:isAnimationFinished() then
+            -- Actually apply
+            local blessId = self.choices[self.selected]
+            g.addBlessing(blessId)
+            return true
+        end
+
+        return false
+    end
+
+    local cardArea = r:padRatio(0.05, 0.1)
     local regions = cardArea:grid(ChoicePanelCommon.NUM_CHOICES, 1)
     local cx = cardArea.x + cardArea.w / 2
     local cy = cardArea.y + cardArea.h / 2
@@ -99,33 +112,24 @@ function BlessingChoicePanel:draw()
         regions[i] = rr:moveUnit(dx + ox, dy)
     end
 
-    if not self.cj:hasAnimationBegun() then
-        for i, blessId in ipairs(self.choices) do
-            local clicked = ui.drawBlessingCard(blessId, regions[i], i)
-            if clicked then
-                -- Delayed select
-                self.selected = i
+    for i, blessId in ipairs(self.choices) do
+        local clicked = ui.drawBlessingCard(blessId, regions[i], i)
+        if clicked then
+            -- Delayed select
+            self.selected = i
 
-                -- Spawn cards
-                for j, otherBlessId in ipairs(self.choices) do
-                    if i ~= j then
-                        self.cj:spawnCardUnselected(regions[j], j, function(r)
-                            return ui.drawBlessingCard(otherBlessId, r, j)
-                        end)
-                    end
+            -- Spawn cards
+            for j, otherBlessId in ipairs(self.choices) do
+                if i ~= j then
+                    self.cj:spawnCardUnselected(regions[j], j, function(r)
+                        return ui.drawBlessingCard(otherBlessId, r, j)
+                    end)
                 end
-                self.cj:spawnCardSelected(regions[i], i, function(r)
-                    return ui.drawBlessingCard(blessId, r, i)
-                end)
             end
+            self.cj:spawnCardSelected(regions[i], i, function(r)
+                return ui.drawBlessingCard(blessId, r, i)
+            end)
         end
-    end
-
-    if self.cj:draw() then
-        -- Actually apply
-        local blessId = self.choices[self.selected]
-        g.addBlessing(blessId)
-        return true
     end
 
     return false
