@@ -2,17 +2,6 @@
 local love = require("love")
 --io.stdout:setvbuf("line")
 
---[[ This profiler currently crashes LuaJIT so no
-local Profiler = nil
-if package.preload["jit.profile"] then
-    Profiler = require("lib.love_profiler")
-    Profiler:stop()
-end
-]]
-
-local heartbeat = require("lib.heartbeat.heartbeat")
-local heartbeatStared = false
-
 _G.lg = love.graphics
 _G.table.clear = require("table.clear")
 _G.table.new = require("table.new")
@@ -75,27 +64,34 @@ _G.json = require("lib.json")
 ---@type g.consts
 _G.consts = require("src.consts")
 
---[[
+local Profiler = nil
+local heartbeat = nil
+local heartbeatStared = false
+if consts.USE_LUAJIT_PROFILER and package.preload["jit.profile"] then
+    -- Note: If you experience crash when stopping the profiler,
+    -- please update your LuaJIT or LOVE 12 build!
+    -- https://github.com/LuaJIT/LuaJIT/issues/1482
+    Profiler = require("lib.love_profiler")
+    Profiler:stop()
+else
+    heartbeat = require("lib.heartbeat.heartbeat")
+end
+
+
 -- Profiler zones
----@param name string
-function _G.prof_push(name)
-    if not Profiler then return end
-    return Profiler:zone(name)
-end
 
-function _G.prof_pop()
-    if not Profiler then return end
-    Profiler:zone_pop()
-end
-]]
-
----@param name string
-function _G.prof_push(name)
-    return heartbeat:PushNamedScope(name)
-end
-
-function _G.prof_pop()
-    heartbeat:PopScope()
+if Profiler then
+    ---@param name string
+    function _G.prof_push(name) return Profiler:zone(name) end
+    function _G.prof_pop() Profiler:zone_pop() end
+elseif heartbeat then
+    ---@param name string
+    function _G.prof_push(name) return heartbeat:PushNamedScope(name) end
+    function _G.prof_pop() heartbeat:PopScope() end
+else
+    ---@param name string
+    function _G.prof_push(name) end
+    function _G.prof_pop() end
 end
 
 _G.settings = require("src.settings")
@@ -200,7 +196,7 @@ function love.load()
 end
 
 function love.update(dt)
-    heartbeat:HeartbeatStart()
+    if heartbeat then heartbeat:HeartbeatStart() end
     prof_push("love.update")
 
     fadeToBlackService.update(dt)
@@ -258,8 +254,7 @@ function love.draw()
             (sceneName or "").."  FPS: "..fps,
             "dGC: " .. dgc .. " KB / GC: " .. gc .. " KB",
         }
-        -- if Profiler and Profiler:is_running() then
-        if heartbeat.captureActive then
+        if (Profiler and Profiler:is_running()) or (heartbeat and heartbeat.captureActive) then
             text[#text+1] = "Profiling"
         end
 
@@ -269,7 +264,7 @@ function love.draw()
     end
 
     prof_pop() -- prof_push("love.draw")
-    heartbeat:HeartbeatEnd()
+    if heartbeat then heartbeat:HeartbeatEnd() end
 end
 
 function love.mousepressed(mx, my, button, istouch, presses)
@@ -300,15 +295,16 @@ function love.keypressed(key, scancode, isrep)
     if consts.DEV_MODE then
         if scancode == "[" then
             consts.SHOW_DEV_STUFF = not consts.SHOW_DEV_STUFF
-        -- elseif Profiler and scancode == "]" then
-        --     Profiler:toggle()
-        -- end
         elseif scancode == "]" then
-            if not heartbeatStared then
-                heartbeat:StartCapture()
-                heartbeatStared = true
-            else
-                heartbeat.captureActive = not heartbeat.captureActive
+            if Profiler then
+                Profiler:toggle()
+            elseif heartbeat then
+                if not heartbeatStared then
+                    heartbeat:StartCapture()
+                    heartbeatStared = true
+                else
+                    heartbeat.captureActive = not heartbeat.captureActive
+                end
             end
         end
     end
