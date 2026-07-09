@@ -2,6 +2,16 @@
 local love = require("love")
 --io.stdout:setvbuf("line")
 
+--[[ This profiler currently crashes LuaJIT so no
+local Profiler = nil
+if package.preload["jit.profile"] then
+    Profiler = require("lib.love_profiler")
+    Profiler:stop()
+end
+]]
+
+local heartbeat = require("lib.heartbeat.heartbeat")
+
 _G.lg = love.graphics
 _G.table.clear = require("table.clear")
 _G.table.new = require("table.new")
@@ -63,6 +73,29 @@ _G.json = require("lib.json")
 
 ---@type g.consts
 _G.consts = require("src.consts")
+
+--[[
+-- Profiler zones
+---@param name string
+function _G.prof_push(name)
+    if not Profiler then return end
+    return Profiler:zone(name)
+end
+
+function _G.prof_pop()
+    if not Profiler then return end
+    Profiler:zone_pop()
+end
+]]
+
+---@param name string
+function _G.prof_push(name)
+    return heartbeat:PushNamedScope(name)
+end
+
+function _G.prof_pop()
+    heartbeat:PopScope()
+end
 
 _G.settings = require("src.settings")
 _G.log = require("src.modules.log")
@@ -166,6 +199,9 @@ function love.load()
 end
 
 function love.update(dt)
+    heartbeat:HeartbeatStart()
+    prof_push("love.update")
+
     fadeToBlackService.update(dt)
     g.pollHandlers()
     agentbridge.update()
@@ -179,6 +215,8 @@ function love.update(dt)
     if sc and sc.update then
         sc:update(dt)
     end
+
+    prof_pop() -- prof_push("love.update")
 end
 
 function love.quit()
@@ -209,11 +247,21 @@ function love.draw()
         local gc = math.floor(collectgarbage("count"))
         local dgc = gc - lastGC
         lastGC = gc
-        local text = (sceneName or "") .. "  FPS: " .. fps .. "\ndGC: " .. dgc .. " KB / GC: " .. gc .. " KB"
+        local text = {
+            (sceneName or "").."  FPS: "..fps,
+            "dGC: " .. dgc .. " KB / GC: " .. gc .. " KB",
+        }
+        -- if Profiler and Profiler:is_running() then
+        if heartbeat.captureActive then
+            text[#text+1] = "Profiling"
+        end
+
         love.graphics.setColor(1, 1, 1, 0.5)
-        love.graphics.printf(text, g.getSmallFont(32), 2, 2, love.graphics.getWidth() - 4, "right")
+        love.graphics.printf(table.concat(text, "\n"), g.getSmallFont(32), 2, 2, love.graphics.getWidth() - 4, "right")
         love.graphics.setColor(1, 1, 1, 1)
     end
+
+    heartbeat:HeartbeatEnd()
 end
 
 function love.mousepressed(mx, my, button, istouch, presses)
@@ -241,9 +289,20 @@ end
 
 function love.keypressed(key, scancode, isrep)
     if devcmd.keypressed(key) then return end
-    if scancode == "[" then
-        consts.SHOW_DEV_STUFF = consts.DEV_MODE and (not consts.SHOW_DEV_STUFF)
-    elseif scancode == "return" and love.keyboard.isDown("lalt", "ralt") then
+    if consts.DEV_MODE then
+        if scancode == "[" then
+            consts.SHOW_DEV_STUFF = not consts.SHOW_DEV_STUFF
+        -- elseif Profiler and scancode == "]" then
+        --     Profiler:toggle()
+        -- end
+        elseif scancode == "]" then
+            if not heartbeat.captureActive then
+                heartbeat:StartCapture()
+            end
+        end
+    end
+
+    if scancode == "return" and love.keyboard.isDown("lalt", "ralt") then
         settings.setFullscreen(not settings.isFullscreen())
     end
     iml.keypressed(key, scancode, isrep)
