@@ -24,6 +24,7 @@ local PATH_SEARCH_DEPTH = 3
 local FOG_CLEAR_RADIUS = 120
 local FOG_STEP = 24
 local FOG_REVEAL_DEPTH = 4
+local FOG_REVEAL_TIME = 1.5
 
 local GALLOP_FREQ = 8
 local GALLOP_TILT = 0.2
@@ -104,7 +105,7 @@ end
 --- Registers an iml panel per node (under the camera transform) and
 --- returns the hovered node, plus whether it was just clicked.
 ---@param graph MapGraph
----@param clearCells table<integer, table<integer, boolean>>
+---@param clearCells table<integer, table<integer, number>>
 ---@return MapNode? hovered
 ---@return MapNode? clicked
 local function updateNodePanels(graph, clearCells)
@@ -153,6 +154,8 @@ function map_scene:enter()
     self.commanderFacing = 1
     self.gallop = 0
     self.traveling = nil
+    ---@type table<MapNode, number?>
+    self.fogReveal = {}
 
     local run = g.getRun()
     local firstMapEntry = not run.mapGraph
@@ -227,36 +230,58 @@ function map_scene:_buildNodeState()
     ambienceService.reInitialize(self.camera:getTransform(), g.getMapType().cloudSprites)
 end
 
-function map_scene:_buildFogClearCells()
-    local run = g.getRun()
-    local graph = run.mapGraph
-    local clearCells = math.ceil(FOG_CLEAR_RADIUS / FOG_STEP)
-    ---@type table<integer, table<integer, boolean>>
-    local cells = {}
-
+function map_scene:_markSeenNodes()
+    local graph = g.getRun().mapGraph
     local pnode = graph:getPlayerNode()
-    if pnode then
-        local queue = {pnode}
-        local depths = {[pnode] = 0}
-        local head = 1
-        while head <= #queue do
-            local node = queue[head]
-            local depth = depths[node]
-            head = head + 1
+    if not pnode then return end
+
+    local queue = {pnode}
+    local depths = {[pnode] = 0}
+    local head = 1
+    while head <= #queue do
+        local node = queue[head]
+        local depth = depths[node]
+        head = head + 1
+        if not node.seen then
             node.seen = true
-            if depth < FOG_REVEAL_DEPTH then
-                for _, nb in ipairs(graph:getNeighbors(node.x, node.y)) do
-                    if not depths[nb] then
-                        depths[nb] = depth + 1
-                        queue[#queue + 1] = nb
-                    end
+            self.fogReveal[node] = 0
+        end
+        if depth < FOG_REVEAL_DEPTH then
+            for _, nb in ipairs(graph:getNeighbors(node.x, node.y)) do
+                if not depths[nb] then
+                    depths[nb] = depth + 1
+                    queue[#queue + 1] = nb
                 end
             end
         end
     end
+end
+
+---@param dt number
+function map_scene:_updateFogReveal(dt)
+    self:_markSeenNodes()
+    for node, v in pairs(self.fogReveal) do
+        if node.seen and v < 1 then
+            self.fogReveal[node] = helper.clamp(v + dt / FOG_REVEAL_TIME, 0, 1)
+        else
+            self.fogReveal[node] = nil
+        end
+    end
+end
+
+function map_scene:_buildFogClearCells()
+    local run = g.getRun()
+    local graph = run.mapGraph
+    local clearCells = math.ceil(FOG_CLEAR_RADIUS / FOG_STEP)
+    ---@type table<integer, table<integer, number>>
+    local cells = {}
+
+    self:_markSeenNodes()
 
     for _, node in ipairs(self.nodeList) do
         if node.seen then
+            local reveal = self.fogReveal[node]
+            if reveal == nil then reveal = 1 end
             local nx, ny = graph:getDrawPos(node)
             local cx = math.floor(nx / FOG_STEP)
             local cy = math.floor(ny / FOG_STEP)
@@ -267,7 +292,7 @@ function map_scene:_buildFogClearCells()
                     cells[cx + dx] = row
                 end
                 for dy = -clearCells, clearCells do
-                    row[cy + dy] = true
+                    row[cy + dy] = math.max(row[cy + dy] or 0, reveal)
                 end
             end
         end
@@ -341,6 +366,7 @@ end
 function map_scene:update(dt)
     checkLevelUp()
     self:_incrementPendingDaysWhenReady()
+    self:_updateFogReveal(dt)
 
     -- WASD panning
     local dx, dy = 0, 0
@@ -371,8 +397,11 @@ function map_scene:update(dt)
 
         for i, node in ipairs(self.nodeList) do
             if node.seen and nodes.getType(node) == "dynamic" then
+                local reveal = self.fogReveal[node]
                 local newNode = rerollDynamicNode(graph, node, count)
                 newNode.seen = true
+                self.fogReveal[node] = nil
+                self.fogReveal[newNode] = reveal
                 self.nodeList[i] = newNode
 
                 local newnt = nodes.getType(newNode)
@@ -616,7 +645,13 @@ function map_scene:draw()
         fogService.renderFog(fogRegion, graph.mapType.fogColor, function(x, y)
             local cx = math.floor(x / FOG_STEP)
             local row = clearCells[cx]
-            return not (row and row[math.floor(y / FOG_STEP)])
+            local reveal = row and row[math.floor(y / FOG_STEP)]
+            return (not reveal) or reveal < 1
+        end, function(x, y)
+            local cx = math.floor(x / FOG_STEP)
+            local row = clearCells[cx]
+            local reveal = row and row[math.floor(y / FOG_STEP)]
+            return reveal and (1 - reveal) or 1
         end)
     end
 
