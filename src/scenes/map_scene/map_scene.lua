@@ -145,11 +145,11 @@ end
 
 function map_scene:enter()
     juiceService.reset()
-    self.ecs = ECSWorld()
+    self.ecs = ECSWorld() --[[@as ecs.ECSWorld]]
     self.camera = Camera(0, 0, CAMERA_ZOOM)
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
     self.pixelCanvas = PixelCanvas.new(love.graphics.getDimensions())
-    self.hud = HUD()
+    self.hud = HUD() --[[@as g.HUD]]
     self.dragging = false
     self.commanderFacing = 1
     self.gallop = 0
@@ -270,6 +270,8 @@ function map_scene:_updateFogReveal(dt)
 end
 
 function map_scene:_buildFogClearCells()
+    prof_push("map_scene:_buildFogClearCells")
+
     local run = g.getRun()
     local graph = run.mapGraph
     local clearCells = math.ceil(FOG_CLEAR_RADIUS / FOG_STEP)
@@ -297,6 +299,8 @@ function map_scene:_buildFogClearCells()
             end
         end
     end
+
+    prof_pop() -- prof_push("map_scene:_buildFogClearCells")
     return cells
 end
 
@@ -570,22 +574,27 @@ function map_scene:draw()
         graph:drawGroundDecors(view)
 
         -- edges
+        prof_push("drawEdges")
         graph:forEachEdge(function(a, b)
             if isEdgeVisible(graph, a, b, view, CULL_PAD) then
                 renderEdge(graph, a, b, mapType.mapPath:getRGBA())
             end
         end)
+        prof_pop() -- prof_push("drawEdges")
 
         -- ground ellipses
+        prof_push("groundEllipses")
         for _, n in ipairs(self.nodeList) do
             local nx, ny = graph:getDrawPos(n)
             if isPointVisible(nx, ny, view, CULL_PAD) then
                 n:drawBelow(nx, ny)
             end
         end
+        prof_pop() -- prof_push("groundEllipses")
 
         -- decor + node images, sorted by y
         local builder = DecorBuilder() --[[@as g.DecorBuilder]]
+        prof_push("buildDecor")
         for _, d in ipairs(self.decorList) do
             if isPointVisible(d.x, d.y, view, CULL_PAD) then
                 local dtype = decor_types.get(d.decorType)
@@ -600,6 +609,7 @@ function map_scene:draw()
                 n:buildDecor(builder, nx, ny)
             end
         end
+        prof_pop() -- prof_push("buildDecor")
 
         -- fog processing
         local fogRegion = {

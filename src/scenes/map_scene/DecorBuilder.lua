@@ -39,6 +39,8 @@ function DecorBuilder:addDrawable(x, y, func, drawOrder)
 end
 
 function DecorBuilder:finalize()
+    prof_push("DecorBuilder:finalize")
+
     for i, it in ipairs(self.items) do
         it._order = i
     end
@@ -79,6 +81,8 @@ function DecorBuilder:finalize()
 
         col:pop()
     end
+
+    prof_pop() -- prof_push("DecorBuilder:finalize")
 end
 
 return DecorBuilder

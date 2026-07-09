@@ -782,6 +782,8 @@ end
 
 ---@param view {x:number,y:number,w:number,h:number}
 function MapGraph:drawGroundDecors(view)
+    prof_push("MapGraph:drawGroundDecors")
+
     local useopacity = not love.keyboard.isModifierActive("capslock")
 
     local range = math.max(view.w, view.h)
@@ -802,6 +804,8 @@ function MapGraph:drawGroundDecors(view)
             col:pop()
         end
     end, range)
+
+    prof_pop() -- prof_push("MapGraph:drawGroundDecors")
 end
 
 ---@param node MapNode

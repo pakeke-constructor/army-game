@@ -103,6 +103,8 @@ end
 ---@param hasFog fun(x:number,y:number):boolean
 ---@param getFogAlpha? fun(x:number,y:number):number
 function fogService.renderFog(r, fogColor, hasFog, getFogAlpha)
+    prof_push("fogService.renderFog")
+
     local t = love.timer.getTime()
     local x1 = math.floor(r.x / FOG_STEP) * FOG_STEP - FOG_EXPAND_CELLS * FOG_STEP
     local y1 = math.floor(r.y / FOG_STEP) * FOG_STEP - FOG_EXPAND_CELLS * FOG_STEP
@@ -179,6 +181,8 @@ function fogService.renderFog(r, fogColor, hasFog, getFogAlpha)
 
     lg.setColor(1, 1, 1, 1)
     lg.draw(batch)
+
+    prof_pop() -- prof_push("fogService.renderFog")
 end
 
 
