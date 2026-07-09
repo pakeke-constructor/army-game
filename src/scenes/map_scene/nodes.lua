@@ -39,6 +39,8 @@ local SHRINE_TXT = loc("Shrine: Sacrifice Squads to lower Demon Fury")
 local FEAST_TXT = loc("Feast: Obtain {xp_icon}")
 
 local CHEST_TXT = loc("Chest: Claim a reward")
+local CHEST_NEEDS_KEY_TXT = CHEST_TXT .. "\n{c r=0.9 g=0.2 b=0.2}" .. loc("(requires Key!)")
+local CHEST_HAS_KEY_TXT = CHEST_TXT .. "\n{c r=0.2 g=0.9 b=0.2}" .. loc("(unlock with a Key!)")
 
 local CAMPFIRE_TXT = loc("Campfire: Obtain XP")
 
@@ -201,6 +203,8 @@ local function describeReward(r)
         return "{XP_COLOR}Bonus rewards:{/XP_COLOR} {xp_icon}{XP_COLOR} +" .. r.amount
     elseif r.type == "blessing" then
         return "Bonus rewards:\nRandom Blessing {blessing_icon}"
+    elseif r.type == "keys" then
+        return "Bonus rewards: {key_icon} +" .. (r.amount or 1)
     end
     return ""
 end
@@ -393,7 +397,10 @@ function ChestNode:enter()
 end
 
 function ChestNode:getHoverDescription()
-    return CHEST_TXT
+    if g.getRun().keys > 0 then
+        return CHEST_HAS_KEY_TXT
+    end
+    return CHEST_NEEDS_KEY_TXT
 end
 
 function ChestNode:buildDecor(builder, wx, wy)

@@ -8,8 +8,9 @@ local active = nil
 
 
 ---@param args g.RewardPanel.Rewards
-function rewardPopupService.battleReward(args)
-    active = RewardPanel("battle", args)
+---@param demonFuryIncrease integer?
+function rewardPopupService.battleReward(args, demonFuryIncrease)
+    active = RewardPanel("battle", args, demonFuryIncrease)
 end
 
 ---@param args g.RewardPanel.Rewards

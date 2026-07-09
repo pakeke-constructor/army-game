@@ -279,7 +279,6 @@ local function winBattle(self)
             a = {type = "squad", rerolls = 1},
             b = {type = "xp", amount = 4}
         },
-        {type = "demon_fury", amount = 1},
     }
     -- append the battle node's bonus rewards, if any
     local node = g.getRun().mapGraph:getPlayerNode()
@@ -291,7 +290,7 @@ local function winBattle(self)
     end
 
     fadeToBlackService.fadeToFromBlack(VICTORY_FADE_IN, function()
-        rewardPopupService.battleReward(rewards)
+        rewardPopupService.battleReward(rewards, 1)
     end, VICTORY_FADE_OUT)
 end
 
@@ -497,9 +496,8 @@ function battle_scene:keypressed(k)
                     {type = "gold", amount = 3},
                     {type = "xp",amount = 3},
                     {type = "squad", rerolls = 1},
-                    {type = "demon_fury", amount = 1},
                     {type = "blessing"},
-                })
+                }, 1)
             end
         end
     end

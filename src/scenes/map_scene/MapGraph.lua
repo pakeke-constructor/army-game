@@ -547,6 +547,9 @@ local function rollReward(difficulty, rng)
     if big then
         table.insert(rewardLists, {{type = "blessing"}})
     end
+    if rng() < 0.6 then
+        table.insert(rewardLists, {{type = "keys", amount = 1}})
+    end
     -- pick one of the candidate reward-lists at random
     return rewardLists[math.floor(rng() * #rewardLists) + 1]
 end

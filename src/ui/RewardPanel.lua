@@ -22,12 +22,12 @@ local RewardPanel = objects.Class("g:RewardPanel")
 ---@class g.RewardPanel.ManaReward
 ---@field type "mana"
 
+---@class g.RewardPanel.KeysReward
+---@field type "keys"
+---@field amount integer?
+
 ---@class g.RewardPanel.ManaBlessingReward
 ---@field type "mana_blessing"
-
----@class g.RewardPanel.DemonRage
----@field type "demon_fury"
----@field amount integer
 
 ---@alias g.RewardPanel.Any
 ---| g.RewardPanel.XPReward
@@ -35,8 +35,8 @@ local RewardPanel = objects.Class("g:RewardPanel")
 ---| g.RewardPanel.SquadReward
 ---| g.RewardPanel.BlessingReward
 ---| g.RewardPanel.ManaReward
+---| g.RewardPanel.KeysReward
 ---| g.RewardPanel.ManaBlessingReward
----| g.RewardPanel.DemonRage
 
 ---@class g.RewardPanel.ORReward
 ---@field type "or"
@@ -47,10 +47,17 @@ local RewardPanel = objects.Class("g:RewardPanel")
 
 ---@param typ "levelup"|"battle"|"other"
 ---@param args g.RewardPanel.Rewards
-function RewardPanel:init(typ, args)
+---@param demonFuryIncrease integer? applied immediately, shown as text at the end
+function RewardPanel:init(typ, args, demonFuryIncrease)
     self.type = typ
     self.rewards = args
+    self.demonFuryIncrease = demonFuryIncrease or 0
+    if self.demonFuryIncrease > 0 then
+        local run = g.getRun()
+        run.demonFury = run.demonFury + self.demonFuryIncrease
+    end
 end
+
 
 
 
@@ -62,8 +69,8 @@ end
 
 
 
-local BATTLE_REWARDS_TXT = loc("Rewards", {}, {
-    context = "As in, the rewards after battle / level-up"
+local BATTLE_REWARDS_TXT = loc("Victory!", {}, {
+    context = "As in, the reward screen after battle victory"
 })
 
 local LEVEL_UP_TXT = loc("Level Up!", {}, {
@@ -88,10 +95,12 @@ local NEW_BLESSING = "{blessing_icon} " ..colStr .. loc("Get random Blessing!")
 
 local NEW_MANA =  "{mana_colorless_large} " .. colStr .. loc("Gain a Mana crystal!")
 
+local NEW_KEY = "{key_icon} " .. colStr .. loc("Gain a Key!")
+
 local MANA_AND_BLESSING = "{mana_colorless_large} {blessing_icon} " .. colStr .. loc("Choose Mana + Blessing!")
 
 local BROWN_COL = (objects.Color("FF9B6F57"))
-local DEMON_FURY = "{o}" .. loc("Increase {DEMON_FURY_COLOR}Demon Fury{/DEMON_FURY_COLOR} {demonfury_icon} by 1")
+local DEMON_FURY_TEXT = "{o}" .. loc("({DEMON_FURY_COLOR}Demon Fury{/DEMON_FURY_COLOR} {demonfury_icon} increased by %{amount})", {amount = 1})
 
 
 function RewardPanel:draw()
@@ -276,22 +285,35 @@ function RewardPanel:draw()
                 choicePopupService.set("mana")
                 table.remove(self.rewards, i)
             end)
+        elseif v.type == "keys" then
+            addBar(NEW_KEY, function()
+                local run = g.getRun()
+                run.keys = math.min(3, run.keys + (v.amount or 1))
+                table.remove(self.rewards, i)
+            end)
         elseif v.type == "mana_blessing" then
             addBar(MANA_AND_BLESSING, function()
                 choicePopupService.set("mana_blessing")
                 table.remove(self.rewards, i)
             end)
-        elseif v.type == "demon_fury" then
-            addSpacer()
-            addBar(DEMON_FURY, function()
-                local run = g.getRun()
-                run.demonFury = run.demonFury + v.amount
-                table.remove(self.rewards, i)
-            end, g.snapToPalette(objects.Color("FF361e19")))
         else
             error("Unknown reward type: "..tostring(v.type))
         end
     end
+
+    if self.demonFuryIncrease > 0 then
+        addSpacer()
+        box:add({
+            getHeight = function(w)
+                return boxH
+            end,
+            draw = function(x, y, w, h)
+                lg.setColor(1, 1, 1)
+                richtext.printRich(DEMON_FURY_TEXT, SMALL_FONT, x, y + pad, w - pad, "center")
+            end
+        })
+    end
+
 
     box:render(r.x,r.y)
 end
