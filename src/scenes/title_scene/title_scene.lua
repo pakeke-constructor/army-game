@@ -157,7 +157,7 @@ function title_scene:draw()
     lg.setColor(1, 1, 1, 1)
 
     local _, left = main:splitHorizontal(1, 2, 4)
-    local _, logoReg, _, bottom = left:splitVertical(1.5, 2, 0.5, 5, 1.5)
+    local _, logoReg, _, bottom = left:splitVertical(1.5, 2, 0.5, 3, 1.5)
     local buttonReg = bottom:splitHorizontal(4, 1)
     -- ui.debugRegion(logoReg)
     -- ui.debugRegion(buttonReg)
@@ -188,7 +188,8 @@ function title_scene:draw()
         else
             lg.setColor(1,1,1,1)
         end
-        richtext.printRichContainedNoWrap(button.name, smallFont, rx + (button.offsetX or 0), ry+10, rw, rh-20, "left")
+        local pad = 4
+        richtext.printRichContainedNoWrap(button.name, smallFont, rx + (button.offsetX or 0), ry+pad, rw, rh-pad*2, "left")
     end
 
     settingsPopupService.draw()
