@@ -193,18 +193,23 @@ end
 -------------------------------
 -- Bonus rewards (shown on hover, granted on battle win)
 -------------------------------
+local REWARD_GOLD_TXT = interp("{GOLD_COLOR}Bonus rewards:{/GOLD_COLOR} {coin_icon}{GOLD_COLOR} +%{amount}")
+local REWARD_XP_TXT = interp("{XP_COLOR}Bonus rewards:{/XP_COLOR} {xp_icon}{XP_COLOR} +%{amount}")
+local REWARD_BLESSING_TXT = loc("Bonus rewards:\nRandom Blessing {blessing_icon}")
+local REWARD_KEYS_TXT = interp("Bonus rewards: {key_icon} +%{amount}")
+
 --- Turn a reward descriptor into a richtext line for the hover tooltip.
 ---@param r g.RewardPanel.ORReward|g.RewardPanel.Any
 ---@return string
 local function describeReward(r)
     if r.type == "gold" then
-        return "{GOLD_COLOR}Bonus rewards:{/GOLD_COLOR} {coin_icon}{GOLD_COLOR} +" .. r.amount
+        return REWARD_GOLD_TXT({amount = r.amount})
     elseif r.type == "xp" then
-        return "{XP_COLOR}Bonus rewards:{/XP_COLOR} {xp_icon}{XP_COLOR} +" .. r.amount
+        return REWARD_XP_TXT({amount = r.amount})
     elseif r.type == "blessing" then
-        return "Bonus rewards:\nRandom Blessing {blessing_icon}"
+        return REWARD_BLESSING_TXT
     elseif r.type == "keys" then
-        return "Bonus rewards: {key_icon} +" .. (r.amount or 1)
+        return REWARD_KEYS_TXT({amount = r.amount or 1})
     end
     return ""
 end
