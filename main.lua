@@ -11,6 +11,7 @@ end
 ]]
 
 local heartbeat = require("lib.heartbeat.heartbeat")
+local heartbeatStared = false
 
 _G.lg = love.graphics
 _G.table.clear = require("table.clear")
@@ -211,9 +212,11 @@ function love.update(dt)
     iml.setPointer(love.mouse.getPosition())
     g.updateSfx()
     textPopupService.update(dt)
-    local sc = sceneManager.getCurrentScene()
+    local sc, scName = sceneManager.getCurrentScene()
     if sc and sc.update then
+        prof_push(scName..":update")
         sc:update(dt)
+        prof_pop() -- prof_push(scName..":updates")
     end
 
     prof_pop() -- prof_push("love.update")
@@ -233,10 +236,12 @@ function love.draw()
         love.window.setFullscreen(settings.isFullscreen(), "desktop")
     end
     lg.setShader(subpixel.shader)
-    local sc = sceneManager.getCurrentScene()
+    local sc, scName = sceneManager.getCurrentScene()
     if sc and sc.draw then
         iml.beginFrame()
+        prof_push(scName..":draw")
         sc:draw()
+        prof_pop() -- prof_push(scName..":draw")
         iml.endFrame()
         textPopupService.draw(ui.getUIScalingTransform())
         vignette.draw()
@@ -299,8 +304,11 @@ function love.keypressed(key, scancode, isrep)
         --     Profiler:toggle()
         -- end
         elseif scancode == "]" then
-            if not heartbeat.captureActive then
+            if not heartbeatStared then
                 heartbeat:StartCapture()
+                heartbeatStared = true
+            else
+                heartbeat.captureActive = not heartbeat.captureActive
             end
         end
     end
