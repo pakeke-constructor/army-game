@@ -104,7 +104,15 @@ function CardJuiceInstance:draw()
             end
 
             -- TODO: Probably some kind of glow/godrays here?
-            card.draw(newR)
+            local cx, cy = newR:getCenter()
+            local centeredR = newR:moveUnit(-cx, -cy)
+            local scale = 1 - parabolic(t0, 0.5)
+
+            lg.push()
+            lg.translate(cx, cy)
+            lg.scale(scale)
+            card.draw(centeredR)
+            lg.pop()
         else
             local cx, cy = card.startRegion:getCenter()
             local _, screenH = ui.getScaledUIDimensions()
