@@ -227,6 +227,8 @@ end
 local lastGC = 0
 
 function love.draw()
+    prof_push("love.draw")
+
     if settings.isFullscreen() ~= love.window.getFullscreen() then
         love.window.setFullscreen(settings.isFullscreen(), "desktop")
     end
@@ -261,6 +263,7 @@ function love.draw()
         love.graphics.setColor(1, 1, 1, 1)
     end
 
+    prof_pop() -- prof_push("love.draw")
     heartbeat:HeartbeatEnd()
 end
 

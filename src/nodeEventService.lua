@@ -388,6 +388,9 @@ local POPUP_DRAWERS = {
 }
 
 function nodeEventService.draw()
+    if not nodeEventService.isActive() then return end
+    prof_push("nodeEventService.draw")
+
     local chest = nodeEventService._chest
     if chest then
         chest:draw()
@@ -395,17 +398,21 @@ function nodeEventService.draw()
             nodeEventService._chest = nil
             g.addBlessing(chest.blessingId)
         end
+        prof_pop() -- prof_push("nodeEventService.draw")
         return
     end
 
     local ev = nodeEventService._activeRandomEventPass
     if ev then
-        return drawRandomEvent(ev)
+        drawRandomEvent(ev)
+        prof_pop() -- prof_push("nodeEventService.draw")
+        return
     end
     local drawer = POPUP_DRAWERS[nodeEventService._popup]
     if drawer then
-        return drawer()
+        drawer()
     end
+    prof_pop() -- prof_push("nodeEventService.draw")
 end
 
 

@@ -29,6 +29,7 @@ end
 
 function gameoverPopupService.draw()
     if not visible then return end
+    prof_push("gameoverPopupService.draw")
     -- Background overlay
     local fr = ui.getFullScreenRegion()
     iml.panel(fr:get())
@@ -63,6 +64,7 @@ function gameoverPopupService.draw()
         g.gotoScene("title_scene")
         visible = false
     end
+    prof_pop() -- prof_push("gameoverPopupService.draw")
 end
 
 return gameoverPopupService

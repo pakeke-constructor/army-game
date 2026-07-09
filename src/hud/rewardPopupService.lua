@@ -34,6 +34,7 @@ end
 
 function rewardPopupService.draw()
     if not active then return end
+    prof_push("rewardPopupService.draw")
     lg.setColor(0,0,0,0.7)
     lg.rectangle("fill", -1000,-1000, 9000,9000)
     active:draw()
@@ -42,6 +43,7 @@ function rewardPopupService.draw()
         -- auto-clear when no rewards left
         rewardPopupService.clear()
     end
+    prof_pop() -- prof_push("rewardPopupService.draw")
 end
 
 return rewardPopupService

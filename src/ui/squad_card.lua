@@ -97,6 +97,7 @@ local SWIPE = {
 ---@return number
 local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
     ui.assertUIStarted()
+    prof_push("drawSquadCard")
 
     local info = g.getSquadInfo(squadId)
     local def = g.getEntityDef(info.entityId)
@@ -475,6 +476,8 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
             richtext.printRichContainedNoWrap(str, font, txtReg:padUnit(4,4):get())
         end
     end
+
+    prof_pop() -- prof_push("drawSquadCard")
 
     return ret, ww,hh
 end
