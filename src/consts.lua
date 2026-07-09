@@ -69,8 +69,8 @@ consts.STARTING_COMMANDER = "sir_horse"
 consts.STARTING_MAP_TYPE = "forest"
 
 
-consts.DEMON_ENCOUNTER_PLUS1_CHANCE = 0.1 -- 30% chance for harder fight (+1 demonEncounter), and bonus rewards
-consts.DEMON_ENCOUNTER_PLUS2_CHANCE = 0.1 -- 10% chance for elite-fight, (+2 demonEncounter), and bonus rewards
+consts.DEMON_ENCOUNTER_PLUS1_CHANCE = 0.4 -- X% chance for harder fight (+1 demonEncounter), and bonus rewards
+consts.DEMON_ENCOUNTER_PLUS2_CHANCE = 0.2 -- X% chance for elite-fight, (+2 demonEncounter), and bonus rewards
 
 
 consts.MAX_SQUAD_COUNT = 10

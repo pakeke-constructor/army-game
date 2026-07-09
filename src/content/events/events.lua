@@ -145,7 +145,7 @@ Avoid
 
 local EVENT_TXT = loc("A blood red pool sits there, shimmering with demon magic. It seems hungry.")
 local EVENT_REACH_TXT = loc("Reach into the shallows")
-local EVENT_REACH = loc("+%{demon_fury} Demon Fury. Gain a Common blessing.", {demon_fury = 1})
+local EVENT_REACH = loc("+1 Demon Fury. Gain a Common blessing.")
 local EVENT_SQUAD_TXT = loc("Send a squad in")
 local EVENT_SQUAD = interp("%{squadName} is gone from your squads. Gain a Rare blessing.")
 local EVENT_AVOID_TXT = loc("Avoid")
@@ -171,9 +171,10 @@ defineEventType("blood_pool", EVENT_TXT, function(evPass)
         {EVENT_REACH_TXT, function(evPass)
             evPass:changeText(EVENT_REACH)
             evPass:setOptions({{EVENT_OK_BTN, function(evPass)
+                local run = g.getRun()
+                run.demonFury = run.demonFury + 1
                 rewardPopupService.genericReward({
                     {type = "blessing", rarityWeights = {COMMON = 1}},
-                    {type = "demon_fury", amount = 1}
                 })
                 evPass:leave()
             end}})
