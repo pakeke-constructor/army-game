@@ -105,10 +105,9 @@ end
 --- Registers an iml panel per node (under the camera transform) and
 --- returns the hovered node, plus whether it was just clicked.
 ---@param graph MapGraph
----@param clearCells table<integer, table<integer, number>>
 ---@return MapNode? hovered
 ---@return MapNode? clicked
-local function updateNodePanels(graph, clearCells)
+local function updateNodePanels(graph)
     local size = graph.distanceBetweenNodes * HOVER_DIST_FRAC
     local mx, my = iml.getTransformedPointer()
     ---@type MapNode?
@@ -116,12 +115,9 @@ local function updateNodePanels(graph, clearCells)
     local distance = math.huge
     local hovered, clicked = nil, nil
     graph:forEachNode(function(node)
+        if not node.seen then return end
+
         local nx, ny = graph:getDrawPos(node)
-        local cx = math.floor(nx / FOG_STEP)
-        local cy = math.floor(ny / FOG_STEP)
-        if not (clearCells and clearCells[cx] and clearCells[cx][cy]) then
-            return
-        end
         local d = helper.magnitude(nx - mx, ny - my)
         -- Do a circle distance check to select potential node.
         if d <= size and d < distance then
@@ -269,7 +265,8 @@ function map_scene:_updateFogReveal(dt)
     end
 end
 
-function map_scene:_buildFogClearCells()
+---@param view {x:number,y:number,w:number,h:number}
+function map_scene:_buildFogClearCells(view)
     prof_push("map_scene:_buildFogClearCells")
 
     local run = g.getRun()
@@ -285,16 +282,18 @@ function map_scene:_buildFogClearCells()
             local reveal = self.fogReveal[node]
             if reveal == nil then reveal = 1 end
             local nx, ny = graph:getDrawPos(node)
-            local cx = math.floor(nx / FOG_STEP)
-            local cy = math.floor(ny / FOG_STEP)
-            for dx = -clearCells, clearCells do
-                local row = cells[cx + dx]
-                if not row then
-                    row = {}
-                    cells[cx + dx] = row
-                end
-                for dy = -clearCells, clearCells do
-                    row[cy + dy] = math.max(row[cy + dy] or 0, reveal)
+            if isPointVisible(nx, ny, view, FOG_CLEAR_RADIUS + FOG_STEP) then
+                local cx = math.floor(nx / FOG_STEP)
+                local cy = math.floor(ny / FOG_STEP)
+                for dx = -clearCells, clearCells do
+                    local row = cells[cx + dx]
+                    if not row then
+                        row = {}
+                        cells[cx + dx] = row
+                    end
+                    for dy = -clearCells, clearCells do
+                        row[cy + dy] = math.max(row[cy + dy] or 0, reveal)
+                    end
                 end
             end
         end
@@ -618,12 +617,12 @@ function map_scene:draw()
             w = view.w,
             h = view.h,
         }
-        local clearCells = self:_buildFogClearCells()
+        local clearCells = self:_buildFogClearCells(fogRegion)
 
         -- hover highlight: path from player to hovered node
         local pnode = graph:getPlayerNode()
         if pnode then
-            local hovered, clicked = updateNodePanels(graph, clearCells)
+            local hovered, clicked = updateNodePanels(graph)
             if clicked then self:travelTo(graph, pnode, clicked) end
             if (not self.traveling) and hovered and hovered ~= pnode then
                 local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, PATH_SEARCH_DEPTH)
