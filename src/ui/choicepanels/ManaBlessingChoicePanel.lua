@@ -1,4 +1,5 @@
 local Picker = require("src.modules.Picker")
+local cardJuiceService = require("src.cardJuiceService")
 
 local ChoicePanelCommon = require(".common")
 
@@ -13,6 +14,9 @@ function ManaBlessingChoicePanel:init(rarityWeights)
     self.choiceCreatedAt = {}
     self.rarityWeights = rarityWeights or consts.DEFAULT_RARITY_WEIGHTS
     self.createdAt = love.timer.getTime()
+    ---@type integer|nil
+    self.selected = nil
+    self.cj = cardJuiceService.CardJuiceInstance()
 
     for _ = 1, ChoicePanelCommon.NUM_CHOICES do
         self.choiceCreatedAt[#self.choiceCreatedAt+1] = self.createdAt
@@ -71,9 +75,40 @@ local MANABLESSING_PICK_TXT = loc("Pick one blessing!")
 local MANA_PLUS_TXT = loc("+1")
 local BONUS_TEXT = interp("Bonus %{s}")
 
+---@param reg kirigami.Region
+---@param i integer
+---@return kirigami.Region
+local function getChoiceRegion(reg, i)
+    local offX = helper.lerp(-0.15, 0.15, (i - 1) % 2)
+    return reg:moveRatio(offX, -0.1)
+end
+
+---@param pair {mana:string,blessing:string}
+---@param reg kirigami.Region
+---@param i integer
+---@return boolean
+function ManaBlessingChoicePanel:_drawChoice(pair, reg, i)
+    local cardR, infoR = reg:splitVertical(8, 3)
+    local clicked = iml.wasJustClicked(reg:get())
+    if iml.isHovered(reg:get()) then
+        cardR = cardR:moveUnit(0, -3)
+    end
+    local clickedBlessing, _, cardH = ui.drawBlessingCard(pair.blessing, cardR:padRatio(0.02), i)
+
+    local x, y, w, h = infoR:padRatio(0.08):get()
+    local textY = y + h * 0.15 + math.max(cardH - cardR.h, 0)
+    local manaFont = g.getBigFont(16)
+    richtext.printRichContainedNoWrap(
+        BONUS_TEXT({s = "{o}" .. MANA_PLUS_TXT .. " {" .. pair.mana .. "}"}),
+        manaFont,
+        x, textY, w, h * 0.7
+    )
+
+    return clicked or clickedBlessing
+end
+
 function ManaBlessingChoicePanel:draw()
     local r = ui.getFullScreenRegion()
-    local cardArea = r
 
     if #self.choices == 0 then
         -- RIP in Pepperoni but safety handler must be done
@@ -81,7 +116,7 @@ function ManaBlessingChoicePanel:draw()
     end
 
     iml.panel(r:get())
-    cardArea = cardArea:padRatio(0.05, 0.1)
+    local cardArea = r:padRatio(0.05, 0.1)
 
     -- Top text
     local titleFont = g.getBigFont(16)
@@ -91,6 +126,19 @@ function ManaBlessingChoicePanel:draw()
     cardArea = cardArea:padRatio(0.03, 0.02)
     titleR = titleR:padRatio(0.4)
     richtext.printRichContainedNoWrap("{o}{bob}" .. MANABLESSING_PICK_TXT, titleFont, titleR:get())
+
+    if self.cj:hasAnimationBegun() then
+        self.cj:draw()
+
+        if self.cj:isAnimationFinished() then
+            local pair = self.choices[self.selected]
+            g.addBlessing(pair.blessing)
+            g.addPermanentMana(pair.mana)
+            return true
+        end
+
+        return false
+    end
 
     local regions = cardArea:grid(ChoicePanelCommon.NUM_CHOICES, 1)
     local cx = cardArea.x + cardArea.w / 2
@@ -104,14 +152,14 @@ function ManaBlessingChoicePanel:draw()
         local scale = 0.5 + 0.5 * t
         local rr = regions[i]
         rr = rr:padRatio(0.15):shrinkToAspectRatio(1,1)
-        local targetCx = rr.x + rr.w / 2
+        local targetCx = rr.x + rr.w / 2 + ox
         local targetCy = rr.y + rr.h / 2
         local animCx = cx + (targetCx - cx) * t
         local animCy = cy + (targetCy - cy) * t
-        local dx = animCx - targetCx
+        local dx = animCx - (rr.x + rr.w / 2)
         local dy = animCy - targetCy
         rr = rr:padRatio(1 - scale)
-        regions[i] = rr:moveUnit(dx + ox, dy)
+        regions[i] = rr:moveUnit(dx, dy)
     end
 
     lg.setColor(1, 1, 1, 0.8)
@@ -129,29 +177,25 @@ function ManaBlessingChoicePanel:draw()
     for i, pair in ipairs(self.choices) do
         ---@diagnostic disable-next-line: cast-type-mismatch
         ---@cast pair {mana:string,blessing:string}
-        local offX = helper.lerp(-0.15, 0.15, (i - 1) % 2)
-        local reg = regions[i]:moveRatio(offX, -0.1)
-        local cardR, infoR = reg:splitVertical(8, 3)
-        local clicked = iml.wasJustClicked(reg:get())
-        if iml.isHovered(reg:get()) then
-            cardR = cardR:moveUnit(0, -3)
-        end
-        local clickedBlessing, _, cardH = ui.drawBlessingCard(pair.blessing, cardR:padRatio(0.02), i)
-
-        local x, y, w, h = infoR:padRatio(0.08):get()
-        local textY = y + h * 0.15 + math.max(cardH - cardR.h, 0)
-        local manaFont = g.getBigFont(16)
-        richtext.printRichContainedNoWrap(
-            BONUS_TEXT({s = "{o}" .. MANA_PLUS_TXT .. " {" .. pair.mana .. "}"}),
-            manaFont,
-            x, textY, w, h * 0.7
-        )
-
-        if clicked or clickedBlessing then
+        local choiceR = getChoiceRegion(regions[i], i)
+        if self:_drawChoice(pair, choiceR, i) then
             g.playUISound("ui_click_basic", 1.4, 0.8)
-            g.addBlessing(pair.blessing)
-            g.addPermanentMana(pair.mana)
-            return true
+            self.selected = i
+
+            -- Spawn cards
+            for j, otherPair in ipairs(self.choices) do
+                ---@diagnostic disable-next-line: cast-type-mismatch
+                ---@cast otherPair {mana:string,blessing:string}
+                local otherChoiceR = getChoiceRegion(regions[j], j)
+                if i ~= j then
+                    self.cj:spawnCardUnselected(otherChoiceR, j, function(r)
+                        return self:_drawChoice(otherPair, r, j)
+                    end)
+                end
+            end
+            self.cj:spawnCardSelected(choiceR, i, function(r)
+                return self:_drawChoice(pair, r, i)
+            end)
         end
     end
 
