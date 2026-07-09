@@ -4,7 +4,7 @@
 if love._os == "Android" and jit then jit.off() jit.flush() end
 local isMobile = love._os == "Android" or love._os == "iOS"
 
-local isFullscreen = false
+local isFullscreen = true
 if isMobile then
     isFullscreen  = true
 end

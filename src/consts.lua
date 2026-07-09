@@ -15,7 +15,9 @@ consts.MAX_PLAYING_SOURCES = 14
 consts.SQUAD_SPACING = 20
 consts.LAGGED_HEALTHBAR_DURATION = 0.25
 
-consts.MAX_SQUAD_LEVEL = 6
+consts.SETTINGS_FILE = "settings.json"
+
+consts.MAX_SQUAD_LEVEL = 9
 
 consts.GRAVITY = 300
 
