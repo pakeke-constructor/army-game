@@ -195,8 +195,8 @@ end
 -------------------------------
 local REWARD_GOLD_TXT = interp("{GOLD_COLOR}Bonus rewards:{/GOLD_COLOR} {coin_icon}{GOLD_COLOR} +%{amount}")
 local REWARD_XP_TXT = interp("{XP_COLOR}Bonus rewards:{/XP_COLOR} {xp_icon}{XP_COLOR} +%{amount}")
-local REWARD_BLESSING_TXT = loc("Bonus rewards:\nRandom Blessing {blessing_icon}")
-local REWARD_KEYS_TXT = interp("Bonus rewards: {key_icon} +%{amount}")
+local REWARD_BLESSING_TXT = loc("{BLESSING_COLOR}Bonus reward:\nRandom Blessing{/BLESSING_COLOR} {blessing_icon}")
+local REWARD_KEYS_TXT = interp("{KEY_COLOR}Bonus reward: +%{amount}{/KEY_COLOR} {key_icon}")
 
 --- Turn a reward descriptor into a richtext line for the hover tooltip.
 ---@param r g.RewardPanel.ORReward|g.RewardPanel.Any

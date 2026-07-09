@@ -3813,6 +3813,8 @@ g.COLORS = {
 
     GOLD = objects.Color("FFD8B01F"),
     XP = objects.Color("FF2BC66E"),
+    KEY = g.snapToPalette(objects.Color("FF755555")),
+    BLESSING = g.snapToPalette(objects.Color("FFBF2A90")),
     DARK_UI = objects.Color("FF0c0c19"),
     DEMON_FURY = g.snapToPalette(objects.Color("FF991A1A")),
 }
