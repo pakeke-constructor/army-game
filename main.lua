@@ -147,6 +147,7 @@ function love.load()
     assertValid()
     sceneManager.loadScenes()
     sceneManager.gotoScene("title_scene")
+    settings.load()
     love.window.setFullscreen(settings.isFullscreen())
     for _, a in ipairs(arg or {}) do
         local port = a:match("^%-%-devport=(%d+)$")

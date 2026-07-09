@@ -1,4 +1,5 @@
 local particles = require("src.modules.particles.particles")
+local settingsPopupService = require("src.hud.settings")
 
 local lg = love.graphics
 -- local root
@@ -68,7 +69,7 @@ local buttons = {
     {
         name = loc("SETTINGS"),
         onClick = function ()
-            error("todo")
+            settingsPopupService.show()
         end
     },
     {
@@ -101,6 +102,10 @@ function title_scene:enter()
         embers.proxy.y = love.math.random()                        -- scatter up the screen
         embers.proxy.lifetime = love.math.random()*embers.proxy.maxLife -- stagger deaths
     end
+end
+
+function title_scene:keypressed(k)
+    settingsPopupService.keypressed(k)
 end
 
 function title_scene:update(dt)
@@ -185,6 +190,8 @@ function title_scene:draw()
         end
         richtext.printRichContainedNoWrap(button.name, smallFont, rx + (button.offsetX or 0), ry+10, rw, rh-20, "left")
     end
+
+    settingsPopupService.draw()
 
     ui.endUI()
 
