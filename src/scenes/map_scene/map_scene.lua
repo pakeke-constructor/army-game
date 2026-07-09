@@ -669,7 +669,9 @@ function map_scene:draw()
     iml.popTransform()
     self.pixelCanvas:finish()
 
-    ambienceService.draw(self.camera:getTransform())
+    if not g.isAnyPopupOpen() then
+        ambienceService.draw(self.camera:getTransform())
+    end
 
     ui.startUI()
     self.hud:drawUI({ mapScene = true })
