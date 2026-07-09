@@ -125,6 +125,8 @@ end
 
 
 function juiceService.draw()
+    prof_push("juiceService.draw")
+
     for i = 1, #arcs do
         local arc = arcs[i]
         local c = arc.color
@@ -136,6 +138,8 @@ function juiceService.draw()
         g.drawImage("arc_particle", arc.x, arc.y, arc.rot)
     end
     lg.setColor(1, 1, 1, 1)
+
+    prof_pop() -- prof_push("juiceService.draw")
 end
 
 return juiceService

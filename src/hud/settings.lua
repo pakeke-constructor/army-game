@@ -128,6 +128,7 @@ end
 
 function settingsPopupService.draw()
     if not visible then return end
+    prof_push("settingsPopupService.draw")
 
     -- Background overlay
     lg.setColor(0, 0, 0, 0.2)
@@ -177,6 +178,7 @@ function settingsPopupService.draw()
     if ui.DefaultButton(TEXT.CLOSE, buttonR) then
         visible = false
     end
+    prof_pop() -- prof_push("settingsPopupService.draw")
 end
 
 return settingsPopupService

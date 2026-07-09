@@ -34,6 +34,7 @@ function textPopups.addPopup(x, y, richtxt, args)
 end
 
 function textPopups.update(dt)
+    prof_push("textPopupService.update")
     for i = #popups, 1, -1 do
         local p = popups[i]
         p.time = p.time + dt
@@ -47,9 +48,11 @@ function textPopups.update(dt)
             table.remove(popups, i)
         end
     end
+    prof_pop() -- prof_push("textPopupService.update")
 end
 
 function textPopups.draw(transform)
+    prof_push("textPopupService.draw")
     love.graphics.push()
     love.graphics.origin()
     if transform then
@@ -66,6 +69,7 @@ function textPopups.draw(transform)
     end
     love.graphics.setColor(1, 1, 1, 1)
     love.graphics.pop()
+    prof_pop() -- prof_push("textPopupService.draw")
 end
 
 return textPopups

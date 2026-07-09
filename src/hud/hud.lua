@@ -615,6 +615,8 @@ end
 
 ---@param opt g.hudArgs
 function HUD:drawUI(opt)
+    prof_push("HUD:drawUI")
+
     self.battleStarted = opt.battleStarted or false
     drawTopBar()
 
@@ -639,6 +641,8 @@ function HUD:drawUI(opt)
     statUpgradePopupService.draw()
     gameoverPopupService.draw()
     hoverService.draw()
+
+    prof_pop() -- prof_push("HUD:drawUI")
 end
 
 --- Returns the current selection: either a spell or a squad.

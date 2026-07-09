@@ -184,6 +184,8 @@ end
 
 ---@param transform love.Transform camera transform (for pixel-perfect world-space rendering)
 function ambienceService.draw(transform)
+    prof_push("ambienceService.draw")
+
     local additionalAmbientService = getAdditionalAmbientService()
     if additionalAmbientService then
         additionalAmbientService.draw(transform)
@@ -238,6 +240,8 @@ function ambienceService.draw(transform)
     lg.setColor(1, 1, 1, CLOUD_ALPHA)
     lg.draw(cloudCanvas)
     lg.setColor(1, 1, 1, 1)
+
+    prof_pop() -- prof_push("ambienceService.draw")
 end
 
 return ambienceService

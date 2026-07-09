@@ -39,13 +39,16 @@ end
 
 function choicePopupService.draw()
     if not active then return end
+    prof_push("choicePopupService.draw")
     lg.setColor(0,0,0,0.7)
     lg.rectangle("fill", -1000,-1000, 9000,9000)
     local done = active:draw()
     if done then
         active = nil
+        prof_pop() -- prof_push("choicePopupService.draw")
         return true
     end
+    prof_pop() -- prof_push("choicePopupService.draw")
 end
 
 return choicePopupService

@@ -432,7 +432,10 @@ local function sortOrder(a, b)
     return ya < yb
 end
 
+---@param transform love.Transform
 function ECSWorld:draw(transform)
+    prof_push("ECSWorld:draw")
+
     g.setCurrentECS(self)
     if transform then
         self.backCanvas:start(transform)
@@ -484,6 +487,8 @@ function ECSWorld:draw(transform)
     if transform then
         self.frontCanvas:finish()
     end
+
+    prof_pop() -- prof_push("ECSWorld:draw")
 end
 
 
