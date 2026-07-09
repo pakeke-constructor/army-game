@@ -101,7 +101,10 @@ end
 ---@param r kirigami.Region -- world-space
 ---@param fogColor objects.Color
 ---@param hasFog fun(x:number,y:number):boolean
-function fogService.renderFog(r, fogColor, hasFog)
+---@param getFogAlpha? fun(x:number,y:number):number
+function fogService.renderFog(r, fogColor, hasFog, getFogAlpha)
+    prof_push("fogService.renderFog")
+
     local t = love.timer.getTime()
     local x1 = math.floor(r.x / FOG_STEP) * FOG_STEP - FOG_EXPAND_CELLS * FOG_STEP
     local y1 = math.floor(r.y / FOG_STEP) * FOG_STEP - FOG_EXPAND_CELLS * FOG_STEP
@@ -141,7 +144,9 @@ function fogService.renderFog(r, fogColor, hasFog)
     -- layer FOG_LAYER_MAX -> 1 so deeper fog is added (drawn) behind edges
     for layer = FOG_LAYER_MAX, 1, -1 do
         local col = fogColor:darken((FOG_LAYER_MAX - layer) * FOG_DARKEN_PER_LAYER)
-        batch:setColor(col[1], col[2], col[3], OPACITY)
+        if not getFogAlpha then
+            batch:setColor(col[1], col[2], col[3], OPACITY)
+        end
         for gx = 0, w - 1 do
             for gy = 0, h - 1 do
                 local v = a:get(gx, gy)
@@ -163,6 +168,10 @@ function fogService.renderFog(r, fogColor, hasFog)
                         local ox = (i % 19) - 10
                         local oy = (hashCell(x, y, 5) % 19) - 10
                         local fq = quads[i % #FOGS + 1]
+                        if getFogAlpha then
+                            local alpha = helper.clamp(getFogAlpha(x, y) or 1, 0, 1)
+                            batch:setColor(col[1], col[2], col[3], OPACITY * alpha)
+                        end
                         batch:add(fq.quad, x + ox, y + oy, math.sin(t + (i % 10) / 3), 1.5, 1.5, fq.ox, fq.oy)
                     end
                 end
@@ -172,6 +181,8 @@ function fogService.renderFog(r, fogColor, hasFog)
 
     lg.setColor(1, 1, 1, 1)
     lg.draw(batch)
+
+    prof_pop() -- prof_push("fogService.renderFog")
 end
 
 
