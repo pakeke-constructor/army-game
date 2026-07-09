@@ -1,6 +1,6 @@
 local settings = {}
 
-local fullscreen = false
+local fullscreen = true
 local language = "en"
 
 function settings.isFullscreen()
