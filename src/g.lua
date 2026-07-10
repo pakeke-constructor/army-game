@@ -2226,6 +2226,7 @@ function g.healEntity(ent, healAmount, healerEnt)
         ent._timeSinceHealed = 0
         g.call("entityHealed", ent, finalHeal, healerEnt)
         g.call("onHitHeal", healerEnt, finalHeal, ent)
+        g.playWorldSound("battle_heal", 1+love.math.random(-20, 20)/100)
     end
 end
 
