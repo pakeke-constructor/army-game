@@ -769,6 +769,48 @@ g.defineSquad("mini_ice_golem_squad", {
 })
 
 
+g.defineSquad("lightning_wizard_squad", {
+    name = "Lightning Wizard",
+    rarity = g.RARITIES.RARE,
+    tags = {"lightning", "ranged", "projectile", "attack_damage", "magic"},
+    entityDef = {
+        image = g.leo("lightningwizard_unit", "icemage"),
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "ranged",
+            projectileType = "arrow",
+            projectileSpeed = 400,
+        },
+        weapon = {
+            image = g.leo("lightningwizard_staff", "icemage_staff"),
+            type = "staff",
+        },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 0.65,
+        baseAttackRange = 230,
+        baseMoveSpeed = 50,
+        baseMaxHealth = 12,
+        baseMagic = 8,
+    },
+    statUpgradeScaling = {magic = 0.25},
+    unitCount = 1,
+    icon = g.leo("lightningwizard_uniticon", "icemage_uniticon"),
+    perks = {{
+        name = "Chain Lightning",
+        description = loc("On-hit, emit lightning dealing damage equal to (MAGK)."),
+        image = "coin_icon",
+        handlers = {
+            onHitDamage = function(ent, damage, target)
+                if target and g.isAlive(target) then
+                    g.lightning(target.x, target.y, ent.magic or 0, ent, 5)
+                end
+            end,
+        },
+    }},
+    cost = {blue = 2},
+})
+
+
 g.defineSquad("ice_mage_squad", {
     name = "Ice Mage",
     rarity = g.RARITIES.UNCOMMON,
