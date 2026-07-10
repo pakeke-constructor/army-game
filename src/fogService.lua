@@ -78,6 +78,9 @@ local function step(src, dst, allowBigger)
     end
 end
 
+---@param wx number
+---@param wy number
+---@param salt integer
 local function hashCell(wx, wy, salt)
     local gx = math.floor(wx / FOG_STEP)
     local gy = math.floor(wy / FOG_STEP)
@@ -99,6 +102,8 @@ end
 
 local batch -- persistent SpriteBatch over the atlas; lazy-init
 local fogQuads -- cached quads + center-origins for FOGS
+---@type integer[][]
+local fogLayerCells = {}
 local function getFogQuads()
     if not fogQuads then
         fogQuads = {}
@@ -159,44 +164,60 @@ function fogService.renderFog(r, fogColor, hasFog, getFogAlpha)
     batch:clear()
 
     -- layer FOG_LAYER_MAX -> 1 so deeper fog is added (drawn) behind edges
-    prof_push("fogtripleloop")
+    for layer = 1, FOG_LAYER_MAX do
+        fogLayerCells[layer] = fogLayerCells[layer] or {}
+        table.clear(fogLayerCells[layer])
+    end
+
+    prof_push("fogassigncell")
+    for gx = 0, w - 1 do
+        for gy = 0, h - 1 do
+            local v = a:get(gx, gy)
+            if v ~= nil then
+                local x = x1 + gx * FOG_STEP
+                local y = y1 + gy * FOG_STEP
+                local j = hashCell(x, y, 2)
+                if j % FOG_VARIATION_MOD == 0 then
+                    v = v + 1
+                end
+                local k = hashCell(x, y, 3)
+                if k % FOG_VARIATION_MOD == 0 then
+                    v = v + 1
+                end
+
+                local lv = helper.clamp(v, 1, FOG_LAYER_MAX)
+                local cells = fogLayerCells[lv]
+                local ci = #cells
+                cells[ci + 1] = x
+                cells[ci + 2] = y
+                cells[ci + 3] = k
+            end
+        end
+    end
+    prof_pop() -- prof_push("fogassigncell")
+
+    prof_push("fogdraw")
     for layer = FOG_LAYER_MAX, 1, -1 do
         local col = fogColor:darken((FOG_LAYER_MAX - layer) * FOG_DARKEN_PER_LAYER)
         if not getFogAlpha then
             batch:setColor(col[1], col[2], col[3], OPACITY)
         end
-        for gx = 0, w - 1 do
-            for gy = 0, h - 1 do
-                local v = a:get(gx, gy)
-                if v ~= nil then
-                    local x = x1 + gx * FOG_STEP
-                    local y = y1 + gy * FOG_STEP
-                    local j = hashCell(x, y, 2)
-                    if j % FOG_VARIATION_MOD == 0 then
-                        v = v + 1
-                    end
-                    local k = hashCell(x, y, 3)
-                    if k % FOG_VARIATION_MOD == 0 then
-                        v = v + 1
-                    end
-
-                    local lv = math.max(1, math.min(FOG_LAYER_MAX, v))
-                    if lv == layer then
-                        local i = k
-                        local ox = (i % 19) - 10
-                        local oy = (hashCell(x, y, 5) % 19) - 10
-                        local fq = quads[i % #FOGS + 1]
-                        if getFogAlpha then
-                            local alpha = helper.clamp(getFogAlpha(x, y) or 1, 0, 1)
-                            batch:setColor(col[1], col[2], col[3], OPACITY * alpha)
-                        end
-                        batch:add(fq.quad, x + ox, y + oy, math.sin(t + (i % 10) / 3), 1.5, 1.5, fq.ox, fq.oy)
-                    end
-                end
+        local cells = fogLayerCells[layer]
+        for ci = 1, #cells, 3 do
+            local x = cells[ci]
+            local y = cells[ci + 1]
+            local i = cells[ci + 2]
+            local ox = (i % 19) - 10
+            local oy = (hashCell(x, y, 5) % 19) - 10
+            local fq = quads[i % #FOGS + 1]
+            if getFogAlpha then
+                local alpha = helper.clamp(getFogAlpha(x, y) or 1, 0, 1)
+                batch:setColor(col[1], col[2], col[3], OPACITY * alpha)
             end
+            batch:add(fq.quad, x + ox, y + oy, math.sin(t + (i % 10) / 3), 1.5, 1.5, fq.ox, fq.oy)
         end
     end
-    prof_pop() -- prof_push("fogtripleloop")
+    prof_pop() -- prof_push("fogdraw")
 
     lg.setColor(1, 1, 1, 1)
     lg.draw(batch)
