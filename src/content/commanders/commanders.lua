@@ -142,7 +142,7 @@ g.defineCommander("druidcommander", "Druid Lady", {
                 projectileSpeed = 240, -- slow-moving fire
             },
             baseAttackDamage = 1,
-            baseAttackSpeed = 1,
+            baseAttackSpeed = 0.45,
             baseAttackRange = 700, -- slightly less than octopus commander
             baseMoveSpeed = 85,
             baseMaxHealth = 160,
