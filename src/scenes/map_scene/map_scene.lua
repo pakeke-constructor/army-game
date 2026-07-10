@@ -541,11 +541,11 @@ local function addCommander(scene, graph, pnode, builder)
         local trav = scene.traveling
         cx = trav.ax + (trav.bx - trav.ax) * trav.t
         cy = trav.ay + (trav.by - trav.ay) * trav.t
-        -- scale the gallop by the commander's walk overrides, relative to the battle defaults
-        local cw = cinfo.squadDef.entityDef.commanderWalk or {}
-        local bounceMul = (cw.bounceHeight or WALK_DEFAULT_BOUNCE) / WALK_DEFAULT_BOUNCE
-        local tiltMul = (cw.bounceRotation or WALK_DEFAULT_ROTATION) / WALK_DEFAULT_ROTATION
-        local speedMul = (cw.speed or WALK_DEFAULT_SPEED) / WALK_DEFAULT_SPEED
+        -- scale the gallop by the commander's walkAnimation overrides, relative to the battle defaults
+        local wa = cinfo.squadDef.entityDef.walkAnimation or {}
+        local bounceMul = (wa.bounceHeight or WALK_DEFAULT_BOUNCE) / WALK_DEFAULT_BOUNCE
+        local tiltMul = (wa.rotationAmount or WALK_DEFAULT_ROTATION) / WALK_DEFAULT_ROTATION
+        local speedMul = (wa.speed or WALK_DEFAULT_SPEED) / WALK_DEFAULT_SPEED
         local phase = scene.gallop * speedMul
         r = math.sin(phase) * GALLOP_TILT * tiltMul * scene.commanderFacing
         bounce = -math.abs(math.sin(phase)) * GALLOP_BOUNCE * bounceMul

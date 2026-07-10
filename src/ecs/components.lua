@@ -124,14 +124,10 @@ local shadow = {
     opacity = 0.6,
 }
 
+-- a def may set any of these directly (partial ok); missing fields are auto-filled from sprite height
 ---@class ecs.components.WalkAnimation
----@field public bounceHeight number
----@field public rotationAmount number
----@field public speed number
-
----@class ecs.components.CommanderWalk overrides for the auto-generated walk animation
 ---@field public bounceHeight number? how high the unit bounces while walking
----@field public bounceRotation number? how much the unit rocks side to side
+---@field public rotationAmount number? how much the unit rocks side to side
 ---@field public speed number? walk cycle speed
 
 ---@class ecs.Components
@@ -141,7 +137,6 @@ local shadow = {
 ---@field public weapon ecs.components.Weapon?
 ---@field public shadow ecs.components.Shadow?
 ---@field public walkAnimation ecs.components.WalkAnimation?
----@field public commanderWalk ecs.components.CommanderWalk?
 ---@field public _walkTime number?
 ---@field public _isMoving boolean? true while the entity is actively moving toward its target (drives walk animation)
 ---@field public faceDir integer?

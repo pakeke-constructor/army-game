@@ -2099,7 +2099,7 @@ function g.spawnEntityWithInit(id, x, y, initFunc, ...)
         local baseSx = math.abs(ent.sx or 1)
         ent.sx = (love.math.random() < 0.5) and -baseSx or baseSx
     end
-    if ent.ai and (not ent.walkAnimation) and (not ent.isBuilding) then
+    if ent.ai and (not ent.isBuilding) then
         local h = 30
         if ent.image then
             local _, ih = g.getImageSize(ent.image)
@@ -2107,11 +2107,12 @@ function g.spawnEntityWithInit(id, x, y, initFunc, ...)
         end
         -- normal units ~30 tall = scale 1; bigger = heavier
         local scale = math.max(1, h / 30)
-        local cw = ent.commanderWalk or {}
+        -- a def may set walkAnimation directly (partial ok); fill missing fields
+        local wa = ent.walkAnimation
         ent.walkAnimation = {
-            bounceHeight = cw.bounceHeight or (2.5 / scale),
-            rotationAmount = cw.bounceRotation or (0.12 / scale),
-            speed = cw.speed or (11 / scale),
+            bounceHeight = wa and wa.bounceHeight or (2.5 / scale),
+            rotationAmount = wa and wa.rotationAmount or (0.12 / scale),
+            speed = wa and wa.speed or (11 / scale),
         }
     end
     ecs:addEntity(ent)
@@ -2258,7 +2259,7 @@ function g.dealDamage(target, damage, attacker, ignoreQuestionBuses)
         g.call("onHitDamage", attacker, damage, target, false)
     end
     g.call("entityHurt", target, damage)
-    g.playWorldSound("battle_splat", 1+love.math.random(-20, 20)/100)
+    g.playWorldSound("battle_hit2", 1+love.math.random(-20, 20)/100)
 
     if attacker and attacker.lifesteal then
         g.healEntity(attacker, damage * attacker.lifesteal, attacker)
