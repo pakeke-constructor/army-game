@@ -63,34 +63,6 @@ g.defineSquad("human_lumberjack_squad", {
     cost = {green = 1},
 })
 
-g.defineSquad("human_archer_squad", {
-    name = "Human Archers",
-    rarity = g.RARITIES.COMMON,
-    -- tags: ranged, projectile (basic ranged)
-    tags = {"ranged", "projectile"},
-    entityDef = {
-        image = g.leo("human_archer_unit", "longbowman"),
-        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-        attack = {
-            attackType = "ranged",
-            projectileType = "arrow",
-            projectileSpeed = 350,
-        },
-        weapon = {
-            image = "longbow",
-            type = "bow",
-        },
-        baseAttackDamage = 1,
-        baseAttackSpeed = 0.6,
-        baseAttackRange = 130,
-        baseMoveSpeed = 55,
-        baseMaxHealth = 5,
-    },
-    unitCount = 4,
-    startingTraits = {"human"},
-    cost = {green = 1},
-})
-
 
 g.defineSquad("druid_squad", {
     name = "Druids",

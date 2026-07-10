@@ -10,7 +10,7 @@ g.defineCommander("sir_horse", "Sir Horse", {
         green = 2
     },
 
-    image = "sir_horse",
+    image = "sirhorse",
 
     squadDef = {
         rarity = g.RARITIES.COMMANDER,
@@ -19,12 +19,13 @@ g.defineCommander("sir_horse", "Sir Horse", {
         statUpgradeScaling = {
             maxHealth = 0.25,
         },
+        icon = g.leo"sirhorse_uniticon",
         entityDef = {
-            image = "sir_horse",
+            image = "sirhorse",
             isCommander = true,
             weapon = {
                 type = "spear",
-                image = "sir_horse_spear"
+                image = "sirhorse_spear"
             },
             attack = {
                 attackType = "melee",
@@ -69,6 +70,7 @@ g.defineCommander("druidcommander", "Druid Lady", {
         statUpgradeScaling = {
             maxHealth = 0.25,
         },
+        icon = g.leo"druidcommander_uniticon",
         entityDef = {
             image = "druidcommander",
             isCommander = true,
@@ -126,6 +128,7 @@ g.defineCommander("mechcommander", "The Mech Goblin", {
         statUpgradeScaling = {
             maxHealth = 0.25,
         },
+        icon = g.leo"mechcommander_uniticon",
         entityDef = {
             onHitDamage = function(ent, damage, target)
                 g.lightning(target.x, target.y, damage * 0.5, nil, 5)
@@ -177,6 +180,7 @@ g.defineCommander("lizardcommander", "Lizard Lord", {
         statUpgradeScaling = {
             maxHealth = 0.25,
         },
+        icon = g.leo"lizardcommander_uniticon",
         entityDef = {
             image = "lizardcommander",
             isCommander = true,
