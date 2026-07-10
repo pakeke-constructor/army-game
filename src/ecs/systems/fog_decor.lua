@@ -18,7 +18,6 @@ local function defineBiomeDeco(biomeId, t)
     biomeDecoDef[biomeId] = t
 end
 
-local spawnedEnts = {}
 
 -- forest deco
 -----
@@ -83,15 +82,15 @@ defineBiomeDeco("hell", {
 })
 
 ---@param world ecs.ECSWorld
-local function spawnDecor(world)
+local function spawnFogDecorations(world)
+    local decorations = {}
     local w, h = world.boundingBox[3], world.boundingBox[4]
 
     local map = g.getMapType()
     local zoneId = map.name or "forest"
 
     local function spawnRandomPatch(x, y, entId)
-        local ent = g.spawnEntity(entId, x, y)
-        spawnedEnts[#spawnedEnts + 1] = ent
+        decorations[#decorations + 1] = g.spawnEntity(entId, x, y)
     end
 
     local zone = biomeDecoDef[zoneId] -- forest is placeholder, later change it to the current zone
@@ -112,27 +111,23 @@ local function spawnDecor(world)
         end
     end
 
-    table.sort(spawnedEnts, function (a, b)
+    table.sort(decorations, function (a, b)
         return a.y < b.y
     end)
-end
-
-function fog_decor.preUpdate()
-    local world = g.getECS()
-    if world.data.fogDecorSpawned then
-        return
-    end
-    if not world.boundingBox then
-        return
-    end
-    spawnDecor(world)
-    world.data.fogDecorSpawned = true
+    return decorations
 end
 
 function fog_decor.drawAboveFog()
+    local world = g.getECS()
+    if not world.boundingBox then
+        return
+    end
+
+    world.data.fogEdgeDecorations = world.data.fogEdgeDecorations or spawnFogDecorations(world)
+
     love.graphics.setColor(1,1,1)
-    for i = 1, #spawnedEnts do
-        local ent = spawnedEnts[i]
+    for i = 1, #world.data.fogEdgeDecorations do
+        local ent = world.data.fogEdgeDecorations[i]
         g.drawEntity(ent, ent.x, ent.y)
     end
 end

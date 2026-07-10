@@ -2,7 +2,7 @@
 
 
 from _ex6.models import M
-from _ex6.tools import read_headers, read_body, glob, search, write_file, edit_file, read_file, edit_file_lines, escalate, bash, explore_agent, CLAUDE_MD, ENV_PROMPT, git_working_tree, add_tool_repetition_guard
+from _ex6.tools import read_headers, read_body, glob, search, write_file, edit_file, read_file, edit_file_lines, escalate, bash, explore_agent, CLAUDE_MD, ENV_PROMPT, git_working_tree, add_tool_repetition_guard, powershell
 from _ex6.skills import load_skill
 from _ex6.lua_coding_style import SYSTEM_PROMPT_CODING_STYLE
 from _ex6.tasks import plan_add_log, plan_done, plan_list, plan_read, plan_write
@@ -78,6 +78,7 @@ The ONLY acceptable text output is: a direct answer, a clarifying question, or a
 MAIN_TOOLS = [
     read_file, glob, search, read_headers, read_body,
     write_file, edit_file, edit_file_lines,
+    powershell,
     # web_search, websearch_agent,
     plan_done, plan_read, plan_write,
     git_working_tree,
