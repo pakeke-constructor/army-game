@@ -3,7 +3,7 @@
 local fogService = {}
 
 
-local FOG_STEP = 18
+local FOG_STEP = 24
 
 local OPACITY = 1
 
@@ -20,11 +20,14 @@ local FOG_EXPAND_CELLS = 5
 local FOG_VARIATION_MOD = 4
 
 local ADJ = {
-    {-1, -1}, {0, -1}, {1, -1},
+              {0, -1},
     {-1,  0},           {1,  0},
-    {-1,  1}, {0,  1}, {1,  1},
+              {0,  1},
 }
 
+---@param grid objects.Grid<integer?>
+---@param x integer
+---@param y integer
 local function hasAdjacentNil(grid, x, y)
     for i = 1, #ADJ do
         local dx, dy = ADJ[i][1], ADJ[i][2]
@@ -36,6 +39,10 @@ local function hasAdjacentNil(grid, x, y)
     return false
 end
 
+---@param grid objects.Grid<integer?>
+---@param x integer
+---@param y integer
+---@param v integer
 local function hasAdjacentBigger(grid, x, y, v)
     for i = 1, #ADJ do
         local dx, dy = ADJ[i][1], ADJ[i][2]
@@ -50,24 +57,30 @@ local function hasAdjacentBigger(grid, x, y, v)
     return false
 end
 
+---@param src objects.Grid<integer?>
+---@param dst objects.Grid<integer?>
+---@param allowBigger boolean
 local function step(src, dst, allowBigger)
-    src:foreach(function(v, x, y)
-        if v == nil then
-            dst:set(x, y, nil)
-            return
-        end
+    for y = 0, src.height - 1 do
+        for x = 0, src.width - 1 do
+            local v = src:get(x, y)
+            if v then
+                if hasAdjacentNil(src, x, y) then
+                    v = v + 1
+                end
+                if allowBigger and hasAdjacentBigger(src, x, y, v) then
+                    v = v + 1
+                end
+            end
 
-        local nv = v
-        if hasAdjacentNil(src, x, y) then
-            nv = nv + 1
+            dst:set(x, y, v)
         end
-        if allowBigger and hasAdjacentBigger(src, x, y, v) then
-            nv = nv + 1
-        end
-        dst:set(x, y, nv)
-    end)
+    end
 end
 
+---@param wx number
+---@param wy number
+---@param salt integer
 local function hashCell(wx, wy, salt)
     local gx = math.floor(wx / FOG_STEP)
     local gy = math.floor(wy / FOG_STEP)
@@ -75,6 +88,9 @@ local function hashCell(wx, wy, salt)
 end
 
 local gridA, gridB, gridW, gridH -- cached grids; reallocated only when size changes
+---@param w integer
+---@param h integer
+---@return objects.Grid<integer?>, objects.Grid<integer?>
 local function getGrids(w, h)
     if gridW ~= w or gridH ~= h then
         gridA = objects.Grid(w, h)
@@ -86,6 +102,8 @@ end
 
 local batch -- persistent SpriteBatch over the atlas; lazy-init
 local fogQuads -- cached quads + center-origins for FOGS
+---@type integer[][]
+local fogLayerCells = {}
 local function getFogQuads()
     if not fogQuads then
         fogQuads = {}
@@ -115,6 +133,7 @@ function fogService.renderFog(r, fogColor, hasFog, getFogAlpha)
     local h = math.floor((y2 - y1) / FOG_STEP) + 1
     local a, b = getGrids(w, h)
 
+    prof_push("fogcheck")
     for gx = 0, w - 1 do
         for gy = 0, h - 1 do
             local wx = x1 + gx * FOG_STEP
@@ -126,7 +145,9 @@ function fogService.renderFog(r, fogColor, hasFog, getFogAlpha)
             end
         end
     end
+    prof_pop() -- prof_push("fogcheck")
 
+    prof_push("fogstep")
     step(a, b, false)
     a, b = b, a
 
@@ -134,6 +155,7 @@ function fogService.renderFog(r, fogColor, hasFog, getFogAlpha)
         step(a, b, true)
         a, b = b, a
     end
+    prof_pop() -- prof_push("fogstep")
 
     local quads = getFogQuads()
     if not batch then
@@ -142,42 +164,60 @@ function fogService.renderFog(r, fogColor, hasFog, getFogAlpha)
     batch:clear()
 
     -- layer FOG_LAYER_MAX -> 1 so deeper fog is added (drawn) behind edges
+    for layer = 1, FOG_LAYER_MAX do
+        fogLayerCells[layer] = fogLayerCells[layer] or {}
+        table.clear(fogLayerCells[layer])
+    end
+
+    prof_push("fogassigncell")
+    for gx = 0, w - 1 do
+        for gy = 0, h - 1 do
+            local v = a:get(gx, gy)
+            if v ~= nil then
+                local x = x1 + gx * FOG_STEP
+                local y = y1 + gy * FOG_STEP
+                local j = hashCell(x, y, 2)
+                if j % FOG_VARIATION_MOD == 0 then
+                    v = v + 1
+                end
+                local k = hashCell(x, y, 3)
+                if k % FOG_VARIATION_MOD == 0 then
+                    v = v + 1
+                end
+
+                local lv = helper.clamp(v, 1, FOG_LAYER_MAX)
+                local cells = fogLayerCells[lv]
+                local ci = #cells
+                cells[ci + 1] = x
+                cells[ci + 2] = y
+                cells[ci + 3] = k
+            end
+        end
+    end
+    prof_pop() -- prof_push("fogassigncell")
+
+    prof_push("fogdraw")
     for layer = FOG_LAYER_MAX, 1, -1 do
         local col = fogColor:darken((FOG_LAYER_MAX - layer) * FOG_DARKEN_PER_LAYER)
         if not getFogAlpha then
             batch:setColor(col[1], col[2], col[3], OPACITY)
         end
-        for gx = 0, w - 1 do
-            for gy = 0, h - 1 do
-                local v = a:get(gx, gy)
-                if v ~= nil then
-                    local x = x1 + gx * FOG_STEP
-                    local y = y1 + gy * FOG_STEP
-                    local j = hashCell(x, y, 2)
-                    if j % FOG_VARIATION_MOD == 0 then
-                        v = v + 1
-                    end
-                    local k = hashCell(x, y, 3)
-                    if k % FOG_VARIATION_MOD == 0 then
-                        v = v + 1
-                    end
-
-                    local lv = math.max(1, math.min(FOG_LAYER_MAX, v))
-                    if lv == layer then
-                        local i = k
-                        local ox = (i % 19) - 10
-                        local oy = (hashCell(x, y, 5) % 19) - 10
-                        local fq = quads[i % #FOGS + 1]
-                        if getFogAlpha then
-                            local alpha = helper.clamp(getFogAlpha(x, y) or 1, 0, 1)
-                            batch:setColor(col[1], col[2], col[3], OPACITY * alpha)
-                        end
-                        batch:add(fq.quad, x + ox, y + oy, math.sin(t + (i % 10) / 3), 1.5, 1.5, fq.ox, fq.oy)
-                    end
-                end
+        local cells = fogLayerCells[layer]
+        for ci = 1, #cells, 3 do
+            local x = cells[ci]
+            local y = cells[ci + 1]
+            local i = cells[ci + 2]
+            local ox = (i % 19) - 10
+            local oy = (hashCell(x, y, 5) % 19) - 10
+            local fq = quads[i % #FOGS + 1]
+            if getFogAlpha then
+                local alpha = helper.clamp(getFogAlpha(x, y) or 1, 0, 1)
+                batch:setColor(col[1], col[2], col[3], OPACITY * alpha)
             end
+            batch:add(fq.quad, x + ox, y + oy, math.sin(t + (i % 10) / 3), 1.5, 1.5, fq.ox, fq.oy)
         end
     end
+    prof_pop() -- prof_push("fogdraw")
 
     lg.setColor(1, 1, 1, 1)
     lg.draw(batch)
