@@ -131,6 +131,8 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
     TITLE_FONT = TITLE_FONT or g.getBigFont(16)
 
     local box = ui.Box({maxWidth = w, maxHeight = h, padding = 12, spacing = 0}, function(bx, by, bw, bh)
+        prof_push("squadbox")
+
         if TRAIL_COUNT[info.rarity.id] then
             helper.rotatingGlow(region:padRatio(0.2), {
                 count = TRAIL_COUNT[info.rarity.id],
@@ -154,6 +156,8 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
         helper.gradientRectStencil("vertical", frameLightColor, manaColor, x,y,w,h, function()
             ui.drawPanel(x,y,w,h)
         end)
+
+        prof_pop() -- prof_push("squadbox")
     end)
 
     -- Header: icon on left, name on right
@@ -175,21 +179,33 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
             return math.max(iconSize, TITLE_FONT:getHeight())
         end,
         draw = function(ex, ey, ew, eh)
+            prof_push("squadheader")
+
             -- icon
+            prof_push("icon")
             love.graphics.setColor(1, 1, 1)
             g.drawSquadIcon(squadId, ex+16, ey+16, true, level)
+            prof_pop() -- prof_push("icon")
+
             -- name to right of icon
+            prof_push("name")
             local textX = ex + iconSize + iconGap
             local textW = ew - iconSize - iconGap
 
             love.graphics.setColor(1, 1, 1)
             local name = "{c r=0.8 g=0.8 b=0.85}{bob amp=0.5}{o}"..info.name
             richtext.printRichContainedNoWrap(name, TITLE_FONT, textX, ey, textW, TITLE_FONT:getHeight(), "left")
+            prof_pop() -- prof_push("name")
+
             -- Rarity
+            prof_push("rarity")
             local rarity = info.rarity
             love.graphics.setColor(rarity.color)
             local rarityText = rarity.lightTextEffect..(SWIPE[rarity.id] or "")..rarity.name
             richtext.printRichContainedNoWrap("{o}" .. rarityText, STAT_FONT, textX, ey + 16, textW, STAT_FONT:getHeight(), "left")
+            prof_pop() -- prof_push("rarity")
+
+            prof_pop() -- prof_push("squadheader")
         end,
     })
 
@@ -204,6 +220,8 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
         end,
         draw = function(ex, ey, ew, eh)
             if unitHeight == 0 then return end
+            prof_push("squadunits")
+
             local count = g.getSquadUnitCount(squadId)
             local padX = count < 3 and 24 or 10
             local cells = Kirigami(ex + padX, ey, ew - padX * 2, eh):grid(count, 1)
@@ -221,6 +239,8 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
                 local uy = cy + (ch - drawUnitHeight) / 2 + math.sin(t + i * 0.9) * 1
                 g.drawUnitPreview(info.entityId, ux, uy, unitWidth, drawUnitHeight)
             end
+
+            prof_pop() -- prof_push("squadunits")
         end
     })
 
@@ -252,8 +272,10 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
     box:add({
         getHeight = function() return statCellH * statRows end,
         draw = function(ex, ey, ew, eh)
+            prof_push("squadstats")
+
             local cellW = math.floor(ew / statCols)
-            
+
             for i = 1, #sortedStats do
                 local row = math.floor((i - 1) / statCols)
                 local col = (i - 1) % statCols
@@ -339,6 +361,8 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
                 richtext.printRich("{o}" .. g.formatNumber(value), STAT_FONT, textX, cy + ch / 2 - STAT_FONT:getHeight() / 2, cw - ch, "left")
                 end
             end
+
+            prof_pop() -- prof_push("squadstats")
         end,
     })
 
@@ -376,6 +400,8 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
                 return H
             end,
             draw = function(xx, yy, ww, hh)
+                prof_push("squadtraits")
+
                 lg.setColor(1,1,1)
                 -- lg.circle("fill",xx,yy, 100)
                 -- print(#traits)
@@ -391,6 +417,8 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
                     drawTraitBox(traitInfos[2], b:get())
                     drawTraitBox(traitInfos[3], c:get())
                 end
+
+                prof_pop() -- prof_push("squadtraits")
             end
         })
     end
@@ -400,6 +428,8 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
     box:addFill({
         getHeight = function() return 0 end,
         draw = function(ex, ey, ew, eh)
+            prof_push("squadperks")
+
             local reg = Kirigami(ex, ey, ew, eh)
             if #perks == 1 then
                 local perkInfo = perks[1] and g.getPerkInfo(perks[1])
@@ -418,6 +448,8 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
                     drawPerkSlot(perkRegs[i]:padUnit(2, 2), perkInfo, manaColor)
                 end
             end
+
+            prof_pop() -- prof_push("squadperks")
         end,
     })
 
@@ -441,6 +473,8 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
     end
 
     if canUpgrade then
+        prof_push("squadupgindicator")
+
         -- its an upgrade
         local r1, _ = region:splitVertical(1,8)
         local titleFont = g.getBigFont(16)
@@ -475,6 +509,8 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
             )
             richtext.printRichContainedNoWrap(str, font, txtReg:padUnit(4,4):get())
         end
+
+        prof_pop() -- prof_push("squadupgindicator")
     end
 
     prof_pop() -- prof_push("drawSquadCard")
