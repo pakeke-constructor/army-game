@@ -1,3 +1,49 @@
+local BASIC_SQUADS = {
+    red = {
+        tank = "gremlin_brute_squad",
+        bruiser = "gremlin_berserker_squad",
+        ranged = "gremlin_slinger_squad",
+    },
+    green = {
+        tank = "human_protector_squad",
+        bruiser = "human_lumberjack_squad",
+        ranged = "green_archer_squad",
+    },
+    blue = {
+        tank = "shield_fish_squad",
+        bruiser = "spear_fish_squad",
+        ranged = "arrow_fish_squad",
+    },
+    yellow = {
+        tank = "protect_bot_squad",
+        bruiser = "angry_bot_squad",
+        ranged = "gun_bot_squad",
+    },
+}
+
+---@param colors string[]
+---@param role string
+local function addBasicSquad(colors, role)
+    local run = g.getRun()
+    local options = {}
+
+    for _, color in ipairs(colors) do
+        local squadId = BASIC_SQUADS[color][role]
+        if not run.squads[squadId] then
+            options[#options + 1] = squadId
+        end
+    end
+
+    if #options == 0 then return end
+    g.addSquadToArmy(options[love.math.random(#options)])
+end
+
+---@param colors string[]
+local function addBasicStartingSquads(colors)
+    addBasicSquad(colors, "tank")
+    addBasicSquad(colors, "bruiser")
+    addBasicSquad(colors, "ranged")
+end
 
 
 g.defineCommander("sir_horse", "Sir Horse", {
@@ -39,14 +85,7 @@ g.defineCommander("sir_horse", "Sir Horse", {
     },
 
     onStart = function(run)
-        g.addSquadToArmy("red_militia_squad")
-        g.addSquadToArmy("red_archer_squad")
-
-        if consts.DEV_MODE then
-            g.addSpellToArmy("dark_ritual_spell")
-            g.addSpellToArmy("bonereap_spell")
-            g.addSpellToArmy("harrier_spell")
-        end
+        addBasicStartingSquads({"red", "green"})
     end
 })
 
@@ -104,8 +143,7 @@ g.defineCommander("druidcommander", "Druid Lady", {
     },
 
     onStart = function(run)
-        g.addSquadToArmy("green_militia_squad")
-        g.addSquadToArmy("green_archer_squad")
+        addBasicStartingSquads({"red", "green"})
     end
 })
 
@@ -157,8 +195,7 @@ g.defineCommander("mechcommander", "The Mech Goblin", {
     },
 
     onStart = function(run)
-        g.addSquadToArmy("green_militia_squad")
-        g.addSquadToArmy("green_archer_squad")
+        addBasicStartingSquads({"yellow", "green"})
     end
 })
 
@@ -204,8 +241,7 @@ g.defineCommander("lizardcommander", "Lizard Lord", {
     },
 
     onStart = function(run)
-        g.addSquadToArmy("red_militia_squad")
-        g.addSquadToArmy("blue_archer_squad")
+        addBasicStartingSquads({"red", "blue"})
     end
 })
 
@@ -249,7 +285,6 @@ g.defineCommander("octopuscommander", "Octopus Tank", {
     },
 
     onStart = function(run)
-        g.addSquadToArmy("blue_militia_squad")
-        g.addSquadToArmy("blue_archer_squad")
+        addBasicStartingSquads({"blue", "yellow"})
     end
 })
