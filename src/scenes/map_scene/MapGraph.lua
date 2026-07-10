@@ -547,6 +547,9 @@ local function rollReward(difficulty, rng)
     if big then
         table.insert(rewardLists, {{type = "blessing"}})
     end
+    if rng() < 0.6 then
+        table.insert(rewardLists, {{type = "keys", amount = 1}})
+    end
     -- pick one of the candidate reward-lists at random
     return rewardLists[math.floor(rng() * #rewardLists) + 1]
 end
@@ -782,6 +785,8 @@ end
 
 ---@param view {x:number,y:number,w:number,h:number}
 function MapGraph:drawGroundDecors(view)
+    prof_push("MapGraph:drawGroundDecors")
+
     local useopacity = not love.keyboard.isModifierActive("capslock")
 
     local range = math.max(view.w, view.h)
@@ -802,6 +807,8 @@ function MapGraph:drawGroundDecors(view)
             col:pop()
         end
     end, range)
+
+    prof_pop() -- prof_push("MapGraph:drawGroundDecors")
 end
 
 ---@param node MapNode

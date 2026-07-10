@@ -8,7 +8,90 @@ local sqhelper = require(".squad_helper")
 sqhelper.defineMilitiaAndArchers("blue")
 
 
+-- ============================================================
+-- BASIC UNITS: Fish-folk (blue)
+-- ============================================================
 
+g.defineSquad("shield_fish_squad", {
+    name = "Shield-Fish",
+    rarity = g.RARITIES.COMMON,
+    -- tags: armor (basic tank)
+    tags = {"armor"},
+    entityDef = {
+        image = g.leo("shieldfish_unit", "defenders_unit"),
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "melee",
+        },
+        weapon = {
+            image = g.leo("shieldfish_shield", "defenders_shield"),
+            type = "shield",
+        },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 1,
+        baseAttackRange = 18,
+        baseMoveSpeed = 50,
+        baseMaxHealth = 14,
+        baseStartingArmor = 3,
+    },
+    unitCount = 4,
+    startingTraits = {"fishfolk"},
+    cost = {blue = 1},
+})
+
+g.defineSquad("spear_fish_squad", {
+    name = "Spear-Fish",
+    rarity = g.RARITIES.COMMON,
+    -- tags: attack_damage (long-reach melee dmg)
+    tags = {"attack_damage"},
+    entityDef = {
+        image = g.leo("spearfish_unit", "divers_unit"),
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "melee",
+        },
+        weapon = {
+            image = g.leo("spearfish_spear", "divers_harpoon"),
+            type = "spear",
+        },
+        baseAttackDamage = 2,
+        baseAttackSpeed = 1,
+        baseAttackRange = 32,
+        baseMoveSpeed = 55,
+        baseMaxHealth = 6,
+    },
+    unitCount = 4,
+    startingTraits = {"fishfolk"},
+    cost = {blue = 1},
+})
+
+g.defineSquad("arrow_fish_squad", {
+    name = "Arrow-Fish",
+    rarity = g.RARITIES.COMMON,
+    -- tags: ranged, projectile (basic ranged)
+    tags = {"ranged", "projectile"},
+    entityDef = {
+        image = g.leo("arrowfish_unit", "longbowman"),
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "ranged",
+            projectileType = "arrow",
+            projectileSpeed = 350,
+        },
+        weapon = {
+            image = g.leo("arrowfish_bow", "longbow"),
+            type = "bow",
+        },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 0.6,
+        baseAttackRange = 130,
+        baseMoveSpeed = 55,
+        baseMaxHealth = 5,
+    },
+    unitCount = 4,
+    startingTraits = {"fishfolk"},
+    cost = {blue = 1},
+})
 
 
 local PURPLE_COLOR = objects.Color("#".."FFC339ED")
@@ -75,8 +158,8 @@ g.defineSquad("crystal_golems", {
 g.defineSquad("diver_squad", {
     name = "Divers",
     rarity = g.RARITIES.RARE,
-    -- tags: attack_damage, color_synergy, armor
-    tags = {"attack_damage", "color_synergy", "armor"},
+    -- tags: attack_damage, buffing
+    tags = {"attack_damage", "buffing"},
     entityDef = {
         image = "divers_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -87,21 +170,31 @@ g.defineSquad("diver_squad", {
             image = "divers_harpoon",
             type = "spear",
         },
-        baseAttackDamage = 1,
+        baseAttackDamage = 2,
         baseAttackSpeed = 1,
         baseAttackRange = 18,
         baseMoveSpeed = 55,
         baseMaxHealth = 8,
         baseStartingArmor = 2,
     },
-    unitCount = 4,
+    unitCount = 3,
+    startingTraits = {"fishfolk"},
     perks = {{
-        name = "Pressure",
-        description = g.loc2("Has damage equal to your currently held (BLUE_MANA)."),
+        name = "Reef Rally",
+        description = g.loc2("At the start of battle, give a random Fishfolk unit +4 (ATK)."),
         image = "coin_icon",
-        handlers = {
-            getAttackDamageModifier = function(ent)
-                return g.getBattleManaCounts().blue or 0
+        rawHandlers = {
+            battleStarted = function(self)
+                if not g.isAlive(self) then return end
+                local fishfolk = {}
+                for _, other in ipairs(g.getAllyList()) do
+                    if g.isAlive(other) and g.hasTrait(other, "fishfolk") then
+                        fishfolk[#fishfolk + 1] = other
+                    end
+                end
+                if #fishfolk > 0 then
+                    g.buffEntity(fishfolk[math.random(#fishfolk)], "attackDamage", 4)
+                end
             end,
         },
     }},
@@ -132,15 +225,13 @@ g.defineSquad("test_subjects_squad", {
         description = g.loc2("When Transformed, gain +50% (HP) and (ASPD)."),
         image = "coin_icon",
         rawHandlers = {
-            entityTransformed = function(self, oldEnt, newEnt)
-                if self ~= oldEnt then return end
-                local hp = (newEnt.maxHealth or 0) * 0.5
-                local aspd = (newEnt.attackSpeed or 0) * 0.5
-                g.buffEntity(newEnt, "maxHealth", hp)
-                newEnt.maxHealth = (newEnt.maxHealth or 0) + hp
-                g.healEntity(newEnt, hp, self)
-                g.buffEntity(newEnt, "attackSpeed", aspd)
-            end,
+            --[[
+            
+            TODO: SUPER IMPORTANT:
+            the transform system has been removed,
+            and this needs refactoring!
+            
+            ]]
         },
     }},
     cost = {blue = 1},
@@ -152,8 +243,8 @@ g.defineSquad("test_subjects_squad", {
 g.defineSquad("monk_squad", {
     name = "Monks",
     rarity = g.RARITIES.COMMON,
-    -- tags: healing, color_synergy
-    tags = {"healing", "color_synergy"},
+    -- tags: attack_damage, magic
+    tags = {"attack_damage", "magic"},
     entityDef = {
         image = "monks_unit",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -165,21 +256,20 @@ g.defineSquad("monk_squad", {
             type = "staff",
         },
         baseAttackDamage = 1,
-        baseAttackSpeed = 1,
+        baseAttackSpeed = 1.5,
         baseAttackRange = 18,
         baseMoveSpeed = 55,
         baseMaxHealth = 8,
+        baseMagic = 1,
     },
-    unitCount = 6,
+    unitCount = 4,
     perks = {{
-        name = "Healthy Spirit",
-        description = g.loc2("Heals to full HP whenever (BLUE_MANA) is spent."),
+        name = "Inner Focus",
+        description = g.loc2("Deals bonus damage equal to (MAGK)."),
         image = "coin_icon",
         handlers = {
-            manaSpent = function(ent, manaRequirement)
-                if manaRequirement and (manaRequirement.blue or 0) > 0 then
-                    g.healEntity(ent, ent.maxHealth or 999)
-                end
+            getAttackDamageModifier = function(ent)
+                return ent.magic or 0
             end,
         },
     }},
@@ -369,13 +459,13 @@ g.defineSquad("clay_troll_squad", {
 
 
 
-g.defineSquad("war_elephant_squad", {
-    name = "War Elephants",
+g.defineSquad("ice_elephant_squad", {
+    name = "Ice Elephants",
     rarity = g.RARITIES.RARE,
-    -- tags: armor, color_synergy, scaling
-    tags = {"armor", "color_synergy", "scaling"},
+    -- tags: armor, freeze, crowd_control, scaling
+    tags = {"armor", "freeze", "crowd_control", "scaling"},
     entityDef = {
-        image = "warelephants_unit",
+        image = "iceelephants_unit",
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 2 },
         attack = { attackType = "melee" },
         baseAttackDamage = 4,
@@ -388,17 +478,14 @@ g.defineSquad("war_elephant_squad", {
     statUpgradeScaling = {startingArmor = 0.25},
     unitCount = 2,
     perks = {{
-        name = "Helmheart",
-        description = g.loc2("Whenever a Blue unit spawns, gains 1 (ARMR)."),
+        name = "Frost Hide",
+        description = g.loc2("When hit, 10% chance to Freeze the attacker for 3s."),
         image = "coin_icon",
-        rawHandlers = {
-            entitySpawned = function(self, ent)
-                if not g.isAlive(self) then return end
-                local squadId = ent.type and ent.type:match("^(.-)_unit$")
-                if not squadId then return end
-                local ok, info = pcall(g.getSquadInfo, squadId)
-                if not ok or not (info and info.cost and info.cost.blue) then return end
-                g.addArmor(self, 1)
+        handlers = {
+            entityHurt = function(ent, damage, attacker)
+                if attacker and g.isAlive(attacker) and love.math.random() < 0.1 then
+                    g.applyFrozen(attacker, 3, ent)
+                end
             end,
         },
     }},
@@ -475,8 +562,8 @@ g.defineSquad("magnet_elemental_squad", {
 g.defineSquad("immortal_eye_squad", {
     name = "The Immortal Eye",
     rarity = g.RARITIES.LEGENDARY,
-    -- tags: building, ranged, projectile, color_synergy
-    tags = {"building", "ranged", "projectile", "color_synergy"},
+    -- tags: building, ranged, projectile, freeze, poison
+    tags = {"building", "ranged", "projectile", "freeze", "poison"},
     entityDef = {
         image = "theimmortaleye_unit",
         isBuilding = true,
@@ -490,24 +577,17 @@ g.defineSquad("immortal_eye_squad", {
     },
     statUpgradeScaling = {attackDamage = 0.33},
     perks = {{
-        name = "Rebirth",
-        description = loc("When you spend Blue mana, trigger the On-spawn effects of all allied units in a large radius around this building."),
+        name = "Frostblight",
+        description = g.loc2("Every second, apply (1 POISON) to all frozen enemies."),
         image = "coin_icon",
-        handlers = {
-            manaSpent = function(ent, manaRequirement)
-                if not (manaRequirement and (manaRequirement.blue or 0) > 0) then return end
-                if not g.isAlive(ent) then return end
-                g.iteratePartition("ally", ent.x, ent.y, function(other)
-                    if not g.isAlive(other) then return end
-                    -- Re-fire the entity's own On-spawn effects: its entityDef hook
-                    -- and its perk handlers, without re-triggering scene-level listeners.
-                    if other.entitySpawned then
-                        other.entitySpawned(other)
+        rawHandlers = {
+            perSecondUpdate = function(self)
+                if not g.isAlive(self) then return end
+                for _, other in ipairs(g.getEnemyList()) do
+                    if g.isAlive(other) and (other.frozenTime or 0) > 0 then
+                        g.applyPoison(other, 1, self)
                     end
-                    if other.scope then
-                        other.scope:call("entitySpawned", other)
-                    end
-                end, 250)
+                end
             end,
         },
     }},
@@ -591,7 +671,7 @@ g.defineSquad("laser_gunner_squad", {
 
 
 g.defineEntity("living_mana", {
-    name = "Living Mana",
+    name = "Anima",
     image = "mana_blue_large",
     physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 0.3 },
     attack = { attackType = "melee" },
@@ -606,18 +686,13 @@ g.defineEntity("living_mana", {
     baseAttackRange = 80,
     baseMoveSpeed = 100,
     baseMaxHealth = 8,
-
-    -- Part of Manaborn perk, supposedly
-    entityDeath = function(ent)
-        g.addMana("blue", 1, ent)
-    end
 })
 
 g.defineSquad("anima_incubator_squad", {
     name = "Anima Incubator",
     rarity = g.RARITIES.RARE,
-    -- tags: building, mana_gain, color_synergy, pest
-    tags = {"building", "mana_gain", "color_synergy", "pest"},
+    -- tags: building, pest
+    tags = {"building", "pest"},
     entityId = "anima_incubator",
     entityDef = {
         image = "anima_incubator",
@@ -634,8 +709,8 @@ g.defineSquad("anima_incubator_squad", {
     statUpgradeScaling = {maxHealth = 0.2},
     unitCount = 1,
     perks = {{
-        name = "Manaborn Legion",
-        description = g.loc2("For every 5 seconds, consume 1 (BLUE_MANA) to summon a {BLUE_MANA_COLOR}Living Mana{/BLUE_MANA_COLOR}. {BLUE_MANA_COLOR}Living Mana{/BLUE_MANA_COLOR} gives 1 (BLUE_MANA) On-death."),
+        name = "Anima Spawner",
+        description = g.loc2("Every 5 seconds, summons an {BLUE_MANA_COLOR}Anima{/BLUE_MANA_COLOR}."),
         image = "mana_blue_small",
         rawHandlers = {
             perSecondUpdate = function(ent)
@@ -643,22 +718,56 @@ g.defineSquad("anima_incubator_squad", {
                     return
                 end
 
-                ent._livingManaSpawnTimer = (ent._livingManaSpawnTimer or 0) + 1
-                if ent._livingManaSpawnTimer >= 5 then
-                    if g.trySpendMana(g.getBattleManaCounts(), {blue = 1}) then
-                        local SPAWN_RADIUS = 20
-                        local a = math.random() * consts.TAU
-                        local ox = math.cos(a) * SPAWN_RADIUS
-                        local oy = math.sin(a) * SPAWN_RADIUS
-                        g.spawnEntity("living_mana", ent.x + ox, ent.y + oy)
-                        ent._livingManaSpawnTimer = 0
-                    end
+                ent._animaSpawnTimer = (ent._animaSpawnTimer or 0) + 1
+                if ent._animaSpawnTimer >= 5 then
+                    local SPAWN_RADIUS = 20
+                    local a = math.random() * consts.TAU
+                    local ox = math.cos(a) * SPAWN_RADIUS
+                    local oy = math.sin(a) * SPAWN_RADIUS
+                    g.spawnEntity("living_mana", ent.x + ox, ent.y + oy)
+                    ent._animaSpawnTimer = 0
                 end
             end
         }
     }},
     cost = {blue = 1},
 })
+
+g.defineSquad("mini_ice_golem_squad", {
+    name = "Mini Ice Golems",
+    rarity = g.RARITIES.UNCOMMON,
+    tags = {"freeze", "crowd_control", "death_trigger", "health"},
+    entityDef = {
+        image = g.leo("miniicegolems_unit", "iceelephants_unit"),
+        physics = { shape = "circle", radius = 6, ox = 0, oy = 0, mass = 2 },
+        attack = {
+            attackType = "melee",
+        },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 0.6,
+        baseAttackRange = 20,
+        baseMoveSpeed = 40,
+        baseMaxHealth = 26,
+        baseStartingArmor = 4,
+    },
+    unitCount = 4,
+    perks = {{
+        name = "Shatter",
+        description = g.loc2("When killed, Freeze nearby enemies for 4s."),
+        image = "coin_icon",
+        handlers = {
+            entityDeath = function(ent)
+                g.iteratePartition("enemy", ent.x, ent.y, function(other)
+                    if g.isAlive(other) then
+                        g.applyFrozen(other, 4, ent)
+                    end
+                end, 100)
+            end,
+        },
+    }},
+    cost = {blue = 1},
+})
+
 
 g.defineSquad("ice_mage_squad", {
     name = "Ice Mage",

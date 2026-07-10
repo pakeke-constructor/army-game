@@ -376,6 +376,25 @@ function g.iteratePartition(partitionId, x, y, fn, range)
     ecs:iteratePartition(partitionId, x, y, fn, range)
 end
 
+
+--- List is cached, so this function is efficient to call, is O(1).
+--- doesn't rebuild list each time.
+---@return ecs.Entity[]
+function g.getAllyList()
+    local ecs = g.getECS()
+    return ecs:getAllyList()
+end
+
+--- List is cached, so this function is efficient to call, is O(1).
+--- doesn't rebuild list each time.
+---@return ecs.Entity[]
+function g.getEnemyList(fn)
+    local ecs = g.getECS()
+    return ecs:getEnemyList()
+end
+
+
+
 ---@param x number
 ---@param y number
 ---@param damage number
@@ -2026,7 +2045,12 @@ function g.defineEntity(id, def)
         assert(def.physics.isStatic, "Buildings must have static physics")
     end
     def.type = id
+
     def.image = def.image or id
+    if def.image and (not g.isImage(def.image)) then
+        def.image = g.leo(def.image)
+    end
+
     for k, v in pairs(Entity) do
         def[k] = v
     end
@@ -2114,36 +2138,6 @@ end
 
 
 
----@param oldEnt ecs.Entity
----@param newEntType string
----@return ecs.Entity
-function g.transformEntity(oldEnt, newEntType)
-    local newEnt = g.spawnEntity(newEntType, oldEnt.x, oldEnt.y)
-
-    if oldEnt.scope then
-        newEnt.scope = oldEnt.scope
-    end
-    if oldEnt.squad then
-        newEnt.squad = oldEnt.squad
-    end
-
-    if oldEnt.buffs then
-        newEnt.buffs = {}
-        for stat, amount in pairs(oldEnt.buffs) do
-            newEnt.buffs[stat] = amount
-        end
-    end
-
-    newEnt.burnTime = oldEnt.burnTime
-    newEnt.poisonAmount = oldEnt.poisonAmount
-    newEnt.frozenTime = oldEnt.frozenTime
-
-    g.call("entityTransformed", oldEnt, newEnt)
-    oldEnt:getWorld():removeEntity(oldEnt)
-
-    return newEnt
-end
-
 function g.isAlive(ent)
     -- todo: check if inside ECS too
     return not ent.___removed
@@ -2154,7 +2148,7 @@ end
 ---@param source ecs.Entity?
 ---@return boolean applied
 function g.applyBurn(ent, duration, source)
-    if g.hasTrait(ent, "fireproof") then return false end
+    if g.hasTrait(ent, "fireproof") or g.hasTrait("fishfolk") then return false end
     local wasActive = ent.burnTime and ent.burnTime > 0
     ent.burnTime = (ent.burnTime or 0) + duration
     if not wasActive then
@@ -2744,7 +2738,7 @@ local function drawWeapon(ent, x,y)
         local bob = math.sin(g.getWorldTime() * 7 + (ent.id or 0)) * ((wep.weaponBobbing or 0.1) * 2)
         local offx, offy = helper.fromPolar(rot, 5)
         local pullx, pully = helper.fromPolar(rot + math.pi, recoil)
-        local dyy = bob + offy + pully - math.floor(h/2)
+        local dyy = bob + offy + pully - math.floor(h/2) + (wep.yOffset or 0)
         g.drawImageOffset(wep.image, x + dx + offx + pullx, y + dyy, rot, 1, 1, 0.5, 0.5)
     elseif wep.type == "object" then
     elseif wep.type == "hammer" then
@@ -3820,6 +3814,8 @@ g.COLORS = {
 
     GOLD = objects.Color("FFD8B01F"),
     XP = objects.Color("FF2BC66E"),
+    KEY = g.snapToPalette(objects.Color("FF755555")),
+    BLESSING = g.snapToPalette(objects.Color("FFBF2A90")),
     DARK_UI = objects.Color("FF0c0c19"),
     DEMON_FURY = g.snapToPalette(objects.Color("FF991A1A")),
 }
@@ -3952,6 +3948,28 @@ g.defineTrait("loyal", "Loyal", {
     description = loc("A loyal unit."),
     color = g.snapToPalette(0,1,0),
 })
+
+g.defineTrait("fishfolk", "Fishfolk", {
+    description = loc("Immune to burning."),
+    handlers = {
+        getBurnDPSMultiplier = function(ent)
+            return 0
+        end,
+    },
+    color = g.snapToPalette(0.2,0.2,1),
+})
+
+g.defineTrait("human", "Human", {
+    description = loc("A human unit"),
+    color = g.snapToPalette(0,1,0),
+})
+
+g.defineTrait("bot", "Bot", {
+    description = loc("A robot unit"),
+    color = g.snapToPalette(1,1,0),
+})
+
+
 
 
 

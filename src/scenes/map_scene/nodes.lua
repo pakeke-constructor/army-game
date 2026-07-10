@@ -39,6 +39,8 @@ local SHRINE_TXT = loc("Shrine: Sacrifice Squads to lower Demon Fury")
 local FEAST_TXT = loc("Feast: Obtain {xp_icon}")
 
 local CHEST_TXT = loc("Chest: Claim a reward")
+local CHEST_NEEDS_KEY_TXT = CHEST_TXT .. "\n{c r=0.9 g=0.2 b=0.2}" .. loc("(requires Key!)")
+local CHEST_HAS_KEY_TXT = CHEST_TXT .. "\n{c r=0.2 g=0.9 b=0.2}" .. loc("(unlock with a Key!)")
 
 local CAMPFIRE_TXT = loc("Campfire: Obtain XP")
 
@@ -155,16 +157,6 @@ local function nodeOpacity(node)
     return 1
 end
 
-local demonSprites = {
-    "direhound",
-    "hellhound",
-    "archerdemon",
-    "demon",
-    "speardemon",
-    "blazingbombardier",
-    "hellbrute",
-    "hellbat"
-}
 
 local function addDemons(node, builder, x, y)
     if node.demonEncounter then
@@ -183,12 +175,12 @@ local function addDemons(node, builder, x, y)
             local a = angle + angleOff
             local phase = hashf(node.x, node.y, i) * math.pi * 2
             local sx = hashf(node.x, node.y, i, 2) < 0.5 and -1 or 1
-            local sprite = demonSprites[math.floor(hashf(node.x, node.y, i, 3) * #demonSprites) + 1]
+
             local function bobMod()
                 local sy = 1 + math.sin(phase + love.timer.getTime()) * 0.12
                 return 0, 0, 0, 1, sy, 0, 0
             end
-            builder:addImage(sprite, x + math.cos(a) * r, y + math.sin(a) * r, 0, sx, nodeOpacity(node), bobMod)
+            builder:addImage("node_combat_demon", x + math.cos(a) * r, y + math.sin(a) * r, 0, sx, nodeOpacity(node), bobMod)
         end
 
         if node.demonEncounter >= 2 then
@@ -201,16 +193,23 @@ end
 -------------------------------
 -- Bonus rewards (shown on hover, granted on battle win)
 -------------------------------
+local REWARD_GOLD_TXT = interp("{GOLD_COLOR}Bonus rewards:{/GOLD_COLOR} {coin_icon}{GOLD_COLOR} +%{amount}")
+local REWARD_XP_TXT = interp("{XP_COLOR}Bonus rewards:{/XP_COLOR} {xp_icon}{XP_COLOR} +%{amount}")
+local REWARD_BLESSING_TXT = loc("{BLESSING_COLOR}Bonus reward:\nRandom Blessing{/BLESSING_COLOR} {blessing_icon}")
+local REWARD_KEYS_TXT = interp("{KEY_COLOR}Bonus reward: +%{amount}{/KEY_COLOR} {key_icon}")
+
 --- Turn a reward descriptor into a richtext line for the hover tooltip.
 ---@param r g.RewardPanel.ORReward|g.RewardPanel.Any
 ---@return string
 local function describeReward(r)
     if r.type == "gold" then
-        return "{GOLD_COLOR}Bonus rewards:{/GOLD_COLOR} {coin_icon}{GOLD_COLOR} +" .. r.amount
+        return REWARD_GOLD_TXT({amount = r.amount})
     elseif r.type == "xp" then
-        return "{XP_COLOR}Bonus rewards:{/XP_COLOR} {xp_icon}{XP_COLOR} +" .. r.amount
+        return REWARD_XP_TXT({amount = r.amount})
     elseif r.type == "blessing" then
-        return "Bonus rewards:\nRandom Blessing {blessing_icon}"
+        return REWARD_BLESSING_TXT
+    elseif r.type == "keys" then
+        return REWARD_KEYS_TXT({amount = r.amount or 1})
     end
     return ""
 end
@@ -403,7 +402,10 @@ function ChestNode:enter()
 end
 
 function ChestNode:getHoverDescription()
-    return CHEST_TXT
+    if g.getRun().keys > 0 then
+        return CHEST_HAS_KEY_TXT
+    end
+    return CHEST_NEEDS_KEY_TXT
 end
 
 function ChestNode:buildDecor(builder, wx, wy)

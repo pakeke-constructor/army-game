@@ -141,6 +141,10 @@ helper.EASINGS = {
     ---@param x number
     easeInCubic = function(x)
         return x ^ 3
+    end,
+    ---@param x number
+    easeOutCubic = function(x)
+        return 1 - math.pow(1 - x, 3)
     end
 }
 

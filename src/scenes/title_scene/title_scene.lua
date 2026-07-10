@@ -1,4 +1,5 @@
 local particles = require("src.modules.particles.particles")
+local settingsPopupService = require("src.hud.settings")
 
 local lg = love.graphics
 -- local root
@@ -22,7 +23,7 @@ local embers = particles.newParticlesWorld({
     drawParticle = function(p)
         local w, h = lg.getDimensions()
         local life = p.lifetime / p.maxLife
-        local size = (1 + (p.id % 3)) * (h / REF_H) * 3
+        local size = (1 + (p.id % 3)) * (h / REF_H) * 1
         local flicker = 0.7 + 0.2*math.sin(love.timer.getTime()*7 + p.id)
         local a = (1 - life) * 0.9 * flicker
         lg.setColor(1, 0.45*flicker, 0.1, a)
@@ -68,7 +69,7 @@ local buttons = {
     {
         name = loc("SETTINGS"),
         onClick = function ()
-            error("todo")
+            settingsPopupService.show()
         end
     },
     {
@@ -101,6 +102,10 @@ function title_scene:enter()
         embers.proxy.y = love.math.random()                        -- scatter up the screen
         embers.proxy.lifetime = love.math.random()*embers.proxy.maxLife -- stagger deaths
     end
+end
+
+function title_scene:keypressed(k)
+    settingsPopupService.keypressed(k)
 end
 
 function title_scene:update(dt)
@@ -152,7 +157,7 @@ function title_scene:draw()
     lg.setColor(1, 1, 1, 1)
 
     local _, left = main:splitHorizontal(1, 2, 4)
-    local _, logoReg, _, bottom = left:splitVertical(1.5, 2, 0.5, 5, 1.5)
+    local _, logoReg, _, bottom = left:splitVertical(1.5, 2, 0.5, 3, 1.5)
     local buttonReg = bottom:splitHorizontal(4, 1)
     -- ui.debugRegion(logoReg)
     -- ui.debugRegion(buttonReg)
@@ -183,8 +188,11 @@ function title_scene:draw()
         else
             lg.setColor(1,1,1,1)
         end
-        richtext.printRichContainedNoWrap(button.name, smallFont, rx + (button.offsetX or 0), ry+10, rw, rh-20, "left")
+        local pad = 4
+        richtext.printRichContainedNoWrap(button.name, smallFont, rx + (button.offsetX or 0), ry+pad, rw, rh-pad*2, "left")
     end
+
+    settingsPopupService.draw()
 
     ui.endUI()
 

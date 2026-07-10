@@ -3,6 +3,93 @@
 
 
 
+-- ============================================================
+-- BASIC UNITS: Robots (yellow)
+-- ============================================================
+
+g.defineSquad("protect_bot_squad", {
+    name = "Protect-Bots",
+    rarity = g.RARITIES.COMMON,
+    -- tags: armor (basic tank)
+    tags = {"armor"},
+    entityDef = {
+        image = g.leo("protectbot_unit", "exosoldiers_unit"),
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "melee",
+        },
+        weapon = {
+            image = g.leo("protectbot_shield", "defenders_shield"),
+            type = "shield",
+        },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 1,
+        baseAttackRange = 18,
+        baseMoveSpeed = 50,
+        baseMaxHealth = 14,
+        baseStartingArmor = 3,
+    },
+    unitCount = 4,
+    startingTraits = {"bot"},
+    cost = {yellow = 1},
+})
+
+g.defineSquad("angry_bot_squad", {
+    name = "Angry-Bots",
+    rarity = g.RARITIES.COMMON,
+    -- tags: attack_damage, health (basic bruiser)
+    tags = {"attack_damage", "health"},
+    entityDef = {
+        image = g.leo("angrybot_unit", "exosoldiers_unit"),
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "melee",
+        },
+        weapon = {
+            image = g.leo("angrybot_sword", "exosoldiers_arm"),
+            type = "sword",
+        },
+        baseAttackDamage = 2,
+        baseAttackSpeed = 1,
+        baseAttackRange = 18,
+        baseMoveSpeed = 55,
+        baseMaxHealth = 12,
+    },
+    unitCount = 4,
+    startingTraits = {"bot"},
+    cost = {yellow = 1},
+})
+
+g.defineSquad("gun_bot_squad", {
+    name = "Gun-Bots",
+    rarity = g.RARITIES.COMMON,
+    -- tags: ranged, projectile (basic ranged)
+    tags = {"ranged", "projectile"},
+    entityDef = {
+        image = g.leo("gunbot_unit", "longbowman"),
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "ranged",
+            projectileType = "arrow",
+            projectileSpeed = 350,
+        },
+        weapon = {
+            image = g.leo("gunbot_gun", "longbow"),
+            type = "bow",
+            yOffset = 6
+        },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 0.6,
+        baseAttackRange = 130,
+        baseMoveSpeed = 55,
+        baseMaxHealth = 5,
+    },
+    unitCount = 4,
+    startingTraits = {"bot"},
+    cost = {yellow = 1},
+})
+
+
 g.defineSquad("exo_soldier_squad", {
     name = "Exo-Soldiers",
     rarity = g.RARITIES.UNCOMMON,
@@ -30,6 +117,39 @@ g.defineSquad("exo_soldier_squad", {
 })
 
 
+
+
+g.defineSquad("spark_bot_squad", {
+    name = "Spark-Bots",
+    rarity = g.RARITIES.UNCOMMON,
+    tags = {"lightning", "death_trigger"},
+    entityDef = {
+        image = g.leo("sparkbots_unit", "exosoldiers_unit"),
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "melee",
+        },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 1,
+        baseAttackRange = 18,
+        baseMoveSpeed = 60,
+        baseMaxHealth = 8,
+    },
+    unitCount = 6,
+    startingTraits = {"bot"},
+    perks = {{
+        name = "Overload",
+        description = g.loc2("On-death, emit lightning dealing damage equal to level."),
+        image = "coin_icon",
+        handlers = {
+            entityDeath = function(ent)
+                local level = (ent.squad and ent.squad.level) or 1
+                g.lightning(ent.x, ent.y, level, ent)
+            end,
+        },
+    }},
+    cost = {yellow = 1},
+})
 
 
 g.defineSquad("prospector_squad", {

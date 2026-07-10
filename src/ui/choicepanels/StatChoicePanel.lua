@@ -1,4 +1,5 @@
 local ChoicePanelCommon = require(".common")
+local cardJuiceService = require("src.cardJuiceService")
 
 local STAT_CARD_BG = objects.Color("#111111")
 local GRADIENT_CIRCLE = helper.gradientCircleMesh()
@@ -149,6 +150,9 @@ function StatChoicePanel:init(squadId)
     ---@type string
     self.squadId = assert(squadId)
     self.createdAt = love.timer.getTime()
+    ---@type integer|nil
+    self.selected = nil
+    self.cj = cardJuiceService.CardJuiceInstance()
 
     for _ = 1, ChoicePanelCommon.NUM_CHOICES do
         self.choiceCreatedAt[#self.choiceCreatedAt+1] = self.createdAt
@@ -168,6 +172,8 @@ end
 function StatChoicePanel:_resetAnim()
     self.createdAt = love.timer.getTime()
     self.choiceCreatedAt = {}
+    self.selected = nil
+    self.cj = cardJuiceService.CardJuiceInstance()
     for _ = 1, ChoicePanelCommon.NUM_CHOICES do
         self.choiceCreatedAt[#self.choiceCreatedAt+1] = self.createdAt
     end
@@ -407,28 +413,39 @@ function StatChoicePanel:_drawStatCard(choice, region, index)
     return false, ww, hh
 end
 
+
+
+
+---@param cardR kirigami.Region
+---@param cardAreaR kirigami.Region
+---@return kirigami.Region
+---@private
+local function _getSelectedTarget(cardR, cardAreaR)
+    local cx = cardAreaR.x + cardAreaR.w / 2
+    local cy = cardAreaR.y + cardAreaR.h * 0.55
+    return Kirigami(cx - cardR.w / 2, cy - cardR.h / 2, cardR.w, cardR.h)
+end
+
 function StatChoicePanel:draw()
     local r = ui.getFullScreenRegion()
 
     iml.panel(r:get())
-
-    local headerR, cardAreaBaseR = r:padRatio(0.05, 0.1):splitVertical(1, 5)
-    local cardAreaR, squadCardR = cardAreaBaseR:splitHorizontal(5, 2)
-    local titleR, iconR = headerR:splitVertical(1, 1)
-
-    TITLE_FONT = TITLE_FONT or g.getBigFont(16)
-    lg.setColor(1, 1, 1)
-    richtext.printRichContainedNoWrap("{o}{bob}" .. CHOOSE_SQUAD_UPGRADE, TITLE_FONT, titleR:padRatio(0.25):get())
-
-    local regions = self:_layoutCards(cardAreaR)
 
     if #self.statChoices == 0 then
         -- RIP in Pepperoni
         return true
     end
 
-    for i, choice in ipairs(self.statChoices) do
-        if self:_drawStatCard(choice, regions[i], i) then
+    local headerR, cardAreaBaseR = r:padRatio(0.05, 0.1):splitVertical(1, 5)
+    local cardAreaR, squadCardR = cardAreaBaseR:splitHorizontal(5, 2)
+    local titleR = headerR:splitVertical(1, 1)
+
+    if self.cj:hasAnimationBegun() then
+        self.cj:draw()
+        ui.drawSquadCard(self.squadId, squadCardR, -999, false, true)
+
+        if self.cj:isAnimationFinished() then
+            local choice = self.statChoices[self.selected]
             local squad = g.getSquadFromArmy(self.squadId)
             if squad then
                 g.buffSquadPermanently(squad, choice.positive[1], choice.positive[2])
@@ -436,7 +453,37 @@ function StatChoicePanel:draw()
                     g.buffSquadPermanently(squad, choice.negative[1], choice.negative[2])
                 end
             end
+
             return true
+        end
+
+        return false
+    end
+
+    TITLE_FONT = TITLE_FONT or g.getBigFont(16)
+    lg.setColor(1, 1, 1)
+    richtext.printRichContainedNoWrap("{o}{bob}" .. CHOOSE_SQUAD_UPGRADE, TITLE_FONT, titleR:padRatio(0.25):get())
+
+    local regions = self:_layoutCards(cardAreaR)
+
+    for i, choice in ipairs(self.statChoices) do
+        if self:_drawStatCard(choice, regions[i], i) then
+            g.playUISound("ui_click_basic", 1.4, 0.8)
+            self.selected = i
+
+            -- Spawn cards
+            for j, otherChoice in ipairs(self.statChoices) do
+                if i ~= j then
+                    self.cj:spawnCardUnselected(regions[j], j, function(r)
+                        return self:_drawStatCard(otherChoice, r, j)
+                    end)
+                end
+            end
+
+            local targetR = _getSelectedTarget(regions[i], cardAreaR)
+            self.cj:spawnCardSelected(regions[i], i, function(r)
+                return self:_drawStatCard(choice, r, i)
+            end, targetR)
         end
     end
 

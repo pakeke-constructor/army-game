@@ -53,6 +53,8 @@ local function drawCommanderList(self, icons)
         love.graphics.setColor(1,1,1,1)
         -- ui.drawPanel(x,y,rw,rh)
         local alpha = selected and 0.4 or 0.15
+        local isHovered = iml.isHovered(x, y, rw, rh, id)
+        local dy = (isHovered and (not selected)) and -6 or 0
 
         -- Draw all the glows
         ---@type objects.Color[]
@@ -69,7 +71,7 @@ local function drawCommanderList(self, icons)
         local glowSize = selected and 100 or 80
         if #glows == 1 then
             local col = glows[1]
-            helper.drawGlow(x+rw/2, y+rh/2, {col.r, col.g, col.b, alpha}, glowSize)
+            helper.drawGlow(x+rw/2, y+rh/2 + dy, {col.r, col.g, col.b, alpha}, glowSize)
         elseif #glows > 1 then
             -- Draw multiple glows. Start at top left
             local glowSepDist = math.min(iconRegR.w, iconRegR.h) * 0.4 * t
@@ -78,11 +80,11 @@ local function drawCommanderList(self, icons)
                 -- offset by 105 degrees for top-left
                 local a = -math.pi * 3 / 4 + (j - 1) * consts.TAU / #glows
                 local ox = x + rw/2 + glowSepDist * math.cos(a)
-                local oy = y + rh/2 + glowSepDist * math.sin(a)
+                local oy = y + rh/2 + dy + glowSepDist * math.sin(a)
                 helper.drawGlow(ox, oy, {col.r, col.g, col.b, alpha}, glowSize)
             end
         end
-        g.drawUnitPreview(info.squadDef.entityId, x, y, rw, rh)
+        g.drawUnitPreview(info.squadDef.entityId, x, y + dy, rw, rh)
 
         if iml.wasJustClicked(x, y, rw, rh, 1, id) then
             self.selectedCommander = id
@@ -98,9 +100,16 @@ local PLAY_TEXT = loc("PLAY", nil, {
 ---@param reg any
 local function drawPlay(self, reg)
     local x, y, rw, rh = reg:padRatio(0.3):get()
-    lg.setColor(1,1,1,1)
     local font = g.getBigFont(48)
-    richtext.printRichContainedNoWrap(PLAY_TEXT, font, x,y,rw,rh)
+    local isHovered = iml.isHovered(x, y, rw, rh, "play")
+    local dy = isHovered and math.sin(love.timer.getTime() * 10) / 6 or 0
+
+    lg.setColor(1,1,1,1)
+    if isHovered then
+        lg.setColor(g.snapToPalette(objects.Color.RED))
+    end
+
+    richtext.printRichContainedNoWrap(PLAY_TEXT, font, x, y+dy, rw, rh)
 
     if iml.wasJustClicked(x, y, rw, rh, 1, "play") then
         self:start(self.selectedCommander)

@@ -2,6 +2,17 @@
 local love = require("love")
 --io.stdout:setvbuf("line")
 
+--[[ This profiler currently crashes LuaJIT so no
+local Profiler = nil
+if package.preload["jit.profile"] then
+    Profiler = require("lib.love_profiler")
+    Profiler:stop()
+end
+]]
+
+local heartbeat = require("lib.heartbeat.heartbeat")
+local heartbeatStared = false
+
 _G.lg = love.graphics
 _G.table.clear = require("table.clear")
 _G.table.new = require("table.new")
@@ -63,6 +74,29 @@ _G.json = require("lib.json")
 
 ---@type g.consts
 _G.consts = require("src.consts")
+
+--[[
+-- Profiler zones
+---@param name string
+function _G.prof_push(name)
+    if not Profiler then return end
+    return Profiler:zone(name)
+end
+
+function _G.prof_pop()
+    if not Profiler then return end
+    Profiler:zone_pop()
+end
+]]
+
+---@param name string
+function _G.prof_push(name)
+    return heartbeat:PushNamedScope(name)
+end
+
+function _G.prof_pop()
+    heartbeat:PopScope()
+end
 
 _G.settings = require("src.settings")
 _G.log = require("src.modules.log")
@@ -147,6 +181,7 @@ function love.load()
     assertValid()
     sceneManager.loadScenes()
     sceneManager.gotoScene("title_scene")
+    settings.load()
     love.window.setFullscreen(settings.isFullscreen())
     for _, a in ipairs(arg or {}) do
         local port = a:match("^%-%-devport=(%d+)$")
@@ -156,13 +191,18 @@ function love.load()
     _loadtime = false
 
     if consts.DEV_MODE then
+        print("<MR LEO, WE NEED THESE IMAGES>")
         for _, v in ipairs(g._dumpWhatLeoNeedsToCreate()) do
-            log.error("Leo we need this image: "..v)
+            print(v)
         end
+        print("</MR LEO, WE NEED THESE IMAGES>")
     end
 end
 
 function love.update(dt)
+    heartbeat:HeartbeatStart()
+    prof_push("love.update")
+
     fadeToBlackService.update(dt)
     g.pollHandlers()
     agentbridge.update()
@@ -172,10 +212,14 @@ function love.update(dt)
     iml.setPointer(love.mouse.getPosition())
     g.updateSfx()
     textPopupService.update(dt)
-    local sc = sceneManager.getCurrentScene()
+    local sc, scName = sceneManager.getCurrentScene()
     if sc and sc.update then
+        prof_push(scName..":update")
         sc:update(dt)
+        prof_pop() -- prof_push(scName..":updates")
     end
+
+    prof_pop() -- prof_push("love.update")
 end
 
 function love.quit()
@@ -186,14 +230,18 @@ end
 local lastGC = 0
 
 function love.draw()
+    prof_push("love.draw")
+
     if settings.isFullscreen() ~= love.window.getFullscreen() then
         love.window.setFullscreen(settings.isFullscreen(), "desktop")
     end
     lg.setShader(subpixel.shader)
-    local sc = sceneManager.getCurrentScene()
+    local sc, scName = sceneManager.getCurrentScene()
     if sc and sc.draw then
         iml.beginFrame()
+        prof_push(scName..":draw")
         sc:draw()
+        prof_pop() -- prof_push(scName..":draw")
         iml.endFrame()
         textPopupService.draw(ui.getUIScalingTransform())
         vignette.draw()
@@ -206,11 +254,22 @@ function love.draw()
         local gc = math.floor(collectgarbage("count"))
         local dgc = gc - lastGC
         lastGC = gc
-        local text = (sceneName or "") .. "  FPS: " .. fps .. "\ndGC: " .. dgc .. " KB / GC: " .. gc .. " KB"
+        local text = {
+            (sceneName or "").."  FPS: "..fps,
+            "dGC: " .. dgc .. " KB / GC: " .. gc .. " KB",
+        }
+        -- if Profiler and Profiler:is_running() then
+        if heartbeat.captureActive then
+            text[#text+1] = "Profiling"
+        end
+
         love.graphics.setColor(1, 1, 1, 0.5)
-        love.graphics.printf(text, g.getSmallFont(32), 2, 2, love.graphics.getWidth() - 4, "right")
+        love.graphics.printf(table.concat(text, "\n"), g.getSmallFont(32), 2, 2, love.graphics.getWidth() - 4, "right")
         love.graphics.setColor(1, 1, 1, 1)
     end
+
+    prof_pop() -- prof_push("love.draw")
+    heartbeat:HeartbeatEnd()
 end
 
 function love.mousepressed(mx, my, button, istouch, presses)
@@ -238,9 +297,23 @@ end
 
 function love.keypressed(key, scancode, isrep)
     if devcmd.keypressed(key) then return end
-    if scancode == "[" then
-        consts.SHOW_DEV_STUFF = consts.DEV_MODE and (not consts.SHOW_DEV_STUFF)
-    elseif scancode == "return" and love.keyboard.isDown("lalt", "ralt") then
+    if consts.DEV_MODE then
+        if scancode == "[" then
+            consts.SHOW_DEV_STUFF = not consts.SHOW_DEV_STUFF
+        -- elseif Profiler and scancode == "]" then
+        --     Profiler:toggle()
+        -- end
+        elseif scancode == "]" then
+            if not heartbeatStared then
+                heartbeat:StartCapture()
+                heartbeatStared = true
+            else
+                heartbeat.captureActive = not heartbeat.captureActive
+            end
+        end
+    end
+
+    if scancode == "return" and love.keyboard.isDown("lalt", "ralt") then
         settings.setFullscreen(not settings.isFullscreen())
     end
     iml.keypressed(key, scancode, isrep)

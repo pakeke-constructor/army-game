@@ -6,47 +6,62 @@ local sqhelper = require(".squad_helper")
 sqhelper.defineMilitiaAndArchers("green")
 
 
+-- ============================================================
+-- BASIC UNITS: Humans (green)
+-- ============================================================
 
-
-g.defineSquad("forest_sprite_squad", {
-    name = "Forest Sprites",
+g.defineSquad("human_protector_squad", {
+    name = "Human Protectors",
     rarity = g.RARITIES.COMMON,
-    -- tags: healing
-    tags = {"healing"},
+    -- tags: armor (basic tank)
+    tags = {"armor"},
     entityDef = {
-        image = g.leo("forest_sprite_unit", "militia"), -- no forest-sprite sprite; militia stand-in
+        image = g.leo("human_protector_unit", "militia"),
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
         },
         weapon = {
-            image = g.leo("forest_sprite_sword", "militia_sword"),
-            type = "sword",
+            image = g.leo("human_wooden_shield", "defenders_shield"),
+            type = "shield",
         },
         baseAttackDamage = 1,
         baseAttackSpeed = 1,
         baseAttackRange = 18,
-        baseMoveSpeed = 55,
-        baseMaxHealth = 5,
+        baseMoveSpeed = 50,
+        baseMaxHealth = 14,
+        baseStartingArmor = 3,
     },
-    unitCount = 6,
-    perks = {{
-        name = "Restore",
-        description = g.loc2("On-spawn, nearby allies are healed to full (HP)."),
-        image = "coin_icon",
-        handlers = {
-            entitySpawned = function(ent)
-                g.iteratePartition("ally", ent.x, ent.y, function(other)
-                    if other == ent then return end
-                    if not g.isAlive(other) then return end
-                    g.healEntity(other, other.maxHealth or 999)
-                end, 150)
-            end,
-        },
-    }},
+    unitCount = 4,
+    startingTraits = {"human"},
     cost = {green = 1},
 })
 
+g.defineSquad("human_lumberjack_squad", {
+    name = "Human Lumberjacks",
+    rarity = g.RARITIES.COMMON,
+    -- tags: attack_damage, health (basic bruiser)
+    tags = {"attack_damage", "health"},
+    entityDef = {
+        image = g.leo("umberjack_unit", "barbarian"),
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "melee",
+        },
+        weapon = {
+            image = g.leo("lumberjack_axe", "orc_battleaxe"),
+            type = "sword",
+        },
+        baseAttackDamage = 2,
+        baseAttackSpeed = 1,
+        baseAttackRange = 18,
+        baseMoveSpeed = 55,
+        baseMaxHealth = 12,
+    },
+    unitCount = 4,
+    startingTraits = {"human"},
+    cost = {green = 1},
+})
 
 
 g.defineSquad("druid_squad", {
@@ -187,8 +202,8 @@ g.defineSquad("hog_squad", {
 g.defineSquad("giant_toad_squad", {
     name = "Giant Toads",
     rarity = g.RARITIES.UNCOMMON,
-    -- tags: health (beefy melee)
-    tags = {"health"},
+    -- tags: health, poison (beefy melee)
+    tags = {"health", "poison"},
     entityDef = {
         image = "gianttoad",
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
@@ -202,6 +217,88 @@ g.defineSquad("giant_toad_squad", {
         baseMaxHealth = 20,
     },
     unitCount = 4,
+    perks = {{
+        name = "Thick Skin",
+        description = loc("Takes 60% less damage from poisoned enemies."),
+        image = "coin_icon",
+        handlers = {
+            getDamageTakenMultiplier = function(ent, attacker)
+                if attacker and (attacker.poisonAmount or 0) > 0 then
+                    return 0.4
+                end
+            end,
+        },
+    }},
+    cost = {green = 1},
+})
+
+
+g.defineSquad("dart_spitter_squad", {
+    name = "Dart Spitters",
+    rarity = g.RARITIES.UNCOMMON,
+    -- tags: ranged, projectile, poison
+    tags = {"ranged", "projectile", "poison"},
+    entityDef = {
+        image = g.leo("dartspitters_unit", "peasant"),
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "ranged",
+            projectileType = "arrow",
+            projectileSpeed = 300,
+        },
+        weapon = {
+            image = g.leo("dart_pipe", "longbow"),
+            type = "bow",
+        },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 0.7,
+        baseAttackRange = 130,
+        baseMoveSpeed = 55,
+        baseMaxHealth = 5,
+    },
+    unitCount = 4,
+    perks = {{
+        name = "Toxic Darts",
+        description = loc("Apply 1 poison on hit."),
+        image = "coin_icon",
+        handlers = {
+            onHitDamage = function(ent, damage, target)
+                g.applyPoison(target, 1, ent)
+            end,
+        },
+    }},
+    cost = {green = 1},
+})
+
+
+g.defineSquad("mini_toad_squad", {
+    name = "Mini Toads",
+    rarity = g.RARITIES.UNCOMMON,
+    -- tags: poison
+    tags = {"poison"},
+    entityDef = {
+        image = "minitoad",
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "melee",
+        },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 1,
+        baseAttackRange = 18,
+        baseMoveSpeed = 55,
+        baseMaxHealth = 7,
+    },
+    unitCount = 6,
+    perks = {{
+        name = "Toxic Skin",
+        description = loc("Apply 1 poison on hit."),
+        image = "coin_icon",
+        handlers = {
+            onHitDamage = function(ent, damage, target)
+                g.applyPoison(target, 1, ent)
+            end,
+        },
+    }},
     cost = {green = 1},
 })
 
