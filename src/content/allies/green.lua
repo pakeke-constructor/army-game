@@ -43,13 +43,13 @@ g.defineSquad("human_lumberjack_squad", {
     -- tags: attack_damage, health (basic bruiser)
     tags = {"attack_damage", "health"},
     entityDef = {
-        image = g.leo("human_lumberjack_unit", "barbarian"),
+        image = g.leo("umberjack_unit", "barbarian"),
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
         },
         weapon = {
-            image = g.leo("human_axe", "orc_battleaxe"),
+            image = g.leo("lumberjack_axe", "orc_battleaxe"),
             type = "sword",
         },
         baseAttackDamage = 2,
