@@ -929,10 +929,7 @@ function g.playWorldSound(soundname, pitch, volume, pitchVar, volumeVar)
     if love.audio.getActiveSourceCount() > consts.MAX_PLAYING_SOURCES then
         return false
     end
-    if select(2, sceneManager.getCurrentScene()) == "harvest_scene" then
-        return sfx.play(soundname, pitch, volume, pitchVar, volumeVar)
-    end
-    return false
+    return sfx.play(soundname, pitch, volume, pitchVar, volumeVar)
 end
 
 
@@ -2242,6 +2239,7 @@ function g.dealDamage(target, damage, attacker, ignoreQuestionBuses)
         if attacker then
             g.call("onHitDamage", attacker, damage, target, true)
         end
+        g.playWorldSound("battle_metalHit", 1+love.math.random(-20, 20)/100)
         g.removeArmor(target, 1)
         return
     end
@@ -2298,6 +2296,7 @@ function g.killEntity(ent, killer)
     ent.___dead = true
     ent.health = 0
     g.call("entityDeath", ent, killer)
+    g.playWorldSound("battle_splat", 1+love.math.random(-20, 20)/100)
     if killer then
         g.call("onKill", killer, ent)
     end
