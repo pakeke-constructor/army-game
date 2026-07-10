@@ -786,7 +786,7 @@ g.defineSquad("lightning_wizard_squad", {
             type = "staff",
         },
         baseAttackDamage = 1,
-        baseAttackSpeed = 0.45,
+        baseAttackSpeed = 0.65,
         baseAttackRange = 230,
         baseMoveSpeed = 50,
         baseMaxHealth = 12,
@@ -802,7 +802,7 @@ g.defineSquad("lightning_wizard_squad", {
         handlers = {
             onHitDamage = function(ent, damage, target)
                 if target and g.isAlive(target) then
-                    g.lightning(target.x, target.y, ent.magic or 0, ent, 4)
+                    g.lightning(target.x, target.y, ent.magic or 0, ent, 5)
                 end
             end,
         },
