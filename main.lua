@@ -73,6 +73,13 @@ if consts.USE_LUAJIT_PROFILER and package.preload["jit.profile"] then
     -- https://github.com/LuaJIT/LuaJIT/issues/1482
     Profiler = require("lib.love_profiler")
     Profiler:stop()
+    local ud = newproxy(true)
+    Profiler.__hacky_stuff = ud
+    getmetatable(ud).__gc = function()
+        if Profiler:is_running() then
+            Profiler:stop_and_report()
+        end
+    end
 else
     heartbeat = require("lib.heartbeat.heartbeat")
 end
