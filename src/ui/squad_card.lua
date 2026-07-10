@@ -16,6 +16,29 @@ local TITLE_FONT = nil
 local PERK_DESC_FONT = nil
 
 
+---@param text string
+---@param font love.Font
+---@param thickness number
+---@param x number
+---@param y number
+---@param w number
+---@param h number
+local function printTextOutlineContainedNoWrap(text, font, thickness, x, y, w, h)
+    local tw = font:getWidth(text)
+    local th = font:getHeight()
+    local scale = math.min(w/tw, h/th)
+    local scaledTw = tw * scale
+    local drawX = x + scaledTw/2
+
+    helper.printTextOutline(
+        text, font, thickness,
+        drawX, y + h/2,
+        tw + 0.0001, "left",
+        0, scale, scale, tw/2, th/2
+    )
+end
+
+
 ---@param region kirigami.Region
 ---@param perk g.PerkInfo?
 ---@param accentColor objects.Color
@@ -192,9 +215,12 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
             local textX = ex + iconSize + iconGap
             local textW = ew - iconSize - iconGap
 
-            love.graphics.setColor(1, 1, 1)
-            local name = "{c r=0.8 g=0.8 b=0.85}{bob amp=0.5}{o}"..info.name
-            richtext.printRichContainedNoWrap(name, TITLE_FONT, textX, ey, textW, TITLE_FONT:getHeight(), "left")
+            local nameBob = math.sin(2 * math.pi * 0.5 * love.timer.getTime()) * 0.5
+            love.graphics.setColor(0.8, 0.8, 0.85)
+            printTextOutlineContainedNoWrap(
+                info.name, TITLE_FONT, 1,
+                textX, ey + nameBob, textW, TITLE_FONT:getHeight()
+            )
             prof_pop() -- prof_push("name")
 
             -- Rarity
