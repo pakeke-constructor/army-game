@@ -51,6 +51,11 @@ end
 local PROJ_HIT_RADIUS = 24
 local PROJ_Z_MAX = 50 -- above this z, projectile doesn't hit anything
 
+---@type table<string, string> projectileType -> sound name
+local SHOOT_SOUNDS = {
+    arrow = "battle_arrowShoot3",
+}
+
 ---@param attacker ecs.Entity
 ---@param target ecs.Entity
 local function spawnProjectile(attacker, target)
@@ -111,7 +116,10 @@ local function spawnProjectile(attacker, target)
         }
     end
 
-    g.playWorldSound("battle_arrowShoot", 1+love.math.random(-15, 15)/100)
+    local shootSound = SHOOT_SOUNDS[projType]
+    if shootSound then
+        g.playWorldSound(shootSound, 1+love.math.random(-15, 15)/100)
+    end
     g.call("entityShootsProjectile", attacker, target)
 end
 
