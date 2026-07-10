@@ -54,6 +54,7 @@ local PROJ_Z_MAX = 50 -- above this z, projectile doesn't hit anything
 ---@type table<string, string> projectileType -> sound name
 local SHOOT_SOUNDS = {
     arrow = "battle_arrowShoot3",
+    octopus_lazer = "battle_lazer",
 }
 
 ---@param attacker ecs.Entity
