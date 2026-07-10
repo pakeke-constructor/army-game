@@ -2258,6 +2258,7 @@ function g.dealDamage(target, damage, attacker, ignoreQuestionBuses)
         g.call("onHitDamage", attacker, damage, target, false)
     end
     g.call("entityHurt", target, damage)
+    g.playWorldSound("battle_splat", 1+love.math.random(-20, 20)/100)
 
     if attacker and attacker.lifesteal then
         g.healEntity(attacker, damage * attacker.lifesteal, attacker)
