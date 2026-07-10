@@ -11,6 +11,7 @@ local juiceService = require("src.juiceService")
 local ambienceService = require("src.ambienceService")
 local mapTypes = require("src.scenes.map_scene.map_types")
 local s = require("src.hud.settings")
+local Z = require("lib.zorder")
 
 local CAMERA_ZOOM = 1--0.5
 local NODE_RADIUS = 4
@@ -157,6 +158,8 @@ function map_scene:enter()
     self.traveling = nil
     ---@type table<MapNode, number?>
     self.fogReveal = {}
+    ---@type table<integer, number>
+    self.fogClearCells = {}
 
     local run = g.getRun()
     local firstMapEntry = not run.mapGraph
@@ -277,8 +280,7 @@ function map_scene:_buildFogClearCells(view)
     local run = g.getRun()
     local graph = run.mapGraph
     local clearCells = math.ceil(FOG_CLEAR_RADIUS / FOG_STEP)
-    ---@type table<integer, table<integer, number>>
-    local cells = {}
+    table.clear(self.fogClearCells)
 
     self:_markSeenNodes()
 
@@ -291,13 +293,9 @@ function map_scene:_buildFogClearCells(view)
                 local cx = math.floor(nx / FOG_STEP)
                 local cy = math.floor(ny / FOG_STEP)
                 for dx = -clearCells, clearCells do
-                    local row = cells[cx + dx]
-                    if not row then
-                        row = {}
-                        cells[cx + dx] = row
-                    end
                     for dy = -clearCells, clearCells do
-                        row[cy + dy] = math.max(row[cy + dy] or 0, reveal)
+                        local key = Z.encode(cx + dx, cy + dy)
+                        self.fogClearCells[key] = math.max(self.fogClearCells[key] or 0, reveal)
                     end
                 end
             end
@@ -305,7 +303,6 @@ function map_scene:_buildFogClearCells(view)
     end
 
     prof_pop() -- prof_push("map_scene:_buildFogClearCells")
-    return cells
 end
 
 function map_scene:leave()
@@ -628,7 +625,7 @@ function map_scene:draw()
             w = view.w,
             h = view.h,
         }
-        local clearCells = self:_buildFogClearCells(fogRegion)
+        self:_buildFogClearCells(fogRegion)
 
         -- hover highlight: path from player to hovered node
         local pnode = graph:getPlayerNode()
@@ -664,13 +661,13 @@ function map_scene:draw()
         -- fog rendering
         fogService.renderFog(fogRegion, graph.mapType.fogColor, function(x, y)
             local cx = math.floor(x / FOG_STEP)
-            local row = clearCells[cx]
-            local reveal = row and row[math.floor(y / FOG_STEP)]
+            local cy = math.floor(y / FOG_STEP)
+            local reveal = self.fogClearCells[Z.encode(cx, cy)]
             return (not reveal) or reveal < 1
         end, function(x, y)
             local cx = math.floor(x / FOG_STEP)
-            local row = clearCells[cx]
-            local reveal = row and row[math.floor(y / FOG_STEP)]
+            local cy = math.floor(y / FOG_STEP)
+            local reveal = self.fogClearCells[Z.encode(cx, cy)]
             return reveal and (1 - reveal) or 1
         end)
     end
