@@ -25,6 +25,9 @@ local ADJ = {
     {-1,  1}, {0,  1}, {1,  1},
 }
 
+---@param grid objects.Grid<integer?>
+---@param x integer
+---@param y integer
 local function hasAdjacentNil(grid, x, y)
     for i = 1, #ADJ do
         local dx, dy = ADJ[i][1], ADJ[i][2]
@@ -36,6 +39,10 @@ local function hasAdjacentNil(grid, x, y)
     return false
 end
 
+---@param grid objects.Grid<integer?>
+---@param x integer
+---@param y integer
+---@param v integer
 local function hasAdjacentBigger(grid, x, y, v)
     for i = 1, #ADJ do
         local dx, dy = ADJ[i][1], ADJ[i][2]
@@ -50,22 +57,25 @@ local function hasAdjacentBigger(grid, x, y, v)
     return false
 end
 
+---@param src objects.Grid<integer?>
+---@param dst objects.Grid<integer?>
+---@param allowBigger boolean
 local function step(src, dst, allowBigger)
-    src:foreach(function(v, x, y)
-        if v == nil then
-            dst:set(x, y, nil)
-            return
-        end
+    for y = 0, src.height - 1 do
+        for x = 0, src.width - 1 do
+            local v = src:get(x, y)
+            if v then
+                if hasAdjacentNil(src, x, y) then
+                    v = v + 1
+                end
+                if allowBigger and hasAdjacentBigger(src, x, y, v) then
+                    v = v + 1
+                end
+            end
 
-        local nv = v
-        if hasAdjacentNil(src, x, y) then
-            nv = nv + 1
+            dst:set(x, y, v)
         end
-        if allowBigger and hasAdjacentBigger(src, x, y, v) then
-            nv = nv + 1
-        end
-        dst:set(x, y, nv)
-    end)
+    end
 end
 
 local function hashCell(wx, wy, salt)
@@ -75,6 +85,9 @@ local function hashCell(wx, wy, salt)
 end
 
 local gridA, gridB, gridW, gridH -- cached grids; reallocated only when size changes
+---@param w integer
+---@param h integer
+---@return objects.Grid<integer?>, objects.Grid<integer?>
 local function getGrids(w, h)
     if gridW ~= w or gridH ~= h then
         gridA = objects.Grid(w, h)
@@ -115,6 +128,7 @@ function fogService.renderFog(r, fogColor, hasFog, getFogAlpha)
     local h = math.floor((y2 - y1) / FOG_STEP) + 1
     local a, b = getGrids(w, h)
 
+    prof_push("fogcheck")
     for gx = 0, w - 1 do
         for gy = 0, h - 1 do
             local wx = x1 + gx * FOG_STEP
@@ -126,7 +140,9 @@ function fogService.renderFog(r, fogColor, hasFog, getFogAlpha)
             end
         end
     end
+    prof_pop() -- prof_push("fogcheck")
 
+    prof_push("fogstep")
     step(a, b, false)
     a, b = b, a
 
@@ -134,6 +150,7 @@ function fogService.renderFog(r, fogColor, hasFog, getFogAlpha)
         step(a, b, true)
         a, b = b, a
     end
+    prof_pop() -- prof_push("fogstep")
 
     local quads = getFogQuads()
     if not batch then
@@ -142,6 +159,7 @@ function fogService.renderFog(r, fogColor, hasFog, getFogAlpha)
     batch:clear()
 
     -- layer FOG_LAYER_MAX -> 1 so deeper fog is added (drawn) behind edges
+    prof_push("fogtripleloop")
     for layer = FOG_LAYER_MAX, 1, -1 do
         local col = fogColor:darken((FOG_LAYER_MAX - layer) * FOG_DARKEN_PER_LAYER)
         if not getFogAlpha then
@@ -178,6 +196,7 @@ function fogService.renderFog(r, fogColor, hasFog, getFogAlpha)
             end
         end
     end
+    prof_pop() -- prof_push("fogtripleloop")
 
     lg.setColor(1, 1, 1, 1)
     lg.draw(batch)
