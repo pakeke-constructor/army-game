@@ -4,7 +4,14 @@ local consts = {}
 
 consts.DEV_MODE = not not (love.filesystem.getInfo(".git", "directory") and os.getenv("DISABLE_DEV_MODE") ~= "1")
 consts.TEST = not not (consts.DEV_MODE)
-consts.PROFILING = false
+-- * If true, use josh's LuaJIT profiler (low overhead, need very recent LuaJIT).
+--   josh's LuaJIT profiler outputs `trace.json` in save directory.
+--   Drag-n-drop the file to https://ui.perfetto.dev/ to view the trace.
+-- * If false, use Heartbeat (higher overhead, more compatible). It will
+--   output `capture.lua` in save directory. Use the heartbeat_Client from
+--   https://github.com/AlexParcell/Heartbeat to view the trace.
+-- Press ']' to toggle profiler. Only works in dev mode.
+consts.USE_LUAJIT_PROFILER = false
 consts.CONSOLE_LOG_LEVEL = "debug"
 consts.FILE_LOG_LEVEL = "none"
 consts.ANALYTICS_URL = nil
