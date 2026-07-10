@@ -2229,6 +2229,10 @@ function g.healEntity(ent, healAmount, healerEnt)
     end
 end
 
+local sfxList = {
+    7, 3, 4
+}
+
 ---@param target ecs.Entity
 ---@param damage number
 ---@param attacker ecs.Entity?
@@ -2240,7 +2244,7 @@ function g.dealDamage(target, damage, attacker, ignoreQuestionBuses)
         if attacker then
             g.call("onHitDamage", attacker, damage, target, true)
         end
-        g.playWorldSound("battle_metalHit", 1+love.math.random(-20, 20)/100)
+        g.playWorldSound("battle_metalHit", 1+love.math.random(30, 50)/100)
         g.removeArmor(target, 1)
         return
     end
@@ -2259,7 +2263,7 @@ function g.dealDamage(target, damage, attacker, ignoreQuestionBuses)
         g.call("onHitDamage", attacker, damage, target, false)
     end
     g.call("entityHurt", target, damage)
-    g.playWorldSound("battle_hit2", 1+love.math.random(-20, 20)/100)
+    g.playWorldSound("battle_hit" .. sfxList[love.math.random(1, #sfxList)], 1+love.math.random(-20, 20)/100)
 
     if attacker and attacker.lifesteal then
         g.healEntity(attacker, damage * attacker.lifesteal, attacker)
@@ -2298,7 +2302,7 @@ function g.killEntity(ent, killer)
     ent.___dead = true
     ent.health = 0
     g.call("entityDeath", ent, killer)
-    g.playWorldSound("battle_splat", 1+love.math.random(-20, 20)/100)
+    g.playWorldSound("battle_splat2", 1+love.math.random(-20, 20)/100)
     if killer then
         g.call("onKill", killer, ent)
     end
