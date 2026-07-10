@@ -111,7 +111,7 @@ local function spawnProjectile(attacker, target)
         }
     end
 
-    g.playWorldSound("battle_arrowShoot2", 1+love.math.random(-15, 15)/100)
+    g.playWorldSound("battle_arrowShoot3", 1+love.math.random(-15, 15)/100)
     g.call("entityShootsProjectile", attacker, target)
 end
 
