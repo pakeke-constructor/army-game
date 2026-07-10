@@ -3,7 +3,7 @@
 local fogService = {}
 
 
-local FOG_STEP = 18
+local FOG_STEP = 24
 
 local OPACITY = 1
 
@@ -20,9 +20,9 @@ local FOG_EXPAND_CELLS = 5
 local FOG_VARIATION_MOD = 4
 
 local ADJ = {
-    {-1, -1}, {0, -1}, {1, -1},
+              {0, -1},
     {-1,  0},           {1,  0},
-    {-1,  1}, {0,  1}, {1,  1},
+              {0,  1},
 }
 
 local function hasAdjacentNil(grid, x, y)
@@ -84,7 +84,7 @@ local function getGrids(w, h)
     return gridA, gridB
 end
 
-local batch -- persistent SpriteBatch over the atlas; lazy-init
+local batches -- persistent SpriteBatches over the atlas; lazy-init
 local fogQuads -- cached quads + center-origins for FOGS
 local function getFogQuads()
     if not fogQuads then
@@ -136,51 +136,53 @@ function fogService.renderFog(r, fogColor, hasFog, getFogAlpha)
     end
 
     local quads = getFogQuads()
-    if not batch then
-        batch = lg.newSpriteBatch(g.getAtlas(), 4096)
-    end
-    batch:clear()
-
-    -- layer FOG_LAYER_MAX -> 1 so deeper fog is added (drawn) behind edges
-    for layer = FOG_LAYER_MAX, 1, -1 do
-        local col = fogColor:darken((FOG_LAYER_MAX - layer) * FOG_DARKEN_PER_LAYER)
-        if not getFogAlpha then
-            batch:setColor(col[1], col[2], col[3], OPACITY)
+    if not batches then
+        batches = {}
+        for layer = 1, FOG_LAYER_MAX do
+            batches[layer] = lg.newSpriteBatch(g.getAtlas(), 2048)
         end
-        for gx = 0, w - 1 do
-            for gy = 0, h - 1 do
-                local v = a:get(gx, gy)
-                if v ~= nil then
-                    local x = x1 + gx * FOG_STEP
-                    local y = y1 + gy * FOG_STEP
-                    local j = hashCell(x, y, 2)
-                    if j % FOG_VARIATION_MOD == 0 then
-                        v = v + 1
-                    end
-                    local k = hashCell(x, y, 3)
-                    if k % FOG_VARIATION_MOD == 0 then
-                        v = v + 1
-                    end
+    end
 
-                    local lv = math.max(1, math.min(FOG_LAYER_MAX, v))
-                    if lv == layer then
-                        local i = k
-                        local ox = (i % 19) - 10
-                        local oy = (hashCell(x, y, 5) % 19) - 10
-                        local fq = quads[i % #FOGS + 1]
-                        if getFogAlpha then
-                            local alpha = helper.clamp(getFogAlpha(x, y) or 1, 0, 1)
-                            batch:setColor(col[1], col[2], col[3], OPACITY * alpha)
-                        end
-                        batch:add(fq.quad, x + ox, y + oy, math.sin(t + (i % 10) / 3), 1.5, 1.5, fq.ox, fq.oy)
-                    end
+    for layer = 1, FOG_LAYER_MAX do
+        batches[layer]:clear()
+    end
+
+    for gx = 0, w - 1 do
+        for gy = 0, h - 1 do
+            local v = a:get(gx, gy)
+            if v ~= nil then
+                local x = x1 + gx * FOG_STEP
+                local y = y1 + gy * FOG_STEP
+                local j = hashCell(x, y, 2)
+                if j % FOG_VARIATION_MOD == 0 then
+                    v = v + 1
                 end
+                local k = hashCell(x, y, 3)
+                if k % FOG_VARIATION_MOD == 0 then
+                    v = v + 1
+                end
+
+                local layer = math.max(1, math.min(FOG_LAYER_MAX, v))
+                local col = fogColor:darken((FOG_LAYER_MAX - layer) * FOG_DARKEN_PER_LAYER)
+                local i = k
+                local ox = (i % 19) - 10
+                local oy = (hashCell(x, y, 5) % 19) - 10
+                local fq = quads[i % #FOGS + 1]
+                if getFogAlpha then
+                    local alpha = helper.clamp(getFogAlpha(x, y) or 1, 0, 1)
+                    batches[layer]:setColor(col[1], col[2], col[3], OPACITY * alpha)
+                else
+                    batches[layer]:setColor(col[1], col[2], col[3], OPACITY)
+                end
+                batches[layer]:add(fq.quad, x + ox, y + oy, math.sin(t + (i % 10) / 3), 1.5, 1.5, fq.ox, fq.oy)
             end
         end
     end
 
     lg.setColor(1, 1, 1, 1)
-    lg.draw(batch)
+    for layer = FOG_LAYER_MAX, 1, -1 do
+        lg.draw(batches[layer])
+    end
 
     prof_pop() -- prof_push("fogService.renderFog")
 end
