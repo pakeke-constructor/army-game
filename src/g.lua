@@ -929,10 +929,7 @@ function g.playWorldSound(soundname, pitch, volume, pitchVar, volumeVar)
     if love.audio.getActiveSourceCount() > consts.MAX_PLAYING_SOURCES then
         return false
     end
-    if select(2, sceneManager.getCurrentScene()) == "harvest_scene" then
-        return sfx.play(soundname, pitch, volume, pitchVar, volumeVar)
-    end
-    return false
+    return sfx.play(soundname, pitch, volume, pitchVar, volumeVar)
 end
 
 
@@ -2102,7 +2099,7 @@ function g.spawnEntityWithInit(id, x, y, initFunc, ...)
         local baseSx = math.abs(ent.sx or 1)
         ent.sx = (love.math.random() < 0.5) and -baseSx or baseSx
     end
-    if ent.ai and (not ent.walkAnimation) and (not ent.isBuilding) then
+    if ent.ai and (not ent.isBuilding) then
         local h = 30
         if ent.image then
             local _, ih = g.getImageSize(ent.image)
@@ -2110,10 +2107,12 @@ function g.spawnEntityWithInit(id, x, y, initFunc, ...)
         end
         -- normal units ~30 tall = scale 1; bigger = heavier
         local scale = math.max(1, h / 30)
+        -- a def may set walkAnimation directly (partial ok); fill missing fields
+        local wa = ent.walkAnimation
         ent.walkAnimation = {
-            bounceHeight = 2.5 / scale,
-            rotationAmount = 0.12 / scale,
-            speed = 11 / scale,
+            bounceHeight = wa and wa.bounceHeight or (2.5 / scale),
+            rotationAmount = wa and wa.rotationAmount or (0.12 / scale),
+            speed = wa and wa.speed or (11 / scale),
         }
     end
     ecs:addEntity(ent)
@@ -2241,6 +2240,7 @@ function g.dealDamage(target, damage, attacker, ignoreQuestionBuses)
         if attacker then
             g.call("onHitDamage", attacker, damage, target, true)
         end
+        g.playWorldSound("battle_metalHit", 1+love.math.random(-20, 20)/100)
         g.removeArmor(target, 1)
         return
     end
@@ -2259,6 +2259,7 @@ function g.dealDamage(target, damage, attacker, ignoreQuestionBuses)
         g.call("onHitDamage", attacker, damage, target, false)
     end
     g.call("entityHurt", target, damage)
+    g.playWorldSound("battle_hit2", 1+love.math.random(-20, 20)/100)
 
     if attacker and attacker.lifesteal then
         g.healEntity(attacker, damage * attacker.lifesteal, attacker)
@@ -2297,6 +2298,7 @@ function g.killEntity(ent, killer)
     ent.___dead = true
     ent.health = 0
     g.call("entityDeath", ent, killer)
+    g.playWorldSound("battle_splat", 1+love.math.random(-20, 20)/100)
     if killer then
         g.call("onKill", killer, ent)
     end

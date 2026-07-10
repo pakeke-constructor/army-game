@@ -29,6 +29,11 @@ local FOG_REVEAL_TIME = 1.5
 local GALLOP_FREQ = 8
 local GALLOP_TILT = 0.2
 local GALLOP_BOUNCE = 8
+-- battle walk defaults (see g.lua auto-gen). commanderWalk overrides scale the
+-- gallop relative to these, so a heavier commander bounces less on the map too.
+local WALK_DEFAULT_BOUNCE = 2.5
+local WALK_DEFAULT_ROTATION = 0.12
+local WALK_DEFAULT_SPEED = 11
 
 
 ---@class g.MapScene
@@ -528,19 +533,25 @@ end
 ---@param pnode any
 ---@param builder g.DecorBuilder
 local function addCommander(scene, graph, pnode, builder)
+    local run = g.getRun()
+    local cinfo = g.getCommanderInfo(run.commander)
     local cx, cy
     local r, bounce = 0, 0
     if scene.traveling then
         local trav = scene.traveling
         cx = trav.ax + (trav.bx - trav.ax) * trav.t
         cy = trav.ay + (trav.by - trav.ay) * trav.t
-        r = math.sin(scene.gallop) * GALLOP_TILT * scene.commanderFacing
-        bounce = -math.abs(math.sin(scene.gallop)) * GALLOP_BOUNCE
+        -- scale the gallop by the commander's walkAnimation overrides, relative to the battle defaults
+        local wa = cinfo.squadDef.entityDef.walkAnimation or {}
+        local bounceMul = (wa.bounceHeight or WALK_DEFAULT_BOUNCE) / WALK_DEFAULT_BOUNCE
+        local tiltMul = (wa.rotationAmount or WALK_DEFAULT_ROTATION) / WALK_DEFAULT_ROTATION
+        local speedMul = (wa.speed or WALK_DEFAULT_SPEED) / WALK_DEFAULT_SPEED
+        local phase = scene.gallop * speedMul
+        r = math.sin(phase) * GALLOP_TILT * tiltMul * scene.commanderFacing
+        bounce = -math.abs(math.sin(phase)) * GALLOP_BOUNCE * bounceMul
     else
         cx, cy = graph:getDrawPos(pnode)
     end
-    local run = g.getRun()
-    local cinfo = g.getCommanderInfo(run.commander)
     builder:addImage(cinfo.image, cx, cy + bounce, r, scene.commanderFacing)
 end
 

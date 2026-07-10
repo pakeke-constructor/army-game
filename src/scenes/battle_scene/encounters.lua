@@ -151,6 +151,18 @@ end
 
 
 
+--- Runs a chosen encounter's spawn fn against a fresh EnemySpawner.
+---@param spawn fun(es:g.EnemySpawner, ecs:ecs.ECSWorld)
+---@param ecs ecs.ECSWorld
+---@param setupRectangles? fun(border:number[])
+local function runEncounter(spawn, ecs, setupRectangles)
+    local rng = love.math.newRandomGenerator(os.time())
+    local es = EnemySpawner(ecs, rng)
+    spawn(es, ecs) -- sets bounds + queues squads (no spawning yet)
+    if setupRectangles then setupRectangles(ecs.boundingBox) end
+    es:finalize() -- lays enemies out into ecs.enemyRectangle
+end
+
 ---@param difficulty integer
 ---@param ecs ecs.ECSWorld
 ---@param setupRectangles? fun(border:number[]) called after bounds are set, before enemies spawn
@@ -159,12 +171,22 @@ function encounters.startRandomEncounter(difficulty, ecs, setupRectangles)
     if not arr or #arr == 0 then
         arr = enemyPool[1]
     end
-    local rng = love.math.newRandomGenerator(os.time())
-    local spawn = arr[rng:random(1, #arr)]
-    local es = EnemySpawner(ecs, rng)
-    spawn(es, ecs) -- sets bounds + queues squads (no spawning yet)
-    if setupRectangles then setupRectangles(ecs.boundingBox) end
-    es:finalize() -- lays enemies out into ecs.enemyRectangle
+    runEncounter(arr[love.math.random(1, #arr)], ecs, setupRectangles)
+end
+
+--- Spawns one specific encounter (by definition order within its difficulty).
+--- Dev/balancing only. Returns how many encounters exist at that difficulty.
+---@param difficulty integer
+---@param index integer 1-based, in file definition order
+---@param ecs ecs.ECSWorld
+---@param setupRectangles? fun(border:number[])
+function encounters.startEncounterAt(difficulty, index, ecs, setupRectangles)
+    local arr = enemyPool[difficulty]
+    if not arr or #arr == 0 then error("no encounters at difficulty " .. tostring(difficulty)) end
+    local spawn = arr[index]
+    if not spawn then error("no encounter #" .. tostring(index) .. " at difficulty " .. tostring(difficulty)) end
+    runEncounter(spawn, ecs, setupRectangles)
+    return #arr
 end
 
 return encounters

@@ -81,7 +81,7 @@ defineBiomeDeco("hell", {
     {grid=55, spawnChance = 0.3, ent={"hellCrystal_decor_1", "hellCrystal_decor_2", "hellCrystal_decor_3", "hellCrystal_decor_4"}},
 })
 
----@param world ecs.ECSWorld
+
 local function spawnFogDecorations(world)
     local decorations = {}
     local w, h = world.boundingBox[3], world.boundingBox[4]

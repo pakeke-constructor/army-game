@@ -124,10 +124,11 @@ local shadow = {
     opacity = 0.6,
 }
 
+-- a def may set any of these directly (partial ok); missing fields are auto-filled from sprite height
 ---@class ecs.components.WalkAnimation
----@field public bounceHeight number
----@field public rotationAmount number
----@field public speed number
+---@field public bounceHeight number? how high the unit bounces while walking
+---@field public rotationAmount number? how much the unit rocks side to side
+---@field public speed number? walk cycle speed
 
 ---@class ecs.Components
 ---@field public ai ecs.components.AI?
