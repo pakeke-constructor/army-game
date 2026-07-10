@@ -3,7 +3,7 @@
 local fogService = {}
 
 
-local FOG_STEP = 18
+local FOG_STEP = 24
 
 local OPACITY = 1
 
@@ -20,9 +20,9 @@ local FOG_EXPAND_CELLS = 5
 local FOG_VARIATION_MOD = 4
 
 local ADJ = {
-    {-1, -1}, {0, -1}, {1, -1},
+              {0, -1},
     {-1,  0},           {1,  0},
-    {-1,  1}, {0,  1}, {1,  1},
+              {0,  1},
 }
 
 ---@param grid objects.Grid<integer?>
