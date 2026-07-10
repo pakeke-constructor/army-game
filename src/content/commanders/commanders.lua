@@ -24,13 +24,24 @@ local BASIC_SQUADS = {
 ---@param colors string[]
 ---@param role string
 local function addBasicSquad(colors, role)
-    local color = colors[love.math.random(#colors)]
-    g.addSquadToArmy(BASIC_SQUADS[color][role])
+    local run = g.getRun()
+    local options = {}
+
+    for _, color in ipairs(colors) do
+        local squadId = BASIC_SQUADS[color][role]
+        if not run.squads[squadId] then
+            options[#options + 1] = squadId
+        end
+    end
+
+    if #options == 0 then return end
+    g.addSquadToArmy(options[love.math.random(#options)])
 end
 
 ---@param colors string[]
 local function addBasicStartingSquads(colors)
     addBasicSquad(colors, "tank")
+    addBasicSquad(colors, "bruiser")
     addBasicSquad(colors, "bruiser")
     addBasicSquad(colors, "ranged")
 end
