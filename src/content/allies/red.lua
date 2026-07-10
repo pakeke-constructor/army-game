@@ -21,7 +21,7 @@ g.defineSquad("gremlin_brute_squad", {
             attackType = "melee",
         },
         weapon = {
-            image = g.leo("gremlin_club", "orc_battleaxe"),
+            image = g.leo("gremlin_shield", "orc_battleaxe"),
             type = "sword",
         },
         baseAttackDamage = 1,
@@ -47,7 +47,7 @@ g.defineSquad("gremlin_berserker_squad", {
             attackType = "melee",
         },
         weapon = {
-            image = g.leo("gremlin_dagger", "daggerbearers_dagger"),
+            image = g.leo("gremlin_cleaver", "daggerbearers_dagger"),
             type = "sword",
         },
         baseAttackDamage = 2,

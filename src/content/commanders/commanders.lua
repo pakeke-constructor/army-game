@@ -10,7 +10,7 @@ g.defineCommander("sir_horse", "Sir Horse", {
         green = 2
     },
 
-    image = "sir_horse",
+    image = "sirhorse",
 
     squadDef = {
         rarity = g.RARITIES.COMMANDER,
@@ -19,13 +19,13 @@ g.defineCommander("sir_horse", "Sir Horse", {
         statUpgradeScaling = {
             maxHealth = 0.25,
         },
-        icon = g.leo"sir_horse_uniticon",
+        icon = g.leo"sirhorse_uniticon",
         entityDef = {
-            image = "sir_horse",
+            image = "sirhorse",
             isCommander = true,
             weapon = {
                 type = "spear",
-                image = "sir_horse_spear"
+                image = "sirhorse_spear"
             },
             attack = {
                 attackType = "melee",
