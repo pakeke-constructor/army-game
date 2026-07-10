@@ -15,14 +15,14 @@ g.defineSquad("gremlin_brute_squad", {
     -- tags: armor (basic tank)
     tags = {"armor"},
     entityDef = {
-        image = g.leo("gremlin_brute_unit", "barbarian"),
+        image = g.leo("gremlinbrute_unit", "barbarian"),
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
         },
         weapon = {
-            image = g.leo("gremlin_shield", "orc_battleaxe"),
-            type = "sword",
+            image = g.leo("gremlinbrute_shield", "orc_battleaxe"),
+            type = "shield",
         },
         baseAttackDamage = 1,
         baseAttackSpeed = 1,
@@ -41,13 +41,13 @@ g.defineSquad("gremlin_berserker_squad", {
     -- tags: attack_damage (short-range melee dmg)
     tags = {"attack_damage"},
     entityDef = {
-        image = g.leo("gremlin_berserker_unit", "berserkers_unit"),
+        image = g.leo("gremlinberserker_unit", "berserkers_unit"),
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
         },
         weapon = {
-            image = g.leo("gremlin_cleaver", "daggerbearers_dagger"),
+            image = g.leo("gremlinbeserker_cleaver", "daggerbearers_dagger"),
             type = "sword",
         },
         baseAttackDamage = 2,
@@ -66,7 +66,7 @@ g.defineSquad("gremlin_slinger_squad", {
     -- tags: ranged, projectile (basic ranged)
     tags = {"ranged", "projectile"},
     entityDef = {
-        image = g.leo("gremlin_slinger_unit", "bladethrowers_unit"),
+        image = g.leo("gremlinslinger_unit", "bladethrowers_unit"),
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "ranged",
@@ -74,7 +74,7 @@ g.defineSquad("gremlin_slinger_squad", {
             projectileSpeed = 300,
         },
         weapon = {
-            image = g.leo("gremlin_sling", "longbow"),
+            image = g.leo("gremlinslinger_slingshot", "longbow"),
             type = "bow",
         },
         baseAttackDamage = 1,
