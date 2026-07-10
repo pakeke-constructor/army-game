@@ -42,7 +42,6 @@ end
 local function addBasicStartingSquads(colors)
     addBasicSquad(colors, "tank")
     addBasicSquad(colors, "bruiser")
-    addBasicSquad(colors, "bruiser")
     addBasicSquad(colors, "ranged")
 end
 
