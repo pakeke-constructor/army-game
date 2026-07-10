@@ -84,6 +84,7 @@ defineBiomeDeco("hell", {
 
 ---@param world ecs.ECSWorld
 local function spawnDecor(world)
+    spawnedEnts = {}
     local w, h = world.boundingBox[3], world.boundingBox[4]
 
     local map = g.getMapType()
