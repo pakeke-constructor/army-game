@@ -2737,7 +2737,7 @@ local function drawWeapon(ent, x,y)
         local bob = math.sin(g.getWorldTime() * 7 + (ent.id or 0)) * ((wep.weaponBobbing or 0.1) * 2)
         local offx, offy = helper.fromPolar(rot, 5)
         local pullx, pully = helper.fromPolar(rot + math.pi, recoil)
-        local dyy = bob + offy + pully - math.floor(h/2)
+        local dyy = bob + offy + pully - math.floor(h/2) + (wep.yOffset or 0)
         g.drawImageOffset(wep.image, x + dx + offx + pullx, y + dyy, rot, 1, 1, 0.5, 0.5)
     elseif wep.type == "object" then
     elseif wep.type == "hammer" then

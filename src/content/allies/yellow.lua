@@ -46,7 +46,7 @@ g.defineSquad("angry_bot_squad", {
             attackType = "melee",
         },
         weapon = {
-            image = g.leo("angrybot_fist", "exosoldiers_arm"),
+            image = g.leo("angrybot_sword", "exosoldiers_arm"),
             type = "sword",
         },
         baseAttackDamage = 2,
@@ -76,6 +76,7 @@ g.defineSquad("gun_bot_squad", {
         weapon = {
             image = g.leo("gunbot_gun", "longbow"),
             type = "bow",
+            yOffset = 6
         },
         baseAttackDamage = 1,
         baseAttackSpeed = 0.6,
