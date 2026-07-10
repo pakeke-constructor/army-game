@@ -38,8 +38,26 @@ local function addBasicSquad(colors, role)
     g.addSquadToArmy(options[love.math.random(#options)])
 end
 
+
+local function validate()
+    if not consts.DEV_MODE then return end
+
+    for color, roles in pairs(BASIC_SQUADS) do
+        g.getSquadInfo(color .. "_militia_squad")
+        for _, squadId in pairs(roles) do
+            g.getSquadInfo(squadId)
+        end
+    end
+end
+
+g.postLoad(validate)
+
+
 ---@param colors string[]
 local function addBasicStartingSquads(colors)
+    local color = colors[love.math.random(#colors)]
+    g.addSquadToArmy(color .. "_militia_squad")
+
     addBasicSquad(colors, "tank")
     addBasicSquad(colors, "bruiser")
     addBasicSquad(colors, "ranged")
@@ -265,6 +283,7 @@ g.defineCommander("octopuscommander", "Octopus Tank", {
         statUpgradeScaling = {
             maxHealth = 0.25,
         },
+        icon = g.leo("octopuscommander_icon"),
         entityDef = {
             image = "octopuscommander",
             isCommander = true,
