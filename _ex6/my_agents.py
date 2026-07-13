@@ -7,7 +7,7 @@ from _ex6.tools import read_headers, read_body, glob, search, write_file, edit_f
 from _ex6.skills import load_skill
 from _ex6.lua_coding_style import SYSTEM_PROMPT_CODING_STYLE
 from _ex6.tasks import plan_add_log, plan_done, plan_list, plan_read, plan_write
-from _ex6.web.web_tools import web_search, websearch_agent
+from _ex6.web_tools import websearch_agent
 from _ex6.love2d_docs.love2d_docs import love2d_docs
 from _ex6.game_tools import game_start, game_interact
 from _ex6.provider import cache_manually
@@ -80,6 +80,7 @@ MAIN_TOOLS = [
     read_file, glob, search, read_headers, read_body,
     write_file, edit_file, edit_file_lines,
     powershell,
+    websearch_agent,
     # web_search, websearch_agent,
     plan_done, plan_read, plan_write,
     git_working_tree,
