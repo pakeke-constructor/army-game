@@ -121,9 +121,9 @@ RARE SQUADS:
 
 
 BLESSINGS:
-[ ] Zeus' Wrath: Whenever an enemy is killed, spawn a chain of lightning
-[ ] Thunderboom: Lightning deals double damage
-[ ] Protectify: At the start of battle, gives +ARMR to each unit equal to the unit's MAGK
+[x] Zeus' Wrath: Whenever an enemy is killed, spawn a chain of lightning
+[x] Thunderboom: Lightning deals double damage
+[x] Protectify: At the start of battle, gives +ARMR to each unit equal to the unit's MAGK
 
 
 

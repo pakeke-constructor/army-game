@@ -455,6 +455,7 @@ end
 ---@param enemyChainSize number?
 function g.lightning(x, y, damage, attacker, enemyChainSize)
     g.playWorldSound("lightning_zap", 0.9, 0.25, 0.3, 0)
+    damage = damage * g.ask("getLightningDamageMultiplier", attacker)
     enemyChainSize = math.max(2, enemyChainSize or 5)
 
     local MAX_LIGHTNING_GAP = 130

@@ -888,7 +888,7 @@ g.defineSquad("frost_warden_squad", {
                         g.applyFrozen(enemy, 2, ent)
                         juiceService.spawnArc(FROST_ARC_COLOR, ent.x, ent.y, enemy.x, enemy.y, enemy)
                     end
-                end, 100)
+                end, 130)
             end,
         },
     }},

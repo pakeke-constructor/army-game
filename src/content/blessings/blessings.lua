@@ -1309,6 +1309,51 @@ g.defineBlessing("overload", "Overload", {
     },
 })
 
+g.defineBlessing("zeus_wrath", "Zeus' Wrath", {
+    description = loc("Whenever an enemy is killed, emit lightning dealing 3 damage."),
+    image = g.leo("blessing_zeuswrath"),
+    rarity = g.RARITIES.LEGENDARY,
+    tags = {"lightning", "death_trigger", "attack_damage"},
+    mana = "yellow",
+    handlers = {
+        entityDeath = function(ent, killer)
+            if ent.team == "enemy" then
+                g.lightning(ent.x, ent.y, 3, killer)
+            end
+        end,
+    },
+})
+
+g.defineBlessing("thunderboom", "Thunderboom", {
+    description = loc("Lightning deals double damage."),
+    image = g.leo("blessing_thunderboom"),
+    rarity = g.RARITIES.RARE,
+    tags = {"lightning", "attack_damage"},
+    mana = "yellow",
+    handlers = {
+        getLightningDamageMultiplier = function()
+            return 2
+        end,
+    },
+})
+
+g.defineBlessing("protectify", "Protectify", {
+    description = loc2("At the start of battle, give each allied unit (ARMR) equal to its (MAGK)."),
+    image = g.leo("blessing_protectify"),
+    rarity = g.RARITIES.RARE,
+    tags = {"armor", "magic", "buffing"},
+    mana = "blue",
+    handlers = {
+        battleStarted = function()
+            for _, ent in g.getECS():iterate("team") do
+                if ent.team == "ally" then
+                    g.addArmor(ent, ent.magic or 0)
+                end
+            end
+        end,
+    },
+})
+
 g.defineBlessing("black_flames", "Black Flames", {
     description = loc2("Burn deals double damage to enemies."),
     image = "blessing_blackflames",
