@@ -410,6 +410,8 @@ end
 
 
 local function drawTopBar()
+    prof_push("drawTopBar")
+
     local r = ui.getScreenRegion()
     local topBar, mainBar = r:splitVertical(0.1,0.9)
     iml.panel(topBar:get())
@@ -477,6 +479,8 @@ local function drawTopBar()
     if iml.wasJustClicked(px, py, pw, ph, 1, "pause_button") then
         settingsPopupService.show()
     end
+
+    prof_pop() -- prof_push("drawTopBar")
 end
 
 
@@ -580,6 +584,8 @@ end
 ---@param self g.HUD
 ---@param opt g.hudArgs
 local function drawBottomBar(self, opt, barHeight)
+    prof_push("drawBottomBar")
+
     local manaW = drawManaBox(self, true)
 
     local sw, sh = ui.getScaledUIDimensions()
@@ -600,6 +606,8 @@ local function drawBottomBar(self, opt, barHeight)
     drawBlessingBar(blessingBar)
 
     drawManaBox(self, false, manaBox)
+
+    prof_pop() -- prof_push("drawBottomBar")
 end
 
 

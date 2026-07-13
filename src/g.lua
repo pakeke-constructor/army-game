@@ -1065,8 +1065,6 @@ local currentEntityId = 0
 ---@field entityId string?
 ---@field entityDef ecs.Components
 ---@field unitCount integer? (default is 1)
----@field statUpgradeScaling table<string, number>? { [statName] -> number }
----@field unitCountUpgradeScaling integer?
 ---@field name string (for definition, untranslated name; for info, translated name)
 ---@field nameContext string? context passed to `loc` function
 ---@field rarity g.Rarity
@@ -1083,8 +1081,6 @@ local currentEntityId = 0
 ---@field squadOrder integer
 ---@field entityId string
 ---@field unitCount integer
----@field statUpgradeScaling table<string, number> { [statName] -> number }
----@field unitCountUpgradeScaling integer
 ---@field icon string
 ---@field perks string[]
 ---@field startingTraits string[] Trait ids applied to every unit in this squad on spawn.
@@ -1213,8 +1209,6 @@ function g.defineSquad(id, info)
     info.unitCount = info.unitCount or 1
     info.name = loc(assert(info.name), {}, {context = info.nameContext or "Name of a squad."})
     info.rarity = assert(info.rarity)
-    info.unitCountUpgradeScaling = info.unitCountUpgradeScaling or 0
-    info.statUpgradeScaling = info.statUpgradeScaling or {}
     info.entityId = info.entityId or (id .. "_unit")
     info.cost = info.cost or {}
     info.squadOrder = info.squadOrder or 0
@@ -1263,19 +1257,7 @@ function g.defineSquad(id, info)
     if not ENTITY_DEFS[info.entityId] then
         g.defineEntity(info.entityId, info.entityDef)
     end
-    assert(type(info.unitCountUpgradeScaling) == "number")
-    for stat,scaling in pairs(info.statUpgradeScaling)do
-        assert(g.getStatInfo(stat), "?")
-        assert(scaling < 1, "Per-level stat scaling shouldn't be more than 100%. Must be number between (0,1)")
-    end
-    if (not next(info.statUpgradeScaling)) then
-        -- then there's no stat upgrades.
-        if info.unitCount > 2 and info.unitCountUpgradeScaling <= 0 then
-            info.unitCountUpgradeScaling = math.max(1, math.floor(info.unitCount * 0.25 + 0.5))
-        else
-            log.error("This unit NEEDS a stat upgrade, but doesn't have one: " .. id)
-        end
-    end
+
     assert(info.icon)
     info.powerIndex = estimateSquadPowerIndex(info)
     info.squadType = info.squadType or categorizeSquad(info)
@@ -2971,9 +2953,8 @@ function g.getSquadUnitCount(squadId)
     local squad = g.getSquadFromArmy(squadId)
     local info = g.getSquadInfo(squadId)
     if squad then
-        local xtra = ((squad.level-1) * info.unitCountUpgradeScaling)
-        local xtra2 = g.ask("getSquadUnitCountModifier", squadId)
-        return info.unitCount + xtra + xtra2
+        local xtra = g.ask("getSquadUnitCountModifier", squadId) --[[@as integer]]
+        return info.unitCount + xtra
     end
     return info.unitCount
 end
@@ -3591,6 +3572,7 @@ end
 
 -- Ask a question. Returns reduced value.
 -- Order: global handlers, then ent[q], then ent.scope
+---@param q string
 function g.ask(q, arg1, ...)
     local t = questions[q]
     if not t then

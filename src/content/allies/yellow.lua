@@ -229,7 +229,6 @@ g.defineSquad("clanker_factory_squad", {
         physics = { shape = "circle", radius = 12, ox = 0, oy = 0, mass = 1, isStatic = true },
         baseMaxHealth = 40,
     },
-    statUpgradeScaling = {maxHealth = 0.2},
     unitCount = 1,
     perks = {{
         name = "Assembly Line",
@@ -293,7 +292,6 @@ g.defineSquad("the_great_factory_squad", {
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 1, isStatic = true },
         baseMaxHealth = 40,
     },
-    statUpgradeScaling = {maxHealth = 0.2},
     unitCount = 1,
     icon = "greatfactory_uniticon",
     perks = {{
@@ -321,7 +319,6 @@ g.defineSquad("gold_mine_squad", {
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 1, isStatic = true },
         baseMaxHealth = 16,
     },
-    statUpgradeScaling = {maxHealth = 0.15},
     unitCount = 1,
     perks = {{
         name = "Extraction",
@@ -351,7 +348,6 @@ g.defineSquad("living_laboratory_squad", {
         baseMaxHealth = 120,
         baseStartingArmor = 4,
     },
-    statUpgradeScaling = {startingArmor = 0.2, maxHealth = 0.1},
     unitCount = 1,
     perks = {{
         name = "Eureka",
@@ -401,7 +397,6 @@ g.defineSquad("endless_army_squad", {
         baseMaxHealth = 8,
         baseStartingArmor = 1,
     },
-    statUpgradeScaling = {maxHealth = 0.2},
     unitCount = 1,
     perks = {{
         name = "Mass-Production",
@@ -438,7 +433,6 @@ g.defineSquad("wealth_elemental_squad", {
         baseMaxHealth = 80,
         baseStartingArmor = 8,
     },
-    statUpgradeScaling = {maxHealth = 0.2},
     unitCount = 2,
     perks = {{
         name = "Golden Bulk",

@@ -602,7 +602,6 @@ g.defineSquad("ice_elephant_squad", {
         baseMaxHealth = 60,
         baseStartingArmor = 12,
     },
-    statUpgradeScaling = {startingArmor = 0.25},
     unitCount = 2,
     perks = {{
         name = "Frost Hide",
@@ -659,7 +658,6 @@ g.defineSquad("magnet_elemental_squad", {
         baseMaxHealth = 20,
         baseStartingArmor = 3,
     },
-    statUpgradeScaling = {startingArmor = 0.25},
     unitCount = 2,
     perks = {{
         name = "Shrapnelmancy",
@@ -702,7 +700,6 @@ g.defineSquad("immortal_eye_squad", {
         baseMaxHealth = 80,
         baseStartingArmor = 10,
     },
-    statUpgradeScaling = {attackDamage = 0.33},
     perks = {{
         name = "Frostblight",
         description = g.loc2("Every second, apply (1 POISON) to all frozen enemies."),
@@ -760,6 +757,41 @@ g.defineSquad("bell_creature_squad", {
 
 
 
+g.defineSquad("laser_gunner_squad", {
+    name = "Laser Gunners",
+    rarity = g.RARITIES.LEGENDARY,
+    -- tags: ranged, projectile, attack_speed, scaling
+    tags = {"ranged", "projectile", "attack_speed", "scaling"},
+    entityDef = {
+        image = "lasergunners_unit",
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        -- TODO: Laser cannon attack rather than arrow?
+        attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 380 },
+        weapon = { image = "lasergunners_lasercannon", type = "bow" },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 0.5,
+        baseAttackRange = 120,
+        baseMoveSpeed = 50,
+        baseMaxHealth = 8,
+    },
+    unitCount = 4,
+    perks = {{
+        name = "Laser Focus",
+        description = g.loc2("On-attack, this unit gains 0.1 (ASPD). Stacks up to 30 times."),
+        image = "coin_icon",
+        handlers = {
+            onAttack = function(ent, target)
+                ent._laserFocusStacks = ent._laserFocusStacks or 0
+                if ent._laserFocusStacks >= 30 then return end
+                ent._laserFocusStacks = ent._laserFocusStacks + 1
+                g.buffEntity(ent, "attackSpeed", 0.1)
+            end,
+        },
+    }},
+    cost = {blue = 1},
+})
+
+
 
 g.defineEntity("living_mana", {
     name = "Anima",
@@ -797,7 +829,6 @@ g.defineSquad("anima_incubator_squad", {
         baseMoveSpeed = 0,
         baseMaxHealth = 200,
     },
-    statUpgradeScaling = {maxHealth = 0.2},
     unitCount = 1,
     perks = {{
         name = "Anima Spawner",
@@ -883,7 +914,6 @@ g.defineSquad("lightning_wizard_squad", {
         baseMaxHealth = 12,
         baseMagic = 8,
     },
-    statUpgradeScaling = {magic = 0.25},
     unitCount = 1,
     icon = g.leo("lightningwizard_uniticon", "icemage_uniticon"),
     perks = {{
@@ -923,7 +953,6 @@ g.defineSquad("frost_warden_squad", {
         baseMaxHealth = 140,
         baseStartingArmor = 10,
     },
-    statUpgradeScaling = {maxHealth = 0.2},
     unitCount = 1,
     icon = g.leo("frostwarden_uniticon", "iceelephants_uniticon"),
     perks = {{
@@ -969,7 +998,6 @@ g.defineSquad("ice_mage_squad", {
         baseMoveSpeed = 50,
         baseMaxHealth = 12,
     },
-    statUpgradeScaling = {attackSpeed = 0.1},
     unitCount = 4,
     perks = {{
         name = "Ice Touch",

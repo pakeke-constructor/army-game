@@ -19,16 +19,23 @@ local PERK_DESC_FONT = nil
 ---@param text string
 ---@param font love.Font
 ---@param thickness number
----@param x number
----@param y number
----@param w number
----@param h number
-local function printTextOutlineContainedNoWrap(text, font, thickness, x, y, w, h)
+---@param r kirigami.Region
+---@param align love.AlignMode?
+local function printTextOutlineContainedNoWrap(text, font, thickness, r, align)
+    local x, y, w, h = r:get()
     local tw = font:getWidth(text)
     local th = font:getHeight()
     local scale = math.min(w/tw, h/th)
     local scaledTw = tw * scale
-    local drawX = x + scaledTw/2
+    local drawX
+    align = align or "center"
+    if align == "left" then
+        drawX = x + scaledTw/2
+    elseif align == "right" then
+        drawX = x + w - scaledTw/2
+    else -- center
+        drawX = x + w/2
+    end
 
     helper.printTextOutline(
         text, font, thickness,
@@ -36,6 +43,12 @@ local function printTextOutlineContainedNoWrap(text, font, thickness, x, y, w, h
         tw + 0.0001, "left",
         0, scale, scale, tw/2, th/2
     )
+end
+
+---@param amp number
+---@param phase number?
+local function getBob(amp, f, phase)
+    return math.sin(2 * math.pi * 0.5 * (love.timer.getTime() + (phase or 0))) * amp
 end
 
 
@@ -168,8 +181,9 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
             })
         end
         if canUpgrade then
-            helper.drawEdgeTrailAnimation(region, manaColor, 0.25, 20)
-            helper.drawEdgeTrailAnimation(region, manaColor, 0.75, 20)
+            local trailR = region:padUnit(-4)
+            helper.drawEdgeTrailAnimation(trailR, manaColor, 0.25, 20, 0.5)
+            helper.drawEdgeTrailAnimation(trailR, manaColor, 0.75, 20, 0.5)
         end
         love.graphics.setColor(0,0,0)
         ui.drawPanel(x-3,y-3, w+6,h+6)
@@ -215,11 +229,11 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
             local textX = ex + iconSize + iconGap
             local textW = ew - iconSize - iconGap
 
-            local nameBob = math.sin(2 * math.pi * 0.5 * love.timer.getTime()) * 0.5
+            local nameBob = getBob(0.5)
             love.graphics.setColor(0.8, 0.8, 0.85)
             printTextOutlineContainedNoWrap(
                 info.name, TITLE_FONT, 1,
-                textX, ey + nameBob, textW, TITLE_FONT:getHeight()
+                Kirigami(textX, ey + nameBob, textW, TITLE_FONT:getHeight())
             )
             prof_pop() -- prof_push("name")
 
@@ -384,7 +398,8 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
                 local r,gg,b,a = statColor:getRGBA()
                 love.graphics.setColor(r,gg,b,a*alpha)
                 local textX = cx + ch
-                richtext.printRich("{o}" .. g.formatNumber(value), STAT_FONT, textX, cy + ch / 2 - STAT_FONT:getHeight() / 2, cw - ch, "left")
+                local textY = cy + (ch - STAT_FONT:getHeight()) / 2
+                helper.printTextOutline(g.formatNumber(value), STAT_FONT, 1, textX, textY, cw - ch, "left")
                 end
             end
 
@@ -501,40 +516,21 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
     if canUpgrade then
         prof_push("squadupgindicator")
 
-        -- its an upgrade
-        local r1, _ = region:splitVertical(1,8)
-        local titleFont = g.getBigFont(16)
-        richtext.printRichContainedNoWrap("{bob amp=0.3}{o}" .. UPGRADE_COLOR_TAG .. UPGRADE, titleFont, r1:moveRatio(0,-0.7):padRatio(0.3):get())
+        local boxR = Kirigami(x, y + h - 20, w, 40):padUnit(30, 0, 30, 0)
 
-        local buf = {}
-        for statId, _ in pairs(info.statUpgradeScaling) do
-            local statInfo = g.getStatInfo(statId)
-            local base = def[statInfo.baseName] or 0
-            local increase = base * info.statUpgradeScaling[statId]
-            local incrtxt = helper.wrapRichtextColor(statInfo.color, " +%d")
-            buf[#buf+1] = string.format("{%s}" .. incrtxt, statInfo.icon, math.floor(increase + 0.5))
-        end
-        if info.unitCountUpgradeScaling and info.unitCountUpgradeScaling > 0 then
-            buf[#buf+1] = helper.wrapRichtextColor(g.COLORS.UPGRADE, UPGRADE_UNITS({n = info.unitCountUpgradeScaling}))
-        end
-        if #buf > 0 then
-            local str = table.concat(buf, "  ")
-            local boxReg = Kirigami(x, y + h - 20, w, 40):padUnit(30, 0, 30, 0)
-            local title, txtReg = boxReg:splitVertical(2,3)
+        love.graphics.setColor(1,1,1)
+        helper.drawEdgeTrailAnimation(boxR, g.COLORS.UPGRADE, 0)
+        helper.drawEdgeTrailAnimation(boxR, g.COLORS.UPGRADE, 0.5)
+        lg.setColor(1,1,1)
+        ui.drawDarkPanel(boxR:get())
 
-            love.graphics.setColor(1,1,1)
-            helper.drawEdgeTrailAnimation(boxReg, manaColor, 0)
-            helper.drawEdgeTrailAnimation(boxReg, manaColor, 0.5)
-            lg.setColor(1,1,1)
-            ui.drawDarkPanel(boxReg:get())
-            local font = g.getSmallFont(16)
-            richtext.printRichContainedNoWrap(
-                "{bob amp=0.5}" .. UPGRADE_COLOR_TAG ..LEVEL({level = canUpgrade.level + 1}),
-                font,
-                title:padUnit(2,2):get()
-            )
-            richtext.printRichContainedNoWrap(str, font, txtReg:padUnit(4,4):get())
-        end
+        local font = g.getSmallFont(16)
+        lg.setColor(g.COLORS.UPGRADE)
+        printTextOutlineContainedNoWrap(
+            UPGRADE,
+            font, 1,
+            boxR:padUnit(8):moveUnit(0, getBob(0.5))
+        )
 
         prof_pop() -- prof_push("squadupgindicator")
     end
