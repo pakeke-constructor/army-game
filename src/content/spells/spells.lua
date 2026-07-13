@@ -1,4 +1,9 @@
 
+local RED = g.snapToPalette(objects.Color("FFB42430"))
+local BLUE = g.snapToPalette(objects.Color("FF1C7CB7"))
+local GREEN = g.snapToPalette(objects.Color("FF52B225"))
+local YELLOW = g.snapToPalette(objects.Color("FFD0D31F"))
+
 
 
 
@@ -6,7 +11,7 @@ g.defineSpell("heal_spell", {
     name = "Heal",
     rarity = g.RARITIES.COMMON,
     icon = "heal_spell",
-    cost = {green = 1},
+    color = GREEN,
     description = loc("Heal allies in range!"),
 
     spellRange = 100,
@@ -25,7 +30,7 @@ g.defineSpell("poison_spell", {
     name = "Poison Cloud",
     rarity = g.RARITIES.UNCOMMON,
     icon = "poison_spell",
-    cost = {green = 1},
+    color = GREEN,
     description = loc("Poison enemies in range!"),
 
     spellRange = 100,
@@ -44,7 +49,7 @@ g.defineSpell("ace_spell", {
     name = "Ace",
     rarity = g.RARITIES.COMMON,
     icon = "ace_spell",
-    cost = {red = 1},
+    color = RED,
     spellRange = 100,
 })
 
@@ -53,7 +58,7 @@ g.defineSpell("coin_spell", {
     name = "Coin",
     rarity = g.RARITIES.COMMON,
     icon = "coin_spell",
-    cost = {blue = 1},
+    color = BLUE,
     spellRange = 100,
 })
 
@@ -62,7 +67,7 @@ g.defineSpell("howl_spell", {
     name = "Howl",
     rarity = g.RARITIES.COMMON,
     icon = "howl_spell",
-    cost = {green = 1},
+    color = GREEN,
     spellRange = 100,
 })
 
@@ -71,7 +76,7 @@ g.defineSpell("ranged_spell", {
     name = "Ranged",
     rarity = g.RARITIES.COMMON,
     icon = "ranged_spell",
-    cost = {yellow = 1},
+    color = YELLOW,
     spellRange = 100,
 })
 
@@ -82,7 +87,7 @@ g.defineSpell("insectify_spell", {
     name = "Insectify",
     rarity = g.RARITIES.UNCOMMON,
     icon = "spell_insectify",
-    cost = {green = 1},
+    color = GREEN,
     description = loc("Spawn a Pest for every ally in range!"),
 
     spellRange = 100,
@@ -101,7 +106,7 @@ g.defineSpell("freeze_spell", {
     name = "Freeze",
     rarity = g.RARITIES.UNCOMMON,
     icon = "freeze_spell",
-    cost = {blue = 1},
+    color = BLUE,
     description = loc("Freeze enemies in range for 5s!"),
 
     spellRange = 100,
@@ -120,7 +125,7 @@ g.defineSpell("dark_ritual_spell", {
     name = "Dark Ritual",
     rarity = g.RARITIES.UNCOMMON,
     icon = "dark_ritual_spell",
-    cost = {red = 1},
+    color = RED,
     description = g.loc2("Deal 2 damage to allies. Damaged allies gain +2 (MAGK)."),
 
     spellRange = 100,
@@ -144,7 +149,7 @@ g.defineSpell("bonereap_spell", {
     name = "Bonereap",
     rarity = g.RARITIES.RARE,
     icon = "skull_spell",
-    cost = {red = 1},
+    color = RED,
     description = loc("Trigger on-death effects on all allies in range, without killing them."),
 
     spellRange = 100,
@@ -166,7 +171,7 @@ g.defineSpell("harrier_spell", {
     name = "Harrier",
     rarity = g.RARITIES.UNCOMMON,
     icon = "harrier_spell",
-    cost = {yellow = 1},
+    color = YELLOW,
     description = g.loc2("Ranged allies in range gain +70% (RANGE)."),
 
     spellRange = 100,
