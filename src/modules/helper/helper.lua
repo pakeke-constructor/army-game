@@ -1001,6 +1001,8 @@ end
 
 
 
+---@param r kirigami.Region
+---@param t number
 local function getOrbitPosOnRegionEdge(r, t)
     local x, y, w, h = r:get()
     local perimeter = 2 * (w + h)
@@ -1023,14 +1025,20 @@ end
 ---@param color objects.Color
 ---@param offset number
 ---@param N integer?
-function helper.drawEdgeTrailAnimation(r, color, offset, N)
+---@param speed number?
+function helper.drawEdgeTrailAnimation(r, color, offset, N, speed)
     N = N or 9
+    local _, _, w, h = r:get()
+    local perimeter = 2 * (w + h)
+    local dotSize = 6
+    local spacing = math.min(perimeter / 80, dotSize - 1)
     local col = objects.Color(color)
     for i=N,1,-1 do
         col = col:darken(0.1)
         lg.setColor(col)
-        local x,y = getOrbitPosOnRegionEdge(r, offset + i/80 + love.timer.getTime()/5)
-        lg.rectangle("fill", x-3,y-3, 6,6)
+        local t =  i * spacing / perimeter + (speed or 1) * love.timer.getTime()/5
+        local px, py = getOrbitPosOnRegionEdge(r, offset + t)
+        lg.rectangle("fill", math.floor(px - dotSize / 2 + 0.5), math.floor(py - dotSize / 2 + 0.5), dotSize, dotSize)
     end
 end
 
