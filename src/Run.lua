@@ -7,7 +7,7 @@ local MapGraph = require("src.scenes.map_scene.MapGraph")
 ---@field commander string
 ---@field difficulty integer
 ---@field squads {[string]: g.Squad}
----@field spells {[string]: boolean}
+---@field spells objects.Set<string>
 ---@field spellsCast {[string]: boolean} which spells have been cast this battle (reset each battle)
 ---@field _sortedSquads g.Squad[]?
 ---@field _battleSquads g.Squad[] temporary squads on the bench for the current fight only
@@ -28,7 +28,7 @@ function Run:init()
     self.difficulty = 0
 
     self.squads = {}
-    self.spells = {}
+    self.spells = objects.Set()
     self.spellsCast = {}
     self._sortedSquads = nil
     self._battleSquads = {}
@@ -117,15 +117,11 @@ function Run:serialize()
     for id, sq in pairs(self.squads) do
         squads[id] = sq:serialize()
     end
-    local spells = {}
-    for id in pairs(self.spells) do
-        spells[id] = true
-    end
     return {
         commander = self.commander,
         difficulty = self.difficulty,
         squads = squads,
-        spells = spells,
+        spells = self.spells:totable(),
         level = self.level,
         xp = self.xp,
         money = self.money,
@@ -143,7 +139,7 @@ end
 ---@param data table (generic `table` type is intentional, format may change which is tedious to sync with LLS)
 ---@return g.Run
 function Run.deserialize(data)
-    local run = Run()
+    local run = Run() --[[@as g.Run]]
     if not data then
         return run
     end
@@ -153,10 +149,7 @@ function Run.deserialize(data)
     for id, sqData in pairs(data.squads or {}) do
         run.squads[id] = Squad.deserialize(sqData)
     end
-    run.spells = {}
-    for id in pairs(data.spells or {}) do
-        run.spells[id] = true
-    end
+    run.spells = objects.Set(data.spells or {})
     run.spellsCast = {}
     run.level = data.level or run.level
     run.xp = data.xp or run.xp

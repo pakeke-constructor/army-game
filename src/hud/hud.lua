@@ -59,12 +59,7 @@ end
 ---@return string[]
 local function getVisibleSpells()
     local run = g.getRun()
-    local spells = {}
-    for spellId in pairs(run.spells) do
-        if not run.spellsCast[spellId] then
-            spells[#spells + 1] = spellId
-        end
-    end
+    local spells = run.spells:totable()
     table.sort(spells)
     return spells
 end

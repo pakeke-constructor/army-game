@@ -1412,16 +1412,19 @@ function g.getSpellInfo(id)
 end
 
 ---@param spellId string
+---@return boolean added true if spell added, false if max spell limit reached
 function g.addSpellToArmy(spellId)
     local run = g.getRun()
     assert(SPELL_DEFS[spellId], "Unknown spell: " .. tostring(spellId))
-    run.spells[spellId] = true
+    if #run.spells >= 2 then return false end
+    run.spells:add(spellId)
+    return true
 end
 
 ---@param spellId string
 ---@return boolean
 function g.hasSpell(spellId)
-    return g.getRun().spells[spellId] == true
+    return g.getRun().spells:has(spellId)
 end
 
 ---@param info g.SpellInfo
