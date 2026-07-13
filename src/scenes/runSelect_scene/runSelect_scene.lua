@@ -10,6 +10,7 @@ end
 
 function runSelect:enter()
     self.selectedCommander = nil
+    self.lastHoveredCommander = nil
 end
 
 ---@param commanderId string
@@ -20,6 +21,7 @@ function runSelect:start(commanderId)
     })
     local dur = consts.DEV_MODE and consts.RUN_START_FADE_DEV or consts.RUN_START_FADE
     g.transitionTo("map_scene", {fadeOut = dur, fadeIn = dur})
+    g.playUISound("ui_embark")
 end
 
 ---@param dt number
@@ -34,6 +36,7 @@ local function drawCommanderList(self, icons)
     local list = g.getCommanderList()
     local cells = icons:grid(#list, 1)
     local dt = love.timer.getDelta()
+    local hoveredId = nil
     for i, reg in ipairs(cells) do
         local id = list[i]
         local info = g.getCommanderInfo(id)
@@ -54,6 +57,7 @@ local function drawCommanderList(self, icons)
         -- ui.drawPanel(x,y,rw,rh)
         local alpha = selected and 0.4 or 0.15
         local isHovered = iml.isHovered(x, y, rw, rh, id)
+        if isHovered then hoveredId = id end
         local dy = (isHovered and (not selected)) and -6 or 0
 
         -- Draw all the glows
@@ -88,7 +92,13 @@ local function drawCommanderList(self, icons)
 
         if iml.wasJustClicked(x, y, rw, rh, 1, id) then
             self.selectedCommander = id
+            g.playUISound("ui_click_satisfying")
         end
+    end
+
+    if hoveredId ~= self.lastHoveredCommander then
+        if hoveredId then g.playUISound("ui_mouse_hover") end
+        self.lastHoveredCommander = hoveredId
     end
 end
 

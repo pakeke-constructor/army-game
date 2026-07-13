@@ -166,6 +166,7 @@ function map_scene:enter()
     self.commanderFacing = 1
     self.gallop = 0
     self.traveling = nil
+    self.lastHoveredNode = nil
     self.currentSelectAnimation = nil
     ---@type table<MapNode, number?>
     self.fogReveal = {}
@@ -651,6 +652,10 @@ function map_scene:draw()
         local pnode = graph:getPlayerNode()
         if pnode then
             hovered, clicked = updateNodePanels(graph)
+            if hovered ~= self.lastHoveredNode then
+                if hovered and hovered ~= pnode then g.playUISound("ui_mouse_hover") end
+                self.lastHoveredNode = hovered
+            end
             if clicked and (not self.traveling) then
                 local x, y = graph:getDrawPos(clicked)
                 self.currentSelectAnimation = {
