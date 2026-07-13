@@ -43,7 +43,7 @@ g.defineSquad("human_lumberjack_squad", {
     -- tags: attack_damage, health (basic bruiser)
     tags = {"attack_damage", "health"},
     entityDef = {
-        image = g.leo("umberjack_unit", "barbarian"),
+        image = g.leo("lumberjack_unit", "barbarian"),
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "melee",
@@ -122,6 +122,7 @@ g.defineSquad("druid_squad", {
     },
     unitCount = 6,
     perks = {{
+        id = "perk_vitalize",
         name = "Vitalize",
         description = loc("On-heal, the target gains 1 max HP."),
         handlers = {
@@ -246,6 +247,7 @@ g.defineSquad("giant_toad_squad", {
     },
     unitCount = 4,
     perks = {{
+        id = "perk_thickskin",
         name = "Thick Skin",
         description = loc("Takes 60% less damage from poisoned enemies."),
         handlers = {
@@ -285,6 +287,7 @@ g.defineSquad("dart_spitter_squad", {
     },
     unitCount = 4,
     perks = {{
+        id = "perk_toxicdarts",
         name = "Toxic Darts",
         description = loc("Apply 1 poison on hit."),
         handlers = {
@@ -316,6 +319,7 @@ g.defineSquad("mini_toad_squad", {
     },
     unitCount = 6,
     perks = {{
+        id = "perk_toxicskin",
         name = "Toxic Skin",
         description = loc("Apply 1 poison on hit."),
         handlers = {
@@ -350,9 +354,9 @@ g.defineSquad("muffinplant_squad", {
     unitCount = 4,
     icon = g.leo("muffinplants_uniticon", "treants_uniticon"),
     perks = {{
+        id = "perk_sweetrelease",
         name = "Sweet Release",
         description = g.loc2("When killed, heal all allies equal to this unit's (MAGK)."),
-        image = g.leo("muffinplants_perk", "coin_icon"),
         handlers = {
             entityDeath = function(ent)
                 for _, ally in ipairs(g.getAllyList()) do
@@ -389,6 +393,7 @@ g.defineSquad("treant_squad", {
     unitCount = 5,
     icon = "treants_uniticon",
     perks = {{
+        id = "perk_regrowth",
         name = "Regrowth",
         description = g.loc2("Every second, heal (HP) equal to (MAGK)."),
         image = "mana_green_small",
@@ -446,6 +451,7 @@ g.defineSquad("infested_squad", {
     unitCount = 8,
     icon = "theinfested_uniticon",
     perks = {{
+        id = "perk_infestation",
         name = "Infestation",
         description = loc("On death, spawn a {GREEN_MANA_COLOR}Pest{/GREEN_MANA_COLOR}."),
         handlers = {
@@ -512,6 +518,7 @@ g.defineSquad("forest_sentry_squad", {
     unitCount = 4,
     icon = "forestsentries_uniticon",
     perks = {{
+        id = "perk_lifeforce",
         name = "Life Force",
         description = g.loc2("Gain (ATK) equal to max (HP). Take 4 x as much damage."),
         handlers = {
@@ -556,6 +563,7 @@ g.defineSquad("arcane_blossom_squad", {
     unitCount = 3,
     icon = "arcaneblossom_uniticon",
     perks = {{
+        id = "perk_magnificence",
         name = "Magnificence",
         description = g.loc2("When this unit heals or gains max HP, spread the effect to 3 random nearby allies without this perk."),
         handlers = {
@@ -610,6 +618,7 @@ g.defineSquad("world_tree_squad", {
     },
     unitCount = 1,
     perks = {{
+        id = "perk_herwrath",
         name = "Her Wrath",
         description = loc("Whenever an ally heals, this building damages a random enemy equal to 100% of the heal value."),
         rawHandlers = {
@@ -649,6 +658,7 @@ g.defineSquad("hive_recycler_squad", {
     },
     unitCount = 2,
     perks = {{
+        id = "perk_swarmsurge",
         name = "Swarmsurge",
         description = loc("Whenever any {GREEN_MANA_COLOR}Green unit{/GREEN_MANA_COLOR} dies, this unit summons a {GREEN_MANA_COLOR}Pest{/GREEN_MANA_COLOR}."),
         rawHandlers = {
@@ -685,6 +695,7 @@ g.defineSquad("living_forest_squad", {
     unitCount = 4,
     icon = "livingforest_uniticon",
     perks = {{
+        id = "perk_circleoflife",
         name = "Circle of Life",
         description = loc("On-death, all allies gain 10% of this unit's max HP."),
         handlers = {
@@ -727,6 +738,7 @@ g.defineSquad("lifesmith_squad", {
     unitCount = 6,
     icon = "lifesmiths_uniticon",
     perks = {{
+        id = "perk_forgelife",
         name = "Forge Life",
         description = g.loc2("This unit has additional (HEAL) equal to its (ARMR)."),
         handlers = {

@@ -120,6 +120,7 @@ g.defineSquad("viking_squad", {
     unitCount = 6,
     icon = g.leo("vikings_uniticon", "barbarian_uniticon"),
     perks = {{
+        id = "perk_icebreaker",
         name = "Icebreaker",
         description = loc("Deals 3x damage to frozen enemies."),
         handlers = {
@@ -221,6 +222,7 @@ g.defineSquad("diver_squad", {
     unitCount = 3,
     startingTraits = {"fishfolk"},
     perks = {{
+        id = "perk_reefrally",
         name = "Reef Rally",
         description = g.loc2("At the start of battle, give a random Fishfolk unit +4 (ATK)."),
         rawHandlers = {
@@ -261,6 +263,7 @@ g.defineSquad("test_subjects_squad", {
     },
     unitCount = 4,
     perks = {{
+        id = "perk_catalyze",
         name = "Catalyze",
         description = g.loc2("When Transformed, gain +50% (HP) and (ASPD)."),
         rawHandlers = {
@@ -303,6 +306,7 @@ g.defineSquad("monk_squad", {
     },
     unitCount = 4,
     perks = {{
+        id = "perk_innerfocus",
         name = "Inner Focus",
         description = g.loc2("Deals bonus damage equal to (MAGK)."),
         handlers = {
@@ -340,9 +344,9 @@ g.defineSquad("ethereal_archer_squad", {
     unitCount = 4,
     icon = g.leo("etherealarchers_uniticon", "archer_uniticon"),
     perks = {{
+        id = "perk_arcanearrows",
         name = "Arcane Arrows",
         description = g.loc2("Deals bonus damage equal to (MAGK)."),
-        image = g.leo("etherealarchers_perk", "coin_icon"),
         handlers = {
             getAttackDamageModifier = function(ent)
                 return ent.magic or 0
@@ -382,9 +386,9 @@ g.defineSquad("enchantress_squad", {
     unitCount = 1,
     icon = g.leo("enchantress_uniticon", "icemage_uniticon"),
     perks = {{
+        id = "perk_arcanegift",
         name = "Arcane Gift",
         description = g.loc2("Every second, give the ally with the lowest (MAGK) +1 (MAGK)."),
-        image = g.leo("enchantress_perk", "coin_icon"),
         rawHandlers = {
             perSecondUpdate = function(ent)
                 if not g.isAlive(ent) then return end
@@ -427,6 +431,7 @@ g.defineSquad("orcball_player_squad", {
     },
     unitCount = 4,
     perks = {{
+        id = "perk_bodyslam",
         name = "Body Slam",
         description = g.loc2("Gains bonus (ATK) equal to current (ARMR). Loses 1 (ARMR) on each attack."),
         handlers = {
@@ -469,6 +474,7 @@ g.defineSquad("defender_squad", {
     },
     unitCount = 6,
     perks = {{
+        id = "perk_knockback",
         name = "Knockback",
         description = loc("On-hit, pushes the target back."),
         handlers = {
@@ -514,6 +520,7 @@ g.defineSquad("incense_holder_squad", {
     unitCount = 4,
     icon = "incenseholder_uniticon",
     perks = {{
+        id = "perk_invigorate",
         name = "Invigorate",
         description = g.loc2("Every 2 seconds, 5 nearby allies gain +50% (ASPD) for 4s."),
         rawHandlers = {
@@ -557,6 +564,7 @@ g.defineSquad("clay_troll_squad", {
     },
     unitCount = 4,
     perks = {{
+        id = "perk_protectivecoating",
         name = "Protective Coating",
         description = g.loc2("On-hurt, gives a random nearby ally 1 (ARMR). Only triggers on (HP) damage."),
         handlers = {
@@ -596,6 +604,7 @@ g.defineSquad("ice_elephant_squad", {
     },
     unitCount = 2,
     perks = {{
+        id = "perk_frosthide",
         name = "Frost Hide",
         description = g.loc2("When hit, 10% chance to Freeze the attacker for 3s."),
         handlers = {
@@ -651,6 +660,7 @@ g.defineSquad("magnet_elemental_squad", {
     },
     unitCount = 2,
     perks = {{
+        id = "perk_shrapnelmancy",
         name = "Shrapnelmancy",
         description = loc("When any ally loses armor, this unit deals 1 damage to a random nearby enemy."),
         rawHandlers = {
@@ -691,6 +701,7 @@ g.defineSquad("immortal_eye_squad", {
         baseStartingArmor = 10,
     },
     perks = {{
+        id = "perk_frostblight",
         name = "Frostblight",
         description = g.loc2("Every second, apply (1 POISON) to all frozen enemies."),
         rawHandlers = {
@@ -728,6 +739,7 @@ g.defineSquad("bell_creature_squad", {
     unitCount = 3,
     icon = "bellcreature_uniticon",
     perks = {{
+        id = "perk_reverberate",
         name = "Reverberate",
         description = loc("When this unit is Buffed, deals 1 damage to all nearby enemies."),
         handlers = {
@@ -743,40 +755,6 @@ g.defineSquad("bell_creature_squad", {
     cost = {blue = 1},
 })
 
-
-
-g.defineSquad("laser_gunner_squad", {
-    name = "Laser Gunners",
-    rarity = g.RARITIES.LEGENDARY,
-    -- tags: ranged, projectile, attack_speed, scaling
-    tags = {"ranged", "projectile", "attack_speed", "scaling"},
-    entityDef = {
-        image = "lasergunners_unit",
-        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
-        -- TODO: Laser cannon attack rather than arrow?
-        attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 380 },
-        weapon = { image = "lasergunners_lasercannon", type = "bow" },
-        baseAttackDamage = 1,
-        baseAttackSpeed = 0.5,
-        baseAttackRange = 120,
-        baseMoveSpeed = 50,
-        baseMaxHealth = 8,
-    },
-    unitCount = 4,
-    perks = {{
-        name = "Laser Focus",
-        description = g.loc2("On-attack, this unit gains 0.1 (ASPD). Stacks up to 30 times."),
-        handlers = {
-            onAttack = function(ent, target)
-                ent._laserFocusStacks = ent._laserFocusStacks or 0
-                if ent._laserFocusStacks >= 30 then return end
-                ent._laserFocusStacks = ent._laserFocusStacks + 1
-                g.buffEntity(ent, "attackSpeed", 0.1)
-            end,
-        },
-    }},
-    cost = {blue = 1},
-})
 
 
 
@@ -818,6 +796,7 @@ g.defineSquad("anima_incubator_squad", {
     },
     unitCount = 1,
     perks = {{
+        id = "perk_animaspawner",
         name = "Anima Spawner",
         description = g.loc2("Every 5 seconds, summons an {BLUE_MANA_COLOR}Anima{/BLUE_MANA_COLOR}."),
         image = "mana_blue_small",
@@ -861,6 +840,7 @@ g.defineSquad("mini_ice_golem_squad", {
     },
     unitCount = 4,
     perks = {{
+        id = "perk_shatter",
         name = "Shatter",
         description = g.loc2("When killed, Freeze nearby enemies for 4s."),
         handlers = {
@@ -903,6 +883,7 @@ g.defineSquad("lightning_wizard_squad", {
     unitCount = 1,
     icon = g.leo("lightningwizard_uniticon", "icemage_uniticon"),
     perks = {{
+        id = "perk_chainlightning",
         name = "Chain Lightning",
         description = loc("On-hit, emit lightning dealing damage equal to (MAGK)."),
         handlers = {
@@ -941,6 +922,7 @@ g.defineSquad("frost_warden_squad", {
     unitCount = 1,
     icon = g.leo("frostwarden_uniticon", "iceelephants_uniticon"),
     perks = {{
+        id = "perk_frostward",
         name = "Frost Ward",
         description = loc("When a spell is cast, Freeze surrounding enemies for 2s."),
         rawHandlers = {
@@ -984,6 +966,7 @@ g.defineSquad("ice_mage_squad", {
     },
     unitCount = 4,
     perks = {{
+        id = "perk_icetouch",
         name = "Ice Touch",
         description = loc("On-hit, 25% chance to Freeze for 5s. {c r=0.388 g=0.388 b=0.388}Prioritizes unfrozen targets.{/c}"),
         handlers = {

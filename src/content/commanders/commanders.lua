@@ -142,6 +142,7 @@ g.defineCommander("druidcommander", "Druid Lady", {
             baseMaxHealth = 160,
         },
         perks = {{
+            id = "perk_breathoflife",
             name = "Breath of Life",
             description = g.loc2("Your squads have +25% Max (HP)."),
             rawHandlers = {

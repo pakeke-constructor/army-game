@@ -140,6 +140,7 @@ g.defineSquad("spark_bot_squad", {
     unitCount = 6,
     startingTraits = {"bot"},
     perks = {{
+        id = "perk_overload",
         name = "Overload",
         description = g.loc2("On-death, emit lightning dealing damage equal to level."),
         handlers = {
@@ -175,9 +176,9 @@ g.defineSquad("engineer_squad", {
     unitCount = 4,
     startingTraits = {"bot"},
     perks = {{
+        id = "perk_industrialmomentum",
         name = "Industrial Momentum",
         description = g.loc2("While 2 buildings are alive, this unit has triple (ATK) and movement speed."),
-        image = g.leo("engineers_perk", "coin_icon"),
         handlers = {
             getAttackDamageMultiplier = function(ent)
                 local buildings = 0
@@ -230,9 +231,9 @@ g.defineSquad("clanker_factory_squad", {
     },
     unitCount = 1,
     perks = {{
+        id = "perk_assemblyline",
         name = "Assembly Line",
         description = g.loc2("Produces 1 Clanker-Bot per second. 2 (HP), 2 (ATK)"),
-        image = g.leo("clankerfactory_perk", "coin_icon"),
         rawHandlers = {
             perSecondUpdate = function(ent)
                 if not g.isAlive(ent) then return end
@@ -267,6 +268,7 @@ g.defineSquad("prospector_squad", {
     },
     unitCount = 4,
     perks = {{
+        id = "perk_strikegold",
         name = "Strike Gold",
         description = g.loc2("On-kill, gain 1 (COIN)."),
         handlers = {
@@ -294,6 +296,7 @@ g.defineSquad("the_great_factory_squad", {
     icon = "greatfactory_uniticon",
     perks = {{
         -- Label purpose only
+        id = "perk_duplication",
         name = "Duplication",
         description = loc("On-deploy, add a copy of the deployed squad to your bench for the fight."),
     }},
@@ -318,6 +321,7 @@ g.defineSquad("gold_mine_squad", {
     },
     unitCount = 1,
     perks = {{
+        id = "perk_extraction",
         name = "Extraction",
         description = g.loc2("When an enemy dies, gain 2 (COIN)."),
         rawHandlers = {
@@ -346,6 +350,7 @@ g.defineSquad("living_laboratory_squad", {
     },
     unitCount = 1,
     perks = {{
+        id = "perk_eureka",
         name = "Eureka",
         description = loc("When this unit is Buffed, spreads the buff to 6 nearby allies."),
         handlers = {
@@ -394,6 +399,7 @@ g.defineSquad("endless_army_squad", {
     },
     unitCount = 1,
     perks = {{
+        id = "perk_massproduction",
         name = "Mass-Production",
         description = loc("Has extra units equal to the total levels of all squads in your army."),
         armyHandlers = {
@@ -429,6 +435,7 @@ g.defineSquad("wealth_elemental_squad", {
     },
     unitCount = 2,
     perks = {{
+        id = "perk_goldenbulk",
         name = "Golden Bulk",
         description = g.loc2("When you gain (COIN) during battle, this unit gains an equal amount of (ARMR)."),
         rawHandlers = {
@@ -463,6 +470,7 @@ g.defineSquad("laser_gunner_squad", {
     statUpgradeScaling = {attackSpeed = 0.1},
     unitCount = 4,
     perks = {{
+        id = "perk_laserfocus",
         name = "Laser Focus",
         description = g.loc2("On-attack, this unit gains 0.1 (ASPD). Stacks up to 30 times."),
         handlers = {

@@ -27,6 +27,7 @@ g.defineSquad("archer_squad", {
     },
     unitCount = 4,
     perks = {{
+        id = "perk_sharpshooter",
         name = "Sharpshooter",
         description = loc("This unit fires 1 extra projectile."),
         handlers = {
@@ -128,6 +129,7 @@ g.defineSquad("militia_band", {
     },
     unitCount = 6,
     perks = {{
+        id = "perk_berserker",
         name = "Berserker",
         description = loc("This unit gains +5 attack when below 50% health."),
         handlers = {
@@ -168,6 +170,7 @@ g.defineSquad("aggravator_7000_squad", {
     },
     unitCount = 1,
     perks = {{
+        id = "perk_racket",
         name = "Racket",
         description = loc("On-attack, all enemies in a large area are Taunted to target this unit."),
         handlers = {
@@ -256,6 +259,7 @@ g.defineSquad("quartz_cannoneer_squad", {
     },
     unitCount = 4,
     perks = {{
+        id = "perk_pinpoint",
         name = "Pinpoint",
         description = loc("Deals double damage to enemies beyond 350 units away."),
         handlers = {
@@ -291,6 +295,7 @@ g.defineSquad("world_devourer_squad", {
     },
     unitCount = 4,
     perks = {{
+        id = "perk_consumption",
         name = "Consumption",
         description = loc("On-kill, spawn a copy of this unit."),
         handlers = {
