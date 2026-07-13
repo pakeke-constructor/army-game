@@ -100,7 +100,7 @@ return function(spellId, region, index)
         draw = function(ex, ey, ew, eh)
             -- icon
             love.graphics.setColor(1, 1, 1)
-            g.renderSpellIcon(spellId, ex+16, ey+16, true)
+            g.renderSpellIcon(spellId, ex+16, ey+16)
             -- name to right of icon
             local textX = ex + iconSize + iconGap
             local textW = ew - iconSize - iconGap
@@ -145,18 +145,5 @@ return function(spellId, region, index)
         ret = true
     end
 
-    local ww, hh = box:render(x, y)
-
-    -- Mana cost beads (bottom center)
-    local cost = info.cost
-    if cost then
-        local rw, rh = region.w, region.h
-        lg.setColor(1, 1, 1)
-        local _, www = g.getManaCostWidth(cost)
-        local H=30
-        ui.drawDarkPanel(x+rw/2 - www/2 - 6, y+rh-H/2, www + 12,H)
-        g.drawManaCostLarge(cost, x + rw / 2, y + rh, rw/2)
-    end
-
-    return ret, ww, hh
+    return ret, box:render(x, y)
 end

@@ -812,8 +812,7 @@ end
 ---@param spellId string
 ---@param x number
 ---@param y number
----@param drawManaCost boolean?
-function g.renderSpellIcon(spellId, x, y, drawManaCost)
+function g.renderSpellIcon(spellId, x, y)
     local info = g.getSpellInfo(spellId)
     local col = info.color
     local c = gsman.mulColor(1, 1, 1)
@@ -822,11 +821,6 @@ function g.renderSpellIcon(spellId, x, y, drawManaCost)
     c = gsman.mulColor(col)
     g.drawImage("spellicon_border", x, y)
     c:pop()
-
-    local size = 32 -- hacky hardcode
-    if drawManaCost and info.cost then
-        g.drawManaCost(info.cost, x, y - size/2, size + 6)
-    end
 end
 
 
@@ -1458,9 +1452,6 @@ end
 ---@return boolean
 function g.canCastSpell(worldX, worldY, spellId)
     local info = g.getSpellInfo(spellId)
-    local run = g.getRun()
-    local affordable = (not info.cost) or g.canAffordMana(run._battleMana, info.cost)
-    if not affordable then return false end
     if not info.instantCast then return true end
 
     local hitCount = iterateSpellTargets(info, worldX, worldY, function() end)

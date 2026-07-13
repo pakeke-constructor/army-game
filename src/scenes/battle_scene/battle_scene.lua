@@ -1136,16 +1136,12 @@ function battle_scene:draw()
         local wx, wy = self.camera:toWorld(mx, my)
 
         if selType == "spell" then
-            local info = g.getSpellInfo(entry)
+            ---@cast entry string
             if g.canCastSpell(wx, wy, entry) then
-                if not info.cost or g.trySpendMana(g.getBattleManaCounts(), info.cost) then
-                    g.castSpell(entry, wx, wy)
-                    spawnManaIconPopups(info.cost)
-                else
-                    spawnCantAffordManaPopup(info.cost)
-                end
+                g.castSpell(entry, wx, wy)
             end
         elseif selType == "squad" and not entry.deployed then
+            ---@cast entry g.Squad
             local sx, sy = getSnappedDeployPosition(self, entry, wx, wy)
             local info = g.getSquadInfo(entry.squadId)
             if not info.cost or g.trySpendMana(g.getBattleManaCounts(), info.cost) then
