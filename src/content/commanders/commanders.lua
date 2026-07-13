@@ -94,7 +94,7 @@ g.defineCommander("sir_horse", "Sir Horse", {
             attack = {
                 attackType = "melee",
             },
-            baseAttackDamage = 6,
+            baseAttackDamage = 7,
             baseAttackSpeed = 2,
             baseAttackRange = 85,
             baseMoveSpeed = 120,

@@ -320,8 +320,8 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
                     local basePower = def.baseHealPower or def.baseAttackDamage or 0
                     local attackSpeed = baseSpeed + g.getSquadStatBuff(squadId, "attackSpeed")
                     local power = basePower + g.getSquadStatBuff(squadId, powerStat)
-                    value = attackSpeed * power
-                    bonus = value - (baseSpeed * basePower)
+                    value = g.getDPS(power, attackSpeed)
+                    bonus = value - g.getDPS(basePower, baseSpeed)
                     icon = isHealer and "healpower" or "damage"
                     statColor = isHealer and g.COLORS.HEAL or g.COLORS.DAMAGE
                     name = isHealer and HPS_NAME or DPS_NAME

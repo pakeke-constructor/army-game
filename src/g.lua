@@ -1092,6 +1092,18 @@ local currentEntityId = 0
 ---@field powerIndex number
 ---@field squadType g.SquadType
 
+local ATTACK_SPEED_SCALING = 0.3
+
+---@param dmg number
+---@param aspd number
+---@return number
+function g.getDPS(dmg, aspd)
+    if aspd > 1 then
+        aspd = 1 + (aspd - 1) * ATTACK_SPEED_SCALING
+    end
+    return dmg * aspd
+end
+
 ---@param squadInfo g.SquadDef
 ---@return number
 local function estimateSquadPowerIndex(squadInfo)
@@ -1112,8 +1124,7 @@ local function estimateSquadPowerIndex(squadInfo)
     if manaCost > 1 then
         bonus = bonus / 2.5 -- units that cost more have lower powerIndex, coz they are more expensive.
     end
-
-    return math.floor(bonus * (attack*attackSpeed*timeToDealDmg*unitCount))
+    return math.floor(bonus * g.getDPS(attack, attackSpeed) * timeToDealDmg * unitCount)
 end
 
 
@@ -2645,7 +2656,7 @@ end
 ---@param ent ecs.Entity
 ---@return number
 function g.getAttackCooldown(ent)
-    return 1 / (ent.attackSpeed or 1)
+    return 1 / g.getDPS(1, ent.attackSpeed or 1)
 end
 
 
