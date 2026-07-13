@@ -1109,7 +1109,7 @@ end
 ---@param hp number
 ---@return boolean
 local function isTanky(dps, hp)
-    return dps*10 > hp
+    return dps*10 < hp
 end
 
 ---@param squadInfo g.SquadDef
@@ -1123,12 +1123,13 @@ local function estimateSquadPowerIndex(squadInfo)
     local attackSpeed = def.baseAttackSpeed or 1
     local dps = g.getDPS(attack, attackSpeed)
     local unitCount = squadInfo.unitCount or 1
-    local healthArmr = (def.baseMaxHealth or 1) + (def.baseStartingArmor or 0)
-    local timeToDealDmg = 4*healthArmr + math.max(1,((def.baseAttackRange or 1) - 20))
+    local healthArmr = (def.baseMaxHealth or 1) + (def.baseStartingArmor or 0) * 3
 
     local isRanged = def.isRanged
     local isHealer = def.isHealer
     local isTank = isTanky(dps,healthArmr)
+    local isBuilding = def.isBuilding
+    local isBruiser = (not isTank) and (not isHealer) and (not isRanged) and (not isBuilding)
 
     local manaCost = 0
     for _, n in pairs(squadInfo.cost or {}) do
@@ -1137,7 +1138,20 @@ local function estimateSquadPowerIndex(squadInfo)
     if manaCost > 1 then
         bonus = bonus / 2.5 -- units that cost more have lower powerIndex, coz they are more expensive.
     end
-    return math.floor(bonus * g.getDPS(attack, attackSpeed) * timeToDealDmg * unitCount)
+
+    local val = 1
+    if isRanged then
+        local rangeMult = (def.baseAttackRange + 300) / 450
+        val = 10 * (dps * rangeMult)
+    elseif isHealer then
+        local rangeMult = (def.baseAttackRange + 300) / 450
+        val = 10 * (dps * rangeMult)
+    elseif isTank then
+        val = 5 * (healthArmr)
+    elseif isBruiser then
+        val = 5 * (healthArmr * ((dps + 2) / 3))
+    end
+    return math.floor(val * unitCount)
 end
 
 
@@ -1175,7 +1189,7 @@ local function categorizeSquad(info)
     -- melee from here on. Compare bulk vs damage output.
     local health = (def.baseMaxHealth or 0) + (def.baseStartingArmor or 0)
     local dps = attackDamage * (def.baseAttackSpeed or 0)
-    if dps > 0 and isTank(dps, health) then
+    if dps > 0 and isTanky(dps, health) then
         return g.SQUAD_TYPES.TANK
     end
     if dps > 0 and health > 0 then
