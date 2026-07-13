@@ -272,7 +272,7 @@ local currentRun
 
 ---@param lopt g.LaunchOptions
 function g.newRun(lopt)
-    currentRun = Run()
+    currentRun = Run() --[[@as g.Run]]
 
     lopt = lopt or {
         commander = consts.STARTING_COMMANDER,
@@ -1355,7 +1355,8 @@ end
 -- ============================================================================
 
 local SPELL_DEFS = {}
-local SPELL_LIST = {}
+---@type string[]
+g.SPELLS = {}
 
 ---@class g.SpellInstantCastDef
 ---@field target "ally"|"enemy"
@@ -1401,7 +1402,7 @@ function g.defineSpell(id, info)
     end
     ---@cast info g.SpellInfo
     SPELL_DEFS[id] = info
-    SPELL_LIST[#SPELL_LIST + 1] = id
+    g.SPELLS[#g.SPELLS + 1] = id
 end
 
 ---@param id string
