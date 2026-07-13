@@ -154,6 +154,98 @@ g.defineSquad("spark_bot_squad", {
 })
 
 
+
+g.defineSquad("engineer_squad", {
+    name = "Engineers",
+    rarity = g.RARITIES.UNCOMMON,
+    tags = {"building", "attack_damage"},
+    entityDef = {
+        image = g.leo("engineers_unit", "prospectors_unit"),
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = { attackType = "melee" },
+        weapon = {
+            image = g.leo("engineers_wrench", "prospectors_pickaxe"),
+            type = "sword",
+        },
+        baseAttackDamage = 2,
+        baseAttackSpeed = 1,
+        baseAttackRange = 18,
+        baseMoveSpeed = 55,
+        baseMaxHealth = 8,
+    },
+    unitCount = 4,
+    startingTraits = {"bot"},
+    perks = {{
+        name = "Industrial Momentum",
+        description = g.loc2("While 2 buildings are alive, this unit has triple (ATK) and movement speed."),
+        image = g.leo("engineers_perk", "coin_icon"),
+        handlers = {
+            getAttackDamageMultiplier = function(ent)
+                local buildings = 0
+                for _, ally in ipairs(g.getAllyList()) do
+                    if g.isAlive(ally) and ally.isBuilding then
+                        buildings = buildings + 1
+                    end
+                end
+                if buildings >= 2 then return 3 end
+            end,
+            getMoveSpeedMultiplier = function(ent)
+                local buildings = 0
+                for _, ally in ipairs(g.getAllyList()) do
+                    if g.isAlive(ally) and ally.isBuilding then
+                        buildings = buildings + 1
+                    end
+                end
+                if buildings >= 2 then return 3 end
+            end,
+        },
+    }},
+    cost = {yellow = 1},
+})
+
+
+g.defineEntity("clanker_bot", {
+    image = g.leo("clankerbot_unit", "angrybot_unit"),
+    physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+    partitions = {"unit", "ally"},
+    team = "ally",
+    ai = { target = "enemy" },
+    attack = { attackType = "melee" },
+    baseAttackDamage = 2,
+    baseAttackSpeed = 1,
+    baseAttackRange = 18,
+    baseMoveSpeed = 55,
+    baseMaxHealth = 2,
+})
+
+
+g.defineSquad("clanker_factory_squad", {
+    name = "Clanker Factory",
+    rarity = g.RARITIES.RARE,
+    tags = {"building", "swarm"},
+    entityDef = {
+        image = g.leo("clankerfactory_unit", "greatfactory_unit"),
+        isBuilding = true,
+        physics = { shape = "circle", radius = 12, ox = 0, oy = 0, mass = 1, isStatic = true },
+        baseMaxHealth = 40,
+    },
+    statUpgradeScaling = {maxHealth = 0.2},
+    unitCount = 1,
+    perks = {{
+        name = "Assembly Line",
+        description = loc("Produces 1 Clanker Bot per second. Clanker Bots have 2 HP and 2 ATK."),
+        image = g.leo("clankerfactory_perk", "coin_icon"),
+        rawHandlers = {
+            perSecondUpdate = function(ent)
+                if not g.isAlive(ent) then return end
+                local bot = g.spawnEntity("clanker_bot", ent.x, ent.y + 16)
+                g.addTrait(bot, "bot")
+            end,
+        },
+    }},
+    cost = {yellow = 2},
+})
+
 g.defineSquad("prospector_squad", {
     name = "Prospectors",
     rarity = g.RARITIES.UNCOMMON,

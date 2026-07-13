@@ -33,7 +33,7 @@ Prefer direct implementation path.
 - Map out problem + solution, and discover more about the codebase. Prioritize read_headers.
 - Complete changes: write code, edit files.
 
-Always check changes afterwards. (Check git diff, run tests, or read file(s).)
+Always check changes afterwards. (Check git diff / read file(s).)
 </agent_strategy>
 
 <agent_tactics>

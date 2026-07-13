@@ -110,8 +110,8 @@ SQUADS:
 [x] Vikings: Deal 3x damage to frozen enemies
 [ ] Ethereal archers: Deal bonus damage equal to MAGK
 [x] Spark-bots: When killed, emit lightning, dealing damage equal to it's current level.
-[ ] Engineers: If there's 2 buildings alive, this unit gains triple speed and damage
-[ ] Clanker factory: Produces 1 bot per second (2hp / 2atk)
+[x] Engineers: If there's 2 buildings alive, this unit gains triple speed and damage
+[x] Clanker factory: Produces 1 bot per second (2hp / 2atk)
 [X] Treant: Every second, heal (HP) equal to (MAGK)
 
 RARE SQUADS:

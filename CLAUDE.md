@@ -110,6 +110,7 @@ A bunch of common pitfalls/traps to look out for:
 - Don't add buffs to entities directly. Use g.buffEntity (stat buffs) or g.addCustomEffect (handler-based effects).
 - table-valued fields on the def are shared across all entities of that type. Mutating them (e.g. `table.insert(ent.tags, ...)`) affects every entity. 
 - Before adding/removing handlers to ent.scopes, look for a g.* function first. If you are unsure in general, **you should just read g.lua;** there's a lot of stuff there.
+- Do NOT try to run luajit for syntax tests unless asked, because it (probably) won't work.
 </gotchas>
 
 <event_question_bus>
