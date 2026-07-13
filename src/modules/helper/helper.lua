@@ -715,6 +715,7 @@ end
 ---@field duration number
 ---@field startRadius number?
 ---@field endRadius number?
+---@field scale number?
 ---@field color [number,number,number,number]?
 local SPARK_ARGS
 
@@ -729,6 +730,7 @@ function helper.drawSpark(x, y, time, rot, sparkArgs)
     local duration = sparkArgs.duration or 0.3
     local startRadius = sparkArgs.startRadius or 4
     local endRadius = sparkArgs.endRadius or 8
+    local scale = sparkArgs.scale or 1
     local color = sparkArgs.color or WHITE
 
     if time > duration then
@@ -742,7 +744,7 @@ function helper.drawSpark(x, y, time, rot, sparkArgs)
     local dx, dy = helper.fromPolar(rot, len)
     lg.setColor(color[1], color[2], color[3], (color[4] or 1) * alpha)
     -- lg.line(x, y, x + dx, y + dy)
-    g.drawImage("spark_bolt", x+dx, y+dy, rot)
+    g.drawImage("spark_bolt", x+dx, y+dy, rot, scale, scale)
 end
 
 

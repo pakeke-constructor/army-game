@@ -36,6 +36,16 @@ local WALK_DEFAULT_BOUNCE = 2.5
 local WALK_DEFAULT_ROTATION = 0.12
 local WALK_DEFAULT_SPEED = 11
 
+---@type sparks.SparkArgs
+local MAP_NODE_SPARK_ARGS = {
+    duration = 0.11,
+    startRadius = 16,
+    endRadius = 30,
+    scale = 2
+}
+
+local INVALID_NODE_COLOR = g.snapToPalette(objects.Color.RED)
+
 
 ---@class g.MapScene
 local map_scene = {}
@@ -156,6 +166,7 @@ function map_scene:enter()
     self.commanderFacing = 1
     self.gallop = 0
     self.traveling = nil
+    self.currentSelectAnimation = nil
     ---@type table<MapNode, number?>
     self.fogReveal = {}
     ---@type table<integer, number>
@@ -369,6 +380,13 @@ local function checkLevelUp()
 end
 
 function map_scene:update(dt)
+    if self.currentSelectAnimation then
+        self.currentSelectAnimation.time = self.currentSelectAnimation.time + dt
+        if self.currentSelectAnimation.time > MAP_NODE_SPARK_ARGS.duration then
+            self.currentSelectAnimation = nil
+        end
+    end
+
     checkLevelUp()
     self:_incrementPendingDaysWhenReady()
     self:_updateFogReveal(dt)
@@ -628,12 +646,24 @@ function map_scene:draw()
         self:_buildFogClearCells(fogRegion)
 
         -- hover highlight: path from player to hovered node
+        local hovered, clicked = nil, nil
+        local hoverReachable = false
         local pnode = graph:getPlayerNode()
         if pnode then
-            local hovered, clicked = updateNodePanels(graph)
-            if clicked then self:travelTo(graph, pnode, clicked) end
+            hovered, clicked = updateNodePanels(graph)
+            if clicked and (not self.traveling) then
+                local x, y = graph:getDrawPos(clicked)
+                self.currentSelectAnimation = {
+                    x = x,
+                    y = y,
+                    rot = love.math.random() * consts.TAU,
+                    time = 0,
+                }
+                self:travelTo(graph, pnode, clicked)
+            end
+            local path = hovered and graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, PATH_SEARCH_DEPTH)
+            hoverReachable = path ~= nil
             if (not self.traveling) and hovered and hovered ~= pnode then
-                local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, PATH_SEARCH_DEPTH)
                 if path and #path >= 2 then
                     -- first edge bold yellow, rest pale yellow
                     local r, gg, b, a = mapType.mapPathHighlight:getRGBA()
@@ -657,6 +687,26 @@ function map_scene:draw()
         end
 
         builder:finalize()
+
+        if hovered and (not self.traveling) then
+            local x, y = graph:getDrawPos(hovered)
+            local color = hoverReachable
+                and (mapType.mapPathHighlight)
+                or INVALID_NODE_COLOR
+            lg.setColor(color)
+            lg.setLineWidth(6)
+            local rad = NODE_RADIUS + 8
+            lg.ellipse("line", x, y, rad, rad/2)
+        end
+
+        local selAnim = self.currentSelectAnimation
+        if selAnim then
+            MAP_NODE_SPARK_ARGS.color = mapType.mapPathHighlight
+            for j = 0, 2 do
+                local rot = (2 * math.pi * j) / 3
+                helper.drawSpark(selAnim.x, selAnim.y, selAnim.time, selAnim.rot + rot, MAP_NODE_SPARK_ARGS)
+            end
+        end
 
         -- fog rendering
         fogService.renderFog(fogRegion, graph.mapType.fogColor, function(x, y)
