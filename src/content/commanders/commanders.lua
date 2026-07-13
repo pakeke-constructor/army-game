@@ -80,9 +80,6 @@ g.defineCommander("sir_horse", "Sir Horse", {
         rarity = g.RARITIES.COMMANDER,
         unitCount = 1,
         cost = {red = 1, green = 1},
-        statUpgradeScaling = {
-            maxHealth = 0.25,
-        },
         icon = g.leo"sirhorse_uniticon",
         entityDef = {
             image = "sirhorse",
@@ -124,9 +121,6 @@ g.defineCommander("druidcommander", "Druid Lady", {
         rarity = g.RARITIES.COMMANDER,
         unitCount = 1,
         cost = {red = 1, green = 1},
-        statUpgradeScaling = {
-            maxHealth = 0.25,
-        },
         icon = g.leo"druidcommander_uniticon",
         entityDef = {
             image = "druidcommander",
@@ -182,9 +176,6 @@ g.defineCommander("mechcommander", "The Mech Goblin", {
         rarity = g.RARITIES.COMMANDER,
         unitCount = 1,
         cost = {yellow = 1, green = 1},
-        statUpgradeScaling = {
-            maxHealth = 0.25,
-        },
         icon = g.leo"mechcommander_uniticon",
         entityDef = {
             onHitDamage = function(ent, damage, target)
@@ -234,9 +225,6 @@ g.defineCommander("lizardcommander", "Lizard Lord", {
         rarity = g.RARITIES.COMMANDER,
         unitCount = 1,
         cost = {red = 1, blue = 1},
-        statUpgradeScaling = {
-            maxHealth = 0.25,
-        },
         icon = g.leo"lizardcommander_uniticon",
         entityDef = {
             image = "lizardcommander",
@@ -280,9 +268,6 @@ g.defineCommander("octopuscommander", "Octopus Tank", {
         rarity = g.RARITIES.COMMANDER,
         unitCount = 1,
         cost = {blue = 1, yellow = 1},
-        statUpgradeScaling = {
-            maxHealth = 0.25,
-        },
         icon = g.leo("octopuscommander_icon"),
         entityDef = {
             image = "octopuscommander",
