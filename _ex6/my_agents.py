@@ -1,7 +1,7 @@
 
 
 
-from _ex6.provider_openai import invoke_llm as openai_invoke_llm
+from _ex6.provider_openai import invoke_llm as invoke_llm_openai
 from _ex6.models import M
 from _ex6.tools import read_headers, read_body, glob, search, write_file, edit_file, read_file, edit_file_lines, escalate, bash, explore_agent, CLAUDE_MD, ENV_PROMPT, git_working_tree, add_tool_repetition_guard, powershell
 from _ex6.skills import load_skill
@@ -117,22 +117,6 @@ cache_manually(c_sonnet)
 
 
 
-Context("c_codex", yolo=False, model=M.CODEX_LATEST.id, reasoning="high", messages=[
-    MAIN_SYSTEM_PROMPT,
-    ENV_PROMPT,
-    # CODING_STYLE_PROMPT,
-    CLAUDE_MD,
-], invoke_llm=openai_invoke_llm)
-
-
-Context("c_CHATGPT", yolo=False, model=M.GPT_LATEST.id, reasoning="high", messages=[
-    MAIN_SYSTEM_PROMPT,
-    ENV_PROMPT,
-    # CODING_STYLE_PROMPT,
-    CLAUDE_MD,
-], invoke_llm=openai_invoke_llm)
-
-
 
 c_gem = Context("c_gem", yolo=False, model=M.GEMINI_LATEST.id, reasoning="high", messages=[
     MAIN_SYSTEM_PROMPT,
@@ -149,6 +133,19 @@ Context("c_zglm", yolo=False, model=M.GLM_LATEST.id, reasoning="high", messages=
     # CODING_STYLE_PROMPT,
     CLAUDE_MD,
 ])
+
+
+Context("sub_GPT", model=M.GPT_LATEST.id, reasoning="high", messages=[
+    MAIN_SYSTEM_PROMPT.with_tools(MAIN_TOOLS),
+    ENV_PROMPT,
+    CLAUDE_MD,
+], invoke_llm=invoke_llm_openai)
+
+Context("sub_TERRA", model=M.GPT_TERRA_LATEST.id, reasoning="high", messages=[
+    MAIN_SYSTEM_PROMPT.with_tools(MAIN_TOOLS),
+    ENV_PROMPT,
+    CLAUDE_MD,
+], invoke_llm=invoke_llm_openai)
 
 
 
