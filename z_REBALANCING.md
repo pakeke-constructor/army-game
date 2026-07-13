@@ -106,7 +106,7 @@ SQUADS:
 [x] Inferno beast: Hits deal AOE damage, setting enemies ablaze (+1 burn)
 [x] Lightning-wizard: Emit lightning on attack, dealing damage equal to MAGK
 [x] Mini ice golems: When killed, freeze all enemies in a radius
-[ ] Frost mage: When a spell is cast, freeze the nearest 4 enemies for 4 seconds.
+[x] Frost Warden: Tanky. When a spell is cast, freeze surrounding enemies for 2 seconds.
 [x] Vikings: Deal 3x damage to frozen enemies
 [ ] Ethereal archers: Deal bonus damage equal to MAGK
 [x] Spark-bots: When killed, emit lightning, dealing damage equal to it's current level.

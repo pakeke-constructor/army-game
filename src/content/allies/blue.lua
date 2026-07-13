@@ -3,6 +3,9 @@
 
 
 local sqhelper = require(".squad_helper")
+local juiceService = require("src.juiceService")
+
+local FROST_ARC_COLOR = objects.Color("#88CCFF")
 
 
 sqhelper.defineMilitiaAndArchers("blue")
@@ -848,6 +851,50 @@ g.defineSquad("lightning_wizard_squad", {
     }},
     cost = {blue = 2},
 })
+
+
+g.defineSquad("frost_warden_squad", {
+    name = "Frost Warden",
+    rarity = g.RARITIES.RARE,
+    tags = {"freeze", "crowd_control", "health", "armor"},
+    entityDef = {
+        image = g.leo("frostwarden_unit", "iceelephants_unit"),
+        physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 2 },
+        attack = {
+            attackType = "melee",
+        },
+        weapon = {
+            image = g.leo("frostwarden_scepter", "ice_scepter"),
+            type = "staff",
+        },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 0.6,
+        baseAttackRange = 24,
+        baseMoveSpeed = 40,
+        baseMaxHealth = 140,
+        baseStartingArmor = 10,
+    },
+    statUpgradeScaling = {maxHealth = 0.2},
+    unitCount = 1,
+    icon = g.leo("frostwarden_uniticon", "iceelephants_uniticon"),
+    perks = {{
+        name = "Frost Ward",
+        description = loc("When a spell is cast, Freeze surrounding enemies for 2s."),
+        image = "coin_icon",
+        rawHandlers = {
+            spellCast = function(ent)
+                g.iteratePartition("enemy", ent.x, ent.y, function(enemy)
+                    if g.isAlive(enemy) then
+                        g.applyFrozen(enemy, 2, ent)
+                        juiceService.spawnArc(FROST_ARC_COLOR, ent.x, ent.y, enemy.x, enemy.y, enemy)
+                    end
+                end, 100)
+            end,
+        },
+    }},
+    cost = {blue = 2},
+})
+
 
 
 g.defineSquad("ice_mage_squad", {

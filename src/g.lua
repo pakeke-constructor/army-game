@@ -1489,12 +1489,14 @@ function g.castSpell(spellId, x, y)
 
     if info.instantCast then
         runInstantCastSpell(info, x, y)
+        g.call("spellCast", spellId, x, y)
         return
     end
 
     if info.cast then
         info.cast(spellId, x, y)
     end
+    g.call("spellCast", spellId, x, y)
 end
 
 

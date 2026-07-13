@@ -19,6 +19,7 @@ g.defineEvent("projectileHit")
 g.defineEvent("explosion")
 g.defineEvent("manaAdded")
 g.defineEvent("manaSpent")
+g.defineEvent("spellCast")
 
 
 -- Entity lifecycle
