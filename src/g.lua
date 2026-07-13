@@ -17,6 +17,7 @@
 ---@field name string (for definition, untranslated name; for info, translated name)
 ---@field description string
 ---@field image string?
+---@field id string?
 ---@field handlers table<string, fun(ent: ecs.Entity, ...): any>? Scoped to the entity. Only fires when the event/question is dispatched AT this entity (eg g.call("onHit", ent)). Cheap; default choice.
 ---@field rawHandlers table<string, fun(ent: ecs.Entity, ...): any>? Scene-level. Fires for EVERY dispatch of that event globally, regardless of target. Use when the perk needs to listen to things happening elsewhere (eg "when any ally is hurt"). More expensive; use only when `handlers` can't express it.
 ---@field armyHandlers table<string, fun(squad: g.Squad, ...): any>? Army-level. Registered once per army squad holding this perk, regardless of whether it has deployed. First arg is the owning squad. Use for effects computed from run state that must be known before the squad spawns (eg modifying this squad's own unit count).
@@ -635,6 +636,7 @@ function g.leo(image, fallback)
 end
 
 function g._dumpWhatLeoNeedsToCreate()
+    table.sort(weNeedThis)
     return weNeedThis:totable()
 end
 
@@ -1271,9 +1273,10 @@ function g.defineSquad(id, info)
                 if type(pdef) == "string" then
                     perkIds[#perkIds+1] = pdef
                 else
-                    local pid = g.leo("perk_" .. id .. i)
-                    g.definePerk(pid, pdef.name, pdef)
-                    perkIds[#perkIds + 1] = pid
+                    local perkId = pdef.id or ("perk_" .. id .. i)
+                    pdef.image = g.leo(pdef.image or perkId)
+                    g.definePerk(perkId, pdef.name, pdef)
+                    perkIds[#perkIds + 1] = perkId
                 end
             end
         end
@@ -1930,6 +1933,9 @@ function g.definePerk(id, name, info)
         error("Duplicate perk: " .. id)
     end
     assertValidTags("Perk", id, info.tags)
+    if info.id then
+        assert(id == info.id, "wot wot?")
+    end
 
     ---@cast info g.PerkInfo
     info.name = loc(name, {}, {

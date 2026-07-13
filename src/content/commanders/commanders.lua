@@ -142,9 +142,9 @@ g.defineCommander("druidcommander", "Druid Lady", {
             baseMaxHealth = 160,
         },
         perks = {{
+            id = "perk_breathoflife",
             name = "Breath of Life",
             description = g.loc2("Your squads have +25% Max (HP)."),
-            image = "coin_icon",
             rawHandlers = {
                 ---@param ent ecs.Entity
                 getMaxHealthMultiplier = function(_, ent)
