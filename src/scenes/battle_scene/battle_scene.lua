@@ -217,7 +217,9 @@ end
 
 function battle_scene:leave()
     if g.hasRun() then
-        for _, squad in pairs(g.getRun().squads) do
+        local run = g.getRun()
+        run.spellsCast = {}
+        for _, squad in pairs(run.squads) do
             squad.deployed = false
         end
     end
@@ -326,6 +328,9 @@ function battle_scene:update(dt)
 
     if not self.paused then
         self.particles:update(dt)
+        for k, v in pairs(run.spellsCast) do
+            run.spellsCast[k] = math.max(v - dt, 0)
+        end
         if enemyCount == 0 and (not self.victory) and (not self.sandbox) then
             winBattle(self)
         end
@@ -1137,7 +1142,7 @@ function battle_scene:draw()
 
         if selType == "spell" then
             ---@cast entry string
-            if g.canCastSpell(wx, wy, entry) then
+            if g.getCurrentSpellCooldown(entry) == 0 and g.canCastSpell(wx, wy, entry) then
                 g.castSpell(entry, wx, wy)
             end
         elseif selType == "squad" and not entry.deployed then
