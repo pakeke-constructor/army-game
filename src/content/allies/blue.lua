@@ -318,9 +318,94 @@ g.defineSquad("monk_squad", {
     cost = {blue = 1},
 })
 
+g.defineSquad("ethereal_archer_squad", {
+    name = "Ethereal Archers",
+    rarity = g.RARITIES.UNCOMMON,
+    tags = {"ranged", "projectile", "attack_damage", "magic"},
+    entityDef = {
+        image = g.leo("etherealarchers_unit", "longbowman"),
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "ranged",
+            projectileType = "arrow",
+            projectileSpeed = 350,
+        },
+        weapon = {
+            image = g.leo("etherealarchers_bow", "longbow"),
+            type = "bow",
+        },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 1,
+        baseAttackRange = 150,
+        baseMoveSpeed = 55,
+        baseMaxHealth = 5,
+        baseMagic = 1,
+    },
+    unitCount = 4,
+    icon = g.leo("etherealarchers_uniticon", "archer_uniticon"),
+    perks = {{
+        name = "Arcane Arrows",
+        description = g.loc2("Deals bonus damage equal to (MAGK)."),
+        image = g.leo("etherealarchers_perk", "coin_icon"),
+        handlers = {
+            getAttackDamageModifier = function(ent)
+                return ent.magic or 0
+            end,
+        },
+    }},
+    cost = {blue = 1},
+})
 
 
-
+g.defineSquad("enchantress_squad", {
+    name = "Enchantress",
+    rarity = g.RARITIES.RARE,
+    tags = {"healing", "buffing", "magic"},
+    entityDef = {
+        image = g.leo("enchantress_unit", "icemage"),
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        ai = { target = "ally" },
+        attack = {
+            attackType = "ranged",
+            projectileType = "arrow",
+            projectileSpeed = 250,
+        },
+        weapon = {
+            image = g.leo("enchantress_staff", "icemage_staff"),
+            type = "staff",
+        },
+        isHealer = true,
+        baseHealPower = 2,
+        baseAttackSpeed = 0.5,
+        baseAttackRange = 120,
+        baseMoveSpeed = 50,
+        baseMaxHealth = 8,
+        baseMagic = 1,
+    },
+    statUpgradeScaling = {magic = 0.25},
+    unitCount = 1,
+    icon = g.leo("enchantress_uniticon", "icemage_uniticon"),
+    perks = {{
+        name = "Arcane Gift",
+        description = g.loc2("Every second, give the ally with the lowest (MAGK) +1 (MAGK)."),
+        image = g.leo("enchantress_perk", "coin_icon"),
+        rawHandlers = {
+            perSecondUpdate = function(ent)
+                if not g.isAlive(ent) then return end
+                local target
+                for _, ally in ipairs(g.getAllyList()) do
+                    if g.isAlive(ally) and (not target or (ally.magic or 0) < (target.magic or 0)) then
+                        target = ally
+                    end
+                end
+                if target then
+                    g.buffEntity(target, "magic", 1, ent)
+                end
+            end,
+        },
+    }},
+    cost = {blue = 2},
+})
 
 g.defineSquad("orcball_player_squad", {
     name = "Orcball Players",
