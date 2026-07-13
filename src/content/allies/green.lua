@@ -346,7 +346,7 @@ g.defineSquad("muffinplant_squad", {
         baseAttackSpeed = 0.7,
         baseAttackRange = 20,
         baseMoveSpeed = 40,
-        baseMaxHealth = 40,
+        baseMaxHealth = 50,
         baseMagic = 2,
         baseStartingArmor = 2,
     },
