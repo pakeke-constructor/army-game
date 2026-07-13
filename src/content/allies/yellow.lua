@@ -233,7 +233,7 @@ g.defineSquad("clanker_factory_squad", {
     unitCount = 1,
     perks = {{
         name = "Assembly Line",
-        description = loc("Produces 1 Clanker Bot per second. Clanker Bots have 2 HP and 2 ATK."),
+        description = g.loc2("Produces 1 Clanker-Bot per second. 2 (HP), 2 (ATK)"),
         image = g.leo("clankerfactory_perk", "coin_icon"),
         rawHandlers = {
             perSecondUpdate = function(ent)
