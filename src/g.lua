@@ -2347,6 +2347,7 @@ function g.killEntity(ent, killer)
     if ent.team == "enemy" then
         local amount = math.max(1, math.floor(g.ask("getMoneyMultiplier") + 0.5))
         g.addGold(amount)
+        g.playWorldSound("battle_goldpickup", 1+love.math.random(-10, 10)/100, 0.6)
         g.addWorldTextPopup(ent.x, ent.y - 10, "{GOLD_COLOR}$" .. tostring(amount), {
             vely = -200,
             velDamping = 0.995,

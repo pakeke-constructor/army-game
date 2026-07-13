@@ -443,7 +443,7 @@ function map_scene:update(dt)
         -- footstep on each ground contact (bottom of the gallop bounce, every pi)
         if math.floor(self.gallop / math.pi) > math.floor(prevGallop / math.pi) then
             local step = love.math.random(1, 2)
-            g.playWorldSound("battle_footstep" .. step, 1+love.math.random(-10, 10)/100, 0.5)
+            g.playWorldSound("battle_footstep" .. step, 1+love.math.random(-10, 10)/100, 0.2)
         end
         if trav.t >= 1 then
             local graph = g.getRun().mapGraph
