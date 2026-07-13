@@ -665,6 +665,7 @@ function map_scene:draw()
                     time = 0,
                 }
                 self:travelTo(graph, pnode, clicked)
+                g.playUISound("ui_mouse_click")
             end
             local path = hovered and graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, PATH_SEARCH_DEPTH)
             hoverReachable = path ~= nil

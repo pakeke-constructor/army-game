@@ -1708,6 +1708,7 @@ function g.spawnSquad(squad, x, y, ...)
                 end
             end
             ent._deployTime = love.timer.getTime() + ((i - 1)/numUnits) * DEPLOY_ANIMATION_STEP
+            ent._deployIndex = i
             for _, traitName in ipairs(info.startingTraits) do
                 g.addTrait(ent, traitName)
             end
@@ -2864,6 +2865,8 @@ end
 
 local DEPLOY_STRETCH_SY = 2.8
 local DEPLOY_ANIMATION_DURATION = 0.15
+local DROP_SOUND_PITCH_STEP = 0.06 -- pitch bump per unit as the squad drops
+local DROP_SOUND_MAX_PITCH = 1.5
 
 local DEV_SHOW_RANGE = false
 DEV_SHOW_RANGE = consts.DEV_MODE and DEV_SHOW_RANGE
@@ -2879,6 +2882,11 @@ function g.drawEntity(ent, x, y)
         local elapsed = love.timer.getTime() - ent._deployTime
         if elapsed < 0 then
             return
+        end
+        if not ent._dropSoundPlayed then
+            ent._dropSoundPlayed = true
+            local pitch = math.min(DROP_SOUND_MAX_PITCH, 1 + ((ent._deployIndex or 1) - 1) * DROP_SOUND_PITCH_STEP)
+            g.playWorldSound("battle_unitDrop", pitch, nil, nil, 0.05)
         end
         local p = math.min(1, elapsed / DEPLOY_ANIMATION_DURATION)
         sx = sx * (0.3 + 0.7 * p)

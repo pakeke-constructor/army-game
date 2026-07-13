@@ -220,6 +220,8 @@ local shadow = {
 ---@field public _timeSinceHealed number?
 ---@field public _timeSinceLostArmor number?
 ---@field public _deployTime number?
+---@field public _deployIndex integer?
+---@field public _dropSoundPlayed boolean?
 ---@field public deployDxFromCommander number?
 ---@field public deployDyFromCommander number?
 ---@field public _timeSinceAutoAttacked number?
