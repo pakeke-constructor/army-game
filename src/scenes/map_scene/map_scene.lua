@@ -438,7 +438,13 @@ function map_scene:update(dt)
     if self.traveling then
         local trav = self.traveling
         trav.t = trav.t + trav.speed * dt
+        local prevGallop = self.gallop
         self.gallop = self.gallop + dt * GALLOP_FREQ
+        -- footstep on each ground contact (bottom of the gallop bounce, every pi)
+        if math.floor(self.gallop / math.pi) > math.floor(prevGallop / math.pi) then
+            local step = love.math.random(1, 2)
+            g.playWorldSound("battle_footstep" .. step, 1+love.math.random(-10, 10)/100, 0.5)
+        end
         if trav.t >= 1 then
             local graph = g.getRun().mapGraph
             graph:setPlayerPosition(trav.toNode.x, trav.toNode.y)
