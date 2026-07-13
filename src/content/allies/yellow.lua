@@ -142,7 +142,6 @@ g.defineSquad("spark_bot_squad", {
     perks = {{
         name = "Overload",
         description = g.loc2("On-death, emit lightning dealing damage equal to level."),
-        image = "coin_icon",
         handlers = {
             entityDeath = function(ent)
                 local level = (ent.squad and ent.squad.level) or 1
@@ -270,7 +269,6 @@ g.defineSquad("prospector_squad", {
     perks = {{
         name = "Strike Gold",
         description = g.loc2("On-kill, gain 1 (COIN)."),
-        image = "coin_icon",
         handlers = {
             onKill = function(ent, target)
                 g.addGold(1)
@@ -298,7 +296,6 @@ g.defineSquad("the_great_factory_squad", {
         -- Label purpose only
         name = "Duplication",
         description = loc("On-deploy, add a copy of the deployed squad to your bench for the fight."),
-        image = "coin_icon",
     }},
     onDeploySquad = function(info, entities)
         local squad = entities[1] and entities[1].squad
@@ -323,7 +320,6 @@ g.defineSquad("gold_mine_squad", {
     perks = {{
         name = "Extraction",
         description = g.loc2("When an enemy dies, gain 2 (COIN)."),
-        image = "coin_icon",
         rawHandlers = {
             ---@param dead ecs.Entity
             entityDeath = function(_, dead)
@@ -352,7 +348,6 @@ g.defineSquad("living_laboratory_squad", {
     perks = {{
         name = "Eureka",
         description = loc("When this unit is Buffed, spreads the buff to 6 nearby allies."),
-        image = "coin_icon",
         handlers = {
             entityBuffed = function(ent, stat, increase)
                 ---@type [ecs.Entity,number][]
@@ -401,7 +396,6 @@ g.defineSquad("endless_army_squad", {
     perks = {{
         name = "Mass-Production",
         description = loc("Has extra units equal to the total levels of all squads in your army."),
-        image = "coin_icon",
         armyHandlers = {
             getSquadUnitCountModifier = function(ownerSquad, squadId)
                 if squadId ~= ownerSquad.squadId then return 0 end
@@ -437,7 +431,6 @@ g.defineSquad("wealth_elemental_squad", {
     perks = {{
         name = "Golden Bulk",
         description = g.loc2("When you gain (COIN) during battle, this unit gains an equal amount of (ARMR)."),
-        image = "coin_icon",
         rawHandlers = {
             ---@param amount number
             goldGained = function(self, amount)
@@ -472,7 +465,6 @@ g.defineSquad("laser_gunner_squad", {
     perks = {{
         name = "Laser Focus",
         description = g.loc2("On-attack, this unit gains 0.1 (ASPD). Stacks up to 30 times."),
-        image = "coin_icon",
         handlers = {
             onAttack = function(ent, target)
                 ent._laserFocusStacks = ent._laserFocusStacks or 0

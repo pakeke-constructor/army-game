@@ -122,7 +122,6 @@ g.defineSquad("viking_squad", {
     perks = {{
         name = "Icebreaker",
         description = loc("Deals 3x damage to frozen enemies."),
-        image = "coin_icon",
         handlers = {
             onHitDamage = function(ent, damage, target, hitArmor)
                 if not hitArmor and (target.frozenTime or 0) > 0 then
@@ -224,7 +223,6 @@ g.defineSquad("diver_squad", {
     perks = {{
         name = "Reef Rally",
         description = g.loc2("At the start of battle, give a random Fishfolk unit +4 (ATK)."),
-        image = "coin_icon",
         rawHandlers = {
             battleStarted = function(self)
                 if not g.isAlive(self) then return end
@@ -265,7 +263,6 @@ g.defineSquad("test_subjects_squad", {
     perks = {{
         name = "Catalyze",
         description = g.loc2("When Transformed, gain +50% (HP) and (ASPD)."),
-        image = "coin_icon",
         rawHandlers = {
             --[[
             
@@ -308,7 +305,6 @@ g.defineSquad("monk_squad", {
     perks = {{
         name = "Inner Focus",
         description = g.loc2("Deals bonus damage equal to (MAGK)."),
-        image = "coin_icon",
         handlers = {
             getAttackDamageModifier = function(ent)
                 return ent.magic or 0
@@ -433,7 +429,6 @@ g.defineSquad("orcball_player_squad", {
     perks = {{
         name = "Body Slam",
         description = g.loc2("Gains bonus (ATK) equal to current (ARMR). Loses 1 (ARMR) on each attack."),
-        image = "coin_icon",
         handlers = {
             getAttackDamageModifier = function(ent)
                 return math.floor(ent.armor or 0)
@@ -476,7 +471,6 @@ g.defineSquad("defender_squad", {
     perks = {{
         name = "Knockback",
         description = loc("On-hit, pushes the target back."),
-        image = "coin_icon",
         handlers = {
             onAttack = function(ent, target)
                 if target and g.isAlive(target) then
@@ -522,7 +516,6 @@ g.defineSquad("incense_holder_squad", {
     perks = {{
         name = "Invigorate",
         description = g.loc2("Every 2 seconds, 5 nearby allies gain +50% (ASPD) for 4s."),
-        image = "coin_icon",
         rawHandlers = {
             perSecondUpdate = function(self, secondCount)
                 if secondCount % 2 ~= 0 then return end
@@ -566,7 +559,6 @@ g.defineSquad("clay_troll_squad", {
     perks = {{
         name = "Protective Coating",
         description = g.loc2("On-hurt, gives a random nearby ally 1 (ARMR). Only triggers on (HP) damage."),
-        image = "coin_icon",
         handlers = {
             entityHurt = function(ent, damage)
                 local nearby = {}
@@ -606,7 +598,6 @@ g.defineSquad("ice_elephant_squad", {
     perks = {{
         name = "Frost Hide",
         description = g.loc2("When hit, 10% chance to Freeze the attacker for 3s."),
-        image = "coin_icon",
         handlers = {
             entityHurt = function(ent, damage, attacker)
                 if attacker and g.isAlive(attacker) and love.math.random() < 0.1 then
@@ -662,7 +653,6 @@ g.defineSquad("magnet_elemental_squad", {
     perks = {{
         name = "Shrapnelmancy",
         description = loc("When any ally loses armor, this unit deals 1 damage to a random nearby enemy."),
-        image = "coin_icon",
         rawHandlers = {
             armorDecreased = function(self, ent, removed)
                 if ent.team ~= "ally" then return end
@@ -703,7 +693,6 @@ g.defineSquad("immortal_eye_squad", {
     perks = {{
         name = "Frostblight",
         description = g.loc2("Every second, apply (1 POISON) to all frozen enemies."),
-        image = "coin_icon",
         rawHandlers = {
             perSecondUpdate = function(self)
                 if not g.isAlive(self) then return end
@@ -741,7 +730,6 @@ g.defineSquad("bell_creature_squad", {
     perks = {{
         name = "Reverberate",
         description = loc("When this unit is Buffed, deals 1 damage to all nearby enemies."),
-        image = "coin_icon",
         handlers = {
             entityBuffed = function(ent, stat, increase)
                 if increase <= 0 then return end
@@ -778,7 +766,6 @@ g.defineSquad("laser_gunner_squad", {
     perks = {{
         name = "Laser Focus",
         description = g.loc2("On-attack, this unit gains 0.1 (ASPD). Stacks up to 30 times."),
-        image = "coin_icon",
         handlers = {
             onAttack = function(ent, target)
                 ent._laserFocusStacks = ent._laserFocusStacks or 0
@@ -876,7 +863,6 @@ g.defineSquad("mini_ice_golem_squad", {
     perks = {{
         name = "Shatter",
         description = g.loc2("When killed, Freeze nearby enemies for 4s."),
-        image = "coin_icon",
         handlers = {
             entityDeath = function(ent)
                 g.iteratePartition("enemy", ent.x, ent.y, function(other)
@@ -919,7 +905,6 @@ g.defineSquad("lightning_wizard_squad", {
     perks = {{
         name = "Chain Lightning",
         description = loc("On-hit, emit lightning dealing damage equal to (MAGK)."),
-        image = "coin_icon",
         handlers = {
             onHitDamage = function(ent, damage, target)
                 if target and g.isAlive(target) then
@@ -958,7 +943,6 @@ g.defineSquad("frost_warden_squad", {
     perks = {{
         name = "Frost Ward",
         description = loc("When a spell is cast, Freeze surrounding enemies for 2s."),
-        image = "coin_icon",
         rawHandlers = {
             spellCast = function(ent)
                 g.iteratePartition("enemy", ent.x, ent.y, function(enemy)
@@ -1002,7 +986,6 @@ g.defineSquad("ice_mage_squad", {
     perks = {{
         name = "Ice Touch",
         description = loc("On-hit, 25% chance to Freeze for 5s. {c r=0.388 g=0.388 b=0.388}Prioritizes unfrozen targets.{/c}"),
-        image = "coin_icon",
         handlers = {
             getAITargetPriorityModifier = function(selfEnt, targEnt)
                 return (targEnt.frozenTime or 0) > 0 and 1000 or 0

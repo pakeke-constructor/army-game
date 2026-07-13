@@ -124,7 +124,6 @@ g.defineSquad("druid_squad", {
     perks = {{
         name = "Vitalize",
         description = loc("On-heal, the target gains 1 max HP."),
-        image = "coin_icon",
         handlers = {
             onAttack = function(ent, target)
                 if ent.healPower and target and g.isAlive(target) then
@@ -249,7 +248,6 @@ g.defineSquad("giant_toad_squad", {
     perks = {{
         name = "Thick Skin",
         description = loc("Takes 60% less damage from poisoned enemies."),
-        image = "coin_icon",
         handlers = {
             getDamageTakenMultiplier = function(ent, attacker)
                 if attacker and (attacker.poisonAmount or 0) > 0 then
@@ -289,7 +287,6 @@ g.defineSquad("dart_spitter_squad", {
     perks = {{
         name = "Toxic Darts",
         description = loc("Apply 1 poison on hit."),
-        image = "coin_icon",
         handlers = {
             onHitDamage = function(ent, damage, target)
                 g.applyPoison(target, 1, ent)
@@ -321,7 +318,6 @@ g.defineSquad("mini_toad_squad", {
     perks = {{
         name = "Toxic Skin",
         description = loc("Apply 1 poison on hit."),
-        image = "coin_icon",
         handlers = {
             onHitDamage = function(ent, damage, target)
                 g.applyPoison(target, 1, ent)
@@ -452,7 +448,6 @@ g.defineSquad("infested_squad", {
     perks = {{
         name = "Infestation",
         description = loc("On death, spawn a {GREEN_MANA_COLOR}Pest{/GREEN_MANA_COLOR}."),
-        image = "coin_icon",
         handlers = {
             entityDeath = function(ent)
                 g.spawnEntity("pest", ent.x, ent.y)
@@ -519,7 +514,6 @@ g.defineSquad("forest_sentry_squad", {
     perks = {{
         name = "Life Force",
         description = g.loc2("Gain (ATK) equal to max (HP). Take 4 x as much damage."),
-        image = "coin_icon",
         handlers = {
             getAttackDamageModifier = function(ent)
                 return ent.maxHealth
@@ -564,7 +558,6 @@ g.defineSquad("arcane_blossom_squad", {
     perks = {{
         name = "Magnificence",
         description = g.loc2("When this unit heals or gains max HP, spread the effect to 3 random nearby allies without this perk."),
-        image = "coin_icon",
         handlers = {
             entityHealed = function(ent, amount, healer)
                 local nearby = {}
@@ -619,7 +612,6 @@ g.defineSquad("world_tree_squad", {
     perks = {{
         name = "Her Wrath",
         description = loc("Whenever an ally heals, this building damages a random enemy equal to 100% of the heal value."),
-        image = "coin_icon",
         rawHandlers = {
             entityHealed = function(self, ent, amount, healer)
                 if not g.isAlive(self) then return end
@@ -659,7 +651,6 @@ g.defineSquad("hive_recycler_squad", {
     perks = {{
         name = "Swarmsurge",
         description = loc("Whenever any {GREEN_MANA_COLOR}Green unit{/GREEN_MANA_COLOR} dies, this unit summons a {GREEN_MANA_COLOR}Pest{/GREEN_MANA_COLOR}."),
-        image = "coin_icon",
         rawHandlers = {
             entityDeath = function(self, ent, killer)
                 if not g.isAlive(self) then return end
@@ -696,7 +687,6 @@ g.defineSquad("living_forest_squad", {
     perks = {{
         name = "Circle of Life",
         description = loc("On-death, all allies gain 10% of this unit's max HP."),
-        image = "coin_icon",
         handlers = {
             entityDeath = function(ent, killer)
                 local amount = (ent.maxHealth or 0) * 0.1
@@ -739,7 +729,6 @@ g.defineSquad("lifesmith_squad", {
     perks = {{
         name = "Forge Life",
         description = g.loc2("This unit has additional (HEAL) equal to its (ARMR)."),
-        image = "coin_icon",
         handlers = {
             getHealPowerModifier = function(ent)
                 return math.floor(ent.armor or 0)
