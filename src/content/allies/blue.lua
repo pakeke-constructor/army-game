@@ -97,13 +97,13 @@ g.defineSquad("arrow_fish_squad", {
 local PURPLE_COLOR = objects.Color("#".."FFC339ED")
 
 
-g.defineSquad("crystal_golems", {
+g.defineSquad("prism_golems", {
     name = "Crystal golems",
     rarity = g.RARITIES.RARE,
     -- tags: projectile
     tags = {"projectile"},
     entityDef = {
-        image = g.leo("crystal_golems_unit", "gargoyle"), -- no crystal-golem sprite; gargoyle stand-in
+        image = g.leo("prismgolems_unit"),
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 2 },
         attack = {
             attackType = "melee",
@@ -148,7 +148,7 @@ g.defineSquad("crystal_golems", {
         end,
     },
     unitCount = 2,
-    icon = g.leo("crystal_golems_uniticon", "gargoyles_uniticon"), -- placeholder
+    icon = g.leo("prismgolems_uniticon"),
     cost = {blue = 2},
 })
 

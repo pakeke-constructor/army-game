@@ -483,7 +483,7 @@ g.defineSquad("fire_archer_squad", {
         image = g.leo("firearchers_unit", "bladethrowers_unit"), -- no art yet
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 300 },
-        weapon = { image = g.leo("firearchers_bow", "bow"), type = "bow" },
+        weapon = { image = g.leo("firearchers_bow", "longbow"), type = "bow" },
         baseAttackDamage = 3,
         baseAttackSpeed = 1,
         baseAttackRange = 70,
@@ -498,6 +498,39 @@ g.defineSquad("fire_archer_squad", {
         handlers = {
             onHitDamage = function(ent, damage, target)
                 g.applyBurn(target, 2, ent)
+            end,
+        },
+    }},
+    cost = {red = 1},
+})
+
+
+g.defineSquad("inferno_beast_squad", {
+    name = "Inferno Beast",
+    rarity = g.RARITIES.UNCOMMON,
+    tags = {"health", "explosion", "burn"},
+    entityDef = {
+        image = g.leo("infernobeast_unit", "warhog"),
+        physics = { shape = "circle", radius = 10, ox = 0, oy = 0, mass = 3 },
+        attack = { attackType = "melee" },
+        baseAttackDamage = 3,
+        baseAttackSpeed = 0.6,
+        baseAttackRange = 24,
+        baseMoveSpeed = 40,
+        baseMaxHealth = 80,
+    },
+    unitCount = 1,
+    icon = g.leo("infernobeast_uniticon", "hog_uniticon"),
+    perks = {{
+        name = "Inferno Strikes",
+        description = loc("Hits deal damage in an area and apply 1 Burn."),
+        image = "coin_icon",
+        handlers = {
+            onHitDamage = function(ent, damage, target)
+                g.explosion(target.x, target.y, damage, 50, ent)
+                g.iteratePartition("enemy", target.x, target.y, function(enemy)
+                    g.applyBurn(enemy, 1, ent)
+                end, 50)
             end,
         },
     }},

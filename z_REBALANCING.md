@@ -102,9 +102,9 @@ SQUADS:
 [x] Mini toads x 4: Apply 1 poison on hit
 [x] Fire golems x 2: When hit, apply 1 burn to the attacker
 [x] Fire archers x 4: Ranged, Apply 2 burn on hit
-[ ] Hunter x 1: Medium Range, (Crossbow,) Very fast fire-rate, good damage. (use crossbow as weapon, under `bow` weapon type)
-[ ] Inferno beast: Hits deal AOE damage, setting enemies ablaze (+1 burn)
-[ ] Lightning-wizard: Emit lightning on attack, dealing damage equal to MAGK
+[x] Hunter x 1: Medium Range, (Crossbow,) Very fast fire-rate, good damage. (use crossbow as weapon, under `bow` weapon type)
+[x] Inferno beast: Hits deal AOE damage, setting enemies ablaze (+1 burn)
+[x] Lightning-wizard: Emit lightning on attack, dealing damage equal to MAGK
 [x] Mini ice golems: When killed, freeze all enemies in a radius
 [ ] Frost mage: When a spell is cast, freeze the nearest 4 enemies for 4 seconds.
 [ ] Vikings: Deal 3x damage to frozen enemies

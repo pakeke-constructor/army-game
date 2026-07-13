@@ -1204,6 +1204,9 @@ function g.defineSquad(id, info)
     end
 
     local def = info.entityDef
+    assert(not def.image or g.isImage(def.image), "Squad '" .. id .. "' has invalid image: " .. tostring(def.image))
+    assert(not def.weapon or not def.weapon.image or g.isImage(def.weapon.image),
+        "Squad '" .. id .. "' has invalid weapon image: " .. tostring(def.weapon and def.weapon.image))
     local hasDmg = def.baseHealPower or def.baseAttackDamage
     assert((not hasDmg) == (not def.baseAttackSpeed),
         "Squad '" .. id .. "': baseAttackSpeed must be set iff baseAttackDamage/baseHealPower is set")
