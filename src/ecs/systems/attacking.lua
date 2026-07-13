@@ -260,6 +260,9 @@ function atckSys.preUpdate(dt)
             local smashing = phase == "swing" and t >= 0.75
             if smashing and not ent._hammerSmashed then
                 juiceService.addCameraShake(ent.weapon.smashShake or 0.2)
+                local ex, ey = ent.x, ent.y
+                if target then ex, ey = target.x, target.y end
+                g.explosion(ex, ey, ent.attackDamage or 0, ent.weapon.smashRadius or 40, ent)
             end
             ent._hammerSmashed = smashing
         end

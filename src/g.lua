@@ -407,6 +407,9 @@ function g.explosion(x, y, damage, radius, fromEntity)
         radius = radius * g.ask("getExplosionSizeMultiplier", fromEntity)
     end
     g.call("explosion", x, y, damage, radius, fromEntity)
+    -- bigger blast -> lower pitch
+    local pitch = helper.clamp(80 / radius, 0.6, 1.4)
+    g.playWorldSound("small_explosion", pitch, nil, 0.1, 0.1)
     local radiusSq = radius * radius
     -- todo: make particles here
     g.iteratePartition("unit", x, y, function(ent)
@@ -1520,6 +1523,7 @@ function g.castSpell(spellId, x, y)
     if info.cast then
         info.cast(spellId, x, y)
     end
+    g.playWorldSound("battle_lazer", 1+love.math.random(-10, 10)/100)
     g.call("spellCast", spellId, x, y)
 end
 
