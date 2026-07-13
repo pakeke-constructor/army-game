@@ -120,7 +120,6 @@ g.defineSquad("druid_squad", {
         baseMoveSpeed = 50,
         baseMaxHealth = 7,
     },
-    statUpgradeScaling = {attackSpeed = 0.1},
     unitCount = 6,
     perks = {{
         name = "Vitalize",
@@ -446,7 +445,6 @@ g.defineSquad("friendly_giant_squad", {
         baseMoveSpeed = 35,
         baseMaxHealth = 300,
     },
-    statUpgradeScaling = {maxHealth = 0.20, attackDamage = 0.15},
     unitCount = 1,
     cost = {green = 2},
 })
@@ -521,7 +519,6 @@ g.defineSquad("arcane_blossom_squad", {
         baseMaxHealth = 30,
         baseStartingArmor = 3,
     },
-    statUpgradeScaling = {maxHealth = 0.15},
     unitCount = 3,
     icon = "arcaneblossom_uniticon",
     perks = {{
@@ -578,7 +575,6 @@ g.defineSquad("world_tree_squad", {
         baseMaxHealth = 300,
         baseStartingArmor = 5,
     },
-    statUpgradeScaling = {maxHealth = 0.25},
     unitCount = 1,
     perks = {{
         name = "Her Wrath",
@@ -619,7 +615,6 @@ g.defineSquad("hive_recycler_squad", {
         baseMoveSpeed = 35,
         baseMaxHealth = 7,
     },
-    statUpgradeScaling = {attackSpeed = 0.2, moveSpeed = 0.2},
     unitCount = 2,
     perks = {{
         name = "Swarmsurge",
