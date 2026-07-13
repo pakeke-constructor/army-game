@@ -455,6 +455,7 @@ end
 ---@param enemyChainSize number?
 function g.lightning(x, y, damage, attacker, enemyChainSize)
     g.playWorldSound("lightning_zap", 0.9, 0.25, 0.3, 0)
+    damage = damage * g.ask("getLightningDamageMultiplier", attacker)
     enemyChainSize = math.max(2, enemyChainSize or 5)
 
     local MAX_LIGHTNING_GAP = 130
@@ -1204,6 +1205,9 @@ function g.defineSquad(id, info)
     end
 
     local def = info.entityDef
+    assert(not def.image or g.isImage(def.image), "Squad '" .. id .. "' has invalid image: " .. tostring(def.image))
+    assert(not def.weapon or not def.weapon.image or g.isImage(def.weapon.image),
+        "Squad '" .. id .. "' has invalid weapon image: " .. tostring(def.weapon and def.weapon.image))
     local hasDmg = def.baseHealPower or def.baseAttackDamage
     assert((not hasDmg) == (not def.baseAttackSpeed),
         "Squad '" .. id .. "': baseAttackSpeed must be set iff baseAttackDamage/baseHealPower is set")
@@ -1486,12 +1490,14 @@ function g.castSpell(spellId, x, y)
 
     if info.instantCast then
         runInstantCastSpell(info, x, y)
+        g.call("spellCast", spellId, x, y)
         return
     end
 
     if info.cast then
         info.cast(spellId, x, y)
     end
+    g.call("spellCast", spellId, x, y)
 end
 
 

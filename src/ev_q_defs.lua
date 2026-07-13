@@ -19,6 +19,7 @@ g.defineEvent("projectileHit")
 g.defineEvent("explosion")
 g.defineEvent("manaAdded")
 g.defineEvent("manaSpent")
+g.defineEvent("spellCast")
 
 
 -- Entity lifecycle
@@ -78,6 +79,7 @@ g.defineQuestion("getAoeDamageMultiplier", MUL, 1)
 g.defineQuestion("getExplosionSizeMultiplier", MUL, 1)
 g.defineQuestion("getDamageTakenMultiplier", MUL, 1)
 g.defineQuestion("getBurnDPSMultiplier", MUL, 1)
+g.defineQuestion("getLightningDamageMultiplier", MUL, 1)
 
 g.defineQuestion("getAITargetPriorityModifier", ADD, 0)
 g.defineQuestion("getSquadUnitCountModifier", ADD, 0)
