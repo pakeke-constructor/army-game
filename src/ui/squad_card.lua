@@ -384,7 +384,8 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
                 local r,gg,b,a = statColor:getRGBA()
                 love.graphics.setColor(r,gg,b,a*alpha)
                 local textX = cx + ch
-                richtext.printRich("{o}" .. g.formatNumber(value), STAT_FONT, textX, cy + ch / 2 - STAT_FONT:getHeight() / 2, cw - ch, "left")
+                local textY = cy + (ch - STAT_FONT:getHeight()) / 2
+                helper.printTextOutline(g.formatNumber(value), STAT_FONT, 1, textX, textY, cw - ch, "left")
                 end
             end
 
