@@ -88,7 +88,6 @@ end
 ---@return boolean
 local function isItemUsable(self, item)
     if type(item) == "string" then
-        if g.getCurrentSpellCooldown(item) > 0 then return false end
         local mx, my = love.mouse.getPosition()
         local wx, wy = g.screenToWorld(mx, my)
         return g.canCastSpell(wx, wy, item)
@@ -156,12 +155,42 @@ end
 ---@param selected boolean
 local function renderSpell(spellId, x, y, selected)
     local size = SQUAD_ICON_SIZE
+    local info = g.getSpellInfo(spellId)
+    local cooldown = g.getCurrentSpellCooldown(spellId)
+    local cx, cy = x+size/2, y+size/2
+
     if selected then
         lg.setColor(1, 1, 1, 0.3)
         ui.drawSingleColorPanel(x - 2, y - 2, size + 4, size + 4)
     end
+
     lg.setColor(1, 1, 1)
-    g.renderSpellIcon(spellId, x+size/2, y+size/2)
+
+    if cooldown > 0 then
+        local radius = size / 1.5 -- bit of leeway
+        local t = cooldown / info.cooldown
+
+        lg.setStencilMode("draw", 1)
+        -- Yes, we're rendering to color AND stencil buffer at same time.
+        lg.setColorMask(true, true, true, true)
+        local shader = gsman.setShader(helper.alphaTestShader)
+        g.renderSpellIcon(spellId, cx, cy)
+        shader:pop()
+
+        lg.setStencilMode("test", 1)
+        lg.setColor(0, 0, 0, 0.6)
+        lg.arc("fill", "pie", cx, cy, radius, -math.pi/2, -t * consts.TAU - math.pi/2)
+        lg.setStencilMode()
+        lg.clear(false, true)
+
+        lg.setColor(1, 1, 1)
+        local font = g.getSmallFont(16)
+        local text = tostring(math.ceil(cooldown))
+        local textW = font:getWidth(text)
+        helper.printTextOutline(text, font, 1, cx, cy, textW, "center", 0, 1, 1, textW / 2, font:getHeight() / 2)
+    else
+        g.renderSpellIcon(spellId, cx, cy)
+    end
 end
 
 
