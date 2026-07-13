@@ -454,3 +454,40 @@ g.defineSquad("wealth_elemental_squad", {
     }},
     cost = {yellow = 1},
 })
+
+
+g.defineSquad("laser_gunner_squad", {
+    name = "Laser Gunners",
+    rarity = g.RARITIES.LEGENDARY,
+    -- tags: ranged, projectile, attack_speed, scaling
+    tags = {"ranged", "projectile", "attack_speed", "scaling"},
+    entityDef = {
+        image = "lasergunners_unit",
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        -- TODO: Laser cannon attack rather than arrow?
+        attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 380 },
+        weapon = { image = "lasergunners_lasercannon", type = "bow" },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 0.5,
+        baseAttackRange = 120,
+        baseMoveSpeed = 50,
+        baseMaxHealth = 8,
+    },
+    statUpgradeScaling = {attackSpeed = 0.1},
+    unitCount = 4,
+    perks = {{
+        name = "Laser Focus",
+        description = g.loc2("On-attack, this unit gains 0.1 (ASPD). Stacks up to 30 times."),
+        image = "coin_icon",
+        handlers = {
+            onAttack = function(ent, target)
+                ent._laserFocusStacks = ent._laserFocusStacks or 0
+                if ent._laserFocusStacks >= 30 then return end
+                ent._laserFocusStacks = ent._laserFocusStacks + 1
+                g.buffEntity(ent, "attackSpeed", 0.1)
+            end,
+        },
+    }},
+    cost = {yellow = 1},
+})
+
