@@ -18,6 +18,7 @@ local SQUADTYPE_ORDER = { "TANK", "BRUISER", "RANGED", "HEALER", "BUILDING", "OT
 function whiteboard_scene:init()
     self.mode = "squads"        -- "squads" | "blessings"
     self.categorize = "rarity"  -- "rarity" | "tag" | "mana"
+    self.showPowerIndex = false
     self.scroll = 0
 end
 
@@ -152,6 +153,9 @@ function whiteboard_scene:draw()
         end
         self.scroll = 0
     end
+    if self.mode == "squads" and ui.DefaultButton("POWER INDEX: " .. (self.showPowerIndex and "ON" or "OFF"), rows[3]) then
+        self.showPowerIndex = not self.showPowerIndex
+    end
     local cats = self.mode == "squads" and { "rarity", "tag", "mana", "type" } or { "rarity", "tag", "mana" }
     for i, c in ipairs(cats) do
         local sel = self.categorize == c
@@ -188,6 +192,10 @@ function whiteboard_scene:draw()
             lg.setColor(1, 1, 1)
             if self.mode == "squads" then
                 g.drawSquadIcon(id, ix, iy, true)
+                if self.showPowerIndex then
+                    local info = g.getSquadInfo(id)
+                    richtext.printRichContained("{o}" .. string.format("%d", math.floor(info.powerIndex or 0)), font, ix - icon / 2, iy, icon, icon / 2, 1, "center")
+                end
             else
                 g.drawBlessingIcon(id, ix, iy)
             end
