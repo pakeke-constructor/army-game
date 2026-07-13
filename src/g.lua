@@ -1104,6 +1104,14 @@ function g.getDPS(dmg, aspd)
     return dmg * aspd
 end
 
+
+---@param dps number
+---@param hp number
+---@return boolean
+local function isTanky(dps, hp)
+    return dps*10 > hp
+end
+
 ---@param squadInfo g.SquadDef
 ---@return number
 local function estimateSquadPowerIndex(squadInfo)
@@ -1113,9 +1121,14 @@ local function estimateSquadPowerIndex(squadInfo)
     local bonus = 1
     local attack = def.baseAttackDamage or def.baseHealPower or 1
     local attackSpeed = def.baseAttackSpeed or 1
+    local dps = g.getDPS(attack, attackSpeed)
     local unitCount = squadInfo.unitCount or 1
     local healthArmr = (def.baseMaxHealth or 1) + (def.baseStartingArmor or 0)
     local timeToDealDmg = 4*healthArmr + math.max(1,((def.baseAttackRange or 1) - 20))
+
+    local isRanged = def.isRanged
+    local isHealer = def.isHealer
+    local isTank = isTanky(dps,healthArmr)
 
     local manaCost = 0
     for _, n in pairs(squadInfo.cost or {}) do
@@ -1162,7 +1175,7 @@ local function categorizeSquad(info)
     -- melee from here on. Compare bulk vs damage output.
     local health = (def.baseMaxHealth or 0) + (def.baseStartingArmor or 0)
     local dps = attackDamage * (def.baseAttackSpeed or 0)
-    if dps > 0 and health >= dps * 20 then
+    if dps > 0 and isTank(dps, health) then
         return g.SQUAD_TYPES.TANK
     end
     if dps > 0 and health > 0 then
@@ -1263,7 +1276,7 @@ function g.defineSquad(id, info)
                     perkIds[#perkIds+1] = pdef
                 else
                     local pid = id.."_perk_"..i
-                    g.definePerk(pid, pdef)
+                    g.definePerk(pid, pdef.name, pdef)
                     perkIds[#perkIds + 1] = pid
                 end
             end
@@ -1916,14 +1929,14 @@ end
 --- Use rawHandlers when listening to things not happening to the entity itself.
 ---@param id string
 ---@param info g.PerkDef
-function g.definePerk(id, info)
+function g.definePerk(id, name, info)
     if PERK_DEFS[id] then
         error("Duplicate perk: " .. id)
     end
     assertValidTags("Perk", id, info.tags)
 
     ---@cast info g.PerkInfo
-    info.name = loc(info.name, {}, {
+    info.name = loc(name, {}, {
         context = "The name of a perk"
     })
     info.id = id
@@ -4034,7 +4047,7 @@ end
 ---@param manaRequirement g.ManaBundle
 ---@return g.ManaCounts?
 local function trySpendManaInternal(manaCounts, manaRequirement)
-    -- HACK: colorless. Only total count matters.
+    -- TODO: RESTORE COLOR-AWARE MANA SPENDING. This temporary version only checks total count.
     local totalNeed = (manaRequirement.blue or 0) + (manaRequirement.green or 0)
         + (manaRequirement.red or 0) + (manaRequirement.yellow or 0)
 

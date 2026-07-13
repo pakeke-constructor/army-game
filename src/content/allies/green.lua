@@ -480,7 +480,7 @@ g.defineSquad("friendly_giant_squad", {
             image = "friendlygiant_bigstick",
             type = "sword",
         },
-        baseAttackDamage = 5,
+        baseAttackDamage = 2,
         baseAttackSpeed = 0.5,
         baseAttackRange = 40,
         baseMoveSpeed = 35,

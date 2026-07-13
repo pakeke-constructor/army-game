@@ -19,10 +19,11 @@ After 8 turns, the map is reset; and the player fights a boss.
 
 <high_level_concepts>
 - Units: A singular Enemy or ally; e.g. a soldier that fights for you. ranged or melee.
-- Squad: A bundle of Units that the player can click to deploy. (Traits and Perks are shared across every unit.)
+- Squad: A bundle of Units that the player can click to deploy during battle planning. (Traits and Perks are shared across every unit.)
+- Spells: Abilities cast during battle, after planning ends.
 - Blessings: A per-run buff that gives global benefits: e.g: "Gain +2 mana after battle". Use question/event buses.
 - Perks: Per-unit buffs/blessings. Use question/event buses. Eg: "This unit gains +2 damage"
-- Mana: Red, Green, Blue, Wildcard. Squads cost mana to play.
+- Mana: Red, Green, Blue, Yellow, Wildcard. Costs currently only compare total mana count.
 </high_level_concepts>
 
 <architecture>
@@ -127,14 +128,14 @@ Pre-declared via g.defineEvent(name) / g.defineQuestion(name, reducer, default).
   Reducers: ADD, MULTIPLY, OR, AND, MIN, MAX, PRIORITY, etc.
 
 Handlers: A handler is a table mapping event/question names to functions: {onUnitDeath = func, getDmg = func2}
-g.addHandler(handler) registers a global handler; g.clearHandlers() wipes all. Called every frame for robustness (add handlers in scene:preUpdate, clear in main loop). Since they are cleared per-frame, there's no need to remove them, lifecycle is robust.
+`g.addHandler(handler)` registers a global handler for one frame. Only call it inside `scene:pollHandlers()`. `g.pollHandlers()` clears and re-registers these handlers each frame.
 If a handler has keys that are NOT an event/question; throws an error.
 
 Scopes: essentially a collection of handlers, (with parent inheritance.)
 - Entities can own a scope, which allows you to add effects/behaviour to entities.
 - Scopes contain handlers, which is just a table of functions: `handler: {my_event = func, my_question = func2}`
 - Handlers can auto-expire via optional duration arg, via `:addHandler(handler, duration)`. (how temporary buffs work.)
-- Squad spawn creates a shared scope for all units. g.addCustomEffect(ent, handler, duration) layers a per-entity scope on top (with the shared scope as parent), so effects stay per-entity.
+- Squad spawn creates a shared scope for all units. `g.addCustomEffect(ent, handler, duration, tag)` layers a per-entity scope on top. Reusing a tag replaces that effect instead of stacking.
 - If the scope has a parent (ent.scope = Scope(parent)) then the parent's handlers are called too. This is useful when we have a scope shared between entities, but we want to add a buff for just ONE entity; we create a new scope, and have it inherit from the old one.
 
 EXAMPLE:
@@ -148,13 +149,14 @@ There are 3 places where events/questions can be dispatched to:
 </event_question_bus>
 
 <perks>
-Defined via `g.definePerk(id, name, info)`. Info has two handler tables:
+Defined via `g.definePerk(id, name, info)`. Info has three handler tables:
 
 - `handlers`: per-entity. Fires only when an event is dispatched AT this entity
   (eg `g.call("onHit", ent)`). Cheap; default.
 - `rawHandlers`: scene-level. Fires on EVERY global dispatch. Entity passed as 1st arg:
     `rawHandlers.onAllyHurt = function(self, ally, dmg) ... end`
   Use only when listening to things not happening to the entity itself (eg "any ally hurt").
+- `armyHandlers`: registered once per army squad, even before deployment. First arg is the owning squad.
 </perks>
 
 <traits>
@@ -172,7 +174,7 @@ When modifying stats:
 - BAD: `ent.attackDamage = ent.attackDamage + 5`. This WON'T WORK, because stats are recalculated every frame.
 - GOOD: `g.buffEntity(ent, "attackDamage", 5) -- permanent buff until ent dies
 - GOOD 2: Alternatively, hook into the question-bus for the stat. (E.g. getMaxHealthModifier/Multiplier)
-</perks>
+</stats>
 
 <localization>
 Do NOT add text to entities, blessings, or UI without wrapping it in a `loc()` call.

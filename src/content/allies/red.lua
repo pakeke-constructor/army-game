@@ -184,7 +184,7 @@ g.defineSquad("blade_thrower_squad", {
             image = "bladethrowers_ringblade",
             type = "bow",
         },
-        baseAttackDamage = 3,
+        baseAttackDamage = 2,
         baseAttackSpeed = 1,
         baseAttackRange = 70,
         baseMoveSpeed = 55,
@@ -586,7 +586,7 @@ g.defineSquad("his_manifestation_squad", {
     unitCount = 1,
     perks = {{
         name = "Feed on Death",
-        description = g.loc2("When an ally dies, gains +1 (ATK)."),
+        description = g.loc2("When an ally dies, this unit gains +1 (ATK)."),
         image = "coin_icon",
         rawHandlers = {
             entityDeath = function(self, ent)
