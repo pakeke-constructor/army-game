@@ -517,7 +517,6 @@ g.defineSquad("ice_elephant_squad", {
         baseMaxHealth = 60,
         baseStartingArmor = 12,
     },
-    statUpgradeScaling = {startingArmor = 0.25},
     unitCount = 2,
     perks = {{
         name = "Frost Hide",
@@ -574,7 +573,6 @@ g.defineSquad("magnet_elemental_squad", {
         baseMaxHealth = 20,
         baseStartingArmor = 3,
     },
-    statUpgradeScaling = {startingArmor = 0.25},
     unitCount = 2,
     perks = {{
         name = "Shrapnelmancy",
@@ -617,7 +615,6 @@ g.defineSquad("immortal_eye_squad", {
         baseMaxHealth = 80,
         baseStartingArmor = 10,
     },
-    statUpgradeScaling = {attackDamage = 0.33},
     perks = {{
         name = "Frostblight",
         description = g.loc2("Every second, apply (1 POISON) to all frozen enemies."),
@@ -692,7 +689,6 @@ g.defineSquad("laser_gunner_squad", {
         baseMoveSpeed = 50,
         baseMaxHealth = 8,
     },
-    statUpgradeScaling = {attackSpeed = 0.1},
     unitCount = 4,
     perks = {{
         name = "Laser Focus",
@@ -748,7 +744,6 @@ g.defineSquad("anima_incubator_squad", {
         baseMoveSpeed = 0,
         baseMaxHealth = 200,
     },
-    statUpgradeScaling = {maxHealth = 0.2},
     unitCount = 1,
     perks = {{
         name = "Anima Spawner",
@@ -834,7 +829,6 @@ g.defineSquad("lightning_wizard_squad", {
         baseMaxHealth = 12,
         baseMagic = 8,
     },
-    statUpgradeScaling = {magic = 0.25},
     unitCount = 1,
     icon = g.leo("lightningwizard_uniticon", "icemage_uniticon"),
     perks = {{
@@ -874,7 +868,6 @@ g.defineSquad("frost_warden_squad", {
         baseMaxHealth = 140,
         baseStartingArmor = 10,
     },
-    statUpgradeScaling = {maxHealth = 0.2},
     unitCount = 1,
     icon = g.leo("frostwarden_uniticon", "iceelephants_uniticon"),
     perks = {{
@@ -920,7 +913,6 @@ g.defineSquad("ice_mage_squad", {
         baseMoveSpeed = 50,
         baseMaxHealth = 12,
     },
-    statUpgradeScaling = {attackSpeed = 0.1},
     unitCount = 4,
     perks = {{
         name = "Ice Touch",
