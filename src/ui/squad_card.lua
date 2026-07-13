@@ -526,13 +526,6 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
         )
 
         local buf = {}
-        for statId, _ in pairs(info.statUpgradeScaling) do
-            local statInfo = g.getStatInfo(statId)
-            local base = def[statInfo.baseName] or 0
-            local increase = base * info.statUpgradeScaling[statId]
-            local incrtxt = helper.wrapRichtextColor(statInfo.color, " +%d")
-            buf[#buf+1] = string.format("{%s}" .. incrtxt, statInfo.icon, math.floor(increase + 0.5))
-        end
 
         if #buf > 0 then
             local str = table.concat(buf, "  ")
