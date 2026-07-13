@@ -1372,12 +1372,14 @@ g.SPELLS = {}
 ---@field icon string
 ---@field description string?
 ---@field range number?
+---@field cooldown number?
 ---@field instantCast g.SpellInstantCastDef?
 ---@field cast (fun(spellId: string, x: number, y: number))?
 
 ---@class g.SpellInfo: g.SpellDef
 ---@field id string
 ---@field range number
+---@field cooldown number
 
 ---@param id string
 ---@param info g.SpellDef
@@ -1391,6 +1393,7 @@ function g.defineSpell(id, info)
     info.name = loc(assert(info.name), {}, {context = info.nameContext or "Name of a spell."})
     info.rarity = assert(info.rarity)
     info.range = info.range or 500
+    info.cooldown = info.cooldown or 10
     assert(info.icon, "Missing icon for spell: " .. id)
     if not g.isImage(info.icon) then
         error("Spell has invalid icon: " .. info.icon)

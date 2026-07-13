@@ -15,6 +15,7 @@ g.defineSpell("heal_spell", {
     description = loc("Heal allies in range!"),
 
     range = 100,
+    cooldown = 10,
 
     instantCast = {
         target = "ally",
@@ -34,6 +35,7 @@ g.defineSpell("poison_spell", {
     description = loc("Poison enemies in range!"),
 
     range = 100,
+    cooldown = 10,
 
     instantCast = {
         target = "enemy",
@@ -51,6 +53,7 @@ g.defineSpell("ace_spell", {
     icon = "ace_spell",
     color = RED,
     range = 100,
+    cooldown = 10,
 })
 
 
@@ -60,6 +63,7 @@ g.defineSpell("coin_spell", {
     icon = "coin_spell",
     color = BLUE,
     range = 100,
+    cooldown = 10,
 })
 
 
@@ -69,6 +73,7 @@ g.defineSpell("howl_spell", {
     icon = "howl_spell",
     color = GREEN,
     range = 100,
+    cooldown = 10,
 })
 
 
@@ -78,6 +83,7 @@ g.defineSpell("ranged_spell", {
     icon = "ranged_spell",
     color = YELLOW,
     range = 100,
+    cooldown = 10,
 })
 
 
@@ -91,6 +97,7 @@ g.defineSpell("insectify_spell", {
     description = loc("Spawn a Pest for every ally in range!"),
 
     range = 100,
+    cooldown = 10,
 
     instantCast = {
         target = "ally",
@@ -110,6 +117,7 @@ g.defineSpell("freeze_spell", {
     description = loc("Freeze enemies in range for 5s!"),
 
     range = 100,
+    cooldown = 10,
 
     instantCast = {
         target = "enemy",
@@ -129,6 +137,7 @@ g.defineSpell("dark_ritual_spell", {
     description = g.loc2("Deal 2 damage to allies. Damaged allies gain +2 (MAGK)."),
 
     range = 100,
+    cooldown = 10,
 
     instantCast = {
         target = "ally",
@@ -153,6 +162,7 @@ g.defineSpell("bonereap_spell", {
     description = loc("Trigger on-death effects on all allies in range, without killing them."),
 
     range = 100,
+    cooldown = 10,
 
     instantCast = {
         target = "ally",
@@ -175,6 +185,7 @@ g.defineSpell("harrier_spell", {
     description = g.loc2("Ranged allies in range gain +70% (RANGE)."),
 
     range = 100,
+    cooldown = 10,
 
     instantCast = {
         target = "ally",
