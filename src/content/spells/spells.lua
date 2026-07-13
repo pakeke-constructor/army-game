@@ -14,7 +14,7 @@ g.defineSpell("heal_spell", {
     color = GREEN,
     description = loc("Heal allies in range!"),
 
-    spellRange = 100,
+    range = 100,
 
     instantCast = {
         target = "ally",
@@ -33,7 +33,7 @@ g.defineSpell("poison_spell", {
     color = GREEN,
     description = loc("Poison enemies in range!"),
 
-    spellRange = 100,
+    range = 100,
 
     instantCast = {
         target = "enemy",
@@ -50,7 +50,7 @@ g.defineSpell("ace_spell", {
     rarity = g.RARITIES.COMMON,
     icon = "ace_spell",
     color = RED,
-    spellRange = 100,
+    range = 100,
 })
 
 
@@ -59,7 +59,7 @@ g.defineSpell("coin_spell", {
     rarity = g.RARITIES.COMMON,
     icon = "coin_spell",
     color = BLUE,
-    spellRange = 100,
+    range = 100,
 })
 
 
@@ -68,7 +68,7 @@ g.defineSpell("howl_spell", {
     rarity = g.RARITIES.COMMON,
     icon = "howl_spell",
     color = GREEN,
-    spellRange = 100,
+    range = 100,
 })
 
 
@@ -77,7 +77,7 @@ g.defineSpell("ranged_spell", {
     rarity = g.RARITIES.COMMON,
     icon = "ranged_spell",
     color = YELLOW,
-    spellRange = 100,
+    range = 100,
 })
 
 
@@ -90,7 +90,7 @@ g.defineSpell("insectify_spell", {
     color = GREEN,
     description = loc("Spawn a Pest for every ally in range!"),
 
-    spellRange = 100,
+    range = 100,
 
     instantCast = {
         target = "ally",
@@ -109,7 +109,7 @@ g.defineSpell("freeze_spell", {
     color = BLUE,
     description = loc("Freeze enemies in range for 5s!"),
 
-    spellRange = 100,
+    range = 100,
 
     instantCast = {
         target = "enemy",
@@ -128,7 +128,7 @@ g.defineSpell("dark_ritual_spell", {
     color = RED,
     description = g.loc2("Deal 2 damage to allies. Damaged allies gain +2 (MAGK)."),
 
-    spellRange = 100,
+    range = 100,
 
     instantCast = {
         target = "ally",
@@ -152,7 +152,7 @@ g.defineSpell("bonereap_spell", {
     color = RED,
     description = loc("Trigger on-death effects on all allies in range, without killing them."),
 
-    spellRange = 100,
+    range = 100,
 
     instantCast = {
         target = "ally",
@@ -174,7 +174,7 @@ g.defineSpell("harrier_spell", {
     color = YELLOW,
     description = g.loc2("Ranged allies in range gain +70% (RANGE)."),
 
-    spellRange = 100,
+    range = 100,
 
     instantCast = {
         target = "ally",

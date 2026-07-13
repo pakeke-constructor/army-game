@@ -815,7 +815,7 @@ end
 ---@param drawManaCost boolean?
 function g.renderSpellIcon(spellId, x, y, drawManaCost)
     local info = g.getSpellInfo(spellId)
-    local col = g.getManaBundleColor(info.cost)
+    local col = info.color
     local c = gsman.mulColor(1, 1, 1)
     g.drawImage(info.icon, x, y)
     c:pop()
@@ -824,7 +824,7 @@ function g.renderSpellIcon(spellId, x, y, drawManaCost)
     c:pop()
 
     local size = 32 -- hacky hardcode
-    if drawManaCost then
+    if drawManaCost and info.cost then
         g.drawManaCost(info.cost, x, y - size/2, size + 6)
     end
 end
@@ -1372,19 +1372,17 @@ local SPELL_LIST = {}
 ---@class g.SpellDef
 ---@field name string (untranslated at definition; translated in info)
 ---@field nameContext string?
----@field color objects.Color?
+---@field color objects.Color
 ---@field rarity g.Rarity
 ---@field icon string
----@field cost g.ManaBundle?
 ---@field description string?
----@field spellRange number?
----@field spellArea number?
+---@field range number?
 ---@field instantCast g.SpellInstantCastDef?
 ---@field cast (fun(spellId: string, x: number, y: number))?
 
 ---@class g.SpellInfo: g.SpellDef
 ---@field id string
----@field cost g.ManaBundle
+---@field range number
 
 ---@param id string
 ---@param info g.SpellDef
@@ -1394,15 +1392,10 @@ function g.defineSpell(id, info)
     end
     assertValidTags("Spell", id, info.tags)
     info.id = id
-    local manaType
-    for key,v in pairs(info.cost) do
-        manaType = key; break
-    end
-    local manaCol = g.getManaInfo(manaType).color
-    info.color = g.snapToPalette(info.color or manaCol)
+    info.color = g.snapToPalette(info.color)
     info.name = loc(assert(info.name), {}, {context = info.nameContext or "Name of a spell."})
     info.rarity = assert(info.rarity)
-    info.cost = info.cost or {}
+    info.range = info.range or 500
     assert(info.icon, "Missing icon for spell: " .. id)
     if not g.isImage(info.icon) then
         error("Spell has invalid icon: " .. info.icon)
@@ -1446,7 +1439,6 @@ local function iterateSpellTargets(info, x, y, fn)
     if not instant then return 0 end
 
     local maxTargets = instant.maxTargets
-    local area = info.spellArea or info.spellRange or 500
     local hitCount = 0
 
     g.iteratePartition(instant.target, x, y, function(ent)
@@ -1455,7 +1447,7 @@ local function iterateSpellTargets(info, x, y, fn)
         if instant.filter and not instant.filter(ent, x, y, info.id) then return end
         hitCount = hitCount + 1
         fn(ent)
-    end, area)
+    end, info.range)
 
     return hitCount
 end
@@ -1480,10 +1472,9 @@ end
 ---@param spellId string
 function g.renderSpellCastPreview(x, y, spellId)
     local info = g.getSpellInfo(spellId)
-    local range = info.spellRange or info.spellArea or 500
 
     lg.setColor(info.color)
-    lg.circle("line", x, y, range)
+    lg.circle("line", x, y, info.range)
 
     local rot = love.timer.getTime() * 3
 

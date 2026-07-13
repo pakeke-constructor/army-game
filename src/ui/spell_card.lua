@@ -4,7 +4,7 @@ local TRAIL_COUNT = {
     LEGENDARY = 6
 }
 
-local RADIUS_TEXT = interp("{range}Range: {c r=0.773 g=0.188 b=0.239}%{spellRange}{/c}", {
+local RADIUS_TEXT = interp("{range}Range: {c r=0.773 g=0.188 b=0.239}%{range}{/c}", {
     context = "The range of a spell.",
 })
 local TEXT_COLOR = {0.8, 0.8, 0.85} -- Note: This is not aligned to palette
@@ -32,7 +32,7 @@ return function(spellId, region, index)
     ui.assertUIStarted()
 
     local info = g.getSpellInfo(spellId)
-    local manaColor = g.getManaBundleColor(info.cost)
+    local manaColor = info.color
     local frameDarkColor = manaColor:lerp(objects.Color.BLACK, 0.65)
     local frameLightColor = manaColor:lerp(objects.Color.WHITE, 0.25)
 
