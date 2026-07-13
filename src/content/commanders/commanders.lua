@@ -1,3 +1,67 @@
+local BASIC_SQUADS = {
+    red = {
+        tank = "gremlin_brute_squad",
+        bruiser = "gremlin_berserker_squad",
+        ranged = "gremlin_slinger_squad",
+    },
+    green = {
+        tank = "human_protector_squad",
+        bruiser = "human_lumberjack_squad",
+        ranged = "green_archer_squad",
+    },
+    blue = {
+        tank = "shield_fish_squad",
+        bruiser = "spear_fish_squad",
+        ranged = "arrow_fish_squad",
+    },
+    yellow = {
+        tank = "protect_bot_squad",
+        bruiser = "angry_bot_squad",
+        ranged = "gun_bot_squad",
+    },
+}
+
+---@param colors string[]
+---@param role string
+local function addBasicSquad(colors, role)
+    local run = g.getRun()
+    local options = {}
+
+    for _, color in ipairs(colors) do
+        local squadId = BASIC_SQUADS[color][role]
+        if not run.squads[squadId] then
+            options[#options + 1] = squadId
+        end
+    end
+
+    if #options == 0 then return end
+    g.addSquadToArmy(options[love.math.random(#options)])
+end
+
+
+local function validate()
+    if not consts.DEV_MODE then return end
+
+    for color, roles in pairs(BASIC_SQUADS) do
+        g.getSquadInfo(color .. "_militia_squad")
+        for _, squadId in pairs(roles) do
+            g.getSquadInfo(squadId)
+        end
+    end
+end
+
+g.postLoad(validate)
+
+
+---@param colors string[]
+local function addBasicStartingSquads(colors)
+    local color = colors[love.math.random(#colors)]
+    g.addSquadToArmy(color .. "_militia_squad")
+
+    addBasicSquad(colors, "tank")
+    addBasicSquad(colors, "bruiser")
+    addBasicSquad(colors, "ranged")
+end
 
 
 g.defineCommander("sir_horse", "Sir Horse", {
@@ -16,9 +80,6 @@ g.defineCommander("sir_horse", "Sir Horse", {
         rarity = g.RARITIES.COMMANDER,
         unitCount = 1,
         cost = {red = 1, green = 1},
-        statUpgradeScaling = {
-            maxHealth = 0.25,
-        },
         icon = g.leo"sirhorse_uniticon",
         entityDef = {
             image = "sirhorse",
@@ -30,7 +91,7 @@ g.defineCommander("sir_horse", "Sir Horse", {
             attack = {
                 attackType = "melee",
             },
-            baseAttackDamage = 6,
+            baseAttackDamage = 7,
             baseAttackSpeed = 2,
             baseAttackRange = 85,
             baseMoveSpeed = 120,
@@ -39,14 +100,7 @@ g.defineCommander("sir_horse", "Sir Horse", {
     },
 
     onStart = function(run)
-        g.addSquadToArmy("red_militia_squad")
-        g.addSquadToArmy("red_archer_squad")
-
-        if consts.DEV_MODE then
-            g.addSpellToArmy("dark_ritual_spell")
-            g.addSpellToArmy("bonereap_spell")
-            g.addSpellToArmy("harrier_spell")
-        end
+        addBasicStartingSquads({"red", "green"})
     end
 })
 
@@ -67,9 +121,6 @@ g.defineCommander("druidcommander", "Druid Lady", {
         rarity = g.RARITIES.COMMANDER,
         unitCount = 1,
         cost = {red = 1, green = 1},
-        statUpgradeScaling = {
-            maxHealth = 0.25,
-        },
         icon = g.leo"druidcommander_uniticon",
         entityDef = {
             image = "druidcommander",
@@ -85,15 +136,15 @@ g.defineCommander("druidcommander", "Druid Lady", {
                 projectileSpeed = 240, -- slow-moving fire
             },
             baseAttackDamage = 1,
-            baseAttackSpeed = 1,
+            baseAttackSpeed = 0.45,
             baseAttackRange = 700, -- slightly less than octopus commander
             baseMoveSpeed = 85,
             baseMaxHealth = 160,
         },
         perks = {{
+            id = "perk_breathoflife",
             name = "Breath of Life",
             description = g.loc2("Your squads have +25% Max (HP)."),
-            image = "coin_icon",
             rawHandlers = {
                 ---@param ent ecs.Entity
                 getMaxHealthMultiplier = function(_, ent)
@@ -104,8 +155,7 @@ g.defineCommander("druidcommander", "Druid Lady", {
     },
 
     onStart = function(run)
-        g.addSquadToArmy("green_militia_squad")
-        g.addSquadToArmy("green_archer_squad")
+        addBasicStartingSquads({"red", "green"})
     end
 })
 
@@ -126,9 +176,6 @@ g.defineCommander("mechcommander", "The Mech Goblin", {
         rarity = g.RARITIES.COMMANDER,
         unitCount = 1,
         cost = {yellow = 1, green = 1},
-        statUpgradeScaling = {
-            maxHealth = 0.25,
-        },
         icon = g.leo"mechcommander_uniticon",
         entityDef = {
             onHitDamage = function(ent, damage, target)
@@ -157,8 +204,7 @@ g.defineCommander("mechcommander", "The Mech Goblin", {
     },
 
     onStart = function(run)
-        g.addSquadToArmy("green_militia_squad")
-        g.addSquadToArmy("green_archer_squad")
+        addBasicStartingSquads({"yellow", "green"})
     end
 })
 
@@ -179,9 +225,6 @@ g.defineCommander("lizardcommander", "Lizard Lord", {
         rarity = g.RARITIES.COMMANDER,
         unitCount = 1,
         cost = {red = 1, blue = 1},
-        statUpgradeScaling = {
-            maxHealth = 0.25,
-        },
         icon = g.leo"lizardcommander_uniticon",
         entityDef = {
             image = "lizardcommander",
@@ -204,8 +247,7 @@ g.defineCommander("lizardcommander", "Lizard Lord", {
     },
 
     onStart = function(run)
-        g.addSquadToArmy("red_militia_squad")
-        g.addSquadToArmy("blue_archer_squad")
+        addBasicStartingSquads({"red", "blue"})
     end
 })
 
@@ -226,9 +268,7 @@ g.defineCommander("octopuscommander", "Octopus Tank", {
         rarity = g.RARITIES.COMMANDER,
         unitCount = 1,
         cost = {blue = 1, yellow = 1},
-        statUpgradeScaling = {
-            maxHealth = 0.25,
-        },
+        icon = g.leo("octopuscommander_icon"),
         entityDef = {
             image = "octopuscommander",
             isCommander = true,
@@ -249,7 +289,6 @@ g.defineCommander("octopuscommander", "Octopus Tank", {
     },
 
     onStart = function(run)
-        g.addSquadToArmy("blue_militia_squad")
-        g.addSquadToArmy("blue_archer_squad")
+        addBasicStartingSquads({"blue", "yellow"})
     end
 })

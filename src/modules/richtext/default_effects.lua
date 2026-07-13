@@ -91,12 +91,12 @@ return function(text)
     local function bob(args, x, y, context, next)
         local f = args.freq or 0.5
         local amp = args.amp or 1
-        local k = args.k or 1 -- `k` determines how "different" the letter are.
+        -- local k = args.k or 1 -- `k` determines how "different" the letter are.
         -- k = 0 indicates all letters bob up and down, in sync.
         local dy = math.sin(2 * math.pi * f * love.timer.getTime()) * amp
         return next(context.textOrDrawable, x, y + dy)
     end
-    text.defineEffect("bob", bob, {perCharacter = true})
+    text.defineEffect("bob", bob, {perCharacter = false})
 
     local rainbow = {
         {0.85, 0.15, 0.15, 1.0},  -- Red

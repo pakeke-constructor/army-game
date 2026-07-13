@@ -51,6 +51,8 @@ end
 local PROJ_HIT_RADIUS = 24
 local PROJ_Z_MAX = 50 -- above this z, projectile doesn't hit anything
 
+local DEFAULT_PROJECTILE_SHOOT_SOUND = "battle_arrowShoot3"
+
 ---@type table<string, string> projectileType -> sound name
 local SHOOT_SOUNDS = {
     arrow = "battle_arrowShoot3",
@@ -117,7 +119,7 @@ local function spawnProjectile(attacker, target)
         }
     end
 
-    local shootSound = SHOOT_SOUNDS[projType]
+    local shootSound = SHOOT_SOUNDS[projType] or DEFAULT_PROJECTILE_SHOOT_SOUND
     if shootSound then
         g.playWorldSound(shootSound, 1+love.math.random(-15, 15)/100)
     end

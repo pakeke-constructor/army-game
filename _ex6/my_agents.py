@@ -1,12 +1,13 @@
 
 
 
+from _ex6.provider_openai import invoke_llm as invoke_llm_openai
 from _ex6.models import M
 from _ex6.tools import read_headers, read_body, glob, search, write_file, edit_file, read_file, edit_file_lines, escalate, bash, explore_agent, CLAUDE_MD, ENV_PROMPT, git_working_tree, add_tool_repetition_guard, powershell
 from _ex6.skills import load_skill
 from _ex6.lua_coding_style import SYSTEM_PROMPT_CODING_STYLE
 from _ex6.tasks import plan_add_log, plan_done, plan_list, plan_read, plan_write
-from _ex6.web.web_tools import web_search, websearch_agent
+from _ex6.web_tools import websearch_agent
 from _ex6.love2d_docs.love2d_docs import love2d_docs
 from _ex6.game_tools import game_start, game_interact
 from _ex6.provider import cache_manually
@@ -32,7 +33,7 @@ Prefer direct implementation path.
 - Map out problem + solution, and discover more about the codebase. Prioritize read_headers.
 - Complete changes: write code, edit files.
 
-Always check changes afterwards. (Check git diff, run tests, or read file(s).)
+Always check changes afterwards. (Check git diff / read file(s).)
 </agent_strategy>
 
 <agent_tactics>
@@ -79,6 +80,7 @@ MAIN_TOOLS = [
     read_file, glob, search, read_headers, read_body,
     write_file, edit_file, edit_file_lines,
     powershell,
+    websearch_agent,
     # web_search, websearch_agent,
     plan_done, plan_read, plan_write,
     git_working_tree,
@@ -115,22 +117,6 @@ cache_manually(c_sonnet)
 
 
 
-Context("c_codex", yolo=False, model=M.CODEX_LATEST.id, reasoning="high", messages=[
-    MAIN_SYSTEM_PROMPT,
-    ENV_PROMPT,
-    # CODING_STYLE_PROMPT,
-    CLAUDE_MD,
-])
-
-
-Context("c_CHATGPT", yolo=False, model=M.GPT_LATEST.id, reasoning="high", messages=[
-    MAIN_SYSTEM_PROMPT,
-    ENV_PROMPT,
-    # CODING_STYLE_PROMPT,
-    CLAUDE_MD,
-])
-
-
 
 c_gem = Context("c_gem", yolo=False, model=M.GEMINI_LATEST.id, reasoning="high", messages=[
     MAIN_SYSTEM_PROMPT,
@@ -147,6 +133,26 @@ Context("c_zglm", yolo=False, model=M.GLM_LATEST.id, reasoning="high", messages=
     # CODING_STYLE_PROMPT,
     CLAUDE_MD,
 ])
+
+
+Context("sub_SOL", model=M.GPT_LATEST.id, reasoning="high", messages=[
+    MAIN_SYSTEM_PROMPT.with_tools(MAIN_TOOLS),
+    ENV_PROMPT,
+    CLAUDE_MD,
+], invoke_llm=invoke_llm_openai)
+
+Context("sub_TERRA", model=M.GPT_TERRA_LATEST.id, reasoning="high", messages=[
+    MAIN_SYSTEM_PROMPT.with_tools(MAIN_TOOLS),
+    ENV_PROMPT,
+    CLAUDE_MD,
+], invoke_llm=invoke_llm_openai)
+
+Context("sub_LUNA", model=M.GPT_LUNA_LATEST.id, reasoning="high", messages=[
+    MAIN_SYSTEM_PROMPT.with_tools(MAIN_TOOLS),
+    ENV_PROMPT,
+    CLAUDE_MD,
+], invoke_llm=invoke_llm_openai)
+
 
 
 

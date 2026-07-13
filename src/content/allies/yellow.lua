@@ -1,6 +1,8 @@
 
+local sqhelper = require(".squad_helper")
 
 
+sqhelper.defineMilitiaAndArchers("yellow")
 
 
 -- ============================================================
@@ -23,10 +25,10 @@ g.defineSquad("protect_bot_squad", {
             type = "shield",
         },
         baseAttackDamage = 1,
-        baseAttackSpeed = 1,
+        baseAttackSpeed = 0.5,
         baseAttackRange = 18,
         baseMoveSpeed = 50,
-        baseMaxHealth = 14,
+        baseMaxHealth = 20,
         baseStartingArmor = 3,
     },
     unitCount = 4,
@@ -138,9 +140,9 @@ g.defineSquad("spark_bot_squad", {
     unitCount = 6,
     startingTraits = {"bot"},
     perks = {{
+        id = "perk_overload",
         name = "Overload",
         description = g.loc2("On-death, emit lightning dealing damage equal to level."),
-        image = "coin_icon",
         handlers = {
             entityDeath = function(ent)
                 local level = (ent.squad and ent.squad.level) or 1
@@ -151,6 +153,97 @@ g.defineSquad("spark_bot_squad", {
     cost = {yellow = 1},
 })
 
+
+
+g.defineSquad("engineer_squad", {
+    name = "Engineers",
+    rarity = g.RARITIES.UNCOMMON,
+    tags = {"building", "attack_damage"},
+    entityDef = {
+        image = g.leo("engineers_unit", "prospectors_unit"),
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = { attackType = "melee" },
+        weapon = {
+            image = g.leo("engineers_wrench", "prospectors_pickaxe"),
+            type = "sword",
+        },
+        baseAttackDamage = 2,
+        baseAttackSpeed = 1,
+        baseAttackRange = 18,
+        baseMoveSpeed = 55,
+        baseMaxHealth = 8,
+    },
+    unitCount = 4,
+    startingTraits = {"bot"},
+    perks = {{
+        id = "perk_industrialmomentum",
+        name = "Industrial Momentum",
+        description = g.loc2("While 2 buildings are alive, this unit has triple (ATK) and movement speed."),
+        handlers = {
+            getAttackDamageMultiplier = function(ent)
+                local buildings = 0
+                for _, ally in ipairs(g.getAllyList()) do
+                    if g.isAlive(ally) and ally.isBuilding then
+                        buildings = buildings + 1
+                    end
+                end
+                if buildings >= 2 then return 3 end
+            end,
+            getMoveSpeedMultiplier = function(ent)
+                local buildings = 0
+                for _, ally in ipairs(g.getAllyList()) do
+                    if g.isAlive(ally) and ally.isBuilding then
+                        buildings = buildings + 1
+                    end
+                end
+                if buildings >= 2 then return 3 end
+            end,
+        },
+    }},
+    cost = {yellow = 1},
+})
+
+
+g.defineEntity("clanker_bot", {
+    image = g.leo("clankerbot_unit", "angrybot_unit"),
+    physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+    partitions = {"unit", "ally"},
+    team = "ally",
+    ai = { target = "enemy" },
+    attack = { attackType = "melee" },
+    baseAttackDamage = 2,
+    baseAttackSpeed = 1,
+    baseAttackRange = 18,
+    baseMoveSpeed = 55,
+    baseMaxHealth = 2,
+})
+
+
+g.defineSquad("clanker_factory_squad", {
+    name = "Clanker Factory",
+    rarity = g.RARITIES.RARE,
+    tags = {"building", "swarm"},
+    entityDef = {
+        image = g.leo("clankerfactory_unit", "greatfactory_unit"),
+        isBuilding = true,
+        physics = { shape = "circle", radius = 12, ox = 0, oy = 0, mass = 1, isStatic = true },
+        baseMaxHealth = 40,
+    },
+    unitCount = 1,
+    perks = {{
+        id = "perk_assemblyline",
+        name = "Assembly Line",
+        description = g.loc2("Produces 1 Clanker-Bot per second. 2 (HP), 2 (ATK)"),
+        rawHandlers = {
+            perSecondUpdate = function(ent)
+                if not g.isAlive(ent) then return end
+                local bot = g.spawnEntity("clanker_bot", ent.x, ent.y + 16)
+                g.addTrait(bot, "bot")
+            end,
+        },
+    }},
+    cost = {yellow = 2},
+})
 
 g.defineSquad("prospector_squad", {
     name = "Prospectors",
@@ -175,9 +268,9 @@ g.defineSquad("prospector_squad", {
     },
     unitCount = 4,
     perks = {{
+        id = "perk_strikegold",
         name = "Strike Gold",
         description = g.loc2("On-kill, gain 1 (COIN)."),
-        image = "coin_icon",
         handlers = {
             onKill = function(ent, target)
                 g.addGold(1)
@@ -199,14 +292,13 @@ g.defineSquad("the_great_factory_squad", {
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 1, isStatic = true },
         baseMaxHealth = 40,
     },
-    statUpgradeScaling = {maxHealth = 0.2},
     unitCount = 1,
     icon = "greatfactory_uniticon",
     perks = {{
         -- Label purpose only
+        id = "perk_duplication",
         name = "Duplication",
         description = loc("On-deploy, add a copy of the deployed squad to your bench for the fight."),
-        image = "coin_icon",
     }},
     onDeploySquad = function(info, entities)
         local squad = entities[1] and entities[1].squad
@@ -227,12 +319,11 @@ g.defineSquad("gold_mine_squad", {
         physics = { shape = "circle", radius = 8, ox = 0, oy = 0, mass = 1, isStatic = true },
         baseMaxHealth = 16,
     },
-    statUpgradeScaling = {maxHealth = 0.15},
     unitCount = 1,
     perks = {{
+        id = "perk_extraction",
         name = "Extraction",
         description = g.loc2("When an enemy dies, gain 2 (COIN)."),
-        image = "coin_icon",
         rawHandlers = {
             ---@param dead ecs.Entity
             entityDeath = function(_, dead)
@@ -257,12 +348,11 @@ g.defineSquad("living_laboratory_squad", {
         baseMaxHealth = 120,
         baseStartingArmor = 4,
     },
-    statUpgradeScaling = {startingArmor = 0.2, maxHealth = 0.1},
     unitCount = 1,
     perks = {{
+        id = "perk_eureka",
         name = "Eureka",
         description = loc("When this unit is Buffed, spreads the buff to 6 nearby allies."),
-        image = "coin_icon",
         handlers = {
             entityBuffed = function(ent, stat, increase)
                 ---@type [ecs.Entity,number][]
@@ -304,15 +394,14 @@ g.defineSquad("endless_army_squad", {
         baseAttackSpeed = 1,
         baseAttackRange = 18,
         baseMoveSpeed = 50,
-        baseMaxHealth = 10,
+        baseMaxHealth = 8,
         baseStartingArmor = 1,
     },
-    statUpgradeScaling = {maxHealth = 0.2},
     unitCount = 1,
     perks = {{
+        id = "perk_massproduction",
         name = "Mass-Production",
         description = loc("Has extra units equal to the total levels of all squads in your army."),
-        image = "coin_icon",
         armyHandlers = {
             getSquadUnitCountModifier = function(ownerSquad, squadId)
                 if squadId ~= ownerSquad.squadId then return 0 end
@@ -344,12 +433,11 @@ g.defineSquad("wealth_elemental_squad", {
         baseMaxHealth = 80,
         baseStartingArmor = 8,
     },
-    statUpgradeScaling = {maxHealth = 0.2},
     unitCount = 2,
     perks = {{
+        id = "perk_goldenbulk",
         name = "Golden Bulk",
         description = g.loc2("When you gain (COIN) during battle, this unit gains an equal amount of (ARMR)."),
-        image = "coin_icon",
         rawHandlers = {
             ---@param amount number
             goldGained = function(self, amount)
@@ -360,3 +448,40 @@ g.defineSquad("wealth_elemental_squad", {
     }},
     cost = {yellow = 1},
 })
+
+
+g.defineSquad("laser_gunner_squad", {
+    name = "Laser Gunners",
+    rarity = g.RARITIES.LEGENDARY,
+    -- tags: ranged, projectile, attack_speed, scaling
+    tags = {"ranged", "projectile", "attack_speed", "scaling"},
+    entityDef = {
+        image = "lasergunners_unit",
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        -- TODO: Laser cannon attack rather than arrow?
+        attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 380 },
+        weapon = { image = "lasergunners_lasercannon", type = "bow" },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 0.5,
+        baseAttackRange = 120,
+        baseMoveSpeed = 50,
+        baseMaxHealth = 8,
+    },
+    statUpgradeScaling = {attackSpeed = 0.1},
+    unitCount = 4,
+    perks = {{
+        id = "perk_laserfocus",
+        name = "Laser Focus",
+        description = g.loc2("On-attack, this unit gains 0.1 (ASPD). Stacks up to 30 times."),
+        handlers = {
+            onAttack = function(ent, target)
+                ent._laserFocusStacks = ent._laserFocusStacks or 0
+                if ent._laserFocusStacks >= 30 then return end
+                ent._laserFocusStacks = ent._laserFocusStacks + 1
+                g.buffEntity(ent, "attackSpeed", 0.1)
+            end,
+        },
+    }},
+    cost = {yellow = 1},
+})
+

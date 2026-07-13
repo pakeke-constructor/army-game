@@ -112,9 +112,9 @@ g.defineSquad("gremlin_technician_squad", {
     },
     unitCount = 4,
     perks = {{
+        id = "perk_volatile",
         name = "Volatile",
         description = loc("On-death, explodes in a large area."),
-        image = "coin_icon",
         handlers = {
             entityDeath = function(ent, killer)
                 g.explosion(ent.x, ent.y, 3, 80)
@@ -151,9 +151,9 @@ g.defineSquad("barbarian_squad", {
     unitCount = 6,
     icon = "barbarian_uniticon",
     perks = {{
+        id = "perk_bloodlust",
         name = "Bloodlust",
         description = loc("This unit heals for 50% of damage dealt on each attack."),
-        image = "coin_icon",
         handlers = {
             onAttack = function(ent, target)
                 if ent.attackDamage and g.isAlive(ent) then
@@ -184,7 +184,7 @@ g.defineSquad("blade_thrower_squad", {
             image = "bladethrowers_ringblade",
             type = "bow",
         },
-        baseAttackDamage = 3,
+        baseAttackDamage = 2,
         baseAttackSpeed = 1,
         baseAttackRange = 70,
         baseMoveSpeed = 55,
@@ -221,9 +221,9 @@ g.defineSquad("brewer_squad", {
     unitCount = 2,
     icon = "brewer_uniticon",
     perks = {{
+        id = "perk_lastbrew",
         name = "Last Brew",
         description = g.loc2("On-death, double the (ASPD) of 2 random allies."),
-        image = "coin_icon",
         handlers = {
             entityDeath = function(ent)
                 local buffed = 0
@@ -261,12 +261,11 @@ g.defineSquad("tribute_squad", {
         baseMoveSpeed = 40,
         baseMaxHealth = 4,
     },
-    statUpgradeScaling = {attackSpeed = 0.35},
     unitCount = 1,
     perks = {{
+        id = "perk_hisgratitude",
         name = "His Gratitude",
         description = loc("On death, deal 10 damage to a random enemy."),
-        image = "coin_icon",
         handlers = {
             entityDeath = function(ent, killer)
                 local enemies = g.getECS():getEnemyList()
@@ -332,9 +331,9 @@ g.defineSquad("berserker_squad", {
     },
     unitCount = 6,
     perks = {{
+        id = "perk_enrage",
         name = "Enrage",
         description = g.loc2("The first time this unit takes damage, it gains 1.0 (ASPD)."),
-        image = "coin_icon",
         handlers = {
             entityHurt = function(ent, damage, attacker)
                 if not ent._enraged then
@@ -376,9 +375,9 @@ g.defineSquad("dagger_bearer_squad", {
     },
     unitCount = 4,
     perks = {{
+        id = "perk_frenziedstart",
         name = "Frenzied Start",
         description = g.loc2("Has triple (ATK) for the first 10 seconds of the fight."),
-        image = "coin_icon",
         handlers = {
             getAttackDamageMultiplier = function(ent)
                 local ecs = g.tryGetECS()
@@ -413,9 +412,9 @@ g.defineSquad("furnace_golems_squad", {
     },
     unitCount = 3,
     perks = {{
+        id = "perk_conflagrate",
         name = "Conflagrate",
         description = g.loc2("On-attack, a nearby ally takes 1 damage and gains +1 (ATK) for the fight."),
-        image = "coin_icon",
         handlers = {
             onAttack = function(ent)
                 local found = nil
@@ -459,9 +458,9 @@ g.defineSquad("fire_golem_squad", {
     },
     unitCount = 2,
     perks = {{
+        id = "perk_moltenskin",
         name = "Molten Skin",
         description = loc("When hit, apply 1 Burn to the attacker."),
-        image = "coin_icon",
         handlers = {
             entityHurt = function(ent, damage, attacker)
                 if attacker and g.isAlive(attacker) then
@@ -483,7 +482,7 @@ g.defineSquad("fire_archer_squad", {
         image = g.leo("firearchers_unit", "bladethrowers_unit"), -- no art yet
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = { attackType = "ranged", projectileType = "arrow", projectileSpeed = 300 },
-        weapon = { image = g.leo("firearchers_bow", "bow"), type = "bow" },
+        weapon = { image = g.leo("firearchers_bow", "longbow"), type = "bow" },
         baseAttackDamage = 3,
         baseAttackSpeed = 1,
         baseAttackRange = 70,
@@ -492,12 +491,45 @@ g.defineSquad("fire_archer_squad", {
     },
     unitCount = 4,
     perks = {{
+        id = "perk_flamingarrows",
         name = "Flaming Arrows",
         description = loc("Apply 2 Burn on hit."),
-        image = "coin_icon",
         handlers = {
             onHitDamage = function(ent, damage, target)
                 g.applyBurn(target, 2, ent)
+            end,
+        },
+    }},
+    cost = {red = 1},
+})
+
+
+g.defineSquad("inferno_beast_squad", {
+    name = "Inferno Beast",
+    rarity = g.RARITIES.UNCOMMON,
+    tags = {"health", "explosion", "burn"},
+    entityDef = {
+        image = g.leo("infernobeast_unit", "warhog"),
+        physics = { shape = "circle", radius = 10, ox = 0, oy = 0, mass = 3 },
+        attack = { attackType = "melee" },
+        baseAttackDamage = 3,
+        baseAttackSpeed = 0.6,
+        baseAttackRange = 24,
+        baseMoveSpeed = 40,
+        baseMaxHealth = 80,
+    },
+    unitCount = 1,
+    icon = g.leo("infernobeast_uniticon", "hog_uniticon"),
+    perks = {{
+        id = "perk_infernostrikes",
+        name = "Inferno Strikes",
+        description = loc("Hits deal damage in an area and apply 1 Burn."),
+        handlers = {
+            onHitDamage = function(ent, damage, target)
+                g.explosion(target.x, target.y, damage, 50, ent)
+                g.iteratePartition("enemy", target.x, target.y, function(enemy)
+                    g.applyBurn(enemy, 1, ent)
+                end, 50)
             end,
         },
     }},
@@ -520,12 +552,11 @@ g.defineSquad("living_entropy_squad", {
         baseMoveSpeed = 50,
         baseMaxHealth = 15,
     },
-    statUpgradeScaling = {attackDamage = 0.2},
     unitCount = 2,
     perks = {{
+        id = "perk_explosive",
         name = "Explosive",
         description = loc("Attacks cause explosions!"),
-        image = "coin_icon",
         onHitDamage = function(attacker, _, target)
             g.explosion(target.x, target.y, attacker.attackDamage or 0, 70, attacker)
         end,
@@ -549,12 +580,11 @@ g.defineSquad("his_manifestation_squad", {
         baseMoveSpeed = 45,
         baseMaxHealth = 40,
     },
-    statUpgradeScaling = {attackDamage = 0.1},
     unitCount = 1,
     perks = {{
+        id = "perk_feedondeath",
         name = "Feed on Death",
-        description = g.loc2("When an ally dies, gains +1 (ATK)."),
-        image = "coin_icon",
+        description = g.loc2("When an ally dies, this unit gains +1 (ATK)."),
         rawHandlers = {
             entityDeath = function(self, ent)
                 if ent == self then return end
@@ -584,12 +614,11 @@ g.defineSquad("pain_elemental_squad", {
         baseMoveSpeed = 55,
         baseMaxHealth = 15,
     },
-    statUpgradeScaling = {attackSpeed = 0.2},
     unitCount = 2,
     perks = {{
+        id = "perk_sadistic",
         name = "Sadistic",
         description = g.loc2("When a nearby ally takes damage, gains 1 (ATK) for the battle."),
-        image = "coin_icon",
         rawHandlers = {
             entityHurt = function(self, ent)
                 if ent == self then return end
@@ -623,12 +652,11 @@ g.defineSquad("doom_herald_squad", {
         baseMoveSpeed = 35,
         baseMaxHealth = 12,
     },
-    statUpgradeScaling = {healPower = 0.2},
     unitCount = 2,
     perks = {{
+        id = "perk_omen",
         name = "Omen",
         description = loc("Triggers ally's On-death effects without killing them."),
-        image = "coin_icon",
         handlers = {
             onAttack = function(ent, target)
                 if not ent.healPower then return end

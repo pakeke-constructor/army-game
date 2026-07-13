@@ -11,6 +11,7 @@ local juiceService = require("src.juiceService")
 local ambienceService = require("src.ambienceService")
 local mapTypes = require("src.scenes.map_scene.map_types")
 local s = require("src.hud.settings")
+local Z = require("lib.zorder")
 
 local CAMERA_ZOOM = 1--0.5
 local NODE_RADIUS = 4
@@ -34,6 +35,16 @@ local GALLOP_BOUNCE = 8
 local WALK_DEFAULT_BOUNCE = 2.5
 local WALK_DEFAULT_ROTATION = 0.12
 local WALK_DEFAULT_SPEED = 11
+
+---@type sparks.SparkArgs
+local MAP_NODE_SPARK_ARGS = {
+    duration = 0.11,
+    startRadius = 16,
+    endRadius = 30,
+    scale = 2
+}
+
+local INVALID_NODE_COLOR = g.snapToPalette(objects.Color.RED)
 
 
 ---@class g.MapScene
@@ -155,8 +166,11 @@ function map_scene:enter()
     self.commanderFacing = 1
     self.gallop = 0
     self.traveling = nil
+    self.currentSelectAnimation = nil
     ---@type table<MapNode, number?>
     self.fogReveal = {}
+    ---@type table<integer, number>
+    self.fogClearCells = {}
 
     local run = g.getRun()
     local firstMapEntry = not run.mapGraph
@@ -277,8 +291,7 @@ function map_scene:_buildFogClearCells(view)
     local run = g.getRun()
     local graph = run.mapGraph
     local clearCells = math.ceil(FOG_CLEAR_RADIUS / FOG_STEP)
-    ---@type table<integer, table<integer, number>>
-    local cells = {}
+    table.clear(self.fogClearCells)
 
     self:_markSeenNodes()
 
@@ -291,13 +304,9 @@ function map_scene:_buildFogClearCells(view)
                 local cx = math.floor(nx / FOG_STEP)
                 local cy = math.floor(ny / FOG_STEP)
                 for dx = -clearCells, clearCells do
-                    local row = cells[cx + dx]
-                    if not row then
-                        row = {}
-                        cells[cx + dx] = row
-                    end
                     for dy = -clearCells, clearCells do
-                        row[cy + dy] = math.max(row[cy + dy] or 0, reveal)
+                        local key = Z.encode(cx + dx, cy + dy)
+                        self.fogClearCells[key] = math.max(self.fogClearCells[key] or 0, reveal)
                     end
                 end
             end
@@ -305,7 +314,6 @@ function map_scene:_buildFogClearCells(view)
     end
 
     prof_pop() -- prof_push("map_scene:_buildFogClearCells")
-    return cells
 end
 
 function map_scene:leave()
@@ -372,6 +380,13 @@ local function checkLevelUp()
 end
 
 function map_scene:update(dt)
+    if self.currentSelectAnimation then
+        self.currentSelectAnimation.time = self.currentSelectAnimation.time + dt
+        if self.currentSelectAnimation.time > MAP_NODE_SPARK_ARGS.duration then
+            self.currentSelectAnimation = nil
+        end
+    end
+
     checkLevelUp()
     self:_incrementPendingDaysWhenReady()
     self:_updateFogReveal(dt)
@@ -628,15 +643,27 @@ function map_scene:draw()
             w = view.w,
             h = view.h,
         }
-        local clearCells = self:_buildFogClearCells(fogRegion)
+        self:_buildFogClearCells(fogRegion)
 
         -- hover highlight: path from player to hovered node
+        local hovered, clicked = nil, nil
+        local hoverReachable = false
         local pnode = graph:getPlayerNode()
         if pnode then
-            local hovered, clicked = updateNodePanels(graph)
-            if clicked then self:travelTo(graph, pnode, clicked) end
+            hovered, clicked = updateNodePanels(graph)
+            if clicked and (not self.traveling) then
+                local x, y = graph:getDrawPos(clicked)
+                self.currentSelectAnimation = {
+                    x = x,
+                    y = y,
+                    rot = love.math.random() * consts.TAU,
+                    time = 0,
+                }
+                self:travelTo(graph, pnode, clicked)
+            end
+            local path = hovered and graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, PATH_SEARCH_DEPTH)
+            hoverReachable = path ~= nil
             if (not self.traveling) and hovered and hovered ~= pnode then
-                local path = graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, PATH_SEARCH_DEPTH)
                 if path and #path >= 2 then
                     -- first edge bold yellow, rest pale yellow
                     local r, gg, b, a = mapType.mapPathHighlight:getRGBA()
@@ -661,16 +688,37 @@ function map_scene:draw()
 
         builder:finalize()
 
+        if hovered and (not self.traveling) then
+            local x, y = graph:getDrawPos(hovered)
+            local color = hoverReachable
+                and (mapType.mapPathHighlight)
+                or INVALID_NODE_COLOR
+            lg.setColor(color)
+            lg.setLineWidth(6)
+            local rad = NODE_RADIUS + 8
+            lg.ellipse("line", x, y, rad, rad/2)
+        end
+
+        local selAnim = self.currentSelectAnimation
+        if selAnim then
+            MAP_NODE_SPARK_ARGS.color = mapType.mapPathHighlight
+            local N=4
+            for j = 0,N do
+                local rot = (2 * math.pi * j) / (N+1)
+                helper.drawSpark(selAnim.x, selAnim.y, selAnim.time, selAnim.rot + rot, MAP_NODE_SPARK_ARGS)
+            end
+        end
+
         -- fog rendering
         fogService.renderFog(fogRegion, graph.mapType.fogColor, function(x, y)
             local cx = math.floor(x / FOG_STEP)
-            local row = clearCells[cx]
-            local reveal = row and row[math.floor(y / FOG_STEP)]
+            local cy = math.floor(y / FOG_STEP)
+            local reveal = self.fogClearCells[Z.encode(cx, cy)]
             return (not reveal) or reveal < 1
         end, function(x, y)
             local cx = math.floor(x / FOG_STEP)
-            local row = clearCells[cx]
-            local reveal = row and row[math.floor(y / FOG_STEP)]
+            local cy = math.floor(y / FOG_STEP)
+            local reveal = self.fogClearCells[Z.encode(cx, cy)]
             return reveal and (1 - reveal) or 1
         end)
     end

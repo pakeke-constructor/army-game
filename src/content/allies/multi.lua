@@ -27,9 +27,9 @@ g.defineSquad("archer_squad", {
     },
     unitCount = 4,
     perks = {{
+        id = "perk_sharpshooter",
         name = "Sharpshooter",
         description = loc("This unit fires 1 extra projectile."),
-        image = "coin_icon",
         handlers = {
             getProjectileCountModifier = function(ent)
                 return 1
@@ -129,9 +129,9 @@ g.defineSquad("militia_band", {
     },
     unitCount = 6,
     perks = {{
+        id = "perk_berserker",
         name = "Berserker",
         description = loc("This unit gains +5 attack when below 50% health."),
-        image = "coin_icon",
         handlers = {
             getAttackDamageModifier = function(ent, attack)
                 if ent.health and ent.maxHealth and ent.health < ent.maxHealth * 0.5 then
@@ -170,9 +170,9 @@ g.defineSquad("aggravator_7000_squad", {
     },
     unitCount = 1,
     perks = {{
+        id = "perk_racket",
         name = "Racket",
         description = loc("On-attack, all enemies in a large area are Taunted to target this unit."),
-        image = "coin_icon",
         handlers = {
             onAttack = function(ent, target)
                 g.iteratePartition("enemy", ent.x, ent.y, function(other)
@@ -224,7 +224,6 @@ do
         unitCount = 3,
         perks = {{
             description = loc("For the first 15s of battle, on-death, summon a copy with +1 ATK."),
-            image = "coin_icon",
         }},
         cost = {red = 1},
         onDeploySquad = function(info, entities)
@@ -260,9 +259,9 @@ g.defineSquad("quartz_cannoneer_squad", {
     },
     unitCount = 4,
     perks = {{
+        id = "perk_pinpoint",
         name = "Pinpoint",
         description = loc("Deals double damage to enemies beyond 350 units away."),
-        image = "coin_icon",
         handlers = {
             onAttack = function(ent, target)
                 if target then
@@ -296,9 +295,9 @@ g.defineSquad("world_devourer_squad", {
     },
     unitCount = 4,
     perks = {{
+        id = "perk_consumption",
         name = "Consumption",
         description = loc("On-kill, spawn a copy of this unit."),
-        image = "coin_icon",
         handlers = {
             onKill = function(ent, target)
                 if not g.isAlive(ent) then return end

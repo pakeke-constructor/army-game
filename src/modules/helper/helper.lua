@@ -715,6 +715,7 @@ end
 ---@field duration number
 ---@field startRadius number?
 ---@field endRadius number?
+---@field scale number?
 ---@field color [number,number,number,number]?
 local SPARK_ARGS
 
@@ -729,6 +730,7 @@ function helper.drawSpark(x, y, time, rot, sparkArgs)
     local duration = sparkArgs.duration or 0.3
     local startRadius = sparkArgs.startRadius or 4
     local endRadius = sparkArgs.endRadius or 8
+    local scale = sparkArgs.scale or 1
     local color = sparkArgs.color or WHITE
 
     if time > duration then
@@ -742,7 +744,7 @@ function helper.drawSpark(x, y, time, rot, sparkArgs)
     local dx, dy = helper.fromPolar(rot, len)
     lg.setColor(color[1], color[2], color[3], (color[4] or 1) * alpha)
     -- lg.line(x, y, x + dx, y + dy)
-    g.drawImage("spark_bolt", x+dx, y+dy, rot)
+    g.drawImage("spark_bolt", x+dx, y+dy, rot, scale, scale)
 end
 
 
@@ -1001,6 +1003,8 @@ end
 
 
 
+---@param r kirigami.Region
+---@param t number
 local function getOrbitPosOnRegionEdge(r, t)
     local x, y, w, h = r:get()
     local perimeter = 2 * (w + h)
@@ -1023,14 +1027,20 @@ end
 ---@param color objects.Color
 ---@param offset number
 ---@param N integer?
-function helper.drawEdgeTrailAnimation(r, color, offset, N)
+---@param speed number?
+function helper.drawEdgeTrailAnimation(r, color, offset, N, speed)
     N = N or 9
+    local _, _, w, h = r:get()
+    local perimeter = 2 * (w + h)
+    local dotSize = 6
+    local spacing = math.min(perimeter / 80, dotSize - 1)
     local col = objects.Color(color)
     for i=N,1,-1 do
         col = col:darken(0.1)
         lg.setColor(col)
-        local x,y = getOrbitPosOnRegionEdge(r, offset + i/80 + love.timer.getTime()/5)
-        lg.rectangle("fill", x-3,y-3, 6,6)
+        local t =  i * spacing / perimeter + (speed or 1) * love.timer.getTime()/5
+        local px, py = getOrbitPosOnRegionEdge(r, offset + t)
+        lg.rectangle("fill", math.floor(px - dotSize / 2 + 0.5), math.floor(py - dotSize / 2 + 0.5), dotSize, dotSize)
     end
 end
 
