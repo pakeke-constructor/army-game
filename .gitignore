@@ -11,6 +11,7 @@ _notes/.obsidian
 
 luasteam.dll
 steam_api64.dll
+lua51.dll
 
 *.kra
 *.kra~

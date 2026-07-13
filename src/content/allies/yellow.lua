@@ -1,6 +1,8 @@
 
+local sqhelper = require(".squad_helper")
 
 
+sqhelper.defineMilitiaAndArchers("yellow")
 
 
 -- ============================================================

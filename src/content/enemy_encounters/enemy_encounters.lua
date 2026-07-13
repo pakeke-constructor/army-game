@@ -6,10 +6,10 @@ local DEFAULT_BOUNDS = {1300,600}
 
 -- Simple front-to-back, archers + demon
 encounters.defineEnemyEncounter(1, function(es,ecs)
-    es:add("archerdemon", 5)
-    es:add("archerdemon", 5)
-    es:add("demon", 5)
-    es:add("demon", 5)
+    es:add("archerdemon", 4)
+    es:add("archerdemon", 4)
+    es:add("demon", 4)
+    es:add("demon", 4)
     ecs:setBounds(300, 200, DEFAULT_BOUNDS[1], DEFAULT_BOUNDS[2])
 end)
 
@@ -18,7 +18,7 @@ encounters.defineEnemyEncounter(1, function(es,ecs)
     es:add("demon", 4)
     es:add("demon", 4)
     es:add("demon", 4)
-    es:add("demon", 3)
+    es:add("speardemon", 3)
     ecs:setBounds(300, 200, DEFAULT_BOUNDS[1], DEFAULT_BOUNDS[2])
 end)
 
@@ -44,11 +44,10 @@ end)
 
 -- Shield line with archer support
 encounters.defineEnemyEncounter(1, function(es,ecs)
-    es:add("shielddemon", 4)
-    es:add("shielddemon", 3)
-    es:add("archerdemon", 4)
-    es:add("archerdemon", 4)
-    es:add("archerdemon", 4)
+    es:add("shielddemon", 2)
+    es:add("shielddemon", 2)
+    es:add("archerdemon", 3)
+    es:add("archerdemon", 3)
     ecs:setBounds(300, 200, DEFAULT_BOUNDS[1], DEFAULT_BOUNDS[2])
 end)
 
@@ -80,17 +79,16 @@ end)
 
 -- Archer + damage soak
 encounters.defineEnemyEncounter(2, function(es,ecs)
-    es:add("crimsongoliath", 1)
     es:add("archerdemon", 8)
     es:add("archerdemon", 8)
+    es:add("hellhound", 4)
     ecs:setBounds(300, 200, 1000,700)
 end)
 
 -- Hound pack led by direhounds
 encounters.defineEnemyEncounter(2, function(es,ecs)
-    es:add("direhound", 3)
-    es:add("direhound", 1)
-    es:add("hellhound", 4)
+    es:add("direhound", 2)
+    es:add("direhound", 2)
     es:add("hellhound", 3)
     es:add("hellhound", 3)
     ecs:setBounds(300, 200, 1000,700)
@@ -143,7 +141,6 @@ end)
 
 -- Reapers, archers and demons
 encounters.defineEnemyEncounter(3, function(es,ecs)
-    es:add("reaper", 4)
     es:add("reaper", 2)
     es:add("shielddemon", 4)
     es:add("shielddemon", 4)

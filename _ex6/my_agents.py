@@ -1,12 +1,13 @@
 
 
 
+from _ex6.provider_openai import invoke_llm as openai_invoke_llm
 from _ex6.models import M
 from _ex6.tools import read_headers, read_body, glob, search, write_file, edit_file, read_file, edit_file_lines, escalate, bash, explore_agent, CLAUDE_MD, ENV_PROMPT, git_working_tree, add_tool_repetition_guard, powershell
 from _ex6.skills import load_skill
 from _ex6.lua_coding_style import SYSTEM_PROMPT_CODING_STYLE
 from _ex6.tasks import plan_add_log, plan_done, plan_list, plan_read, plan_write
-from _ex6.web.web_tools import web_search, websearch_agent
+from _ex6.web_tools import websearch_agent
 from _ex6.love2d_docs.love2d_docs import love2d_docs
 from _ex6.game_tools import game_start, game_interact
 from _ex6.provider import cache_manually
@@ -79,6 +80,7 @@ MAIN_TOOLS = [
     read_file, glob, search, read_headers, read_body,
     write_file, edit_file, edit_file_lines,
     powershell,
+    websearch_agent,
     # web_search, websearch_agent,
     plan_done, plan_read, plan_write,
     git_working_tree,
@@ -120,7 +122,7 @@ Context("c_codex", yolo=False, model=M.CODEX_LATEST.id, reasoning="high", messag
     ENV_PROMPT,
     # CODING_STYLE_PROMPT,
     CLAUDE_MD,
-])
+], invoke_llm=openai_invoke_llm)
 
 
 Context("c_CHATGPT", yolo=False, model=M.GPT_LATEST.id, reasoning="high", messages=[
@@ -128,7 +130,7 @@ Context("c_CHATGPT", yolo=False, model=M.GPT_LATEST.id, reasoning="high", messag
     ENV_PROMPT,
     # CODING_STYLE_PROMPT,
     CLAUDE_MD,
-])
+], invoke_llm=openai_invoke_llm)
 
 
 
