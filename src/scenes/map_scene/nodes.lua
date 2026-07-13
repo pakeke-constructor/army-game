@@ -2,7 +2,7 @@ local Class = require("src.modules.objects.Class")
 
 
 
-local SHOP_TXT = loc("Shop: Spend money, upgrade squads")
+local SHOP_TXT = loc("{GOLD_COLOR}Shop:{/GOLD_COLOR}\nSpend gold {coin_icon} to get Squads and Blessings")
 
 local BATTLE_TXTS = {
     -- demonEncounter difficulty => pool of flavor names

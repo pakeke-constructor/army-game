@@ -702,8 +702,9 @@ function map_scene:draw()
         local selAnim = self.currentSelectAnimation
         if selAnim then
             MAP_NODE_SPARK_ARGS.color = mapType.mapPathHighlight
-            for j = 0, 2 do
-                local rot = (2 * math.pi * j) / 3
+            local N=4
+            for j = 0,N do
+                local rot = (2 * math.pi * j) / (N+1)
                 helper.drawSpark(selAnim.x, selAnim.y, selAnim.time, selAnim.rot + rot, MAP_NODE_SPARK_ARGS)
             end
         end
