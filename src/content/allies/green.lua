@@ -190,6 +190,7 @@ g.defineSquad("peasant_squad", {
         weapon = {
             image = "peasant_pitchfork",
             type = "sword",
+            xOffset = 0,
         },
         baseAttackDamage = 1,
         baseAttackSpeed = 1,

@@ -2999,6 +2999,8 @@ local function drawPreviewWeapon(def, x, y)
     elseif wep.type == "staff" then
         local bob = math.sin(g.getWorldTime() * 2.5) * (wep.weaponBobbing or 1.5)
         g.drawImageOffset(wep.image, x + (wep.xOffset or 8), y + (wep.yOffset or 0) + bob - math.floor(h / 3), 0, 1, 1, 0.5, 0.95)
+    elseif wep.type == "shield" then
+        g.drawImageOffset(wep.image, x + (wep.xOffset or 12), y + (wep.yOffset or 0), 0, 1, 1, 0.5, 0.95)
     end
 end
 

@@ -96,7 +96,6 @@ SPELLS:
 [x] Harrier: Give +70% range to all ranged units
 
 SQUADS:
-[ ] Possessor: Healer, slow moving, tanky health. Every 3 seconds: Spawn an infested human. (infested entity)
 [x] Dart spitters x 4: Ranged, Apply 1 poison on hit
 [x] Giant toads x 2: Tanky, Takes 50% less damage from poisoned enemies
 [x] Mini toads x 4: Apply 1 poison on hit
