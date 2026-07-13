@@ -515,40 +515,21 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
     if canUpgrade then
         prof_push("squadupgindicator")
 
-        -- its an upgrade
-        local r1, _ = region:splitVertical(1,8)
-        local upgradeTextBob = getBob(0.3)
-        love.graphics.setColor(g.COLORS.UPGRADE)
+        local boxR = Kirigami(x, y + h - 20, w, 40):padUnit(30, 0, 30, 0)
+
+        love.graphics.setColor(1,1,1)
+        helper.drawEdgeTrailAnimation(boxR, g.COLORS.UPGRADE, 0)
+        helper.drawEdgeTrailAnimation(boxR, g.COLORS.UPGRADE, 0.5)
+        lg.setColor(1,1,1)
+        ui.drawDarkPanel(boxR:get())
+
+        local font = g.getSmallFont(16)
+        lg.setColor(g.COLORS.UPGRADE)
         printTextOutlineContainedNoWrap(
-            UPGRADE, TITLE_FONT, 1,
-            r1:moveRatio(0, -0.7):padRatio(0.3):moveUnit(0, upgradeTextBob),
-            "center"
+            UPGRADE,
+            font, 1,
+            boxR:padUnit(8):moveUnit(0, getBob(0.5))
         )
-
-        local buf = {}
-
-        if #buf > 0 then
-            local str = table.concat(buf, "  ")
-            local boxReg = Kirigami(x, y + h - 20, w, 40):padUnit(30, 0, 30, 0)
-            local title, txtReg = boxReg:splitVertical(2,3)
-
-            love.graphics.setColor(1,1,1)
-            helper.drawEdgeTrailAnimation(boxReg, manaColor, 0)
-            helper.drawEdgeTrailAnimation(boxReg, manaColor, 0.5)
-            lg.setColor(1,1,1)
-            ui.drawDarkPanel(boxReg:get())
-
-            local font = g.getSmallFont(16)
-            lg.setColor(g.COLORS.UPGRADE)
-            printTextOutlineContainedNoWrap(
-                LEVEL({level = canUpgrade.level + 1}),
-                font, 1,
-                title:padUnit(2,2):moveUnit(0, getBob(0.5))
-            )
-            lg.setColor(1, 1, 1)
-
-            richtext.printRichContainedNoWrap(str, font, txtReg:padUnit(4,4):get())
-        end
 
         prof_pop() -- prof_push("squadupgindicator")
     end
