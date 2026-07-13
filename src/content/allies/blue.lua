@@ -94,6 +94,45 @@ g.defineSquad("arrow_fish_squad", {
 })
 
 
+g.defineSquad("viking_squad", {
+    name = "Vikings",
+    rarity = g.RARITIES.COMMON,
+    tags = {"attack_damage", "health", "freeze"},
+    entityDef = {
+        image = g.leo("viking", "barbarian"),
+        physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
+        attack = {
+            attackType = "melee",
+        },
+        weapon = {
+            image = g.leo("viking_axe", "orc_battleaxe"),
+            type = "sword",
+        },
+        baseAttackDamage = 2,
+        baseAttackSpeed = 1,
+        baseAttackRange = 18,
+        baseMoveSpeed = 55,
+        baseMaxHealth = 10,
+    },
+    unitCount = 6,
+    icon = g.leo("vikings_uniticon", "barbarian_uniticon"),
+    perks = {{
+        name = "Icebreaker",
+        description = loc("Deals 3x damage to frozen enemies."),
+        image = "coin_icon",
+        handlers = {
+            onHitDamage = function(ent, damage, target, hitArmor)
+                if not hitArmor and (target.frozenTime or 0) > 0 then
+                    g.dealDamage(target, damage * 2, ent, true)
+                end
+            end,
+        },
+    }},
+    cost = {blue = 1},
+})
+
+
+
 local PURPLE_COLOR = objects.Color("#".."FFC339ED")
 
 

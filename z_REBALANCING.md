@@ -107,7 +107,7 @@ SQUADS:
 [x] Lightning-wizard: Emit lightning on attack, dealing damage equal to MAGK
 [x] Mini ice golems: When killed, freeze all enemies in a radius
 [ ] Frost mage: When a spell is cast, freeze the nearest 4 enemies for 4 seconds.
-[ ] Vikings: Deal 3x damage to frozen enemies
+[x] Vikings: Deal 3x damage to frozen enemies
 [ ] Ethereal archers: Deal bonus damage equal to MAGK
 [x] Spark-bots: When killed, emit lightning, dealing damage equal to it's current level.
 [ ] Engineers: If there's 2 buildings alive, this unit gains triple speed and damage
