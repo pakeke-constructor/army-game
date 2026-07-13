@@ -8,7 +8,7 @@ local MapGraph = require("src.scenes.map_scene.MapGraph")
 ---@field difficulty integer
 ---@field squads {[string]: g.Squad}
 ---@field spells objects.Set<string>
----@field spellsCast {[string]: boolean} which spells have been cast this battle (reset each battle)
+---@field spellsCast table<string, number> key = spell id, value = spell timeout in sec (reset on battle)
 ---@field _sortedSquads g.Squad[]?
 ---@field _battleSquads g.Squad[] temporary squads on the bench for the current fight only
 ---@field money number

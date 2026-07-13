@@ -1453,6 +1453,7 @@ local function iterateSpellTargets(info, x, y, fn)
     return hitCount
 end
 
+---Note: This only check spell range, not cooldown. Use `g.getCurrentSpellCooldown` for that instead.
 ---@param worldX number
 ---@param worldY number
 ---@param spellId string
@@ -1498,18 +1499,20 @@ end
 ---@param y number
 function g.castSpell(spellId, x, y)
     local info = g.getSpellInfo(spellId)
-    g.getRun().spellsCast[spellId] = true
+    g.getRun().spellsCast[spellId] = info.cooldown
 
     if info.instantCast then
         runInstantCastSpell(info, x, y)
-        g.call("spellCast", spellId, x, y)
-        return
-    end
-
-    if info.cast then
+    elseif info.cast then
         info.cast(spellId, x, y)
     end
+
     g.call("spellCast", spellId, x, y)
+end
+
+---@param spellId string
+function g.getCurrentSpellCooldown(spellId)
+    return g.getRun().spellsCast[spellId] or 0
 end
 
 

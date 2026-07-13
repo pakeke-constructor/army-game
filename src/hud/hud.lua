@@ -88,8 +88,7 @@ end
 ---@return boolean
 local function isItemUsable(self, item)
     if type(item) == "string" then
-        local run = g.getRun()
-        if run.spellsCast[item] then return false end
+        if g.getCurrentSpellCooldown(item) > 0 then return false end
         local mx, my = love.mouse.getPosition()
         local wx, wy = g.screenToWorld(mx, my)
         return g.canCastSpell(wx, wy, item)
