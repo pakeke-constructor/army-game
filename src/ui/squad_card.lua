@@ -533,9 +533,7 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
             local incrtxt = helper.wrapRichtextColor(statInfo.color, " +%d")
             buf[#buf+1] = string.format("{%s}" .. incrtxt, statInfo.icon, math.floor(increase + 0.5))
         end
-        if info.unitCountUpgradeScaling and info.unitCountUpgradeScaling > 0 then
-            buf[#buf+1] = helper.wrapRichtextColor(g.COLORS.UPGRADE, UPGRADE_UNITS({n = info.unitCountUpgradeScaling}))
-        end
+
         if #buf > 0 then
             local str = table.concat(buf, "  ")
             local boxReg = Kirigami(x, y + h - 20, w, 40):padUnit(30, 0, 30, 0)
