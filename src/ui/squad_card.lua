@@ -181,8 +181,9 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
             })
         end
         if canUpgrade then
-            helper.drawEdgeTrailAnimation(region, manaColor, 0.25, 20)
-            helper.drawEdgeTrailAnimation(region, manaColor, 0.75, 20)
+            local trailR = region:padUnit(-4)
+            helper.drawEdgeTrailAnimation(trailR, manaColor, 0.25, 20, 0.5)
+            helper.drawEdgeTrailAnimation(trailR, manaColor, 0.75, 20, 0.5)
         end
         love.graphics.setColor(0,0,0)
         ui.drawPanel(x-3,y-3, w+6,h+6)
