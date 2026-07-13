@@ -135,7 +135,7 @@ Context("c_zglm", yolo=False, model=M.GLM_LATEST.id, reasoning="high", messages=
 ])
 
 
-Context("sub_GPT", model=M.GPT_LATEST.id, reasoning="high", messages=[
+Context("sub_SOL", model=M.GPT_LATEST.id, reasoning="high", messages=[
     MAIN_SYSTEM_PROMPT.with_tools(MAIN_TOOLS),
     ENV_PROMPT,
     CLAUDE_MD,
@@ -146,6 +146,13 @@ Context("sub_TERRA", model=M.GPT_TERRA_LATEST.id, reasoning="high", messages=[
     ENV_PROMPT,
     CLAUDE_MD,
 ], invoke_llm=invoke_llm_openai)
+
+Context("sub_LUNA", model=M.GPT_LUNA_LATEST.id, reasoning="high", messages=[
+    MAIN_SYSTEM_PROMPT.with_tools(MAIN_TOOLS),
+    ENV_PROMPT,
+    CLAUDE_MD,
+], invoke_llm=invoke_llm_openai)
+
 
 
 

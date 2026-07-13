@@ -189,6 +189,7 @@ g.defineSquad("peasant_squad", {
         weapon = {
             image = "peasant_pitchfork",
             type = "sword",
+            xOffset = 0,
         },
         baseAttackDamage = 1,
         baseAttackSpeed = 1,
@@ -331,6 +332,45 @@ g.defineSquad("mini_toad_squad", {
 })
 
 
+g.defineSquad("muffinplant_squad", {
+    name = "Muffinplants",
+    rarity = g.RARITIES.RARE,
+    tags = {"health", "death_trigger", "healing", "magic"},
+    entityDef = {
+        image = g.leo("muffinplants_unit", "treant"),
+        physics = { shape = "circle", radius = 7, ox = 0, oy = 0, mass = 2 },
+        attack = {
+            attackType = "melee",
+        },
+        baseAttackDamage = 1,
+        baseAttackSpeed = 0.7,
+        baseAttackRange = 20,
+        baseMoveSpeed = 40,
+        baseMaxHealth = 50,
+        baseMagic = 2,
+        baseStartingArmor = 2,
+    },
+    statUpgradeScaling = {maxHealth = 0.2},
+    unitCount = 4,
+    icon = g.leo("muffinplants_uniticon", "treants_uniticon"),
+    perks = {{
+        name = "Sweet Release",
+        description = g.loc2("When killed, heal all allies equal to this unit's (MAGK)."),
+        image = g.leo("muffinplants_perk", "coin_icon"),
+        handlers = {
+            entityDeath = function(ent)
+                for _, ally in ipairs(g.getAllyList()) do
+                    if g.isAlive(ally) then
+                        g.healEntity(ally, ent.magic or 0, ent)
+                    end
+                end
+            end,
+        },
+    }},
+    cost = {green = 2},
+})
+
+
 g.defineSquad("treant_squad", {
     name = "Treants",
     rarity = g.RARITIES.UNCOMMON,
@@ -439,7 +479,7 @@ g.defineSquad("friendly_giant_squad", {
             image = "friendlygiant_bigstick",
             type = "sword",
         },
-        baseAttackDamage = 5,
+        baseAttackDamage = 2,
         baseAttackSpeed = 0.5,
         baseAttackRange = 40,
         baseMoveSpeed = 35,

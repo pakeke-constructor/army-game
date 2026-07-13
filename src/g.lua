@@ -16,7 +16,7 @@
 ---@class g.PerkDef
 ---@field name string (for definition, untranslated name; for info, translated name)
 ---@field description string
----@field image string
+---@field image string?
 ---@field handlers table<string, fun(ent: ecs.Entity, ...): any>? Scoped to the entity. Only fires when the event/question is dispatched AT this entity (eg g.call("onHit", ent)). Cheap; default choice.
 ---@field rawHandlers table<string, fun(ent: ecs.Entity, ...): any>? Scene-level. Fires for EVERY dispatch of that event globally, regardless of target. Use when the perk needs to listen to things happening elsewhere (eg "when any ally is hurt"). More expensive; use only when `handlers` can't express it.
 ---@field armyHandlers table<string, fun(squad: g.Squad, ...): any>? Army-level. Registered once per army squad holding this perk, regardless of whether it has deployed. First arg is the owning squad. Use for effects computed from run state that must be known before the squad spawns (eg modifying this squad's own unit count).
@@ -1088,6 +1088,26 @@ local currentEntityId = 0
 ---@field powerIndex number
 ---@field squadType g.SquadType
 
+local ATTACK_SPEED_SCALING = 0.3
+
+---@param dmg number
+---@param aspd number
+---@return number
+function g.getDPS(dmg, aspd)
+    if aspd > 1 then
+        aspd = 1 + (aspd - 1) * ATTACK_SPEED_SCALING
+    end
+    return dmg * aspd
+end
+
+
+---@param dps number
+---@param hp number
+---@return boolean
+local function isTanky(dps, hp)
+    return dps*10 < hp
+end
+
 ---@param squadInfo g.SquadDef
 ---@return number
 local function estimateSquadPowerIndex(squadInfo)
@@ -1097,9 +1117,15 @@ local function estimateSquadPowerIndex(squadInfo)
     local bonus = 1
     local attack = def.baseAttackDamage or def.baseHealPower or 1
     local attackSpeed = def.baseAttackSpeed or 1
+    local dps = g.getDPS(attack, attackSpeed)
     local unitCount = squadInfo.unitCount or 1
-    local healthArmr = (def.baseMaxHealth or 1) + (def.baseStartingArmor or 0)
-    local timeToDealDmg = 4*healthArmr + math.max(1,((def.baseAttackRange or 1) - 20))
+    local healthArmr = (def.baseMaxHealth or 1) + (def.baseStartingArmor or 0) * 3
+
+    local isRanged = def.isRanged
+    local isHealer = def.isHealer
+    local isTank = isTanky(dps,healthArmr)
+    local isBuilding = def.isBuilding
+    local isBruiser = (not isTank) and (not isHealer) and (not isRanged) and (not isBuilding)
 
     local manaCost = 0
     for _, n in pairs(squadInfo.cost or {}) do
@@ -1109,7 +1135,19 @@ local function estimateSquadPowerIndex(squadInfo)
         bonus = bonus / 2.5 -- units that cost more have lower powerIndex, coz they are more expensive.
     end
 
-    return math.floor(bonus * (attack*attackSpeed*timeToDealDmg*unitCount))
+    local val = 1
+    if isRanged then
+        local rangeMult = (def.baseAttackRange + 300) / 450
+        val = 10 * (dps * rangeMult)
+    elseif isHealer then
+        local rangeMult = (def.baseAttackRange + 300) / 450
+        val = 10 * (dps * rangeMult)
+    elseif isTank then
+        val = 5 * (healthArmr)
+    elseif isBruiser then
+        val = 5 * (healthArmr * ((dps + 2) / 3))
+    end
+    return math.floor(val * unitCount)
 end
 
 
@@ -1147,7 +1185,7 @@ local function categorizeSquad(info)
     -- melee from here on. Compare bulk vs damage output.
     local health = (def.baseMaxHealth or 0) + (def.baseStartingArmor or 0)
     local dps = attackDamage * (def.baseAttackSpeed or 0)
-    if dps > 0 and health >= dps * 20 then
+    if dps > 0 and isTanky(dps, health) then
         return g.SQUAD_TYPES.TANK
     end
     if dps > 0 and health > 0 then
@@ -1233,8 +1271,8 @@ function g.defineSquad(id, info)
                 if type(pdef) == "string" then
                     perkIds[#perkIds+1] = pdef
                 else
-                    local pid = id.."_perk_"..i
-                    g.definePerk(pid, pdef)
+                    local pid = g.leo("perk_" .. id .. i)
+                    g.definePerk(pid, pdef.name, pdef)
                     perkIds[#perkIds + 1] = pid
                 end
             end
@@ -1887,14 +1925,14 @@ end
 --- Use rawHandlers when listening to things not happening to the entity itself.
 ---@param id string
 ---@param info g.PerkDef
-function g.definePerk(id, info)
+function g.definePerk(id, name, info)
     if PERK_DEFS[id] then
         error("Duplicate perk: " .. id)
     end
     assertValidTags("Perk", id, info.tags)
 
     ---@cast info g.PerkInfo
-    info.name = loc(info.name, {}, {
+    info.name = loc(name, {}, {
         context = "The name of a perk"
     })
     info.id = id
@@ -2627,7 +2665,7 @@ end
 ---@param ent ecs.Entity
 ---@return number
 function g.getAttackCooldown(ent)
-    return 1 / (ent.attackSpeed or 1)
+    return 1 / g.getDPS(1, ent.attackSpeed or 1)
 end
 
 
@@ -2969,6 +3007,8 @@ local function drawPreviewWeapon(def, x, y)
     elseif wep.type == "staff" then
         local bob = math.sin(g.getWorldTime() * 2.5) * (wep.weaponBobbing or 1.5)
         g.drawImageOffset(wep.image, x + (wep.xOffset or 8), y + (wep.yOffset or 0) + bob - math.floor(h / 3), 0, 1, 1, 0.5, 0.95)
+    elseif wep.type == "shield" then
+        g.drawImageOffset(wep.image, x + (wep.xOffset or 12), y + (wep.yOffset or 0), 0, 1, 1, 0.5, 0.95)
     end
 end
 
@@ -4003,7 +4043,7 @@ end
 ---@param manaRequirement g.ManaBundle
 ---@return g.ManaCounts?
 local function trySpendManaInternal(manaCounts, manaRequirement)
-    -- HACK: colorless. Only total count matters.
+    -- TODO: RESTORE COLOR-AWARE MANA SPENDING. This temporary version only checks total count.
     local totalNeed = (manaRequirement.blue or 0) + (manaRequirement.green or 0)
         + (manaRequirement.red or 0) + (manaRequirement.yellow or 0)
 

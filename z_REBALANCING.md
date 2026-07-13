@@ -96,7 +96,6 @@ SPELLS:
 [x] Harrier: Give +70% range to all ranged units
 
 SQUADS:
-[ ] Possessor: Healer, slow moving, tanky health. Every 3 seconds: Spawn an infested human. (infested entity)
 [x] Dart spitters x 4: Ranged, Apply 1 poison on hit
 [x] Giant toads x 2: Tanky, Takes 50% less damage from poisoned enemies
 [x] Mini toads x 4: Apply 1 poison on hit
@@ -108,15 +107,15 @@ SQUADS:
 [x] Mini ice golems: When killed, freeze all enemies in a radius
 [x] Frost Warden: Tanky. When a spell is cast, freeze surrounding enemies for 2 seconds.
 [x] Vikings: Deal 3x damage to frozen enemies
-[ ] Ethereal archers: Deal bonus damage equal to MAGK
+[x] Ethereal archers: Deal bonus damage equal to MAGK
 [x] Spark-bots: When killed, emit lightning, dealing damage equal to it's current level.
 [x] Engineers: If there's 2 buildings alive, this unit gains triple speed and damage
 [x] Clanker factory: Produces 1 bot per second (2hp / 2atk)
 [X] Treant: Every second, heal (HP) equal to (MAGK)
 
 RARE SQUADS:
-[ ] Muffinplants: (4x tanky melee) When killed, heal ALL allies equal to this unit's MAGK
-[ ] Enchantress: (1-unit healer) Every second, give the ally with the lowest MAGK +1 MAGK
+[x] Muffinplants: (4x tanky melee) When killed, heal ALL allies equal to this unit's MAGK
+[x] Enchantress: (1-unit healer) Every second, give the ally with the lowest MAGK +1 MAGK
 
 
 
