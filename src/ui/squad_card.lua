@@ -19,16 +19,23 @@ local PERK_DESC_FONT = nil
 ---@param text string
 ---@param font love.Font
 ---@param thickness number
----@param x number
----@param y number
----@param w number
----@param h number
-local function printTextOutlineContainedNoWrap(text, font, thickness, x, y, w, h)
+---@param r kirigami.Region
+---@param align love.AlignMode?
+local function printTextOutlineContainedNoWrap(text, font, thickness, r, align)
+    local x, y, w, h = r:get()
     local tw = font:getWidth(text)
     local th = font:getHeight()
     local scale = math.min(w/tw, h/th)
     local scaledTw = tw * scale
-    local drawX = x + scaledTw/2
+    local drawX
+    align = align or "center"
+    if align == "left" then
+        drawX = x + scaledTw/2
+    elseif align == "right" then
+        drawX = x + w - scaledTw/2
+    else -- center
+        drawX = x + w/2
+    end
 
     helper.printTextOutline(
         text, font, thickness,
@@ -36,6 +43,12 @@ local function printTextOutlineContainedNoWrap(text, font, thickness, x, y, w, h
         tw + 0.0001, "left",
         0, scale, scale, tw/2, th/2
     )
+end
+
+---@param amp number
+---@param phase number?
+local function getBob(amp, f, phase)
+    return math.sin(2 * math.pi * 0.5 * (love.timer.getTime() + (phase or 0))) * amp
 end
 
 
@@ -215,11 +228,11 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
             local textX = ex + iconSize + iconGap
             local textW = ew - iconSize - iconGap
 
-            local nameBob = math.sin(2 * math.pi * 0.5 * love.timer.getTime()) * 0.5
+            local nameBob = getBob(0.5)
             love.graphics.setColor(0.8, 0.8, 0.85)
             printTextOutlineContainedNoWrap(
                 info.name, TITLE_FONT, 1,
-                textX, ey + nameBob, textW, TITLE_FONT:getHeight()
+                Kirigami(textX, ey + nameBob, textW, TITLE_FONT:getHeight())
             )
             prof_pop() -- prof_push("name")
 
@@ -504,8 +517,13 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
 
         -- its an upgrade
         local r1, _ = region:splitVertical(1,8)
-        local titleFont = g.getBigFont(16)
-        richtext.printRichContainedNoWrap("{bob amp=0.3}{o}" .. UPGRADE_COLOR_TAG .. UPGRADE, titleFont, r1:moveRatio(0,-0.7):padRatio(0.3):get())
+        local upgradeTextBob = getBob(0.3)
+        love.graphics.setColor(g.COLORS.UPGRADE)
+        printTextOutlineContainedNoWrap(
+            UPGRADE, TITLE_FONT, 1,
+            r1:moveRatio(0, -0.7):padRatio(0.3):moveUnit(0, upgradeTextBob),
+            "center"
+        )
 
         local buf = {}
         for statId, _ in pairs(info.statUpgradeScaling) do
@@ -528,12 +546,16 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
             helper.drawEdgeTrailAnimation(boxReg, manaColor, 0.5)
             lg.setColor(1,1,1)
             ui.drawDarkPanel(boxReg:get())
+
             local font = g.getSmallFont(16)
-            richtext.printRichContainedNoWrap(
-                "{bob amp=0.5}" .. UPGRADE_COLOR_TAG ..LEVEL({level = canUpgrade.level + 1}),
-                font,
-                title:padUnit(2,2):get()
+            lg.setColor(g.COLORS.UPGRADE)
+            printTextOutlineContainedNoWrap(
+                LEVEL({level = canUpgrade.level + 1}),
+                font, 1,
+                title:padUnit(2,2):moveUnit(0, getBob(0.5))
             )
+            lg.setColor(1, 1, 1)
+
             richtext.printRichContainedNoWrap(str, font, txtReg:padUnit(4,4):get())
         end
 
