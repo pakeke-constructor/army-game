@@ -1433,6 +1433,12 @@ function g.hasSpell(spellId)
     return g.getRun().spells:has(spellId)
 end
 
+---@param spellId string
+---@return boolean removed true if spell was removed, false if spell was not in army
+function g.removeSpellFromArmy(spellId)
+    return not not g.getRun().spells:remove(spellId)
+end
+
 ---@param spellId string|g.SpellInfo
 function g.getSpellRange(spellId)
     local info = type(spellId) == "string" and g.getSpellInfo(spellId) or spellId
