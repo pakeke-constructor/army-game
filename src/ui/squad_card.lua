@@ -497,7 +497,7 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
 
     local ret = false
     if iml.wasJustHovered(hitX, hitY, w, h, uid) then
-        g.playUISound("ui_mouse_hover")
+        g.playUISound("ui_tick")
     end
     if iml.wasJustClicked(hitX, hitY, w, h, 1, uid) then
         g.playUISound("ui_click_basic", 1.4, 0.8)
