@@ -212,6 +212,10 @@ function battle_scene:enter()
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
     self.camera:setPos(border[3] * 0.45, border[4] * 0.5)
 
+    if self:canUseLastArmy() then
+        self:deployLastArmy()
+    end
+
     ambienceService.reInitialize(self.camera:getTransform(), g.getMapType().cloudSprites)
 end
 
@@ -957,44 +961,6 @@ local function drawCommanderTarget(self)
     end
 end
 
-
----@param self g.BattleScene
----@return boolean
-local function canUseLastArmy(self)
-    if #self.deployedSquads > 0 then return false end
-    local layout = g.getRun().lastArmyLayout
-    if not layout or #layout == 0 then return false end
-
-    -- simulate spending mana, checking all squads exist + are affordable
-    local mana = {}
-    for k, v in pairs(g.getBattleManaCounts()) do mana[k] = v end
-    for _, entry in ipairs(layout) do
-        local squad = g.getSquadFromArmy(entry.squadId)
-        if not squad then return false end
-        local info = g.getSquadInfo(entry.squadId)
-        if info.cost and not g.trySpendMana(mana, info.cost) then
-            return false
-        end
-    end
-    return true
-end
-
----@param self g.BattleScene
-local function deployLastArmy(self)
-    local commx, commy = getCommanderDeployBasePos(self)
-    for _, entry in ipairs(g.getRun().lastArmyLayout) do
-        local squad = g.getSquadFromArmy(entry.squadId)
-        if squad and not squad.deployed then
-            local info = g.getSquadInfo(entry.squadId)
-            if not info.cost or g.trySpendMana(g.getBattleManaCounts(), info.cost) then
-                local sx, sy = commx + entry.dx, commy + entry.dy
-                squad:spawn(sx, sy)
-                self.deployedSquads[#self.deployedSquads + 1] = {squadId = entry.squadId, x = sx, y = sy}
-            end
-        end
-    end
-end
-
 ---@param self g.BattleScene
 local function saveLastArmy(self)
     if #self.deployedSquads == 0 then return end
@@ -1094,6 +1060,43 @@ local function spawnCantAffordManaPopup(cost)
         fadeIn = 0.15,
         duration = 1.5,
     })
+end
+
+---@param self g.BattleScene
+---@return boolean
+function battle_scene:canUseLastArmy()
+    if #self.deployedSquads > 0 then return false end
+    local layout = g.getRun().lastArmyLayout
+    if not layout or #layout == 0 then return false end
+
+    -- simulate spending mana, checking all squads exist + are affordable
+    local mana = {}
+    for k, v in pairs(g.getBattleManaCounts()) do mana[k] = v end
+    for _, entry in ipairs(layout) do
+        local squad = g.getSquadFromArmy(entry.squadId)
+        if not squad then return false end
+        local info = g.getSquadInfo(entry.squadId)
+        if info.cost and not g.trySpendMana(mana, info.cost) then
+            return false
+        end
+    end
+    return true
+end
+
+---@param self g.BattleScene
+function battle_scene:deployLastArmy()
+    local commx, commy = getCommanderDeployBasePos(self)
+    for _, entry in ipairs(g.getRun().lastArmyLayout) do
+        local squad = g.getSquadFromArmy(entry.squadId)
+        if squad and not squad.deployed then
+            local info = g.getSquadInfo(entry.squadId)
+            if not info.cost or g.trySpendMana(g.getBattleManaCounts(), info.cost) then
+                local sx, sy = commx + entry.dx, commy + entry.dy
+                squad:spawn(sx, sy)
+                self.deployedSquads[#self.deployedSquads + 1] = {squadId = entry.squadId, x = sx, y = sy}
+            end
+        end
+    end
 end
 
 
@@ -1241,13 +1244,13 @@ function battle_scene:draw()
                 self.deployPhase = false
                 g.call("battleStarted")
             end
-        elseif #self.deployedSquads == 0 and canUseLastArmy(self) then
+        elseif #self.deployedSquads == 0 and self:canUseLastArmy() then
             -- DEPLOY PHASE, nothing placed yet: offer the last layout (center).
             local r = ui.getScreenRegion()
             local _, row, _ = r:splitVertical(5.7, 1, 1.3)
             local _, mid, _ = row:splitHorizontal(1, 1, 1)
             if ui.DefaultButton("{o}"..USE_LAST_ARMY_BTM, mid:padRatio(0.15)) then
-                deployLastArmy(self)
+                self:deployLastArmy()
             end
         end
     end
