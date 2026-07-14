@@ -17,10 +17,7 @@ g.defineEntity("grass", {
 
 
 g.defineEntity("rock", {
-    init = function (ent)
-        ent.image = "oli_rock_"..love.math.random(1,3)
-    end,
-    image = "oli_rock_1",
+    image = "decorock_1",
     randomizeScaleX = true,
 })
 
