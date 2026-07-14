@@ -1,6 +1,5 @@
 
 local hoverService = require("src.hud.hoverService")
-local s = require("src.hud.settings")
 
 
 
@@ -73,9 +72,10 @@ end
 
 ---@param key string
 ---@param scancode string
----@param isrep boolean
-function shop_scene:keypressed(key, scancode, isrep)
-    if s.keypressed(key) then return end
+function shop_scene:keyreleased(key, scancode)
+    if key == "escape" then
+        pausePopupService.toggle()
+    end
 end
 
 

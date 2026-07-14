@@ -29,6 +29,14 @@ function pausePopupService.clear()
     showExitPopup = false
 end
 
+function pausePopupService.toggle()
+    if showExitPopup then
+        showExitPopup = false
+    else
+        showPause = not showPause
+    end
+end
+
 local function exitToTitle(save)
     g.transitionTo("title_scene", {onSwitch = function()
         pausePopupService.clear()
@@ -125,7 +133,9 @@ function pausePopupService.draw()
     lg.rectangle("fill", r:get())
     lg.setColor(1, 1, 1)
 
-    if showExitPopup then
+    if settingsPopupService.isActive() then
+        settingsPopupService.draw()
+    elseif showExitPopup then
         drawExitPopup()
     else
         drawPauseMenu(safeExit)

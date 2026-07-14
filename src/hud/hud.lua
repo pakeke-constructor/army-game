@@ -489,7 +489,7 @@ local function drawTopBar()
     drawPanel(pausePanel, "II")
     local px, py, pw, ph = pausePanel:get()
     if iml.wasJustClicked(px, py, pw, ph, 1, "pause_button") then
-        settingsPopupService.show()
+        pausePopupService.activate()
     end
 
     prof_pop() -- prof_push("drawTopBar")
