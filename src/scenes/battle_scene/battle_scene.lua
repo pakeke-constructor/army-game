@@ -1224,25 +1224,30 @@ function battle_scene:draw()
     self._leftClickThisFrame = false
 
     if self.deployPhase then
-        local r = ui.getScreenRegion()
-        local _, row, _ = r:splitVertical(5.7, 1, 1.3)
-        local _, mid, _ = row:splitHorizontal(1, 1, 1)
-        local a, b = mid:splitHorizontal(1, 1)
+        local hud = self.hud
 
-        if canSpendMoreMana(self) then
-            -- DEPLOY PHASE: still mana to spend. Only "use last layout", no start button.
-            if canUseLastArmy(self) and ui.DefaultButton("{o}"..USE_LAST_ARMY_BTM, mid:padRatio(0.15)) then
-                deployLastArmy(self)
-            end
-        else
-            -- READY PHASE: nothing left to spend. Reset + Start.
-            if ui.DefaultButton("{o}"..RESET_BTN, a:padRatio(0.15)) then
+        -- RESET: sits above the mana box, available whenever something's deployed.
+        if #self.deployedSquads > 0 and hud.manaBoxRegion then
+            local resetR = hud.manaBoxRegion:moveUnit(0, -hud.manaBoxRegion.h)
+            if ui.DefaultButton("{o}"..RESET_BTN, resetR:padRatio(0.1, 0.5, 0.1, 0.5)) then
                 resetDeployment(self)
             end
-            if ui.DefaultButton("{o}"..START_BATTLE_BTN, b:padRatio(0.15)) then
+        end
+
+        if not canSpendMoreMana(self) then
+            -- READY PHASE: START overlays the squad HUD (fine if it covers icons).
+            if hud.squadBarRegion and ui.DefaultButton("{o}"..START_BATTLE_BTN, hud.squadBarRegion:padRatio(0.5, 0.4, 0.5, 0.4)) then
                 saveLastArmy(self)
                 self.deployPhase = false
                 g.call("battleStarted")
+            end
+        elseif #self.deployedSquads == 0 and canUseLastArmy(self) then
+            -- DEPLOY PHASE, nothing placed yet: offer the last layout (center).
+            local r = ui.getScreenRegion()
+            local _, row, _ = r:splitVertical(5.7, 1, 1.3)
+            local _, mid, _ = row:splitHorizontal(1, 1, 1)
+            if ui.DefaultButton("{o}"..USE_LAST_ARMY_BTM, mid:padRatio(0.15)) then
+                deployLastArmy(self)
             end
         end
     end

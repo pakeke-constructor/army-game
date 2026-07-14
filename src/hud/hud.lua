@@ -7,6 +7,8 @@ local settingsPopupService = require("src.hud.settings")
 ---@field hoveredSpell string|nil hovered spellId
 ---@field selectedIndex integer? index into the active selection list (see getActiveList)
 ---@field battleStarted boolean cached each frame; false = squads selectable, true = spells selectable
+---@field manaBoxRegion kirigami.Region? bottom-bar mana box
+---@field squadBarRegion kirigami.Region? bottom-bar squad icons
 local HUD = objects.Class("g:HUD")
 
 function HUD:init()
@@ -605,6 +607,10 @@ local function drawBottomBar(self, opt, barHeight)
 
     local manaBox, rest = mainBar:splitHorizontal(manaW, mainBar.w-manaW)
     local squadBar,blessingBar = rest:splitHorizontal(2,1)
+
+    -- cached so battle_scene can anchor its Reset/Start buttons to the HUD
+    self.manaBoxRegion = manaBox
+    self.squadBarRegion = squadBar
 
     -- Squad box
     ui.drawDarkPanel(squadBar:get())
