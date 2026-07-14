@@ -55,6 +55,7 @@ g.defineEvent("arrivedAtNode") -- args: nodeType, node
 -- g.defineEvent("rewardChosen")
 -- g.defineEvent("chestOpened")
 g.defineEvent("rerollShop")
+g.defineEvent("shopEntered")
 g.defineEvent("blessingAdded")
 
 
