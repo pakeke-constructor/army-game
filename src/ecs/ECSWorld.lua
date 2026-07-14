@@ -469,9 +469,6 @@ function ECSWorld:draw(transform)
     end
     g.call("postDraw")
     if consts.DEV_MODE then
-        local b = self.boundingBox or {1,1,1,1}
-        lg.setColor(1,1,1)
-        lg.rectangle("line", b[1],b[2],b[3],b[4])
         if self.allyRectangle then
             local r = self.allyRectangle
             lg.setColor(ALLY_RECT_COLOR)

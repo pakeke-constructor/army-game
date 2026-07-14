@@ -22,6 +22,7 @@ COMMANDS.help = function()
     addLog("/spawn <ent_id> [count] - spawn at cursor")
     addLog("/spell <spell_id> - give spell")
     addLog("/gold <amount> - add gold")
+    addLog("/zone <forest|fall|hell> - enter zone")
     addLog("/tp - teleport to cursor (map)")
     addLog("/sb - reset & enter sandbox battle")
     addLog("/enc <diff> <idx> - spawn specific encounter")
@@ -117,6 +118,17 @@ COMMANDS.xp = function(args)
     g.addXP(amt)
     local run = g.getRun()
     addLog("xp -> " .. run.xp)
+end
+
+COMMANDS.zone = function(args)
+    local zone = args[1]
+    local mapTypes = require("src.scenes.map_scene.map_types")
+    if not mapTypes[zone] then return addLog("usage: /zone <forest|fall|hell>") end
+
+    local scene, name = g.getCurrentScene()
+    if name ~= "map_scene" then return addLog("/zone only works in map scene") end
+    scene:_buildMap(zone, true)
+    addLog("entered " .. zone)
 end
 
 COMMANDS.tp = function()
