@@ -155,7 +155,6 @@ end
 ---@param selected boolean
 local function renderSpell(spellId, x, y, selected)
     local size = SQUAD_ICON_SIZE
-    local info = g.getSpellInfo(spellId)
     local cooldown = g.getCurrentSpellCooldown(spellId)
     local cx, cy = x+size/2, y+size/2
 
@@ -168,7 +167,7 @@ local function renderSpell(spellId, x, y, selected)
 
     if cooldown > 0 then
         local radius = size / 1.5 -- bit of leeway
-        local t = cooldown / info.cooldown
+        local t = cooldown / g.getSpellCooldown(spellId)
 
         lg.setStencilMode("draw", 1)
         -- Yes, we're rendering to color AND stencil buffer at same time.
