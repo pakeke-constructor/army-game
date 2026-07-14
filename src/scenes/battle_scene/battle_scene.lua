@@ -812,7 +812,8 @@ local function drawSquadHover(self, squad, wx, wy)
     local manaCost = {}
     for _, manaType in ipairs(g.getManaTypelist()) do
         for i = 1, info.cost[manaType] or 0 do
-            manaCost[#manaCost + 1] = "{" .. manaType .. "_mana}"
+            local minfo = g.getManaInfo(manaType)
+            manaCost[#manaCost + 1] = "{" .. minfo.imageLarge .. "}"
         end
     end
     lg.setColor(1, 1, 1, 1)
