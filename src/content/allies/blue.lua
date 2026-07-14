@@ -18,7 +18,7 @@ sqhelper.defineMilitiaAndArchers("blue")
 g.defineSquad("shield_fish_squad", {
     name = "Shield-Fish",
     rarity = g.RARITIES.COMMON,
-    -- tags: armor (basic tank)
+    -- tags: armor (basic tank)love 
     tags = {"armor"},
     entityDef = {
         image = g.leo("shieldfish_unit", "defenders_unit"),
