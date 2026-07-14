@@ -167,7 +167,7 @@ function SpellChoicePanel:draw()
             local spellId = self.choices[self.selected]
 
             if not g.addSpellToArmy(spellId) then
-                -- TODO: Show Spell Discard Panel
+                choicePopupService.set({type = "spell_discard", spellId = spellId})
             end
 
             return true
