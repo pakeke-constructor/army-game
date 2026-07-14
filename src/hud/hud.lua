@@ -662,6 +662,7 @@ function HUD:drawUI(opt)
     rewardPopupService.draw()
     choicePopupService.draw()
     nodeEventService.draw()
+    pausePopupService.draw()
     gameoverPopupService.draw()
     hoverService.draw()
 

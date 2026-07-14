@@ -3204,6 +3204,7 @@ function g.isAnyPopupOpen()
         or choicePopupService.getActive()
         or nodeEventService.isActive()
         or gameoverPopupService.isActive()
+        or pausePopupService.isActive()
     )
 end
 
