@@ -238,22 +238,22 @@ function RewardPanel:draw()
                             end)
                         elseif b[1].type == "squad" then
                             drawButton(b[2], NEW_SQUAD, function()
-                                choicePopupService.set("squad", b[1].rerolls or 0)
+                                choicePopupService.set({type = "squad", rerolls = b[1].rerolls})
                                 table.remove(self.rewards, i)
                             end)
                         elseif b[1].type == "blessing" then
                             drawButton(b[2], NEW_BLESSING, function()
-                                choicePopupService.set("blessing", nil, b[1].rarityWeights)
+                                choicePopupService.set({type = "blessing", rarityWeights = b[1].rarityWeights})
                                 table.remove(self.rewards, i)
                             end)
                         elseif b[1].type == "mana" then
                             drawButton(b[2], NEW_MANA, function()
-                                choicePopupService.set("mana")
+                                choicePopupService.set({type = "mana"})
                                 table.remove(self.rewards, i)
                             end)
                         elseif b[1].type == "mana_blessing" then
                             drawButton(b[2], MANA_AND_BLESSING, function()
-                                choicePopupService.set("mana_blessing")
+                                choicePopupService.set({type = "mana_blessing"})
                                 table.remove(self.rewards, i)
                             end)
                         end
@@ -272,17 +272,17 @@ function RewardPanel:draw()
             end)
         elseif v.type == "squad" then
             addBar(NEW_SQUAD, function()
-                choicePopupService.set("squad", v.rerolls or 0)
+                choicePopupService.set({type = "squad", rerolls = v.rerolls})
                 table.remove(self.rewards, i)
             end)
         elseif v.type == "blessing" then
             addBar(NEW_BLESSING, function()
-                choicePopupService.set("blessing", nil, v.rarityWeights)
+                choicePopupService.set({type = "blessing", rarityWeights = v.rarityWeights})
                 table.remove(self.rewards, i)
             end)
         elseif v.type == "mana" then
             addBar(NEW_MANA, function()
-                choicePopupService.set("mana")
+                choicePopupService.set({type = "mana"})
                 table.remove(self.rewards, i)
             end)
         elseif v.type == "keys" then
@@ -293,7 +293,7 @@ function RewardPanel:draw()
             end)
         elseif v.type == "mana_blessing" then
             addBar(MANA_AND_BLESSING, function()
-                choicePopupService.set("mana_blessing")
+                choicePopupService.set({type = "mana_blessing"})
                 table.remove(self.rewards, i)
             end)
         else

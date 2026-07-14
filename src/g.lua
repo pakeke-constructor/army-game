@@ -1433,6 +1433,30 @@ function g.hasSpell(spellId)
     return g.getRun().spells:has(spellId)
 end
 
+---@param spellId string
+---@return boolean removed true if spell was removed, false if spell was not in army
+function g.removeSpellFromArmy(spellId)
+    return not not g.getRun().spells:remove(spellId)
+end
+
+---@param spellId string|g.SpellInfo
+function g.getSpellRange(spellId)
+    local info = type(spellId) == "string" and g.getSpellInfo(spellId) or spellId
+    ---@cast info g.SpellInfo
+    local range1 = g.ask("getSpellRangeModifier", info.id) --[[@as number]]
+    local rangemul = g.ask("getSpellRangeMultiplier", info.id) --[[@as number]]
+    return (info.range + range1) * rangemul
+end
+
+---@param spellId string|g.SpellInfo
+function g.getSpellCooldown(spellId)
+    local info = type(spellId) == "string" and g.getSpellInfo(spellId) or spellId
+    ---@cast info g.SpellInfo
+    local cooldown1 = g.ask("getSpellCooldownModifier", info.id) --[[@as number]]
+    local cooldownmul = g.ask("getSpellCooldownMultiplier", info.id) --[[@as number]]
+    return (info.cooldown + cooldown1) * cooldownmul
+end
+
 ---@param info g.SpellInfo
 ---@param x number
 ---@param y number
@@ -1451,7 +1475,7 @@ local function iterateSpellTargets(info, x, y, fn)
         if instant.filter and not instant.filter(ent, x, y, info.id) then return end
         hitCount = hitCount + 1
         fn(ent)
-    end, info.range)
+    end, g.getSpellRange(info))
 
     return hitCount
 end
@@ -1476,7 +1500,7 @@ function g.renderSpellCastPreview(x, y, spellId)
     local info = g.getSpellInfo(spellId)
 
     lg.setColor(info.color)
-    lg.circle("line", x, y, info.range)
+    lg.circle("line", x, y, g.getSpellRange(info))
 
     local rot = love.timer.getTime() * 3
 
@@ -1502,7 +1526,7 @@ end
 ---@param y number
 function g.castSpell(spellId, x, y)
     local info = g.getSpellInfo(spellId)
-    g.getRun().spellsCast[spellId] = info.cooldown
+    g.getRun().spellsCast[spellId] = g.getSpellCooldown(spellId)
 
     if info.instantCast then
         runInstantCastSpell(info, x, y)
@@ -3177,7 +3201,6 @@ function g.isAnyPopupOpen()
     return not not (
         rewardPopupService.getActive()
         or choicePopupService.getActive()
-        or statUpgradePopupService.getActive()
         or nodeEventService.isActive()
         or gameoverPopupService.isActive()
     )

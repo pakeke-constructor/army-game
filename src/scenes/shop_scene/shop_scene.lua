@@ -285,7 +285,7 @@ local function drawSquadBox(r, squadId, cost)
             g.addOrUpgradeSquad(squadId)
             g.playUISound("ui_buy_upgrade")
             if squad then
-                statUpgradePopupService.set(squadId)
+                choicePopupService.set({type = "upgrade_stat", squadId = squadId})
             end
             return true, isHovered, squadCol
         end

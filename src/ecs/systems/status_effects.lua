@@ -75,7 +75,7 @@ function statusFx.postDraw()
                 g.spawnParticle("fire_particle", ent.x, ent.y, 1)
             end
         end
-        if ent.poisonTime and ent.poisonTime > 0 then
+        if ent.poisonAmount and ent.poisonAmount > 0 then
             if love.math.random() < POISON_PARTICLE_RATE then
                 g.spawnParticle("poison_particle", ent.x, ent.y, 1)
             end
