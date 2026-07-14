@@ -337,6 +337,7 @@ local function drawRerollButton(self, r)
 
     if iml.wasJustClicked(buttonR:get()) and canReroll then
         if g.trySpendGold(cost) then
+            g.playUISound("ui_cashing")
             g.call("rerollShop")
             shop_scene.rerollShopNodeInplace(self.shopNode)
         end
