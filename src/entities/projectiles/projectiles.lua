@@ -28,8 +28,8 @@ defineProjectile("bread", {
 })
 
 
-defineProjectile("octopus_lazer", {
-    image = "octopus_lazer"
+defineProjectile("lazer_projectile", {
+    image = "lazer_projectile"
 })
 
 

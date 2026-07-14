@@ -147,6 +147,13 @@ function EnemySpawner:finalize()
     end
 
     self._squads = {}
+
+    local fury = g.getRun().demonFury or 0
+    local cx, cy = bx + w / 2, by + h / 2
+    for i = 1, fury do
+        local angle = (i - 1) / fury * math.pi * 2
+        g.spawnEntity("demon_head", cx + math.cos(angle) * 80, cy + math.sin(angle) * 80)
+    end
 end
 
 

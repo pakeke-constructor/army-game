@@ -101,23 +101,23 @@ function battle_scene:pollHandlers()
     self.ecs:addSystemHandlers()
     g.addBlessingAndEntityHandlers()
 
-    local furyMul = 1 + (g.getRun().demonFury or 0) * 0.1
     g.addHandler({
-        getAttackDamageMultiplier = function(ent)
-            if ent and ent.team == "enemy" then
-                return furyMul
+        battleStarted = function()
+            for _, head in self.ecs:iterate("type") do
+                if head.type == "demon_head" then
+                    for _, enemy in ipairs(self.ecs:getEnemyList()) do
+                        g.addCustomEffect(enemy, {
+                            getAttackDamageMultiplier = function() return 1.1 end,
+                            getMaxHealthMultiplier = function() return 1.1 end,
+                        })
+                        if enemy.health then
+                            enemy.health = enemy.health * 1.1
+                        end
+                        juiceService.spawnArc(g.COLORS.DAMAGE, head.x, head.y, enemy.x, enemy.y, enemy)
+                    end
+                end
             end
-            return 1
         end,
-        getMaxHealthMultiplier = function(ent)
-            if ent and ent.team == "enemy" then
-                return furyMul
-            end
-            return 1
-        end,
-    })
-
-    g.addHandler({
         postDraw = function()
             lg.setColor(1,1,1)
             self.particles:draw()

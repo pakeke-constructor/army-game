@@ -72,7 +72,7 @@ g.defineSquad("gun_bot_squad", {
         physics = { shape = "circle", radius = 5, ox = 0, oy = 0, mass = 1 },
         attack = {
             attackType = "ranged",
-            projectileType = "arrow",
+            projectileType = "lazer_projectile",
             projectileSpeed = 350,
         },
         weapon = {

@@ -31,6 +31,12 @@ g.defineEntity("body", {
 
 
 
+g.defineEntity("demon_head", {
+    image = "demon_head",
+})
+
+
+
 g.defineEntity("nexus", {
     image = "placeholder",
     -- NOTE: UNUSED AS OF JUNE 2026; replaced with commander win-con
