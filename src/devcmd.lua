@@ -76,6 +76,11 @@ end
 COMMANDS.get = function(args)
     local squadId = args[1]
     if not squadId then return addLog("usage: /get <squad_id>") end
+    if squadId == "pick" then
+        local rr = tonumber(args[2] or 0) or 0
+        choicePopupService.set({type = "squad", rerolls = rr})
+        return
+    end
     if g.getSquadFromArmy(squadId) then return addLog("already have squad: " .. squadId) end
     g.addSquadToArmy(squadId)
     addLog("added squad: " .. squadId)
@@ -200,6 +205,12 @@ end
 COMMANDS.spell = function(args)
     local spellId = args[1]
     if not spellId then return addLog("usage: /spell <spell_id>") end
+
+    if spellId == "pick" then
+        local rr = tonumber(args[2] or 0) or 0
+        choicePopupService.set({type = "spell", rerolls = rr})
+        return
+    end
 
     local found = false
     for _, v in ipairs(g.SPELLS) do

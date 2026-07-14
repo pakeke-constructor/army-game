@@ -3,12 +3,12 @@ local Picker = require("src.modules.Picker")
 local ChoicePanelCommon = require(".common")
 local cardJuiceService = require("src.cardJuiceService")
 
----@class g.SquadChoicePanel: g.ChoicePanelCommon
-local SquadChoicePanel = objects.Class("g:SquadChoicePanel"):implement(ChoicePanelCommon)
+---@class g.SpellChoicePanel: g.ChoicePanelCommon
+local SpellChoicePanel = objects.Class("g:SpellChoicePanel"):implement(ChoicePanelCommon)
 
 ---@param rerolls integer?
 ---@param rarityWeights g.RarityWeights?
-function SquadChoicePanel:init(rerolls, rarityWeights)
+function SpellChoicePanel:init(rerolls, rarityWeights)
     ---@type integer[]
     self.rerolls = {}
     ---@type string[]
@@ -33,18 +33,17 @@ end
 if false then
     ---@param rerolls integer?
     ---@param rarityWeights g.RarityWeights?
-    ---@return g.SquadChoicePanel
+    ---@return g.SpellChoicePanel
     ---@diagnostic disable-next-line: cast-local-type, missing-return
-    function SquadChoicePanel(rerolls, rarityWeights) end
+    function SpellChoicePanel(rerolls, rarityWeights) end
 end
 
 ---@private
-function SquadChoicePanel:_rollChoices()
+function SpellChoicePanel:_rollChoices()
     self.choices = {}
 
-    local manaCells = g.getRun().mana
-
-    local pool = g.getSquadsByMana(manaCells)
+    local run = g.getRun()
+    local pool = objects.Set(g.SPELLS):exclude(run.spells)
     self:_pickFromPool(pool)
 end
 
@@ -52,14 +51,14 @@ end
 ---@param out string[]?
 ---@param count integer?
 ---@private
-function SquadChoicePanel:_pickFromPool(pool, out, count)
+function SpellChoicePanel:_pickFromPool(pool, out, count)
     if #pool == 0 then return end
     out = out or self.choices
     count = count or ChoicePanelCommon.NUM_CHOICES
 
     local weights = {}
     for i, id in ipairs(pool) do
-        local info = g.getSquadInfo(id)
+        local info = g.getSpellInfo(id)
         weights[i] = self.rarityWeights[info.rarity.id] or 0
     end
 
@@ -71,14 +70,13 @@ function SquadChoicePanel:_pickFromPool(pool, out, count)
 end
 
 ---@param pool string[]
----@param seen table<string, true?>
 ---@private
-function SquadChoicePanel:_pickOneFromPool(pool, seen)
+function SpellChoicePanel:_pickOneFromPool(pool)
     if #pool == 0 then return end
 
     local weights = {}
     for i, id in ipairs(pool) do
-        local info = g.getSquadInfo(id)
+        local info = g.getSpellInfo(id)
         weights[i] = self.rarityWeights[info.rarity.id] or 0
     end
 
@@ -89,15 +87,11 @@ end
 
 ---@param index integer
 ---@private
-function SquadChoicePanel:_rerollChoice(index)
+function SpellChoicePanel:_rerollChoice(index)
     if (self.rerolls[index] or 0) <= 0 then return end
 
-    local seen = {}
-    for _, id in ipairs(self.choices) do
-        seen[id] = true
-    end
-
-    local pick = self:_pickOneFromPool(g.getSquadsByMana(g.getRun().mana), seen)
+    local pool = objects.Set(g.SPELLS):exclude(g.getRun().spells)
+    local pick = self:_pickOneFromPool(pool)
     self.rerolls[index] = self.rerolls[index] - 1
     self.choices[index] = pick
     self.choiceCreatedAt[index] = love.timer.getTime()
@@ -106,6 +100,18 @@ end
 
 local REROLL_GLOW_COL = objects.Color("#4d8c21")
 local REROLL_GLOW_HOVER_COL = objects.Color("#7cc82a")
+local REROLL_GAP = 8
+
+---@param region kirigami.Region
+---@return kirigami.Region cardR
+---@return kirigami.Region rerollR
+local function getCardRegions(region)
+    local cardBaseR = region:splitVertical(9, 1)
+    local cardR = cardBaseR:splitVertical(3, 2):center(cardBaseR)
+    local _, rerollH = g.getImageSize("reroll_button_body")
+    local rerollR = Kirigami(cardR.x, cardR.y + cardR.h + REROLL_GAP, cardR.w, rerollH)
+    return cardR, rerollR
+end
 
 ---@param region kirigami.Region
 ---@param index integer
@@ -143,7 +149,7 @@ local function drawRerollButton(region, index, disabled)
     return iml.wasJustClicked(x, y, w, h, 1, uid)
 end
 
-function SquadChoicePanel:draw()
+function SpellChoicePanel:draw()
     local r = ui.getFullScreenRegion()
 
     if #self.choices == 0 then
@@ -158,12 +164,12 @@ function SquadChoicePanel:draw()
 
         if self.cj:isAnimationFinished() then
             -- Actually apply
-            local squadId = self.choices[self.selected]
-            local hadSquad = g.getSquadFromArmy(squadId)
-            g.addOrUpgradeSquad(squadId)
-            if hadSquad then
-                choicePopupService.set({type = "upgrade_stat", squadId = squadId})
+            local spellId = self.choices[self.selected]
+
+            if not g.addSpellToArmy(spellId) then
+                choicePopupService.set({type = "spell_discard", spellId = spellId})
             end
+
             return true
         end
 
@@ -194,10 +200,10 @@ function SquadChoicePanel:draw()
         regions[i] = rr:moveUnit(dx + ox, dy)
     end
 
-    for i, squadId in ipairs(self.choices) do
-        local cardR, _, rerollR = regions[i]:splitVertical(8, 1, 1)
+    for i, spellId in ipairs(self.choices) do
+        local cardR, rerollR = getCardRegions(regions[i])
         local function draw(r)
-            return ui.drawSquadCard(squadId, r, i, true, true)
+            return ui.drawSpellCard(spellId, r, i)
         end
 
         local clicked = draw(cardR)
@@ -213,30 +219,22 @@ function SquadChoicePanel:draw()
             self.selected = i
 
             -- Spawn cards
-            for j, sqId in ipairs(self.choices) do
+            for j, otherSpellId in ipairs(self.choices) do
                 if i ~= j then
-                    local otherCardR = regions[j]:splitVertical(8, 1, 1)
+                    local otherCardR = getCardRegions(regions[j])
                     self.cj:spawnCardUnselected(otherCardR, j, function(r)
-                        return ui.drawSquadCard(sqId, r, j, true, true)
+                        return ui.drawSpellCard(otherSpellId, r, j)
                     end)
                 end
             end
 
-            local targetR = nil
-            if g.getSquadFromArmy(squadId) then
-                -- This duplicates stat choice layouting
-                local baseR = ui.getFullScreenRegion()
-                local _, cardAreaBaseR = baseR:padRatio(0.05, 0.1):splitVertical(1, 5)
-                local _, squadCardR = cardAreaBaseR:splitHorizontal(5, 2)
-                targetR = squadCardR
-            end
             self.cj:spawnCardSelected(cardR, i, function(r)
-                return ui.drawSquadCard(squadId, r, i, true, true)
-            end, targetR)
+                return ui.drawSpellCard(spellId, r, i)
+            end)
         end
     end
 
     return false
 end
 
-return SquadChoicePanel
+return SpellChoicePanel

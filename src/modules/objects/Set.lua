@@ -205,4 +205,19 @@ function Set:equals(other)
     return true
 end
 
+---@generic T
+---@param self objects.Set<T>
+---@param other objects.Set<T>
+---@return objects.Set<T>
+function Set:exclude(other)
+    local result = objects.Set()
+    for _, v in ipairs(self) do
+        if not other:has(v) then
+            result:add(v)
+        end
+    end
+    return result
+end
+Set.complement = Set.exclude -- alias
+
 return Set
