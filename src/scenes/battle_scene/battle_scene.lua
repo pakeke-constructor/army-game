@@ -103,17 +103,17 @@ function battle_scene:pollHandlers()
 
     g.addHandler({
         battleStarted = function()
+            local enemies = self.ecs:getEnemyList()
             for _, head in self.ecs:iterate("type") do
                 if head.type == "demon_head" then
-                    for _, enemy in ipairs(self.ecs:getEnemyList()) do
-                        g.addCustomEffect(enemy, {
-                            getAttackDamageMultiplier = function() return 1.1 end,
-                            getMaxHealthMultiplier = function() return 1.1 end,
-                        })
-                        if enemy.health then
-                            enemy.health = enemy.health * 1.1
+                    for _, enemy in ipairs(enemies) do
+                        enemy.baseAttackDamage = enemy.baseAttackDamage and enemy.baseAttackDamage * 1.1
+                        if enemy.baseMaxHealth then
+                            enemy.baseMaxHealth = enemy.baseMaxHealth * 1.1
+                            enemy.health = (enemy.health or enemy.baseMaxHealth) * 1.1
+                            enemy.scale = (enemy.scale or 1) * 1.1
                         end
-                        juiceService.spawnArc(g.COLORS.DAMAGE, head.x, head.y, enemy.x, enemy.y, enemy)
+                        juiceService.spawnArc(g.COLORS.DAMAGE, head.x, head.y, enemy.x, enemy.y, enemy, nil, 400)
                     end
                 end
             end

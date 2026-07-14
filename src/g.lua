@@ -2459,7 +2459,8 @@ end
 ---@param ent ecs.Entity
 ---@param x number
 ---@param y number
-local function drawHealthBar(ent, x,y)
+---@param scale number
+local function drawHealthBar(ent, x,y, scale)
     if not ent.maxHealth then return end
 
     -- Ok so technical info in new rendering:
@@ -2486,7 +2487,7 @@ local function drawHealthBar(ent, x,y)
         local hx = x - width / 2
         local hy
         if HEALTHBAR_ON_TOP then
-            hy = y - ih - 4 - height
+            hy = y - ih * scale - 4 - height
         else
             hy = y + height + 4
         end
@@ -2626,7 +2627,7 @@ local function drawHealthBar(ent, x,y)
     local oy = -2
     if HEALTHBAR_ON_TOP then
         local _w,hhh = g.getImageSize(ent.image)
-        oy= -hhh - 4
+        oy= -hhh * scale - 4
     end
 
     -- black outline
@@ -2977,7 +2978,7 @@ function g.drawEntity(ent, x, y)
     end
     if ent.health then
         lg.setColor(1,1,1)
-        drawHealthBar(ent, x,y)
+        drawHealthBar(ent, x, y, math.abs(sy))
     end
 end
 

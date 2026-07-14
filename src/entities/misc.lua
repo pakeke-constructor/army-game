@@ -33,6 +33,9 @@ g.defineEntity("body", {
 
 g.defineEntity("demon_head", {
     image = "demon_head",
+    onUpdate = function(ent)
+        ent.oy = math.sin(love.timer.getTime() * 3 + ent.id) * 3
+    end,
 })
 
 
