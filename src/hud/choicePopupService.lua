@@ -24,7 +24,7 @@ local active = nil
 ---@param rarityWeights g.RarityWeights?
 function choicePopupService.set(rType, rerolls, rarityWeights)
     if rType == "squad" then
-        active = SquadChoicePanel(rerolls or 0, rarityWeights)
+        active = SquadChoicePanel(rerolls, rarityWeights)
     elseif rType == "blessing" then
         active = BlessingChoicePanel(rarityWeights)
     elseif rType == "mana" then
@@ -34,7 +34,7 @@ function choicePopupService.set(rType, rerolls, rarityWeights)
     elseif rType == "mana_blessing" then
         active = ManaBlessingChoicePanel(rarityWeights)
     elseif rType == "spell" then
-        active = SpellChoicePanel(rerolls or 0, rarityWeights)
+        active = SpellChoicePanel(rerolls, rarityWeights)
     else
         error("Unknown choice panel type: "..tostring(rType))
     end

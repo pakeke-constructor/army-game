@@ -20,6 +20,7 @@ function SquadChoicePanel:init(rerolls, rarityWeights)
     ---@type integer|nil
     self.selected = nil
     self.cj = cardJuiceService.CardJuiceInstance()
+    self.showReroll = (rerolls or 0) > 0
 
     for _ = 1, ChoicePanelCommon.NUM_CHOICES do
         self.rerolls[#self.rerolls+1] = rerolls or 0
@@ -200,7 +201,10 @@ function SquadChoicePanel:draw()
         end
 
         local clicked = draw(cardR)
-        local rerollClicked = drawRerollButton(rerollR, i, (self.rerolls[i] or 0) <= 0)
+        local rerollClicked = false
+        if self.showReroll then
+            rerollClicked = drawRerollButton(rerollR, i, (self.rerolls[i] or 0) <= 0)
+        end
 
         if rerollClicked then
             self:_rerollChoice(i)
