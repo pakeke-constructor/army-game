@@ -20,6 +20,7 @@ function SpellChoicePanel:init(rerolls, rarityWeights)
     ---@type integer|nil
     self.selected = nil
     self.cj = cardJuiceService.CardJuiceInstance()
+    self.showReroll = (rerolls or 0) > 0
 
     for _ = 1, ChoicePanelCommon.NUM_CHOICES do
         self.rerolls[#self.rerolls+1] = rerolls or 0
@@ -99,6 +100,18 @@ end
 
 local REROLL_GLOW_COL = objects.Color("#4d8c21")
 local REROLL_GLOW_HOVER_COL = objects.Color("#7cc82a")
+local REROLL_GAP = 8
+
+---@param region kirigami.Region
+---@return kirigami.Region cardR
+---@return kirigami.Region rerollR
+local function getCardRegions(region)
+    local cardBaseR = region:splitVertical(9, 1)
+    local cardR = cardBaseR:splitVertical(3, 2):center(cardBaseR)
+    local _, rerollH = g.getImageSize("reroll_button_body")
+    local rerollR = Kirigami(cardR.x, cardR.y + cardR.h + REROLL_GAP, cardR.w, rerollH)
+    return cardR, rerollR
+end
 
 ---@param region kirigami.Region
 ---@param index integer
@@ -126,6 +139,8 @@ local function drawRerollButton(region, index, disabled)
     elseif isHovered then
         bodyImage = "reroll_button_body_hover"
     end
+
+    lg.setColor(1, 1, 1)
     g.drawImageContained(bodyImage, rerollR:get())
 
     local iconImage = disabled and "shop_reroll_icon_gray" or "shop_reroll_icon"
@@ -186,14 +201,16 @@ function SpellChoicePanel:draw()
     end
 
     for i, spellId in ipairs(self.choices) do
-        local cardBaseR, rerollR = regions[i]:splitVertical(9, 1)
-        local cardR = cardBaseR:splitVertical(3, 2):center(cardBaseR)
+        local cardR, rerollR = getCardRegions(regions[i])
         local function draw(r)
             return ui.drawSpellCard(spellId, r, i)
         end
 
         local clicked = draw(cardR)
-        local rerollClicked = drawRerollButton(rerollR, i, (self.rerolls[i] or 0) <= 0)
+        local rerollClicked = false
+        if self.showReroll then
+            rerollClicked = drawRerollButton(rerollR, i, (self.rerolls[i] or 0) <= 0)
+        end
 
         if rerollClicked then
             self:_rerollChoice(i)
@@ -204,8 +221,7 @@ function SpellChoicePanel:draw()
             -- Spawn cards
             for j, otherSpellId in ipairs(self.choices) do
                 if i ~= j then
-                    local otherCardBaseR = regions[j]:splitVertical(9, 1)
-                    local otherCardR = otherCardBaseR:splitVertical(3, 2):center(otherCardBaseR)
+                    local otherCardR = getCardRegions(regions[j])
                     self.cj:spawnCardUnselected(otherCardR, j, function(r)
                         return ui.drawSpellCard(otherSpellId, r, j)
                     end)
