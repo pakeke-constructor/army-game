@@ -1,12 +1,22 @@
 
+local hoverService = require("src.hud.hoverService")
+
 local TRAIL_COUNT = {
     RARE = 3,
     LEGENDARY = 6
 }
 
-local RADIUS_TEXT = interp("{range}Range: {c r=0.773 g=0.188 b=0.239}%{range}{/c}", {
-    context = "The range of a spell.",
-})
+local RANGE_NAME = loc("Spell Range", {}, {
+    context = "Name of spell range stat."})
+local RANGE_DESC = loc("How far from the cursor the spell reaches.", {}, {
+    context = "Description of spell range stat."})
+local COOLDOWN_NAME = loc("Spell Cooldown", {}, {
+    context = "Name of spell cooldown stat."})
+local COOLDOWN_DESC = loc("Seconds before the spell can be cast again.", {}, {
+    context = "Description of spell cooldown stat."})
+local COOLDOWN_NUM = interp("%{cooldown}s", {
+    context = "Spell cooldown text. Cooldown is in seconds."})
+
 local TEXT_COLOR = {0.8, 0.8, 0.85} -- Note: This is not aligned to palette
 local PANEL_TOP_COLOR = objects.Color(0.05, 0.05, 0.06, 0.9)
 
@@ -35,6 +45,7 @@ return function(spellId, region, index)
     local manaColor = info.color
     local frameDarkColor = manaColor:lerp(objects.Color.BLACK, 0.65)
     local frameLightColor = manaColor:lerp(objects.Color.WHITE, 0.25)
+    local panelBottomColor = manaColor:lerp(objects.Color.BLACK, 0.65)
 
     local x, y, w, h = region:get()
     local uid = spellId.."_"..index
@@ -95,7 +106,7 @@ return function(spellId, region, index)
     local iconGap = 10
     box:add({
         getHeight = function(innerW)
-            return math.max(iconSize, TITLE_FONT:getHeight() * 3)
+            return math.max(iconSize, TITLE_FONT:getHeight() * 2)
         end,
         draw = function(ex, ey, ew, eh)
             -- icon
@@ -114,11 +125,72 @@ return function(spellId, region, index)
             love.graphics.setColor(rarity.color)
             local rarityText = rarity.lightTextEffect..rarity.name
             richtext.printRichContainedNoWrap("{o}"..rarityText, STAT_FONT, textX, ey + 16, textW, STAT_FONT:getHeight(), "left")
+        end,
+    })
 
-            -- Radius
-            love.graphics.setColor(TEXT_COLOR)
-            local radiusText = RADIUS_TEXT(info)
-            richtext.printRichContainedNoWrap("{o}"..radiusText, STAT_FONT, textX, ey + 32, textW, STAT_FONT:getHeight(), "left")
+    box:addSpacing(6)
+
+    -- Stats
+    local spellStats = {
+        {
+            name = RANGE_NAME,
+            desc = RANGE_DESC,
+            icon = "range",
+            color = g.snapToPalette(objects.Color(0.8, 0.5, 0.2)),
+            value = g.formatNumber(g.getSpellRange(info)),
+        },
+        {
+            name = COOLDOWN_NAME,
+            desc = COOLDOWN_DESC,
+            icon = "hourglass_icon",
+            color = g.snapToPalette(objects.Color(0.95, 0.85, 0.3)),
+            value = COOLDOWN_NUM({
+                cooldown = g.formatNumber(g.getSpellCooldown(info))
+            }),
+        },
+    }
+    local statCellH = 22
+    box:add({
+        getHeight = function() return statCellH end,
+        draw = function(ex, ey, ew, eh)
+            local cellW = math.floor(ew / #spellStats)
+
+            for i = 1, #spellStats do
+                local stat = spellStats[i]
+                local cx = ex + (i - 1) * cellW
+                local cy = ey
+                local cw = cellW - 2
+                local ch = statCellH - 2
+                local alpha = 1
+
+                local px, py = iml.getTransformedPointer()
+                local isStatHovered = px >= cx and py >= cy and px <= cx + cw and py <= cy + ch
+                if isStatHovered then
+                    alpha = 0.75
+                    hoverService.requestHover(function(boxx, fonts)
+                        local rr, gg, bb = stat.color.r, stat.color.g, stat.color.b
+                        boxx:addText(string.format("{c r=%.3f g=%.3f b=%.3f}%s", rr, gg, bb, stat.name), fonts.title)
+                        boxx:addText(stat.desc, fonts.body)
+                    end)
+                end
+
+                local r, gg, b, a = panelBottomColor:getRGBA()
+                love.graphics.setColor(r / 4, gg / 4, b / 4)
+                ui.drawSingleColorPanel(cx - 3, cy - 3, cw + 6, ch + 6)
+                love.graphics.setColor(r, gg, b, a * alpha)
+                ui.drawSingleColorPanel(cx, cy, cw, ch)
+
+                if g.isImage(stat.icon) then
+                    love.graphics.setColor(1, 1, 1, alpha)
+                    g.drawImageContained(stat.icon, cx + 2, cy + 2, ch - 4, ch - 4)
+                end
+
+                local sr, sg, sb, sa = stat.color:getRGBA()
+                love.graphics.setColor(sr, sg, sb, sa * alpha)
+                local textX = cx + ch
+                local textY = cy + (ch - STAT_FONT:getHeight()) / 2
+                helper.printTextOutline(stat.value, STAT_FONT, 1, textX, textY, cw - ch, "left")
+            end
         end,
     })
 
