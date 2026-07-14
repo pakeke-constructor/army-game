@@ -217,7 +217,9 @@ end
 
 function battle_scene:leave()
     if g.hasRun() then
-        for _, squad in pairs(g.getRun().squads) do
+        local run = g.getRun()
+        run.spellsCast = {}
+        for _, squad in pairs(run.squads) do
             squad.deployed = false
         end
     end
@@ -326,6 +328,9 @@ function battle_scene:update(dt)
 
     if not self.paused then
         self.particles:update(dt)
+        for k, v in pairs(run.spellsCast) do
+            run.spellsCast[k] = math.max(v - dt, 0)
+        end
         if enemyCount == 0 and (not self.victory) and (not self.sandbox) then
             winBattle(self)
         end
@@ -1136,16 +1141,12 @@ function battle_scene:draw()
         local wx, wy = self.camera:toWorld(mx, my)
 
         if selType == "spell" then
-            local info = g.getSpellInfo(entry)
-            if g.canCastSpell(wx, wy, entry) then
-                if not info.cost or g.trySpendMana(g.getBattleManaCounts(), info.cost) then
-                    g.castSpell(entry, wx, wy)
-                    spawnManaIconPopups(info.cost)
-                else
-                    spawnCantAffordManaPopup(info.cost)
-                end
+            ---@cast entry string
+            if g.getCurrentSpellCooldown(entry) == 0 and g.canCastSpell(wx, wy, entry) then
+                g.castSpell(entry, wx, wy)
             end
         elseif selType == "squad" and not entry.deployed then
+            ---@cast entry g.Squad
             local sx, sy = getSnappedDeployPosition(self, entry, wx, wy)
             local info = g.getSquadInfo(entry.squadId)
             if not info.cost or g.trySpendMana(g.getBattleManaCounts(), info.cost) then

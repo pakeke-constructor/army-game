@@ -4,7 +4,7 @@ local TRAIL_COUNT = {
     LEGENDARY = 6
 }
 
-local RADIUS_TEXT = interp("{range}Range: {c r=0.773 g=0.188 b=0.239}%{spellRange}{/c}", {
+local RADIUS_TEXT = interp("{range}Range: {c r=0.773 g=0.188 b=0.239}%{range}{/c}", {
     context = "The range of a spell.",
 })
 local TEXT_COLOR = {0.8, 0.8, 0.85} -- Note: This is not aligned to palette
@@ -32,7 +32,7 @@ return function(spellId, region, index)
     ui.assertUIStarted()
 
     local info = g.getSpellInfo(spellId)
-    local manaColor = g.getManaBundleColor(info.cost)
+    local manaColor = info.color
     local frameDarkColor = manaColor:lerp(objects.Color.BLACK, 0.65)
     local frameLightColor = manaColor:lerp(objects.Color.WHITE, 0.25)
 
@@ -100,7 +100,7 @@ return function(spellId, region, index)
         draw = function(ex, ey, ew, eh)
             -- icon
             love.graphics.setColor(1, 1, 1)
-            g.renderSpellIcon(spellId, ex+16, ey+16, true)
+            g.renderSpellIcon(spellId, ex+16, ey+16)
             -- name to right of icon
             local textX = ex + iconSize + iconGap
             local textW = ew - iconSize - iconGap
@@ -145,18 +145,5 @@ return function(spellId, region, index)
         ret = true
     end
 
-    local ww, hh = box:render(x, y)
-
-    -- Mana cost beads (bottom center)
-    local cost = info.cost
-    if cost then
-        local rw, rh = region.w, region.h
-        lg.setColor(1, 1, 1)
-        local _, www = g.getManaCostWidth(cost)
-        local H=30
-        ui.drawDarkPanel(x+rw/2 - www/2 - 6, y+rh-H/2, www + 12,H)
-        g.drawManaCostLarge(cost, x + rw / 2, y + rh, rw/2)
-    end
-
-    return ret, ww, hh
+    return ret, box:render(x, y)
 end
