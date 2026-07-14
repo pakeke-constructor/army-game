@@ -211,6 +211,16 @@ function initParticles()
     poison:setDirection(-math.pi/2)
     poison:setSpread(0.1)
 
+    local demonHead = defineParticle("demon_head_particle", {
+        frames = {"particle_4", "particle_3", "particle_2", "particle_1"},
+        lifetime = 0.4,
+        emissionArea = {
+            distribution = "uniform",
+            distance = {4,4},
+        }
+    })
+    demonHead:setColors({1, 0.1, 0.1}, {0.6, 0, 0}, {0.2, 0, 0})
+
     -- ... 
 
     -- ... 

@@ -155,6 +155,7 @@ function EnemySpawner:finalize()
         for i = 1, fury do
             local angle = (i - 1) / fury * math.pi * 2
             local ent = g.spawnEntity("demon_head", cx + math.cos(angle) * radius, cy + math.sin(angle) * radius)
+            ent.activationDelay = (ent.id % fury) / fury
         end
     end
 end

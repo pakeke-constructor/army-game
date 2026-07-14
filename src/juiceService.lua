@@ -59,7 +59,6 @@ end
 
 function juiceService.update(dt)
     trauma = math.max(0, trauma - TRAUMA_DECAY * dt)
-    pauseFatigue = math.max(0, pauseFatigue - PAUSE_FATIGUE_DECAY * dt)
     shakeT = shakeT + dt
     local s = trauma * trauma
     local mag = s * SHAKE_MAX
