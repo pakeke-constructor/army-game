@@ -1008,7 +1008,6 @@ end
 
 
 --- True while there's still an affordable, mana-costing squad left to deploy.
---- No stored state; checked per-frame to pick deploy- vs ready-phase.
 ---@param self g.BattleScene
 ---@return boolean
 local function canSpendMoreMana(self)
@@ -1225,30 +1224,25 @@ function battle_scene:draw()
     self._leftClickThisFrame = false
 
     if self.deployPhase then
+        local r = ui.getScreenRegion()
+        local _, row, _ = r:splitVertical(5.7, 1, 1.3)
+        local _, mid, _ = row:splitHorizontal(1, 1, 1)
+        local a, b = mid:splitHorizontal(1, 1)
+
         if canSpendMoreMana(self) then
-            -- DEPLOY PHASE: still mana to spend. Offer "use last layout", no start button.
-            if canUseLastArmy(self) then
-                local r = ui.getScreenRegion()
-                local _, row, _ = r:splitVertical(6, 1, 1)
-                local _, mid, _ = row:splitHorizontal(1, 1, 1)
-                if ui.DefaultButton("{o}"..USE_LAST_ARMY_BTM, mid:padRatio(0.15)) then
-                    deployLastArmy(self)
-                end
+            -- DEPLOY PHASE: still mana to spend. Only "use last layout", no start button.
+            if canUseLastArmy(self) and ui.DefaultButton("{o}"..USE_LAST_ARMY_BTM, mid:padRatio(0.15)) then
+                deployLastArmy(self)
             end
         else
-            -- READY PHASE: nothing left to spend. Big START + small Reset.
-            local r = ui.getScreenRegion()
-            local _, midRow, _ = r:splitVertical(1, 2, 1)
-            local _, midCol, _ = midRow:splitHorizontal(1, 2, 1)
-            local startR, resetR = midCol:splitVertical(3, 1)
-
-            if ui.DefaultButton("{o}"..START_BATTLE_BTN, startR:padRatio(0.1)) then
+            -- READY PHASE: nothing left to spend. Reset + Start.
+            if ui.DefaultButton("{o}"..RESET_BTN, a:padRatio(0.15)) then
+                resetDeployment(self)
+            end
+            if ui.DefaultButton("{o}"..START_BATTLE_BTN, b:padRatio(0.15)) then
                 saveLastArmy(self)
                 self.deployPhase = false
                 g.call("battleStarted")
-            end
-            if ui.DefaultButton("{o}"..RESET_BTN, resetR:padRatio(0.3)) then
-                resetDeployment(self)
             end
         end
     end
