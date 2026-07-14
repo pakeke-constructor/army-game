@@ -13,12 +13,14 @@ local function addLog(msg)
     logTime = love.timer.getTime()
 end
 
+---@type table<string, fun(args:string[])>
 local COMMANDS = {}
 
 COMMANDS.help = function()
     addLog("/get <squad_id> - add squad to army")
     addLog("/upgrade <perk_id> [idx] - add perk to squad")
     addLog("/spawn <ent_id> [count] - spawn at cursor")
+    addLog("/spell <spell_id> - give spell")
     addLog("/gold <amount> - add gold")
     addLog("/tp - teleport to cursor (map)")
     addLog("/sb - reset & enter sandbox battle")
@@ -181,6 +183,31 @@ COMMANDS.lua = function(args)
     else
         return addLog("Executed")
     end
+end
+
+COMMANDS.spell = function(args)
+    local spellId = args[1]
+    if not spellId then return addLog("usage: /spell <spell_id>") end
+
+    local found = false
+    for _, v in ipairs(g.SPELLS) do
+        if v == spellId then
+            found = true
+            break
+        end
+    end
+
+    if not found then
+        return addLog("unknown spell: "..spellId)
+    end
+    if g.hasSpell(spellId) then
+        return addLog("already has spell: "..spellId)
+    end
+    if not g.addSpellToArmy(spellId) then
+        return addLog("max spells obtained")
+    end
+
+    return addLog("added spell: "..spellId)
 end
 
 local function execCmd(line)

@@ -283,6 +283,7 @@ local function drawSquadBox(r, squadId, cost)
     if wasJustClicked then
         if g.trySpendGold(cost) then
             g.addOrUpgradeSquad(squadId)
+            g.playUISound("ui_buy_upgrade")
             if squad then
                 statUpgradePopupService.set(squadId)
             end
@@ -391,6 +392,7 @@ local function drawBlessing(blesR, blessingId, cost)
     if iml.wasJustClicked(blesR:get()) then
         if g.trySpendGold(cost) then
             g.addBlessing(blessingId)
+            g.playUISound("ui_buy_upgrade")
             return true
         end
     end
@@ -455,6 +457,7 @@ local function drawShopUI(self, freeArea)
         g.drawImage(img, x,y+oy)
         if wasJustClicked and g.trySpendGold(cost) then
             g.addXP(xpAmount)
+            g.playUISound("ui_buy_upgrade")
             self.xpBoughtSince[boughtSinceIndex] = t
         end
         lg.setColor(1,1,1)

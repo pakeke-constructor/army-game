@@ -272,7 +272,7 @@ local currentRun
 
 ---@param lopt g.LaunchOptions
 function g.newRun(lopt)
-    currentRun = Run()
+    currentRun = Run() --[[@as g.Run]]
 
     lopt = lopt or {
         commander = consts.STARTING_COMMANDER,
@@ -407,6 +407,9 @@ function g.explosion(x, y, damage, radius, fromEntity)
         radius = radius * g.ask("getExplosionSizeMultiplier", fromEntity)
     end
     g.call("explosion", x, y, damage, radius, fromEntity)
+    -- bigger blast -> lower pitch
+    local pitch = helper.clamp(80 / radius, 0.6, 1.4)
+    g.playWorldSound("small_explosion", pitch, nil, 0.1, 0.1)
     local radiusSq = radius * radius
     -- todo: make particles here
     g.iteratePartition("unit", x, y, function(ent)
@@ -812,21 +815,15 @@ end
 ---@param spellId string
 ---@param x number
 ---@param y number
----@param drawManaCost boolean?
-function g.renderSpellIcon(spellId, x, y, drawManaCost)
+function g.renderSpellIcon(spellId, x, y)
     local info = g.getSpellInfo(spellId)
-    local col = g.getManaBundleColor(info.cost)
+    local col = info.color
     local c = gsman.mulColor(1, 1, 1)
     g.drawImage(info.icon, x, y)
     c:pop()
     c = gsman.mulColor(col)
     g.drawImage("spellicon_border", x, y)
     c:pop()
-
-    local size = 32 -- hacky hardcode
-    if drawManaCost then
-        g.drawManaCost(info.cost, x, y - size/2, size + 6)
-    end
 end
 
 
@@ -1361,7 +1358,8 @@ end
 -- ============================================================================
 
 local SPELL_DEFS = {}
-local SPELL_LIST = {}
+---@type string[]
+g.SPELLS = {}
 
 ---@class g.SpellInstantCastDef
 ---@field target "ally"|"enemy"
@@ -1372,19 +1370,19 @@ local SPELL_LIST = {}
 ---@class g.SpellDef
 ---@field name string (untranslated at definition; translated in info)
 ---@field nameContext string?
----@field color objects.Color?
+---@field color objects.Color
 ---@field rarity g.Rarity
 ---@field icon string
----@field cost g.ManaBundle?
 ---@field description string?
----@field spellRange number?
----@field spellArea number?
+---@field range number?
+---@field cooldown number?
 ---@field instantCast g.SpellInstantCastDef?
 ---@field cast (fun(spellId: string, x: number, y: number))?
 
 ---@class g.SpellInfo: g.SpellDef
 ---@field id string
----@field cost g.ManaBundle
+---@field range number
+---@field cooldown number
 
 ---@param id string
 ---@param info g.SpellDef
@@ -1394,15 +1392,11 @@ function g.defineSpell(id, info)
     end
     assertValidTags("Spell", id, info.tags)
     info.id = id
-    local manaType
-    for key,v in pairs(info.cost) do
-        manaType = key; break
-    end
-    local manaCol = g.getManaInfo(manaType).color
-    info.color = g.snapToPalette(info.color or manaCol)
+    info.color = g.snapToPalette(info.color)
     info.name = loc(assert(info.name), {}, {context = info.nameContext or "Name of a spell."})
     info.rarity = assert(info.rarity)
-    info.cost = info.cost or {}
+    info.range = info.range or 500
+    info.cooldown = info.cooldown or 10
     assert(info.icon, "Missing icon for spell: " .. id)
     if not g.isImage(info.icon) then
         error("Spell has invalid icon: " .. info.icon)
@@ -1414,7 +1408,7 @@ function g.defineSpell(id, info)
     end
     ---@cast info g.SpellInfo
     SPELL_DEFS[id] = info
-    SPELL_LIST[#SPELL_LIST + 1] = id
+    g.SPELLS[#g.SPELLS + 1] = id
 end
 
 ---@param id string
@@ -1424,16 +1418,19 @@ function g.getSpellInfo(id)
 end
 
 ---@param spellId string
+---@return boolean added true if spell added, false if max spell limit reached
 function g.addSpellToArmy(spellId)
     local run = g.getRun()
     assert(SPELL_DEFS[spellId], "Unknown spell: " .. tostring(spellId))
-    run.spells[spellId] = true
+    if #run.spells >= 2 then return false end
+    run.spells:add(spellId)
+    return true
 end
 
 ---@param spellId string
 ---@return boolean
 function g.hasSpell(spellId)
-    return g.getRun().spells[spellId] == true
+    return g.getRun().spells:has(spellId)
 end
 
 ---@param info g.SpellInfo
@@ -1446,7 +1443,6 @@ local function iterateSpellTargets(info, x, y, fn)
     if not instant then return 0 end
 
     local maxTargets = instant.maxTargets
-    local area = info.spellArea or info.spellRange or 500
     local hitCount = 0
 
     g.iteratePartition(instant.target, x, y, function(ent)
@@ -1455,20 +1451,18 @@ local function iterateSpellTargets(info, x, y, fn)
         if instant.filter and not instant.filter(ent, x, y, info.id) then return end
         hitCount = hitCount + 1
         fn(ent)
-    end, area)
+    end, info.range)
 
     return hitCount
 end
 
+---Note: This only check spell range, not cooldown. Use `g.getCurrentSpellCooldown` for that instead.
 ---@param worldX number
 ---@param worldY number
 ---@param spellId string
 ---@return boolean
 function g.canCastSpell(worldX, worldY, spellId)
     local info = g.getSpellInfo(spellId)
-    local run = g.getRun()
-    local affordable = (not info.cost) or g.canAffordMana(run._battleMana, info.cost)
-    if not affordable then return false end
     if not info.instantCast then return true end
 
     local hitCount = iterateSpellTargets(info, worldX, worldY, function() end)
@@ -1480,10 +1474,9 @@ end
 ---@param spellId string
 function g.renderSpellCastPreview(x, y, spellId)
     local info = g.getSpellInfo(spellId)
-    local range = info.spellRange or info.spellArea or 500
 
     lg.setColor(info.color)
-    lg.circle("line", x, y, range)
+    lg.circle("line", x, y, info.range)
 
     local rot = love.timer.getTime() * 3
 
@@ -1509,18 +1502,21 @@ end
 ---@param y number
 function g.castSpell(spellId, x, y)
     local info = g.getSpellInfo(spellId)
-    g.getRun().spellsCast[spellId] = true
+    g.getRun().spellsCast[spellId] = info.cooldown
 
     if info.instantCast then
         runInstantCastSpell(info, x, y)
-        g.call("spellCast", spellId, x, y)
-        return
-    end
-
-    if info.cast then
+    elseif info.cast then
         info.cast(spellId, x, y)
     end
+
+    g.playWorldSound("battle_lazer", 1+love.math.random(-10, 10)/100)
     g.call("spellCast", spellId, x, y)
+end
+
+---@param spellId string
+function g.getCurrentSpellCooldown(spellId)
+    return g.getRun().spellsCast[spellId] or 0
 end
 
 
@@ -1708,6 +1704,7 @@ function g.spawnSquad(squad, x, y, ...)
                 end
             end
             ent._deployTime = love.timer.getTime() + ((i - 1)/numUnits) * DEPLOY_ANIMATION_STEP
+            ent._deployIndex = i
             for _, traitName in ipairs(info.startingTraits) do
                 g.addTrait(ent, traitName)
             end
@@ -2342,6 +2339,7 @@ function g.killEntity(ent, killer)
     if ent.team == "enemy" then
         local amount = math.max(1, math.floor(g.ask("getMoneyMultiplier") + 0.5))
         g.addGold(amount)
+        g.playWorldSound("battle_goldpickup", 1+love.math.random(-10, 10)/100, 0.6)
         g.addWorldTextPopup(ent.x, ent.y - 10, "{GOLD_COLOR}$" .. tostring(amount), {
             vely = -200,
             velDamping = 0.995,
@@ -2864,6 +2862,8 @@ end
 
 local DEPLOY_STRETCH_SY = 2.8
 local DEPLOY_ANIMATION_DURATION = 0.15
+local DROP_SOUND_PITCH_STEP = 0.06 -- pitch bump per unit as the squad drops
+local DROP_SOUND_MAX_PITCH = 1.5
 
 local DEV_SHOW_RANGE = false
 DEV_SHOW_RANGE = consts.DEV_MODE and DEV_SHOW_RANGE
@@ -2879,6 +2879,11 @@ function g.drawEntity(ent, x, y)
         local elapsed = love.timer.getTime() - ent._deployTime
         if elapsed < 0 then
             return
+        end
+        if not ent._dropSoundPlayed then
+            ent._dropSoundPlayed = true
+            local pitch = math.min(DROP_SOUND_MAX_PITCH, 1 + ((ent._deployIndex or 1) - 1) * DROP_SOUND_PITCH_STEP)
+            g.playWorldSound("battle_unitDrop", pitch, nil, nil, 0.05)
         end
         local p = math.min(1, elapsed / DEPLOY_ANIMATION_DURATION)
         sx = sx * (0.3 + 0.7 * p)
