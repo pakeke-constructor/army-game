@@ -31,11 +31,15 @@ g.defineEntity("body", {
 
 
 
+
 local DEMON_HEAD_DAMAGE_MULTIPLIER = 1.1
 local DEMON_HEAD_PARTICLE_COUNT = 12
 
+local juiceService
+
 ---@param ent ecs.Entity
 local function activateDemonHead(ent)
+    juiceService = juiceService or require("src.juiceService")
     for _, enemy in ipairs(ent:getWorld():getEnemyList()) do
         enemy.baseAttackDamage = enemy.baseAttackDamage and enemy.baseAttackDamage * DEMON_HEAD_DAMAGE_MULTIPLIER
         if enemy.baseMaxHealth then
