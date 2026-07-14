@@ -111,7 +111,7 @@ function battle_scene:pollHandlers()
                         if enemy.baseMaxHealth then
                             enemy.baseMaxHealth = enemy.baseMaxHealth * 1.1
                             enemy.health = (enemy.health or enemy.baseMaxHealth) * 1.1
-                            enemy.scale = (enemy.scale or 1) * 1.1
+                            enemy.scale = math.min(1.75, (enemy.scale or 1) * 1.1)
                         end
                         juiceService.spawnArc(g.COLORS.DAMAGE, head.x, head.y, enemy.x, enemy.y, enemy, nil, 400)
                     end
@@ -318,8 +318,7 @@ function battle_scene:update(dt)
     self:updateCamera(dt)
     juiceService.update(dt)
     ambienceService.update(dt, self.camera:getTransform())
-    local timeScale = juiceService.consumeHitPause(dt)
-    self.ecs:update(self.deployPhase and 0 or dt * timeScale)
+    self.ecs:update(self.deployPhase and 0 or dt)
 
     local enemyCount = countEnemies(self.ecs)
     self.lastEnemyCount = enemyCount

@@ -154,7 +154,7 @@ function EnemySpawner:finalize()
         local radius = math.min(80, bridge.w * 0.3, bridge.h * 0.3)
         for i = 1, fury do
             local angle = (i - 1) / fury * math.pi * 2
-            g.spawnEntity("demon_head", cx + math.cos(angle) * radius, cy + math.sin(angle) * radius)
+            local ent = g.spawnEntity("demon_head", cx + math.cos(angle) * radius, cy + math.sin(angle) * radius)
         end
     end
 end
