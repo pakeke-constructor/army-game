@@ -5,6 +5,7 @@ local ManaChoicePanel = require("src.ui.choicepanels.ManaChoicePanel")
 local ManaBlessingChoicePanel = require("src.ui.choicepanels.ManaBlessingChoicePanel")
 local SpellChoicePanel = require("src.ui.choicepanels.SpellChoicePanel")
 local SpellDiscardChoicePanel = require("src.ui.choicepanels.SpellDiscardChoicePanel")
+local StatChoicePanel = require("src.ui.choicepanels.StatChoicePanel")
 
 ---@class g.choicePopupService
 local choicePopupService = {}
@@ -37,6 +38,10 @@ local active = nil
 ---@field type "spell_discard"
 ---@field spellId string?
 
+---@class g.StatChoicePanelParam
+---@field type "upgrade_stat"
+---@field squadId string
+
 ---@alias g.ChoicePopupParam
 ---| g.SquadChoicePanelParam
 ---| g.BlessingChoicePanelParam
@@ -44,6 +49,7 @@ local active = nil
 ---| g.ManaBlessingChoicePanelParam
 ---| g.SpellChoicePanelParam
 ---| g.SpellDiscardPanelParam
+---| g.StatChoicePanelParam
 
 ---@param param g.ChoicePopupParam
 function choicePopupService.set(param)
@@ -66,6 +72,9 @@ function choicePopupService.set(param)
     elseif rType == "spell_discard" then
         ---@cast param g.SpellDiscardPanelParam
         active = SpellDiscardChoicePanel(param.spellId)
+    elseif rType == "upgrade_stat" then
+        ---@cast param g.StatChoicePanelParam
+        active = StatChoicePanel(param.squadId)
     else
         error("Unknown choice panel type: "..tostring(rType))
     end

@@ -162,7 +162,7 @@ function SquadChoicePanel:draw()
             local hadSquad = g.getSquadFromArmy(squadId)
             g.addOrUpgradeSquad(squadId)
             if hadSquad then
-                statUpgradePopupService.set(squadId)
+                choicePopupService.set({type = "upgrade_stat", squadId = squadId})
             end
             return true
         end
