@@ -55,6 +55,7 @@ g.defineEvent("arrivedAtNode") -- args: nodeType, node
 -- g.defineEvent("rewardChosen")
 -- g.defineEvent("chestOpened")
 g.defineEvent("rerollShop")
+g.defineEvent("shopEntered")
 g.defineEvent("blessingAdded")
 
 
@@ -85,3 +86,9 @@ g.defineQuestion("getAITargetPriorityModifier", ADD, 0)
 g.defineQuestion("getSquadUnitCountModifier", ADD, 0)
 g.defineQuestion("getSquadStatBuffModifier", ADD, 0)
 g.defineQuestion("canDeployAnywhere", OR, false)
+
+-- Questions: spells
+g.defineQuestion("getSpellRangeModifier", ADD, 0) -- args: spell ID
+g.defineQuestion("getSpellRangeMultiplier", MUL, 1) -- args: spell ID
+g.defineQuestion("getSpellCooldownModifier", ADD, 0) -- args: spell ID
+g.defineQuestion("getSpellCooldownMultiplier", MUL, 1) -- args: spell ID

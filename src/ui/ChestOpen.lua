@@ -5,7 +5,7 @@ local drawBlessingCard = require("src.ui.blessing_card")
 local lg = love.graphics
 
 local REEL_SIZE = 50
-local REEL_DURATION = 8.0
+local REEL_DURATION = 4.0
 local RAY_COLOR = objects.Color("#FFEFC52C")
 local NUM_PARTICLES = 30
 

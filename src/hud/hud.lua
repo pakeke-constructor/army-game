@@ -59,21 +59,9 @@ end
 ---@return string[]
 local function getVisibleSpells()
     local run = g.getRun()
-    local spells = {}
-    for spellId in pairs(run.spells) do
-        if not run.spellsCast[spellId] then
-            spells[#spells + 1] = spellId
-        end
-    end
+    local spells = run.spells:totable()
     table.sort(spells)
     return spells
-end
-
----@param spellId string
----@return boolean
-local function isSpellAffordable(spellId)
-    local info = g.getSpellInfo(spellId)
-    return (not info.cost) or g.canAffordMana(g.getBattleManaCounts(), info.cost)
 end
 
 --- The ordered list of currently-selectable items: spellIds (battle started) or
@@ -100,8 +88,6 @@ end
 ---@return boolean
 local function isItemUsable(self, item)
     if type(item) == "string" then
-        local run = g.getRun()
-        if run.spellsCast[item] then return false end
         local mx, my = love.mouse.getPosition()
         local wx, wy = g.screenToWorld(mx, my)
         return g.canCastSpell(wx, wy, item)
@@ -167,19 +153,43 @@ end
 ---@param x number
 ---@param y number
 ---@param selected boolean
----@param affordable boolean spell can be afforded right now
-local function renderSpell(spellId, x, y, selected, affordable)
+local function renderSpell(spellId, x, y, selected)
     local size = SQUAD_ICON_SIZE
+    local cooldown = g.getCurrentSpellCooldown(spellId)
+    local cx, cy = x+size/2, y+size/2
+
     if selected then
         lg.setColor(1, 1, 1, 0.3)
         ui.drawSingleColorPanel(x - 2, y - 2, size + 4, size + 4)
     end
-    if not affordable then
-        lg.setColor(1, 1, 1, 0.35)
-    else
+
+    lg.setColor(1, 1, 1)
+
+    if cooldown > 0 then
+        local radius = size / 1.5 -- bit of leeway
+        local t = cooldown / g.getSpellCooldown(spellId)
+
+        lg.setStencilMode("draw", 1)
+        -- Yes, we're rendering to color AND stencil buffer at same time.
+        lg.setColorMask(true, true, true, true)
+        local shader = gsman.setShader(helper.alphaTestShader)
+        g.renderSpellIcon(spellId, cx, cy)
+        shader:pop()
+
+        lg.setStencilMode("test", 1)
+        lg.setColor(0, 0, 0, 0.6)
+        lg.arc("fill", "pie", cx, cy, radius, -math.pi/2, -t * consts.TAU - math.pi/2)
+        lg.setStencilMode()
+        lg.clear(false, true)
+
         lg.setColor(1, 1, 1)
+        local font = g.getSmallFont(16)
+        local text = tostring(math.ceil(cooldown))
+        local textW = font:getWidth(text)
+        helper.printTextOutline(text, font, 1, cx, cy, textW, "center", 0, 1, 1, textW / 2, font:getHeight() / 2)
+    else
+        g.renderSpellIcon(spellId, cx, cy)
     end
-    g.renderSpellIcon(spellId, x+size/2, y+size/2, true)
 end
 
 
@@ -252,15 +262,14 @@ local function drawSpellsSection(self, region, selIdx)
     local startX, baseY, step = layoutIcons(region, #spells)
 
     for i, spellId in ipairs(spells) do
-        local affordable = (selIdx == nil) or isSpellAffordable(spellId)
-        local usable = (selIdx ~= nil) and affordable and isItemUsable(self, spellId)
+        local usable = (selIdx ~= nil) and isItemUsable(self, spellId)
         local x = startX + (i - 1) * step
         local y = baseY
         local selected = (i == selIdx)
         if selected then
             y = y - 6
         end
-        renderSpell(spellId, x, y-4, selected, affordable)
+        renderSpell(spellId, x, y-4, selected)
         local id = "spell" .. i
         if usable and iml.wasJustClicked(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, 1, id) then
             self.selectedIndex = i
@@ -646,7 +655,6 @@ function HUD:drawUI(opt)
     rewardPopupService.draw()
     choicePopupService.draw()
     nodeEventService.draw()
-    statUpgradePopupService.draw()
     gameoverPopupService.draw()
     hoverService.draw()
 

@@ -499,6 +499,7 @@ function ShopNode:init(x,y)
 end
 
 function ShopNode:enter()
+    g.call("shopEntered", self)
     shop_scene = shop_scene or require("src.scenes.shop_scene.shop_scene")
     shop_scene.prefillShopNode(self)
     g.transitionTo("shop_scene", {

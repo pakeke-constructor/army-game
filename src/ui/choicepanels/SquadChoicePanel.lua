@@ -20,6 +20,7 @@ function SquadChoicePanel:init(rerolls, rarityWeights)
     ---@type integer|nil
     self.selected = nil
     self.cj = cardJuiceService.CardJuiceInstance()
+    self.showReroll = (rerolls or 0) > 0
 
     for _ = 1, ChoicePanelCommon.NUM_CHOICES do
         self.rerolls[#self.rerolls+1] = rerolls or 0
@@ -132,6 +133,8 @@ local function drawRerollButton(region, index, disabled)
     elseif isHovered then
         bodyImage = "reroll_button_body_hover"
     end
+
+    lg.setColor(1, 1, 1)
     g.drawImageContained(bodyImage, rerollR:get())
 
     local iconImage = disabled and "shop_reroll_icon_gray" or "shop_reroll_icon"
@@ -159,7 +162,7 @@ function SquadChoicePanel:draw()
             local hadSquad = g.getSquadFromArmy(squadId)
             g.addOrUpgradeSquad(squadId)
             if hadSquad then
-                statUpgradePopupService.set(squadId)
+                choicePopupService.set({type = "upgrade_stat", squadId = squadId})
             end
             return true
         end
@@ -198,7 +201,10 @@ function SquadChoicePanel:draw()
         end
 
         local clicked = draw(cardR)
-        local rerollClicked = drawRerollButton(rerollR, i, (self.rerolls[i] or 0) <= 0)
+        local rerollClicked = false
+        if self.showReroll then
+            rerollClicked = drawRerollButton(rerollR, i, (self.rerolls[i] or 0) <= 0)
+        end
 
         if rerollClicked then
             self:_rerollChoice(i)

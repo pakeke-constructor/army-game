@@ -18,7 +18,7 @@ sqhelper.defineMilitiaAndArchers("blue")
 g.defineSquad("shield_fish_squad", {
     name = "Shield-Fish",
     rarity = g.RARITIES.COMMON,
-    -- tags: armor (basic tank)
+    -- tags: armor (basic tank)love 
     tags = {"armor"},
     entityDef = {
         image = g.leo("shieldfish_unit", "defenders_unit"),
@@ -265,15 +265,14 @@ g.defineSquad("test_subjects_squad", {
     perks = {{
         id = "perk_catalyze",
         name = "Catalyze",
-        description = g.loc2("When Transformed, gain +50% (HP) and (ASPD)."),
-        rawHandlers = {
-            --[[
-            
-            TODO: SUPER IMPORTANT:
-            the transform system has been removed,
-            and this needs refactoring!
-            
-            ]]
+        description = g.loc2("Gain 4 (HP) and 2 (ATK) per (MAGK) on this unit."),
+        handlers = {
+            getMaxHealthModifier = function(ent)
+                return (ent.magic or 0) * 4
+            end,
+            getAttackDamageModifier = function(ent)
+                return (ent.magic or 0) * 2
+            end,
         },
     }},
     cost = {blue = 1},

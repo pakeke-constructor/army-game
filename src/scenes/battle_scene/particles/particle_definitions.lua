@@ -203,7 +203,11 @@ function initParticles()
             distance = {2,2},
         }
     })
-    poison:setColors({0.5, 1, 0.3}, {0.2, 0.8, 0.1}, {0.1, 0.5, 0.05})
+    poison:setColors(
+        g.snapToPalette("#c852a4"),
+        g.snapToPalette("#4f2d5d"),
+        g.snapToPalette("#2c2c2c")
+    )
     poison:setDirection(-math.pi/2)
     poison:setSpread(0.1)
 

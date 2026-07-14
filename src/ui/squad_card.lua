@@ -233,7 +233,8 @@ local function drawSquadCard(squadId, region, index, showUpgrade, showLevel)
             love.graphics.setColor(0.8, 0.8, 0.85)
             printTextOutlineContainedNoWrap(
                 info.name, TITLE_FONT, 1,
-                Kirigami(textX, ey + nameBob, textW, TITLE_FONT:getHeight())
+                Kirigami(textX, ey + nameBob, textW, TITLE_FONT:getHeight()),
+                "left"
             )
             prof_pop() -- prof_push("name")
 

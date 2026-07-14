@@ -208,14 +208,19 @@ g.defineBlessing("grace", "Grace", {
 })
 
 g.defineBlessing("lucky_sack", "Lucky Sack", {
-    description = loc("Gain between 100 and 200 gold when acquired."),
+    description = loc("When entering a shop, 50% chance to gain 60 gold!"),
     image = "blessing_luckysack",
     rarity = g.RARITIES.COMMON,
     -- draft tags: economy
     tags = {"economy"},
-    onAdd = function()
-        g.addGold(math.random(100, 200))
-    end,
+    handlers = {
+        arrivedAtNode = function(nodeType, node)
+            if nodeType ~= "shop" or node.visited then return end
+            if love.math.random() < 0.5 then
+                g.addGold(60)
+            end
+        end,
+    },
 })
 
 g.defineBlessing("barrage", "Barrage", {

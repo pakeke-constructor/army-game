@@ -64,7 +64,7 @@ function UpgradeSquadChoicePanel:draw()
             -- Actually apply
             local squadId = self.choices[self.selected]
             g.addOrUpgradeSquad(squadId)
-            statUpgradePopupService.set(squadId)
+            choicePopupService.set({type = "upgrade_stat", squadId = squadId})
             return true
         end
 

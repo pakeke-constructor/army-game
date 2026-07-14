@@ -13,13 +13,16 @@ local function addLog(msg)
     logTime = love.timer.getTime()
 end
 
+---@type table<string, fun(args:string[])>
 local COMMANDS = {}
 
 COMMANDS.help = function()
     addLog("/get <squad_id> - add squad to army")
     addLog("/upgrade <perk_id> [idx] - add perk to squad")
     addLog("/spawn <ent_id> [count] - spawn at cursor")
+    addLog("/spell <spell_id> - give spell")
     addLog("/gold <amount> - add gold")
+    addLog("/zone <forest|fall|hell> - enter zone")
     addLog("/tp - teleport to cursor (map)")
     addLog("/sb - reset & enter sandbox battle")
     addLog("/enc <diff> <idx> - spawn specific encounter")
@@ -73,6 +76,11 @@ end
 COMMANDS.get = function(args)
     local squadId = args[1]
     if not squadId then return addLog("usage: /get <squad_id>") end
+    if squadId == "pick" then
+        local rr = tonumber(args[2] or 0) or 0
+        choicePopupService.set({type = "squad", rerolls = rr})
+        return
+    end
     if g.getSquadFromArmy(squadId) then return addLog("already have squad: " .. squadId) end
     g.addSquadToArmy(squadId)
     addLog("added squad: " .. squadId)
@@ -115,6 +123,17 @@ COMMANDS.xp = function(args)
     g.addXP(amt)
     local run = g.getRun()
     addLog("xp -> " .. run.xp)
+end
+
+COMMANDS.zone = function(args)
+    local zone = args[1]
+    local mapTypes = require("src.scenes.map_scene.map_types")
+    if not mapTypes[zone] then return addLog("usage: /zone <forest|fall|hell>") end
+
+    local scene, name = g.getCurrentScene()
+    if name ~= "map_scene" then return addLog("/zone only works in map scene") end
+    scene:_buildMap(zone, true)
+    addLog("entered " .. zone)
 end
 
 COMMANDS.tp = function()
@@ -181,6 +200,37 @@ COMMANDS.lua = function(args)
     else
         return addLog("Executed")
     end
+end
+
+COMMANDS.spell = function(args)
+    local spellId = args[1]
+    if not spellId then return addLog("usage: /spell <spell_id>") end
+
+    if spellId == "pick" then
+        local rr = tonumber(args[2] or 0) or 0
+        choicePopupService.set({type = "spell", rerolls = rr})
+        return
+    end
+
+    local found = false
+    for _, v in ipairs(g.SPELLS) do
+        if v == spellId then
+            found = true
+            break
+        end
+    end
+
+    if not found then
+        return addLog("unknown spell: "..spellId)
+    end
+    if g.hasSpell(spellId) then
+        return addLog("already has spell: "..spellId)
+    end
+    if not g.addSpellToArmy(spellId) then
+        return addLog("max spells obtained")
+    end
+
+    return addLog("added spell: "..spellId)
 end
 
 local function execCmd(line)

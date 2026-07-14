@@ -80,7 +80,7 @@ g.defineCommander("sir_horse", "Sir Horse", {
         rarity = g.RARITIES.COMMANDER,
         unitCount = 1,
         cost = {red = 1, green = 1},
-        icon = g.leo"sirhorse_uniticon",
+        icon = g.leo("sirhorse_uniticon", "sirhorse"),
         entityDef = {
             image = "sirhorse",
             isCommander = true,
@@ -121,7 +121,7 @@ g.defineCommander("druidcommander", "Druid Lady", {
         rarity = g.RARITIES.COMMANDER,
         unitCount = 1,
         cost = {red = 1, green = 1},
-        icon = g.leo"druidcommander_uniticon",
+        icon = g.leo("druidcommander_uniticon", "druidcommander"),
         entityDef = {
             image = "druidcommander",
             isCommander = true,
@@ -139,7 +139,7 @@ g.defineCommander("druidcommander", "Druid Lady", {
             baseAttackSpeed = 0.45,
             baseAttackRange = 700, -- slightly less than octopus commander
             baseMoveSpeed = 85,
-            baseMaxHealth = 160,
+            baseMaxHealth = 150,
         },
         perks = {{
             id = "perk_breathoflife",
@@ -176,7 +176,7 @@ g.defineCommander("mechcommander", "The Mech Goblin", {
         rarity = g.RARITIES.COMMANDER,
         unitCount = 1,
         cost = {yellow = 1, green = 1},
-        icon = g.leo"mechcommander_uniticon",
+        icon = g.leo("mechcommander_uniticon", "mechcommander"),
         entityDef = {
             onHitDamage = function(ent, damage, target)
                 g.lightning(target.x, target.y, damage * 0.5, nil, 5)
@@ -225,7 +225,7 @@ g.defineCommander("lizardcommander", "Lizard Lord", {
         rarity = g.RARITIES.COMMANDER,
         unitCount = 1,
         cost = {red = 1, blue = 1},
-        icon = g.leo"lizardcommander_uniticon",
+        icon = g.leo("lizardcommander_uniticon", "lizardcommander"),
         entityDef = {
             image = "lizardcommander",
             isCommander = true,
@@ -268,7 +268,7 @@ g.defineCommander("octopuscommander", "Octopus Tank", {
         rarity = g.RARITIES.COMMANDER,
         unitCount = 1,
         cost = {blue = 1, yellow = 1},
-        icon = g.leo("octopuscommander_icon"),
+        icon = g.leo("octopuscommander_icon", "octopuscommander"),
         entityDef = {
             image = "octopuscommander",
             isCommander = true,
