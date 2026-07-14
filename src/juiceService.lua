@@ -58,7 +58,7 @@ function juiceService.consumeHitPause(dt)
 end
 
 
-function juiceService.spawnArc(color, x, y, targetX, targetY, targetEnt, onComplete)
+function juiceService.spawnArc(color, x, y, targetX, targetY, targetEnt, onComplete, speed)
     if #arcs >= MAX_ARCS then
         return false
     end
@@ -72,6 +72,7 @@ function juiceService.spawnArc(color, x, y, targetX, targetY, targetEnt, onCompl
         targetY = targetY,
         targetEnt = targetEnt,
         onComplete = onComplete,
+        speed = speed or ARC_SPEED,
         t = 0,
         rot = math.atan2(targetY - y, targetX - x),
     }
@@ -104,7 +105,7 @@ function juiceService.update(dt)
         local dx = arc.targetX - arc.sx
         local dy = arc.targetY - arc.sy
         local dist = math.sqrt(dx * dx + dy * dy)
-        local duration = math.max(0.001, dist / ARC_SPEED)
+        local duration = math.max(0.001, dist / arc.speed)
         arc.t = arc.t + dt / duration
 
         if arc.t >= 1 then

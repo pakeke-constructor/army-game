@@ -95,8 +95,6 @@ end
 function EnemySpawner:finalize()
     local ecs = self._ecs
     if not ecs.boundingBox then ecs:setBounds(300, 200, 1300, 600) end -- encounter forgot to set bounds
-    local bx, by, w, h = ecs.boundingBox[1], ecs.boundingBox[2], ecs.boundingBox[3], ecs.boundingBox[4]
-
     -- lay enemies out into the enemy rectangle battle_scene set up.
     local enemyR = ecs.enemyRectangle
     if not enemyR then
@@ -147,6 +145,18 @@ function EnemySpawner:finalize()
     end
 
     self._squads = {}
+
+    local fury = g.getRun().demonFury or 0
+    local bridge = ecs:getBridgeRectangle()
+    if fury > 0 then
+        local cx = bridge.x + bridge.w / 2
+        local cy = bridge.y + bridge.h / 2
+        local radius = math.min(80, bridge.w * 0.3, bridge.h * 0.3)
+        for i = 1, fury do
+            local angle = (i - 1) / fury * math.pi * 2
+            g.spawnEntity("demon_head", cx + math.cos(angle) * radius, cy + math.sin(angle) * radius)
+        end
+    end
 end
 
 

@@ -125,6 +125,14 @@ COMMANDS.xp = function(args)
     addLog("xp -> " .. run.xp)
 end
 
+COMMANDS.fury = function(args)
+    local amt = tonumber(args[1])
+    if not amt then return addLog("usage: /fury <value> Sets fury to a value.") end
+    local run = g.getRun()
+    run.demonFury = amt
+    addLog("demonFury set to " .. tostring(amt))
+end
+
 COMMANDS.zone = function(args)
     local zone = args[1]
     local mapTypes = require("src.scenes.map_scene.map_types")

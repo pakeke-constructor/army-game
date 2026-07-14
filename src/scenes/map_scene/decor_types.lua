@@ -158,4 +158,9 @@ M.define("burnedtree_3", { image = "burnedtree_3", chance = 0.3, nodeRadius = 8,
 M.define("burnedtree_4", { image = "burnedtree_4", chance = 0.3, nodeRadius = 8, decorRadius = 8, transformModifier = treeAnimationRigid })
 
 
+-- Map decor
+M.define("decorock_1", { image = "decorock_1", chance = 0.12, nodeRadius = 4, decorRadius = 6 })
+M.define("oldskull_1", { image = "oldskull_1", chance = 0.03, nodeRadius = 2, decorRadius = 5 })
+
+
 return M

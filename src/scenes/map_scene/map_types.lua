@@ -39,7 +39,9 @@ M.forest = {
         "tree_small_1",
         "grass_1",
         "grass_2",
-        "grass_3"
+        "grass_3",
+        "decorock_1",
+        "oldskull_1",
     },
     groundTextures = {
         {"decor_mega_1", 6},
@@ -111,6 +113,8 @@ M.fall = {
         "bush_medium",
         "bush_small_1",
         "bush_small_2",
+        "decorock_1",
+        "oldskull_1",
     },
     groundTextures = {
         {"decor_mega_1", 6},
@@ -185,6 +189,8 @@ M.hell = {
         "burnedtree_2",
         "burnedtree_3",
         "burnedtree_4",
+        "decorock_1",
+        "oldskull_1",
     },
     groundTextures = {
         {"decor_mega_1", 6},

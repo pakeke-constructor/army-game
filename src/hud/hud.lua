@@ -461,7 +461,8 @@ local function drawTopBar()
 
     drawXpBar(xp)
 
-    local furyHover = run.demonFury <= 0 and LOC_HOVER_FURY_ZERO or LOC_HOVER_FURY({pct = run.demonFury * 10})
+    local pct = math.floor(100 * 1.1 ^ run.demonFury) - 100
+    local furyHover = run.demonFury <= 0 and LOC_HOVER_FURY_ZERO or LOC_HOVER_FURY({pct=pct})
     drawPanel(demonFury, "{demonfury_icon}{c r=0.6 g=0.1 b=0}  " .. tostring(run.demonFury), furyHover)
     drawPanel(gold, "{coin_icon} {GOLD_COLOR}" .. tostring(run.money), LOC_HOVER_GOLD)
 
