@@ -7,12 +7,45 @@ local showExitPopup = false
 local settingsPopupService = require("src.hud.settings")
 
 local TEXT = {
-    RESUME = loc("Resume"),
-    SETTINGS = loc("Settings"),
-    SAVE_EXIT = loc("Save and Exit"),
-    EXIT = loc("Exit"),
+    PAUSED = loc("PAUSED"),
+    RESUME = loc("RESUME"),
+    SETTINGS = loc("SETTINGS"),
+    SAVE_EXIT = loc("SAVE AND EXIT"),
+    EXIT = loc("EXIT"),
     WARNING = loc("Your progress will not be saved."),
     CANCEL = loc("Cancel"),
+}
+
+local function isSaveExit()
+    local _, scName = g.getCurrentScene()
+    return scName == "map_scene"
+end
+
+local PAUSE_BUTTON = {
+    {
+        name = function() return TEXT.RESUME end,
+        action = function()
+            pausePopupService.clear()
+        end,
+    },
+    {
+        name = function() return TEXT.SETTINGS end,
+        action = function()
+            settingsPopupService.show()
+        end,
+    },
+    {
+        name = function()
+            return isSaveExit() and TEXT.SAVE_EXIT or TEXT.EXIT
+        end,
+        action = function()
+            if isSaveExit() then
+                pausePopupService.exitToTitle(true)
+            else
+                showExitPopup = true
+            end
+        end
+    }
 }
 
 function pausePopupService.isActive()
@@ -37,7 +70,9 @@ function pausePopupService.toggle()
     end
 end
 
-local function exitToTitle(save)
+---@param save boolean
+---@package
+function pausePopupService.exitToTitle(save)
     g.transitionTo("title_scene", {onSwitch = function()
         pausePopupService.clear()
 
@@ -80,25 +115,60 @@ local function drawChoiceButton(reg, txt, font)
     return iml.wasJustClicked(reg:get())
 end
 
----@param safeExit boolean
-local function drawPauseMenu(safeExit)
-    local window = drawBasicWindow():padRatio(0.2)
+---@param reg kirigami.Region
+---@param txt string
+---@param font love.Font
+---@return boolean
+local function drawTextButton(reg, txt, font)
+    local buttonR = reg:padUnit(0, 2)
+
+    if iml.isHovered(buttonR:get()) then
+        lg.setColor(1, 1, 0.6)
+    else
+        lg.setColor(1, 1, 1)
+    end
+
+    local cx, cy = buttonR:getCenter()
+    helper.printTextOutline(
+        txt,
+        font,
+        1,
+        cx, cy,
+        buttonR.w,
+        "center",
+        0, 1, 1,
+        buttonR.w / 2, font:getHeight() / 2
+    )
+
+    return iml.wasJustClicked(buttonR:get())
+end
+
+local function drawPauseMenu()
+    local screen = ui.getScreenRegion()
+    local menu = screen:set(nil, nil, 420, 360):center(screen)
+    local titleFont = g.getBigFont(32)
     local font = g.getSmallFont(16)
-    local rows = window:grid(1, 3)
 
-    if drawChoiceButton(rows[1], TEXT.RESUME, font) then
-        pausePopupService.clear()
-    end
-    if drawChoiceButton(rows[2], TEXT.SETTINGS, font) then
-        settingsPopupService.show()
-    end
+    local _, titleR, _, buttonsR, _ = menu:splitVertical(1, 1, 1, 1, 2)
+    lg.setColor(1, 1, 1)
+    local tx, ty = titleR:getCenter()
+    helper.printTextOutline(
+        TEXT.PAUSED,
+        titleFont,
+        1,
+        tx, ty,
+        titleR.w,
+        "center",
+        0, 1, 1,
+        titleR.w / 2, titleFont:getHeight() / 2
+    )
 
-    local exitText = safeExit and TEXT.SAVE_EXIT or TEXT.EXIT
-    if drawChoiceButton(rows[3], exitText, font) then
-        if safeExit then
-            exitToTitle(true)
-        else
-            showExitPopup = true
+    local rows = buttonsR:grid(1, #PAUSE_BUTTON)
+
+    for i, info in ipairs(PAUSE_BUTTON) do
+        local rowR = rows[i]
+        if drawTextButton(rowR, info.name(), font) then
+            info.action()
         end
     end
 end
@@ -113,7 +183,7 @@ local function drawExitPopup()
 
     local leftR, rightR = buttonsR:splitHorizontal(1,1)
     if drawChoiceButton(leftR, TEXT.EXIT, font) then
-        exitToTitle(false)
+        pausePopupService.exitToTitle(false)
     end
     if drawChoiceButton(rightR, TEXT.CANCEL, font) then
         showExitPopup = false
@@ -138,7 +208,7 @@ function pausePopupService.draw()
     elseif showExitPopup then
         drawExitPopup()
     else
-        drawPauseMenu(safeExit)
+        drawPauseMenu()
     end
 
     prof_pop() -- prof_push("pausePopupService.draw")
