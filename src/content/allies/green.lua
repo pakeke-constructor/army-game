@@ -40,6 +40,7 @@ g.defineSquad("human_protector_squad", {
 g.defineSquad("human_lumberjack_squad", {
     name = "Human Lumberjacks",
     rarity = g.RARITIES.COMMON,
+    icon = g.leo("lumberjacks_uniticon", "militia_uniticon"),
     -- tags: attack_damage, health (basic bruiser)
     tags = {"attack_damage", "health"},
     entityDef = {

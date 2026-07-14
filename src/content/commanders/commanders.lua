@@ -139,7 +139,7 @@ g.defineCommander("druidcommander", "Druid Lady", {
             baseAttackSpeed = 0.45,
             baseAttackRange = 700, -- slightly less than octopus commander
             baseMoveSpeed = 85,
-            baseMaxHealth = 160,
+            baseMaxHealth = 10,
         },
         perks = {{
             id = "perk_breathoflife",

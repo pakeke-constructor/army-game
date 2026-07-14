@@ -123,7 +123,7 @@ function battle_scene:pollHandlers()
             self.particles:draw()
         end,
         entityDeath = function(ent)
-            if (ent == self.commander) and (ent.health < 0) then
+            if ent == self.commander and (ent.health <= 0) then
                 loseBattle(self)
             end
             if ent.team == "ally" then
