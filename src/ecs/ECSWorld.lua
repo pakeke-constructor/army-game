@@ -13,8 +13,7 @@ local ECSWorld = objects.Class("ecs:ECSWorld")
 
 local PARTITION_CHUNKSIZE = 32
 
-local ALLY_RECT_COLOR = g.snapToPalette(0.3, 1, 0.3)
-local ENEMY_RECT_COLOR = g.snapToPalette(1, 0.3, 0.3)
+local ALLY_RECT_COLOR = g.snapToPalette(0.3, 1, 0.3, 0.08)
 
 function ECSWorld:init(systemNames)
     ---@type objects.BufferedSet<ecs.Entity>
@@ -470,17 +469,9 @@ function ECSWorld:draw(transform)
     end
     g.call("postDraw")
     if consts.DEV_MODE then
-        local b = self.boundingBox or {1,1,1,1}
-        lg.setColor(1,1,1)
-        lg.rectangle("line", b[1],b[2],b[3],b[4])
         if self.allyRectangle then
             local r = self.allyRectangle
             lg.setColor(ALLY_RECT_COLOR)
-            lg.rectangle("line", r.x, r.y, r.w, r.h)
-        end
-        if self.enemyRectangle then
-            local r = self.enemyRectangle
-            lg.setColor(ENEMY_RECT_COLOR)
             lg.rectangle("line", r.x, r.y, r.w, r.h)
         end
     end
