@@ -101,6 +101,7 @@ local physics = {
 ---@field public yOffset number?
 ---@field public arcRadius number? hammer: orbit radius around the body
 ---@field public smashShake number? hammer: screen shake on smash
+---@field public smashRadius number? hammer: explosion radius on smash (default 40)
 ---@field public drawBehind boolean?
 ---@field public staffCastHeight number?
 ---@field public shieldBashDistance number?
@@ -220,6 +221,8 @@ local shadow = {
 ---@field public _timeSinceHealed number?
 ---@field public _timeSinceLostArmor number?
 ---@field public _deployTime number?
+---@field public _deployIndex integer?
+---@field public _dropSoundPlayed boolean?
 ---@field public deployDxFromCommander number?
 ---@field public deployDyFromCommander number?
 ---@field public _timeSinceAutoAttacked number?

@@ -1041,6 +1041,7 @@ end
 
 ---@param cost g.ManaBundle
 local function spawnCantAffordManaPopup(cost)
+    g.playUISound("ui_reject")
     local manaType = findMissingMana(cost, g.getBattleManaCounts())
     local umx, umy = ui.getMouse()
     g.addUITextPopup(umx, umy, CANT_AFFORD({manaType = manaType}), {

@@ -166,6 +166,7 @@ function map_scene:enter()
     self.commanderFacing = 1
     self.gallop = 0
     self.traveling = nil
+    self.lastHoveredNode = nil
     self.currentSelectAnimation = nil
     ---@type table<MapNode, number?>
     self.fogReveal = {}
@@ -437,7 +438,13 @@ function map_scene:update(dt)
     if self.traveling then
         local trav = self.traveling
         trav.t = trav.t + trav.speed * dt
+        local prevGallop = self.gallop
         self.gallop = self.gallop + dt * GALLOP_FREQ
+        -- footstep on each ground contact (bottom of the gallop bounce, every pi)
+        if math.floor(self.gallop / math.pi) > math.floor(prevGallop / math.pi) then
+            local step = love.math.random(1, 2)
+            g.playWorldSound("battle_footstep" .. step, 1+love.math.random(-10, 10)/100, 0.2)
+        end
         if trav.t >= 1 then
             local graph = g.getRun().mapGraph
             graph:setPlayerPosition(trav.toNode.x, trav.toNode.y)
@@ -651,6 +658,10 @@ function map_scene:draw()
         local pnode = graph:getPlayerNode()
         if pnode then
             hovered, clicked = updateNodePanels(graph)
+            if hovered ~= self.lastHoveredNode then
+                if hovered and hovered ~= pnode then g.playUISound("ui_mouse_hover") end
+                self.lastHoveredNode = hovered
+            end
             if clicked and (not self.traveling) then
                 local x, y = graph:getDrawPos(clicked)
                 self.currentSelectAnimation = {
@@ -660,6 +671,7 @@ function map_scene:draw()
                     time = 0,
                 }
                 self:travelTo(graph, pnode, clicked)
+                g.playUISound("ui_mouse_click")
             end
             local path = hovered and graph:findPath(pnode.x, pnode.y, hovered.x, hovered.y, PATH_SEARCH_DEPTH)
             hoverReachable = path ~= nil
