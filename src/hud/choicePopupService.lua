@@ -3,6 +3,7 @@ local BlessingChoicePanel = require("src.ui.choicepanels.BlessingChoicePanel")
 local ManaChoicePanel = require("src.ui.choicepanels.ManaChoicePanel")
 local UpgradeSquadChoicePanel = require("src.ui.choicepanels.UpgradeSquadChoicePanel")
 local ManaBlessingChoicePanel = require("src.ui.choicepanels.ManaBlessingChoicePanel")
+local SpellChoicePanel = require("src.ui.choicepanels.SpellChoicePanel")
 
 ---@class g.choicePopupService
 local choicePopupService = {}
@@ -10,7 +11,15 @@ local choicePopupService = {}
 ---@type g.ChoicePanelCommon?
 local active = nil
 
----@param rType "squad"|"blessing"|"mana"|"upgrade_squad"|"mana_blessing"
+---@alias g.ChoicePopupType
+---| "squad"
+---| "blessing"
+---| "mana"
+---| "upgrade_squad"
+---| "mana_blessing"
+---| "spell"
+
+---@param rType g.ChoicePopupType
 ---@param rerolls integer?
 ---@param rarityWeights g.RarityWeights?
 function choicePopupService.set(rType, rerolls, rarityWeights)
@@ -24,6 +33,8 @@ function choicePopupService.set(rType, rerolls, rarityWeights)
         active = UpgradeSquadChoicePanel()
     elseif rType == "mana_blessing" then
         active = ManaBlessingChoicePanel(rarityWeights)
+    elseif rType == "spell" then
+        active = SpellChoicePanel(rerolls or 0, rarityWeights)
     else
         error("Unknown choice panel type: "..tostring(rType))
     end

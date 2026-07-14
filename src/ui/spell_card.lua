@@ -8,7 +8,7 @@ local TRAIL_COUNT = {
 
 local RANGE_NAME = loc("Spell Range", {}, {
     context = "Name of spell range stat."})
-local RANGE_DESC = loc("How far from the cursor the spell reaches.", {}, {
+local RANGE_DESC = loc("Radius of the spell's area.", {}, {
     context = "Description of spell range stat."})
 local COOLDOWN_NAME = loc("Spell Cooldown", {}, {
     context = "Name of spell cooldown stat."})
