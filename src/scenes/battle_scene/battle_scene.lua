@@ -196,6 +196,10 @@ function battle_scene:enter()
     self.camera:setViewport(0, 0, love.graphics.getDimensions())
     self.camera:setPos(border[3] * 0.45, border[4] * 0.5)
 
+    if self:canUseLastArmy() then
+        self:deployLastArmy()
+    end
+
     ambienceService.reInitialize(self.camera:getTransform(), g.getMapType().cloudSprites)
 end
 
@@ -511,6 +515,7 @@ local BATTLE_START = {
 
 local START_BATTLE_BTN = loc("Start Battle!", {}, {context="Button the player presses to begin the battle after deploying their squads"})
 local USE_LAST_ARMY_BTM = loc("Use Last Layout", {}, {context="Button for the player to use the layout used last battle"})
+local RESET_BTN = loc("Reset", {}, {context="Button that clears all deployed squads and refunds mana, so the player can re-plan"})
 
 local CANT_AFFORD = interp("{c r=1 g=0.2 b=0.2}{o}Can't afford! (Need {c r=1 b=1 g=1}{%{manaType}}{/c})", {
     context = "Popup shown when player tries to deploy a squad but doesn't have enough mana. %{manaType} is a richtext icon for the mana type (e.g. red, blue, green, yellow)."
@@ -939,44 +944,6 @@ local function drawCommanderTarget(self)
     end
 end
 
-
----@param self g.BattleScene
----@return boolean
-local function canUseLastArmy(self)
-    if #self.deployedSquads > 0 then return false end
-    local layout = g.getRun().lastArmyLayout
-    if not layout or #layout == 0 then return false end
-
-    -- simulate spending mana, checking all squads exist + are affordable
-    local mana = {}
-    for k, v in pairs(g.getBattleManaCounts()) do mana[k] = v end
-    for _, entry in ipairs(layout) do
-        local squad = g.getSquadFromArmy(entry.squadId)
-        if not squad then return false end
-        local info = g.getSquadInfo(entry.squadId)
-        if info.cost and not g.trySpendMana(mana, info.cost) then
-            return false
-        end
-    end
-    return true
-end
-
----@param self g.BattleScene
-local function deployLastArmy(self)
-    local commx, commy = getCommanderDeployBasePos(self)
-    for _, entry in ipairs(g.getRun().lastArmyLayout) do
-        local squad = g.getSquadFromArmy(entry.squadId)
-        if squad and not squad.deployed then
-            local info = g.getSquadInfo(entry.squadId)
-            if not info.cost or g.trySpendMana(g.getBattleManaCounts(), info.cost) then
-                local sx, sy = commx + entry.dx, commy + entry.dy
-                squad:spawn(sx, sy)
-                self.deployedSquads[#self.deployedSquads + 1] = {squadId = entry.squadId, x = sx, y = sy}
-            end
-        end
-    end
-end
-
 ---@param self g.BattleScene
 local function saveLastArmy(self)
     if #self.deployedSquads == 0 then return end
@@ -986,6 +953,40 @@ local function saveLastArmy(self)
         layout[#layout + 1] = {squadId = d.squadId, dx = d.x - commx, dy = d.y - commy}
     end
     g.getRun().lastArmyLayout = layout
+end
+
+
+--- True while there's still an affordable, mana-costing squad left to deploy.
+---@param self g.BattleScene
+---@return boolean
+local function canSpendMoreMana(self)
+    for _, sq in ipairs(g.getSortedArmyList()) do
+        if not sq.deployed and sq.canAfford and g.getSquadInfo(sq.squadId).cost then
+            return true
+        end
+    end
+    return false
+end
+
+--- Undeploy every player-deployed squad, remove their units, refund all mana.
+---@param self g.BattleScene
+local function resetDeployment(self)
+    local deployedIds = {}
+    for _, d in ipairs(self.deployedSquads) do deployedIds[d.squadId] = true end
+    for _, ent in self.ecs:iterate("team") do
+        if ent ~= self.commander and ent.squad and deployedIds[ent.squad.squadId] then
+            self.ecs:removeEntity(ent)
+        end
+    end
+    for _, sq in ipairs(g.getSortedArmyList()) do
+        if deployedIds[sq.squadId] then sq.deployed = false end
+    end
+    self.deployedSquads = {}
+    local run = g.getRun()
+    run._battleMana = {}
+    for mana, count in pairs(run.mana) do
+        if count > 0 then run._battleMana[mana] = count end
+    end
 end
 
 
@@ -1042,6 +1043,43 @@ local function spawnCantAffordManaPopup(cost)
         fadeIn = 0.15,
         duration = 1.5,
     })
+end
+
+---@param self g.BattleScene
+---@return boolean
+function battle_scene:canUseLastArmy()
+    if #self.deployedSquads > 0 then return false end
+    local layout = g.getRun().lastArmyLayout
+    if not layout or #layout == 0 then return false end
+
+    -- simulate spending mana, checking all squads exist + are affordable
+    local mana = {}
+    for k, v in pairs(g.getBattleManaCounts()) do mana[k] = v end
+    for _, entry in ipairs(layout) do
+        local squad = g.getSquadFromArmy(entry.squadId)
+        if not squad then return false end
+        local info = g.getSquadInfo(entry.squadId)
+        if info.cost and not g.trySpendMana(mana, info.cost) then
+            return false
+        end
+    end
+    return true
+end
+
+---@param self g.BattleScene
+function battle_scene:deployLastArmy()
+    local commx, commy = getCommanderDeployBasePos(self)
+    for _, entry in ipairs(g.getRun().lastArmyLayout) do
+        local squad = g.getSquadFromArmy(entry.squadId)
+        if squad and not squad.deployed then
+            local info = g.getSquadInfo(entry.squadId)
+            if not info.cost or g.trySpendMana(g.getBattleManaCounts(), info.cost) then
+                local sx, sy = commx + entry.dx, commy + entry.dy
+                squad:spawn(sx, sy)
+                self.deployedSquads[#self.deployedSquads + 1] = {squadId = entry.squadId, x = sx, y = sy}
+            end
+        end
+    end
 end
 
 
@@ -1172,19 +1210,31 @@ function battle_scene:draw()
     self._leftClickThisFrame = false
 
     if self.deployPhase then
-        local r = ui.getScreenRegion()
-        local _, row, _ = r:splitVertical(6, 1, 1)
-        local _, mid, _ = row:splitHorizontal(1,1,1)
-        local a,b = mid:splitHorizontal(1,1)
+        local hud = self.hud
 
-        if canUseLastArmy(self) and ui.DefaultButton("{o}"..USE_LAST_ARMY_BTM, a:padRatio(0.15)) then
-            deployLastArmy(self)
+        -- RESET: sits above the mana box, available whenever something's deployed.
+        if #self.deployedSquads > 0 and hud.manaBoxRegion then
+            local resetR = hud.manaBoxRegion:moveUnit(0, -hud.manaBoxRegion.h)
+            if ui.DefaultButton("{o}"..RESET_BTN, resetR:padRatio(0.1, 0.5, 0.1, 0.5)) then
+                resetDeployment(self)
+            end
         end
 
-        if ui.DefaultButton("{o}"..START_BATTLE_BTN, b:padRatio(0.15)) then
-            saveLastArmy(self)
-            self.deployPhase = false
-            g.call("battleStarted")
+        if not canSpendMoreMana(self) then
+            -- READY PHASE: START overlays the squad HUD (fine if it covers icons).
+            if hud.squadBarRegion and ui.DefaultButton("{o}"..START_BATTLE_BTN, hud.squadBarRegion:padRatio(0.5, 0.4, 0.5, 0.4)) then
+                saveLastArmy(self)
+                self.deployPhase = false
+                g.call("battleStarted")
+            end
+        elseif #self.deployedSquads == 0 and self:canUseLastArmy() then
+            -- DEPLOY PHASE, nothing placed yet: offer the last layout (center).
+            local r = ui.getScreenRegion()
+            local _, row, _ = r:splitVertical(5.7, 1, 1.3)
+            local _, mid, _ = row:splitHorizontal(1, 1, 1)
+            if ui.DefaultButton("{o}"..USE_LAST_ARMY_BTM, mid:padRatio(0.15)) then
+                self:deployLastArmy()
+            end
         end
     end
 
