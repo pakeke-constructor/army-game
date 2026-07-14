@@ -78,7 +78,7 @@ COMMANDS.get = function(args)
     if not squadId then return addLog("usage: /get <squad_id>") end
     if squadId == "pick" then
         local rr = tonumber(args[2] or 0) or 0
-        require("src.hud.choicePopupService").set("squad", rr)
+        choicePopupService.set({type = "squad", rerolls = rr})
         return
     end
     if g.getSquadFromArmy(squadId) then return addLog("already have squad: " .. squadId) end
@@ -208,7 +208,7 @@ COMMANDS.spell = function(args)
 
     if spellId == "pick" then
         local rr = tonumber(args[2] or 0) or 0
-        require("src.hud.choicePopupService").set("spell", rr)
+        choicePopupService.set({type = "spell", rerolls = rr})
         return
     end
 

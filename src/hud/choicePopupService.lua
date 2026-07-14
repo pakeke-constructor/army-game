@@ -1,9 +1,10 @@
 local SquadChoicePanel = require("src.ui.choicepanels.SquadChoicePanel")
+local UpgradeSquadChoicePanel = require("src.ui.choicepanels.UpgradeSquadChoicePanel")
 local BlessingChoicePanel = require("src.ui.choicepanels.BlessingChoicePanel")
 local ManaChoicePanel = require("src.ui.choicepanels.ManaChoicePanel")
-local UpgradeSquadChoicePanel = require("src.ui.choicepanels.UpgradeSquadChoicePanel")
 local ManaBlessingChoicePanel = require("src.ui.choicepanels.ManaBlessingChoicePanel")
 local SpellChoicePanel = require("src.ui.choicepanels.SpellChoicePanel")
+local SpellDiscardChoicePanel = require("src.ui.choicepanels.SpellDiscardChoicePanel")
 
 ---@class g.choicePopupService
 local choicePopupService = {}
@@ -11,30 +12,60 @@ local choicePopupService = {}
 ---@type g.ChoicePanelCommon?
 local active = nil
 
----@alias g.ChoicePopupType
----| "squad"
----| "blessing"
----| "mana"
----| "upgrade_squad"
----| "mana_blessing"
----| "spell"
+---@class g.SquadChoicePanelParam
+---@field type "squad"
+---@field rerolls integer?
+---@field rarityWeights g.RarityWeights?
 
----@param rType g.ChoicePopupType
----@param rerolls integer?
----@param rarityWeights g.RarityWeights?
-function choicePopupService.set(rType, rerolls, rarityWeights)
+---@class g.BlessingChoicePanelParam
+---@field type "blessing"
+---@field rarityWeights g.RarityWeights?
+
+---@class g.ManaChoicePanelParam
+---@field type "mana"
+
+---@class g.ManaBlessingChoicePanelParam
+---@field type "mana_blessing"
+---@field rarityWeights g.RarityWeights?
+
+---@class g.SpellChoicePanelParam
+---@field type "spell"
+---@field rerolls integer?
+---@field rarityWeights g.RarityWeights?
+
+---@class g.SpellDiscardPanelParam
+---@field type "spell_discard"
+---@field spellId string?
+
+---@alias g.ChoicePopupParam
+---| g.SquadChoicePanelParam
+---| g.BlessingChoicePanelParam
+---| g.ManaChoicePanelParam
+---| g.ManaBlessingChoicePanelParam
+---| g.SpellChoicePanelParam
+---| g.SpellDiscardPanelParam
+
+---@param param g.ChoicePopupParam
+function choicePopupService.set(param)
+    local rType = param.type
     if rType == "squad" then
-        active = SquadChoicePanel(rerolls, rarityWeights)
-    elseif rType == "blessing" then
-        active = BlessingChoicePanel(rarityWeights)
-    elseif rType == "mana" then
-        active = ManaChoicePanel()
+        ---@cast param g.SquadChoicePanelParam
+        active = SquadChoicePanel(param.rerolls, param.rarityWeights)
     elseif rType == "upgrade_squad" then
         active = UpgradeSquadChoicePanel()
+    elseif rType == "blessing" then
+        active = BlessingChoicePanel(param.rarityWeights)
+    elseif rType == "mana" then
+        active = ManaChoicePanel()
     elseif rType == "mana_blessing" then
-        active = ManaBlessingChoicePanel(rarityWeights)
+        ---@cast param g.ManaBlessingChoicePanelParam
+        active = ManaBlessingChoicePanel(param.rarityWeights)
     elseif rType == "spell" then
-        active = SpellChoicePanel(rerolls, rarityWeights)
+        ---@cast param g.SpellChoicePanelParam
+        active = SpellChoicePanel(param.rerolls, param.rarityWeights)
+    elseif rType == "spell_discard" then
+        ---@cast param g.SpellDiscardPanelParam
+        active = SpellDiscardChoicePanel(param.spellId)
     else
         error("Unknown choice panel type: "..tostring(rType))
     end
@@ -53,13 +84,17 @@ function choicePopupService.draw()
     prof_push("choicePopupService.draw")
     lg.setColor(0,0,0,0.7)
     lg.rectangle("fill", -1000,-1000, 9000,9000)
+    local curActive = active
     local done = active:draw()
+    local finish = false
     if done then
-        active = nil
-        prof_pop() -- prof_push("choicePopupService.draw")
-        return true
+        if curActive == active then
+            active = nil
+            finish = true
+        end
     end
     prof_pop() -- prof_push("choicePopupService.draw")
+    return finish
 end
 
 return choicePopupService
