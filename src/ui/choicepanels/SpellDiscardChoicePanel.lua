@@ -2,17 +2,21 @@ local ChoicePanelCommon = require(".common")
 local cardJuiceService = require("src.cardJuiceService")
 
 local CHOOSE_SPELL_DISCARD = loc("Choose a Spell to Discard")
+local REROLL_GAP = 8
 
 ---@class g.SpellDiscardChoicePanel: g.ChoicePanelCommon
 local SpellDiscardChoicePanel = objects.Class("g:SpellDiscardChoicePanel"):implement(ChoicePanelCommon)
 
----@param spellId string
+---@param spellId string?
 function SpellDiscardChoicePanel:init(spellId)
     self.toBeAddedSpell = spellId
     ---@type string[]
     self.choices = g.getRun().spells:totable()
     table.sort(self.choices)
-    self.choices[ChoicePanelCommon.NUM_CHOICES] = spellId
+
+    if spellId then
+        self.choices[#self.choices+1] = spellId
+    end
     ---@type number[]
     self.choiceCreatedAt = {}
     self.createdAt = love.timer.getTime()
@@ -34,9 +38,13 @@ end
 
 ---@param region kirigami.Region
 ---@return kirigami.Region cardR
-local function getCardRegion(region)
+---@return kirigami.Region rerollR
+local function getCardRegions(region)
     local cardBaseR = region:splitVertical(9, 1)
-    return cardBaseR:splitVertical(3, 2):center(cardBaseR)
+    local cardR = cardBaseR:splitVertical(3, 2):center(cardBaseR)
+    local _, rerollH = g.getImageSize("reroll_button_body")
+    local rerollR = Kirigami(cardR.x, cardR.y + cardR.h + REROLL_GAP, cardR.w, rerollH)
+    return cardR, rerollR
 end
 
 function SpellDiscardChoicePanel:draw()
@@ -56,6 +64,7 @@ function SpellDiscardChoicePanel:draw()
     local titleFont = g.getBigFont(16)
     lg.setColor(1, 1, 1)
     richtext.printRichContainedNoWrap("{o}{bob}" .. CHOOSE_SPELL_DISCARD, titleFont, titleR:get())
+    cardArea = r:padRatio(0.05, 0.1)
 
     if self.cj:hasAnimationBegun() then
         self.cj:draw()
@@ -65,9 +74,13 @@ function SpellDiscardChoicePanel:draw()
                 local spell = self.choices[self.selected]
                 if spell ~= self.toBeAddedSpell then
                     g.removeSpellFromArmy(spell)
-                    g.addSpellToArmy(self.toBeAddedSpell)
+
+                    if self.toBeAddedSpell then
+                        g.addSpellToArmy(self.toBeAddedSpell)
+                    end
                 end
             end
+
             return true
         end
 
@@ -96,7 +109,7 @@ function SpellDiscardChoicePanel:draw()
     end
 
     for i, spellId in ipairs(self.choices) do
-        local cardR = getCardRegion(regions[i])
+        local cardR = getCardRegions(regions[i])
         local function draw(reg)
             return ui.drawSpellCard(spellId, reg, i)
         end
@@ -106,7 +119,7 @@ function SpellDiscardChoicePanel:draw()
 
             for j, otherSpellId in ipairs(self.choices) do
                 if i ~= j then
-                    local otherCardR = getCardRegion(regions[j])
+                    local otherCardR = getCardRegions(regions[j])
                     self.cj:spawnCardUnselected(otherCardR, j, function(reg)
                         return ui.drawSpellCard(otherSpellId, reg, j)
                     end)
