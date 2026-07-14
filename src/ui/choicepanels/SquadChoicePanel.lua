@@ -132,6 +132,8 @@ local function drawRerollButton(region, index, disabled)
     elseif isHovered then
         bodyImage = "reroll_button_body_hover"
     end
+
+    lg.setColor(1, 1, 1)
     g.drawImageContained(bodyImage, rerollR:get())
 
     local iconImage = disabled and "shop_reroll_icon_gray" or "shop_reroll_icon"
