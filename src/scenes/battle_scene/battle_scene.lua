@@ -190,7 +190,9 @@ function battle_scene:enter()
         self.ecs:setBounds(500,300, 1900, 1100)
         self:generateAllyAndEnemyRectangles(self.ecs.boundingBox)
     else
-        encounters.startRandomEncounter(run.day, self.ecs, function(border)
+        local node = run.mapGraph:getPlayerNode()
+        local difficulty = (run.level - 1) * 3 + node.demonEncounter + 1
+        encounters.startRandomEncounter(difficulty, self.ecs, function(border)
             self:generateAllyAndEnemyRectangles(border)
         end)
     end
@@ -805,8 +807,16 @@ local function drawSquadHover(self, squad, wx, wy)
     end
     local smallFont = g.getSmallFont(16)
     lg.setColor(info.rarity.color)
-    local yof2 = -24
-    richtext.printRichCentered("{bob}{o}"..info.name, smallFont, sx, sy+minY+yof2, 1000, "left")
+    richtext.printRichCentered("{bob}{o}"..info.name, smallFont, sx, sy + minY - 24, 1000, "left")
+
+    local manaCost = {}
+    for _, manaType in ipairs(g.getManaTypelist()) do
+        for i = 1, info.cost[manaType] or 0 do
+            manaCost[#manaCost + 1] = "{" .. manaType .. "_mana}"
+        end
+    end
+    lg.setColor(1, 1, 1, 1)
+    richtext.printRichCentered(table.concat(manaCost, " "), smallFont, sx, sy + maxY + h / 2 + 12, 1000, "left")
 end
 
 
