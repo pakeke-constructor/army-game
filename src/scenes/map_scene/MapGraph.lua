@@ -364,7 +364,59 @@ function MapGraph.generate(args, rng)
         end
     end
 
-    -- 8. DFS from (0,0) — prune all unreachable nodes
+    -- 8. Make a starting enclave path with one route out
+    local ENCLAVE_SIZE = 5
+    self:setPlayerPosition(0, 0)
+    local playerNode = self:getPlayerNode()
+
+    local function findEnclavePath(path, pathKeys)
+        local current = path[#path]
+        if #path == ENCLAVE_SIZE then
+            local exits = {}
+            for _, node in ipairs(self:getNeighbors(current.x, current.y)) do
+                if not pathKeys[nodeKey(node.x, node.y)] then
+                    exits[#exits + 1] = node
+                end
+            end
+            if #exits > 0 then
+                return path, exits[math.floor(rng() * #exits) + 1]
+            end
+            return nil
+        end
+
+        for _, node in ipairs(self:getNeighbors(current.x, current.y)) do
+            local key = nodeKey(node.x, node.y)
+            if not pathKeys[key] then
+                path[#path + 1] = node
+                pathKeys[key] = true
+                local foundPath, exit = findEnclavePath(path, pathKeys)
+                if foundPath then return foundPath, exit end
+                pathKeys[key] = nil
+                path[#path] = nil
+            end
+        end
+    end
+
+    local playerKey = nodeKey(playerNode.x, playerNode.y)
+    local path, exit = findEnclavePath({ playerNode }, { [playerKey] = true })
+    if path then
+        local keptEdges = {}
+        for i = 1, #path - 1 do
+            local a, b = path[i], path[i + 1]
+            keptEdges[edgeKey(a.x, a.y, b.x, b.y)] = true
+        end
+        keptEdges[edgeKey(path[#path].x, path[#path].y, exit.x, exit.y)] = true
+
+        for _, node in ipairs(path) do
+            for _, neighbor in ipairs(self:getNeighbors(node.x, node.y)) do
+                if not keptEdges[edgeKey(node.x, node.y, neighbor.x, neighbor.y)] then
+                    self:removeEdge(node.x, node.y, neighbor.x, neighbor.y)
+                end
+            end
+        end
+    end
+
+    -- 9. DFS from (0,0) — prune all unreachable nodes
     local reachable = {}
     local stack = { nodeKey(0, 0) }
     while #stack > 0 do
@@ -390,7 +442,6 @@ function MapGraph.generate(args, rng)
     end
 
     -- STAGE 2: Node generation
-    self:setPlayerPosition(0, 0)
     self:_generateNodes(rng, not not args.fromPortal)
 
     ensureNodeOffsets() -- since more nodes were generated; add more here.
@@ -487,7 +538,10 @@ function MapGraph.generate(args, rng)
     return self
 end
 
---- Generate a tunnel map.
+
+
+--- Generates an alternative map type: A tunnel map.
+--- (UNUSED CURRENTLY I THINK; the)
 ---@param args MapGraph.GenArgs
 ---@param rng? fun():number a function returning [0,1), e.g. math.random
 function MapGraph.generateTunnel(args, rng)

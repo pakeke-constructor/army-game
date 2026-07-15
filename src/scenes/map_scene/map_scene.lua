@@ -193,7 +193,7 @@ function map_scene:_buildMap(mapType, fromPortal)
     local run = g.getRun()
     -- Run the proc gen algorithm until we have a valid setup.
     -- (nodeCount > 20 is valid)
-    repeat run.mapGraph = MapGraph.generateTunnel({
+    repeat run.mapGraph = MapGraph.generate({
         width = 18,
         height = 10,
         tunnelHeight = 6,
