@@ -5,7 +5,6 @@ local ParticleService = require(".particles.ParticleService")
 local fogService = require("src.fogService")
 local juiceService = require("src.juiceService")
 local ambienceService = require("src.ambienceService")
-local s = require("src.hud.settings")
 
 
 local function cameraZoom()
@@ -295,6 +294,7 @@ end
 
 function battle_scene:update(dt)
     self.timeSinceEnteredScene = self.timeSinceEnteredScene + dt
+    local paused = self.paused or pausePopupService.isActive()
 
     local run = g.getRun()
     for _, squad in pairs(run.squads) do
@@ -306,7 +306,7 @@ function battle_scene:update(dt)
     self:updateCamera(dt)
     juiceService.update(dt)
     ambienceService.update(dt, self.camera:getTransform())
-    self.ecs:update(self.deployPhase and 0 or dt)
+    self.ecs:update((paused or self.deployPhase) and 0 or dt)
 
     local enemyCount = countEnemies(self.ecs)
     self.lastEnemyCount = enemyCount
@@ -315,7 +315,7 @@ function battle_scene:update(dt)
         return
     end
 
-    if not self.paused then
+    if not paused then
         self.particles:update(dt)
         for k, v in pairs(run.spellsCast) do
             run.spellsCast[k] = math.max(v - dt, 0)
@@ -410,7 +410,10 @@ end
 function battle_scene:mousepressed(x, y, button)
     -- raw flag so draw() can tell a click happened even when it lands on a UI
     -- element (which swallows the battlefield click via iml). Reset in draw().
-    if button == 1 then self._leftClickThisFrame = true end
+    if button == 1 then
+        self.hud.pinnedCard = nil
+        self._leftClickThisFrame = true
+    end
     if button == 2 then self.selectedSquad = nil end
 end
 
@@ -469,7 +472,6 @@ local function spawnTestLightning(self)
 end
 
 function battle_scene:keypressed(k)
-    if s.keypressed(k) then return end
     local n = tonumber(k)
     if n and n >= 1 and n <= 9 then
         self.hud:selectVisibleSlot(n)
@@ -500,6 +502,13 @@ function battle_scene:keypressed(k)
                 }, 1)
             end
         end
+    end
+end
+
+---@param k love.KeyConstant
+function battle_scene:keyreleased(k)
+    if k == "escape" then
+        pausePopupService.toggle()
     end
 end
 
@@ -1256,7 +1265,6 @@ function battle_scene:draw()
     if self.sandbox and consts.SHOW_DEV_STUFF then
         drawSandboxUI(self)
     end
-    s.draw()
     ui.endUI()
 
     if self.shockwave and self.shockwave.time < WIN_SHOCKWAVE_DURATION then

@@ -1,6 +1,5 @@
 
 local hoverService = require("src.hud.hoverService")
-local s = require("src.hud.settings")
 
 
 
@@ -54,6 +53,9 @@ end
 ---@param istouch boolean
 ---@param presses number
 function shop_scene:mousepressed(mx, my, button, istouch, presses)
+    if button == 1 then
+        self.hud.pinnedCard = nil
+    end
 end
 
 ---@param mx number
@@ -73,9 +75,10 @@ end
 
 ---@param key string
 ---@param scancode string
----@param isrep boolean
-function shop_scene:keypressed(key, scancode, isrep)
-    if s.keypressed(key) then return end
+function shop_scene:keyreleased(key, scancode)
+    if key == "escape" then
+        pausePopupService.toggle()
+    end
 end
 
 

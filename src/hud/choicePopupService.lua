@@ -25,6 +25,9 @@ local active = nil
 ---@class g.ManaChoicePanelParam
 ---@field type "mana"
 
+---@class g.UpgradeSquadChoicePanelParam
+---@field type "upgrade_squad"
+
 ---@class g.ManaBlessingChoicePanelParam
 ---@field type "mana_blessing"
 ---@field rarityWeights g.RarityWeights?
@@ -44,6 +47,7 @@ local active = nil
 
 ---@alias g.ChoicePopupParam
 ---| g.SquadChoicePanelParam
+---| g.UpgradeSquadChoicePanelParam
 ---| g.BlessingChoicePanelParam
 ---| g.ManaChoicePanelParam
 ---| g.ManaBlessingChoicePanelParam
