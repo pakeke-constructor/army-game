@@ -294,6 +294,7 @@ end
 
 function battle_scene:update(dt)
     self.timeSinceEnteredScene = self.timeSinceEnteredScene + dt
+    local paused = self.paused or pausePopupService.isActive()
 
     local run = g.getRun()
     for _, squad in pairs(run.squads) do
@@ -305,7 +306,7 @@ function battle_scene:update(dt)
     self:updateCamera(dt)
     juiceService.update(dt)
     ambienceService.update(dt, self.camera:getTransform())
-    self.ecs:update(self.deployPhase and 0 or dt)
+    self.ecs:update((paused or self.deployPhase) and 0 or dt)
 
     local enemyCount = countEnemies(self.ecs)
     self.lastEnemyCount = enemyCount
@@ -314,7 +315,7 @@ function battle_scene:update(dt)
         return
     end
 
-    if not self.paused then
+    if not paused then
         self.particles:update(dt)
         for k, v in pairs(run.spellsCast) do
             run.spellsCast[k] = math.max(v - dt, 0)
