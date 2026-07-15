@@ -6,6 +6,26 @@ local cardJuiceService = require("src.cardJuiceService")
 ---@class g.SquadChoicePanel: g.ChoicePanelCommon
 local SquadChoicePanel = objects.Class("g:SquadChoicePanel"):implement(ChoicePanelCommon)
 
+
+
+---@param rarityWeights g.RarityWeights
+---@return picker.Picker<string>
+local function buildPicker(rarityWeights)
+    local manaCells = g.getRun().mana
+    local pool = g.getSquadsByMana(manaCells)
+
+    ---@type number[]
+    local weights = {}
+    for i, id in ipairs(pool) do
+        local info = g.getSquadInfo(id)
+        weights[i] = rarityWeights[info.rarity.id] or 0
+    end
+
+    return Picker(pool, weights)
+end
+
+
+
 ---@param rerolls integer?
 ---@param rarityWeights g.RarityWeights?
 function SquadChoicePanel:init(rerolls, rarityWeights)
@@ -15,19 +35,18 @@ function SquadChoicePanel:init(rerolls, rarityWeights)
     self.choices = {}
     ---@type number[]
     self.choiceCreatedAt = {}
-    self.rarityWeights = rarityWeights or consts.DEFAULT_RARITY_WEIGHTS
     self.createdAt = love.timer.getTime()
     ---@type integer|nil
     self.selected = nil
     self.cj = cardJuiceService.CardJuiceInstance()
     self.showReroll = (rerolls or 0) > 0
+    self.picker = buildPicker(rarityWeights or consts.DEFAULT_RARITY_WEIGHTS)
 
     for _ = 1, ChoicePanelCommon.NUM_CHOICES do
         self.rerolls[#self.rerolls+1] = rerolls or 0
         self.choiceCreatedAt[#self.choiceCreatedAt+1] = self.createdAt
+        self.choices[#self.choices+1] = self.picker:pickAndRemove(nil, 20)
     end
-
-    self:_rollChoices()
 end
 
 if false then
@@ -38,66 +57,12 @@ if false then
     function SquadChoicePanel(rerolls, rarityWeights) end
 end
 
----@private
-function SquadChoicePanel:_rollChoices()
-    self.choices = {}
-
-    local manaCells = g.getRun().mana
-
-    local pool = g.getSquadsByMana(manaCells)
-    self:_pickFromPool(pool)
-end
-
----@param pool string[]
----@param out string[]?
----@param count integer?
----@private
-function SquadChoicePanel:_pickFromPool(pool, out, count)
-    if #pool == 0 then return end
-    out = out or self.choices
-    count = count or ChoicePanelCommon.NUM_CHOICES
-
-    local weights = {}
-    for i, id in ipairs(pool) do
-        local info = g.getSquadInfo(id)
-        weights[i] = self.rarityWeights[info.rarity.id] or 0
-    end
-
-    local picker = Picker(pool, weights)
-    for _ = 1, count do
-        local pick = picker:pickAndRemove(nil, 20)
-        out[#out + 1] = pick
-    end
-end
-
----@param pool string[]
----@param seen table<string, true?>
----@private
-function SquadChoicePanel:_pickOneFromPool(pool, seen)
-    if #pool == 0 then return end
-
-    local weights = {}
-    for i, id in ipairs(pool) do
-        local info = g.getSquadInfo(id)
-        weights[i] = self.rarityWeights[info.rarity.id] or 0
-    end
-
-    local picker = Picker(pool, weights)
-    local pick = picker:pickAndRemove(nil, 20)
-    return pick
-end
-
 ---@param index integer
 ---@private
 function SquadChoicePanel:_rerollChoice(index)
     if (self.rerolls[index] or 0) <= 0 then return end
 
-    local seen = {}
-    for _, id in ipairs(self.choices) do
-        seen[id] = true
-    end
-
-    local pick = self:_pickOneFromPool(g.getSquadsByMana(g.getRun().mana), seen)
+    local pick = self.picker:pickAndRemove(nil, 20)
     self.rerolls[index] = self.rerolls[index] - 1
     self.choices[index] = pick
     self.choiceCreatedAt[index] = love.timer.getTime()

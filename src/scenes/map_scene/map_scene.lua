@@ -10,7 +10,6 @@ local hoverService = require("src.hud.hoverService")
 local juiceService = require("src.juiceService")
 local ambienceService = require("src.ambienceService")
 local mapTypes = require("src.scenes.map_scene.map_types")
-local s = require("src.hud.settings")
 local Z = require("lib.zorder")
 
 local CAMERA_ZOOM = 1--0.5
@@ -482,7 +481,6 @@ end
 
 
 function map_scene:keypressed(k)
-    if s.keypressed(k) then return end
     if consts.DEV_MODE then
         if k == "o" then
             nodeEventService.openFountainPopup()
@@ -490,6 +488,13 @@ function map_scene:keypressed(k)
         if k == "q" then
             nodeEventService.startRandomEvent()
         end
+    end
+end
+
+---@param key love.KeyConstant
+function map_scene:keyreleased(key)
+    if key == "escape" then
+        pausePopupService.toggle()
     end
 end
 
@@ -521,6 +526,7 @@ function map_scene:_startTravelLeg(graph)
 end
 
 function map_scene:mousepressed(mx, my, button)
+    self.hud.pinnedCard = nil
     if button == 1 then
         self.dragging = true
     end
@@ -746,7 +752,6 @@ function map_scene:draw()
 
     ui.startUI()
     self.hud:drawUI({ mapScene = true })
-    s.draw()
     ui.endUI()
 end
 

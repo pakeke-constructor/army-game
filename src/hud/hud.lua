@@ -9,11 +9,13 @@ local settingsPopupService = require("src.hud.settings")
 ---@field battleStarted boolean cached each frame; false = squads selectable, true = spells selectable
 ---@field manaBoxRegion kirigami.Region? bottom-bar mana box
 ---@field squadBarRegion kirigami.Region? bottom-bar squad icons
+---@field pinnedCard string|g.Squad|nil pinned squad (g.Squad) or spell (string)
 local HUD = objects.Class("g:HUD")
 
 function HUD:init()
     self.selectedIndex = 1
     self.battleStarted = false
+    self.pinnedCard = nil
 end
 
 ---@class g.hudArgs.hoverSquad
@@ -220,6 +222,7 @@ end
 ---@param region kirigami.Region
 ---@param selIdx integer?
 local function drawSquadsSection(self, region, selIdx)
+    ---@type g.Squad[]
     local visible = {}
     for _, sq in ipairs(g.getSortedArmyList()) do
         if isSquadVisible(sq) then
@@ -236,15 +239,19 @@ local function drawSquadsSection(self, region, selIdx)
     for i, sq in ipairs(visible) do
         local x = startX + (i - 1) * step
         local y = baseY
-        local selected = (i == selIdx)
-        if isBattle and selected then
+        local selected = (isBattle and i == selIdx) or (self.pinnedCard == sq)
+        if selected then
             y = y - 6
         end
         renderSquad(sq, x, y-4, selected)
-        if selIdx and iml.wasJustClicked(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, 1, i) then
-            self.selectedIndex = i
+        if iml.wasJustClicked(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, 1, i) then
+            if selIdx then
+                self.selectedIndex = i
+            end
+
+            self.pinnedCard = sq
         end
-        iml.panel(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, i)
+
         if iml.isHovered(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, i) then
             self.hoveredSquad = sq
         end
@@ -277,7 +284,9 @@ local function drawSpellsSection(self, region, selIdx)
             self.selectedIndex = i
         end
         iml.panel(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, id)
-        if iml.isHovered(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, id) then
+        if iml.wasJustClicked(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, 1, id) then
+            self.pinnedCard = spellId
+        elseif iml.isHovered(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, id) then
             self.hoveredSpell = spellId
         end
     end
@@ -489,7 +498,7 @@ local function drawTopBar()
     drawPanel(pausePanel, "II")
     local px, py, pw, ph = pausePanel:get()
     if iml.wasJustClicked(px, py, pw, ph, 1, "pause_button") then
-        settingsPopupService.show()
+        pausePopupService.activate()
     end
 
     prof_pop() -- prof_push("drawTopBar")
@@ -646,22 +655,30 @@ function HUD:drawUI(opt)
 
     drawBottomBar(self, opt, SQUAD_ICON_SIZE + 30)
 
-    local hoveredSquadId = (opt.hoverSquad and opt.hoverSquad.id) or (self.hoveredSquad and self.hoveredSquad.squadId)
+    local hoveredSquadId =
+        (opt.hoverSquad and opt.hoverSquad.id)
+        or (self.hoveredSquad and self.hoveredSquad.squadId)
+        or (type(self.pinnedCard) == "table" and self.pinnedCard.squadId)
+    local hoveredSpell = self.hoveredSpell
+        or (type(self.pinnedCard) == "string" and self.pinnedCard)
+
     if hoveredSquadId then
         local main = ui.getScreenRegion()
         local _, left = main:padRatio(0.2):splitHorizontal(2, 1)
         local showUpgrade = not not (opt.hoverSquad and opt.hoverSquad.showUpgrade)
         ui.drawSquadCard(hoveredSquadId, left:padRatio(0.1), -999, showUpgrade, true)
-    elseif self.hoveredSpell then
+    elseif hoveredSpell then
+        ---@cast hoveredSpell string
         local main = ui.getScreenRegion()
         local _, left = main:padRatio(0.2):splitHorizontal(2, 1)
         local spellR = left:splitVertical(3, 2):center(left)
-        ui.drawSpellCard(self.hoveredSpell, spellR:padRatio(0.1), -999)
+        ui.drawSpellCard(hoveredSpell, spellR:padRatio(0.1), -999)
     end
 
     rewardPopupService.draw()
     choicePopupService.draw()
     nodeEventService.draw()
+    pausePopupService.draw()
     gameoverPopupService.draw()
     hoverService.draw()
 
