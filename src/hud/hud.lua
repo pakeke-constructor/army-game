@@ -9,11 +9,13 @@ local settingsPopupService = require("src.hud.settings")
 ---@field battleStarted boolean cached each frame; false = squads selectable, true = spells selectable
 ---@field manaBoxRegion kirigami.Region? bottom-bar mana box
 ---@field squadBarRegion kirigami.Region? bottom-bar squad icons
+---@field pinnedCard string|g.Squad|nil pinned squad (g.Squad) or spell (string)
 local HUD = objects.Class("g:HUD")
 
 function HUD:init()
     self.selectedIndex = 1
     self.battleStarted = false
+    self.pinnedCard = nil
 end
 
 ---@class g.hudArgs.hoverSquad
@@ -245,7 +247,9 @@ local function drawSquadsSection(self, region, selIdx)
             self.selectedIndex = i
         end
         iml.panel(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, i)
-        if iml.isHovered(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, i) then
+        if iml.wasJustClicked(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, 1, i) then
+            self.pinnedCard = sq
+        elseif iml.isHovered(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, i) then
             self.hoveredSquad = sq
         end
     end
@@ -277,7 +281,9 @@ local function drawSpellsSection(self, region, selIdx)
             self.selectedIndex = i
         end
         iml.panel(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, id)
-        if iml.isHovered(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, id) then
+        if iml.wasJustClicked(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, 1, id) then
+            self.pinnedCard = spellId
+        elseif iml.isHovered(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, id) then
             self.hoveredSpell = spellId
         end
     end
@@ -646,17 +652,24 @@ function HUD:drawUI(opt)
 
     drawBottomBar(self, opt, SQUAD_ICON_SIZE + 30)
 
-    local hoveredSquadId = (opt.hoverSquad and opt.hoverSquad.id) or (self.hoveredSquad and self.hoveredSquad.squadId)
+    local hoveredSquadId =
+        (opt.hoverSquad and opt.hoverSquad.id)
+        or (self.hoveredSquad and self.hoveredSquad.squadId)
+        or (type(self.pinnedCard) == "table" and self.pinnedCard.squadId)
+    local hoveredSpell = self.hoveredSpell
+        or (type(self.pinnedCard) == "string" and self.pinnedCard)
+
     if hoveredSquadId then
         local main = ui.getScreenRegion()
         local _, left = main:padRatio(0.2):splitHorizontal(2, 1)
         local showUpgrade = not not (opt.hoverSquad and opt.hoverSquad.showUpgrade)
         ui.drawSquadCard(hoveredSquadId, left:padRatio(0.1), -999, showUpgrade, true)
-    elseif self.hoveredSpell then
+    elseif hoveredSpell then
+        ---@cast hoveredSpell string
         local main = ui.getScreenRegion()
         local _, left = main:padRatio(0.2):splitHorizontal(2, 1)
         local spellR = left:splitVertical(3, 2):center(left)
-        ui.drawSpellCard(self.hoveredSpell, spellR:padRatio(0.1), -999)
+        ui.drawSpellCard(hoveredSpell, spellR:padRatio(0.1), -999)
     end
 
     rewardPopupService.draw()
