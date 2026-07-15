@@ -257,6 +257,54 @@ end
 nodes.BattleNode = BattleNode
 
 
+
+
+
+
+
+
+
+
+
+-------------------------------
+-- BossNode
+-------------------------------
+---@class MapNode.BossNode: MapNode
+local BossNode = nodes.newClass("boss")
+
+function BossNode:init(x,y)
+    self.demonEncounter = 0
+    Node.init(self,x,y)
+end
+
+function BossNode:enter()
+    g.transitionTo("battle_scene")
+end
+
+local BOSS = loc("Boss node")
+function BossNode:getHoverDescription()
+    return BOSS
+end
+
+function BattleNode:drawBelow(wx, wy)
+    love.graphics.setColor(g.getMapType().mapPath)
+    love.graphics.ellipse("fill", wx, wy, 8, 5)
+    love.graphics.setColor(0.8, 0.3, 0.3, 1)
+    love.graphics.ellipse("fill", wx, wy, 6, 3)
+end
+
+function BattleNode:buildDecor(builder, wx, wy)
+    if not self.visited then
+        addDemons(self, builder, wx, wy)
+    end
+end
+
+nodes.BattleNode = BattleNode
+
+
+
+
+
 -------------------------------
 -- FeastNode
 -------------------------------

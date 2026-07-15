@@ -255,6 +255,7 @@ end
 ---@field nodeOffsetFactor number
 ---@field scaleX number
 ---@field scaleY number
+---@field tunnelHeight integer?
 ---@field fromPortal boolean? If true, new player position will be deactivated portal node.
 
 --- Generate a map procedurally.
@@ -486,6 +487,90 @@ function MapGraph.generate(args, rng)
     return self
 end
 
+--- Generate a tunnel map.
+---@param args MapGraph.GenArgs
+---@param rng? fun():number a function returning [0,1), e.g. math.random
+function MapGraph.generateTunnel(args, rng)
+    local width = args.width
+    local height = args.tunnelHeight
+    local y0 = -math.floor(height / 2)
+    local y1 = y0 + height - 1
+    local self = MapGraph(width, height, args.mapType) --[[@as MapGraph]]
+    self.distanceBetweenNodes = args.distanceBetweenNodes
+    self.scaleX = args.scaleX
+    self.scaleY = args.scaleY
+    rng = rng or love.math.random
+    self.rng = rng
+
+    for x = 0, width - 1 do
+        for y = y0, y1 do
+            self:addNode(x, y, "battle")
+        end
+    end
+
+    for x = 0, width - 2 do
+        for y = y0, y1 do
+            self:addEdge(x, y, x + 1, y)
+            if y > y0 then self:addEdge(x, y, x + 1, y - 1) end
+            if y < y1 then self:addEdge(x, y, x + 1, y + 1) end
+        end
+    end
+
+    for x = 0, width - 1 do
+        if rng() < 0.5 then
+            local ys = {}
+            for y = y0, y1 do
+                if x ~= 0 or y ~= 0 then
+                    ys[#ys + 1] = y
+                end
+            end
+            local y = ys[math.floor(rng() * #ys) + 1]
+            self:removeNode(x, y)
+        end
+    end
+
+    local function ensureNodeOffsets()
+        local maxOff = args.distanceBetweenNodes * args.nodeOffsetFactor
+        for _, node in pairs(self.nodes) do
+            node.ox = (rng() - 0.5) * 2 * maxOff
+            node.oy = (rng() - 0.5) * 2 * maxOff
+        end
+    end
+    ensureNodeOffsets()
+
+    local boss = self:getNode(width - 1, 0)
+    if not boss then
+        for y = y0, y1 do
+            boss = self:getNode(width - 1, y)
+            if boss then break end
+        end
+    end
+
+    for x = 0, width - 1 do
+        for y = y0, y1 do
+            local node = self:getNode(x, y)
+            local hasForwardEdge = false
+            local hasBackwardEdge = false
+            if node then
+                for _, neighbor in ipairs(self:getNeighbors(x, y)) do
+                    hasForwardEdge = hasForwardEdge or neighbor.x > x
+                    hasBackwardEdge = hasBackwardEdge or neighbor.x < x
+                end
+                if node ~= boss and node ~= self:getNode(0, 0)
+                    and (not hasForwardEdge or not hasBackwardEdge) then
+                    self:removeNode(x, y)
+                end
+            end
+        end
+    end
+
+    self:setPlayerPosition(0, 0)
+    self:_generateNodes(rng, not not args.fromPortal)
+    self:setNode(boss.x, boss.y, "boss")
+    self:_generateGroundDecors()
+
+    return self
+end
 
 
 ---@return integer
