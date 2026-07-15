@@ -222,6 +222,7 @@ end
 ---@param region kirigami.Region
 ---@param selIdx integer?
 local function drawSquadsSection(self, region, selIdx)
+    ---@type g.Squad[]
     local visible = {}
     for _, sq in ipairs(g.getSortedArmyList()) do
         if isSquadVisible(sq) then
@@ -238,18 +239,20 @@ local function drawSquadsSection(self, region, selIdx)
     for i, sq in ipairs(visible) do
         local x = startX + (i - 1) * step
         local y = baseY
-        local selected = (i == selIdx)
-        if isBattle and selected then
+        local selected = (isBattle and i == selIdx) or (self.pinnedCard == sq)
+        if selected then
             y = y - 6
         end
         renderSquad(sq, x, y-4, selected)
-        if selIdx and iml.wasJustClicked(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, 1, i) then
-            self.selectedIndex = i
-        end
-        iml.panel(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, i)
         if iml.wasJustClicked(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, 1, i) then
+            if selIdx then
+                self.selectedIndex = i
+            end
+
             self.pinnedCard = sq
-        elseif iml.isHovered(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, i) then
+        end
+
+        if iml.isHovered(x, y, SQUAD_ICON_SIZE, SQUAD_ICON_SIZE, i) then
             self.hoveredSquad = sq
         end
     end
