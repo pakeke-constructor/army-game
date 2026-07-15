@@ -389,7 +389,7 @@ end
 --- List is cached, so this function is efficient to call, is O(1).
 --- doesn't rebuild list each time.
 ---@return ecs.Entity[]
-function g.getEnemyList(fn)
+function g.getEnemyList()
     local ecs = g.getECS()
     return ecs:getEnemyList()
 end
@@ -3293,7 +3293,7 @@ function g.getMouseTargetEntity(requester)
     if commander and g.isAlive(commander)
             and commander.attack and commander.attack.attackType == "melee" then
         local closest, closestD2 = nil, math.huge
-        for _, ent in ecs:iterate("unit") do
+        for _, ent in ipairs(g.getEnemyList()) do
             if g.isAlive(ent) and ent.health and ent.team ~= commander.team then
                 local dx, dy = ent.x - commander.x, ent.y - commander.y
                 local d2 = dx * dx + dy * dy
