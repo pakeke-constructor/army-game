@@ -12,6 +12,7 @@ local TEXT = {
     SETTINGS = loc("SETTINGS"),
     SAVE_EXIT = loc("SAVE AND EXIT"),
     EXIT = loc("EXIT"),
+    EXIT_LOWERCASE = loc("Exit"),
     WARNING = loc("Your progress will not be saved."),
     CANCEL = loc("Cancel"),
 }
@@ -21,18 +22,26 @@ local function isSaveExit()
     return scName == "map_scene"
 end
 
+---@class PauseButton
+---@field name fun(): string
+---@field action fun()
+---@field t number?
+
+---@type PauseButton[]
 local PAUSE_BUTTON = {
     {
         name = function() return TEXT.RESUME end,
         action = function()
             pausePopupService.clear()
         end,
+        t = 0,
     },
     {
         name = function() return TEXT.SETTINGS end,
         action = function()
             settingsPopupService.show()
         end,
+        t = 0,
     },
     {
         name = function()
@@ -44,7 +53,8 @@ local PAUSE_BUTTON = {
             else
                 showExitPopup = true
             end
-        end
+        end,
+        t = 0,
     }
 }
 
@@ -86,13 +96,13 @@ end
 
 ---@return kirigami.Region
 local function drawBasicWindow()
-    local screen = ui.getFullScreenRegion()
-    iml.panel(screen:get())
+    local r = ui.getFullScreenRegion()
+    iml.panel(r:get())
     lg.setColor(0,0,0,.5)
-    lg.rectangle("fill", screen:get())
+    lg.rectangle("fill", r:get())
 
-    local _, window, _ = screen:splitHorizontal(1,5,1)
-    window = window:padRatio(0.3)
+    local _, window, _ = r:splitHorizontal(1,4,1)
+    window = window:padRatio(0.4)
     lg.setColor(1,1,1)
     ui.drawDarkPanel(window:get())
     return window
@@ -119,17 +129,25 @@ end
 ---@param reg kirigami.Region
 ---@param txt string
 ---@param font love.Font
+---@param dt number
 ---@return boolean
-local function drawTextButton(i, reg, txt, font)
+local function drawTextButton(i, reg, txt, font, dt)
     local buttonR = reg:padUnit(0, 2)
+    local button = PAUSE_BUTTON[i]
+    local hovered = iml.isHovered(buttonR:get())
+    local target = hovered and 1 or 0
+    local rate = hovered and 10 or 28
+    button.t = helper.lerp(button.t or 0, target, dt * rate)
+    local offsetY = helper.lerp(0, -2, helper.EASINGS.easeOutBack(button.t))
 
-    if iml.isHovered(buttonR:get()) then
+    if hovered then
         lg.setColor(1, 1, 0.6)
     else
         lg.setColor(1, 1, 1)
     end
 
     local cx, cy = buttonR:getCenter()
+    cy = cy + offsetY
     helper.printTextOutline(
         txt,
         font,
@@ -149,6 +167,7 @@ local function drawPauseMenu()
     local menu = screen:set(nil, nil, 420, 360):center(screen)
     local titleFont = g.getBigFont(48)
     local font = g.getSmallFont(16)
+    local dt = love.timer.getDelta()
 
     local _, titleR, _, buttonsR = menu:splitVerticalExact(
         0,
@@ -176,26 +195,22 @@ local function drawPauseMenu()
 
     for i, info in ipairs(PAUSE_BUTTON) do
         local rowR = rows[i]
-        if drawTextButton(i, rowR, info.name(), font) then
+        if drawTextButton(i, rowR, info.name(), font, dt) then
             info.action()
         end
-        ui.debugRegion(rowR)
     end
-
-    ui.debugRegion(titleR)
-    ui.debugRegion(buttonsR)
 end
 
 local function drawExitPopup()
     local window = drawBasicWindow():padRatio(0.2)
     local font = g.getSmallFont(16)
-    local txtR, buttonsR = window:splitVertical(2,1)
+    local txtR, buttonsR = window:splitVertical(3,1)
 
     local x,y,w,h = txtR:padRatio(0.3):get()
     richtext.printRichContained(TEXT.WARNING, font, x,y,w,h, 1)
 
     local leftR, rightR = buttonsR:splitHorizontal(1,1)
-    if drawChoiceButton(leftR, TEXT.EXIT, font) then
+    if drawChoiceButton(leftR, TEXT.EXIT_LOWERCASE, font) then
         pausePopupService.exitToTitle(false)
     end
     if drawChoiceButton(rightR, TEXT.CANCEL, font) then
