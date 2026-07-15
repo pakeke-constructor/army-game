@@ -31,10 +31,38 @@ g.defineEntity("body", {
 
 
 
+
+local DEMON_HEAD_DAMAGE_MULTIPLIER = 1.1
+local DEMON_HEAD_PARTICLE_COUNT = 12
+
+local juiceService
+
+---@param ent ecs.Entity
+local function activateDemonHead(ent)
+    juiceService = juiceService or require("src.juiceService")
+    for _, enemy in ipairs(ent:getWorld():getEnemyList()) do
+        enemy.baseAttackDamage = enemy.baseAttackDamage and enemy.baseAttackDamage * DEMON_HEAD_DAMAGE_MULTIPLIER
+        if enemy.baseMaxHealth then
+            enemy.baseMaxHealth = enemy.baseMaxHealth * DEMON_HEAD_DAMAGE_MULTIPLIER
+            enemy.health = (enemy.health or enemy.baseMaxHealth) * DEMON_HEAD_DAMAGE_MULTIPLIER
+            enemy.scale = math.min(1.75, (enemy.scale or 1) * DEMON_HEAD_DAMAGE_MULTIPLIER)
+        end
+        juiceService.spawnArc(g.COLORS.DAMAGE, ent.x, ent.y, enemy.x, enemy.y, enemy, nil, 400)
+    end
+    g.spawnParticle("demon_head_particle", ent.x, ent.y, DEMON_HEAD_PARTICLE_COUNT)
+    ent:getWorld():removeEntity(ent)
+end
+
 g.defineEntity("demon_head", {
     image = "demon_head",
-    onUpdate = function(ent)
+    onUpdate = function(ent, dt)
         ent.oy = math.sin(love.timer.getTime() * 3 + ent.id) * 3
+        if ent.activationDelay then
+            ent.activationDelay = ent.activationDelay - dt
+            if ent.activationDelay <= 0 then
+                activateDemonHead(ent)
+            end
+        end
     end,
 })
 

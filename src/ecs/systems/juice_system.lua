@@ -152,7 +152,6 @@ function juice_system.entityDeath(ent, killer)
     if not ent then return end
     if not ent.isPest then
         juiceService.addCameraShake(0.25)
-        juiceService.addTimePause(0.03)
     end
     -- death burst: ring of sparks
     local store = getStore()
@@ -218,7 +217,6 @@ end
 
 function juice_system.explosion(x, y, damage, radius)
     juiceService.addCameraShake(math.min(0.6, 0.2 + (radius or 60) / 300))
-    juiceService.addTimePause(0.05)
 end
 
 function juice_system.battleStarted()

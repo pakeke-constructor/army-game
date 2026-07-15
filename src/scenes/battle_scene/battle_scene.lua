@@ -102,22 +102,6 @@ function battle_scene:pollHandlers()
     g.addBlessingAndEntityHandlers()
 
     g.addHandler({
-        battleStarted = function()
-            local enemies = self.ecs:getEnemyList()
-            for _, head in self.ecs:iterate("type") do
-                if head.type == "demon_head" then
-                    for _, enemy in ipairs(enemies) do
-                        enemy.baseAttackDamage = enemy.baseAttackDamage and enemy.baseAttackDamage * 1.1
-                        if enemy.baseMaxHealth then
-                            enemy.baseMaxHealth = enemy.baseMaxHealth * 1.1
-                            enemy.health = (enemy.health or enemy.baseMaxHealth) * 1.1
-                            enemy.scale = (enemy.scale or 1) * 1.1
-                        end
-                        juiceService.spawnArc(g.COLORS.DAMAGE, head.x, head.y, enemy.x, enemy.y, enemy, nil, 400)
-                    end
-                end
-            end
-        end,
         postDraw = function()
             lg.setColor(1,1,1)
             self.particles:draw()
@@ -322,8 +306,7 @@ function battle_scene:update(dt)
     self:updateCamera(dt)
     juiceService.update(dt)
     ambienceService.update(dt, self.camera:getTransform())
-    local timeScale = juiceService.consumeHitPause(dt)
-    self.ecs:update(self.deployPhase and 0 or dt * timeScale)
+    self.ecs:update(self.deployPhase and 0 or dt)
 
     local enemyCount = countEnemies(self.ecs)
     self.lastEnemyCount = enemyCount
