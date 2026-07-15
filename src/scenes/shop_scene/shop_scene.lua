@@ -53,6 +53,9 @@ end
 ---@param istouch boolean
 ---@param presses number
 function shop_scene:mousepressed(mx, my, button, istouch, presses)
+    if button == 1 then
+        self.hud.pinnedCard = nil
+    end
 end
 
 ---@param mx number

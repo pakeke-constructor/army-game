@@ -525,6 +525,7 @@ function map_scene:_startTravelLeg(graph)
 end
 
 function map_scene:mousepressed(mx, my, button)
+    self.hud.pinnedCard = nil
     if button == 1 then
         self.dragging = true
     end

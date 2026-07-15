@@ -410,7 +410,10 @@ end
 function battle_scene:mousepressed(x, y, button)
     -- raw flag so draw() can tell a click happened even when it lands on a UI
     -- element (which swallows the battlefield click via iml). Reset in draw().
-    if button == 1 then self._leftClickThisFrame = true end
+    if button == 1 then
+        self.hud.pinnedCard = nil
+        self._leftClickThisFrame = true
+    end
     if button == 2 then self.selectedSquad = nil end
 end
 
