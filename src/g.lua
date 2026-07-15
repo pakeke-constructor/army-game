@@ -3289,6 +3289,22 @@ function g.getMouseTargetEntity(requester)
         end
     end
 
+    if commander and g.isAlive(commander)
+            and commander.attack and commander.attack.attackType == "melee" then
+        local closest, closestD2 = nil, math.huge
+        for _, ent in ecs:iterate("unit") do
+            if g.isAlive(ent) and ent.health and ent.team ~= commander.team then
+                local dx, dy = ent.x - commander.x, ent.y - commander.y
+                local d2 = dx * dx + dy * dy
+                if d2 < closestD2 then
+                    closest = ent
+                    closestD2 = d2
+                end
+            end
+        end
+        return closest
+    end
+
     local commanderX, commanderY, commanderRange2
     if commander and g.isAlive(commander) and commander.attackRange then
         commanderX = commander.x

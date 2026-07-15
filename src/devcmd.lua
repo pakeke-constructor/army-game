@@ -27,6 +27,7 @@ COMMANDS.help = function()
     addLog("/sb - reset & enter sandbox battle")
     addLog("/enc <diff> <idx> - spawn specific encounter")
     addLog("/rb - reset battle & zoom out (map-gen test)")
+    addLog("/map - regenerate map")
     addLog("/vacuum - removes all fogs")
     addLog("/wb - open whiteboard dev scene")
     addLog("/help - show this")
@@ -142,6 +143,13 @@ COMMANDS.zone = function(args)
     if name ~= "map_scene" then return addLog("/zone only works in map scene") end
     scene:_buildMap(zone, true)
     addLog("entered " .. zone)
+end
+
+COMMANDS.map = function()
+    local scene, name = g.getCurrentScene()
+    if name ~= "map_scene" then return addLog("/map only works in map scene") end
+    scene:_buildMap(g.getMapType().name)
+    addLog("regenerated map")
 end
 
 COMMANDS.tp = function()
