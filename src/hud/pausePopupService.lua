@@ -210,11 +210,11 @@ local function drawExitPopup()
     richtext.printRichContained(TEXT.WARNING, font, x,y,w,h, 1)
 
     local leftR, rightR = buttonsR:splitHorizontal(1,1)
-    if drawChoiceButton(leftR, TEXT.EXIT_LOWERCASE, font) then
-        pausePopupService.exitToTitle(false)
-    end
-    if drawChoiceButton(rightR, TEXT.CANCEL, font) then
+    if drawChoiceButton(leftR, TEXT.CANCEL, font) then
         showExitPopup = false
+    end
+    if drawChoiceButton(rightR, TEXT.EXIT_LOWERCASE, font) then
+        pausePopupService.exitToTitle(false)
     end
 end
 
