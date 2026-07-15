@@ -6,23 +6,39 @@ local ChoicePanelCommon = require(".common")
 ---@class g.BlessingChoicePanel: g.ChoicePanelCommon
 local BlessingChoicePanel = objects.Class("g:BlessingChoicePanel"):implement(ChoicePanelCommon)
 
+
+---@param rarityWeights g.RarityWeights
+---@return picker.Picker<string>
+local function buildPicker(rarityWeights)
+    local pool = g.getBlessingsByMana(g.getRun().mana)
+    local weights = {}
+    for i, id in ipairs(pool) do
+        local info = g.getBlessingInfo(id)
+        weights[i] = rarityWeights[info.rarity.id] or 0
+    end
+
+    return Picker(pool, weights)
+end
+
+
 ---@param rarityWeights g.RarityWeights?
 function BlessingChoicePanel:init(rarityWeights)
     ---@type string[]
     self.choices = {}
     ---@type number[]
     self.choiceCreatedAt = {}
-    self.rarityWeights = rarityWeights or consts.DEFAULT_RARITY_WEIGHTS
     self.createdAt = love.timer.getTime()
     ---@type integer|nil
     self.selected = nil
     self.cj = cardJuiceService.CardJuiceInstance()
 
+    -- Roll directly
+    local picker = buildPicker(rarityWeights or consts.DEFAULT_RARITY_WEIGHTS)
+
     for _ = 1, ChoicePanelCommon.NUM_CHOICES do
+        self.choices[#self.choices+1] = picker:pickAndRemove(nil, 20)
         self.choiceCreatedAt[#self.choiceCreatedAt+1] = self.createdAt
     end
-
-    self:_rollChoices()
 end
 
 if false then
@@ -32,38 +48,6 @@ if false then
     function BlessingChoicePanel(rarityWeights) end
 end
 
----@private
-function BlessingChoicePanel:_rollChoices()
-    self.choices = {}
-
-    local pool = g.getBlessingsByMana(g.getRun().mana)
-    self:_pickFromPool(pool)
-end
-
----@param pool string[]
----@param out string[]?
----@param count integer?
----@private
-function BlessingChoicePanel:_pickFromPool(pool, out, count)
-    if #pool == 0 then return end
-    out = out or self.choices
-    count = count or ChoicePanelCommon.NUM_CHOICES
-
-    local weights = {}
-    for i, id in ipairs(pool) do
-        local info = g.getBlessingInfo(id)
-        weights[i] = self.rarityWeights[info.rarity.id] or 0
-    end
-
-    local picker = Picker(pool, weights)
-    ---@type table<string, true?>
-    local seen = helper.shallowCopy(g.getRun().blessings)
-    for _ = 1, count do
-        local pick = picker:pickAndRemove(nil, 20)
-        seen[pick] = true
-        out[#out + 1] = pick
-    end
-end
 
 function BlessingChoicePanel:draw()
     local r = ui.getFullScreenRegion()
