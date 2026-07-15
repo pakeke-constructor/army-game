@@ -115,11 +115,12 @@ local function drawChoiceButton(reg, txt, font)
     return iml.wasJustClicked(reg:get())
 end
 
+---@param i integer
 ---@param reg kirigami.Region
 ---@param txt string
 ---@param font love.Font
 ---@return boolean
-local function drawTextButton(reg, txt, font)
+local function drawTextButton(i, reg, txt, font)
     local buttonR = reg:padUnit(0, 2)
 
     if iml.isHovered(buttonR:get()) then
@@ -146,10 +147,18 @@ end
 local function drawPauseMenu()
     local screen = ui.getScreenRegion()
     local menu = screen:set(nil, nil, 420, 360):center(screen)
-    local titleFont = g.getBigFont(32)
+    local titleFont = g.getBigFont(48)
     local font = g.getSmallFont(16)
 
-    local _, titleR, _, buttonsR, _ = menu:splitVertical(1, 1, 1, 1, 2)
+    local _, titleR, _, buttonsR = menu:splitVerticalExact(
+        0,
+        titleFont:getHeight(),
+        0,
+        (font:getHeight() + 10) * #PAUSE_BUTTON,
+        0,
+        0
+    )
+
     lg.setColor(1, 1, 1)
     local tx, ty = titleR:getCenter()
     helper.printTextOutline(
@@ -167,10 +176,14 @@ local function drawPauseMenu()
 
     for i, info in ipairs(PAUSE_BUTTON) do
         local rowR = rows[i]
-        if drawTextButton(rowR, info.name(), font) then
+        if drawTextButton(i, rowR, info.name(), font) then
             info.action()
         end
+        ui.debugRegion(rowR)
     end
+
+    ui.debugRegion(titleR)
+    ui.debugRegion(buttonsR)
 end
 
 local function drawExitPopup()
@@ -195,7 +208,6 @@ function pausePopupService.draw()
     prof_push("pausePopupService.draw")
 
     local _, scName = g.getCurrentScene()
-    local safeExit = scName == "map_scene"
 
     local r = ui.getFullScreenRegion()
     iml.panel(r:get())
