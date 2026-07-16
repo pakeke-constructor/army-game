@@ -191,6 +191,6 @@ or learning about other codebases in order to write better code in this codebase
 
 
 
-ex6.state.current = c_sonnet
+ex6.set_current(c_sonnet)
 
 

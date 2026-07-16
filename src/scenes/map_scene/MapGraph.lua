@@ -502,6 +502,7 @@ function MapGraph.generate(args, rng)
         for i = 2, 4 do
             local node = path[i]
             node = self:setNode(node.x, node.y, "battle")
+            ---@cast node MapNode.BattleNode
             node.demonEncounter = i == 4 and 1 or 0
             node.rewards = rollReward(node.demonEncounter, rng)
         end
